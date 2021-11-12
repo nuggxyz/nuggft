@@ -48,11 +48,5 @@
     "svg.preview.background": "transparent",
     "[svg]": {
         "editor.defaultFormatter": "jock.svg"
-    },
-    "[shellscript]": {
-        "editor.defaultFormatter": "foxundermoon.shell-format"
-    },
-    "[ignore]": {
-        "editor.defaultFormatter": "foxundermoon.shell-format"
     }
 }
