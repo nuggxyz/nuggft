@@ -2,8 +2,6 @@
 
 pragma solidity 0.8.4;
 
-import '@openzeppelin/contracts/utils/math/SafeMath.sol';
-
 import '../interfaces/IEpochable.sol';
 import '../libraries/EpochMath.sol';
 
@@ -14,7 +12,6 @@ import '../libraries/EpochMath.sol';
  * @dev also enables storage of blockhash for a given epoch
  */
 abstract contract Epochable is IEpochable {
-    using SafeMath for uint256;
     using EpochMath for EpochMath.State;
 
     EpochMath.State private _state;
