@@ -4,11 +4,10 @@ pragma solidity 0.8.4;
 
 import '../interfaces/IStakeable.sol';
 import '../libraries/StakeMath.sol';
-import 'hardhat/console.sol';
-import './Testable.sol';
-import './Mutexable.sol';
+import '../../node_modules/hardhat/console.sol';
+import '../common/Testable.sol';
+import '../common/Mutexable.sol';
 
-import 'hardhat/console.sol';
 
 /**
  * @title Stakeable
