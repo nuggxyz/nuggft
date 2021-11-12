@@ -25,7 +25,7 @@ import { HardhatUserConfig, NetworksUserConfig, NetworkUserConfig } from 'hardha
 
 dotenvConfig({ path: resolve(__dirname, './.env') });
 
-export const GAS_PRICE = utils.parseUnits('5', 'gwei');
+export const GAS_PRICE = utils.parseUnits('100', 'gwei');
 
 export const NamedAccounts = {
     main: { default: 0 },
@@ -57,7 +57,7 @@ const DefaultLocalNetworkConfig = {
     saveDeployments: true,
     accounts: {
         mnemonic: 'many dark suns glow like gods fury when they eats that nugg',
-        accountsBalance: '990000000000000000000',
+        accountsBalance: '690000000000000000000',
     },
 };
 
