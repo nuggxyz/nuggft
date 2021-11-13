@@ -22,7 +22,7 @@ contract NuggMinter is INuggMinter, Auctionable, Launchable, Epochable, Seedable
 
     constructor() Epochable(25) {}
 
-    function NUGGETH() internal view override returns (INuggETH res) {
+    function NUGGETH() internal view returns (INuggETH res) {
         res = _NUGGETH;
     }
 

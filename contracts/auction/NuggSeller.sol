@@ -25,7 +25,7 @@ contract NuggSeller is INuggSeller, Auctionable, Launchable, ERC721Holder {
 
     constructor() {}
 
-    function NUGGETH() internal view override returns (INuggETH res) {
+    function NUGGETH() internal view returns (INuggETH res) {
         res = _NUGGETH;
     }
 
@@ -59,7 +59,7 @@ contract NuggSeller is INuggSeller, Auctionable, Launchable, ERC721Holder {
             uint256 amount = _bidsAmt[saleId][_topAddr[saleId]];
             uint256 royalties = (amount * 15) / 100;
             _NUGGETH.depositRewards{value: royalties}(address(this));
-            Exchange.give_eth(msg_sender(), amount - royalties);
+            Exchange.give_eth(payable(msg_sender()), amount - royalties);
         } else {
             _NUGGFT.safeTransferFrom(address(this), sale.seller, sale.tokenId);
             emit SaleStop(saleId);
