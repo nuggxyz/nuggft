@@ -3,11 +3,11 @@ import { BigNumber } from 'ethers';
 import { ethers } from 'hardhat';
 import { expect } from 'chai';
 
-import { EpochableTest, EpochableTest__factory } from '../types';
+import { EpochableTest, EpochableTest__factory } from '../typechain';
 import { NamedAccounts } from '../hardhat.config';
-import { NuggFT } from '../types/NuggFT';
-import { NuggFT__factory } from '../types/factories/NuggFT__factory';
-import { MockEscrow } from '../types/MockEscrow';
+import { NuggFT } from '../typechain/NuggFT';
+import { NuggFT__factory } from '../typechain/factories/NuggFT__factory';
+import { MockEscrow } from '../typechain/MockEscrow';
 
 import { deployContract, prepareAccounts } from './shared';
 import { Mining } from './shared/mining';

@@ -3,32 +3,9 @@ import { ethers } from 'hardhat';
 import { BigNumber, Wallet, Contract } from 'ethers';
 
 import { ensureWETH, getHRE } from '../shared/deployment';
-import { DotNugg__factory } from '../../typechain/factories/DotNugg__factory';
-import { NuggFT__factory } from '../../typechain/factories/NuggFT__factory';
-import { NuggETH } from '../../typechain/NuggETH';
-import { NuggFT } from '../../typechain/NuggFT';
-import { deployContractWithSalt } from '../shared';
-import { toEth } from '../shared/conversion';
-import { NuggETH__factory } from '../../typechain/factories/NuggETH__factory';
-import {
-    DotNugg,
-    NuggMinter,
-    NuggMinter__factory,
-    NuggSeller,
-    NuggSeller__factory,
-    SvgNuggIn,
-    SvgNuggIn__factory,
-    WETH9,
-} from '../../typechain';
-
-import { NuggETHRelay__factory } from './../../typechain/factories/NuggETHRelay__factory';
-import { NuggETHRelay } from './../../typechain/NuggETHRelay.d';
-import { Escrow } from './../../typechain/Escrow.d';
-import { Escrow__factory } from './../../typechain/factories/Escrow__factory';
 
 export interface NuggFatherFixture {
     nuggft: NuggFT;
-    relay: NuggETHRelay;
     minter: NuggMinter;
     seller: NuggSeller;
     nuggeth: NuggETH;
@@ -54,12 +31,6 @@ export const NuggFatherFix: Fixture<NuggFatherFixture> = async function (
 
     const nuggeth = await deployContractWithSalt<NuggETH__factory>({
         factory: 'NuggETH',
-        from: eoaDeployer,
-        args: [],
-    });
-
-    const relay = await deployContractWithSalt<NuggETHRelay__factory>({
-        factory: 'NuggETHRelay',
         from: eoaDeployer,
         args: [],
     });

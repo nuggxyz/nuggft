@@ -2,7 +2,7 @@ import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/dist/src/signers';
 import { expect } from 'chai';
 
 import { NamedAccounts } from '../hardhat.config';
-import { EncoderTest, EncoderTest__factory } from '../types';
+import { EncoderTest, EncoderTest__factory } from '../typechain';
 
 import { deployContract, prepareAccounts } from './shared';
 
