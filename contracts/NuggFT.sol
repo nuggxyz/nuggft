@@ -111,7 +111,7 @@ contract NuggFT is INuggFT, ERC721, Mutexable, Launchable {
         string memory uriName = string(abi.encodePacked('NuggFT #', epoch.toString()));
         string memory uriDesc = 'TDB';
 
-        string memory uriImage = _DOTNUGG.nuggify(_getItems(seed), resolver, 5, 10);
+        string memory uriImage = _DOTNUGG.nuggify(collection_, _getItems(seed), resolver, "");
 
         return
             string(

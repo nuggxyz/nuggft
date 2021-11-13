@@ -12,6 +12,6 @@ import './IDotNuggImplementer.sol';
  * @title ILaunchable
  * @dev interface for Launchable.sol
  */
-interface INuggFT is IDotNuggImplementer, IERC721 {
+interface INuggFT is IDotNuggImplementer, IAuctionableImplementer, IERC721 {
     function pendingTokenURI() external view returns (string memory res);
 }

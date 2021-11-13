@@ -15,6 +15,8 @@ interface INuggETH is IERC20, IStakeable, IEscrowable {
 
     function deposit() external payable;
 
+    function withdraw(uint256 amount) external ;
+
     function totalSupply() external view override(IERC20, IStakeable) returns (uint256 res);
 
     function balanceOf(address from) external view override(IERC20) returns (uint256 res);
