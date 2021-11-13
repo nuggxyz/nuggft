@@ -2,7 +2,7 @@ import { Signer, Contract } from 'ethers';
 import { ethers } from 'hardhat';
 import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/dist/src/signers';
 
-import { MinEthersFactory, GetContractTypeFromFactory, GetARGsTypeFromFactory } from '../types/commons';
+import { MinEthersFactory, GetContractTypeFromFactory, GetARGsTypeFromFactory } from '../../../../typechain/common';
 
 import { getHRE } from './deployment';
 

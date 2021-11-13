@@ -15,7 +15,7 @@ import 'hardhat-storage-layout';
 // NORMAL IMPORTS
 import 'hardhat-tracer';
 
-import './tasks/auto';
+import './tasks/middleware';
 
 import { resolve } from 'path';
 
@@ -58,7 +58,7 @@ const DefaultLocalNetworkConfig = {
     saveDeployments: true,
     accounts: {
         mnemonic: 'many dark suns glow like gods fury when they eats that nugg',
-        accountsBalance: '690000000000000000000',
+        accountsBalance: '1000080000000000000000',
     },
 };
 

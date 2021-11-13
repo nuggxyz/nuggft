@@ -2,12 +2,13 @@ import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/dist/src/signers';
 import { ethers, waffle } from 'hardhat';
 import { BigNumber } from 'ethers';
 
-import { NamedAccounts } from '../hardhat.config';
+import { NamedAccounts } from '../../../hardhat.config';
 
 import { Mining } from './shared/mining';
 import { prepareAccounts } from './shared';
 import { ETH_ONE, toEth, BINARY_128, ETH_TRILLION, fromEth } from './shared/conversion';
 import { NuggFatherFix, NuggFatherFixture } from './fixtures/NuggFather.fix';
+import { getHRE } from './shared/deployment';
 // import { getHRE } from './shared/deployment';
 const createFixtureLoader = waffle.createFixtureLoader;
 const {
@@ -27,6 +28,9 @@ const refresh = async () => {
 describe('uint tests', async function () {
     beforeEach(async () => {
         await refresh();
+        const hre = getHRE();
+
+        console.log(hre.middleware.test);
     });
 
     describe('internal', async () => {
