@@ -1,8 +1,6 @@
-/** @format */
-
 module.exports = {
     parser: '@typescript-eslint/parser', // Specifies the ESLint parser
-    extends: ['universe/node'],
+    extends: ['universe/node', 'prettier'],
     plugins: ['prettier', 'unused-imports', 'import'],
     rules: {
         'prettier/prettier': 'error',

@@ -10,7 +10,7 @@ import '../erc165/ERC165.sol';
 // import '@openzeppelin/contracts/utils/Context.sol';
 
 // import '../libraries/Address.sol';
-import '../base/Testable.sol';
+import '../common/Testable.sol';
 
 /**
  * @dev Implementation of https://eips.ethereum.org/EIPS/eip-721[ERC721] Non-Fungible Token Standard, including

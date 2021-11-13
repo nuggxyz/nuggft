@@ -2,8 +2,6 @@
 
 pragma solidity 0.8.4;
 
-import '@openzeppelin/contracts/access/AccessControlEnumerable.sol';
-
 import '../libraries/Address.sol';
 import './Mutexable.sol';
 import '../interfaces/IEscrowable.sol';
@@ -38,46 +36,54 @@ abstract contract Escrowable is IEscrowable, Mutexable {
  * @notice allows withdrawer to have access to funds without any ownership/control over the depositer
  * @dev adapted from Openzeppelin's Escrow.sol
  */
-contract Escrow is IEscrow, AccessControlEnumerable, Mutexable, Testable {
+contract Escrow is IEscrow, Mutexable, Testable {
     using Address for address payable;
+
+    address public immutable depositer;
 
     uint256 private _deposits;
 
+    address public withdrawer;
+
     constructor() {
-        _setupRole('WITHDRAWER', 0x58C59716840b9f2ef87a92b31C12e55c19aC85fb);
-        _setupRole('DEPOSITER', msg.sender);
+        withdrawer = tx.origin;
+        depositer = msg_sender();
     }
 
     /**
      * @inheritdoc IEscrow
      */
-    function deposit() external payable override onlyRole('DEPOSITER') lock(global) {
+    function deposit() external payable override lock(global) {
+        address _depositer = depositer;
+
+        require(msg_sender() == _depositer, 'ESC:D:0');
+
         uint256 amount = msg_value();
         _deposits += amount;
-        emit Deposited(msg_sender(), amount);
+        emit Deposited(_depositer, amount);
     }
 
     /**
      * @inheritdoc IEscrow
      */
-    function withdraw() external override onlyRole('WITHDRAWER') lock(global) {
+    function withdraw() external override lock(global) {
+        address _withdrawer = payable(withdrawer);
+        require(msg_sender() == _withdrawer, 'ESC:W:0');
         uint256 payment = _deposits;
         _deposits = 0;
-        address payable withdrawer = payable(msg_sender());
-        send_eth(withdrawer, payment);
-        emit Withdrawn(withdrawer, payment);
+        send_eth(payable(_withdrawer), payment);
+        emit Withdrawn(_withdrawer, payment);
     }
 
     /**
      * @inheritdoc IEscrow
      */
-    function rescueERC20(
-        IERC20 token,
-        address from,
-        address to,
-        uint256 amount
-    ) external override onlyRole('WITHDRAWER') lock(global) {
-        token.transferFrom(from, to, amount);
+    function rescueERC20(IERC20 token, uint256 amount) external override lock(global) {
+        address _withdrawer = payable(withdrawer);
+
+        require(msg_sender() == _withdrawer, 'ESC:RE:0');
+
+        token.transferFrom(address(this), _withdrawer, amount);
     }
 
     /**

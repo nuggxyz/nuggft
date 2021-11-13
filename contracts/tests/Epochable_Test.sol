@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: MIT
 
-import '../base/Epochable.sol';
+import '../core/Epochable.sol';
 
 pragma solidity 0.8.4;
 

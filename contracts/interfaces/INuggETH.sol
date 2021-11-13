@@ -10,10 +10,10 @@ import '../erc20/IERC20.sol';
  * @title ISeedable
  * @dev interface for Seedable.sol
  */
-interface INuggETH is IERC20, IWETH9, IStakeable, IEscrowable {
+interface INuggETH is IERC20, IStakeable, IEscrowable {
     function depositRewards(address sender) external payable override(IStakeable);
 
-    function deposit() external payable override(IWETH9);
+    function deposit() external payable;
 
     function totalSupply() external view override(IERC20, IStakeable) returns (uint256 res);
 

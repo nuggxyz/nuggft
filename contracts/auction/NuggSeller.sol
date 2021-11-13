@@ -3,10 +3,11 @@
 pragma solidity 0.8.4;
 
 import './base/Auctionable.sol';
-import '../base/Launchable.sol';
-import 'hardhat/console.sol';
-import '../base/Seedable.sol';
-import '../base/Epochable.sol';
+import '../common/Launchable.sol';
+import '../interfaces/INuggETH.sol';
+
+import '../core/Seedable.sol';
+import '../core/Epochable.sol';
 import './interfaces/INuggSeller.sol';
 import '../interfaces/INuggFT.sol';
 import '../erc721/ERC721Holder.sol';
@@ -15,7 +16,6 @@ contract NuggSeller is INuggSeller, Auctionable, Launchable, ERC721Holder {
     INuggFT internal _NUGGFT;
 
     INuggETH internal _NUGGETH;
-    IWETH9 internal _WETH;
 
     uint256 private _counter = 1;
 
@@ -25,16 +25,6 @@ contract NuggSeller is INuggSeller, Auctionable, Launchable, ERC721Holder {
 
     constructor() {}
 
-    /**
-     * @inheritdoc Exchangeable
-     */
-    function WETH() internal view override returns (IWETH9 res) {
-        res = _WETH;
-    }
-
-    /**
-     * @inheritdoc Exchangeable
-     */
     function NUGGETH() internal view override returns (INuggETH res) {
         res = _NUGGETH;
     }
@@ -56,7 +46,7 @@ contract NuggSeller is INuggSeller, Auctionable, Launchable, ERC721Holder {
         emit SaleStart(saleId, tokenId, length, floor);
     }
 
-    function claimSale(uint256 saleId, Currency currency) external {
+    function claimSale(uint256 saleId) external {
         Sale memory sale = _sales[saleId];
 
         require(block_num() > sale.startblock + sale.length, 'NS:CS:0');
@@ -69,7 +59,7 @@ contract NuggSeller is INuggSeller, Auctionable, Launchable, ERC721Holder {
             uint256 amount = _bidsAmt[saleId][_topAddr[saleId]];
             uint256 royalties = (amount * 15) / 100;
             _NUGGETH.depositRewards{value: royalties}(address(this));
-            giveCurrency(msg_sender(), amount - royalties, currency);
+            Exchange.give_eth(msg_sender(), amount - royalties);
         } else {
             _NUGGFT.safeTransferFrom(address(this), sale.seller, sale.tokenId);
             emit SaleStop(saleId);
@@ -96,7 +86,6 @@ contract NuggSeller is INuggSeller, Auctionable, Launchable, ERC721Holder {
         super.launch(data);
         (address nuggft, address nuggeth, address weth) = abi.decode(data, (address, address, address));
         _NUGGFT = INuggFT(nuggft);
-        _WETH = IWETH9(weth);
         _NUGGETH = INuggETH(nuggeth);
         _NUGGFT.setApprovalForAll(nuggft, true);
     }

@@ -3,18 +3,18 @@
 pragma solidity 0.8.4;
 
 import './base/Auctionable.sol';
-import '../base/Launchable.sol';
-import 'hardhat/console.sol';
-import '../base/Seedable.sol';
-import '../base/Epochable.sol';
+import '../common/Launchable.sol';
+import '../core/Seedable.sol';
+import '../core/Epochable.sol';
+import '../interfaces/INuggETH.sol';
 import './interfaces/INuggMinter.sol';
+
 import './periphery/IAuctionableImplementer.sol';
 
 contract NuggMinter is INuggMinter, Auctionable, Launchable, Epochable, Seedable {
     IAuctionableImplementer internal _NUGGFT;
 
     INuggETH internal _NUGGETH;
-    IWETH9 internal _WETH;
 
     // uint256 private constant _OFFSET = 42069;
 
@@ -22,16 +22,6 @@ contract NuggMinter is INuggMinter, Auctionable, Launchable, Epochable, Seedable
 
     constructor() Epochable(25) {}
 
-    /**
-     * @inheritdoc Exchangeable
-     */
-    function WETH() internal view override returns (IWETH9 res) {
-        res = _WETH;
-    }
-
-    /**
-     * @inheritdoc Exchangeable
-     */
     function NUGGETH() internal view override returns (INuggETH res) {
         res = _NUGGETH;
     }
@@ -44,9 +34,8 @@ contract NuggMinter is INuggMinter, Auctionable, Launchable, Epochable, Seedable
      */
     function launch(bytes memory data) public override {
         super.launch(data);
-        (address nuggft, address nuggeth, address weth) = abi.decode(data, (address, address, address));
+        (address nuggft, address nuggeth) = abi.decode(data, (address, address));
         _NUGGFT = IAuctionableImplementer(nuggft);
-        _WETH = IWETH9(weth);
         _NUGGETH = INuggETH(nuggeth);
     }
 
