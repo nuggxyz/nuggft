@@ -2,7 +2,6 @@
 
 pragma solidity 0.8.4;
 
-import '@openzeppelin/contracts/access/IAccessControlEnumerable.sol';
 import '../erc20/IERC20.sol';
 
 /**
@@ -20,7 +19,7 @@ interface IEscrowable {
  * @title IEscrow
  * @dev interface for Escrow.sol
  */
-interface IEscrow is IAccessControlEnumerable {
+interface IEscrow {
     event Deposited(address indexed payee, uint256 weiAmount);
     event Withdrawn(address indexed payee, uint256 weiAmount);
 
@@ -40,12 +39,7 @@ interface IEscrow is IAccessControlEnumerable {
      */
     function withdraw() external;
 
-    function rescueERC20(
-        IERC20 token,
-        address from,
-        address to,
-        uint256 amount
-    ) external;
+    function rescueERC20(IERC20 token, uint256 amount) external;
 
     function deposits() external view returns (uint256);
 }

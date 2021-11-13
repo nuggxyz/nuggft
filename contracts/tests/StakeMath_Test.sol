@@ -2,7 +2,6 @@
 pragma solidity 0.8.4;
 
 import '../libraries/StakeMath.sol';
-import 'hardhat/console.sol';
 
 contract StakeMath_Test {
     function getBalance(StakeMath.State memory state, StakeMath.Position memory pos) external pure returns (uint256 res) {

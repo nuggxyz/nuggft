@@ -2,9 +2,8 @@
 
 pragma solidity 0.8.4;
 
-import './base/Stakeable.sol';
-import './base/Escrowable.sol';
-import './base/Launchable.sol';
+import './core/Stakeable.sol';
+import './common/Escrowable.sol';
 
 import './libraries/Exchange.sol';
 
@@ -17,9 +16,6 @@ import './erc20/ERC20.sol';
  * @notice leggo
  */
 contract NuggETH is INuggETH, ERC20, Escrowable, Stakeable {
-    using Exchange for IWETH9;
-    IWETH9 private _WETH;
-
     Mutex local;
 
     constructor() ERC20('Nugg Wrapped Ether', 'NuggETH') {
@@ -30,6 +26,7 @@ contract NuggETH is INuggETH, ERC20, Escrowable, Stakeable {
         uint256 tuck = (msg_value() * 1000) / 10000;
         _TUMMY.deposit{value: tuck}();
         Stakeable._onRewardIncrease(sender, msg_value() - tuck);
+        ERC20._mint(address(this), msg_value() - tuck);
     }
 
     function deposit() public payable override(INuggETH) {
@@ -39,7 +36,6 @@ contract NuggETH is INuggETH, ERC20, Escrowable, Stakeable {
     function withdraw(uint256 amount) public override(INuggETH) {
         _withdraw(msg_sender(), amount);
     }
-
 
     function totalSupply() public view override(INuggETH, ERC20, Stakeable) returns (uint256 res) {
         res = Stakeable.totalSupply();
@@ -66,7 +62,6 @@ contract NuggETH is INuggETH, ERC20, Escrowable, Stakeable {
         Exchange.give_eth(payable(msg_sender()), amount);
     }
 
-
     function _afterTokenTransfer(
         address from,
         address to,
@@ -87,7 +82,6 @@ contract NuggETH is INuggETH, ERC20, Escrowable, Stakeable {
             _assign(account, owned - minted);
             _onEarn(account, owned - minted);
         }
-
     }
 
     function _beforeTokenTransfer(

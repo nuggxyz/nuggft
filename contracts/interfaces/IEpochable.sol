@@ -8,6 +8,7 @@ import '../libraries/EpochMath.sol';
  * @title IEpochable
  * @dev interface for Auctionable.sol
  */
+
 interface IEpochable {
     function genesisBlock() external view returns (uint256 res);
 

@@ -13,8 +13,9 @@ import 'hardhat-contract-sizer';
 import '@atixlabs/hardhat-time-n-mine';
 import 'hardhat-storage-layout';
 // NORMAL IMPORTS
-import './tasks/general/accounts';
 import 'hardhat-tracer';
+
+import './tasks/auto';
 
 import { resolve } from 'path';
 
@@ -242,7 +243,7 @@ const HardhatConfig: HardhatUserConfig = {
                 settings: {
                     optimizer: {
                         enabled: true,
-                        runs: 100000,
+                        runs: 1000,
                     },
                 },
             },
@@ -279,7 +280,8 @@ const HardhatConfig: HardhatUserConfig = {
         coinmarketcap: process.env.COINMARKETCAP_API_KEY,
         currency: 'USD',
         enabled: true,
-        // excludeContracts: ['contracts/libraries/'],
+
+        excludeContracts: ['*/libraries/'],
     },
     networks: {
         // ...ProductionNetworks,
@@ -287,7 +289,7 @@ const HardhatConfig: HardhatUserConfig = {
         ...LocalNetworks,
     },
     preprocess: {
-        eachLine: removeConsoleLog((bre): boolean => bre.network.name !== 'hardhat' && bre.network.name !== 'localhost'),
+        eachLine: removeConsoleLog((hre): boolean => !(hre.hardhatArguments.showStackTraces && hre.network.name === 'localhost')),
     },
     abiExporter: {
         path: './abis',

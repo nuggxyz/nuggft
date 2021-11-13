@@ -2,21 +2,17 @@
 
 pragma solidity 0.8.4;
 
-import '../../interfaces/IExchangeable.sol';
-import '../../interfaces/IWETH9.sol';
-
 /**
  * @title IAuctionable
  * @dev interface for Auctionable.sol
  */
-interface IAuctionable is IExchangeable {
+interface IAuctionable {
     struct Bid {
         bytes32 id;
         uint256 auctionId;
         address account;
         uint256 amount;
         bool claimed;
-        Currency currency;
         uint256 bidnum;
         bool first;
     }
@@ -34,9 +30,9 @@ interface IAuctionable is IExchangeable {
 
     event WinningClaim(uint256 indexed epoch, address indexed user, uint256 amount);
 
-    event NormalClaim(uint256 indexed epoch, address indexed user, uint256 amount, Currency currency);
+    event NormalClaim(uint256 indexed epoch, address indexed user, uint256 amount);
 
-    event BidPlaced(uint256 indexed epoch, address indexed user, uint256 amount, Currency currency);
+    event BidPlaced(uint256 indexed epoch, address indexed user, uint256 amount);
 
     event AuctionInit(uint256 indexed epoch, uint256 amount);
 
@@ -49,14 +45,10 @@ interface IAuctionable is IExchangeable {
     /**
      * @dev #TODO
      */
-    function placeBid(
-        uint256 epoch,
-        uint256 amount,
-        Currency currency
-    ) external payable;
+    function placeBid(uint256 epoch, uint256 amount) external payable;
 
     /**
      * @dev #TODO
      */
-    function claim(uint256 epoch, Currency currency) external;
+    function claim(uint256 epoch) external;
 }

@@ -6,22 +6,18 @@ import './libraries/Base64.sol';
 import './libraries/SeedMath.sol';
 import './libraries/Uint.sol';
 
-import './base/Launchable.sol';
-import './base/Seedable.sol';
-import './base/Epochable.sol';
+import './common/Launchable.sol';
+import './core/Seedable.sol';
+import './core/Epochable.sol';
 
 import './erc721/ERC721.sol';
-import './core/interfaces/INuggIn.sol';
+import './interfaces/IDotNuggFileResolver.sol';
+import './interfaces/IDotNuggColorResolver.sol';
 
-import './core/interfaces/IDotNugg.sol';
+import './interfaces/IDotNugg.sol';
 import './interfaces/INuggFT.sol';
 import './auction/NuggMinter.sol';
 import './auction/NuggSeller.sol';
-
-import './gen/DotNuggGenerated.sol';
-import './core/external/DeployableDotNugg.sol';
-
-import './weth/interfaces/INuggETH.sol';
 
 /**
  * @title Nugg Labs NFT Collection 0 - "NuggFT"
@@ -34,21 +30,18 @@ import './weth/interfaces/INuggETH.sol';
  * Note: the block hash corresponding to the start of an epoch is used as the "random" seed
  * Note: epochs are 256 blocks long as block hashes only exist for 256 blocks
  */
-contract NuggFT is INuggFT, Launchable, ERC721, DeployableDotNugg, Mutexable {
+contract NuggFT is INuggFT, ERC721, Mutexable, Launchable {
     using SeedMath for bytes32;
     using Uint256 for uint256;
 
-    uint8 private constant _MAX_FEATURES = 3;
-
     IDotNugg internal _DOTNUGG;
-    INuggETH internal _NUGGETH;
     INuggMinter internal _MINTER;
     INuggSeller internal _SELLER;
-    INuggIn internal _DEFAULT_NUGGIN;
+    IDotNuggFileResolver internal _DEFAULT_NUGGIN;
 
     Mutex transfer;
 
-    constructor() ERC721('Nugg Fungable Token', 'NuggFT') DeployableDotNugg(msg_sender()) {
+    constructor() ERC721('Nugg Fungable Token', 'NuggFT') {
         transfer = initMutex();
     }
 
@@ -77,13 +70,12 @@ contract NuggFT is INuggFT, Launchable, ERC721, DeployableDotNugg, Mutexable {
     function launch(bytes memory data) public override {
         super.launch(data);
         (address nuggeth, address dotnugg, address minter, address seller, address nuggin) = abi.decode(data, (address, address, address, address, address));
-        _NUGGETH = INuggETH(nuggeth);
         _DOTNUGG = IDotNugg(dotnugg);
         _MINTER = INuggMinter(minter);
         _SELLER = INuggSeller(seller);
-        _DEFAULT_NUGGIN = INuggIn(nuggin);
+        _DEFAULT_NUGGIN = IDotNuggFileResolver(nuggin);
 
-        require(_DEFAULT_NUGGIN.supportsInterface(type(INuggIn).interfaceId), 'NUG:LAUNCH:0');
+        require(_DEFAULT_NUGGIN.supportsInterface(type(IDotNuggFileResolver).interfaceId), 'NUG:LAUNCH:0');
     }
 
     /**
@@ -119,7 +111,7 @@ contract NuggFT is INuggFT, Launchable, ERC721, DeployableDotNugg, Mutexable {
         string memory uriName = string(abi.encodePacked('NuggFT #', epoch.toString()));
         string memory uriDesc = 'TDB';
 
-        string memory uriImage = _DOTNUGG.nuggify(_getBase(seed), _getAttributes(seed), resolver, _MAX_FEATURES, 10);
+        string memory uriImage = _DOTNUGG.nuggify(_getItems(seed), resolver, 5, 10);
 
         return
             string(
@@ -129,20 +121,19 @@ contract NuggFT is INuggFT, Launchable, ERC721, DeployableDotNugg, Mutexable {
             );
     }
 
+    // collection_
+    bytes private collection_;
+
+    // bases_
+    bytes[] internal items_;
+
     /**
      * @notice gets unique attribtues based on given epoch and converts encoded bytes to object that can be merged
      */
-    function _getAttributes(uint256 seed) internal view returns (bytes[] memory res) {
-        res = new bytes[](_MAX_FEATURES * 10);
+    function _getItems(uint256 seed) internal view returns (bytes[] memory res) {
+        res = new bytes[](5);
         for (uint8 i = 0; i < res.length; i++) {
-            res[i] = attribute(uint16((seed >> i) % attrs_.length));
+            res[i] = items_[uint16((seed >> i) % items_.length)];
         }
-    }
-
-    /**
-     * @notice gets unique base based on given epoch and converts encoded bytes to object that can be merged
-     */
-    function _getBase(uint256 seed) internal view returns (bytes memory res) {
-        res = base(seed % bases_.length);
     }
 }

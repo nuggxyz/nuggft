@@ -2,7 +2,6 @@
 pragma solidity 0.8.4;
 
 import '../libraries/QuadMath.sol';
-import 'hardhat/console.sol';
 
 contract QuadMath_Test {
     function mulDiv(

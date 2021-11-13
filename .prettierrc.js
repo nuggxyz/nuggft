@@ -1,10 +1,10 @@
-/** @format */
-
 module.exports = {
     trailingComma: 'all',
     tabWidth: 4,
     singleQuote: true,
+    jsxBracketSameLine: true,
     printWidth: 140,
+
     overrides: [
         {
             files: '*.sol',
@@ -12,7 +12,7 @@ module.exports = {
                 printWidth: 160,
                 tabWidth: 4,
                 useTabs: false,
-                // singleQuote: true,
+                //  singleQuote: false,
                 bracketSpacing: false,
                 explicitTypes: 'always',
             },

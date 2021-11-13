@@ -1,6 +1,5 @@
 {
     "eslint.validate": ["javascript", "javascriptreact", "typescript", "typescriptreact"],
-
     "editor.codeActionsOnSave": {
         "source.fixAll.eslint": true
     },
@@ -26,7 +25,7 @@
         "editor.defaultFormatter": "esbenp.prettier-vscode"
     },
     "[solidity]": {
-        "editor.defaultFormatter": "esbenp.prettier-vscode"
+        "editor.defaultFormatter": "JuanBlanco.solidity"
     },
     "[python]": {
         "editor.defaultFormatter": null
@@ -48,5 +47,9 @@
     "svg.preview.background": "transparent",
     "[svg]": {
         "editor.defaultFormatter": "jock.svg"
+    },
+
+    "[dotenv]": {
+        "editor.defaultFormatter": "foxundermoon.shell-format"
     }
 }

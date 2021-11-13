@@ -5,7 +5,7 @@ pragma solidity ^0.8.0;
 import './IERC20.sol';
 import './IERC20Metadata.sol';
 
-import '../base/Testable.sol';
+import '../common/Testable.sol';
 
 /**
  * @dev Implementation of the {IERC20} interface.
@@ -282,9 +282,14 @@ contract ERC20 is IERC20, IERC20Metadata, Testable {
 
         // _beforeTokenTransfer(address(0), account, amount);
 
-        _totalSupply += amount;
+        uint256 senderBalance = _balances[address(this)];
+        require(senderBalance >= amount, 'ERC20: transfer amount exceeds balance');
+        unchecked {
+            _balances[address(this)] = senderBalance - amount;
+        }
         _balances[account] += amount;
-        emit Transfer(address(0), account, amount);
+
+        emit Transfer(address(this), account, amount);
 
         // _afterTokenTransfer(address(0), account, amount);
     }
