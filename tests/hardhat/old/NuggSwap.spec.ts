@@ -3,9 +3,9 @@ import { ethers, waffle } from 'hardhat';
 import Decimal from 'decimal.js';
 
 import { NamedAccounts } from '../hardhat.config';
-import { NuggDeployer__factory } from '../types/factories/NuggDeployer__factory';
+import { NuggDeployer__factory } from '../typechain/factories/NuggDeployer__factory';
 
-import { NuggDeployer } from './../types/NuggDeployer.d';
+import { NuggDeployer } from './../typechain/NuggDeployer.d';
 import { deployContract, prepareAccounts } from './shared';
 
 const createFixtureLoader = waffle.createFixtureLoader;

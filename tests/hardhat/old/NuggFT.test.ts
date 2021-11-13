@@ -2,10 +2,10 @@ import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/dist/src/signers';
 import { BigNumber } from 'ethers';
 import { expect } from 'chai';
 
-import { NuggFT__factory } from '../types/factories/NuggFT__factory';
-import { NamedAccounts } from '../hardhat.config';
-import { AuctionableTest, DotNugg__factory, NuggETH, DotNugg, NuggETH__factory } from '../types';
-import { NuggFT } from '../types/NuggFT';
+import { NuggFT__factory } from '../../../typechain/factories/NuggFT__factory';
+import { NamedAccounts } from '../../../hardhat.config';
+import { NuggETH, NuggETH__factory } from '../../../typechain';
+import { NuggFT } from '../../../typechain/NuggFT';
 
 import { deployContract, prepareAccounts } from './shared';
 

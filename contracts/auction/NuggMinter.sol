@@ -43,8 +43,8 @@ contract NuggMinter is INuggMinter, Auctionable, Launchable, Epochable, Seedable
      * @inheritdoc Auctionable
      */
     function _onWinnerClaim(Bid memory bid) internal override {
-        super._onWinnerClaim(bid);
-        _NUGGFT.onMinterClaim(bid.account, bid.auctionId);
+        super._onWinnerClaim(bids);
+        _NUGGFT.onMinterClaim(bid.accountw, bid.auctionId);
     }
 
     /**

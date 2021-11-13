@@ -1,14 +1,9 @@
 import { HardhatRuntimeEnvironment } from 'hardhat/types';
 import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/dist/src/signers';
 import { Contract } from 'ethers';
-
-import { GetARGsTypeFromFactory, GetContractTypeFromFactory, MinEthersFactory } from '../../types/commons';
-import { NamedAccounts } from '../../hardhat.config';
-import { WETH9 } from '../../types';
-
-import { WETH9__factory } from './../../types/factories/WETH9__factory';
-import { WETH9 } from '../../../../typechain/WETH9';
-import { Typechain } from '../../declaration';
+import { NamedAccounts } from '../../../../hardhat.config';
+import { WETH9__factory, WETH9 } from '../../../../typechain';
+import { MinEthersFactory, GetContractTypeFromFactory, GetARGsTypeFromFactory } from '../../../../typechain/common';
 
 export const getHRE = (): HardhatRuntimeEnvironment => {
     return require('hardhat') as HardhatRuntimeEnvironment;
@@ -66,7 +61,7 @@ const WETH_ADDRESSES: { [index: string]: string } = {
     '97': '0xae13d989dac2f0debff460ac112a837c89baa7cd',
 };
 
-export const ensureWETH = async (): Promise<NL.Nuggft.Typechain> => {
+export const ensureWETH = async (): Promise<WETH9> => {
     const hre = getHRE();
     console.log('herheherehrehe');
 
@@ -86,7 +81,7 @@ export const ensureWETH = async (): Promise<NL.Nuggft.Typechain> => {
         console.log('Mock WETH successfully deployed at ', mock.address);
         //
 
-        return await hre.ethers.getContractAt<NL.>(WETH9__factory.abi, mock.address);
+        return await hre.ethers.getContractAt<WETH9>(WETH9__factory.abi, mock.address);
     } else {
         console.log('WETH found at', WETH_ADDRESSES[await hre.getChainId()]);
 

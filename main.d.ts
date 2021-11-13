@@ -8,3 +8,7 @@ declare module 'hardhat/types/runtime' {
         };
     }
 }
+
+declare module 'Typechain' {
+    export type TC = typeof import('./typechain');
+}

@@ -1,7 +1,7 @@
 import { ethers } from 'hardhat';
 import { expect } from './shared/expect';
 import { Decimal } from 'decimal.js';
-import { QuadMathTest } from '../types/QuadMathTest';
+import { QuadMathTest } from '../typechain/QuadMathTest';
 import { BINARY_128 } from './shared/conversion';
 
 const {
@@ -49,7 +49,11 @@ describe('QuadMath', function () {
         it('accurate without phantom overflow', async function () {
             const result = BINARY_128.div(3);
             expect(
-                await quadMath.mulDiv(BINARY_128, /*0.5=*/ BigNumber.from(50).mul(BINARY_128).div(100), /*1.5=*/ BigNumber.from(150).mul(BINARY_128).div(100)),
+                await quadMath.mulDiv(
+                    BINARY_128,
+                    /*0.5=*/ BigNumber.from(50).mul(BINARY_128).div(100),
+                    /*1.5=*/ BigNumber.from(150).mul(BINARY_128).div(100),
+                ),
             ).to.eq(result);
         });
 
@@ -60,7 +64,9 @@ describe('QuadMath', function () {
 
         it('accurate with phantom overflow and repeating decimal', async function () {
             const result = BigNumber.from(1).mul(BINARY_128).div(3);
-            expect(await quadMath.mulDiv(BINARY_128, BigNumber.from(1000).mul(BINARY_128), BigNumber.from(3000).mul(BINARY_128))).to.eq(result);
+            expect(await quadMath.mulDiv(BINARY_128, BigNumber.from(1000).mul(BINARY_128), BigNumber.from(3000).mul(BINARY_128))).to.eq(
+                result,
+            );
         });
     });
 
@@ -79,7 +85,9 @@ describe('QuadMath', function () {
         });
 
         it('reverts if mulDiv overflows 256 bits after rounding up', async function () {
-            await expect(quadMath.mulDivRoundingUp('535006138814359', '432862656469423142931042426214547535783388063929571229938474969', '2')).to.be.reverted;
+            await expect(
+                quadMath.mulDivRoundingUp('535006138814359', '432862656469423142931042426214547535783388063929571229938474969', '2'),
+            ).to.be.reverted;
         });
 
         it('reverts if mulDiv overflows 256 bits after rounding up case 2', async function () {
@@ -109,12 +117,16 @@ describe('QuadMath', function () {
 
         it('accurate with phantom overflow', async function () {
             const result = BigNumber.from(4375).mul(BINARY_128).div(1000);
-            expect(await quadMath.mulDivRoundingUp(BINARY_128, BigNumber.from(35).mul(BINARY_128), BigNumber.from(8).mul(BINARY_128))).to.eq(result);
+            expect(
+                await quadMath.mulDivRoundingUp(BINARY_128, BigNumber.from(35).mul(BINARY_128), BigNumber.from(8).mul(BINARY_128)),
+            ).to.eq(result);
         });
 
         it('accurate with phantom overflow and repeating decimal', async function () {
             const result = BigNumber.from(1).mul(BINARY_128).div(3).add(1);
-            expect(await quadMath.mulDivRoundingUp(BINARY_128, BigNumber.from(1000).mul(BINARY_128), BigNumber.from(3000).mul(BINARY_128))).to.eq(result);
+            expect(
+                await quadMath.mulDivRoundingUp(BINARY_128, BigNumber.from(1000).mul(BINARY_128), BigNumber.from(3000).mul(BINARY_128)),
+            ).to.eq(result);
         });
     });
 

@@ -3,9 +3,9 @@ import { Fixture, MockProvider } from 'ethereum-waffle';
 import { BigNumber, Wallet } from 'ethers';
 import { expect } from 'chai';
 
-import { AuctionableTest } from '../../types/AuctionableTest';
+import { AuctionableTest } from '../../typechain/AuctionableTest';
 import { deployContract } from '../shared';
-import { AuctionableTest__factory } from '../../types';
+import { AuctionableTest__factory } from '../../typechain';
 import { ETH_ZERO, toEth } from '../shared/conversion';
 
 export interface AuctionableTestFixture {

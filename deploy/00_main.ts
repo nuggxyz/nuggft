@@ -2,22 +2,13 @@ import { ethers } from 'ethers';
 import { HardhatRuntimeEnvironment } from 'hardhat/types';
 
 import { NamedAccounts } from '../hardhat.config';
-import {
-    fromEth,
-    toEth,
-} from '../tests/shared/conversion';
-import {
-    ensureERC1820,
-    ensureWETH,
-} from '../tests/shared/deployment';
-import {
-    DotNugg,
-    NuggETHRelay,
-} from '../types';
-import { NuggAuction } from '../types/NuggAuction.d';
-import { NuggETH } from '../types/NuggETH';
-import { NuggFather } from '../types/NuggFather';
-import { NuggFT } from '../types/NuggFT.d';
+import { fromEth, toEth } from '../tests/shared/conversion';
+import { ensureERC1820, ensureWETH } from '../tests/shared/deployment';
+import { DotNugg, NuggETHRelay } from '../typechain';
+import { NuggAuction } from '../typechain/NuggAuction.d';
+import { NuggETH } from '../typechain/NuggETH';
+import { NuggFather } from '../typechain/NuggFather';
+import { NuggFT } from '../typechain/NuggFT.d';
 
 const deployment = async (hre: HardhatRuntimeEnvironment) => {
     const chainID = await hre.getChainId();

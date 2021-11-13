@@ -3,7 +3,7 @@ import { BigNumber } from 'ethers';
 import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/dist/src/signers';
 
 import { NamedAccounts } from '../../hardhat.config';
-import { EpochMathTest, EpochMathTest__factory } from '../types';
+import { EpochMathTest, EpochMathTest__factory } from '../typechain';
 
 import { MockEpochMathState, MockEpochMathTests } from './mocks/MockEpochMath';
 import { ETH_BILLION } from './shared/conversion';

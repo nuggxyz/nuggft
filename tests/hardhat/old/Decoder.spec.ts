@@ -1,7 +1,7 @@
 import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/dist/src/signers';
 import { expect } from 'chai';
 
-import { DecoderTest, DecoderTest__factory } from '../types';
+import { DecoderTest, DecoderTest__factory } from '../typechain';
 import { NamedAccounts } from '../hardhat.config';
 
 import { deployContract, prepareAccounts } from './shared';

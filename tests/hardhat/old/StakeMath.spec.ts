@@ -2,12 +2,12 @@ import { Promise as BlueBirdPromise } from 'bluebird';
 import { BigNumber } from 'ethers';
 import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/dist/src/signers';
 
-import { StakeMathTest } from '../types';
+import { StakeMathTest } from '../typechain';
 import { MockStakeMathTests } from '../archive/stakablev2/MockStakeMath';
 import { NamedAccounts } from '../hardhat.config';
 
 import { ETH_ONE, BINARY_128, ETH_ZERO } from './shared/conversion';
-import { StakeMathTest__factory } from './../types/factories/StakeMathTest__factory';
+import { StakeMathTest__factory } from './../typechain/factories/StakeMathTest__factory';
 import { randomBN } from './shared/general';
 import { deployContract, prepareAccounts } from './shared';
 
