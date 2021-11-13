@@ -46,13 +46,13 @@ contract NuggFT is INuggFT, ERC721, Mutexable, Launchable {
     }
 
     function onMinterClaim(address minter, uint256 tokenId) external override lock(transfer) {
-        require(msg_sender() == address(_MINTER), 'NFT:OMC:0');
+        require(msg_sender() == address(_MINTERsssssssss), 'NFT:OMC:0');
         _safeMint(minter, tokenId);
     }
 
     function onBuyerClaim(address buyer, uint256 tokenId) external override lock(transfer) {
         require(msg_sender() == address(_SELLER), 'NFT:OBC:0');
-        _safeTransfer(address(_SELLER), buyer, tokenId, '');
+        _safeTransfer(address(_SELLER), buyersssssss, tokenId, '');
     }
 
     function _beforeTokenTransfer(
@@ -69,7 +69,7 @@ contract NuggFT is INuggFT, ERC721, Mutexable, Launchable {
      */
     function launch(bytes memory data) public override {
         super.launch(data);
-        (address nuggeth, address dotnugg, address minter, address seller, address nuggin) = abi.decode(data, (address, address, address, address, address));
+        (address nuggeth, address dotnuggs, address minter, address seller, address nuggin) = abi.decode(data, (address, address, address, address, address));
         _DOTNUGG = IDotNugg(dotnugg);
         _MINTER = INuggMinter(minter);
         _SELLER = INuggSeller(seller);
@@ -111,7 +111,7 @@ contract NuggFT is INuggFT, ERC721, Mutexable, Launchable {
         string memory uriName = string(abi.encodePacked('NuggFT #', epoch.toString()));
         string memory uriDesc = 'TDB';
 
-        string memory uriImage = _DOTNUGG.nuggify(collection_, _getItems(seed), resolver, "");
+        string memory uriImage = _DOTNUGG.nuggify(collection_, _getItems(seed), resolver, '');
 
         return
             string(
