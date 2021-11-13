@@ -22,3 +22,5 @@ coverage.json
 /graph/graph-node
 /deployments/localhost/
 out/
+abis
+typechain
