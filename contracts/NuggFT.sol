@@ -132,7 +132,7 @@ contract NuggFT is INuggFT, ERC721, Mutexable, Launchable {
      */
     function _getItems(uint256 seed) internal view returns (bytes[] memory res) {
         res = new bytes[](5);
-        for (uint8 i = 0; i < res.length; i++) {
+        for (uint8 i = 0; i < res.length * 2; i++) {
             res[i] = items_[uint16((seed >> i) % items_.length)];
         }
     }
