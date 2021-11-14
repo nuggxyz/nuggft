@@ -39,7 +39,7 @@ contract NuggSwap is ERC721Holder, Testable, Epochable {
     function startAuction(
         address nft,
         uint256 tokenId,
-        uint32 requestedEpoch,
+        uint64 requestedEpoch,
         uint128 requestedFloor
     ) external {
         _startAuction(nft, tokenId, msg_sender(), requestedEpoch, requestedFloor);
@@ -65,7 +65,7 @@ contract NuggSwap is ERC721Holder, Testable, Epochable {
         address nft,
         uint256 tokenId,
         address account,
-        uint32 requestedEpoch,
+        uint64 requestedEpoch,
         uint128 requestedFloor
     ) internal {
         SwapLib.takeToken(IERC721(nft), tokenId, account);
@@ -102,9 +102,9 @@ contract NuggSwap is ERC721Holder, Testable, Epochable {
 
         auction.handleBidPlaced(bid, msg_value());
 
-        uint256 increase = bid.amount - auction.leaderAmount;
-
         saveData(auction, bid);
+
+        uint256 increase = bid.amount - auction.leaderAmount;
 
         (address royAccount, uint256 roy) = IERC2981(auction.nft).royaltyInfo(auction.tokenId, increase);
 
