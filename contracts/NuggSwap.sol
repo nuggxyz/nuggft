@@ -5,12 +5,13 @@ pragma solidity 0.8.4;
 import './libraries/SwapLib.sol';
 
 import './interfaces/INuggSwapable.sol';
-
+import 'hardhat/console.sol';
 import './erc721/IERC721.sol';
 
 import './common/Testable.sol';
+import './erc721/ERC721Holder.sol';
 
-contract NuggSwap is Testable {
+contract NuggSwap is ERC721Holder, Testable {
     using Address for address payable;
     using SwapLib for SwapLib.AuctionData;
 
@@ -108,6 +109,7 @@ contract NuggSwap is Testable {
             auctionNum,
             msg_sender()
         );
+        console.log('HELLO', bid.amount);
 
         auction.handleBidClaim(bid);
 
@@ -128,7 +130,7 @@ contract NuggSwap is Testable {
         (address leader, uint64 epoch, bool claimedByOwner, bool exists) = SwapLib.decodeAuctionData(
             _encodedAuctionData[auctionId]
         );
-        (uint248 leaderAmount, ) = SwapLib.decodeBid(_encodedBidData[auctionId][leader]);
+        (uint128 leaderAmount, ) = SwapLib.decodeBidData(_encodedBidData[auctionId][leader]);
 
         auction = SwapLib.AuctionData({
             nft: nft,
@@ -140,12 +142,16 @@ contract NuggSwap is Testable {
             epoch: epoch,
             exists: exists,
             claimedByOwner: claimedByOwner,
-            owner: _auctionOwners[auctionListId][auctionNum],
+            owner: _auctionOwners[auctionListId].length > auctionNum
+                ? _auctionOwners[auctionListId][auctionNum]
+                : address(0),
             activeEpoch: INuggSwapable(address(nft)).currentEpoch()
         });
 
-        (uint248 amount, bool claimed) = SwapLib.decodeBid(_encodedBidData[auctionId][account]);
+        (uint128 amount, bool claimed) = SwapLib.decodeBidData(_encodedBidData[auctionId][account]);
 
+        console.log('auction.activeEpoch: ', auction.activeEpoch, claimedByOwner);
+        // console.logBytes32(bytes32(_encodedBidData[auctionId][account]));
         bid = SwapLib.BidData({claimed: claimed, amount: amount, account: account});
     }
 

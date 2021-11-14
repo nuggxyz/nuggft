@@ -287,9 +287,9 @@ const HardhatConfig: HardhatUserConfig = {
         ...StagingNetworks,
         ...LocalNetworks,
     },
-    preprocess: {
-        eachLine: removeConsoleLog((hre): boolean => !(hre.hardhatArguments.showStackTraces && hre.network.name === 'localhost')),
-    },
+    // preprocess: {
+    //     eachLine: removeConsoleLog((hre): boolean => !(hre.hardhatArguments.showStackTraces && hre.network.name === 'localhost')),
+    // },
     abiExporter: {
         path: './abis',
         clear: true,

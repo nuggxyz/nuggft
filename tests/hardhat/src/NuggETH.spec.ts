@@ -40,13 +40,13 @@ describe('uint tests', async function () {
             const res = await fix.nuggeth.balanceOf(accounts.dee.address);
             await fix.nuggswap.connect(accounts.dee).placeBid(fix.nuggft.address, BigNumber.from(0), 0, { value: toEth('3.000') });
 
-            console.log(res.toString());
+            // console.log(res.toString());
 
-            await Mining.advanceBlockTo(35);
-            await fix.nuggswap.connect(accounts.dee).claim(fix.nuggft.address, 0, 2);
+            await Mining.advanceBlockTo(350);
+            await fix.nuggswap.connect(accounts.dee).claim(fix.nuggft.address, 0, 0);
             await fix.nuggft.connect(accounts.dee).approve(fix.nuggswap.address, 0);
 
-            await fix.nuggswap.connect(accounts.dee).startAuction(fix.nuggft.address, 0, toEth('0.0002'), 30);
+            await fix.nuggswap.connect(accounts.dee).startAuction(fix.nuggft.address, 0, 30, toEth('.02000'));
 
             const positionDee0 = await fix.nuggeth.balanceOf(accounts.dee.address);
             const positionMac0 = await fix.nuggeth.balanceOf(accounts.mac.address);
@@ -77,11 +77,14 @@ describe('uint tests', async function () {
 
             await fix.nuggeth.connect(accounts.dennis).deposit({ value: toEth('13') });
             await fix.nuggeth.connect(accounts.frank).deposit({ value: toEth('1') });
-            await fix.nuggswap.connect(accounts.frank).placeBid(fix.nuggft.address, BigNumber.from(1), 0, { value: toEth('20.000') });
-            await fix.nuggswap.connect(accounts.dee).placeBid(fix.nuggft.address, BigNumber.from(1), 0, { value: toEth('22.000') });
-            await fix.nuggswap.connect(accounts.frank).placeBid(fix.nuggft.address, BigNumber.from(1), 0, { value: toEth('3.000') });
-            await fix.nuggswap.connect(accounts.dee).placeBid(fix.nuggft.address, BigNumber.from(1), 0, { value: toEth('2.000') });
-            await fix.nuggswap.connect(accounts.dee).placeBid(fix.nuggft.address, BigNumber.from(1), 0, { value: toEth('2.000') });
+
+            console.log('yououououoi');
+
+            await fix.nuggswap.connect(accounts.frank).placeBid(fix.nuggft.address, 1, 0, { value: toEth('20.000') });
+            await fix.nuggswap.connect(accounts.dee).placeBid(fix.nuggft.address, 1, 0, { value: toEth('22.000') });
+            await fix.nuggswap.connect(accounts.frank).placeBid(fix.nuggft.address, 1, 0, { value: toEth('3.000') });
+            await fix.nuggswap.connect(accounts.dee).placeBid(fix.nuggft.address, 1, 0, { value: toEth('2.000') });
+            await fix.nuggswap.connect(accounts.dee).placeBid(fix.nuggft.address, 1, 0, { value: toEth('2.000') });
 
             console.log('yououououoi');
             await fix.nuggeth.connect(accounts.frank).deposit({ value: toEth('1') });
