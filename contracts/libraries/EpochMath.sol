@@ -3,11 +3,6 @@
 pragma solidity 0.8.4;
 
 library EpochMath {
-    struct State {
-        uint256 genesisBlock;
-        uint8 interval;
-    }
-
     enum Status {
         OVER,
         ACTIVE,
@@ -15,15 +10,33 @@ library EpochMath {
     }
 
     struct Epoch {
-        uint256 id;
+        uint64 id;
         uint256 startblock;
         uint256 endblock;
         Status status;
     }
 
+    function encodeData(uint128 _interval, uint128 _baseblock) internal pure returns (uint256 res) {
+        assembly {
+            res := or(shl(128, _baseblock), _interval)
+        }
+    }
+
+    function decodeGenesis(uint256 _state) internal pure returns (uint256 res) {
+        assembly {
+            res := shr(128, _state)
+        }
+    }
+
+    function decodeInterval(uint256 _state) internal pure returns (uint256 res) {
+        assembly {
+            res := shr(128, shl(128, _state))
+        }
+    }
+
     function getEpoch(
-        EpochMath.State memory state,
-        uint256 id,
+        uint256 state,
+        uint64 id,
         uint256 blocknum
     ) internal pure returns (EpochMath.Epoch memory res) {
         res = EpochMath.Epoch({
@@ -35,8 +48,8 @@ library EpochMath {
     }
 
     function getStatus(
-        State memory state,
-        uint256 id,
+        uint256 state,
+        uint64 id,
         uint256 blocknum
     ) internal pure returns (Status res) {
         if (getIdFromBlocknum(state, blocknum) == id) res = Status.ACTIVE;
@@ -48,19 +61,19 @@ library EpochMath {
      * @dev #TODO
      * @return res
      */
-    function getStartBlockFromId(State memory state, uint256 id) internal pure returns (uint256 res) {
-        res = id * state.interval + state.genesisBlock;
+    function getStartBlockFromId(uint256 state, uint64 id) internal pure returns (uint256 res) {
+        res = id * decodeInterval(state) + decodeGenesis(state);
     }
 
     /**
      * @dev #TODO
      * @return res
      */
-    function getEndBlockFromId(State memory state, uint256 id) internal pure returns (uint256 res) {
+    function getEndBlockFromId(uint256 state, uint64 id) internal pure returns (uint256 res) {
         res = getStartBlockFromId(state, id + 1) - 1;
     }
 
-    function getIdFromBlocknum(State memory state, uint256 blocknum) internal pure returns (uint256 res) {
-        res = (blocknum - state.genesisBlock) / state.interval;
+    function getIdFromBlocknum(uint256 state, uint256 blocknum) internal pure returns (uint64 res) {
+        res = uint64((blocknum - decodeGenesis(state)) / decodeInterval(state));
     }
 }

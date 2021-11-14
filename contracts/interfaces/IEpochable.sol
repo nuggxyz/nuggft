@@ -10,11 +10,19 @@ import '../libraries/EpochMath.sol';
  */
 
 interface IEpochable {
+    function getSeed(uint256 id) external view returns (bytes32 res);
+
+    function getSeedWithOffset(uint256 id, uint256 offset) external view returns (bytes32 res);
+
+    function seedExists(uint256 id) external view returns (bool res);
+
+    function currentSeed() external view returns (bytes32 res);
+
     function genesisBlock() external view returns (uint256 res);
 
     function interval() external view returns (uint256 res);
 
-    function currentEpochId() external view returns (uint256 res);
+    function currentEpochId() external view returns (uint64 res);
 
     function epochFromBlocknum(uint256 blocknum) external view returns (EpochMath.Epoch memory res);
 }

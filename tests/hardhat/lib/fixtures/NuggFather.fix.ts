@@ -48,7 +48,7 @@ export const NuggFatherFix: Fixture<NuggFatherFixture> = async function (
     const nuggswap = await deployContractWithSalt<NuggSwap__factory>({
         factory: 'NuggSwap',
         from: eoaDeployer,
-        args: [],
+        args: [nuggeth.address],
     });
 
     const nuggin = await deployContractWithSalt<MockFileResolver__factory>({

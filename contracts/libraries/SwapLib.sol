@@ -1,3 +1,5 @@
+pragma solidity 0.8.4;
+
 import '../erc721/IERC721.sol';
 import '../erc2981/IERC2981Receiver.sol';
 
@@ -128,7 +130,7 @@ library SwapLib {
             require(false, 'SLIB:MT:2');
         } catch (bytes memory) {}
 
-        _nft.mint();
+        _nft.nuggSwapMint(auction.activeEpoch);
 
         require((auction.nft.ownerOf(auction.tokenId) == address(this)), 'AUC:MT:3');
 
@@ -151,25 +153,13 @@ library SwapLib {
         AuctionData memory auction,
         BidData memory bid,
         uint256 amount
-    ) internal {
+    ) internal pure {
         bid.amount += uint128(amount);
 
         require(isActive(auction), 'SL:OBP:0');
         require(validateBidIncrement(auction, bid), 'SL:OBP:1');
 
         auction.leader = bid.account;
-
-        (address royAccount, uint256 roy) = IERC2981(address(auction.nft)).royaltyInfo(auction.tokenId, amount);
-
-        IERC2981Receiver(royAccount).onERC2981Received{value: roy}(
-            address(this),
-            bid.account,
-            address(auction.nft),
-            auction.tokenId,
-            address(0),
-            roy,
-            ''
-        );
     }
 
     function handleBidClaim(AuctionData memory auction, BidData memory bid) internal {
@@ -240,8 +230,8 @@ library SwapLib {
         address to,
         address token,
         uint256 tokenId,
-        address erc20,
-        uint256 amount,
+        address,
+        uint256,
         bytes memory _data
     ) private returns (bool) {
         if (to.isContract()) {
