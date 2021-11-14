@@ -168,7 +168,7 @@ contract NuggSwap is ERC721Holder, Testable, Epochable {
         uint256 tokenId,
         uint256 auctionNum,
         address account
-    ) internal returns (SwapLib.AuctionData memory auction, SwapLib.BidData memory bid) {
+    ) internal view  returns (SwapLib.AuctionData memory auction, SwapLib.BidData memory bid) {
         // uint256 auctionId = SwapLib.encodeAuctionId(nft, tokenId, auctionNum);
         // uint256 auctionListId = SwapLib.encodeAuctionId(nft, tokenId, 0);
 

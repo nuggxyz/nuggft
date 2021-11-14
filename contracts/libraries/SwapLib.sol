@@ -123,13 +123,8 @@ library SwapLib {
 
         require(_nft.supportsInterface(type(INuggMintable).interfaceId), 'AUC:MT:0');
 
-        // require(auction.activeEpoch == auction.tokenId, 'AUC:MT:1');
-
-        // try _nft.ownerOf(auction.tokenId) returns (address) {
-        //     require(false, 'SLIB:MT:2');
-        // } catch (bytes memory) {}
-
         uint256 tokenId = INuggMintable(address(auction.nft)).nuggSwapMint(auction.activeEpoch);
+
         require(tokenId == auction.tokenId, 'AUC:MT:2');
         require((_nft.ownerOf(auction.tokenId) == address(this)), 'AUC:MT:3');
 

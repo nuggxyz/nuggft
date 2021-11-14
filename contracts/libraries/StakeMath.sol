@@ -52,14 +52,6 @@ library StakeMath {
         return tAmount.mulDiv(state.rSupply, state.tSupply);
     }
 
-    // function _safeRtoTRoundingUnsafe(State memory state, uint256 rAmount) private pure returns (uint256) {
-    //     return rAmount.mulDivRoundingUnsafe(state.tSupply, state.rSupply);
-    // }
-
-    // function _safeTtoRRoundingUnsafe(State memory state, uint256 tAmount) private pure returns (uint256) {
-    //     return tAmount.mulDivRoundingUnsafe(state.rSupply, state.tSupply);
-    // }
-
     function _safeRtoTRoundingUp(State memory state, uint256 rAmount) private pure returns (uint256) {
         return rAmount.mulDivRoundingUp(state.tSupply, state.rSupply);
     }
