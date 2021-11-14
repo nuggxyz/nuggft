@@ -15,6 +15,10 @@ contract MockDotNugg is IDotNugg {
         bytes memory,
         bytes[] memory,
         address,
+        string memory,
+        string memory,
+        uint256,
+        bytes32,
         bytes memory
     ) public pure override returns (string memory image) {
         image = 'this is supposed to be an image';

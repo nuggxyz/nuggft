@@ -2,22 +2,19 @@
 
 pragma solidity 0.8.4;
 
-import './libraries/Base64.sol';
-import './libraries/SeedMath.sol';
-import './libraries/Uint.sol';
-
 import './common/Launchable.sol';
 import './core/Epochable.sol';
 
-import './erc721/ERC721.sol';
 import './interfaces/IDotNuggFileResolver.sol';
 import './interfaces/IDotNuggColorResolver.sol';
-import './erc2981/IERC2981.sol';
 
 import './interfaces/IDotNugg.sol';
 import './interfaces/INuggFT.sol';
 import './NuggSwap.sol';
 import './NuggETH.sol';
+
+import './erc721/ERC721.sol';
+import './erc2981/IERC2981.sol';
 
 /**
  * @title Nugg Labs NFT Collection 0 - "NuggFT"
@@ -31,9 +28,6 @@ import './NuggETH.sol';
  * Note: epochs are 256 blocks long as block hashes only exist for 256 blocks
  */
 contract NuggFT is INuggFT, ERC721 {
-    using SeedMath for bytes32;
-    using Uint256 for uint256;
-
     IDotNugg internal dotnugg;
     NuggETH internal nuggeth;
     NuggSwap internal nuggswap;
@@ -74,7 +68,7 @@ contract NuggFT is INuggFT, ERC721 {
     function nuggSwapMint(uint256 currentEpochId) external override returns (uint256 tokenId) {
         tokenId = currentEpochId - epochOffset;
         require(!_exists(tokenId), 'NFT:NSM:0');
-        _safeMint(address(nuggswap), currentEpochId - epochOffset);
+        _safeMint(address(nuggswap), tokenId);
     }
 
     function _beforeTokenTransfer(
@@ -100,33 +94,14 @@ contract NuggFT is INuggFT, ERC721 {
      * @notice calcualtes the token uri for a given epoch
      */
     function _generateTokenURI(
-        uint256 epoch,
+        uint256 tokenId,
         bytes32 seed,
         address resolver
     ) internal view returns (string memory) {
-        string memory uriName = string(abi.encodePacked('NuggFT #', epoch.toString()));
+        string memory uriName = 'NuggFT {#}';
         string memory uriDesc = string(abi.encodePacked(seed));
 
-        string memory uriImage = dotnugg.nuggify(collection_, _getItems(seed), resolver, '');
-
-        return
-            string(
-                abi.encodePacked(
-                    Base64.encodeJson(
-                        bytes(
-                            abi.encodePacked(
-                                '{"name":"',
-                                uriName,
-                                '","description":"',
-                                uriDesc,
-                                '", "image": "',
-                                uriImage,
-                                '"}'
-                            )
-                        )
-                    )
-                )
-            );
+        return dotnugg.nuggify(collection_, _getItems(seed), resolver, uriName, uriDesc, tokenId, seed, '');
     }
 
     // collection_
