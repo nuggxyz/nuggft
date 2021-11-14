@@ -58,7 +58,7 @@ const DefaultLocalNetworkConfig = {
     saveDeployments: true,
     accounts: {
         mnemonic: 'many dark suns glow like gods fury when they eats that nugg',
-        accountsBalance: '1000080000000000000000',
+        accountsBalance: '690001000080000000000000000',
     },
 };
 
@@ -80,6 +80,7 @@ const LocalNetworks: NetworksUserConfig = {
     hardhat: {
         ...DefaultLocalNetworkConfig,
         allowUnlimitedContractSize: true,
+        saveDeployments: false,
         forking: {
             enabled: false,
             url: `https://ropsten.infura.io/v3/${process.env.INFURA_API_KEY}` || '',
@@ -233,8 +234,6 @@ const HardhatConfig: HardhatUserConfig = {
         cache: 'cache',
         sources: 'contracts',
         tests: 'tests',
-        deploy: 'devops/deploy',
-        deployments: 'devops/deployments',
     },
     solidity: {
         compilers: [

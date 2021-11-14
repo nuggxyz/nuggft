@@ -14,4 +14,25 @@ interface IDotNugg {
         bytes memory data
     ) external view returns (string memory image);
 
+    struct Matrix {
+        uint8 width;
+        uint8 height;
+        Pixel[][] data;
+        uint8 currentUnsetX;
+        uint8 currentUnsetY;
+        bool init;
+        uint8 startX;
+    }
+
+    struct Rgba {
+        uint8 r;
+        uint8 g;
+        uint8 b;
+        uint8 a;
+    }
+    struct Pixel {
+        int8 zindex;
+        Rgba rgba;
+        bool exists;
+    }
 }
