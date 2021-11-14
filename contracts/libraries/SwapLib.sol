@@ -18,10 +18,9 @@ library SwapLib {
     }
 
     struct AuctionData {
-        IERC721 nft;
-        uint128 tokenId;
-        uint128 num;
-        uint256 id;
+        address nft;
+        uint256 tokenId;
+        uint256 num;
         address leader;
         uint128 leaderAmount;
         uint64 epoch;
@@ -67,8 +66,8 @@ library SwapLib {
         pure
         returns (
             address nft,
-            uint64 tokenId,
-            uint32 auctionNum
+            uint256 tokenId,
+            uint256 auctionNum
         )
     {
         assembly {
@@ -81,8 +80,8 @@ library SwapLib {
 
     function encodeAuctionId(
         address nft,
-        uint64 tokenId,
-        uint32 auctionNum
+        uint256 tokenId,
+        uint256 auctionNum
     ) internal pure returns (uint256 res) {
         assembly {
             res := or(or(shl(224, auctionNum), shl(160, tokenId)), nft)
@@ -105,7 +104,7 @@ library SwapLib {
 
     function takeToken(
         IERC721 nft,
-        uint128 tokenId,
+        uint256 tokenId,
         address from
     ) internal {
         require(nft.supportsInterface(type(INuggSwapable).interfaceId), 'AUC:TT:0');
@@ -120,33 +119,34 @@ library SwapLib {
     }
 
     function mintToken(AuctionData memory auction) internal {
-        require(auction.nft.supportsInterface(type(INuggMintable).interfaceId), 'AUC:MT:0');
+        IERC721 _nft = IERC721(auction.nft);
 
-        INuggMintable _nft = INuggMintable(address(auction.nft));
+        require(_nft.supportsInterface(type(INuggMintable).interfaceId), 'AUC:MT:0');
 
-        require(auction.activeEpoch == auction.tokenId, 'AUC:MT:1');
+        // require(auction.activeEpoch == auction.tokenId, 'AUC:MT:1');
 
-        try auction.nft.ownerOf(auction.tokenId) returns (address) {
-            require(false, 'SLIB:MT:2');
-        } catch (bytes memory) {}
+        // try _nft.ownerOf(auction.tokenId) returns (address) {
+        //     require(false, 'SLIB:MT:2');
+        // } catch (bytes memory) {}
 
-        _nft.nuggSwapMint(auction.activeEpoch);
-
-        require((auction.nft.ownerOf(auction.tokenId) == address(this)), 'AUC:MT:3');
+        uint256 tokenId = INuggMintable(address(auction.nft)).nuggSwapMint(auction.activeEpoch);
+        require(tokenId == auction.tokenId, 'AUC:MT:2');
+        require((_nft.ownerOf(auction.tokenId) == address(this)), 'AUC:MT:3');
 
         handleInitAuction(auction, BidData({account: address(0), amount: 0, claimed: false}), auction.activeEpoch, 0);
     }
 
     function _giveToken(
-        IERC721 nft,
-        uint128 tokenId,
+        address nft,
+        uint256 tokenId,
         address to
     ) internal {
-        require(nft.ownerOf(tokenId) == address(this), 'AUC:TT:1');
+        IERC721 _nft = IERC721(nft);
+        require(_nft.ownerOf(tokenId) == address(this), 'AUC:TT:1');
 
-        nft.safeTransferFrom(address(this), to, tokenId);
+        _nft.safeTransferFrom(address(this), to, tokenId);
 
-        require(nft.ownerOf(tokenId) == to, 'AUC:TT:3');
+        require(_nft.ownerOf(tokenId) == to, 'AUC:TT:3');
     }
 
     function handleBidPlaced(

@@ -71,7 +71,9 @@ contract NuggFT is INuggFT, ERC721 {
         return (address(nuggeth), (value * 1000) / 10000);
     }
 
-    function nuggSwapMint(uint256 currentEpochId) external override {
+    function nuggSwapMint(uint256 currentEpochId) external override returns (uint256 tokenId) {
+        tokenId = currentEpochId - epochOffset;
+        require(!_exists(tokenId), 'NFT:NSM:0');
         _safeMint(address(nuggswap), currentEpochId - epochOffset);
     }
 

@@ -18,17 +18,17 @@ contract NuggSwap is ERC721Holder, Testable, Epochable {
     using Address for address payable;
     using SwapLib for SwapLib.AuctionData;
 
-    mapping(uint256 => address[]) internal _auctionOwners;
+   mapping(address => mapping(uint256 => address[])) internal _auctionOwners;
 
-    mapping(uint256 => uint256) internal _encodedAuctionData;
+    mapping(address => mapping(uint256 => mapping(uint256 => uint256))) internal _encodedAuctionData;
 
-    mapping(uint256 => mapping(address => uint256)) internal _encodedBidData;
+    mapping(address => mapping(uint256 => mapping(uint256 => mapping(address => uint256)))) internal _encodedBidData;
 
-    event BidPlaced(uint256 auctionId, address account, uint256 amount);
+    event BidPlaced(address nft, uint256 tokenId, uint256 auctionNum, address account, uint256 amount);
 
     event AuctionInit(uint256 indexed epoch);
 
-    event Claim(uint256 indexed epoch, address indexed account);
+    event Claim(address nft, uint256 tokenId, uint256 auctionNum, address indexed account);
 
     INuggETH immutable nuggeth;
 
@@ -37,8 +37,8 @@ contract NuggSwap is ERC721Holder, Testable, Epochable {
     }
 
     function startAuction(
-        IERC721 nft,
-        uint64 tokenId,
+        address nft,
+        uint256 tokenId,
         uint32 requestedEpoch,
         uint128 requestedFloor
     ) external {
@@ -46,33 +46,33 @@ contract NuggSwap is ERC721Holder, Testable, Epochable {
     }
 
     function placeBid(
-        IERC721 nft,
-        uint64 tokenId,
-        uint32 auctionNum
+        address nft,
+        uint256 tokenId,
+        uint256 auctionNum
     ) external payable {
         _placeBid(nft, tokenId, auctionNum);
     }
 
     function claim(
-        IERC721 nft,
-        uint64 tokenId,
-        uint32 auctionNum
+        address nft,
+        uint256 tokenId,
+        uint256 auctionNum
     ) external {
         _claim(nft, tokenId, auctionNum);
     }
 
     function _startAuction(
-        IERC721 nft,
-        uint64 tokenId,
+        address nft,
+        uint256 tokenId,
         address account,
         uint32 requestedEpoch,
         uint128 requestedFloor
     ) internal {
-        SwapLib.takeToken(nft, tokenId, account);
+        SwapLib.takeToken(IERC721(nft), tokenId, account);
 
-        address[] storage prevAuctionOwners = _auctionOwners[SwapLib.encodeAuctionId(address(nft), tokenId, 0)];
+        address[] storage prevAuctionOwners = _auctionOwners[nft][tokenId];
 
-        uint32 auctionNum = uint32(prevAuctionOwners.length);
+        uint256 auctionNum = uint32(prevAuctionOwners.length);
 
         (SwapLib.AuctionData memory auction, SwapLib.BidData memory bid) = loadData(nft, tokenId, auctionNum, account);
 
@@ -84,9 +84,9 @@ contract NuggSwap is ERC721Holder, Testable, Epochable {
     }
 
     function _placeBid(
-        IERC721 nft,
-        uint64 tokenId,
-        uint32 auctionNum
+        address nft,
+        uint256 tokenId,
+        uint256 auctionNum
     ) internal {
         (SwapLib.AuctionData memory auction, SwapLib.BidData memory bid) = loadData(
             nft,
@@ -97,20 +97,23 @@ contract NuggSwap is ERC721Holder, Testable, Epochable {
 
         if (!auction.exists) {
             SwapLib.mintToken(auction);
-            _auctionOwners[SwapLib.encodeAuctionId(address(nft), tokenId, 0)].push(address(0));
+            _auctionOwners[nft][tokenId].push(address(0));
         }
 
         auction.handleBidPlaced(bid, msg_value());
 
         uint256 increase = bid.amount - auction.leaderAmount;
 
-        (address royAccount, uint256 roy) = IERC2981(address(auction.nft)).royaltyInfo(auction.tokenId, increase);
+        saveData(auction, bid);
+
+        (address royAccount, uint256 roy) = IERC2981(auction.nft).royaltyInfo(auction.tokenId, increase);
+
 
         if (royAccount == address(nuggeth)) {
             nuggeth.onERC2981Received{value: increase}(
                 address(this),
                 bid.account,
-                address(nft),
+                auction.nft,
                 tokenId,
                 address(0),
                 0,
@@ -120,7 +123,7 @@ contract NuggSwap is ERC721Holder, Testable, Epochable {
             IERC2981Receiver(royAccount).onERC2981Received{value: roy}(
                 address(this),
                 bid.account,
-                address(auction.nft),
+                auction.nft,
                 auction.tokenId,
                 address(0),
                 0,
@@ -129,7 +132,7 @@ contract NuggSwap is ERC721Holder, Testable, Epochable {
             nuggeth.onERC2981Received{value: increase - roy}(
                 address(this),
                 bid.account,
-                address(nft),
+                auction.nft,
                 tokenId,
                 address(0),
                 0,
@@ -137,15 +140,14 @@ contract NuggSwap is ERC721Holder, Testable, Epochable {
             );
         }
 
-        saveData(auction, bid);
 
-        emit BidPlaced(auction.id, bid.account, bid.amount);
+        emit BidPlaced(auction.nft, auction.tokenId, auction.num, bid.account, bid.amount);
     }
 
     function _claim(
-        IERC721 nft,
-        uint64 tokenId,
-        uint32 auctionNum
+        address nft,
+        uint256 tokenId,
+        uint256 auctionNum
     ) internal {
         (SwapLib.AuctionData memory auction, SwapLib.BidData memory bid) = loadData(
             nft,
@@ -158,51 +160,51 @@ contract NuggSwap is ERC721Holder, Testable, Epochable {
 
         saveData(auction, bid);
 
-        emit Claim(auction.id, bid.account);
+        emit Claim(auction.nft, auction.tokenId, auction.num, bid.account);
     }
 
     function loadData(
-        IERC721 nft,
-        uint64 tokenId,
-        uint32 auctionNum,
+        address nft,
+        uint256 tokenId,
+        uint256 auctionNum,
         address account
     ) internal returns (SwapLib.AuctionData memory auction, SwapLib.BidData memory bid) {
-        uint256 auctionId = SwapLib.encodeAuctionId(address(nft), tokenId, auctionNum);
-        uint256 auctionListId = SwapLib.encodeAuctionId(address(nft), tokenId, 0);
+        // uint256 auctionId = SwapLib.encodeAuctionId(nft, tokenId, auctionNum);
+        // uint256 auctionListId = SwapLib.encodeAuctionId(nft, tokenId, 0);
 
         (address leader, uint64 epoch, bool claimedByOwner, bool exists) = SwapLib.decodeAuctionData(
-            _encodedAuctionData[auctionId]
+            _encodedAuctionData[nft][tokenId][auctionNum]
         );
-        (uint128 leaderAmount, ) = SwapLib.decodeBidData(_encodedBidData[auctionId][leader]);
+        (uint128 leaderAmount, ) = SwapLib.decodeBidData(_encodedBidData[nft][tokenId][auctionNum][leader]);
 
         auction = SwapLib.AuctionData({
             nft: nft,
             tokenId: tokenId,
             num: auctionNum,
-            id: auctionId,
+            // id: auctionId,
             leader: leader,
             leaderAmount: leaderAmount,
             epoch: epoch,
             exists: exists,
             claimedByOwner: claimedByOwner,
-            owner: _auctionOwners[auctionListId].length > auctionNum
-                ? _auctionOwners[auctionListId][auctionNum]
+            owner: _auctionOwners[nft][tokenId].length > auctionNum
+                ? _auctionOwners[nft][tokenId][auctionNum]
                 : address(0),
             activeEpoch: currentEpochId()
         });
 
-        (uint128 amount, bool claimed) = SwapLib.decodeBidData(_encodedBidData[auctionId][account]);
+        (uint128 amount, bool claimed) = SwapLib.decodeBidData(_encodedBidData[nft][tokenId][auctionNum][account]);
 
         bid = SwapLib.BidData({claimed: claimed, amount: amount, account: account});
     }
 
     function saveData(SwapLib.AuctionData memory auction, SwapLib.BidData memory bid) internal {
-        _encodedAuctionData[auction.id] = SwapLib.encodeAuctionData(
+        _encodedAuctionData[auction.nft][auction.tokenId][auction.num] = SwapLib.encodeAuctionData(
             auction.leader,
             auction.epoch,
             auction.claimedByOwner,
             auction.exists
         );
-        _encodedBidData[auction.id][bid.account] = SwapLib.encodeBidData(bid.amount, bid.claimed);
+        _encodedBidData[auction.nft][auction.tokenId][auction.num][bid.account] = SwapLib.encodeBidData(bid.amount, bid.claimed);
     }
 }
