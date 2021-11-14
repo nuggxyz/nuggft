@@ -44,11 +44,15 @@ library SwapLib {
 
     function encodeAuctionData(
         address leader,
-        uint88 epoch,
+        uint64 epoch,
         bool claimedByOwner,
         bool exists
     ) internal pure returns (uint256 res) {
-        res = (uint256(exists ? 1 : 0) << (160 + 64 + 8)) | (uint256(claimedByOwner ? 1 : 0) << (160 + 64)) | (uint256(epoch) << 160) | uint160(leader);
+        res =
+            (uint256(exists ? 1 : 0) << (160 + 64 + 8)) |
+            (uint256(claimedByOwner ? 1 : 0) << (160 + 64)) |
+            (uint256(epoch) << 160) |
+            uint160(leader);
     }
 
     function decodeAuctionId(uint256 _unparsed)
@@ -105,7 +109,7 @@ library SwapLib {
         require(nft.ownerOf(tokenId) == address(this), 'AUC:TT:3');
     }
 
-    function mintToken(AuctionData memory auction) internal returns (bool) {
+    function mintToken(AuctionData memory auction) internal {
         require(auction.nft.supportsInterface(type(INuggMintable).interfaceId), 'AUC:TT:0');
 
         INuggMintable _nft = INuggMintable(address(auction.nft));
