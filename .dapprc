@@ -1,6 +1,6 @@
-DAPP_SRC=./src/tests/dapptools/src
-DAPP_LIB=./src/tests/dapptools/lib
-DAPP_OUT=./src/tests/dapptools/out
+DAPP_SRC=./tests/dapptools/src
+DAPP_LIB=./tests/dapptools/lib
+DAPP_OUT=./tests/dapptools/out
 DAPP_SOLC_VERSION=0.8.4
 
 
