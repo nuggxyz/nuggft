@@ -83,14 +83,14 @@ library SwapLib {
         }
     }
 
-    function encodeAuctionListId(address nft, uint64 tokenId) internal pure returns (uint256 res) {
-        res = (uint256(tokenId) << (160)) | uint160(address(nft));
-    }
+    // function encodeAuctionListId(address nft, uint64 tokenId) internal pure returns (uint256 res) {
+    //     res = (uint256(tokenId) << (160)) | uint160(address(nft));
+    // }
 
-    function decodeAuctionListId(uint256 _unparsed) internal pure returns (address nft, uint64 tokenId) {
-        tokenId = uint64(_unparsed >> 160);
-        nft = address(address(uint160(_unparsed)));
-    }
+    // function decodeAuctionListId(uint256 _unparsed) internal pure returns (address nft, uint64 tokenId) {
+    //     tokenId = uint64(_unparsed >> 160);
+    //     nft = address(address(uint160(_unparsed)));
+    // }
 
     function decodeBid(uint256 _unparsed) internal pure returns (uint128 amount, bool claimed) {
         amount = uint128(_unparsed >> 128);
