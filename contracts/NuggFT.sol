@@ -16,8 +16,8 @@ import './interfaces/IDotNuggColorResolver.sol';
 
 import './interfaces/IDotNugg.sol';
 import './interfaces/INuggFT.sol';
-import './auction/NuggMinter.sol';
-import './auction/NuggSeller.sol';
+import './NuggSwap.sol';
+import './NuggETH.sol';
 
 /**
  * @title Nugg Labs NFT Collection 0 - "NuggFT"
@@ -30,29 +30,36 @@ import './auction/NuggSeller.sol';
  * Note: the block hash corresponding to the start of an epoch is used as the "random" seed
  * Note: epochs are 256 blocks long as block hashes only exist for 256 blocks
  */
-contract NuggFT is INuggFT, ERC721, Mutexable, Launchable {
+contract NuggFT is INuggFT, ERC721, Seedable {
     using SeedMath for bytes32;
     using Uint256 for uint256;
 
     IDotNugg internal _DOTNUGG;
-    INuggMinter internal _MINTER;
-    INuggSeller internal _SELLER;
+    NuggETH internal _NUGGETH;
+    NuggSwap internal _NUGGSWAP;
     IDotNuggFileResolver internal _DEFAULT_NUGGIN;
 
-    Mutex transfer;
+    constructor(
+        address nuggeth,
+        address nuggswap,
+        address dotnugg,
+        address nuggin
+    ) ERC721('Nugg Fungable Token', 'NuggFT') Epochable(250) {
+        _DOTNUGG = IDotNugg(dotnugg);
+        _NUGGSWAP = NuggSwap(nuggswap);
+        _NUGGETH = NuggETH(nuggeth);
+        _DEFAULT_NUGGIN = IDotNuggFileResolver(nuggin);
 
-    constructor() ERC721('Nugg Fungable Token', 'NuggFT') {
-        transfer = initMutex();
+        require(_DEFAULT_NUGGIN.supportsInterface(type(IDotNuggFileResolver).interfaceId), 'NUG:LAUNCH:0');
     }
 
-    function onMinterClaim(address minter, uint256 tokenId) external override lock(transfer) {
-        require(msg_sender() == address(_MINTERsssssssss), 'NFT:OMC:0');
-        _safeMint(minter, tokenId);
+    function mint() external override {
+        setSeed();
+        _safeMint(address(_NUGGSWAP), currentEpochId());
     }
 
-    function onBuyerClaim(address buyer, uint256 tokenId) external override lock(transfer) {
-        require(msg_sender() == address(_SELLER), 'NFT:OBC:0');
-        _safeTransfer(address(_SELLER), buyersssssss, tokenId, '');
+    function currentEpoch() external override returns (uint32) {
+        return uint32(currentEpochId());
     }
 
     function _beforeTokenTransfer(
@@ -60,44 +67,18 @@ contract NuggFT is INuggFT, ERC721, Mutexable, Launchable {
         address,
         uint256
     ) internal view override {
-        require(msg_sender() == address(_MINTER) || msg_sender() == address(_SELLER), 'NFT:BTT:0');
-    }
-
-    /**
-     * @notice inializes contract outside of constructor
-     * @inheritdoc Launchable
-     */
-    function launch(bytes memory data) public override {
-        super.launch(data);
-        (address nuggeth, address dotnuggs, address minter, address seller, address nuggin) = abi.decode(data, (address, address, address, address, address));
-        _DOTNUGG = IDotNugg(dotnugg);
-        _MINTER = INuggMinter(minter);
-        _SELLER = INuggSeller(seller);
-        _DEFAULT_NUGGIN = IDotNuggFileResolver(nuggin);
-
-        require(_DEFAULT_NUGGIN.supportsInterface(type(IDotNuggFileResolver).interfaceId), 'NUG:LAUNCH:0');
+        require(msg_sender() == address(_NUGGSWAP), 'NFT:BTT:0');
     }
 
     /**
      * @inheritdoc ERC721
      */
-    function tokenURI(uint256 tokenId) public view override isLaunched returns (string memory res) {
-        require(_MINTER.seedExists(tokenId), 'NUG:TURI:0');
-        res = _generateTokenURI(tokenId, _MINTER.getSeed(tokenId).toUint256(), address(_DEFAULT_NUGGIN));
+    function tokenURI(uint256 tokenId) public view override returns (string memory res) {
+        res = _generateTokenURI(tokenId, getSeed(tokenId).toUint256(), address(_DEFAULT_NUGGIN));
     }
 
-    function tokenURI(uint256 tokenId, address resolver) public view isLaunched returns (string memory res) {
-        require(_MINTER.seedExists(tokenId), 'NUG:TURI:1');
-        res = _generateTokenURI(tokenId, _MINTER.getSeed(tokenId).toUint256(), resolver);
-    }
-
-    /**
-     * @notice equivilent of tokenURI function, but for only for active epoch as real uri does not exist yet
-     */
-    function pendingTokenURI() public view override isLaunched returns (string memory res) {
-        uint256 id = _MINTER.currentEpochId();
-        bytes32 seed = _MINTER.seedExists(id) ? _MINTER.getSeed(id) : _MINTER.calculateCurrentSeed();
-        res = _generateTokenURI(id, seed.toUint256(), address(_DEFAULT_NUGGIN));
+    function tokenURI(uint256 tokenId, address resolver) public view returns (string memory res) {
+        res = _generateTokenURI(tokenId, getSeed(tokenId).toUint256(), resolver);
     }
 
     /**
@@ -109,7 +90,7 @@ contract NuggFT is INuggFT, ERC721, Mutexable, Launchable {
         address resolver
     ) internal view returns (string memory) {
         string memory uriName = string(abi.encodePacked('NuggFT #', epoch.toString()));
-        string memory uriDesc = 'TDB';
+        string memory uriDesc = seed.toHexString();
 
         string memory uriImage = _DOTNUGG.nuggify(collection_, _getItems(seed), resolver, '');
 

@@ -45,12 +45,12 @@ abstract contract Epochable is IEpochable {
         res = EpochMath.getIdFromBlocknum(_state, block.number);
     }
 
-    /**
-     * @dev public wrapper for internal blocknumFirstFromEpoch() - to save on gas
-     */
-    function currentEpoch() public view override returns (EpochMath.Epoch memory res) {
-        res = epochFromId(currentEpochId());
-    }
+    // /**
+    //  * @dev public wrapper for internal blocknumFirstFromEpoch() - to save on gas
+    //  */
+    // function currentEpoch() public view override returns (EpochMath.Epoch memory res) {
+    //     res = epochFromId(currentEpochId());
+    // }
 
     function epochFromId(uint256 id) public view returns (EpochMath.Epoch memory res) {
         res = EpochMath.getEpoch(_state, id, block.number);

@@ -7,8 +7,6 @@ pragma solidity 0.8.4;
  * @dev interface for Seedable.sol
  */
 interface ISeedable {
-    function seeds(uint256 id) external view returns (bytes32 res);
-
     function getSeed(uint256 id) external view returns (bytes32 res);
 
     function seedExists(uint256 id) external view returns (bool res);
