@@ -18,7 +18,7 @@ subtask(TASK_COMPILE_SOLIDITY_GET_ARTIFACT_FROM_COMPILATION_OUTPUT).setAction(
         runSuper: RunSuperFunction<unknown>,
     ): Promise<void> => {
         console.log(args.contractOutput.evm.bytecode.object);
-        hre.middleware.test = 'this should not work';
+        hre.middleware = { test: 'this should not work' };
         return await runSuper(args);
     },
 );
