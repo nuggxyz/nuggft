@@ -60,4 +60,47 @@ contract SwapLibTest is DSTestExtended {
         assertTrue(expectedClaimedByOwner == gotClaimedByOwner, 'claimedByOwner');
         assertTrue(expectedExists == gotExists, 'exists');
     }
+
+    function test_unit_encodeAuctionId_raw_0() public {
+        uint256 res = SwapLib.encodeAuctionId(msg.sender, 384823748, 3434334356);
+        assertEq(bytes32(res), bytes32(0xccb3c8940000000016eff1c400a329c0648769a73afac7f9381e08fb43dbea72));
+    }
+
+    function test_unit_encodeAuctionId_mock_0() public {
+        uint256 res = SwapLib.encodeAuctionId(msg.sender, 384823748, 3434334356);
+        uint256 mock_res = MockSwapLib.mock_encodeAuctionId(msg.sender, 384823748, 3434334356);
+        assertEq(res, mock_res);
+    }
+
+    function test_unit_decodeAuctionId_raw_0() public {
+        uint256 input = 0xccb3c8940000000016eff1c400a329c0648769a73afac7f9381e08fb43dbea72;
+        (address nft, uint64 tokenId, uint32 auctionNum) = SwapLib.decodeAuctionId(input);
+
+        assertEq(nft, msg.sender);
+        assertEq(tokenId, 384823748);
+        assertEq(auctionNum, 3434334356);
+    }
+
+    function test_unit_decodeAuctionId_mock_0() public {
+        uint256 input = 0xccb3c8940000000016eff1c400a329c0648769a73afac7f9381e08fb43dbea72;
+        (address nft, uint64 tokenId, uint32 auctionNum) = SwapLib.decodeAuctionId(input);
+        (address mock_nft, uint64 mock_tokenId, uint32 mock_auctionNum) = MockSwapLib.mock_decodeAuctionId(input);
+        assertEq(nft, mock_nft);
+        assertEq(tokenId, mock_tokenId);
+        assertEq(auctionNum, mock_auctionNum);
+    }
+
+    function test_intg_encodeDecodeAuctionId_0() public {
+        address input_nft = msg.sender;
+        uint64 input_tokenId = 384823748;
+        uint32 input_auctionNum = 3434334356;
+
+        uint256 res = SwapLib.encodeAuctionId(msg.sender, 384823748, 3434334356);
+
+        (address nft, uint64 tokenId, uint32 auctionNum) = SwapLib.decodeAuctionId(res);
+
+        assertEq(nft, input_nft);
+        assertEq(tokenId, input_tokenId);
+        assertEq(auctionNum, input_auctionNum);
+    }
 }

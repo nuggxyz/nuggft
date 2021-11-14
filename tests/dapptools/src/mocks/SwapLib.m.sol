@@ -1,5 +1,3 @@
-import '../../../../contracts/erc721/IERC721.sol';
-
 library MockSwapLib {
     function mock_decodeAuctionData(uint256 _unparsed)
         internal
@@ -34,31 +32,31 @@ library MockSwapLib {
         internal
         pure
         returns (
-            IERC721 nft,
-            uint128 tokenId,
-            uint128 auctionId
+            address nft,
+            uint64 tokenId,
+            uint32 auctionNum
         )
     {
-        auctionId = uint32(_unparsed >> (256 - 32));
-        tokenId = uint64(_unparsed >> (256 - 64));
-        nft = IERC721(address(uint160(_unparsed)));
+        auctionNum = uint32(_unparsed >> (256 - 32));
+        tokenId = uint64(_unparsed >> (256 - 96));
+        nft = address(uint160(_unparsed));
     }
 
     function mock_encodeAuctionId(
-        IERC721 nft,
+        address nft,
         uint64 tokenId,
         uint32 auctionId
     ) internal pure returns (uint256 res) {
-        res = (uint256(auctionId) << (256 - 32)) | (uint256(tokenId) << (256 - 64)) | uint160(address(nft));
+        res = (uint256(auctionId) << (256 - 32)) | (uint256(tokenId) << (256 - 96)) | uint160(address(nft));
     }
 
-    function mock_encodeAuctionListId(IERC721 nft, uint64 tokenId) internal pure returns (uint256 res) {
+    function mock_encodeAuctionListId(address nft, uint64 tokenId) internal pure returns (uint256 res) {
         res = (uint256(tokenId) << (160)) | uint160(address(nft));
     }
 
-    function mock_decodeAuctionListId(uint256 _unparsed) internal pure returns (IERC721 nft, uint64 tokenId) {
+    function mock_decodeAuctionListId(uint256 _unparsed) internal pure returns (address nft, uint64 tokenId) {
         tokenId = uint64(_unparsed >> 160);
-        nft = IERC721(address(uint160(_unparsed)));
+        nft = address(uint160(_unparsed));
     }
 
     function mock_decodeBid(uint256 _unparsed) internal pure returns (uint128 amount, bool claimed) {

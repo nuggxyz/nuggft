@@ -38,8 +38,8 @@ library SwapLib {
     {
         assembly {
             let tmp := _unparsed
-            exists := shr(132, tmp)
-            claimedByOwner := shr(124, tmp)
+            exists := shr(232, tmp)
+            claimedByOwner := shr(224, tmp)
             epoch := shr(160, tmp)
             leader := tmp
         }
@@ -60,31 +60,36 @@ library SwapLib {
         internal
         pure
         returns (
-            IERC721 nft,
-            uint128 tokenId,
-            uint128 auctionId
+            address nft,
+            uint64 tokenId,
+            uint32 auctionNum
         )
     {
-        auctionId = uint32(_unparsed >> (256 - 32));
-        tokenId = uint64(_unparsed >> (256 - 64));
-        nft = IERC721(address(uint160(_unparsed)));
+        assembly {
+            let tmp := _unparsed
+            auctionNum := shr(224, tmp)
+            tokenId := shr(160, tmp)
+            nft := tmp
+        }
     }
 
     function encodeAuctionId(
-        IERC721 nft,
+        address nft,
         uint64 tokenId,
-        uint32 auctionId
+        uint32 auctionNum
     ) internal pure returns (uint256 res) {
-        res = (uint256(auctionId) << (256 - 32)) | (uint256(tokenId) << (256 - 64)) | uint160(address(nft));
+        assembly {
+            res := or(or(shl(224, auctionNum), shl(160, tokenId)), nft)
+        }
     }
 
-    function encodeAuctionListId(IERC721 nft, uint64 tokenId) internal pure returns (uint256 res) {
+    function encodeAuctionListId(address nft, uint64 tokenId) internal pure returns (uint256 res) {
         res = (uint256(tokenId) << (160)) | uint160(address(nft));
     }
 
-    function decodeAuctionListId(uint256 _unparsed) internal pure returns (IERC721 nft, uint64 tokenId) {
+    function decodeAuctionListId(uint256 _unparsed) internal pure returns (address nft, uint64 tokenId) {
         tokenId = uint64(_unparsed >> 160);
-        nft = IERC721(address(uint160(_unparsed)));
+        nft = address(address(uint160(_unparsed)));
     }
 
     function decodeBid(uint256 _unparsed) internal pure returns (uint128 amount, bool claimed) {
