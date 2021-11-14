@@ -58,7 +58,7 @@ abstract contract Seedable is ISeedable, Epochable {
      * @return
      */
     function setSeed() internal {
-        require(seedExists(currentEpochId()), 'SEED:SET:0');
+        require(!seedExists(currentEpochId()), 'SEED:SET:0');
         _seeds[currentEpochId()] = calculateCurrentSeed();
     }
 }

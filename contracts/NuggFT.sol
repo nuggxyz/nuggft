@@ -53,6 +53,16 @@ contract NuggFT is INuggFT, ERC721, Seedable {
         require(_DEFAULT_NUGGIN.supportsInterface(type(IDotNuggFileResolver).interfaceId), 'NUG:LAUNCH:0');
     }
 
+    /**
+     * @dev See {IERC165-supportsInterface}.
+     */
+    function supportsInterface(bytes4 interfaceId) public view override(ERC721, IERC165) returns (bool) {
+        return
+            interfaceId == type(INuggMintable).interfaceId ||
+            interfaceId == type(INuggSwapable).interfaceId ||
+            super.supportsInterface(interfaceId);
+    }
+
     function mint() external override {
         setSeed();
         _safeMint(address(_NUGGSWAP), currentEpochId());
@@ -97,7 +107,19 @@ contract NuggFT is INuggFT, ERC721, Seedable {
         return
             string(
                 abi.encodePacked(
-                    Base64.encodeJson(bytes(abi.encodePacked('{"name":"', uriName, '","description":"', uriDesc, '", "image": "', uriImage, '"}')))
+                    Base64.encodeJson(
+                        bytes(
+                            abi.encodePacked(
+                                '{"name":"',
+                                uriName,
+                                '","description":"',
+                                uriDesc,
+                                '", "image": "',
+                                uriImage,
+                                '"}'
+                            )
+                        )
+                    )
                 )
             );
     }

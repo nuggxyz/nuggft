@@ -76,7 +76,7 @@ export const NuggFatherFix: Fixture<NuggFatherFixture> = async function (
     hre.tracer.nameTags[nuggft.address] = 'NuggFT';
     hre.tracer.nameTags[dotnugg.address] = 'DotNugg';
     hre.tracer.nameTags[nuggeth.address] = 'NuggETH';
-    hre.tracer.nameTags[nuggswap.address] = 'NuggETHRelay';
+    hre.tracer.nameTags[nuggswap.address] = 'NuggSwap';
     hre.tracer.nameTags[tummy.address] = 'Tummy';
     hre.tracer.nameTags[nuggin.address] = 'NuggIn';
 

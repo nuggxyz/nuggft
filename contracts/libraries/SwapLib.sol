@@ -38,8 +38,9 @@ library SwapLib {
     {
         assembly {
             let tmp := _unparsed
+
             exists := shr(232, tmp)
-            claimedByOwner := shr(224, tmp)
+            claimedByOwner := shr(248, shl(24, tmp))
             epoch := shr(160, tmp)
             leader := tmp
         }
@@ -112,13 +113,15 @@ library SwapLib {
     }
 
     function mintToken(AuctionData memory auction) internal {
-        require(auction.nft.supportsInterface(type(INuggMintable).interfaceId), 'AUC:TT:0');
+        require(auction.nft.supportsInterface(type(INuggMintable).interfaceId), 'AUC:MT:0');
 
         INuggMintable _nft = INuggMintable(address(auction.nft));
 
         require(auction.activeEpoch == auction.tokenId, 'AUC:MT:1');
 
-        require(auction.nft.ownerOf(auction.tokenId) == address(0), 'AUC:MT:2');
+        try auction.nft.ownerOf(auction.tokenId) returns (address) {
+            require(false, 'SLIB:MT:2');
+        } catch (bytes memory) {}
 
         _nft.mint();
 
@@ -134,7 +137,7 @@ library SwapLib {
     ) internal {
         require(nft.ownerOf(tokenId) == address(this), 'AUC:TT:1');
 
-        nft.safeTransferFrom(to, address(this), tokenId);
+        nft.safeTransferFrom(address(this), to, tokenId);
 
         require(nft.ownerOf(tokenId) == to, 'AUC:TT:3');
     }
@@ -153,7 +156,9 @@ library SwapLib {
     }
 
     function handleBidClaim(AuctionData memory auction, BidData memory bid) internal {
-        require(!bid.claimed && bid.amount > 0, 'AUC:CLM:1');
+        require(auction.exists, 'SL:HBC:0');
+        require(!bid.claimed, 'AUC:CLM:0');
+        require(bid.amount > 0, 'AUC:CLM:1');
 
         bid.claimed = true;
 
@@ -178,10 +183,10 @@ library SwapLib {
         require(!auction.exists, 'AUC:IA:0');
 
         auction.epoch = epoch;
-
         require(hasVaildEpoch(auction), 'AUC:IA:1');
 
         auction.leader = bid.account;
+        auction.exists = true;
 
         bid.amount = floor;
     }
@@ -191,14 +196,14 @@ library SwapLib {
     }
 
     function hasVaildEpoch(AuctionData memory auction) internal pure returns (bool) {
-        return auction.epoch > auction.activeEpoch && auction.epoch - auction.activeEpoch <= 1000;
+        return auction.epoch >= auction.activeEpoch && auction.epoch - auction.activeEpoch <= 1000;
     }
 
     function isOver(AuctionData memory auction) internal pure returns (bool) {
-        return auction.exists && (auction.activeEpoch <= auction.epoch || auction.claimedByOwner);
+        return auction.exists && (auction.activeEpoch > auction.epoch || auction.claimedByOwner);
     }
 
     function isActive(AuctionData memory auction) internal pure returns (bool) {
-        return auction.exists && !auction.claimedByOwner && auction.activeEpoch < auction.epoch;
+        return auction.exists && !auction.claimedByOwner && auction.activeEpoch <= auction.epoch;
     }
 }
