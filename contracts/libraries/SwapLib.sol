@@ -9,7 +9,7 @@ library SwapLib {
     struct BidData {
         bool claimed;
         address account;
-        uint248 amount;
+        uint128 amount;
     }
 
     struct AuctionData {
@@ -18,7 +18,7 @@ library SwapLib {
         uint128 num;
         uint256 id;
         address leader;
-        uint248 leaderAmount;
+        uint128 leaderAmount;
         uint64 epoch;
         address owner;
         bool claimedByOwner;
@@ -83,22 +83,18 @@ library SwapLib {
         }
     }
 
-    // function encodeAuctionListId(address nft, uint64 tokenId) internal pure returns (uint256 res) {
-    //     res = (uint256(tokenId) << (160)) | uint160(address(nft));
-    // }
-
-    // function decodeAuctionListId(uint256 _unparsed) internal pure returns (address nft, uint64 tokenId) {
-    //     tokenId = uint64(_unparsed >> 160);
-    //     nft = address(address(uint160(_unparsed)));
-    // }
-
-    function decodeBid(uint256 _unparsed) internal pure returns (uint128 amount, bool claimed) {
-        amount = uint128(_unparsed >> 128);
-        claimed = bool(uint128(_unparsed) == 1);
+    function decodeBidData(uint256 _unparsed) internal pure returns (uint128 amount, bool claimed) {
+        assembly {
+            let tmp := _unparsed
+            claimed := shr(128, tmp)
+            amount := tmp
+        }
     }
 
-    function encodeBidData(uint248 amount, bool claimed) internal pure returns (uint256 res) {
-        res = (uint256(amount) << 248) | (claimed ? 1 : 0);
+    function encodeBidData(uint128 amount, bool claimed) internal pure returns (uint256 res) {
+        assembly {
+            res := or(shl(128, claimed), amount)
+        }
     }
 
     function takeToken(
@@ -148,7 +144,7 @@ library SwapLib {
         BidData memory bid,
         uint256 amount
     ) internal pure {
-        bid.amount += uint248(amount);
+        bid.amount += uint128(amount);
 
         require(isActive(auction), 'SL:OBP:0');
         require(validateBidIncrement(auction, bid), 'SL:OBP:1');
@@ -177,7 +173,7 @@ library SwapLib {
         AuctionData memory auction,
         BidData memory bid,
         uint64 epoch,
-        uint248 floor
+        uint128 floor
     ) internal pure {
         require(!auction.exists, 'AUC:IA:0');
 
