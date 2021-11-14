@@ -50,21 +50,12 @@ library MockSwapLib {
         res = (uint256(auctionId) << (256 - 32)) | (uint256(tokenId) << (256 - 96)) | uint160(address(nft));
     }
 
-    function mock_encodeAuctionListId(address nft, uint64 tokenId) internal pure returns (uint256 res) {
-        res = (uint256(tokenId) << (160)) | uint160(address(nft));
+    function mock_decodeBidData(uint256 _unparsed) internal pure returns (uint128 amount, bool claimed) {
+        claimed = bool((_unparsed >> 128) == 1);
+        amount = uint128(_unparsed);
     }
 
-    function mock_decodeAuctionListId(uint256 _unparsed) internal pure returns (address nft, uint64 tokenId) {
-        tokenId = uint64(_unparsed >> 160);
-        nft = address(uint160(_unparsed));
-    }
-
-    function mock_decodeBid(uint256 _unparsed) internal pure returns (uint128 amount, bool claimed) {
-        amount = uint128(_unparsed >> 128);
-        claimed = bool(uint128(_unparsed) == 1);
-    }
-
-    function mock_encodeBidData(uint248 amount, bool claimed) internal pure returns (uint256 res) {
-        res = (uint256(amount) << 248) | (claimed ? 1 : 0);
+    function mock_encodeBidData(uint128 amount, bool claimed) internal pure returns (uint256 res) {
+        res = (uint256(claimed ? 1 : 0) << 128) | amount;
     }
 }

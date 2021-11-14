@@ -103,4 +103,43 @@ contract SwapLibTest is DSTestExtended {
         assertEq(tokenId, input_tokenId);
         assertEq(auctionNum, input_auctionNum);
     }
+
+    function test_unit_encodeBidData_raw_0() public {
+        uint256 res = SwapLib.encodeBidData(uint128(3434334356), true);
+        assertEq(bytes32(res), bytes32(0x00000000000000000000000000000001000000000000000000000000ccb3c894));
+    }
+
+    function test_unit_encodeBidData_mock_0() public {
+        uint256 res = SwapLib.encodeBidData(uint128(3434334356), true);
+        uint256 mock_res = MockSwapLib.mock_encodeBidData(uint128(3434334356), true);
+        assertEq(res, mock_res);
+    }
+
+    function test_unit_decodeBidData_raw_0() public {
+        uint256 input = 0x00000000000000000000000000000001000000000000000000000000ccb3c894;
+        (uint128 amount, bool claimed) = SwapLib.decodeBidData(input);
+
+        assertEq(amount, uint128(3434334356));
+        assertTrue(claimed == true);
+    }
+
+    function test_unit_decodeBidData_mock_0() public {
+        uint256 input = 0x00000000000000000000000000000001000000000000000000000000ccb3c894;
+        (uint128 amount, bool claimed) = SwapLib.decodeBidData(input);
+        (uint128 mock_amount, bool mock_claimed) = MockSwapLib.mock_decodeBidData(input);
+        assertEq(amount, mock_amount);
+        assertTrue(claimed == mock_claimed);
+    }
+
+    function test_intg_encodeDecodeBid_0() public {
+        uint128 input_amount = uint128(3434334356);
+        bool input_claimed = true;
+
+        uint256 res = SwapLib.encodeBidData(input_amount, input_claimed);
+
+        (uint128 amount, bool claimed) = SwapLib.decodeBidData(res);
+
+        assertEq(amount, input_amount);
+        assertTrue(claimed == input_claimed);
+    }
 }
