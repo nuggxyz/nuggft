@@ -12,6 +12,19 @@ contract SwapLibTest is DSTestExtended {
         assertEq(res, 0x00000101000000000000004d00a329c0648769a73afac7f9381e08fb43dbea72);
     }
 
+    function test_unit_encodeAuctionData_raw_1() public {
+        uint256 res = SwapLib.encodeAuctionData(address(0), 0, true, false);
+        emit log_bytes32(bytes32(res));
+        assertEq(res, 0x0000000100000000000000000000000000000000000000000000000000000000);
+    }
+
+    function test_unit_encodeAuctionData_raw_2() public {
+        uint256 res = SwapLib.encodeAuctionData(address(0), 0, false, true);
+        emit log_bytes32(bytes32(res));
+
+        assertEq(res, 0x0000010000000000000000000000000000000000000000000000000000000000);
+    }
+
     function test_unit_encodeAuctionData_mock_0() public {
         uint256 res = SwapLib.encodeAuctionData(msg.sender, 77, true, true);
         uint256 mock_res = MockSwapLib.mock_encodeAuctionData(msg.sender, 77, true, true);
@@ -24,6 +37,24 @@ contract SwapLibTest is DSTestExtended {
         assertEq(leader, msg.sender);
         assertEq(epoch, 77);
         assertTrue(claimedByOwner);
+        assertTrue(exists);
+    }
+
+    function test_unit_decodeAuctionData_raw_1() public {
+        uint256 input = 0x0000000100000000000000000000000000000000000000000000000000000000;
+        (address leader, uint64 epoch, bool claimedByOwner, bool exists) = SwapLib.decodeAuctionData(input);
+        assertEq(leader, address(0));
+        assertEq(epoch, 0);
+        assertTrue(claimedByOwner);
+        assertTrue(!exists);
+    }
+
+    function test_unit_decodeAuctionData_raw_2() public {
+        uint256 input = 0x0000010000000000000000000000000000000000000000000000000000000000;
+        (address leader, uint64 epoch, bool claimedByOwner, bool exists) = SwapLib.decodeAuctionData(input);
+        assertEq(leader, address(0));
+        assertEq(epoch, 0);
+        assertTrue(!claimedByOwner);
         assertTrue(exists);
     }
 
@@ -59,6 +90,45 @@ contract SwapLibTest is DSTestExtended {
         assertEq(gotEpoch, expectedEpoch, 'epoch');
         assertTrue(expectedClaimedByOwner == gotClaimedByOwner, 'claimedByOwner');
         assertTrue(expectedExists == gotExists, 'exists');
+    }
+
+    function test_intg_encodeDecodeAuctionData_raw_1() public {
+        address expectedLeader = address(0);
+        uint64 expectedEpoch = 0;
+        bool expectedClaimedByOwner = false;
+        bool expectedExists = true;
+
+        uint256 _unparsed = SwapLib.encodeAuctionData(
+            expectedLeader,
+            expectedEpoch,
+            expectedClaimedByOwner,
+            expectedExists
+        );
+        (address gotLeader, uint64 gotEpoch, bool gotClaimedByOwner, bool gotExists) = SwapLib.decodeAuctionData(
+            _unparsed
+        );
+
+        assertEq(expectedLeader, gotLeader, 'leader');
+        assertEq(gotEpoch, expectedEpoch, 'epoch');
+        assertTrue(expectedClaimedByOwner == gotClaimedByOwner, 'claimedByOwner');
+        assertTrue(expectedExists == gotExists, 'exists');
+    }
+
+    function test_intg_encodeDecodeAuctionData_raw_0(
+        address leader,
+        uint64 epoch,
+        bool claimedByOwner,
+        bool exists
+    ) public {
+        uint256 _unparsed = SwapLib.encodeAuctionData(leader, epoch, claimedByOwner, exists);
+        (address gotLeader, uint64 gotEpoch, bool gotClaimedByOwner, bool gotExists) = SwapLib.decodeAuctionData(
+            _unparsed
+        );
+
+        assertEq(leader, gotLeader);
+        assertEq(gotEpoch, epoch);
+        assertTrue(claimedByOwner == gotClaimedByOwner);
+        assertTrue(exists == gotExists);
     }
 
     function test_unit_encodeAuctionId_raw_0() public {
