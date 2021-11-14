@@ -60,7 +60,7 @@ contract NuggSwap is Testable {
     ) internal {
         SwapLib.takeToken(nft, tokenId, account);
 
-        address[] storage prevAuctionOwners = _auctionOwners[SwapLib.encodeAuctionListId(nft, tokenId)];
+        address[] storage prevAuctionOwners = _auctionOwners[SwapLib.encodeAuctionId(address(nft), tokenId, 0)];
 
         uint32 auctionNum = uint32(prevAuctionOwners.length);
 
@@ -78,11 +78,16 @@ contract NuggSwap is Testable {
         uint64 tokenId,
         uint32 auctionNum
     ) internal {
-        (SwapLib.AuctionData memory auction, SwapLib.BidData memory bid) = loadData(nft, tokenId, auctionNum, msg_sender());
+        (SwapLib.AuctionData memory auction, SwapLib.BidData memory bid) = loadData(
+            nft,
+            tokenId,
+            auctionNum,
+            msg_sender()
+        );
 
         if (!auction.exists) {
             SwapLib.mintToken(auction);
-            _auctionOwners[SwapLib.encodeAuctionListId(nft, tokenId)].push(address(0));
+            _auctionOwners[SwapLib.encodeAuctionId(address(nft), tokenId, 0)].push(address(0));
         }
 
         auction.handleBidPlaced(bid, msg_value());
@@ -97,7 +102,12 @@ contract NuggSwap is Testable {
         uint64 tokenId,
         uint32 auctionNum
     ) internal {
-        (SwapLib.AuctionData memory auction, SwapLib.BidData memory bid) = loadData(nft, tokenId, auctionNum, msg_sender());
+        (SwapLib.AuctionData memory auction, SwapLib.BidData memory bid) = loadData(
+            nft,
+            tokenId,
+            auctionNum,
+            msg_sender()
+        );
 
         auction.handleBidClaim(bid);
 
@@ -112,10 +122,12 @@ contract NuggSwap is Testable {
         uint32 auctionNum,
         address account
     ) internal returns (SwapLib.AuctionData memory auction, SwapLib.BidData memory bid) {
-        uint256 auctionId = SwapLib.encodeAuctionId(nft, tokenId, auctionNum);
-        uint256 auctionListId = SwapLib.encodeAuctionListId(nft, tokenId);
+        uint256 auctionId = SwapLib.encodeAuctionId(address(nft), tokenId, auctionNum);
+        uint256 auctionListId = SwapLib.encodeAuctionId(address(nft), tokenId, 0);
 
-        (address leader, uint64 epoch, bool claimedByOwner, bool exists) = SwapLib.decodeAuctionData(_encodedAuctionData[auctionId]);
+        (address leader, uint64 epoch, bool claimedByOwner, bool exists) = SwapLib.decodeAuctionData(
+            _encodedAuctionData[auctionId]
+        );
         (uint248 leaderAmount, ) = SwapLib.decodeBid(_encodedBidData[auctionId][leader]);
 
         auction = SwapLib.AuctionData({
@@ -138,7 +150,12 @@ contract NuggSwap is Testable {
     }
 
     function saveData(SwapLib.AuctionData memory auction, SwapLib.BidData memory bid) internal {
-        _encodedAuctionData[auction.id] = SwapLib.encodeAuctionData(auction.leader, auction.epoch, auction.claimedByOwner, auction.exists);
+        _encodedAuctionData[auction.id] = SwapLib.encodeAuctionData(
+            auction.leader,
+            auction.epoch,
+            auction.claimedByOwner,
+            auction.exists
+        );
         _encodedBidData[auction.id][bid.account] = SwapLib.encodeBidData(bid.amount, bid.claimed);
     }
 }
