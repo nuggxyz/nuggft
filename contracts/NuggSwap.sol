@@ -39,7 +39,7 @@ contract NuggSwap is Testable {
         IERC721 nft,
         uint64 tokenId,
         uint32 auctionNum
-    ) external {
+    ) external payable {
         _placeBid(nft, tokenId, auctionNum);
     }
 
