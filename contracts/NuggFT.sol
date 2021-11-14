@@ -7,7 +7,6 @@ import './libraries/SeedMath.sol';
 import './libraries/Uint.sol';
 
 import './common/Launchable.sol';
-import './core/Seedable.sol';
 import './core/Epochable.sol';
 
 import './erc721/ERC721.sol';
@@ -31,27 +30,31 @@ import './NuggETH.sol';
  * Note: the block hash corresponding to the start of an epoch is used as the "random" seed
  * Note: epochs are 256 blocks long as block hashes only exist for 256 blocks
  */
-contract NuggFT is INuggFT, ERC721, Seedable {
+contract NuggFT is INuggFT, ERC721 {
     using SeedMath for bytes32;
     using Uint256 for uint256;
 
-    IDotNugg internal _DOTNUGG;
-    NuggETH internal _NUGGETH;
-    NuggSwap internal _NUGGSWAP;
-    IDotNuggFileResolver internal _DEFAULT_NUGGIN;
+    IDotNugg internal dotnugg;
+    NuggETH internal nuggeth;
+    NuggSwap internal nuggswap;
+    IDotNuggFileResolver internal nuggin;
+
+    uint256 public epochOffset;
 
     constructor(
-        address nuggeth,
-        address nuggswap,
-        address dotnugg,
-        address nuggin
-    ) ERC721('Nugg Fungable Token', 'NuggFT') Epochable(250) {
-        _DOTNUGG = IDotNugg(dotnugg);
-        _NUGGSWAP = NuggSwap(nuggswap);
-        _NUGGETH = NuggETH(nuggeth);
-        _DEFAULT_NUGGIN = IDotNuggFileResolver(nuggin);
+        address _nuggeth,
+        address _nuggswap,
+        address _dotnugg,
+        address _nuggin
+    ) ERC721('Nugg Fungable Token', 'NuggFT') {
+        dotnugg = IDotNugg(_dotnugg);
+        nuggswap = NuggSwap(_nuggswap);
+        nuggeth = NuggETH(_nuggeth);
+        nuggin = IDotNuggFileResolver(_nuggin);
 
-        require(_DEFAULT_NUGGIN.supportsInterface(type(IDotNuggFileResolver).interfaceId), 'NUG:LAUNCH:0');
+        require(nuggin.supportsInterface(type(IDotNuggFileResolver).interfaceId), 'NUG:LAUNCH:0');
+
+        epochOffset = nuggswap.currentEpochId();
     }
 
     /**
@@ -65,16 +68,11 @@ contract NuggFT is INuggFT, ERC721, Seedable {
     }
 
     function royaltyInfo(uint256, uint256 value) external view override returns (address, uint256) {
-        return (address(_NUGGETH), (value * 1000) / 10000);
+        return (address(nuggeth), (value * 1000) / 10000);
     }
 
-    function mint() external override {
-        setSeed();
-        _safeMint(address(_NUGGSWAP), currentEpochId());
-    }
-
-    function currentEpoch() external override returns (uint32) {
-        return uint32(currentEpochId());
+    function nuggSwapMint(uint256 currentEpochId) external override {
+        _safeMint(address(nuggswap), currentEpochId - epochOffset);
     }
 
     function _beforeTokenTransfer(
@@ -82,18 +80,18 @@ contract NuggFT is INuggFT, ERC721, Seedable {
         address,
         uint256
     ) internal view override {
-        require(msg_sender() == address(_NUGGSWAP), 'NFT:BTT:0');
+        require(msg_sender() == address(nuggswap), 'NFT:BTT:0');
     }
 
     /**
      * @inheritdoc ERC721
      */
     function tokenURI(uint256 tokenId) public view override returns (string memory res) {
-        res = _generateTokenURI(tokenId, getSeed(tokenId).toUint256(), address(_DEFAULT_NUGGIN));
+        res = _generateTokenURI(tokenId, nuggswap.getSeedWithOffset(tokenId, epochOffset), address(nuggin));
     }
 
     function tokenURI(uint256 tokenId, address resolver) public view returns (string memory res) {
-        res = _generateTokenURI(tokenId, getSeed(tokenId).toUint256(), resolver);
+        res = _generateTokenURI(tokenId, nuggswap.getSeedWithOffset(tokenId, epochOffset), resolver);
     }
 
     /**
@@ -101,13 +99,13 @@ contract NuggFT is INuggFT, ERC721, Seedable {
      */
     function _generateTokenURI(
         uint256 epoch,
-        uint256 seed,
+        bytes32 seed,
         address resolver
     ) internal view returns (string memory) {
         string memory uriName = string(abi.encodePacked('NuggFT #', epoch.toString()));
-        string memory uriDesc = seed.toHexString();
+        string memory uriDesc = string(abi.encodePacked(seed));
 
-        string memory uriImage = _DOTNUGG.nuggify(collection_, _getItems(seed), resolver, '');
+        string memory uriImage = dotnugg.nuggify(collection_, _getItems(seed), resolver, '');
 
         return
             string(
@@ -138,10 +136,10 @@ contract NuggFT is INuggFT, ERC721, Seedable {
     /**
      * @notice gets unique attribtues based on given epoch and converts encoded bytes to object that can be merged
      */
-    function _getItems(uint256 seed) internal view returns (bytes[] memory res) {
+    function _getItems(bytes32 seed) internal view returns (bytes[] memory res) {
         res = new bytes[](5);
         for (uint8 i = 0; i < res.length * 2; i++) {
-            res[i] = items_[uint16((seed >> i) % items_.length)];
+            res[i] = items_[uint16(uint64(uint256(seed) >> (196 + i)) % items_.length)];
         }
     }
 }

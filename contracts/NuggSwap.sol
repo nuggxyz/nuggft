@@ -5,13 +5,16 @@ pragma solidity 0.8.4;
 import './libraries/SwapLib.sol';
 
 import './interfaces/INuggSwapable.sol';
+import './interfaces/INuggETH.sol';
+
 import 'hardhat/console.sol';
 import './erc721/IERC721.sol';
+import './core/Epochable.sol';
 
 import './common/Testable.sol';
 import './erc721/ERC721Holder.sol';
 
-contract NuggSwap is ERC721Holder, Testable {
+contract NuggSwap is ERC721Holder, Testable, Epochable {
     using Address for address payable;
     using SwapLib for SwapLib.AuctionData;
 
@@ -26,6 +29,12 @@ contract NuggSwap is ERC721Holder, Testable {
     event AuctionInit(uint256 indexed epoch);
 
     event Claim(uint256 indexed epoch, address indexed account);
+
+    INuggETH immutable nuggeth;
+
+    constructor(INuggETH _nuggeth) Epochable(250, uint128(block.number)) {
+        nuggeth = _nuggeth;
+    }
 
     function startAuction(
         IERC721 nft,
@@ -93,6 +102,41 @@ contract NuggSwap is ERC721Holder, Testable {
 
         auction.handleBidPlaced(bid, msg_value());
 
+        uint256 increase = bid.amount - auction.leaderAmount;
+
+        (address royAccount, uint256 roy) = IERC2981(address(auction.nft)).royaltyInfo(auction.tokenId, increase);
+
+        if (royAccount == address(nuggeth)) {
+            nuggeth.onERC2981Received{value: increase}(
+                address(this),
+                bid.account,
+                address(nft),
+                tokenId,
+                address(0),
+                0,
+                ''
+            );
+        } else {
+            IERC2981Receiver(royAccount).onERC2981Received{value: roy}(
+                address(this),
+                bid.account,
+                address(auction.nft),
+                auction.tokenId,
+                address(0),
+                0,
+                ''
+            );
+            nuggeth.onERC2981Received{value: increase - roy}(
+                address(this),
+                bid.account,
+                address(nft),
+                tokenId,
+                address(0),
+                0,
+                ''
+            );
+        }
+
         saveData(auction, bid);
 
         emit BidPlaced(auction.id, bid.account, bid.amount);
@@ -109,7 +153,6 @@ contract NuggSwap is ERC721Holder, Testable {
             auctionNum,
             msg_sender()
         );
-        console.log('HELLO', bid.amount);
 
         auction.handleBidClaim(bid);
 
@@ -145,13 +188,11 @@ contract NuggSwap is ERC721Holder, Testable {
             owner: _auctionOwners[auctionListId].length > auctionNum
                 ? _auctionOwners[auctionListId][auctionNum]
                 : address(0),
-            activeEpoch: INuggSwapable(address(nft)).currentEpoch()
+            activeEpoch: currentEpochId()
         });
 
         (uint128 amount, bool claimed) = SwapLib.decodeBidData(_encodedBidData[auctionId][account]);
 
-        console.log('auction.activeEpoch: ', auction.activeEpoch, claimedByOwner);
-        // console.logBytes32(bytes32(_encodedBidData[auctionId][account]));
         bid = SwapLib.BidData({claimed: claimed, amount: amount, account: account});
     }
 
