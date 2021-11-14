@@ -36,10 +36,13 @@ library SwapLib {
             bool exists
         )
     {
-        leader = address(uint160(_unparsed));
-        epoch = uint64(_unparsed >> 160);
-        claimedByOwner = bool(uint8(_unparsed >> (160 + 64)) == 1);
-        exists = bool(uint8(_unparsed >> (160 + 64 + 8)) == 1);
+        assembly {
+            let tmp := _unparsed
+            exists := shr(132, tmp)
+            claimedByOwner := shr(124, tmp)
+            epoch := shr(160, tmp)
+            leader := tmp
+        }
     }
 
     function encodeAuctionData(
@@ -48,11 +51,9 @@ library SwapLib {
         bool claimedByOwner,
         bool exists
     ) internal pure returns (uint256 res) {
-        res =
-            (uint256(exists ? 1 : 0) << (160 + 64 + 8)) |
-            (uint256(claimedByOwner ? 1 : 0) << (160 + 64)) |
-            (uint256(epoch) << 160) |
-            uint160(leader);
+        assembly {
+            res := or(or(or(shl(232, exists), shl(224, claimedByOwner)), shl(160, epoch)), leader)
+        }
     }
 
     function decodeAuctionId(uint256 _unparsed)
