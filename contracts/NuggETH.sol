@@ -9,24 +9,37 @@ import './libraries/Exchange.sol';
 
 import './interfaces/INuggETH.sol';
 import './erc20/ERC20.sol';
+import './erc2981/ERC2981Receiver.sol';
 
 /**
  * @title NuggETH
  * @author Nugg Labs - @danny7even & @dub6ix
  * @notice leggo
  */
-contract NuggETH is INuggETH, ERC20, Escrowable, Stakeable {
+contract NuggETH is INuggETH, ERC20, ERC2981Receiver, Escrowable, Stakeable {
     Mutex local;
 
     constructor() ERC20('Nugg Wrapped Ether', 'NuggETH') {
         local = initMutex();
     }
 
-    function depositRewards(address sender) external payable override(INuggETH, Stakeable) lock(local) {
-        uint256 tuck = (msg_value() * 1000) / 10000;
-        _TUMMY.deposit{value: tuck}();
-        Stakeable._onRewardIncrease(sender, msg_value() - tuck);
-        ERC20._mint(address(this), msg_value() - tuck);
+    function onERC2981Received(
+        address operator,
+        address from,
+        address token,
+        uint256 tokenId,
+        address erc20,
+        uint256 amount,
+        bytes calldata data
+    ) public payable override(ERC2981Receiver, IERC2981Receiver) lock(local) returns (bytes4) {
+        if (msg_value() > 0) {
+            uint256 tuck = (msg_value() * 1000) / 10000;
+            _TUMMY.deposit{value: tuck}();
+            Stakeable._onRewardIncrease(from, msg_value() - tuck);
+            ERC20._mint(address(this), msg_value() - tuck);
+        }
+
+        return super.onERC2981Received(operator, from, token, tokenId, erc20, amount, data);
     }
 
     function deposit() public payable override(INuggETH) {
@@ -67,8 +80,8 @@ contract NuggETH is INuggETH, ERC20, Escrowable, Stakeable {
         address to,
         uint256 amount
     ) internal override(ERC20) {
-        if (to != address(0)) Stakeable._onShareIncrease(to, amount);
-        if (from != address(0)) Stakeable._onShareDecrease(from, amount);
+        if (to != address(0) && to != address(this)) Stakeable._onShareIncrease(to, amount);
+        if (from != address(0) && from != address(this)) Stakeable._onShareDecrease(from, amount);
 
         require(Stakeable.supplyOf(from) <= ERC20.balanceOf(from), 'NETH:ATT:0');
         require(Stakeable.supplyOf(to) <= ERC20.balanceOf(to), 'NETH:ATT:1');
@@ -89,7 +102,7 @@ contract NuggETH is INuggETH, ERC20, Escrowable, Stakeable {
         address to,
         uint256
     ) internal override(ERC20) {
-        if (to != address(0)) _realize(to);
-        if (from != address(0)) _realize(from);
+        if (to != address(0) && to != address(this)) _realize(to);
+        if (from != address(0) && from != address(this)) _realize(from);
     }
 }

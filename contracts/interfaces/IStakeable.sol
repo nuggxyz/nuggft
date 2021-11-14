@@ -15,11 +15,6 @@ interface IStakeable {
     event RewardIncrease(address indexed sender, uint256 amount);
 
     /**
-     * @notice returns user's current reward balance
-     */
-    function depositRewards(address sender) external payable;
-
-    /**
      * @dev in regards to this contract, this could just be earningsOf + sharesOf
      */
     function supplyOf(address account) external returns (uint256 res);

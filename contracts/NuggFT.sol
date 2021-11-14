@@ -13,6 +13,7 @@ import './core/Epochable.sol';
 import './erc721/ERC721.sol';
 import './interfaces/IDotNuggFileResolver.sol';
 import './interfaces/IDotNuggColorResolver.sol';
+import './erc2981/IERC2981.sol';
 
 import './interfaces/IDotNugg.sol';
 import './interfaces/INuggFT.sol';
@@ -61,6 +62,10 @@ contract NuggFT is INuggFT, ERC721, Seedable {
             interfaceId == type(INuggMintable).interfaceId ||
             interfaceId == type(INuggSwapable).interfaceId ||
             super.supportsInterface(interfaceId);
+    }
+
+    function royaltyInfo(uint256, uint256 value) external view override returns (address, uint256) {
+        return (address(_NUGGETH), (value * 1000) / 10000);
     }
 
     function mint() external override {

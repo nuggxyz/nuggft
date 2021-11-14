@@ -34,16 +34,11 @@ abstract contract Stakeable is IStakeable, Mutexable, Testable {
 
     modifier validateSupply() {
         _;
+        console.log(getState().tSupply, address(this).balance);
         require(getState().tSupply == address(this).balance, 'STAKE:TS:0');
     }
 
     constructor() {}
-
-    /**
-     * @dev external wrapper for _invest() - to save on gas
-     * @inheritdoc IStakeable
-     */
-    function depositRewards(address from) external payable virtual override;
 
     /**
      * @dev external wrapper for _shares - to save on gas

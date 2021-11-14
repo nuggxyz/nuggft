@@ -1,9 +1,12 @@
 import '../erc721/IERC721.sol';
+import '../erc2981/IERC2981Receiver.sol';
+
 import './Address.sol';
 import '../interfaces/INuggSwapable.sol';
 import '../interfaces/INuggMintable.sol';
 
 library SwapLib {
+    using Address for address;
     using Address for address payable;
 
     struct BidData {
@@ -105,6 +108,8 @@ library SwapLib {
     ) internal {
         require(nft.supportsInterface(type(INuggSwapable).interfaceId), 'AUC:TT:0');
 
+        // TODO check that royalty supports the
+
         require(nft.ownerOf(tokenId) == from, 'AUC:TT:1');
 
         nft.safeTransferFrom(from, address(this), tokenId);
@@ -146,13 +151,25 @@ library SwapLib {
         AuctionData memory auction,
         BidData memory bid,
         uint256 amount
-    ) internal pure {
+    ) internal {
         bid.amount += uint128(amount);
 
         require(isActive(auction), 'SL:OBP:0');
         require(validateBidIncrement(auction, bid), 'SL:OBP:1');
 
         auction.leader = bid.account;
+
+        (address royAccount, uint256 roy) = IERC2981(address(auction.nft)).royaltyInfo(auction.tokenId, amount);
+
+        IERC2981Receiver(royAccount).onERC2981Received{value: roy}(
+            address(this),
+            bid.account,
+            address(auction.nft),
+            auction.tokenId,
+            address(0),
+            roy,
+            ''
+        );
     }
 
     function handleBidClaim(AuctionData memory auction, BidData memory bid) internal {
@@ -192,7 +209,7 @@ library SwapLib {
     }
 
     function validateBidIncrement(AuctionData memory auction, BidData memory bid) internal pure returns (bool) {
-        return bid.amount > auction.leaderAmount + ((auction.leaderAmount * 1000) / 100000);
+        return bid.amount > auction.leaderAmount + ((auction.leaderAmount * 100) / 10000);
     }
 
     function hasVaildEpoch(AuctionData memory auction) internal pure returns (bool) {
@@ -205,5 +222,44 @@ library SwapLib {
 
     function isActive(AuctionData memory auction) internal pure returns (bool) {
         return auction.exists && !auction.claimedByOwner && auction.activeEpoch <= auction.epoch;
+    }
+
+    /**
+     * @dev Internal function to invoke {IERC721Receiver-onERC721Received} on a target address.
+     * The call is not executed if the target address is not a contract.
+     *
+     * @param from address representing the previous owner of the given token ID
+     * @param to target address that will receive the tokens
+     * @param token token sending the royalties
+     * @param tokenId uint256 ID of the token to be transferred
+     * @param _data bytes optional data to send along with the call
+     * @return bool whether the call correctly returned the expected magic value
+     */
+    function _checkOnERC2981Received(
+        address from,
+        address to,
+        address token,
+        uint256 tokenId,
+        address erc20,
+        uint256 amount,
+        bytes memory _data
+    ) private returns (bool) {
+        if (to.isContract()) {
+            try IERC2981Receiver(to).onERC2981Received(msg.sender, from, token, tokenId, address(0), 0, _data) returns (
+                bytes4 retval
+            ) {
+                return retval == IERC2981Receiver.onERC2981Received.selector;
+            } catch (bytes memory reason) {
+                if (reason.length == 0) {
+                    revert('ERC2981: transfer to non ERC2981Receiver implementer');
+                } else {
+                    assembly {
+                        revert(add(32, reason), mload(reason))
+                    }
+                }
+            }
+        } else {
+            return true;
+        }
     }
 }
