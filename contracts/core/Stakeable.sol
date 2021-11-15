@@ -116,45 +116,45 @@ abstract contract Stakeable is IStakeable, Mutexable, Testable {
      * @param amount the amount shares is being increased
      * @custom:assump earnings should stay same
      */
-    function _onShareIncrease(address account, uint256 amount) internal {
+    function _onShareAdd(address account, uint256 amount) internal {
         StakeMath.State memory state = getStateBeforeDeposit(amount);
         StakeMath.Position memory pos = getPosition(account);
 
-        StakeMath.applyShareIncrease(state, pos, amount);
+        StakeMath.applyShareAdd(state, pos, amount);
 
         setState(state);
         setPosition(pos, account);
 
-        emit SharesIncrease(account, msg_sender(), amount);
+        emit ShareAdd(account, msg_sender(), amount);
     }
 
-    function _onShareDecrease(address account, uint256 amount) internal {
+    function _onShareSub(address account, uint256 amount) internal {
         StakeMath.State memory state = getState();
         StakeMath.Position memory pos = getPosition(account);
 
-        StakeMath.applyShareDecrease(state, pos, amount);
+        StakeMath.applyShareSub(state, pos, amount);
 
         setState(state);
         setPosition(pos, account);
 
-        emit SharesDecrease(account, msg_sender(), amount);
+        emit ShareSub(account, msg_sender(), amount);
     }
 
     /**
      * @notice increases the overall eps from an increase in total rewards
      * @param amount the amount the total reward is being increased
      */
-    function _onRewardIncrease(address sender, uint256 amount) internal virtual {
+    function _onRoyaltyAdd(address sender, uint256 amount) internal virtual {
         StakeMath.State memory state = getState();
 
-        StakeMath.applyRewardIncrease(state, amount);
+        StakeMath.applyRoyaltyAdd(state, amount);
 
         setState(state);
 
-        emit RewardIncrease(sender, amount);
+        emit RoyaltyAdd(sender, amount);
     }
 
-    function _onEarn(address account, uint256 amount) internal {
-        emit TokenEarn(account, msg_sender(), amount);
+    function _onRealize(address account, uint256 amount) internal {
+        emit Realize(account, msg_sender(), amount);
     }
 }
