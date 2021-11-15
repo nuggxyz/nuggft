@@ -20,8 +20,11 @@ abstract contract Epochable is IEpochable {
 
     uint256 private _state;
 
+    event Genesis(uint128 interval, uint128 baseblock);
+
     constructor(uint128 _interval, uint128 _baseblock) {
         _state = EpochMath.encodeData(_interval, _baseblock);
+        emit Genesis(_interval, _baseblock);
     }
 
     /**
@@ -66,6 +69,16 @@ abstract contract Epochable is IEpochable {
     function setSeed() internal {
         require(!seedExists(currentEpochId()), 'SEED:SET:0');
         _seeds[currentEpochId()] = currentSeed();
+    }
+
+    /**
+     * @dev
+     * @return
+     */
+    function ensureActiveSeed() internal {
+        if (!seedExists(currentEpochId())) {
+            _seeds[currentEpochId()] = currentSeed();
+        }
     }
 
     /**
