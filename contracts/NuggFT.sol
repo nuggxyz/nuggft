@@ -73,6 +73,10 @@ contract NuggFT is INuggFT, ERC721, MockDotNuggImplementer {
         tokenId = epoch - epochOffset;
     }
 
+    function currentTokenId() public view returns (uint256 tokenId) {
+        tokenId = epochToTokenId(nuggswap.currentEpochId());
+    }
+
     function _beforeTokenTransfer(
         address,
         address,
@@ -85,12 +89,12 @@ contract NuggFT is INuggFT, ERC721, MockDotNuggImplementer {
      * @inheritdoc ERC721
      */
     function tokenURI(uint256 tokenId) public view override returns (string memory res) {
-        require(_exists(tokenId) || tokenId == epochToTokenId(nuggswap.currentEpochId()), 'NFT:NSM:0');
+        require(_exists(tokenId) || tokenId == currentTokenId(), 'NFT:NSM:0');
         res = _generateTokenURI(tokenId, address(nuggin));
     }
 
     function tokenURI(uint256 tokenId, address resolver) public view returns (string memory res) {
-        require(_exists(tokenId) || tokenId == epochToTokenId(nuggswap.currentEpochId()), 'NFT:NSM:0');
+        require(_exists(tokenId) || tokenId == currentTokenId(), 'NFT:NSM:0');
         res = _generateTokenURI(tokenId, resolver);
     }
 
