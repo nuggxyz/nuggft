@@ -33,6 +33,47 @@ contract NuggSwap is INuggSwap, ERC721Holder, Testable, Epochable {
         xnugg = _xnugg;
     }
 
+    function getSwap(address nft, uint256 tokenid)
+        external
+        view
+        override
+        returns (
+            uint256 swapnum,
+            address leader,
+            uint128 leaderAmount,
+            uint64 epoch,
+            bool claimedByOwner,
+            bool exists
+        )
+    {
+        swapnum = _swapOwners[nft][tokenid].length;
+        (leader, epoch, claimedByOwner, exists) = SwapLib.decodeSwapData(_encodedSwapData[nft][tokenid][swapnum]);
+        (leaderAmount, ) = SwapLib.decodeOfferData(_encodedOfferData[nft][tokenid][swapnum][leader]);
+    }
+
+    function getSwap(
+        address nft,
+        uint256 tokenid,
+        uint256 _swapnum
+    )
+        external
+        view
+        override
+        returns (
+            uint256 swapnum,
+            address leader,
+            uint128 leaderAmount,
+            uint64 epoch,
+            bool claimedByOwner,
+            bool exists
+        )
+    {
+        require(_swapnum <= _swapOwners[nft][tokenid].length);
+        swapnum = _swapnum;
+        (leader, epoch, claimedByOwner, exists) = SwapLib.decodeSwapData(_encodedSwapData[nft][tokenid][swapnum]);
+        (leaderAmount, ) = SwapLib.decodeOfferData(_encodedOfferData[nft][tokenid][swapnum][leader]);
+    }
+
     // function registerFromCreation() external {
     //     // require contract in creation
     //     // require that nft implements the NuggSwapable interface
