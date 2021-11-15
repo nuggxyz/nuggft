@@ -81,7 +81,12 @@ const deployment = async (hre: HardhatRuntimeEnvironment) => {
         const nuggFTDeployement = await hre.deployments.deploy('NuggFT', {
             from: eoaDeployer,
             log: true,
-            args: [xnuggDeployement.address, nuggswapDeployment.address, nuggswapDeployment.address, nuggswapDeployment.address],
+            args: [
+                xnuggDeployement.address,
+                nuggswapDeployment.address,
+                '0xeBdE9e7F12449e043502227b9D7EBDe55A809925',
+                '0x2D9b450E87253EA02072531A1422dec3cEBB0f6c',
+            ],
             // deterministicDeployment: salts[3],
         });
 
