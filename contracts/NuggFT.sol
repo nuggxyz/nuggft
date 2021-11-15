@@ -44,7 +44,7 @@ contract NuggFT is INuggFT, ERC721, MockDotNuggImplementer {
         xnugg = IxNUGG(_xnugg);
         nuggin = IDotNuggFileResolver(_nuggin);
 
-        require(nuggin.supportsInterface(type(IDotNuggFileResolver).interfaceId), 'NUG:LAUNCH:0');
+        // require(nuggin.supportsInterface(type(IDotNuggFileResolver).interfaceId), 'NUG:LAUNCH:0');
 
         epochOffset = nuggswap.currentEpochId();
     }
