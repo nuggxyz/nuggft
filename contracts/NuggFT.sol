@@ -2,9 +2,6 @@
 
 pragma solidity 0.8.4;
 
-import './common/Launchable.sol';
-import './core/Epochable.sol';
-
 import './interfaces/IDotNuggFileResolver.sol';
 import './interfaces/IDotNuggColorResolver.sol';
 
