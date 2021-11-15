@@ -41,11 +41,11 @@ describe('uint tests', async function () {
 
             // console.log(res.toString());
 
-            await Mining.advanceBlockTo(350);
+            await Mining.advanceBlockTo(50);
             await fix.nuggswap.connect(accounts.dee).submitClaim(fix.nuggft.address, 0, 0);
             await fix.nuggft.connect(accounts.dee).approve(fix.nuggswap.address, 0);
 
-            await fix.nuggswap.connect(accounts.dee).startSwap(fix.nuggft.address, 0, 30, toEth('.02000'));
+            await fix.nuggswap.connect(accounts.dee).submitSwap(fix.nuggft.address, 0, 5, toEth('.02000'));
 
             const positionDee0 = await fix.xnugg.balanceOf(accounts.dee.address);
             const positionMac0 = await fix.xnugg.balanceOf(accounts.mac.address);
@@ -79,11 +79,11 @@ describe('uint tests', async function () {
 
             console.log('yououououoi');
 
-            await fix.nuggswap.connect(accounts.frank).submitOffer(fix.nuggft.address, 1, 0, { value: toEth('20.000') });
-            await fix.nuggswap.connect(accounts.dee).submitOffer(fix.nuggft.address, 1, 0, { value: toEth('22.000') });
-            await fix.nuggswap.connect(accounts.frank).submitOffer(fix.nuggft.address, 1, 0, { value: toEth('3.000') });
-            await fix.nuggswap.connect(accounts.dee).submitOffer(fix.nuggft.address, 1, 0, { value: toEth('2.000') });
-            await fix.nuggswap.connect(accounts.dee).submitOffer(fix.nuggft.address, 1, 0, { value: toEth('2.000') });
+            await fix.nuggswap.connect(accounts.frank).submitOffer(fix.nuggft.address, 0, 1, { value: toEth('20.000') });
+            await fix.nuggswap.connect(accounts.dee).submitOffer(fix.nuggft.address, 0, 1, { value: toEth('22.000') });
+            await fix.nuggswap.connect(accounts.frank).submitOffer(fix.nuggft.address, 0, 1, { value: toEth('3.000') });
+            await fix.nuggswap.connect(accounts.dee).submitOffer(fix.nuggft.address, 0, 1, { value: toEth('2.000') });
+            await fix.nuggswap.connect(accounts.dee).submitOffer(fix.nuggft.address, 0, 1, { value: toEth('2.000') });
 
             console.log('yououououoi');
             await fix.xnugg.connect(accounts.frank).deposit({ value: toEth('1') });

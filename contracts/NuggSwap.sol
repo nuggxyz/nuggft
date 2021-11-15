@@ -3,6 +3,7 @@
 pragma solidity 0.8.4;
 
 import './libraries/SwapLib.sol';
+import './interfaces/INuggSwap.sol';
 
 import './interfaces/INuggSwapable.sol';
 import './interfaces/IxNUGG.sol';
@@ -14,54 +15,66 @@ import './core/Epochable.sol';
 import './common/Testable.sol';
 import './erc721/ERC721Holder.sol';
 
-contract NuggSwap is ERC721Holder, Testable, Epochable {
+contract NuggSwap is INuggSwap, ERC721Holder, Testable, Epochable {
     using Address for address payable;
     using SwapLib for SwapLib.SwapData;
 
     mapping(address => mapping(uint256 => address[])) internal _swapOwners;
 
+    // mapping(address => uint256) internal _registrations; // address - supports minting, supports swapping, implements mintable, implements swappable, where to send royalties, approvals
+
     mapping(address => mapping(uint256 => mapping(uint256 => uint256))) internal _encodedSwapData;
 
     mapping(address => mapping(uint256 => mapping(uint256 => mapping(address => uint256)))) internal _encodedOfferData;
 
-    event Offer(address nft, uint256 tokenid, uint256 swapnum, address account, uint256 amount);
+    IxNUGG public immutable override xnugg;
 
-    event SwapInit(uint256 indexed epoch);
-
-    event Claim(address nft, uint256 tokenid, uint256 swapnum, address indexed account);
-
-    IxNUGG immutable xnugg;
-
-    constructor(IxNUGG _xnugg) Epochable(250, uint128(block.number)) {
+    constructor(IxNUGG _xnugg) Epochable(25, uint128(block.number)) {
         xnugg = _xnugg;
     }
 
-    function startSwap(
+    // function registerFromCreation() external {
+    //     // require contract in creation
+    //     // require that nft implements the NuggSwapable interface
+    //     // require that it is an nft (implements ERC721)
+    // }
+
+    // function registerByOwner(address nft, address royaltyAddress) external {
+    //     // require this is owner of nft
+    //     // require that it is an nft (implements ERC721)
+    // }
+
+    // function registerByTokenOwners(address nft, address royaltyAddress) external {
+    //     // require this is owner of nft
+    //     // require that it is an nft (implements ERC721)
+    // }
+
+    function submitSwap(
         address nft,
         uint256 tokenid,
         uint64 requestedEpoch,
         uint128 requestedFloor
-    ) external {
-        _startSwap(nft, tokenid, msg_sender(), requestedEpoch, requestedFloor);
+    ) external override {
+        _submitSwap(nft, tokenid, msg_sender(), requestedEpoch, requestedFloor);
     }
 
     function submitOffer(
         address nft,
         uint256 tokenid,
         uint256 swapnum
-    ) external payable {
-        _offer(nft, tokenid, swapnum);
+    ) external payable override {
+        _submitOffer(nft, tokenid, swapnum);
     }
 
     function submitClaim(
         address nft,
         uint256 tokenid,
         uint256 swapnum
-    ) external {
-        _claim(nft, tokenid, swapnum);
+    ) external override {
+        _submitClaim(nft, tokenid, swapnum);
     }
 
-    function _startSwap(
+    function _submitSwap(
         address nft,
         uint256 tokenid,
         address account,
@@ -76,14 +89,14 @@ contract NuggSwap is ERC721Holder, Testable, Epochable {
 
         (SwapLib.SwapData memory swap, SwapLib.OfferData memory offer) = loadData(nft, tokenid, swapnum, account);
 
-        swap.handleInitSwap(offer, requestedEpoch, requestedFloor);
+        swap.handleSubmitSwap(offer, requestedEpoch, requestedFloor);
 
         prevSwapOwners.push(account);
 
         saveData(swap, offer);
     }
 
-    function _offer(
+    function _submitOffer(
         address nft,
         uint256 tokenid,
         uint256 swapnum
@@ -95,7 +108,7 @@ contract NuggSwap is ERC721Holder, Testable, Epochable {
             _swapOwners[nft][tokenid].push(address(0));
         }
 
-        swap.handleOfferSubmit(offer, msg_value());
+        swap.handleSubmitOffer(offer, msg_value());
 
         saveData(swap, offer);
 
@@ -139,14 +152,14 @@ contract NuggSwap is ERC721Holder, Testable, Epochable {
         emit Offer(swap.nft, swap.tokenid, swap.num, offer.account, offer.amount);
     }
 
-    function _claim(
+    function _submitClaim(
         address nft,
         uint256 tokenid,
         uint256 swapnum
     ) internal {
         (SwapLib.SwapData memory swap, SwapLib.OfferData memory offer) = loadData(nft, tokenid, swapnum, msg_sender());
 
-        swap.handleOfferClaim(offer);
+        swap.handleSubmitClaim(offer);
 
         saveData(swap, offer);
 
