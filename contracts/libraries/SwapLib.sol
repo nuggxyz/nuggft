@@ -132,6 +132,8 @@ library SwapLib {
         OfferData memory offer,
         uint256 amount
     ) internal pure {
+        require(swap.owner != offer.account, 'SL:HSO:0');
+
         offer.amount += uint128(amount);
 
         require(isActive(swap), 'SL:OBP:0');

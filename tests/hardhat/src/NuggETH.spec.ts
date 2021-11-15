@@ -77,17 +77,20 @@ describe('uint tests', async function () {
             await fix.xnugg.connect(accounts.dennis).deposit({ value: toEth('13') });
             await fix.xnugg.connect(accounts.frank).deposit({ value: toEth('1') });
 
-            console.log('yououououoi');
-
             await fix.nuggswap.connect(accounts.frank).submitOffer(fix.nuggft.address, 0, { value: toEth('20.000') });
-            await fix.nuggswap.connect(accounts.dee).submitOffer(fix.nuggft.address, 0, { value: toEth('22.000') });
+            await fix.nuggswap.connect(accounts.dennis).submitOffer(fix.nuggft.address, 0, { value: toEth('22.000') });
             await fix.nuggswap.connect(accounts.frank).submitOffer(fix.nuggft.address, 0, { value: toEth('3.000') });
-            await fix.nuggswap.connect(accounts.dee).submitOffer(fix.nuggft.address, 0, { value: toEth('2.000') });
-            await fix.nuggswap.connect(accounts.dee).submitOffer(fix.nuggft.address, 0, { value: toEth('2.000') });
+            await fix.nuggswap.connect(accounts.dennis).submitOffer(fix.nuggft.address, 0, { value: toEth('2.000') });
+            await fix.nuggswap.connect(accounts.dennis).submitOffer(fix.nuggft.address, 0, { value: toEth('2.000') });
+            await fix.nuggswap.connect(accounts.frank).submitOffer(fix.nuggft.address, 0, { value: toEth('33.000') });
 
-            console.log('yououououoi');
             await fix.xnugg.connect(accounts.frank).deposit({ value: toEth('1') });
             console.log('NOPE');
+
+            console.log('yououououoi');
+            const res99 = await fix.nuggswap['getSwap(address,uint256,uint256)'](fix.nuggft.address, 0, 0);
+
+            console.log({ res99 });
 
             const positionDee2 = await fix.xnugg.balanceOf(accounts.dee.address);
             const positionMac2 = await fix.xnugg.balanceOf(accounts.mac.address);
