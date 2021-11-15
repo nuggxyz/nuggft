@@ -24,7 +24,7 @@ contract NuggSwap is ERC721Holder, Testable, Epochable {
 
     mapping(address => mapping(uint256 => mapping(uint256 => mapping(address => uint256)))) internal _encodedOfferData;
 
-    event OfferPlaced(address nft, uint256 tokenId, uint256 swapNum, address account, uint256 amount);
+    event Offer(address nft, uint256 tokenId, uint256 swapNum, address account, uint256 amount);
 
     event SwapInit(uint256 indexed epoch);
 
@@ -45,15 +45,15 @@ contract NuggSwap is ERC721Holder, Testable, Epochable {
         _startSwap(nft, tokenId, msg_sender(), requestedEpoch, requestedFloor);
     }
 
-    function placeOffer(
+    function submitOffer(
         address nft,
         uint256 tokenId,
         uint256 swapNum
     ) external payable {
-        _placeOffer(nft, tokenId, swapNum);
+        _offer(nft, tokenId, swapNum);
     }
 
-    function claim(
+    function submitClaim(
         address nft,
         uint256 tokenId,
         uint256 swapNum
@@ -83,7 +83,7 @@ contract NuggSwap is ERC721Holder, Testable, Epochable {
         saveData(swap, offer);
     }
 
-    function _placeOffer(
+    function _offer(
         address nft,
         uint256 tokenId,
         uint256 swapNum
@@ -95,7 +95,7 @@ contract NuggSwap is ERC721Holder, Testable, Epochable {
             _swapOwners[nft][tokenId].push(address(0));
         }
 
-        swap.handleOfferPlaced(offer, msg_value());
+        swap.handleOfferSubmit(offer, msg_value());
 
         saveData(swap, offer);
 
@@ -134,7 +134,7 @@ contract NuggSwap is ERC721Holder, Testable, Epochable {
             );
         }
 
-        emit OfferPlaced(swap.nft, swap.tokenId, swap.num, offer.account, offer.amount);
+        emit Offer(swap.nft, swap.tokenId, swap.num, offer.account, offer.amount);
     }
 
     function _claim(
