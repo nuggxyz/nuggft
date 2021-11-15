@@ -114,19 +114,6 @@ library SwapLib {
         require(nft.ownerOf(tokenid) == address(this), 'AUC:TT:3');
     }
 
-    function mintToken(SwapData memory swap) internal {
-        IERC721 _nft = IERC721(swap.nft);
-
-        require(_nft.supportsInterface(type(INuggMintable).interfaceId), 'AUC:MT:0');
-
-        uint256 tokenid = INuggMintable(address(swap.nft)).nuggSwapMint(swap.activeEpoch);
-
-        require(tokenid == swap.tokenid, 'AUC:MT:2');
-        require((_nft.ownerOf(swap.tokenid) == address(this)), 'AUC:MT:3');
-
-        handleSubmitSwap(swap, OfferData({account: address(0), amount: 0, claimed: false}), swap.activeEpoch, 0);
-    }
-
     function _giveToken(
         address nft,
         uint256 tokenid,

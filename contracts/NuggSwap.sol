@@ -91,9 +91,11 @@ contract NuggSwap is INuggSwap, ERC721Holder, Testable, Epochable {
 
         swap.handleSubmitSwap(offer, requestedEpoch, requestedFloor);
 
+        saveData(swap, offer);
+
         prevSwapOwners.push(account);
 
-        saveData(swap, offer);
+        emit SubmitSwap(swap.nft, swap.tokenid, swap.num, offer.account, offer.amount, swap.epoch);
     }
 
     function _submitOffer(
@@ -104,7 +106,7 @@ contract NuggSwap is INuggSwap, ERC721Holder, Testable, Epochable {
         (SwapLib.SwapData memory swap, SwapLib.OfferData memory offer) = loadData(nft, tokenid, swapnum, msg_sender());
 
         if (!swap.exists) {
-            SwapLib.mintToken(swap);
+            mintToken(swap);
             _swapOwners[nft][tokenid].push(address(0));
         }
 
@@ -149,7 +151,7 @@ contract NuggSwap is INuggSwap, ERC721Holder, Testable, Epochable {
             );
         }
 
-        emit Offer(swap.nft, swap.tokenid, swap.num, offer.account, offer.amount);
+        emit SubmitOffer(swap.nft, swap.tokenid, swap.num, offer.account, offer.amount);
     }
 
     function _submitClaim(
@@ -163,7 +165,22 @@ contract NuggSwap is INuggSwap, ERC721Holder, Testable, Epochable {
 
         saveData(swap, offer);
 
-        emit Claim(swap.nft, swap.tokenid, swap.num, offer.account);
+        emit SubmitClaim(swap.nft, swap.tokenid, swap.num, offer.account);
+    }
+
+    function mintToken(SwapLib.SwapData memory swap) internal {
+        IERC721 _nft = IERC721(swap.nft);
+
+        require(_nft.supportsInterface(type(INuggMintable).interfaceId), 'AUC:MT:0');
+
+        uint256 tokenid = INuggMintable(address(swap.nft)).nuggSwapMint(swap.activeEpoch);
+
+        ensureActiveSeed();
+
+        require(tokenid == swap.tokenid, 'AUC:MT:2');
+        require((_nft.ownerOf(swap.tokenid) == address(this)), 'AUC:MT:3');
+
+        swap.handleSubmitSwap(SwapLib.OfferData({account: address(0), amount: 0, claimed: false}), swap.activeEpoch, 0);
     }
 
     function loadData(

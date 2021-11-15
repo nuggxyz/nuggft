@@ -3,11 +3,11 @@ pragma solidity 0.8.4;
 import './IxNUGG.sol';
 
 interface INuggSwap {
-    event Offer(address nft, uint256 tokenid, uint256 swapnum, address account, uint256 amount);
+    event SubmitOffer(address nft, uint256 tokenid, uint256 swapnum, address account, uint256 amount);
 
-    event SwapInit(uint256 indexed epoch);
+    event SubmitSwap(address nft, uint256 tokenid, uint256 swapnum, address account, uint256 amount, uint64 epoch);
 
-    event Claim(address nft, uint256 tokenid, uint256 swapnum, address indexed account);
+    event SubmitClaim(address nft, uint256 tokenid, uint256 swapnum, address account);
 
     function xnugg() external view returns (IxNUGG);
 

@@ -12,6 +12,7 @@ import './interfaces/IxNUGG.sol';
 
 import './erc721/ERC721.sol';
 import './erc2981/IERC2981.sol';
+import './mock/MockDotNuggImplementer.sol';
 
 /**
  * @title Nugg Labs NFT Collection 0 - "NuggFT"
@@ -24,7 +25,7 @@ import './erc2981/IERC2981.sol';
  * Note: the block hash corresponding to the start of an epoch is used as the "random" seed
  * Note: epochs are 256 blocks long as block hashes only exist for 256 blocks
  */
-contract NuggFT is INuggFT, ERC721 {
+contract NuggFT is INuggFT, ERC721, MockDotNuggImplementer {
     IDotNugg internal dotnugg;
     IxNUGG internal xnugg;
     NuggSwap internal nuggswap;
@@ -100,24 +101,24 @@ contract NuggFT is INuggFT, ERC721 {
         bytes32 seed = nuggswap.getSeedWithOffset(tokenId, epochOffset);
 
         string memory uriName = 'NuggFT {#}';
-        string memory uriDesc = string(abi.encodePacked(seed));
+        string memory uriDesc = 'the description';
 
         return dotnugg.nuggify(collection_, _getItems(seed), resolver, uriName, uriDesc, tokenId, seed, '');
     }
 
-    // collection_
-    bytes private collection_;
+    // // collection_
+    // bytes private collection_;
 
-    // bases_
-    bytes[] internal items_;
+    // // bases_
+    // bytes[] internal items_;
 
     /**
      * @notice gets unique attribtues based on given epoch and converts encoded bytes to object that can be merged
      */
     function _getItems(bytes32 seed) internal view returns (bytes[] memory res) {
-        res = new bytes[](5);
-        for (uint8 i = 0; i < res.length * 2; i++) {
-            res[i] = items_[uint16(uint64(uint256(seed) >> (196 + i)) % items_.length)];
+        res = new bytes[](2);
+        for (uint8 i = 0; i < res.length; i++) {
+            res[i] = items_[((uint256(seed >> i) % (items_.length)))];
         }
     }
 }
