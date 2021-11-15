@@ -170,6 +170,7 @@ contract NuggSwap is ERC721Holder, Testable, Epochable {
         (address leader, uint64 epoch, bool claimedByOwner, bool exists) = SwapLib.decodeAuctionData(
             _encodedAuctionData[nft][tokenId][auctionNum]
         );
+
         (uint128 leaderAmount, ) = SwapLib.decodeBidData(_encodedBidData[nft][tokenId][auctionNum][leader]);
 
         auction = SwapLib.AuctionData({
