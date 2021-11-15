@@ -11,13 +11,13 @@ library SwapLib {
     using Address for address;
     using Address for address payable;
 
-    struct BidData {
+    struct OfferData {
         bool claimed;
         address account;
         uint128 amount;
     }
 
-    struct AuctionData {
+    struct SwapData {
         address nft;
         uint256 tokenId;
         uint256 num;
@@ -30,7 +30,7 @@ library SwapLib {
         bool exists;
     }
 
-    function decodeAuctionData(uint256 _unparsed)
+    function decodeSwapData(uint256 _unparsed)
         internal
         pure
         returns (
@@ -50,7 +50,7 @@ library SwapLib {
         }
     }
 
-    function encodeAuctionData(
+    function encodeSwapData(
         address leader,
         uint64 epoch,
         bool claimedByOwner,
@@ -61,42 +61,40 @@ library SwapLib {
         }
     }
 
-    function decodeAuctionId(uint256 _unparsed)
+    function decodeSwapId(uint256 _unparsed)
         internal
         pure
         returns (
             address nft,
             uint256 tokenId,
-            uint256 auctionNum
+            uint256 swapNum
         )
     {
         assembly {
-            let tmp := _unparsed
-            auctionNum := shr(224, tmp)
-            tokenId := shr(160, tmp)
-            nft := tmp
+            swapNum := shr(224, _unparsed)
+            tokenId := shr(160, _unparsed)
+            nft := _unparsed
         }
     }
 
-    function encodeAuctionId(
+    function encodeSwapId(
         address nft,
         uint256 tokenId,
-        uint256 auctionNum
+        uint256 swapNum
     ) internal pure returns (uint256 res) {
         assembly {
-            res := or(or(shl(224, auctionNum), shl(160, tokenId)), nft)
+            res := or(or(shl(224, swapNum), shl(160, tokenId)), nft)
         }
     }
 
-    function decodeBidData(uint256 _unparsed) internal pure returns (uint128 amount, bool claimed) {
+    function decodeOfferData(uint256 _unparsed) internal pure returns (uint128 amount, bool claimed) {
         assembly {
-            let tmp := _unparsed
-            claimed := shr(128, tmp)
-            amount := tmp
+            claimed := shr(128, _unparsed)
+            amount := _unparsed
         }
     }
 
-    function encodeBidData(uint128 amount, bool claimed) internal pure returns (uint256 res) {
+    function encodeOfferData(uint128 amount, bool claimed) internal pure returns (uint256 res) {
         assembly {
             res := or(shl(128, claimed), amount)
         }
@@ -118,17 +116,17 @@ library SwapLib {
         require(nft.ownerOf(tokenId) == address(this), 'AUC:TT:3');
     }
 
-    function mintToken(AuctionData memory auction) internal {
-        IERC721 _nft = IERC721(auction.nft);
+    function mintToken(SwapData memory swap) internal {
+        IERC721 _nft = IERC721(swap.nft);
 
         require(_nft.supportsInterface(type(INuggMintable).interfaceId), 'AUC:MT:0');
 
-        uint256 tokenId = INuggMintable(address(auction.nft)).nuggSwapMint(auction.activeEpoch);
+        uint256 tokenId = INuggMintable(address(swap.nft)).nuggSwapMint(swap.activeEpoch);
 
-        require(tokenId == auction.tokenId, 'AUC:MT:2');
-        require((_nft.ownerOf(auction.tokenId) == address(this)), 'AUC:MT:3');
+        require(tokenId == swap.tokenId, 'AUC:MT:2');
+        require((_nft.ownerOf(swap.tokenId) == address(this)), 'AUC:MT:3');
 
-        handleInitAuction(auction, BidData({account: address(0), amount: 0, claimed: false}), auction.activeEpoch, 0);
+        handleInitSwap(swap, OfferData({account: address(0), amount: 0, claimed: false}), swap.activeEpoch, 0);
     }
 
     function _giveToken(
@@ -144,69 +142,69 @@ library SwapLib {
         require(_nft.ownerOf(tokenId) == to, 'AUC:TT:3');
     }
 
-    function handleBidPlaced(
-        AuctionData memory auction,
-        BidData memory bid,
+    function handleOfferPlaced(
+        SwapData memory swap,
+        OfferData memory offer,
         uint256 amount
     ) internal pure {
-        bid.amount += uint128(amount);
+        offer.amount += uint128(amount);
 
-        require(isActive(auction), 'SL:OBP:0');
-        require(validateBidIncrement(auction, bid), 'SL:OBP:1');
+        require(isActive(swap), 'SL:OBP:0');
+        require(validateOfferIncrement(swap, offer), 'SL:OBP:1');
 
-        auction.leader = bid.account;
+        swap.leader = offer.account;
     }
 
-    function handleBidClaim(AuctionData memory auction, BidData memory bid) internal {
-        require(auction.exists, 'SL:HBC:0');
-        require(!bid.claimed, 'AUC:CLM:0');
-        require(bid.amount > 0, 'AUC:CLM:1');
+    function handleOfferClaim(SwapData memory swap, OfferData memory offer) internal {
+        require(swap.exists, 'SL:HBC:0');
+        require(!offer.claimed, 'AUC:CLM:0');
+        require(offer.amount > 0, 'AUC:CLM:1');
 
-        bid.claimed = true;
+        offer.claimed = true;
 
-        if (isOver(auction)) {
-            if (bid.account == auction.leader) {
-                _giveToken(auction.nft, auction.tokenId, bid.account);
+        if (isOver(swap)) {
+            if (offer.account == swap.leader) {
+                _giveToken(swap.nft, swap.tokenId, offer.account);
             } else {
-                payable(bid.account).sendValue(bid.amount);
+                payable(offer.account).sendValue(offer.amount);
             }
         } else {
-            require(bid.account == auction.leader && bid.account == auction.owner, 'AUC:CLM:2');
-            auction.claimedByOwner;
+            require(offer.account == swap.leader && offer.account == swap.owner, 'AUC:CLM:2');
+            swap.claimedByOwner = true;
         }
     }
 
-    function handleInitAuction(
-        AuctionData memory auction,
-        BidData memory bid,
+    function handleInitSwap(
+        SwapData memory swap,
+        OfferData memory offer,
         uint64 epoch,
         uint128 floor
     ) internal pure {
-        require(!auction.exists, 'AUC:IA:0');
+        require(!swap.exists, 'AUC:IA:0');
 
-        auction.epoch = epoch;
-        require(hasVaildEpoch(auction), 'AUC:IA:1');
+        swap.epoch = epoch;
+        require(hasVaildEpoch(swap), 'AUC:IA:1');
 
-        auction.leader = bid.account;
-        auction.exists = true;
+        swap.leader = offer.account;
+        swap.exists = true;
 
-        bid.amount = floor;
+        offer.amount = floor;
     }
 
-    function validateBidIncrement(AuctionData memory auction, BidData memory bid) internal pure returns (bool) {
-        return bid.amount > auction.leaderAmount + ((auction.leaderAmount * 100) / 10000);
+    function validateOfferIncrement(SwapData memory swap, OfferData memory offer) internal pure returns (bool) {
+        return offer.amount > swap.leaderAmount + ((swap.leaderAmount * 100) / 10000);
     }
 
-    function hasVaildEpoch(AuctionData memory auction) internal pure returns (bool) {
-        return auction.epoch >= auction.activeEpoch && auction.epoch - auction.activeEpoch <= 1000;
+    function hasVaildEpoch(SwapData memory swap) internal pure returns (bool) {
+        return swap.epoch >= swap.activeEpoch && swap.epoch - swap.activeEpoch <= 1000;
     }
 
-    function isOver(AuctionData memory auction) internal pure returns (bool) {
-        return auction.exists && (auction.activeEpoch > auction.epoch || auction.claimedByOwner);
+    function isOver(SwapData memory swap) internal pure returns (bool) {
+        return swap.exists && (swap.activeEpoch > swap.epoch || swap.claimedByOwner);
     }
 
-    function isActive(AuctionData memory auction) internal pure returns (bool) {
-        return auction.exists && !auction.claimedByOwner && auction.activeEpoch <= auction.epoch;
+    function isActive(SwapData memory swap) internal pure returns (bool) {
+        return swap.exists && !swap.claimedByOwner && swap.activeEpoch <= swap.epoch;
     }
 
     /**

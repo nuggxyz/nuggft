@@ -10,7 +10,6 @@ import { ETH_ONE, toEth, BINARY_128, ETH_TRILLION, fromEth } from '../lib/shared
 import { NuggFatherFix, NuggFatherFixture } from '../lib/fixtures/NuggFather.fix';
 import { getHRE } from '../lib/shared/deployment';
 import { Address } from 'ethereumjs-util';
-// import { getHRE } from './shared/deployment';
 const createFixtureLoader = waffle.createFixtureLoader;
 const {
     constants: { MaxUint256 },
@@ -38,7 +37,7 @@ describe('uint tests', async function () {
         it('should revert if shares = 0', async () => {
             await fix.nuggeth.connect(accounts.dee).deposit({ value: toEth('5') });
             const res = await fix.nuggeth.balanceOf(accounts.dee.address);
-            await fix.nuggswap.connect(accounts.dee).placeBid(fix.nuggft.address, BigNumber.from(0), 0, { value: toEth('3.000') });
+            await fix.nuggswap.connect(accounts.dee).placeOffer(fix.nuggft.address, BigNumber.from(0), 0, { value: toEth('3.000') });
 
             // console.log(res.toString());
 
@@ -46,7 +45,7 @@ describe('uint tests', async function () {
             await fix.nuggswap.connect(accounts.dee).claim(fix.nuggft.address, 0, 0);
             await fix.nuggft.connect(accounts.dee).approve(fix.nuggswap.address, 0);
 
-            await fix.nuggswap.connect(accounts.dee).startAuction(fix.nuggft.address, 0, 30, toEth('.02000'));
+            await fix.nuggswap.connect(accounts.dee).startSwap(fix.nuggft.address, 0, 30, toEth('.02000'));
 
             const positionDee0 = await fix.nuggeth.balanceOf(accounts.dee.address);
             const positionMac0 = await fix.nuggeth.balanceOf(accounts.mac.address);
@@ -80,11 +79,11 @@ describe('uint tests', async function () {
 
             console.log('yououououoi');
 
-            await fix.nuggswap.connect(accounts.frank).placeBid(fix.nuggft.address, 1, 0, { value: toEth('20.000') });
-            await fix.nuggswap.connect(accounts.dee).placeBid(fix.nuggft.address, 1, 0, { value: toEth('22.000') });
-            await fix.nuggswap.connect(accounts.frank).placeBid(fix.nuggft.address, 1, 0, { value: toEth('3.000') });
-            await fix.nuggswap.connect(accounts.dee).placeBid(fix.nuggft.address, 1, 0, { value: toEth('2.000') });
-            await fix.nuggswap.connect(accounts.dee).placeBid(fix.nuggft.address, 1, 0, { value: toEth('2.000') });
+            await fix.nuggswap.connect(accounts.frank).placeOffer(fix.nuggft.address, 1, 0, { value: toEth('20.000') });
+            await fix.nuggswap.connect(accounts.dee).placeOffer(fix.nuggft.address, 1, 0, { value: toEth('22.000') });
+            await fix.nuggswap.connect(accounts.frank).placeOffer(fix.nuggft.address, 1, 0, { value: toEth('3.000') });
+            await fix.nuggswap.connect(accounts.dee).placeOffer(fix.nuggft.address, 1, 0, { value: toEth('2.000') });
+            await fix.nuggswap.connect(accounts.dee).placeOffer(fix.nuggft.address, 1, 0, { value: toEth('2.000') });
 
             console.log('yououououoi');
             await fix.nuggeth.connect(accounts.frank).deposit({ value: toEth('1') });
@@ -103,11 +102,11 @@ describe('uint tests', async function () {
             const res3 = await fix.nuggeth.balanceOf(accounts.charile.address);
             console.log(res3.toString());
 
-            // await fix.seller.connect(accounts.frank).placeBid(BigNumber.from(1), toEth('2'), 0, { value: toEth('2.000') });
+            // await fix.seller.connect(accounts.frank).placeOffer(BigNumber.from(1), toEth('2'), 0, { value: toEth('2.000') });
             await fix.nuggeth.connect(accounts.dennis).withdraw(toEth('1.696969696970000'));
             await fix.nuggeth.connect(accounts.dennis).withdraw(toEth('1.696969696970000'));
 
-            // await fix.seller.connect(accounts.frank).placeBid(BigNumber.from(1), toEth('2'), 0, { value: toEth('2.000') });
+            // await fix.seller.connect(accounts.frank).placeOffer(BigNumber.from(1), toEth('2'), 0, { value: toEth('2.000') });
 
             // await fix.nuggeth.connect(accounts.dee).withdraw(toEth('41'));
 
@@ -206,7 +205,7 @@ describe('uint tests', async function () {
 
             // // await fix.nuggeth.connect(accounts.dee).approve(fix.minter.address, toEth('40'));
 
-            // await fix.minter.connect(accounts.frank).placeBid(BigNumber.from(0), toEth('20.0001'), 0, { value: toEth('20.0001') });
+            // await fix.minter.connect(accounts.frank).placeOffer(BigNumber.from(0), toEth('20.0001'), 0, { value: toEth('20.0001') });
             // const res4 = await fix.nuggeth.balanceOf(accounts.frank.address);
             // console.log(res4.toString());
 
@@ -262,10 +261,10 @@ describe('uint tests', async function () {
 
             // await fix.nuggft.connect(accounts.frank).approve(fix.seller.address, 0);
 
-            // // const res7 = await fix.minter.getBid(0, accounts.frank.address);
+            // // const res7 = await fix.minter.getOffer(0, accounts.frank.address);
             // await fix.seller.connect(accounts.frank).startSale(0, 10, toEth('1'));
 
-            // await fix.seller.connect(accounts.dee).placeBid(0, toEth('3'), 0, {
+            // await fix.seller.connect(accounts.dee).placeOffer(0, toEth('3'), 0, {
             //     value: toEth('3'),
             // });
 
@@ -277,10 +276,10 @@ describe('uint tests', async function () {
 
             // await fix.nuggft.connect(accounts.dee).approve(fix.seller.address, 0);
 
-            // // const res7 = await fix.minter.getBid(0, accounts.frank.address);
+            // // const res7 = await fix.minter.getOffer(0, accounts.frank.address);
             // await fix.seller.connect(accounts.dee).startSale(0, 10, toEth('1'));
 
-            // await fix.seller.connect(accounts.mac).placeBid(1, toEth('3'), 0, {
+            // await fix.seller.connect(accounts.mac).placeOffer(1, toEth('3'), 0, {
             //     value: toEth('3'),
             // });
 
