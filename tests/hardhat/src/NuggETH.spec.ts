@@ -35,8 +35,8 @@ describe('uint tests', async function () {
 
     describe('internal', async () => {
         it('should revert if shares = 0', async () => {
-            await fix.nuggeth.connect(accounts.dee).deposit({ value: toEth('5') });
-            const res = await fix.nuggeth.balanceOf(accounts.dee.address);
+            await fix.xnugg.connect(accounts.dee).deposit({ value: toEth('5') });
+            const res = await fix.xnugg.balanceOf(accounts.dee.address);
             await fix.nuggswap.connect(accounts.dee).submitOffer(fix.nuggft.address, BigNumber.from(0), 0, { value: toEth('3.000') });
 
             // console.log(res.toString());
@@ -47,35 +47,35 @@ describe('uint tests', async function () {
 
             await fix.nuggswap.connect(accounts.dee).startSwap(fix.nuggft.address, 0, 30, toEth('.02000'));
 
-            const positionDee0 = await fix.nuggeth.balanceOf(accounts.dee.address);
-            const positionMac0 = await fix.nuggeth.balanceOf(accounts.mac.address);
-            const ownershipMac0 = await fix.nuggeth.ownershipOfX128(accounts.mac.address);
-            const ownershipDee0 = await fix.nuggeth.ownershipOfX128(accounts.dee.address);
-            const positionDennis0 = await fix.nuggeth.balanceOf(accounts.dennis.address);
-            const positionFrank0 = await fix.nuggeth.balanceOf(accounts.frank.address);
-            const ownershipFrank0 = await fix.nuggeth.ownershipOfX128(accounts.frank.address);
-            const ownershipDennis0 = await fix.nuggeth.ownershipOfX128(accounts.dennis.address);
-            const positionCharlie0 = await fix.nuggeth.balanceOf(accounts.charile.address);
-            const ownershipCharlie0 = await fix.nuggeth.ownershipOfX128(accounts.charile.address);
-            await fix.nuggeth.connect(accounts.mac).deposit({ value: toEth('40') });
-            await fix.nuggeth.connect(accounts.charile).deposit({ value: toEth('1.696969696969696') });
+            const positionDee0 = await fix.xnugg.balanceOf(accounts.dee.address);
+            const positionMac0 = await fix.xnugg.balanceOf(accounts.mac.address);
+            const ownershipMac0 = await fix.xnugg.ownershipOfX128(accounts.mac.address);
+            const ownershipDee0 = await fix.xnugg.ownershipOfX128(accounts.dee.address);
+            const positionDennis0 = await fix.xnugg.balanceOf(accounts.dennis.address);
+            const positionFrank0 = await fix.xnugg.balanceOf(accounts.frank.address);
+            const ownershipFrank0 = await fix.xnugg.ownershipOfX128(accounts.frank.address);
+            const ownershipDennis0 = await fix.xnugg.ownershipOfX128(accounts.dennis.address);
+            const positionCharlie0 = await fix.xnugg.balanceOf(accounts.charile.address);
+            const ownershipCharlie0 = await fix.xnugg.ownershipOfX128(accounts.charile.address);
+            await fix.xnugg.connect(accounts.mac).deposit({ value: toEth('40') });
+            await fix.xnugg.connect(accounts.charile).deposit({ value: toEth('1.696969696969696') });
 
-            // const res2 = await fix.nuggeth.balanceOf(accounts.charile.address);
+            // const res2 = await fix.xnugg.balanceOf(accounts.charile.address);
             // console.log(res2.toString());
 
-            const positionDee1 = await fix.nuggeth.balanceOf(accounts.dee.address);
-            const positionMac1 = await fix.nuggeth.balanceOf(accounts.mac.address);
-            const ownershipMac1 = await fix.nuggeth.ownershipOfX128(accounts.mac.address);
-            const ownershipDee1 = await fix.nuggeth.ownershipOfX128(accounts.dee.address);
-            const positionDennis1 = await fix.nuggeth.balanceOf(accounts.dennis.address);
-            const positionFrank1 = await fix.nuggeth.balanceOf(accounts.frank.address);
-            const ownershipFrank1 = await fix.nuggeth.ownershipOfX128(accounts.frank.address);
-            const ownershipDennis1 = await fix.nuggeth.ownershipOfX128(accounts.dennis.address);
-            const positionCharlie1 = await fix.nuggeth.balanceOf(accounts.charile.address);
-            const ownershipCharlie1 = await fix.nuggeth.ownershipOfX128(accounts.charile.address);
+            const positionDee1 = await fix.xnugg.balanceOf(accounts.dee.address);
+            const positionMac1 = await fix.xnugg.balanceOf(accounts.mac.address);
+            const ownershipMac1 = await fix.xnugg.ownershipOfX128(accounts.mac.address);
+            const ownershipDee1 = await fix.xnugg.ownershipOfX128(accounts.dee.address);
+            const positionDennis1 = await fix.xnugg.balanceOf(accounts.dennis.address);
+            const positionFrank1 = await fix.xnugg.balanceOf(accounts.frank.address);
+            const ownershipFrank1 = await fix.xnugg.ownershipOfX128(accounts.frank.address);
+            const ownershipDennis1 = await fix.xnugg.ownershipOfX128(accounts.dennis.address);
+            const positionCharlie1 = await fix.xnugg.balanceOf(accounts.charile.address);
+            const ownershipCharlie1 = await fix.xnugg.ownershipOfX128(accounts.charile.address);
 
-            await fix.nuggeth.connect(accounts.dennis).deposit({ value: toEth('13') });
-            await fix.nuggeth.connect(accounts.frank).deposit({ value: toEth('1') });
+            await fix.xnugg.connect(accounts.dennis).deposit({ value: toEth('13') });
+            await fix.xnugg.connect(accounts.frank).deposit({ value: toEth('1') });
 
             console.log('yououououoi');
 
@@ -86,44 +86,44 @@ describe('uint tests', async function () {
             await fix.nuggswap.connect(accounts.dee).submitOffer(fix.nuggft.address, 1, 0, { value: toEth('2.000') });
 
             console.log('yououououoi');
-            await fix.nuggeth.connect(accounts.frank).deposit({ value: toEth('1') });
+            await fix.xnugg.connect(accounts.frank).deposit({ value: toEth('1') });
             console.log('NOPE');
 
-            const positionDee2 = await fix.nuggeth.balanceOf(accounts.dee.address);
-            const positionMac2 = await fix.nuggeth.balanceOf(accounts.mac.address);
-            const ownershipMac2 = await fix.nuggeth.ownershipOfX128(accounts.mac.address);
-            const ownershipDee2 = await fix.nuggeth.ownershipOfX128(accounts.dee.address);
-            const positionDennis2 = await fix.nuggeth.balanceOf(accounts.dennis.address);
-            const positionFrank2 = await fix.nuggeth.balanceOf(accounts.frank.address);
-            const ownershipFrank2 = await fix.nuggeth.ownershipOfX128(accounts.frank.address);
-            const ownershipDennis2 = await fix.nuggeth.ownershipOfX128(accounts.dennis.address);
-            const positionCharlie2 = await fix.nuggeth.balanceOf(accounts.charile.address);
-            const ownershipCharlie2 = await fix.nuggeth.ownershipOfX128(accounts.charile.address);
-            const res3 = await fix.nuggeth.balanceOf(accounts.charile.address);
+            const positionDee2 = await fix.xnugg.balanceOf(accounts.dee.address);
+            const positionMac2 = await fix.xnugg.balanceOf(accounts.mac.address);
+            const ownershipMac2 = await fix.xnugg.ownershipOfX128(accounts.mac.address);
+            const ownershipDee2 = await fix.xnugg.ownershipOfX128(accounts.dee.address);
+            const positionDennis2 = await fix.xnugg.balanceOf(accounts.dennis.address);
+            const positionFrank2 = await fix.xnugg.balanceOf(accounts.frank.address);
+            const ownershipFrank2 = await fix.xnugg.ownershipOfX128(accounts.frank.address);
+            const ownershipDennis2 = await fix.xnugg.ownershipOfX128(accounts.dennis.address);
+            const positionCharlie2 = await fix.xnugg.balanceOf(accounts.charile.address);
+            const ownershipCharlie2 = await fix.xnugg.ownershipOfX128(accounts.charile.address);
+            const res3 = await fix.xnugg.balanceOf(accounts.charile.address);
             console.log(res3.toString());
 
             // await fix.seller.connect(accounts.frank).submitOffer(BigNumber.from(1), toEth('2'), 0, { value: toEth('2.000') });
-            await fix.nuggeth.connect(accounts.dennis).withdraw(toEth('1.696969696970000'));
-            await fix.nuggeth.connect(accounts.dennis).withdraw(toEth('1.696969696970000'));
+            await fix.xnugg.connect(accounts.dennis).withdraw(toEth('1.696969696970000'));
+            await fix.xnugg.connect(accounts.dennis).withdraw(toEth('1.696969696970000'));
 
             // await fix.seller.connect(accounts.frank).submitOffer(BigNumber.from(1), toEth('2'), 0, { value: toEth('2.000') });
 
-            // await fix.nuggeth.connect(accounts.dee).withdraw(toEth('41'));
+            // await fix.xnugg.connect(accounts.dee).withdraw(toEth('41'));
 
             // await Mining.advanceBlockTo(100);
             // await fix.seller.connect(accounts.dee).submitClaimSale(1, 2);
 
-            const res4 = await fix.nuggeth.balanceOf(accounts.dee.address);
-            const positionDee3 = await fix.nuggeth.balanceOf(accounts.dee.address);
-            const ownershipMac3 = await fix.nuggeth.ownershipOfX128(accounts.mac.address);
-            const ownershipDee3 = await fix.nuggeth.ownershipOfX128(accounts.dee.address);
-            const positionMac3 = await fix.nuggeth.balanceOf(accounts.mac.address);
-            const positionDennis3 = await fix.nuggeth.balanceOf(accounts.dennis.address);
-            const positionFrank3 = await fix.nuggeth.balanceOf(accounts.frank.address);
-            const ownershipFrank3 = await fix.nuggeth.ownershipOfX128(accounts.frank.address);
-            const ownershipDennis3 = await fix.nuggeth.ownershipOfX128(accounts.dennis.address);
-            const positionCharlie3 = await fix.nuggeth.balanceOf(accounts.charile.address);
-            const ownershipCharlie3 = await fix.nuggeth.ownershipOfX128(accounts.charile.address);
+            const res4 = await fix.xnugg.balanceOf(accounts.dee.address);
+            const positionDee3 = await fix.xnugg.balanceOf(accounts.dee.address);
+            const ownershipMac3 = await fix.xnugg.ownershipOfX128(accounts.mac.address);
+            const ownershipDee3 = await fix.xnugg.ownershipOfX128(accounts.dee.address);
+            const positionMac3 = await fix.xnugg.balanceOf(accounts.mac.address);
+            const positionDennis3 = await fix.xnugg.balanceOf(accounts.dennis.address);
+            const positionFrank3 = await fix.xnugg.balanceOf(accounts.frank.address);
+            const ownershipFrank3 = await fix.xnugg.ownershipOfX128(accounts.frank.address);
+            const ownershipDennis3 = await fix.xnugg.ownershipOfX128(accounts.dennis.address);
+            const positionCharlie3 = await fix.xnugg.balanceOf(accounts.charile.address);
+            const ownershipCharlie3 = await fix.xnugg.ownershipOfX128(accounts.charile.address);
 
             console.log('positionDee0: ', fromEth(positionDee0));
             console.log('positionDee1: ', fromEth(positionDee1));
@@ -186,7 +186,7 @@ describe('uint tests', async function () {
                 '(expe) supply:',
                 fromEth(positionCharlie.add(positionFrank).add(positionDee).add(positionMac).add(positionDennis)),
             );
-            console.log('(real) supply:', fromEth(await fix.nuggeth.totalSupply()));
+            console.log('(real) supply:', fromEth(await fix.xnugg.totalSupply()));
 
             console.log(
                 '(expe) owners:',
@@ -201,12 +201,12 @@ describe('uint tests', async function () {
                 ),
             );
             console.log('(real) owners:', fromEth(ETH_TRILLION));
-            // await fix.nuggeth.connect(accounts.dee).approve(fix.minter.address, toEth('40'));
+            // await fix.xnugg.connect(accounts.dee).approve(fix.minter.address, toEth('40'));
 
-            // // await fix.nuggeth.connect(accounts.dee).approve(fix.minter.address, toEth('40'));
+            // // await fix.xnugg.connect(accounts.dee).approve(fix.minter.address, toEth('40'));
 
             // await fix.minter.connect(accounts.frank).submitOffer(BigNumber.from(0), toEth('20.0001'), 0, { value: toEth('20.0001') });
-            // const res4 = await fix.nuggeth.balanceOf(accounts.frank.address);
+            // const res4 = await fix.xnugg.balanceOf(accounts.frank.address);
             // console.log(res4.toString());
 
             // await fix.weth.connect(accounts.frank).deposit({ value: toEth('20') });
@@ -214,15 +214,15 @@ describe('uint tests', async function () {
             // await fix.relay.connect(accounts.frank).depositWETH(toEth('20'));
 
             // // await fix.relay.connect(accounts.dee).depositWETH();
-            // const res2 = await fix.nuggeth.balanceOf(accounts.dee.address);
-            // const res3 = await fix.nuggeth.totalSupply();
+            // const res2 = await fix.xnugg.balanceOf(accounts.dee.address);
+            // const res3 = await fix.xnugg.totalSupply();
 
-            // await fix.nuggeth.connect(accounts.mac).deposit({ value: toEth('40') });
-            // const res5 = await fix.nuggeth.balanceOf(accounts.mac.address);
+            // await fix.xnugg.connect(accounts.mac).deposit({ value: toEth('40') });
+            // const res5 = await fix.xnugg.balanceOf(accounts.mac.address);
             // console.log(res5.toString());
 
-            // let earnings = await fix.nuggeth.earningsOf(accounts.dee.address);
-            // let position = await fix.nuggeth.positionOf(accounts.dee.address);
+            // let earnings = await fix.xnugg.earningsOf(accounts.dee.address);
+            // let position = await fix.xnugg.positionOf(accounts.dee.address);
             // console.log({
             //     PRECOMPOUND: {
             //         calc: earnings.toString(),
@@ -230,27 +230,27 @@ describe('uint tests', async function () {
             //     },
             // });
 
-            // await fix.nuggeth.connect(accounts.dee).compound();
-            // let res6 = await fix.nuggeth.balanceOf(accounts.dee.address);
+            // await fix.xnugg.connect(accounts.dee).compound();
+            // let res6 = await fix.xnugg.balanceOf(accounts.dee.address);
             // console.log(res6.toString());
 
-            // earnings = await fix.nuggeth.earningsOf(accounts.dee.address);
-            // position = await fix.nuggeth.positionOf(accounts.dee.address);
+            // earnings = await fix.xnugg.earningsOf(accounts.dee.address);
+            // position = await fix.xnugg.positionOf(accounts.dee.address);
             // console.log({
             //     AFTERCOMPOUND: {
             //         calc: earnings.toString(),
             //         rOwned: position.rOwned.toString(),
             //         sudo: MockStakeMath.convertSharesToEarnings(
             //             {
-            //                 epsX128: await fix.nuggeth.epsX128(),
-            //                 shares: await fix.nuggeth.totalShares(),
+            //                 epsX128: await fix.xnugg.epsX128(),
+            //                 shares: await fix.xnugg.totalShares(),
             //             },
             //             earnings,
             //         ).toString(),
             //     },
             // });
-            // await fix.nuggeth.connect(accounts.dee).withdraw(toEth('1'));
-            // const res9 = await fix.nuggeth.balanceOf(accounts.dee.address);
+            // await fix.xnugg.connect(accounts.dee).withdraw(toEth('1'));
+            // const res9 = await fix.xnugg.balanceOf(accounts.dee.address);
             // console.log('test withdraw', res9.toString());
 
             // console.log(res2.toString(), res3.toString());
@@ -289,11 +289,11 @@ describe('uint tests', async function () {
 
             // await fix.seller.connect(accounts.dee).submitClaimSale(1, 0);
 
-            // await fix.nuggeth.connect(accounts.dee).submitClaimSale(1, 0);
+            // await fix.xnugg.connect(accounts.dee).submitClaimSale(1, 0);
             // await fix.nuggft.connect(accounts.mac).transferFrom(accounts.mac.address, accounts.dee.address, 0);
 
             // await fix.auction.connect(accounts.dee).movePendingReward();
-            // // const res6 = await fix.nuggeth.balanceOf(accounts.dee.address);
+            // // const res6 = await fix.xnugg.balanceOf(accounts.dee.address);
             // // console.log(res6.toString());
         });
     });

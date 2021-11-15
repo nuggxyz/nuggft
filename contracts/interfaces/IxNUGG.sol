@@ -11,7 +11,7 @@ import '../erc2981/IERC2981Receiver.sol';
  * @title ISeedable
  * @dev interface for Seedable.sol
  */
-interface INuggETH is IERC20, IStakeable, IEscrowable, IERC2981Receiver {
+interface IxNUGG is IERC20, IStakeable, IEscrowable, IERC2981Receiver {
     function deposit() external payable;
 
     function withdraw(uint256 amount) external;

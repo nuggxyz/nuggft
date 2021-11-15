@@ -7,21 +7,21 @@ import './common/Escrowable.sol';
 
 import './libraries/Exchange.sol';
 
-import './interfaces/INuggETH.sol';
+import './interfaces/IxNUGG.sol';
 import './erc20/ERC20.sol';
 import './erc2981/ERC2981Receiver.sol';
 
 /**
- * @title NuggETH
+ * @title xNUGG
  * @author Nugg Labs - @danny7even & @dub6ix
  * @notice leggo
  */
-contract NuggETH is INuggETH, ERC20, ERC2981Receiver, Escrowable, Stakeable {
+contract xNUGG is IxNUGG, ERC20, ERC2981Receiver, Escrowable, Stakeable {
     Mutex local;
 
     using Address for address payable;
 
-    constructor() ERC20('Nugg Wrapped Ether', 'NuggETH') {
+    constructor() ERC20('Staked NUGG', 'xNUGG') {
         local = initMutex();
     }
 
@@ -44,15 +44,15 @@ contract NuggETH is INuggETH, ERC20, ERC2981Receiver, Escrowable, Stakeable {
         return super.onERC2981Received(operator, from, token, tokenId, erc20, amount, data);
     }
 
-    function deposit() public payable override(INuggETH) {
+    function deposit() public payable override(IxNUGG) {
         _deposit(msg_sender(), msg_value());
     }
 
-    function withdraw(uint256 amount) public override(INuggETH) {
+    function withdraw(uint256 amount) public override(IxNUGG) {
         _withdraw(msg_sender(), amount);
     }
 
-    function totalSupply() public view override(INuggETH, ERC20, Stakeable) returns (uint256 res) {
+    function totalSupply() public view override(IxNUGG, ERC20, Stakeable) returns (uint256 res) {
         res = Stakeable.totalSupply();
     }
 
@@ -64,7 +64,7 @@ contract NuggETH is INuggETH, ERC20, ERC2981Receiver, Escrowable, Stakeable {
         res = ERC20.balanceOf(from);
     }
 
-    function balanceOf(address from) public view override(INuggETH, ERC20) returns (uint256 res) {
+    function balanceOf(address from) public view override(IxNUGG, ERC20) returns (uint256 res) {
         res = Stakeable.supplyOf(from);
     }
 

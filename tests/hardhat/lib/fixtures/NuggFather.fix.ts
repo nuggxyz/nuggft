@@ -6,9 +6,9 @@ import { ensureWETH, getHRE } from '../shared/deployment';
 import { NuggSwap } from '../../../../typechain/NuggSwap';
 import {
     NuggFT,
-    NuggETH,
     Escrow,
-    NuggETH__factory,
+    XNUGG as xNUGG,
+    XNUGG__factory as xNUGG__factory,
     NuggFT__factory,
     Escrow__factory,
     NuggSwap__factory,
@@ -23,7 +23,7 @@ import { MockFileResolver } from '../../../../typechain/MockFileResolver';
 export interface NuggFatherFixture {
     nuggft: NuggFT;
     nuggswap: NuggSwap;
-    nuggeth: NuggETH;
+    xnugg: xNUGG;
     dotnugg: MockDotNugg;
     tummy: Escrow;
     nuggin: MockFileResolver;
@@ -39,8 +39,8 @@ export const NuggFatherFix: Fixture<NuggFatherFixture> = async function (
 
     const eoaDeployer = provider.getWallets()[16];
 
-    const nuggeth = await deployContractWithSalt<NuggETH__factory>({
-        factory: 'NuggETH',
+    const xnugg = await deployContractWithSalt<xNUGG__factory>({
+        factory: 'xNUGG',
         from: eoaDeployer,
         args: [],
     });
@@ -48,7 +48,7 @@ export const NuggFatherFix: Fixture<NuggFatherFixture> = async function (
     const nuggswap = await deployContractWithSalt<NuggSwap__factory>({
         factory: 'NuggSwap',
         from: eoaDeployer,
-        args: [nuggeth.address],
+        args: [xnugg.address],
     });
 
     const nuggin = await deployContractWithSalt<MockFileResolver__factory>({
@@ -66,19 +66,19 @@ export const NuggFatherFix: Fixture<NuggFatherFixture> = async function (
     const nuggft = await deployContractWithSalt<NuggFT__factory>({
         factory: 'NuggFT',
         from: eoaDeployer,
-        args: [nuggeth.address, nuggswap.address, dotnugg.address, nuggin.address],
+        args: [xnugg.address, nuggswap.address, dotnugg.address, nuggin.address],
     });
 
     const blockOffset = BigNumber.from(await hre.ethers.provider.getBlockNumber());
 
-    const tummy = new Contract(await nuggeth.tummy(), Escrow__factory.abi, provider.getSigner(0)) as Escrow;
+    const tummy = new Contract(await xnugg.tummy(), Escrow__factory.abi, provider.getSigner(0)) as Escrow;
 
     hre.tracer.nameTags[nuggft.address] = 'NuggFT';
     hre.tracer.nameTags[dotnugg.address] = 'DotNugg';
-    hre.tracer.nameTags[nuggeth.address] = 'NuggETH';
+    hre.tracer.nameTags[xnugg.address] = 'xNUGG';
     hre.tracer.nameTags[nuggswap.address] = 'NuggSwap';
     hre.tracer.nameTags[tummy.address] = 'Tummy';
     hre.tracer.nameTags[nuggin.address] = 'NuggIn';
 
-    return { nuggft, dotnugg, nuggeth, blockOffset, tummy, nuggin, nuggswap };
+    return { nuggft, dotnugg, xnugg, blockOffset, tummy, nuggin, nuggswap };
 };
