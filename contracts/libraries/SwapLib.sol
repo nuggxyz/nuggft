@@ -142,7 +142,7 @@ library SwapLib {
         require(_nft.ownerOf(tokenId) == to, 'AUC:TT:3');
     }
 
-    function handleOfferPlaced(
+    function handleOfferSubmit(
         SwapData memory swap,
         OfferData memory offer,
         uint256 amount
