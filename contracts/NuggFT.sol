@@ -8,7 +8,7 @@ import './interfaces/IDotNuggColorResolver.sol';
 import './interfaces/IDotNugg.sol';
 import './interfaces/INuggFT.sol';
 import './NuggSwap.sol';
-import './NuggETH.sol';
+import './interfaces/IxNUGG.sol';
 
 import './erc721/ERC721.sol';
 import './erc2981/IERC2981.sol';
@@ -26,21 +26,21 @@ import './erc2981/IERC2981.sol';
  */
 contract NuggFT is INuggFT, ERC721 {
     IDotNugg internal dotnugg;
-    NuggETH internal nuggeth;
+    IxNUGG internal xnugg;
     NuggSwap internal nuggswap;
     IDotNuggFileResolver internal nuggin;
 
     uint256 public epochOffset;
 
     constructor(
-        address _nuggeth,
+        address _xnugg,
         address _nuggswap,
         address _dotnugg,
         address _nuggin
     ) ERC721('Nugg Fungable Token', 'NuggFT') {
         dotnugg = IDotNugg(_dotnugg);
         nuggswap = NuggSwap(_nuggswap);
-        nuggeth = NuggETH(_nuggeth);
+        xnugg = IxNUGG(_xnugg);
         nuggin = IDotNuggFileResolver(_nuggin);
 
         require(nuggin.supportsInterface(type(IDotNuggFileResolver).interfaceId), 'NUG:LAUNCH:0');
@@ -59,7 +59,7 @@ contract NuggFT is INuggFT, ERC721 {
     }
 
     function royaltyInfo(uint256, uint256 value) external view override returns (address, uint256) {
-        return (address(nuggeth), (value * 1000) / 10000);
+        return (address(xnugg), (value * 1000) / 10000);
     }
 
     function nuggSwapMint(uint256 currentEpochId) external override returns (uint256 tokenId) {

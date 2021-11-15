@@ -19,7 +19,7 @@ library SwapLib {
 
     struct SwapData {
         address nft;
-        uint256 tokenId;
+        uint256 tokenid;
         uint256 num;
         address leader;
         uint128 leaderAmount;
@@ -41,12 +41,10 @@ library SwapLib {
         )
     {
         assembly {
-            let tmp := _unparsed
-
-            exists := shr(232, tmp)
-            claimedByOwner := shr(248, shl(24, tmp))
-            epoch := shr(160, tmp)
-            leader := tmp
+            exists := shr(232, _unparsed)
+            claimedByOwner := shr(248, shl(24, _unparsed))
+            epoch := shr(160, _unparsed)
+            leader := _unparsed
         }
     }
 
@@ -66,24 +64,24 @@ library SwapLib {
         pure
         returns (
             address nft,
-            uint256 tokenId,
+            uint256 tokenid,
             uint256 swapNum
         )
     {
         assembly {
             swapNum := shr(224, _unparsed)
-            tokenId := shr(160, _unparsed)
+            tokenid := shr(160, _unparsed)
             nft := _unparsed
         }
     }
 
     function encodeSwapId(
         address nft,
-        uint256 tokenId,
+        uint256 tokenid,
         uint256 swapNum
     ) internal pure returns (uint256 res) {
         assembly {
-            res := or(or(shl(224, swapNum), shl(160, tokenId)), nft)
+            res := or(or(shl(224, swapNum), shl(160, tokenid)), nft)
         }
     }
 
@@ -102,18 +100,18 @@ library SwapLib {
 
     function takeToken(
         IERC721 nft,
-        uint256 tokenId,
+        uint256 tokenid,
         address from
     ) internal {
         require(nft.supportsInterface(type(INuggSwapable).interfaceId), 'AUC:TT:0');
 
         // TODO check that royalty supports the
 
-        require(nft.ownerOf(tokenId) == from, 'AUC:TT:1');
+        require(nft.ownerOf(tokenid) == from, 'AUC:TT:1');
 
-        nft.safeTransferFrom(from, address(this), tokenId);
+        nft.safeTransferFrom(from, address(this), tokenid);
 
-        require(nft.ownerOf(tokenId) == address(this), 'AUC:TT:3');
+        require(nft.ownerOf(tokenid) == address(this), 'AUC:TT:3');
     }
 
     function mintToken(SwapData memory swap) internal {
@@ -121,25 +119,25 @@ library SwapLib {
 
         require(_nft.supportsInterface(type(INuggMintable).interfaceId), 'AUC:MT:0');
 
-        uint256 tokenId = INuggMintable(address(swap.nft)).nuggSwapMint(swap.activeEpoch);
+        uint256 tokenid = INuggMintable(address(swap.nft)).nuggSwapMint(swap.activeEpoch);
 
-        require(tokenId == swap.tokenId, 'AUC:MT:2');
-        require((_nft.ownerOf(swap.tokenId) == address(this)), 'AUC:MT:3');
+        require(tokenid == swap.tokenid, 'AUC:MT:2');
+        require((_nft.ownerOf(swap.tokenid) == address(this)), 'AUC:MT:3');
 
         handleInitSwap(swap, OfferData({account: address(0), amount: 0, claimed: false}), swap.activeEpoch, 0);
     }
 
     function _giveToken(
         address nft,
-        uint256 tokenId,
+        uint256 tokenid,
         address to
     ) internal {
         IERC721 _nft = IERC721(nft);
-        require(_nft.ownerOf(tokenId) == address(this), 'AUC:TT:1');
+        require(_nft.ownerOf(tokenid) == address(this), 'AUC:TT:1');
 
-        _nft.safeTransferFrom(address(this), to, tokenId);
+        _nft.safeTransferFrom(address(this), to, tokenid);
 
-        require(_nft.ownerOf(tokenId) == to, 'AUC:TT:3');
+        require(_nft.ownerOf(tokenid) == to, 'AUC:TT:3');
     }
 
     function handleOfferSubmit(
@@ -164,7 +162,7 @@ library SwapLib {
 
         if (isOver(swap)) {
             if (offer.account == swap.leader) {
-                _giveToken(swap.nft, swap.tokenId, offer.account);
+                _giveToken(swap.nft, swap.tokenid, offer.account);
             } else {
                 payable(offer.account).sendValue(offer.amount);
             }
@@ -214,7 +212,7 @@ library SwapLib {
      * @param from address representing the previous owner of the given token ID
      * @param to target address that will receive the tokens
      * @param token token sending the royalties
-     * @param tokenId uint256 ID of the token to be transferred
+     * @param tokenid uint256 ID of the token to be transferred
      * @param _data bytes optional data to send along with the call
      * @return bool whether the call correctly returned the expected magic value
      */
@@ -222,13 +220,13 @@ library SwapLib {
         address from,
         address to,
         address token,
-        uint256 tokenId,
+        uint256 tokenid,
         address,
         uint256,
         bytes memory _data
     ) private returns (bool) {
         if (to.isContract()) {
-            try IERC2981Receiver(to).onERC2981Received(msg.sender, from, token, tokenId, address(0), 0, _data) returns (
+            try IERC2981Receiver(to).onERC2981Received(msg.sender, from, token, tokenid, address(0), 0, _data) returns (
                 bytes4 retval
             ) {
                 return retval == IERC2981Receiver.onERC2981Received.selector;
