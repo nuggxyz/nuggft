@@ -7,7 +7,7 @@ import '../libraries/Address.sol';
 // import '../weth/interfaces/INuggETH.sol';
 
 library Exchange {
-    using Address for     address payable;
+    using Address for address payable;
 
     function take_eth(address account, uint256 amount) internal {
         require(msg.value == amount && msg.sender == account, 'EX:TE:0');

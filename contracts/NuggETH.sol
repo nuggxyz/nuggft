@@ -19,6 +19,8 @@ import './erc2981/ERC2981Receiver.sol';
 contract NuggETH is INuggETH, ERC20, ERC2981Receiver, Escrowable, Stakeable {
     Mutex local;
 
+    using Address for address payable;
+
     constructor() ERC20('Nugg Wrapped Ether', 'NuggETH') {
         local = initMutex();
     }
@@ -35,7 +37,7 @@ contract NuggETH is INuggETH, ERC20, ERC2981Receiver, Escrowable, Stakeable {
         if (msg_value() > 0) {
             uint256 tuck = (msg_value() * 1000) / 10000;
             _TUMMY.deposit{value: tuck}();
-            Stakeable._onRewardIncrease(from, msg_value() - tuck);
+            Stakeable._onRoyaltyAdd(from, msg_value() - tuck);
             ERC20._mint(address(this), msg_value() - tuck);
         }
 
@@ -72,7 +74,7 @@ contract NuggETH is INuggETH, ERC20, ERC2981Receiver, Escrowable, Stakeable {
 
     function _withdraw(address from, uint256 amount) internal validateSupply {
         ERC20._burn(from, amount);
-        Exchange.give_eth(payable(msg_sender()), amount);
+        payable(from).sendValue(amount);
     }
 
     function _afterTokenTransfer(
@@ -80,8 +82,8 @@ contract NuggETH is INuggETH, ERC20, ERC2981Receiver, Escrowable, Stakeable {
         address to,
         uint256 amount
     ) internal override(ERC20) {
-        if (to != address(0) && to != address(this)) Stakeable._onShareIncrease(to, amount);
-        if (from != address(0) && from != address(this)) Stakeable._onShareDecrease(from, amount);
+        if (to != address(0) && to != address(this)) Stakeable._onShareAdd(to, amount);
+        if (from != address(0) && from != address(this)) Stakeable._onShareSub(from, amount);
 
         require(Stakeable.supplyOf(from) <= ERC20.balanceOf(from), 'NETH:ATT:0');
         require(Stakeable.supplyOf(to) <= ERC20.balanceOf(to), 'NETH:ATT:1');
@@ -93,7 +95,7 @@ contract NuggETH is INuggETH, ERC20, ERC2981Receiver, Escrowable, Stakeable {
 
         if (owned > minted) {
             _assign(account, owned - minted);
-            _onEarn(account, owned - minted);
+            _onRealize(account, owned - minted);
         }
     }
 

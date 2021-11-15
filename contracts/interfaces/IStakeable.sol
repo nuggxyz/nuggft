@@ -9,10 +9,10 @@ import '../libraries/StakeMath.sol';
  * @dev interface for Stakeable.sol
  */
 interface IStakeable {
-    event TokenEarn(address indexed account, address sender, uint256 amount);
-    event SharesIncrease(address indexed account, address sender, uint256 amount);
-    event SharesDecrease(address indexed account, address sender, uint256 amount);
-    event RewardIncrease(address indexed sender, uint256 amount);
+    event Realize(address indexed account, address sender, uint256 amount);
+    event ShareAdd(address indexed account, address sender, uint256 amount);
+    event ShareSub(address indexed account, address sender, uint256 amount);
+    event RoyaltyAdd(address indexed sender, uint256 amount);
 
     /**
      * @dev in regards to this contract, this could just be earningsOf + sharesOf

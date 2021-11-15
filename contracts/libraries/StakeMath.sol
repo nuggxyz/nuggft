@@ -60,7 +60,7 @@ library StakeMath {
         return tAmount.mulDivRoundingUp(state.rSupply, state.tSupply);
     }
 
-    function applyShareIncrease(
+    function applyShareAdd(
         State memory state,
         Position memory pos,
         uint256 tAmount
@@ -77,7 +77,7 @@ library StakeMath {
         }
     }
 
-    function applyShareDecrease(
+    function applyShareSub(
         State memory state,
         Position memory pos,
         uint256 tAmount
@@ -88,7 +88,7 @@ library StakeMath {
         state.tSupply -= tAmount;
     }
 
-    function applyRewardIncrease(State memory state, uint256 amount) internal pure {
+    function applyRoyaltyAdd(State memory state, uint256 amount) internal pure {
         state.tSupply += amount;
     }
 }
