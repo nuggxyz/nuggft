@@ -124,7 +124,7 @@ library SwapLib {
         require(tokenid == swap.tokenid, 'AUC:MT:2');
         require((_nft.ownerOf(swap.tokenid) == address(this)), 'AUC:MT:3');
 
-        handleInitSwap(swap, OfferData({account: address(0), amount: 0, claimed: false}), swap.activeEpoch, 0);
+        handleSubmitSwap(swap, OfferData({account: address(0), amount: 0, claimed: false}), swap.activeEpoch, 0);
     }
 
     function _giveToken(
@@ -140,7 +140,7 @@ library SwapLib {
         require(_nft.ownerOf(tokenid) == to, 'AUC:TT:3');
     }
 
-    function handleOfferSubmit(
+    function handleSubmitOffer(
         SwapData memory swap,
         OfferData memory offer,
         uint256 amount
@@ -153,7 +153,7 @@ library SwapLib {
         swap.leader = offer.account;
     }
 
-    function handleOfferClaim(SwapData memory swap, OfferData memory offer) internal {
+    function handleSubmitClaim(SwapData memory swap, OfferData memory offer) internal {
         require(swap.exists, 'SL:HBC:0');
         require(!offer.claimed, 'AUC:CLM:0');
         require(offer.amount > 0, 'AUC:CLM:1');
@@ -172,7 +172,7 @@ library SwapLib {
         }
     }
 
-    function handleInitSwap(
+    function handleSubmitSwap(
         SwapData memory swap,
         OfferData memory offer,
         uint64 epoch,
