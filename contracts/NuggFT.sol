@@ -16,7 +16,7 @@ import './erc2981/IERC2981.sol';
 /**
  * @title Nugg Labs NFT Collection 0 - "NuggFT"
  * @author Nugg Labs - @danny7even & @dub6ix - 2021
- * @notice entrily onchain generative NFT and stakable auction contract
+ * @notice entrily onchain generative NFT
  * @dev this is art
  *
  * Note: epochs correlate directly to tokenIDs
@@ -63,9 +63,13 @@ contract NuggFT is INuggFT, ERC721 {
     }
 
     function nuggSwapMint(uint256 currentEpochId) external override returns (uint256 tokenId) {
-        tokenId = currentEpochId - epochOffset;
+        tokenId = epochToTokenId(currentEpochId);
         require(!_exists(tokenId), 'NFT:NSM:0');
         _safeMint(address(nuggswap), tokenId);
+    }
+
+    function epochToTokenId(uint256 epoch) public view returns (uint256 tokenId) {
+        tokenId = epoch - epochOffset;
     }
 
     function _beforeTokenTransfer(
@@ -80,21 +84,21 @@ contract NuggFT is INuggFT, ERC721 {
      * @inheritdoc ERC721
      */
     function tokenURI(uint256 tokenId) public view override returns (string memory res) {
-        res = _generateTokenURI(tokenId, nuggswap.getSeedWithOffset(tokenId, epochOffset), address(nuggin));
+        require(_exists(tokenId) || tokenId == epochToTokenId(nuggswap.currentEpochId()), 'NFT:NSM:0');
+        res = _generateTokenURI(tokenId, address(nuggin));
     }
 
     function tokenURI(uint256 tokenId, address resolver) public view returns (string memory res) {
-        res = _generateTokenURI(tokenId, nuggswap.getSeedWithOffset(tokenId, epochOffset), resolver);
+        require(_exists(tokenId) || tokenId == epochToTokenId(nuggswap.currentEpochId()), 'NFT:NSM:0');
+        res = _generateTokenURI(tokenId, resolver);
     }
 
     /**
      * @notice calcualtes the token uri for a given epoch
      */
-    function _generateTokenURI(
-        uint256 tokenId,
-        bytes32 seed,
-        address resolver
-    ) internal view returns (string memory) {
+    function _generateTokenURI(uint256 tokenId, address resolver) internal view returns (string memory) {
+        bytes32 seed = nuggswap.getSeedWithOffset(tokenId, epochOffset);
+
         string memory uriName = 'NuggFT {#}';
         string memory uriDesc = string(abi.encodePacked(seed));
 
