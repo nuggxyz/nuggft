@@ -58,20 +58,12 @@ contract NuggSwap is INuggSwap, ERC721Holder, Testable, Epochable {
         _submitSwap(nft, tokenid, msg_sender(), requestedEpoch, requestedFloor);
     }
 
-    function submitOffer(
-        address nft,
-        uint256 tokenid,
-        uint256 swapnum
-    ) external payable override {
-        _submitOffer(nft, tokenid, swapnum);
+    function submitOffer(address nft, uint256 tokenid) external payable override {
+        _submitOffer(nft, tokenid);
     }
 
-    function submitClaim(
-        address nft,
-        uint256 tokenid,
-        uint256 swapnum
-    ) external override {
-        _submitClaim(nft, tokenid, swapnum);
+    function submitClaim(address nft, uint256 tokenid) external override {
+        _submitClaim(nft, tokenid);
     }
 
     function _submitSwap(
@@ -85,30 +77,23 @@ contract NuggSwap is INuggSwap, ERC721Holder, Testable, Epochable {
 
         address[] storage prevSwapOwners = _swapOwners[nft][tokenid];
 
-        uint256 swapnum = uint32(prevSwapOwners.length);
+        prevSwapOwners.push(account);
 
-        (SwapLib.SwapData memory swap, SwapLib.OfferData memory offer) = loadData(nft, tokenid, swapnum, account);
+        (SwapLib.SwapData memory swap, SwapLib.OfferData memory offer) = loadData(nft, tokenid, account);
 
         swap.handleSubmitSwap(offer, requestedEpoch, requestedFloor);
 
         saveData(swap, offer);
 
-        prevSwapOwners.push(account);
+        // prevSwapOwners.push(account);
 
         emit SubmitSwap(swap.nft, swap.tokenid, swap.num, offer.account, offer.amount, swap.epoch);
     }
 
-    function _submitOffer(
-        address nft,
-        uint256 tokenid,
-        uint256 swapnum
-    ) internal {
-        (SwapLib.SwapData memory swap, SwapLib.OfferData memory offer) = loadData(nft, tokenid, swapnum, msg_sender());
+    function _submitOffer(address nft, uint256 tokenid) internal {
+        (SwapLib.SwapData memory swap, SwapLib.OfferData memory offer) = loadData(nft, tokenid, msg_sender());
 
-        if (!swap.exists) {
-            mintToken(swap);
-            _swapOwners[nft][tokenid].push(address(0));
-        }
+        if (!swap.exists) mintToken(swap);
 
         swap.handleSubmitOffer(offer, msg_value());
 
@@ -154,12 +139,8 @@ contract NuggSwap is INuggSwap, ERC721Holder, Testable, Epochable {
         emit SubmitOffer(swap.nft, swap.tokenid, swap.num, offer.account, offer.amount);
     }
 
-    function _submitClaim(
-        address nft,
-        uint256 tokenid,
-        uint256 swapnum
-    ) internal {
-        (SwapLib.SwapData memory swap, SwapLib.OfferData memory offer) = loadData(nft, tokenid, swapnum, msg_sender());
+    function _submitClaim(address nft, uint256 tokenid) internal {
+        (SwapLib.SwapData memory swap, SwapLib.OfferData memory offer) = loadData(nft, tokenid, msg_sender());
 
         swap.handleSubmitClaim(offer);
 
@@ -186,15 +167,16 @@ contract NuggSwap is INuggSwap, ERC721Holder, Testable, Epochable {
     function loadData(
         address nft,
         uint256 tokenid,
-        uint256 swapnum,
         address account
     ) internal view returns (SwapLib.SwapData memory swap, SwapLib.OfferData memory offer) {
+        uint256 swapnum = _swapOwners[nft][tokenid].length;
+
         (address leader, uint64 epoch, bool claimedByOwner, bool exists) = SwapLib.decodeSwapData(
             _encodedSwapData[nft][tokenid][swapnum]
         );
 
         (uint128 leaderAmount, ) = SwapLib.decodeOfferData(_encodedOfferData[nft][tokenid][swapnum][leader]);
-
+        console.log('yellow', swapnum);
         swap = SwapLib.SwapData({
             nft: nft,
             tokenid: tokenid,
@@ -204,7 +186,7 @@ contract NuggSwap is INuggSwap, ERC721Holder, Testable, Epochable {
             epoch: epoch,
             exists: exists,
             claimedByOwner: claimedByOwner,
-            owner: _swapOwners[nft][tokenid].length > swapnum ? _swapOwners[nft][tokenid][swapnum] : address(0),
+            owner: swapnum == 0 ? address(0) : _swapOwners[nft][tokenid][swapnum - 1],
             activeEpoch: currentEpochId()
         });
 
