@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity 0.8.4;
 
-import '../libraries/QuadMath.sol';
+import '../src/libraries/QuadMath.sol';
 
 contract QuadMath_Test {
     function mulDiv(

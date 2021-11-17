@@ -2,7 +2,7 @@
 
 pragma solidity 0.8.4;
 
-import '../interfaces/IDotNugg.sol';
+import '../../src/interfaces/IDotNugg.sol';
 import 'hardhat/console.sol';
 
 /**

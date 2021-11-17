@@ -1,8 +1,8 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity 0.8.4;
 
-import '../libraries/StakeMath.sol';
-import '../libraries/QuadMath.sol';
+import '../src/libraries/StakeMath.sol';
+import '../src/libraries/QuadMath.sol';
 import './QuadMath_Echidna.sol';
 
 contract StakeMath_Echidna {

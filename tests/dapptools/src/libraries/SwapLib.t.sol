@@ -3,7 +3,7 @@ pragma solidity ^0.8.4;
 
 import '../../lib/DSTestExtended.sol';
 
-import '../../../../contracts/libraries/SwapLib.sol';
+import '../../../../contracts/src/libraries/SwapLib.sol';
 import '../mocks/SwapLib.m.sol';
 
 contract SwapLibTest is DSTestExtended {

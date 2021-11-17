@@ -2,7 +2,7 @@
 
 pragma solidity 0.8.4;
 
-import '../interfaces/IDotNuggImplementer.sol';
+import '../../src/interfaces/IDotNuggImplementer.sol';
 
 /**
  * @title DotNuggImplementer V1 - onchain encoder/decoder for dotnuggImplementer files
