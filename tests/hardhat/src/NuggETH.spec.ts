@@ -190,6 +190,7 @@ describe('uint tests', async function () {
                 fromEth(positionCharlie.add(positionFrank).add(positionDee).add(positionMac).add(positionDennis)),
             );
             console.log('(real) supply:', fromEth(await fix.xnugg.totalSupply()));
+            console.log('(tummy) supply:', fromEth((await fix.hre.ethers.provider.getBalance(fix.tummy)).sub(fix.tummyStartBal)));
 
             console.log(
                 '(expe) owners:',

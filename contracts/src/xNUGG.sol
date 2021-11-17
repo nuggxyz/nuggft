@@ -3,7 +3,6 @@
 pragma solidity 0.8.4;
 
 import './core/Stakeable.sol';
-import './common/Escrowable.sol';
 
 import './libraries/Exchange.sol';
 
@@ -16,33 +15,48 @@ import './erc2981/ERC2981Receiver.sol';
  * @author Nugg Labs - @danny7even & @dub6ix
  * @notice leggo
  */
-contract xNUGG is IxNUGG, ERC20, ERC2981Receiver, Escrowable, Stakeable {
-    Mutex local;
-
+contract xNUGG is IxNUGG, ERC20, Stakeable {
     using Address for address payable;
 
+    address payable public tummy;
+
     constructor() ERC20('Staked NUGG', 'xNUGG') {
-        local = initMutex();
+        tummy = payable(msg_sender());
     }
 
-    function onERC2981Received(
-        address operator,
-        address from,
-        address token,
-        uint256 tokenId,
-        address erc20,
-        uint256 amount,
-        bytes calldata data
-    ) public payable override(ERC2981Receiver, IERC2981Receiver) lock(local) returns (bytes4) {
+    receive() external payable {
+        _recieve();
+    }
+
+    fallback() external payable {
+        _recieve();
+    }
+
+    function _recieve() internal {
         if (msg_value() > 0) {
-            uint256 tuck = (msg_value() * 1000) / 10000;
-            _TUMMY.deposit{value: tuck}();
-            Stakeable._onRoyaltyAdd(from, msg_value() - tuck);
-            ERC20._mint(address(this), msg_value() - tuck);
+            uint256 t = (msg_value() * 100) / 1000;
+            Stakeable._onRoyaltyAdd(msg_sender(), msg_value() - t);
+            ERC20._mint(address(this), msg_value() - t);
+            tummy.sendValue(t);
         }
-
-        return super.onERC2981Received(operator, from, token, tokenId, erc20, amount, data);
     }
+
+    // function onERC2981Received(
+    //     address operator,
+    //     address from,
+    //     address token,
+    //     uint256 tokenId,
+    //     address erc20,
+    //     uint256 amount,
+    //     bytes calldata data
+    // ) public payable override(ERC2981Receiver, IERC2981Receiver) lock(local) returns (bytes4) {
+    //     if (msg_value() > 0) {
+    //         uint256 tuck = (msg_value() * 1000) / 10000;
+    //         _TUMMY.deposit{value: tuck}();
+    //     }
+
+    //     return super.onERC2981Received(operator, from, token, tokenId, erc20, amount, data);
+    // }
 
     function deposit() public payable override(IxNUGG) {
         _deposit(msg_sender(), msg_value());

@@ -147,34 +147,10 @@ contract NuggSwap is INuggSwap, ERC721Holder, Testable, Epochable {
         // todo - we need to check if they implement erc2981 - if they do not send royalties to owner - if they have no owner than no royalties
 
         if (royAccount == address(xnugg)) {
-            xnugg.onERC2981Received{value: increase}(
-                address(this),
-                offer.account,
-                swap.nft,
-                tokenid,
-                address(0),
-                0,
-                ''
-            );
+            payable(address(xnugg)).sendValue(increase);
         } else {
-            IERC2981Receiver(royAccount).onERC2981Received{value: roy}(
-                address(this),
-                offer.account,
-                swap.nft,
-                swap.tokenid,
-                address(0),
-                0,
-                ''
-            );
-            xnugg.onERC2981Received{value: increase - roy}(
-                address(this),
-                offer.account,
-                swap.nft,
-                tokenid,
-                address(0),
-                0,
-                ''
-            );
+            payable(royAccount).sendValue(roy);
+            payable(address(xnugg)).sendValue(increase - roy);
         }
 
         emit SubmitOffer(swap.nft, swap.tokenid, swap.num, offer.account, offer.amount);
