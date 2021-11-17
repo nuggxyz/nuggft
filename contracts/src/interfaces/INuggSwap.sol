@@ -22,6 +22,18 @@ interface INuggSwap {
 
     function submitClaim(address nft, uint256 tokenid) external;
 
+    function submitOfferTo(
+        address nft,
+        uint256 tokenid,
+        address to
+    ) external payable;
+
+    function submitClaimTo(
+        address nft,
+        uint256 tokenid,
+        address to
+    ) external;
+
     function getSwap(address nft, uint256 tokenid)
         external
         view

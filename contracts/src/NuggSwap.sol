@@ -100,11 +100,27 @@ contract NuggSwap is INuggSwap, ERC721Holder, Testable, Epochable {
     }
 
     function submitOffer(address nft, uint256 tokenid) external payable override {
-        _submitOffer(nft, tokenid);
+        _submitOffer(nft, tokenid, msg_sender(), msg_sender(), uint128(msg_value()));
+    }
+
+    function submitOfferTo(
+        address nft,
+        uint256 tokenid,
+        address to
+    ) external payable override {
+        _submitOffer(nft, tokenid, msg_sender(), to, uint128(msg_value()));
     }
 
     function submitClaim(address nft, uint256 tokenid) external override {
-        _submitClaim(nft, tokenid);
+        _submitClaim(nft, tokenid, msg_sender(), msg_sender());
+    }
+
+    function submitClaimTo(
+        address nft,
+        uint256 tokenid,
+        address to
+    ) external override {
+        _submitClaim(nft, tokenid, msg_sender(), to);
     }
 
     function _submitSwap(
@@ -122,7 +138,7 @@ contract NuggSwap is INuggSwap, ERC721Holder, Testable, Epochable {
 
         (SwapLib.SwapData memory swap, SwapLib.OfferData memory offer) = loadData(nft, tokenid, account);
 
-        swap.handleSubmitSwap(offer, requestedEpoch, requestedFloor);
+        handleSubmitSwap(swap, offer, requestedEpoch, requestedFloor);
 
         saveData(swap, offer);
 
@@ -131,12 +147,18 @@ contract NuggSwap is INuggSwap, ERC721Holder, Testable, Epochable {
         emit SubmitSwap(swap.nft, swap.tokenid, swap.num, offer.account, offer.amount, swap.epoch);
     }
 
-    function _submitOffer(address nft, uint256 tokenid) internal {
-        (SwapLib.SwapData memory swap, SwapLib.OfferData memory offer) = loadData(nft, tokenid, msg_sender());
+    function _submitOffer(
+        address nft,
+        uint256 tokenid,
+        address sender,
+        address to,
+        uint128 value
+    ) internal {
+        (SwapLib.SwapData memory swap, SwapLib.OfferData memory offer) = loadData(nft, tokenid, to);
 
         if (!swap.exists) mintToken(swap);
 
-        swap.handleSubmitOffer(offer, msg_value());
+        handleSubmitOffer(swap, offer, value, sender);
 
         saveData(swap, offer);
 
@@ -157,10 +179,15 @@ contract NuggSwap is INuggSwap, ERC721Holder, Testable, Epochable {
         emit SubmitOffer(swap.nft, swap.tokenid, swap.num, offer.account, offer.amount);
     }
 
-    function _submitClaim(address nft, uint256 tokenid) internal {
-        (SwapLib.SwapData memory swap, SwapLib.OfferData memory offer) = loadData(nft, tokenid, msg_sender());
+    function _submitClaim(
+        address nft,
+        uint256 tokenid,
+        address sender,
+        address to
+    ) internal {
+        (SwapLib.SwapData memory swap, SwapLib.OfferData memory offer) = loadData(nft, tokenid, sender);
 
-        swap.handleSubmitClaim(offer);
+        handleSubmitClaim(swap, offer, to);
 
         saveData(swap, offer);
 
@@ -179,7 +206,12 @@ contract NuggSwap is INuggSwap, ERC721Holder, Testable, Epochable {
         require(tokenid == swap.tokenid, 'AUC:MT:2');
         require((_nft.ownerOf(swap.tokenid) == address(this)), 'AUC:MT:3');
 
-        swap.handleSubmitSwap(SwapLib.OfferData({account: address(0), amount: 0, claimed: false}), swap.activeEpoch, 0);
+        handleSubmitSwap(
+            swap,
+            SwapLib.OfferData({account: address(0), amount: 0, claimed: false}),
+            swap.activeEpoch,
+            0
+        );
     }
 
     function loadData(
@@ -224,5 +256,61 @@ contract NuggSwap is INuggSwap, ERC721Holder, Testable, Epochable {
             offer.amount,
             offer.claimed
         );
+    }
+
+    function handleSubmitOffer(
+        SwapLib.SwapData memory swap,
+        SwapLib.OfferData memory offer,
+        uint256 amount,
+        address from
+    ) internal pure {
+        require(swap.owner != offer.account, 'SL:HSO:0');
+
+        offer.amount += uint128(amount);
+
+        require(swap.isActive(), 'SL:OBP:0');
+        require(swap.validateOfferIncrement(offer), 'SL:OBP:1');
+
+        swap.leader = offer.account;
+    }
+
+    function handleSubmitClaim(
+        SwapLib.SwapData memory swap,
+        SwapLib.OfferData memory offer,
+        address to
+    ) internal {
+        require(swap.exists, 'SL:HBC:0');
+        require(!offer.claimed, 'AUC:CLM:0');
+        require(offer.amount > 0, 'AUC:CLM:1');
+
+        offer.claimed = true;
+
+        if (swap.isOver()) {
+            if (offer.account == swap.leader) {
+                SwapLib._giveToken(swap.nft, swap.tokenid, to);
+            } else {
+                payable(to).sendValue(offer.amount);
+            }
+        } else {
+            require(offer.account == swap.leader && offer.account == swap.owner, 'AUC:CLM:2');
+            swap.claimedByOwner = true;
+        }
+    }
+
+    function handleSubmitSwap(
+        SwapLib.SwapData memory swap,
+        SwapLib.OfferData memory offer,
+        uint64 epoch,
+        uint128 floor
+    ) internal pure {
+        require(!swap.exists, 'AUC:IA:0');
+
+        swap.epoch = epoch;
+        require(swap.hasVaildEpoch(), 'AUC:IA:1');
+
+        swap.leader = offer.account;
+        swap.exists = true;
+
+        offer.amount = floor;
     }
 }

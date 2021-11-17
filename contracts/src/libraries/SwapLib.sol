@@ -127,57 +127,6 @@ library SwapLib {
         require(_nft.ownerOf(tokenid) == to, 'AUC:TT:3');
     }
 
-    function handleSubmitOffer(
-        SwapData memory swap,
-        OfferData memory offer,
-        uint256 amount
-    ) internal pure {
-        require(swap.owner != offer.account, 'SL:HSO:0');
-
-        offer.amount += uint128(amount);
-
-        require(isActive(swap), 'SL:OBP:0');
-        require(validateOfferIncrement(swap, offer), 'SL:OBP:1');
-
-        swap.leader = offer.account;
-    }
-
-    function handleSubmitClaim(SwapData memory swap, OfferData memory offer) internal {
-        require(swap.exists, 'SL:HBC:0');
-        require(!offer.claimed, 'AUC:CLM:0');
-        require(offer.amount > 0, 'AUC:CLM:1');
-
-        offer.claimed = true;
-
-        if (isOver(swap)) {
-            if (offer.account == swap.leader) {
-                _giveToken(swap.nft, swap.tokenid, offer.account);
-            } else {
-                payable(offer.account).sendValue(offer.amount);
-            }
-        } else {
-            require(offer.account == swap.leader && offer.account == swap.owner, 'AUC:CLM:2');
-            swap.claimedByOwner = true;
-        }
-    }
-
-    function handleSubmitSwap(
-        SwapData memory swap,
-        OfferData memory offer,
-        uint64 epoch,
-        uint128 floor
-    ) internal pure {
-        require(!swap.exists, 'AUC:IA:0');
-
-        swap.epoch = epoch;
-        require(hasVaildEpoch(swap), 'AUC:IA:1');
-
-        swap.leader = offer.account;
-        swap.exists = true;
-
-        offer.amount = floor;
-    }
-
     function validateOfferIncrement(SwapData memory swap, OfferData memory offer) internal pure returns (bool) {
         return offer.amount > swap.leaderAmount + ((swap.leaderAmount * 100) / 10000);
     }
