@@ -21,8 +21,8 @@ abstract contract Stakeable is IStakeable, Mutexable, Testable {
      * 1. Total Shares (_supply): the total amount of user deposts, represting their percent share of the epoch pool
      * 2. Earnings Per Share (_shares): - the earnings per user invested wei
      **/
-    uint256 internal _supply;
-    uint256 internal _shares;
+    uint256 internal _state;
+    // uint256 internal _shares;
 
     /*
      * @dev keeps track of individual user info
@@ -53,9 +53,9 @@ abstract contract Stakeable is IStakeable, Mutexable, Testable {
         res = StakeMath.getBalance(getState(), getPosition(account));
     }
 
-    function _supplyOfBefore(address account, uint256 amount) public view returns (uint256 res) {
-        res = StakeMath.getBalance(getStateBeforeDeposit(amount), getPosition(account));
-    }
+    // function _supplyOfBefore(address account, uint256 amount) public view returns (uint256 res) {
+    //     res = StakeMath.getBalance(getStateBeforeDeposit(amount), getPosition(account));
+    // }
 
     /**
      * @dev external wrapper for _shares - to save on gas
@@ -78,18 +78,9 @@ abstract contract Stakeable is IStakeable, Mutexable, Testable {
         res = StakeMath.getOwnershipX128(getState(), getPosition(account));
     }
 
-    /**
-     * @dev external wrapper for _positions[account]
-     */
-    function getStateBeforeDeposit(uint256 amount) internal view returns (StakeMath.State memory res) {
-        // res.tSupply = address(this).balance > 0 ? address(this).balance - amount : 0;
-        res.tSupply = _supply;
-        res.rSupply = _shares;
-    }
-
     function getState() internal view returns (StakeMath.State memory res) {
-        res.tSupply = _supply;
-        res.rSupply = _shares;
+        res.tSupply = decodeSupply(_state);
+        res.rSupply = decodeShares(_state);
     }
 
     function getPosition(address account) internal view returns (StakeMath.Position memory res) {
@@ -97,8 +88,25 @@ abstract contract Stakeable is IStakeable, Mutexable, Testable {
     }
 
     function setState(StakeMath.State memory update) internal {
-        _shares = update.rSupply;
-        _supply = update.tSupply;
+        _state = encodeData(update.tSupply, update.rSupply);
+    }
+
+    function encodeData(uint256 _supply, uint256 _shares) internal pure returns (uint256 res) {
+        assembly {
+            res := or(shl(128, _shares), _supply)
+        }
+    }
+
+    function decodeShares(uint256 _s) internal pure returns (uint256 res) {
+        assembly {
+            res := shr(128, _s)
+        }
+    }
+
+    function decodeSupply(uint256 _s) internal pure returns (uint256 res) {
+        assembly {
+            res := shr(128, shl(128, _s))
+        }
     }
 
     function setPosition(StakeMath.Position memory update, address account) internal {
@@ -116,7 +124,7 @@ abstract contract Stakeable is IStakeable, Mutexable, Testable {
      * @custom:assump earnings should stay same
      */
     function _onShareAdd(address account, uint256 value) internal {
-        StakeMath.State memory state = getStateBeforeDeposit(value);
+        StakeMath.State memory state = getState();
         StakeMath.Position memory pos = getPosition(account);
 
         uint256 shares = StakeMath.applyShareAdd(state, pos, value);
@@ -163,13 +171,11 @@ abstract contract Stakeable is IStakeable, Mutexable, Testable {
      * @param value the amount the total reward is being increased
      */
     function _onValueAdd(address from, uint256 value) internal virtual {
-        // StakeMath.State memory state = getState();
+        StakeMath.State memory state = getState();
 
-        // StakeMath.applyValueAdd(state, amount);
+        StakeMath.applyValueAdd(state, value);
 
-        // setState(state);
-
-        _supply += value;
+        setState(state);
 
         emit ValueAdd(from, value);
     }

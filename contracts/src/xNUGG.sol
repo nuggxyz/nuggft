@@ -34,27 +34,9 @@ contract xNUGG is IxNUGG, ERC20, Stakeable {
         if (msg_value() > 0) {
             uint256 t = (msg_value() * 100) / 1000;
             Stakeable._onValueAdd(msg_sender(), msg_value() - t);
-            // ERC20._mint(address(this), msg_value() - t);
             tummy.sendValue(t);
         }
     }
-
-    // function onERC2981Received(
-    //     address operator,
-    //     address from,
-    //     address token,
-    //     uint256 tokenId,
-    //     address erc20,
-    //     uint256 amount,
-    //     bytes calldata data
-    // ) public payable override(ERC2981Receiver, IERC2981Receiver) lock(local) returns (bytes4) {
-    //     if (msg_value() > 0) {
-    //         uint256 tuck = (msg_value() * 1000) / 10000;
-    //         _TUMMY.deposit{value: tuck}();
-    //     }
-
-    //     return super.onERC2981Received(operator, from, token, tokenId, erc20, amount, data);
-    // }
 
     function mint() external payable override {
         _mint(msg_sender(), msg_value());
@@ -81,14 +63,6 @@ contract xNUGG is IxNUGG, ERC20, Stakeable {
         Stakeable._onShareSub(account, amount);
         payable(account).sendValue(amount);
     }
-
-    // function deposit() public payable override(IxNUGG) {
-    //     _deposit(msg_sender(), msg_value());
-    // }
-
-    // function withdraw(uint256 amount) public override(IxNUGG) {
-    //     _withdraw(msg_sender(), amount);
-    // }
 
     function totalSupply() public view override(IxNUGG, ERC20, Stakeable) returns (uint256 res) {
         res = Stakeable.totalSupply();
