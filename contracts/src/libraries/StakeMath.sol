@@ -100,7 +100,7 @@ library StakeMath {
         posTo.rOwned += amountR;
     }
 
-    // function applyValueAdd(State memory state, uint256 amount) internal pure {
-    //     state.tSupply += amount;
-    // }
+    function applyValueAdd(State memory state, uint256 amount) internal pure {
+        state.tSupply += amount;
+    }
 }

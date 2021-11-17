@@ -68,7 +68,7 @@ contract NuggSwap is INuggSwap, ERC721Holder, Testable, Epochable {
             bool exists
         )
     {
-        require(_swapnum <= _swapOwners[nft][tokenid].length);
+        require(_swapnum <= _swapOwners[nft][tokenid].length, 'NS:GS:0');
         swapnum = _swapnum;
         (leader, epoch, claimedByOwner, exists) = SwapLib.decodeSwapData(_encodedSwapData[nft][tokenid][swapnum]);
         (leaderAmount, ) = SwapLib.decodeOfferData(_encodedOfferData[nft][tokenid][swapnum][leader]);
@@ -226,7 +226,7 @@ contract NuggSwap is INuggSwap, ERC721Holder, Testable, Epochable {
         );
 
         (uint128 leaderAmount, ) = SwapLib.decodeOfferData(_encodedOfferData[nft][tokenid][swapnum][leader]);
-        console.log('yellow', swapnum);
+
         swap = SwapLib.SwapData({
             nft: nft,
             tokenid: tokenid,
@@ -262,7 +262,7 @@ contract NuggSwap is INuggSwap, ERC721Holder, Testable, Epochable {
         SwapLib.SwapData memory swap,
         SwapLib.OfferData memory offer,
         uint256 amount,
-        address from
+        address
     ) internal pure {
         require(swap.owner != offer.account, 'SL:HSO:0');
 
