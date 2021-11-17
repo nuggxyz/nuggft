@@ -19,9 +19,9 @@ pragma solidity 0.8.4;
  * https://blog.openzeppelin.com/reentrancy-after-istanbul/[Reentrancy After Istanbul].
  */
 abstract contract Mutexable {
-    struct Mutex {
-        uint8 status;
-    }
+    // struct Mutex {
+    //     uint8 status;
+    // }
     // Booleans are more expensive than uint256 or any type that takes up a full
     // word because each write operation emits an extra SLOAD to first read the
     // slot's contents, replace the bits taken up by the boolean, and then write
@@ -37,8 +37,8 @@ abstract contract Mutexable {
     uint8 private constant _LOCKED = 2;
 
     // uint256 private _lockblock;
-    Mutex internal global;
-
+    // Mutex internal global;
+    uint8 private status = _NOT_LOCKED;
     /**
      * @dev Prevents a contract from calling itself, directly or indirectly.
      * Calling a `nonReentrant` function from another `nonReentrant`
@@ -46,32 +46,31 @@ abstract contract Mutexable {
      * by making the `nonReentrant` function external, and make it call a
      * `private` function that does the actual work.
      */
-    modifier lock(Mutex storage m) {
+    modifier lock() {
         // On the first call to nonReentrant, _notEntered will be true
-        require(m.status != _LOCKED, 'MUTEX:LOCKED:0');
+        require(status != _LOCKED, 'MUTEX:LOCKED:0');
 
         // Any calls to nonReentrant after this point will fail
-        m.status = _LOCKED;
+        status = _LOCKED;
 
         _;
 
         // By storing the original value once again, a refund is triggered (see
         // https://eips.ethereum.org/EIPS/eip-2200)
-        m.status = _NOT_LOCKED;
+        status = _NOT_LOCKED;
     }
 
     constructor() {
         // _lockblock = block.number;
-        global = initMutex();
     }
 
-    function initMutex() internal pure returns (Mutex memory res) {
-        /** require(block.number == _lockblock, 'MUTEX:IM:0'); */
-        res = Mutex({status: _NOT_LOCKED});
-    }
+    // function initMutex() internal pure returns (Mutex memory res) {
+    //     /** require(block.number == _lockblock, 'MUTEX:IM:0'); */
+    //     res = Mutex({status: _NOT_LOCKED});
+    // }
 
-    function locked(Mutex memory m) internal pure returns (bool res) {
-        /** require(block.number == _lockblock, 'MUTEX:IM:0'); */
-        res = m.status == _LOCKED;
-    }
+    // function locked(Mutex memory m) internal pure returns (bool res) {
+    //     /** require(block.number == _lockblock, 'MUTEX:IM:0'); */
+    //     res = m.status == _LOCKED;
+    // }
 }
