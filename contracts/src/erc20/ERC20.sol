@@ -5,8 +5,6 @@ pragma solidity ^0.8.0;
 import './IERC20.sol';
 import './IERC20Metadata.sol';
 
-import '../common/Testable.sol';
-
 /**
  * @dev Implementation of the {IERC20} interface.
  *
@@ -32,7 +30,7 @@ import '../common/Testable.sol';
  * functions have been added to mitigate the well-known issues around setting
  * allowances. See {IERC20-approve}.
  */
-contract ERC20 is IERC20, IERC20Metadata, Testable {
+contract ERC20 is IERC20, IERC20Metadata {
     mapping(address => uint256) private _balances;
 
     mapping(address => mapping(address => uint256)) private _allowances;
@@ -111,7 +109,7 @@ contract ERC20 is IERC20, IERC20Metadata, Testable {
      * - the caller must have a balance of at least `amount`.
      */
     function transfer(address recipient, uint256 amount) public virtual override returns (bool) {
-        _transfer(msg_sender(), recipient, amount);
+        _transfer(msg.sender, recipient, amount);
         return true;
     }
 
@@ -130,7 +128,7 @@ contract ERC20 is IERC20, IERC20Metadata, Testable {
      * - `spender` cannot be the zero address.
      */
     function approve(address spender, uint256 amount) public virtual override returns (bool) {
-        _approve(msg_sender(), spender, amount);
+        _approve(msg.sender, spender, amount);
         return true;
     }
 
@@ -154,10 +152,10 @@ contract ERC20 is IERC20, IERC20Metadata, Testable {
     ) public virtual override returns (bool) {
         _transfer(sender, recipient, amount);
 
-        uint256 currentAllowance = _allowances[sender][msg_sender()];
+        uint256 currentAllowance = _allowances[sender][msg.sender];
         require(currentAllowance >= amount, 'ERC20: transfer amount exceeds allowance');
         unchecked {
-            _approve(sender, msg_sender(), currentAllowance - amount);
+            _approve(sender, msg.sender, currentAllowance - amount);
         }
 
         return true;
@@ -176,7 +174,7 @@ contract ERC20 is IERC20, IERC20Metadata, Testable {
      * - `spender` cannot be the zero address.
      */
     function increaseAllowance(address spender, uint256 addedValue) public virtual returns (bool) {
-        _approve(msg_sender(), spender, _allowances[msg_sender()][spender] + addedValue);
+        _approve(msg.sender, spender, _allowances[msg.sender][spender] + addedValue);
         return true;
     }
 
@@ -195,10 +193,10 @@ contract ERC20 is IERC20, IERC20Metadata, Testable {
      * `subtractedValue`.
      */
     function decreaseAllowance(address spender, uint256 subtractedValue) public virtual returns (bool) {
-        uint256 currentAllowance = _allowances[msg_sender()][spender];
+        uint256 currentAllowance = _allowances[msg.sender][spender];
         require(currentAllowance >= subtractedValue, 'ERC20: decreased allowance below zero');
         unchecked {
-            _approve(msg_sender(), spender, currentAllowance - subtractedValue);
+            _approve(msg.sender, spender, currentAllowance - subtractedValue);
         }
 
         return true;
