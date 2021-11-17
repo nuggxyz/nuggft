@@ -14,8 +14,9 @@ import './core/Epochable.sol';
 
 import './common/Testable.sol';
 import './erc721/ERC721Holder.sol';
+import './erc1155/ERC1155Holder.sol';
 
-contract NuggSwap is INuggSwap, ERC721Holder, Testable, Epochable {
+contract NuggSwap is INuggSwap, ERC721Holder, ERC1155Holder, Testable, Epochable {
     using Address for address payable;
     using SwapLib for SwapLib.SwapData;
 

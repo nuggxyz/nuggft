@@ -79,44 +79,4 @@ contract xNUGG is IxNUGG, ERC20, Stakeable {
     function balanceOf(address from) public view override(IxNUGG, ERC20) returns (uint256 res) {
         res = Stakeable.supplyOf(from);
     }
-
-    // function _deposit(address to, uint256 amount) internal validateSupply {
-    //     ERC20._mint(to, amount);
-    // }
-
-    // function _withdraw(address from, uint256 amount) internal validateSupply {
-    //     ERC20._burn(from, amount);
-    //     payable(from).sendValue(amount);
-    // }
-
-    // function _afterTokenTransfer(
-    //     address from,
-    //     address to,
-    //     uint256 amount
-    // ) internal override(ERC20) {
-    //     if (to != address(0) && to != address(this)) Stakeable._onShareAdd(to, amount);
-    //     if (from != address(0) && from != address(this)) Stakeable._onShareSub(from, amount);
-
-    //     require(Stakeable.supplyOf(from) <= ERC20.balanceOf(from), 'NETH:ATT:0');
-    //     require(Stakeable.supplyOf(to) <= ERC20.balanceOf(to), 'NETH:ATT:1');
-    // }
-
-    // function _realize(address account) internal {
-    //     uint256 minted = ERC20.balanceOf(account);
-    //     uint256 owned = Stakeable.supplyOf(account);
-
-    //     if (owned > minted) {
-    //         _assign(account, owned - minted);
-    //         _onRealize(account, owned - minted);
-    //     }
-    // }
-
-    // function _beforeTokenTransfer(
-    //     address from,
-    //     address to,
-    //     uint256
-    // ) internal override(ERC20) {
-    //     if (to != address(0) && to != address(this)) _realize(to);
-    //     if (from != address(0) && from != address(this)) _realize(from);
-    // }
 }
