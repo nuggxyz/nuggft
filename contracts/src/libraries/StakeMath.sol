@@ -22,6 +22,15 @@ library StakeMath {
         uint256 rSupply;
     }
 
+    function decodeState(uint256 state) internal pure returns (State memory res) {
+        res.tSupply = state >> 128;
+        res.rSupply = (state << 128) >> 128;
+    }
+
+    function encodeState(State memory state) internal pure returns (uint256 res) {
+        res = (state.tSupply << 128) | state.rSupply;
+    }
+
     function getBalance(State memory state, Position memory pos) internal pure returns (uint256 res) {
         return pos.rOwned > 0 ? _safeRtoT(state, pos.rOwned) : 0;
     }
