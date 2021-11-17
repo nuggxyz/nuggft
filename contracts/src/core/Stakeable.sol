@@ -34,7 +34,6 @@ abstract contract Stakeable is IStakeable, Mutexable, Testable {
 
     modifier validateSupply() {
         _;
-        console.log(getState().tSupply, address(this).balance);
         require(getState().tSupply == address(this).balance, 'STAKE:TS:0');
     }
 
@@ -113,48 +112,69 @@ abstract contract Stakeable is IStakeable, Mutexable, Testable {
     /**
      * @dev increases a users total staked shares in a given epoch
      * @param account the user who is adding shares
-     * @param amount the amount shares is being increased
+     * @param value the amount shares is being increased
      * @custom:assump earnings should stay same
      */
-    function _onShareAdd(address account, uint256 amount) internal {
-        StakeMath.State memory state = getStateBeforeDeposit(amount);
+    function _onShareAdd(address account, uint256 value) internal {
+        StakeMath.State memory state = getStateBeforeDeposit(value);
         StakeMath.Position memory pos = getPosition(account);
 
-        StakeMath.applyShareAdd(state, pos, amount);
+        uint256 shares = StakeMath.applyShareAdd(state, pos, value);
 
         setState(state);
         setPosition(pos, account);
 
-        emit ShareAdd(account, msg_sender(), amount);
+        emit ShareAdd(account, shares, value);
     }
 
-    function _onShareSub(address account, uint256 amount) internal {
+    function _onShareSub(address account, uint256 value) internal {
         StakeMath.State memory state = getState();
         StakeMath.Position memory pos = getPosition(account);
 
-        StakeMath.applyShareSub(state, pos, amount);
+        uint256 shares = StakeMath.applyShareSub(state, pos, value);
 
         setState(state);
         setPosition(pos, account);
 
-        emit ShareSub(account, msg_sender(), amount);
+        emit ShareSub(account, shares, value);
+    }
+
+    function _onShareMove(
+        address from,
+        address to,
+        uint256 value
+    ) internal {
+        StakeMath.State memory state = getState();
+        StakeMath.Position memory posTo = getPosition(to);
+        StakeMath.Position memory posFrom = getPosition(from);
+
+        uint256 shares = StakeMath.applyShareMove(state, posFrom, posTo, value);
+
+        setState(state);
+        setPosition(posFrom, from);
+        setPosition(posTo, to);
+
+        emit ShareSub(from, shares, value);
+        emit ShareAdd(to, shares, value);
     }
 
     /**
      * @notice increases the overall eps from an increase in total rewards
-     * @param amount the amount the total reward is being increased
+     * @param value the amount the total reward is being increased
      */
-    function _onRoyaltyAdd(address sender, uint256 amount) internal virtual {
-        StakeMath.State memory state = getState();
+    function _onValueAdd(address from, uint256 value) internal virtual {
+        // StakeMath.State memory state = getState();
 
-        StakeMath.applyRoyaltyAdd(state, amount);
+        // StakeMath.applyValueAdd(state, amount);
 
-        setState(state);
+        // setState(state);
 
-        emit RoyaltyAdd(sender, amount);
+        _supply += value;
+
+        emit ValueAdd(from, value);
     }
 
-    function _onRealize(address account, uint256 amount) internal {
-        emit Realize(account, msg_sender(), amount);
-    }
+    // function _onRealize(address account, uint256 amount) internal {
+    //     emit Realize(account, msg_sender(), amount);
+    // }
 }

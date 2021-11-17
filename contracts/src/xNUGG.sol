@@ -4,8 +4,6 @@ pragma solidity 0.8.4;
 
 import './core/Stakeable.sol';
 
-import './libraries/Exchange.sol';
-
 import './interfaces/IxNUGG.sol';
 import './erc20/ERC20.sol';
 import './erc2981/ERC2981Receiver.sol';
@@ -35,8 +33,8 @@ contract xNUGG is IxNUGG, ERC20, Stakeable {
     function _recieve() internal {
         if (msg_value() > 0) {
             uint256 t = (msg_value() * 100) / 1000;
-            Stakeable._onRoyaltyAdd(msg_sender(), msg_value() - t);
-            ERC20._mint(address(this), msg_value() - t);
+            Stakeable._onValueAdd(msg_sender(), msg_value() - t);
+            // ERC20._mint(address(this), msg_value() - t);
             tummy.sendValue(t);
         }
     }
@@ -58,13 +56,39 @@ contract xNUGG is IxNUGG, ERC20, Stakeable {
     //     return super.onERC2981Received(operator, from, token, tokenId, erc20, amount, data);
     // }
 
-    function deposit() public payable override(IxNUGG) {
-        _deposit(msg_sender(), msg_value());
+    function mint() external payable override {
+        _mint(msg_sender(), msg_value());
     }
 
-    function withdraw(uint256 amount) public override(IxNUGG) {
-        _withdraw(msg_sender(), amount);
+    function burn(uint256 amount) external override {
+        _burn(msg_sender(), amount);
     }
+
+    function _transfer(
+        address sender,
+        address recipient,
+        uint256 amount
+    ) internal override {
+        Stakeable._onShareSub(sender, amount);
+        Stakeable._onShareAdd(recipient, amount);
+    }
+
+    function _mint(address account, uint256 amount) internal override {
+        Stakeable._onShareAdd(account, amount);
+    }
+
+    function _burn(address account, uint256 amount) internal override {
+        Stakeable._onShareSub(account, amount);
+        payable(account).sendValue(amount);
+    }
+
+    // function deposit() public payable override(IxNUGG) {
+    //     _deposit(msg_sender(), msg_value());
+    // }
+
+    // function withdraw(uint256 amount) public override(IxNUGG) {
+    //     _withdraw(msg_sender(), amount);
+    // }
 
     function totalSupply() public view override(IxNUGG, ERC20, Stakeable) returns (uint256 res) {
         res = Stakeable.totalSupply();
@@ -82,43 +106,43 @@ contract xNUGG is IxNUGG, ERC20, Stakeable {
         res = Stakeable.supplyOf(from);
     }
 
-    function _deposit(address to, uint256 amount) internal validateSupply {
-        ERC20._mint(to, amount);
-    }
+    // function _deposit(address to, uint256 amount) internal validateSupply {
+    //     ERC20._mint(to, amount);
+    // }
 
-    function _withdraw(address from, uint256 amount) internal validateSupply {
-        ERC20._burn(from, amount);
-        payable(from).sendValue(amount);
-    }
+    // function _withdraw(address from, uint256 amount) internal validateSupply {
+    //     ERC20._burn(from, amount);
+    //     payable(from).sendValue(amount);
+    // }
 
-    function _afterTokenTransfer(
-        address from,
-        address to,
-        uint256 amount
-    ) internal override(ERC20) {
-        if (to != address(0) && to != address(this)) Stakeable._onShareAdd(to, amount);
-        if (from != address(0) && from != address(this)) Stakeable._onShareSub(from, amount);
+    // function _afterTokenTransfer(
+    //     address from,
+    //     address to,
+    //     uint256 amount
+    // ) internal override(ERC20) {
+    //     if (to != address(0) && to != address(this)) Stakeable._onShareAdd(to, amount);
+    //     if (from != address(0) && from != address(this)) Stakeable._onShareSub(from, amount);
 
-        require(Stakeable.supplyOf(from) <= ERC20.balanceOf(from), 'NETH:ATT:0');
-        require(Stakeable.supplyOf(to) <= ERC20.balanceOf(to), 'NETH:ATT:1');
-    }
+    //     require(Stakeable.supplyOf(from) <= ERC20.balanceOf(from), 'NETH:ATT:0');
+    //     require(Stakeable.supplyOf(to) <= ERC20.balanceOf(to), 'NETH:ATT:1');
+    // }
 
-    function _realize(address account) internal {
-        uint256 minted = ERC20.balanceOf(account);
-        uint256 owned = Stakeable.supplyOf(account);
+    // function _realize(address account) internal {
+    //     uint256 minted = ERC20.balanceOf(account);
+    //     uint256 owned = Stakeable.supplyOf(account);
 
-        if (owned > minted) {
-            _assign(account, owned - minted);
-            _onRealize(account, owned - minted);
-        }
-    }
+    //     if (owned > minted) {
+    //         _assign(account, owned - minted);
+    //         _onRealize(account, owned - minted);
+    //     }
+    // }
 
-    function _beforeTokenTransfer(
-        address from,
-        address to,
-        uint256
-    ) internal override(ERC20) {
-        if (to != address(0) && to != address(this)) _realize(to);
-        if (from != address(0) && from != address(this)) _realize(from);
-    }
+    // function _beforeTokenTransfer(
+    //     address from,
+    //     address to,
+    //     uint256
+    // ) internal override(ERC20) {
+    //     if (to != address(0) && to != address(this)) _realize(to);
+    //     if (from != address(0) && from != address(this)) _realize(from);
+    // }
 }

@@ -5,7 +5,6 @@ import '../interfaces/IEpochable.sol';
 
 import '../interfaces/IEpochable.sol';
 import '../libraries/EpochMath.sol';
-import '../libraries/SeedMath.sol';
 
 /**
  * @title Epochable

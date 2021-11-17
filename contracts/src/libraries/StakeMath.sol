@@ -64,13 +64,14 @@ library StakeMath {
         State memory state,
         Position memory pos,
         uint256 tAmount
-    ) internal pure {
+    ) internal pure returns (uint256 amountR) {
         if (state.rSupply == 0 && state.tSupply == 0) {
-            pos.rOwned = tAmount;
-            state.rSupply = tAmount;
+            amountR = tAmount;
+            pos.rOwned = amountR;
+            state.rSupply = amountR;
             state.tSupply = tAmount;
         } else {
-            uint256 amountR = _safeTtoR(state, tAmount);
+            amountR = _safeTtoR(state, tAmount);
             pos.rOwned += amountR;
             state.rSupply += amountR;
             state.tSupply += tAmount;
@@ -81,14 +82,25 @@ library StakeMath {
         State memory state,
         Position memory pos,
         uint256 tAmount
-    ) internal pure {
-        uint256 amountR = _safeTtoRRoundingUp(state, tAmount);
+    ) internal pure returns (uint256 amountR) {
+        amountR = _safeTtoRRoundingUp(state, tAmount);
         pos.rOwned -= amountR;
         state.rSupply -= amountR;
         state.tSupply -= tAmount;
     }
 
-    function applyRoyaltyAdd(State memory state, uint256 amount) internal pure {
-        state.tSupply += amount;
+    function applyShareMove(
+        State memory state,
+        Position memory posFrom,
+        Position memory posTo,
+        uint256 tAmount
+    ) internal pure returns (uint256 amountR) {
+        amountR = _safeTtoRRoundingUp(state, tAmount);
+        posFrom.rOwned -= amountR;
+        posTo.rOwned += amountR;
     }
+
+    // function applyValueAdd(State memory state, uint256 amount) internal pure {
+    //     state.tSupply += amount;
+    // }
 }
