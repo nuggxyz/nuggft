@@ -35,7 +35,7 @@ describe('uint tests', async function () {
 
     describe('internal', async () => {
         it('should revert if shares = 0', async () => {
-            await fix.xnugg.connect(accounts.dee).deposit({ value: toEth('5') });
+            await fix.xnugg.connect(accounts.dee).mint({ value: toEth('5') });
             const res = await fix.xnugg.balanceOf(accounts.dee.address);
             await fix.nuggswap.connect(accounts.dee).submitOffer(fix.nuggft.address, BigNumber.from(0), { value: toEth('3.000') });
 
@@ -57,8 +57,8 @@ describe('uint tests', async function () {
             const ownershipDennis0 = await fix.xnugg.ownershipOfX128(accounts.dennis.address);
             const positionCharlie0 = await fix.xnugg.balanceOf(accounts.charile.address);
             const ownershipCharlie0 = await fix.xnugg.ownershipOfX128(accounts.charile.address);
-            await fix.xnugg.connect(accounts.mac).deposit({ value: toEth('40') });
-            await fix.xnugg.connect(accounts.charile).deposit({ value: toEth('1.696969696969696') });
+            await fix.xnugg.connect(accounts.mac).mint({ value: toEth('40') });
+            await fix.xnugg.connect(accounts.charile).mint({ value: toEth('1.696969696969696') });
 
             // const res2 = await fix.xnugg.balanceOf(accounts.charile.address);
             // console.log(res2.toString());
@@ -74,8 +74,8 @@ describe('uint tests', async function () {
             const positionCharlie1 = await fix.xnugg.balanceOf(accounts.charile.address);
             const ownershipCharlie1 = await fix.xnugg.ownershipOfX128(accounts.charile.address);
 
-            await fix.xnugg.connect(accounts.dennis).deposit({ value: toEth('13') });
-            await fix.xnugg.connect(accounts.frank).deposit({ value: toEth('1') });
+            await fix.xnugg.connect(accounts.dennis).mint({ value: toEth('13') });
+            await fix.xnugg.connect(accounts.frank).mint({ value: toEth('1') });
 
             await fix.nuggswap.connect(accounts.frank).submitOffer(fix.nuggft.address, 0, { value: toEth('20.000') });
             await fix.nuggswap.connect(accounts.dennis).submitOffer(fix.nuggft.address, 0, { value: toEth('22.000') });
@@ -84,7 +84,7 @@ describe('uint tests', async function () {
             await fix.nuggswap.connect(accounts.dennis).submitOffer(fix.nuggft.address, 0, { value: toEth('2.000') });
             await fix.nuggswap.connect(accounts.frank).submitOffer(fix.nuggft.address, 0, { value: toEth('33.000') });
 
-            await fix.xnugg.connect(accounts.frank).deposit({ value: toEth('1') });
+            await fix.xnugg.connect(accounts.frank).mint({ value: toEth('1') });
             console.log('NOPE');
 
             console.log('yououououoi');
@@ -106,12 +106,21 @@ describe('uint tests', async function () {
             console.log(res3.toString());
 
             // await fix.seller.connect(accounts.frank).submitOffer(BigNumber.from(1), toEth('2'), 0, { value: toEth('2.000') });
-            await fix.xnugg.connect(accounts.dennis).withdraw(toEth('1.696969696970000'));
-            await fix.xnugg.connect(accounts.dennis).withdraw(toEth('1.696969696970000'));
-
+            await fix.xnugg.connect(accounts.dennis).burn(toEth('1.696969696970000'));
+            await fix.xnugg.connect(accounts.dennis).burn(toEth('1.696969696970000'));
+            await fix.xnugg.connect(accounts.dennis).burn(toEth('1.696969696970000'));
+            await fix.xnugg.connect(accounts.dennis).burn(toEth('1.696969696970000'));
+            await fix.xnugg.connect(accounts.dennis).burn(toEth('1.696969696970000'));
+            await fix.xnugg.connect(accounts.dennis).burn(toEth('1.696969696970000'));
+            await fix.xnugg.connect(accounts.dennis).burn(toEth('1.696969696970000'));
+            await fix.xnugg.connect(accounts.dennis).burn(toEth('1.696969696970000'));
+            await fix.xnugg.connect(accounts.dennis).burn(toEth('1.696969696970000'));
+            await fix.xnugg.connect(accounts.dennis).burn(toEth('1.696969696970000'));
+            await fix.xnugg.connect(accounts.dennis).burn(toEth('1.696969696970000'));
+            await fix.xnugg.connect(accounts.dennis).burn(toEth('1.696969696970000'));
             // await fix.seller.connect(accounts.frank).submitOffer(BigNumber.from(1), toEth('2'), 0, { value: toEth('2.000') });
 
-            // await fix.xnugg.connect(accounts.dee).withdraw(toEth('41'));
+            // await fix.xnugg.connect(accounts.dee).burn(toEth('41'));
 
             // await Mining.advanceBlockTo(100);
             // await fix.seller.connect(accounts.dee).submitClaimSale(1, 2);
@@ -216,15 +225,15 @@ describe('uint tests', async function () {
             // const res4 = await fix.xnugg.balanceOf(accounts.frank.address);
             // console.log(res4.toString());
 
-            // await fix.weth.connect(accounts.frank).deposit({ value: toEth('20') });
+            // await fix.weth.connect(accounts.frank).mint({ value: toEth('20') });
             // await fix.weth.connect(accounts.frank).approve(fix.relay.address, toEth('20'));
-            // await fix.relay.connect(accounts.frank).depositWETH(toEth('20'));
+            // await fix.relay.connect(accounts.frank).mintWETH(toEth('20'));
 
-            // // await fix.relay.connect(accounts.dee).depositWETH();
+            // // await fix.relay.connect(accounts.dee).mintWETH();
             // const res2 = await fix.xnugg.balanceOf(accounts.dee.address);
             // const res3 = await fix.xnugg.totalSupply();
 
-            // await fix.xnugg.connect(accounts.mac).deposit({ value: toEth('40') });
+            // await fix.xnugg.connect(accounts.mac).mint({ value: toEth('40') });
             // const res5 = await fix.xnugg.balanceOf(accounts.mac.address);
             // console.log(res5.toString());
 
@@ -256,9 +265,9 @@ describe('uint tests', async function () {
             //         ).toString(),
             //     },
             // });
-            // await fix.xnugg.connect(accounts.dee).withdraw(toEth('1'));
+            // await fix.xnugg.connect(accounts.dee).burn(toEth('1'));
             // const res9 = await fix.xnugg.balanceOf(accounts.dee.address);
-            // console.log('test withdraw', res9.toString());
+            // console.log('test burn', res9.toString());
 
             // console.log(res2.toString(), res3.toString());
 

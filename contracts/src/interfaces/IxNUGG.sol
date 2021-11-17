@@ -11,9 +11,11 @@ import '../erc20/IERC20.sol';
  * @dev interface for Seedable.sol
  */
 interface IxNUGG is IERC20, IStakeable {
-    function deposit() external payable;
+    function mint() external payable;
 
-    function withdraw(uint256 amount) external;
+    function burn(uint256 amount) external;
+
+    // function withdraw(uint256 amount) external;
 
     function totalSupply() external view override(IERC20, IStakeable) returns (uint256 res);
 
