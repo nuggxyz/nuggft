@@ -22,13 +22,6 @@ library StakeMath {
         uint256 rSupply;
     }
 
-    /**
-     * @notice #TODO
-     * @param state the percent out of 100 to be taken
-     * @param pos the percent out of 100 to be taken
-     * @return res shares
-     * @dev #TODO
-     */
     function getBalance(State memory state, Position memory pos) internal pure returns (uint256 res) {
         return pos.rOwned > 0 ? _safeRtoT(state, pos.rOwned) : 0;
     }

@@ -10,7 +10,7 @@ import './interfaces/INuggFT.sol';
 import './NuggSwap.sol';
 import './interfaces/IxNUGG.sol';
 
-import './erc721/ERC721.sol';
+import './erc721/ERC721Enumerable.sol';
 import './erc2981/IERC2981.sol';
 import '../tests/mock/MockDotNuggImplementer.sol';
 
@@ -25,7 +25,7 @@ import '../tests/mock/MockDotNuggImplementer.sol';
  * Note: the block hash corresponding to the start of an epoch is used as the "random" seed
  * Note: epochs are 256 blocks long as block hashes only exist for 256 blocks
  */
-contract NuggFT is INuggFT, ERC721, MockDotNuggImplementer {
+contract NuggFT is INuggFT, ERC721Enumerable, MockDotNuggImplementer {
     IDotNugg internal dotnugg;
     IxNUGG internal xnugg;
     NuggSwap internal nuggswap;
@@ -52,7 +52,7 @@ contract NuggFT is INuggFT, ERC721, MockDotNuggImplementer {
     /**
      * @dev See {IERC165-supportsInterface}.
      */
-    function supportsInterface(bytes4 interfaceId) public view override(ERC721, IERC165) returns (bool) {
+    function supportsInterface(bytes4 interfaceId) public view override(ERC721Enumerable, IERC165) returns (bool) {
         return
             interfaceId == type(INuggMintable).interfaceId ||
             interfaceId == type(INuggSwapable).interfaceId ||
@@ -109,12 +109,6 @@ contract NuggFT is INuggFT, ERC721, MockDotNuggImplementer {
 
         return dotnugg.nuggify(collection_, _getItems(seed), resolver, uriName, uriDesc, tokenId, seed, '');
     }
-
-    // // collection_
-    // bytes private collection_;
-
-    // // bases_
-    // bytes[] internal items_;
 
     /**
      * @notice gets unique attribtues based on given epoch and converts encoded bytes to object that can be merged
