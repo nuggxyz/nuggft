@@ -6,7 +6,7 @@ import '../src/libraries/QuadMath.sol';
 import './QuadMath_Echidna.sol';
 
 contract StakeMath_Echidna {
-    using StakeMath for StakeMath.State;
+    // using StakeMath for StakeMath.State;
     using QuadMath for uint256;
 
     // function checkToRewardFromEps(
