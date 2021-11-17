@@ -12,7 +12,7 @@ import './interfaces/IxNUGG.sol';
 
 import './erc721/ERC721.sol';
 import './erc2981/IERC2981.sol';
-import '../mock/MockDotNuggImplementer.sol';
+import '../tests/mock/MockDotNuggImplementer.sol';
 
 /**
  * @title Nugg Labs NFT Collection 0 - "NuggFT"
