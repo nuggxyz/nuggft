@@ -142,6 +142,7 @@ contract NuggSwap is INuggSwap, ERC721Holder, Testable, Epochable {
 
         uint256 increase = offer.amount - swap.leaderAmount;
 
+        // todo - we need to make sure that if any of this fails the transaction still goes through (sending value to xnugg should never fail)
         (address royAccount, uint256 roy) = IERC2981(swap.nft).royaltyInfo(swap.tokenid, increase);
 
         // todo - we need to check if they implement erc2981 - if they do not send royalties to owner - if they have no owner than no royalties
