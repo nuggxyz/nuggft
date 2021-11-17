@@ -17,7 +17,7 @@ import '../common/Testable.sol';
  * the Metadata extension, but not including the Enumerable extension, which is available separately as
  * {ERC721Enumerable}.
  */
-abstract contract ERC721 is ERC165, IERC721, IERC721Metadata, Testable {
+abstract contract ERC721 is ERC165, IERC721, IERC721Metadata {
     using Address for address;
 
     // Token name
@@ -50,7 +50,10 @@ abstract contract ERC721 is ERC165, IERC721, IERC721Metadata, Testable {
      * @dev See {IERC165-supportsInterface}.
      */
     function supportsInterface(bytes4 interfaceId) public view virtual override(ERC165, IERC165) returns (bool) {
-        return interfaceId == type(IERC721).interfaceId || interfaceId == type(IERC721Metadata).interfaceId || super.supportsInterface(interfaceId);
+        return
+            interfaceId == type(IERC721).interfaceId ||
+            interfaceId == type(IERC721Metadata).interfaceId ||
+            super.supportsInterface(interfaceId);
     }
 
     /**
@@ -115,7 +118,10 @@ abstract contract ERC721 is ERC165, IERC721, IERC721Metadata, Testable {
         address owner = ERC721.ownerOf(tokenId);
         require(to != owner, 'ERC721: approval to current owner');
 
-        require(msg_sender() == owner || isApprovedForAll(owner, msg_sender()), 'ERC721: approve caller is not owner nor approved for all');
+        require(
+            msg.sender == owner || isApprovedForAll(owner, msg.sender),
+            'ERC721: approve caller is not owner nor approved for all'
+        );
 
         _approve(to, tokenId);
     }
@@ -133,10 +139,10 @@ abstract contract ERC721 is ERC165, IERC721, IERC721Metadata, Testable {
      * @dev See {IERC721-setApprovalForAll}.
      */
     function setApprovalForAll(address operator, bool approved) public virtual override {
-        require(operator != msg_sender(), 'ERC721: approve to caller');
+        require(operator != msg.sender, 'ERC721: approve to caller');
 
-        _operatorApprovals[msg_sender()][operator] = approved;
-        emit ApprovalForAll(msg_sender(), operator, approved);
+        _operatorApprovals[msg.sender][operator] = approved;
+        emit ApprovalForAll(msg.sender, operator, approved);
     }
 
     /**
@@ -155,7 +161,7 @@ abstract contract ERC721 is ERC165, IERC721, IERC721Metadata, Testable {
         uint256 tokenId
     ) public virtual override {
         //solhint-disable-next-line max-line-length
-        require(_isApprovedOrOwner(msg_sender(), tokenId), 'ERC721: transfer caller is not owner nor approved');
+        require(_isApprovedOrOwner(msg.sender, tokenId), 'ERC721: transfer caller is not owner nor approved');
 
         _transfer(from, to, tokenId);
     }
@@ -180,7 +186,7 @@ abstract contract ERC721 is ERC165, IERC721, IERC721Metadata, Testable {
         uint256 tokenId,
         bytes memory _data
     ) public virtual override {
-        require(_isApprovedOrOwner(msg_sender(), tokenId), 'ERC721: transfer caller is not owner nor approved');
+        require(_isApprovedOrOwner(msg.sender, tokenId), 'ERC721: transfer caller is not owner nor approved');
         _safeTransfer(from, to, tokenId, _data);
     }
 
@@ -261,7 +267,10 @@ abstract contract ERC721 is ERC165, IERC721, IERC721Metadata, Testable {
         bytes memory _data
     ) internal virtual {
         _mint(to, tokenId);
-        require(_checkOnERC721Received(address(0), to, tokenId, _data), 'ERC721: transfer to non ERC721Receiver implementer');
+        require(
+            _checkOnERC721Received(address(0), to, tokenId, _data),
+            'ERC721: transfer to non ERC721Receiver implementer'
+        );
     }
 
     /**
@@ -370,7 +379,7 @@ abstract contract ERC721 is ERC165, IERC721, IERC721Metadata, Testable {
         bytes memory _data
     ) private returns (bool) {
         if (to.isContract()) {
-            try IERC721Receiver(to).onERC721Received(msg_sender(), from, tokenId, _data) returns (bytes4 retval) {
+            try IERC721Receiver(to).onERC721Received(msg.sender, from, tokenId, _data) returns (bytes4 retval) {
                 return retval == IERC721Receiver.onERC721Received.selector;
             } catch (bytes memory reason) {
                 if (reason.length == 0) {

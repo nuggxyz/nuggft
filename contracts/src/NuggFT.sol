@@ -82,7 +82,7 @@ contract NuggFT is INuggFT, ERC721, MockDotNuggImplementer {
         address,
         uint256
     ) internal view override {
-        require(msg_sender() == address(nuggswap), 'NFT:BTT:0');
+        require(msg.sender == address(nuggswap), 'NFT:BTT:0');
     }
 
     /**
