@@ -3,8 +3,6 @@
 pragma solidity 0.8.4;
 import './QuadMath.sol';
 
-import 'hardhat/console.sol';
-
 /**
  * @title StakeMath
  * @notice a library for performing staking operations

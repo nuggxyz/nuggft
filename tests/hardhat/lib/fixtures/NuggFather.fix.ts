@@ -20,6 +20,8 @@ import { MockERC721Nuggable } from '../../../../typechain/MockERC721Nuggable';
 import { MockERC721Royalties } from '../../../../typechain/MockERC721Royalties';
 import { MockERC721__factory } from '../../../../typechain/factories/MocKERC721__factory';
 import { MockERC721 } from '../../../../typechain/MocKERC721';
+import { MockERC721Ownable__factory } from '../../../../typechain/factories/MockERC721Ownable__factory';
+import { MockERC721Ownable } from '../../../../typechain/MockERC721Ownable';
 
 type Mock721s = {
     normal: MockERC721[];
@@ -34,6 +36,8 @@ export interface NuggFatherFixture {
     mockERC721: MockERC721;
     mockERC721Royalties: MockERC721Royalties;
     mockERC721Nuggable: MockERC721Nuggable;
+    mockERC721Ownable: MockERC721Ownable;
+
     tummy: string;
     tummyStartBal: BigNumber;
     hre: HardhatRuntimeEnvironment;
@@ -79,9 +83,16 @@ export const NuggFatherFix: Fixture<NuggFatherFixture> = async function (
         args: [eoaOwner.address, nuggswap.address],
     });
 
+    const mockERC721Ownable = await deployContractWithSalt<MockERC721Ownable__factory>({
+        factory: 'MockERC721Ownable',
+        from: eoaDeployer,
+        args: [],
+    });
+
     hre.tracer.nameTags[mockERC721.address] = `mockERC721`;
     hre.tracer.nameTags[mockERC721Royalties.address] = `mockERC721Royalties`;
     hre.tracer.nameTags[mockERC721Nuggable.address] = `mockERC721Nuggable`;
+    hre.tracer.nameTags[mockERC721Ownable.address] = `mockERC721Ownable`;
 
     const blockOffset = BigNumber.from(await hre.ethers.provider.getBlockNumber());
 
@@ -95,6 +106,7 @@ export const NuggFatherFix: Fixture<NuggFatherFixture> = async function (
         mockERC721,
         mockERC721Royalties,
         mockERC721Nuggable,
+        mockERC721Ownable,
         xnugg,
         blockOffset,
         tummy,

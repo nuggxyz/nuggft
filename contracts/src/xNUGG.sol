@@ -6,7 +6,6 @@ import './interfaces/IxNUGG.sol';
 import './erc20/ERC20.sol';
 import './libraries/Address.sol';
 import './libraries/StakeMath.sol';
-import 'hardhat/console.sol';
 
 /**
  * @title xNUGG
