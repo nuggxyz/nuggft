@@ -12,18 +12,19 @@ import {
     NuggSwap__factory,
     MockFileResolver__factory,
     MockDotNugg__factory,
+    MockERC721Nuggable__factory,
 } from '../../../../typechain';
 import { deployContractWithSalt } from '../shared';
 import { toEth } from '../shared/conversion';
 import { MockDotNugg } from '../../../../typechain/MockDotNugg';
 import { MockFileResolver } from '../../../../typechain/MockFileResolver';
 import { HardhatRuntimeEnvironment } from 'hardhat/types';
+import { MockERC721Nuggable } from '../../../../typechain/MockERC721Nuggable';
 
 export interface NuggFatherFixture {
     nuggft: NuggFT;
     nuggswap: NuggSwap;
     xnugg: xNUGG;
-    dotnugg: MockDotNugg;
     tummy: string;
     tummyStartBal: BigNumber;
     nuggin: MockFileResolver;
@@ -38,6 +39,7 @@ export const NuggFatherFix: Fixture<NuggFatherFixture> = async function (
     const hre = getHRE();
 
     const eoaDeployer = provider.getWallets()[16];
+    const eoaOwner = provider.getWallets()[17];
 
     const xnugg = await deployContractWithSalt<xNUGG__factory>({
         factory: 'xNUGG',
@@ -57,16 +59,10 @@ export const NuggFatherFix: Fixture<NuggFatherFixture> = async function (
         args: [],
     });
 
-    const dotnugg = await deployContractWithSalt<MockDotNugg__factory>({
-        factory: 'MockDotNugg',
+    const erc721Nuggable = await deployContractWithSalt<MockERC721Nuggable__factory>({
+        factory: 'MockERC721Nuggable',
         from: eoaDeployer,
-        args: [],
-    });
-
-    const nuggft = await deployContractWithSalt<NuggFT__factory>({
-        factory: 'NuggFT',
-        from: eoaDeployer,
-        args: [xnugg.address, nuggswap.address, dotnugg.address, nuggin.address],
+        args: [eoaOwner.address, nuggswap.address],
     });
 
     const blockOffset = BigNumber.from(await hre.ethers.provider.getBlockNumber());

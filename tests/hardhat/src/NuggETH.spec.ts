@@ -59,8 +59,8 @@ describe('uint tests', async function () {
             const ownershipCharlie0 = await fix.xnugg.ownershipOfX128(accounts.charile.address);
             await fix.xnugg.connect(accounts.mac).mint({ value: toEth('40') });
             await fix.xnugg.connect(accounts.charile).mint({ value: toEth('1.696969696969696') });
-            await fix.xnugg.connect(accounts.mac).transfer(accounts.dennis.address, toEth('12'));
-            await fix.xnugg.connect(accounts.mac).transfer(accounts.dennis.address, toEth('24'));
+            await fix.xnugg.connect(accounts.mac).transfer(accounts.frank.address, toEth('1.69'));
+            await fix.xnugg.connect(accounts.mac).transfer(accounts.frank.address, toEth('1.566'));
 
             // const res2 = await fix.xnugg.balanceOf(accounts.charile.address);
             // console.log(res2.toString());
