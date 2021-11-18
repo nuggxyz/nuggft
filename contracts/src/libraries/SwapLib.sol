@@ -3,7 +3,6 @@ pragma solidity 0.8.4;
 import '../erc721/IERC721.sol';
 
 import './Address.sol';
-import '../interfaces/INuggSwapable.sol';
 
 library SwapLib {
     using Address for address;
@@ -101,7 +100,7 @@ library SwapLib {
         uint256 tokenid,
         address from
     ) internal {
-        require(nft.supportsInterface(type(INuggSwapable).interfaceId), 'AUC:TT:0');
+        // require(nft.supportsInterface(type(INuggSwapable).interfaceId), 'AUC:TT:0');
 
         // TODO check that royalty supports the
 

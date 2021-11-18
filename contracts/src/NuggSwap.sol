@@ -167,17 +167,19 @@ contract NuggSwap is INuggSwap, ERC721Holder, ERC1155Holder, Testable, Epochable
 
         uint256 increase = offer.amount - swap.leaderAmount;
 
+        try IERC165(swap.nft).supportsInterface(type(IERC2981).interfaceId) returns (bool res) {
+            if (res) {
+                (address royAccount, uint256 royalties) = IERC2981(swap.nft).royaltyInfo(swap.tokenid, increase);
+                require(royalties < increase, 'NS:SO:0');
+                increase -= royalties;
+                payable(royAccount).sendValue(royalties);
+            }
+        } catch {}
         // todo - we need to make sure that if any of this fails the transaction still goes through (sending value to xnugg should never fail)
-        (address royAccount, uint256 roy) = IERC2981(swap.nft).royaltyInfo(swap.tokenid, increase);
 
         // todo - we need to check if they implement erc2981 - if they do not send royalties to owner - if they have no owner than no royalties
 
-        if (royAccount == address(xnugg)) {
-            payable(address(xnugg)).sendValue(increase);
-        } else {
-            payable(royAccount).sendValue(roy);
-            payable(address(xnugg)).sendValue(increase - roy);
-        }
+        payable(address(xnugg)).sendValue(increase);
 
         emit SubmitOffer(swap.nft, swap.tokenid, swap.num, offer.account, offer.amount);
     }

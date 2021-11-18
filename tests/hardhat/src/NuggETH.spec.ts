@@ -37,15 +37,17 @@ describe('uint tests', async function () {
         it('should revert if shares = 0', async () => {
             await fix.xnugg.connect(accounts.dee).mint({ value: toEth('5') });
             const res = await fix.xnugg.balanceOf(accounts.dee.address);
-            await fix.nuggswap.connect(accounts.dee).submitOffer(fix.nuggft.address, BigNumber.from(0), { value: toEth('3.000') });
+            await fix.nuggswap
+                .connect(accounts.dee)
+                .submitOffer(fix.mockERC721Nuggable.address, BigNumber.from(0), { value: toEth('3.000') });
 
             // console.log(res.toString());
 
             await Mining.advanceBlockTo(50);
-            await fix.nuggswap.connect(accounts.dee).submitClaim(fix.nuggft.address, 0);
-            await fix.nuggft.connect(accounts.dee).approve(fix.nuggswap.address, 0);
+            await fix.nuggswap.connect(accounts.dee).submitClaim(fix.mockERC721Nuggable.address, 0);
+            await fix.mockERC721Nuggable.connect(accounts.dee).approve(fix.nuggswap.address, 0);
 
-            await fix.nuggswap.connect(accounts.dee).submitSwap(fix.nuggft.address, 0, 5, toEth('.02000'));
+            await fix.nuggswap.connect(accounts.dee).submitSwap(fix.mockERC721Nuggable.address, 0, 5, toEth('.02000'));
 
             const positionDee0 = await fix.xnugg.balanceOf(accounts.dee.address);
             const positionMac0 = await fix.xnugg.balanceOf(accounts.mac.address);
@@ -79,18 +81,18 @@ describe('uint tests', async function () {
             await fix.xnugg.connect(accounts.dennis).mint({ value: toEth('13') });
             await fix.xnugg.connect(accounts.frank).mint({ value: toEth('1') });
 
-            await fix.nuggswap.connect(accounts.frank).submitOffer(fix.nuggft.address, 0, { value: toEth('20.000') });
-            await fix.nuggswap.connect(accounts.dennis).submitOffer(fix.nuggft.address, 0, { value: toEth('22.000') });
-            await fix.nuggswap.connect(accounts.frank).submitOffer(fix.nuggft.address, 0, { value: toEth('3.000') });
-            await fix.nuggswap.connect(accounts.dennis).submitOffer(fix.nuggft.address, 0, { value: toEth('2.000') });
-            await fix.nuggswap.connect(accounts.dennis).submitOffer(fix.nuggft.address, 0, { value: toEth('2.000') });
-            await fix.nuggswap.connect(accounts.frank).submitOffer(fix.nuggft.address, 0, { value: toEth('33.000') });
+            await fix.nuggswap.connect(accounts.frank).submitOffer(fix.mockERC721Nuggable.address, 0, { value: toEth('20.000') });
+            await fix.nuggswap.connect(accounts.dennis).submitOffer(fix.mockERC721Nuggable.address, 0, { value: toEth('22.000') });
+            await fix.nuggswap.connect(accounts.frank).submitOffer(fix.mockERC721Nuggable.address, 0, { value: toEth('3.000') });
+            await fix.nuggswap.connect(accounts.dennis).submitOffer(fix.mockERC721Nuggable.address, 0, { value: toEth('2.000') });
+            await fix.nuggswap.connect(accounts.dennis).submitOffer(fix.mockERC721Nuggable.address, 0, { value: toEth('2.000') });
+            await fix.nuggswap.connect(accounts.frank).submitOffer(fix.mockERC721Nuggable.address, 0, { value: toEth('33.000') });
 
             await fix.xnugg.connect(accounts.frank).mint({ value: toEth('1') });
             console.log('NOPE');
 
             console.log('yououououoi');
-            const res99 = await fix.nuggswap['getSwap(address,uint256,uint256)'](fix.nuggft.address, 0, 0);
+            const res99 = await fix.nuggswap['getSwap(address,uint256,uint256)'](fix.mockERC721Nuggable.address, 0, 0);
 
             console.log({ res99 });
 
@@ -217,7 +219,7 @@ describe('uint tests', async function () {
             );
             console.log('(real) owners:', fromEth(ETH_TRILLION));
 
-            console.log('tokenURI', await fix.nuggft['tokenURI(uint256)'](0));
+            console.log('tokenURI', await fix.mockERC721Nuggable['tokenURI(uint256)'](0));
 
             // await fix.xnugg.connect(accounts.dee).approve(fix.minter.address, toEth('40'));
 
@@ -277,7 +279,7 @@ describe('uint tests', async function () {
 
             // await fix.minter.connect(accounts.frank).submitClaim(0, 0);
 
-            // await fix.nuggft.connect(accounts.frank).approve(fix.seller.address, 0);
+            // await fix.mockERC721Nuggable.connect(accounts.frank).approve(fix.seller.address, 0);
 
             // // const res7 = await fix.minter.getOffer(0, accounts.frank.address);
             // await fix.seller.connect(accounts.frank).startSale(0, 10, toEth('1'));
@@ -292,7 +294,7 @@ describe('uint tests', async function () {
 
             // await fix.seller.connect(accounts.frank).submitClaimSale(0, 0);
 
-            // await fix.nuggft.connect(accounts.dee).approve(fix.seller.address, 0);
+            // await fix.mockERC721Nuggable.connect(accounts.dee).approve(fix.seller.address, 0);
 
             // // const res7 = await fix.minter.getOffer(0, accounts.frank.address);
             // await fix.seller.connect(accounts.dee).startSale(0, 10, toEth('1'));
@@ -308,7 +310,7 @@ describe('uint tests', async function () {
             // await fix.seller.connect(accounts.dee).submitClaimSale(1, 0);
 
             // await fix.xnugg.connect(accounts.dee).submitClaimSale(1, 0);
-            // await fix.nuggft.connect(accounts.mac).transferFrom(accounts.mac.address, accounts.dee.address, 0);
+            // await fix.mockERC721Nuggable.connect(accounts.mac).transferFrom(accounts.mac.address, accounts.dee.address, 0);
 
             // await fix.auction.connect(accounts.dee).movePendingReward();
             // // const res6 = await fix.xnugg.balanceOf(accounts.dee.address);
