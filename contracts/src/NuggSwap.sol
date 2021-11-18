@@ -34,6 +34,12 @@ contract NuggSwap is INuggSwap, ERC721Holder, ERC1155Holder, Testable, Epochable
 
     mapping(address => mapping(uint256 => mapping(uint256 => mapping(address => uint256)))) internal _encodedOfferData;
 
+    enum TokenType {
+        erc721,
+        erc1155,
+        erc20
+    }
+
     IxNUGG public immutable override xnugg;
 
     constructor(IxNUGG _xnugg) Epochable(25, uint128(block.number)) {
