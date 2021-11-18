@@ -1,11 +1,9 @@
 pragma solidity 0.8.4;
 
 import '../erc721/IERC721.sol';
-import '../erc2981/IERC2981Receiver.sol';
 
 import './Address.sol';
 import '../interfaces/INuggSwapable.sol';
-import '../interfaces/INuggMintable.sol';
 
 library SwapLib {
     using Address for address;
@@ -141,44 +139,5 @@ library SwapLib {
 
     function isActive(SwapData memory swap) internal pure returns (bool) {
         return swap.exists && !swap.claimedByOwner && swap.activeEpoch <= swap.epoch;
-    }
-
-    /**
-     * @dev Internal function to invoke {IERC721Receiver-onERC721Received} on a target address.
-     * The call is not executed if the target address is not a contract.
-     *
-     * @param from address representing the previous owner of the given token ID
-     * @param to target address that will receive the tokens
-     * @param token token sending the royalties
-     * @param tokenid uint256 ID of the token to be transferred
-     * @param _data bytes optional data to send along with the call
-     * @return bool whether the call correctly returned the expected magic value
-     */
-    function _checkOnERC2981Received(
-        address from,
-        address to,
-        address token,
-        uint256 tokenid,
-        address,
-        uint256,
-        bytes memory _data
-    ) private returns (bool) {
-        if (to.isContract()) {
-            try IERC2981Receiver(to).onERC2981Received(msg.sender, from, token, tokenid, address(0), 0, _data) returns (
-                bytes4 retval
-            ) {
-                return retval == IERC2981Receiver.onERC2981Received.selector;
-            } catch (bytes memory reason) {
-                if (reason.length == 0) {
-                    revert('ERC2981: transfer to non ERC2981Receiver implementer');
-                } else {
-                    assembly {
-                        revert(add(32, reason), mload(reason))
-                    }
-                }
-            }
-        } else {
-            return true;
-        }
     }
 }

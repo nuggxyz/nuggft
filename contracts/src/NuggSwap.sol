@@ -4,6 +4,7 @@ pragma solidity 0.8.4;
 
 import './libraries/SwapLib.sol';
 import './interfaces/INuggSwap.sol';
+import './interfaces/IERC721Nuggable.sol';
 
 import './interfaces/INuggSwapable.sol';
 import './interfaces/IxNUGG.sol';
@@ -11,6 +12,7 @@ import './interfaces/IxNUGG.sol';
 import 'hardhat/console.sol';
 import './erc721/IERC721.sol';
 import './core/Epochable.sol';
+import './erc2981/IERC2981.sol';
 
 import './common/Testable.sol';
 import './erc721/ERC721Holder.sol';
@@ -198,9 +200,9 @@ contract NuggSwap is INuggSwap, ERC721Holder, ERC1155Holder, Testable, Epochable
     function mintToken(SwapLib.SwapData memory swap) internal {
         IERC721 _nft = IERC721(swap.nft);
 
-        require(_nft.supportsInterface(type(INuggMintable).interfaceId), 'AUC:MT:0');
+        require(_nft.supportsInterface(type(IERC721Nuggable).interfaceId), 'AUC:MT:0');
 
-        uint256 tokenid = INuggMintable(address(swap.nft)).nuggSwapMint(swap.activeEpoch);
+        uint256 tokenid = IERC721Nuggable(address(swap.nft)).nsMint(swap.activeEpoch);
 
         ensureActiveSeed();
 
