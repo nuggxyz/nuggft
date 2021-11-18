@@ -6,6 +6,7 @@ import './libraries/SwapLib.sol';
 import './interfaces/INuggSwap.sol';
 import './interfaces/IERC721Nuggable.sol';
 import './libraries/CheapMath.sol';
+import './libraries/ShiftLib.sol';
 
 import './interfaces/INuggSwapable.sol';
 import './interfaces/IxNUGG.sol';
@@ -22,6 +23,10 @@ contract NuggSwap is INuggSwap, ERC721Holder, ERC1155Holder, Testable, Epochable
     using Address for address payable;
     using SwapLib for SwapLib.SwapData;
     using CheapMath for uint256;
+    using ShiftLib for uint256;
+
+    uint16 MAX_ROYALTY_BPS = 1000;
+    uint16 FULL_ROYALTY_BPS = 10000;
 
     mapping(address => mapping(uint256 => address[])) internal _swapOwners;
 
@@ -59,8 +64,8 @@ contract NuggSwap is INuggSwap, ERC721Holder, ERC1155Holder, Testable, Epochable
         )
     {
         swapnum = _swapOwners[nft][tokenid].length;
-        (leader, epoch, claimedByOwner, exists) = SwapLib.decodeSwapData(_encodedSwapData[nft][tokenid][swapnum]);
-        (leaderAmount, ) = SwapLib.decodeOfferData(_encodedOfferData[nft][tokenid][swapnum][leader]);
+        (leader, epoch, claimedByOwner, exists) = ShiftLib.decodeSwapData(_encodedSwapData[nft][tokenid][swapnum]);
+        (leaderAmount, ) = ShiftLib.decodeOfferData(_encodedOfferData[nft][tokenid][swapnum][leader]);
     }
 
     function getSwap(
@@ -82,8 +87,8 @@ contract NuggSwap is INuggSwap, ERC721Holder, ERC1155Holder, Testable, Epochable
     {
         require(_swapnum <= _swapOwners[nft][tokenid].length, 'NS:GS:0');
         swapnum = _swapnum;
-        (leader, epoch, claimedByOwner, exists) = SwapLib.decodeSwapData(_encodedSwapData[nft][tokenid][swapnum]);
-        (leaderAmount, ) = SwapLib.decodeOfferData(_encodedOfferData[nft][tokenid][swapnum][leader]);
+        (leader, epoch, claimedByOwner, exists) = ShiftLib.decodeSwapData(_encodedSwapData[nft][tokenid][swapnum]);
+        (leaderAmount, ) = ShiftLib.decodeOfferData(_encodedOfferData[nft][tokenid][swapnum][leader]);
     }
 
     function setRoyalty(
@@ -92,12 +97,12 @@ contract NuggSwap is INuggSwap, ERC721Holder, ERC1155Holder, Testable, Epochable
         uint16 bps
     ) external payable {
         require(SwapLib.checkOwner(token, msg.sender), 'NS:SRB:0');
-        require(bps <= 1000, 'NS:SRB:1');
-        require(msg.value > 10**15);
+        if (bps > MAX_ROYALTY_BPS) bps = MAX_ROYALTY_BPS;
+        require(msg.value > 10**15, 'NS:SRB:1');
 
         payable(receiver).sendValue(msg.value);
 
-        _royalty[token] = SwapLib.encodeRoyaltyData(receiver, bps);
+        _royalty[token] = ShiftLib.encodeRoyaltyData(receiver, bps);
     }
 
     function submitSwap(
@@ -170,9 +175,7 @@ contract NuggSwap is INuggSwap, ERC721Holder, ERC1155Holder, Testable, Epochable
 
         saveData(swap, offer);
 
-        uint256 remainder = payRoyalties(nft, tokenid, offer.amount - swap.leaderAmount);
-
-        payable(address(xnugg)).sendValue(remainder);
+        payRoyalties(nft, tokenid, offer.amount - swap.leaderAmount);
 
         emit SubmitOffer(swap.nft, swap.tokenid, swap.num, offer.account, offer.amount);
     }
@@ -223,19 +226,33 @@ contract NuggSwap is INuggSwap, ERC721Holder, ERC1155Holder, Testable, Epochable
         address nft,
         uint256 tokenid,
         uint256 amount
-    ) internal returns (uint256 remainder) {
+    ) internal returns (uint256 remainder, uint256 royalties) {
         remainder = amount;
-        try IERC165(nft).supportsInterface(type(IERC2981).interfaceId) returns (bool res) {
-            if (res) {
-                (address royAccount, uint256 royalties) = IERC2981(nft).royaltyInfo(tokenid, remainder);
-                if (royAccount != address(xnugg)) {
-                    remainder -= royalties; // relying on v8 for overflow protection
-                    payable(royAccount).sendValue(royalties);
+
+        uint256 bps;
+        address receiver;
+
+        (receiver, bps) = ShiftLib.decodeRoyaltyData(_royalty[nft]);
+
+        if (receiver == address(0)) {
+            try IERC165(nft).supportsInterface(type(IERC2981).interfaceId) returns (bool res) {
+                if (res) {
+                    (receiver, bps) = IERC2981(nft).royaltyInfo(tokenid, FULL_ROYALTY_BPS);
                 }
+            } catch {
+                require(false, 'NS:PR:0');
             }
-        } catch {
-            require(false, 'NS:PR:0');
         }
+
+        if (receiver != address(0) && receiver != address(xnugg)) {
+            royalties = (remainder * (bps < MAX_ROYALTY_BPS ? bps : MAX_ROYALTY_BPS)) / FULL_ROYALTY_BPS;
+            require(remainder > royalties, 'NS:PR:0');
+
+            remainder -= royalties;
+            payable(receiver).sendValue(royalties);
+        }
+
+        payable(address(xnugg)).sendValue(remainder);
     }
 
     function loadData(
@@ -245,11 +262,11 @@ contract NuggSwap is INuggSwap, ERC721Holder, ERC1155Holder, Testable, Epochable
     ) internal view returns (SwapLib.SwapData memory swap, SwapLib.OfferData memory offer) {
         uint256 swapnum = _swapOwners[nft][tokenid].length;
 
-        (address leader, uint64 epoch, bool claimedByOwner, bool exists) = SwapLib.decodeSwapData(
+        (address leader, uint64 epoch, bool claimedByOwner, bool exists) = ShiftLib.decodeSwapData(
             _encodedSwapData[nft][tokenid][swapnum]
         );
 
-        (uint128 leaderAmount, ) = SwapLib.decodeOfferData(_encodedOfferData[nft][tokenid][swapnum][leader]);
+        (uint128 leaderAmount, ) = ShiftLib.decodeOfferData(_encodedOfferData[nft][tokenid][swapnum][leader]);
 
         swap = SwapLib.SwapData({
             nft: nft,
@@ -264,19 +281,19 @@ contract NuggSwap is INuggSwap, ERC721Holder, ERC1155Holder, Testable, Epochable
             activeEpoch: currentEpochId()
         });
 
-        (uint128 amount, bool claimed) = SwapLib.decodeOfferData(_encodedOfferData[nft][tokenid][swapnum][account]);
+        (uint128 amount, bool claimed) = ShiftLib.decodeOfferData(_encodedOfferData[nft][tokenid][swapnum][account]);
 
         offer = SwapLib.OfferData({claimed: claimed, amount: amount, account: account});
     }
 
     function saveData(SwapLib.SwapData memory swap, SwapLib.OfferData memory offer) internal {
-        _encodedSwapData[swap.nft][swap.tokenid][swap.num] = SwapLib.encodeSwapData(
+        _encodedSwapData[swap.nft][swap.tokenid][swap.num] = ShiftLib.encodeSwapData(
             swap.leader,
             swap.epoch,
             swap.claimedByOwner,
             swap.exists
         );
-        _encodedOfferData[swap.nft][swap.tokenid][swap.num][offer.account] = SwapLib.encodeOfferData(
+        _encodedOfferData[swap.nft][swap.tokenid][swap.num][offer.account] = ShiftLib.encodeOfferData(
             offer.amount,
             offer.claimed
         );
