@@ -107,29 +107,17 @@ library SwapLib {
         }
     }
 
-    function takeToken(
-        IERC721 nft,
-        uint256 tokenid,
-        address from
-    ) internal {
-        require(nft.ownerOf(tokenid) == from, 'AUC:TT:1');
-
-        nft.safeTransferFrom(from, address(this), tokenid);
-
-        require(nft.ownerOf(tokenid) == address(this), 'AUC:TT:3');
-    }
-
-    function _giveToken(
+    function moveERC721(
         address nft,
         uint256 tokenid,
+        address from,
         address to
     ) internal {
-        IERC721 _nft = IERC721(nft);
-        require(_nft.ownerOf(tokenid) == address(this), 'AUC:TT:1');
+        require(IERC721(nft).ownerOf(tokenid) == from, 'AUC:TT:1');
 
-        _nft.safeTransferFrom(address(this), to, tokenid);
+        IERC721(nft).safeTransferFrom(from, to, tokenid);
 
-        require(_nft.ownerOf(tokenid) == to, 'AUC:TT:3');
+        require(IERC721(nft).ownerOf(tokenid) == to, 'AUC:TT:3');
     }
 
     function validateOfferIncrement(SwapData memory swap, OfferData memory offer) internal pure returns (bool) {
