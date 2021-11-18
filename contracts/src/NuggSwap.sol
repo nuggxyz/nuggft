@@ -5,6 +5,7 @@ pragma solidity 0.8.4;
 import './libraries/SwapLib.sol';
 import './interfaces/INuggSwap.sol';
 import './interfaces/IERC721Nuggable.sol';
+import './libraries/CheapMath.sol';
 
 import './interfaces/INuggSwapable.sol';
 import './interfaces/IxNUGG.sol';
@@ -21,10 +22,13 @@ import './erc1155/ERC1155Holder.sol';
 contract NuggSwap is INuggSwap, ERC721Holder, ERC1155Holder, Testable, Epochable {
     using Address for address payable;
     using SwapLib for SwapLib.SwapData;
+    using CheapMath for uint256;
 
     mapping(address => mapping(uint256 => address[])) internal _swapOwners;
 
     // mapping(address => uint256) internal _registrations; // address - supports minting, supports swapping, implements mintable, implements swappable, where to send royalties, approvals
+
+    // mapping(uint256 => uint256[]) _encodedSwapData;
 
     mapping(address => mapping(uint256 => mapping(uint256 => uint256))) internal _encodedSwapData;
 
@@ -145,8 +149,6 @@ contract NuggSwap is INuggSwap, ERC721Holder, ERC1155Holder, Testable, Epochable
 
         saveData(swap, offer);
 
-        // prevSwapOwners.push(account);
-
         emit SubmitSwap(swap.nft, swap.tokenid, swap.num, offer.account, offer.amount, swap.epoch);
     }
 
@@ -165,24 +167,16 @@ contract NuggSwap is INuggSwap, ERC721Holder, ERC1155Holder, Testable, Epochable
 
         saveData(swap, offer);
 
-        uint256 increase = offer.amount - swap.leaderAmount;
+        uint256 remainder = payRoyalties(nft, tokenid, offer.amount - swap.leaderAmount);
 
-        try IERC165(swap.nft).supportsInterface(type(IERC2981).interfaceId) returns (bool res) {
-            if (res) {
-                (address royAccount, uint256 royalties) = IERC2981(swap.nft).royaltyInfo(swap.tokenid, increase);
-                require(royalties < increase, 'NS:SO:0');
-                increase -= royalties;
-                payable(royAccount).sendValue(royalties);
-            }
-        } catch {}
-        // todo - we need to make sure that if any of this fails the transaction still goes through (sending value to xnugg should never fail)
-
-        // todo - we need to check if they implement erc2981 - if they do not send royalties to owner - if they have no owner than no royalties
-
-        payable(address(xnugg)).sendValue(increase);
+        payable(address(xnugg)).sendValue(remainder);
 
         emit SubmitOffer(swap.nft, swap.tokenid, swap.num, offer.account, offer.amount);
     }
+
+    // todo - we need to make sure that if any of this fails the transaction still goes through (sending value to xnugg should never fail)
+
+    // todo - we need to check if they implement erc2981 - if they do not send royalties to owner - if they have no owner than no royalties
 
     function _submitClaim(
         address nft,
@@ -217,6 +211,28 @@ contract NuggSwap is INuggSwap, ERC721Holder, ERC1155Holder, Testable, Epochable
             swap.activeEpoch,
             0
         );
+    }
+
+    /*
+     *  this https://eips.ethereum.org/EIPS/eip-721
+     */
+    function payRoyalties(
+        address nft,
+        uint256 tokenid,
+        uint256 amount
+    ) internal returns (uint256 remainder) {
+        remainder = amount;
+        try IERC165(nft).supportsInterface(type(IERC2981).interfaceId) returns (bool res) {
+            if (res) {
+                (address royAccount, uint256 royalties) = IERC2981(nft).royaltyInfo(tokenid, remainder);
+                if (royAccount != address(xnugg)) {
+                    remainder -= royalties; // relying on v8 for overflow protection
+                    payable(royAccount).sendValue(royalties);
+                }
+            }
+        } catch {
+            require(false, 'NS:PR:0');
+        }
     }
 
     function loadData(
