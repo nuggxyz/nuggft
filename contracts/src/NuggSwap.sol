@@ -10,7 +10,6 @@ import './libraries/CheapMath.sol';
 import './interfaces/INuggSwapable.sol';
 import './interfaces/IxNUGG.sol';
 
-import 'hardhat/console.sol';
 import './erc721/IERC721.sol';
 import './core/Epochable.sol';
 import './erc2981/IERC2981.sol';
@@ -26,7 +25,7 @@ contract NuggSwap is INuggSwap, ERC721Holder, ERC1155Holder, Testable, Epochable
 
     mapping(address => mapping(uint256 => address[])) internal _swapOwners;
 
-    // mapping(address => uint256) internal _registrations; // address - supports minting, supports swapping, implements mintable, implements swappable, where to send royalties, approvals
+    mapping(address => uint256) internal _royalty;
 
     // mapping(uint256 => uint256[]) _encodedSwapData;
 
@@ -87,21 +86,19 @@ contract NuggSwap is INuggSwap, ERC721Holder, ERC1155Holder, Testable, Epochable
         (leaderAmount, ) = SwapLib.decodeOfferData(_encodedOfferData[nft][tokenid][swapnum][leader]);
     }
 
-    // function registerFromCreation() external {
-    //     // require contract in creation
-    //     // require that nft implements the NuggSwapable interface
-    //     // require that it is an nft (implements ERC721)
-    // }
+    function setRoyalty(
+        address token,
+        address receiver,
+        uint16 bps
+    ) external payable {
+        require(SwapLib.checkOwner(token, msg.sender), 'NS:SRB:0');
+        require(bps <= 1000, 'NS:SRB:1');
+        require(msg.value > 10**15);
 
-    // function registerByOwner(address nft, address royaltyAddress) external {
-    //     // require this is owner of nft
-    //     // require that it is an nft (implements ERC721)
-    // }
+        payable(receiver).sendValue(msg.value);
 
-    // function registerByTokenOwners(address nft, address royaltyAddress) external {
-    //     // require this is owner of nft
-    //     // require that it is an nft (implements ERC721)
-    // }
+        _royalty[token] = SwapLib.encodeRoyaltyData(receiver, bps);
+    }
 
     function submitSwap(
         address nft,

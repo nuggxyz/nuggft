@@ -45,6 +45,18 @@ library SwapLib {
         }
     }
 
+    function checkOwner(address token, address asker) internal view returns (bool res) {
+        (bool ok, bytes memory returnData) = token.staticcall(abi.encodeWithSignature('owner()'));
+        if (!ok) return false;
+        return abi.decode(returnData, (address)) == asker;
+    }
+
+    function encodeRoyaltyData(address receiver, uint16 bps) internal pure returns (uint256 res) {
+        assembly {
+            res := or(shl(160, bps), receiver)
+        }
+    }
+
     function encodeSwapData(
         address leader,
         uint64 epoch,
@@ -100,10 +112,6 @@ library SwapLib {
         uint256 tokenid,
         address from
     ) internal {
-        // require(nft.supportsInterface(type(INuggSwapable).interfaceId), 'AUC:TT:0');
-
-        // TODO check that royalty supports the
-
         require(nft.ownerOf(tokenid) == from, 'AUC:TT:1');
 
         nft.safeTransferFrom(from, address(this), tokenid);

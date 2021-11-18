@@ -14,7 +14,7 @@ contract AssemblyGasTest is DSTestExtended {
 
     Packed _pack_cold;
 
-    uint256 _shift_warm = type(uint256).max;
+    uint256 _shift_warm = 42;
 
     Packed _pack_warm = Packed({_address: address(this), _uint32: type(uint32).max, _uint64: type(uint64).max});
 
