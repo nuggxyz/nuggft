@@ -4,7 +4,7 @@ pragma solidity 0.8.4;
 
 import '../src/erc721/ERC721Enumerable.sol';
 
-contract MocKERC721 is ERC721Enumerable {
+contract MockERC721 is ERC721Enumerable {
     constructor() ERC721('Mock ERC721', 'MockERC721') {}
 
     /**

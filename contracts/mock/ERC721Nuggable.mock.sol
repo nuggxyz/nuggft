@@ -3,7 +3,6 @@
 pragma solidity 0.8.4;
 
 import '../src/erc721/ERC721Enumerable.sol';
-import '../src/erc2981/IERC2981.sol';
 import '../src/interfaces/INuggSwap.sol';
 import '../src/interfaces/IERC721Nuggable.sol';
 
@@ -18,12 +17,13 @@ import '../src/interfaces/IERC721Nuggable.sol';
  * Note: the block hash corresponding to the start of an epoch is used as the "random" seed
  * Note: epochs are 256 blocks long as block hashes only exist for 256 blocks
  */
-contract Mock_ERC721Nuggable is IERC721Nuggable, ERC721Enumerable {
+contract MockERC721Nuggable is IERC721Nuggable, ERC721Enumerable {
     INuggSwap public nuggswap;
     uint256 public epochOffset;
     address public owner;
 
     constructor(address royalty, address _nuggswap) ERC721('Mock ERC721 Nuggable', 'MockERC721Nuggable') {
+        nuggswap = INuggSwap(_nuggswap);
         epochOffset = nuggswap.currentEpochId();
         owner = royalty;
     }
