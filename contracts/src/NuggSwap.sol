@@ -140,7 +140,7 @@ contract NuggSwap is INuggSwap, ERC721Holder, ERC1155Holder, Testable, Epochable
         uint64 requestedEpoch,
         uint128 requestedFloor
     ) internal {
-        SwapLib.takeToken(IERC721(nft), tokenid, account);
+        SwapLib.moveERC721(nft, tokenid, account, address(this));
 
         address[] storage prevSwapOwners = _swapOwners[nft][tokenid];
 
@@ -311,7 +311,7 @@ contract NuggSwap is INuggSwap, ERC721Holder, ERC1155Holder, Testable, Epochable
 
         if (swap.isOver()) {
             if (offer.account == swap.leader) {
-                SwapLib._giveToken(swap.nft, swap.tokenid, to);
+                SwapLib.moveERC721(swap.nft, swap.tokenid, address(this), to);
             } else {
                 payable(to).sendValue(offer.amount);
             }
