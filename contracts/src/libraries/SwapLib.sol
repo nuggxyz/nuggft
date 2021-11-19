@@ -50,6 +50,11 @@ library SwapLib {
         bool exists;
     }
 
+    function decodeSwapData(uint256 encodedSwapData) internal returns (SwapData memory res) {
+        (res.leader, res.epoch, res.amount, res.precision, res.tokenClaimed, res.exists, res.is1155) = ShiftLib
+            .decodeSwapData(encodedSwapData);
+    }
+
     function checkOwner(address token, address asker) internal view returns (bool res) {
         (bool ok, bytes memory returnData) = token.staticcall(abi.encodeWithSignature('owner()'));
         if (!ok) return false;

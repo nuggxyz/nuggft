@@ -22,7 +22,7 @@ library StakeMath {
 
     function decodeState(uint256 state) internal pure returns (State memory res) {
         res.tSupply = state >> 128;
-        res.rSupply = (state << 128) >> 128;
+        res.rSupply = uint256(uint128(state));
     }
 
     function encodeState(State memory state) internal pure returns (uint256 res) {
