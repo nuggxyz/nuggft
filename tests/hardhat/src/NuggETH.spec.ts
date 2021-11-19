@@ -38,6 +38,10 @@ describe('uint tests', async function () {
             await fix.xnugg.connect(accounts.dee).mint({ value: toEth('5') });
             const res = await fix.xnugg.balanceOf(accounts.dee.address);
             await fix.nuggswap
+                .connect(accounts.mac)
+                .submitOffer(fix.mockERC721Nuggable.address, BigNumber.from(0), { value: toEth('2.000') });
+
+            await fix.nuggswap
                 .connect(accounts.dee)
                 .submitOffer(fix.mockERC721Nuggable.address, BigNumber.from(0), { value: toEth('3.000') });
 
@@ -46,6 +50,7 @@ describe('uint tests', async function () {
             await Mining.advanceBlockTo(50);
             await fix.nuggswap.connect(accounts.dee).submitClaim(fix.mockERC721Nuggable.address, 0);
             await fix.mockERC721Nuggable.connect(accounts.dee).approve(fix.nuggswap.address, 0);
+            await fix.nuggswap.connect(accounts.mac).submitClaim(fix.mockERC721Nuggable.address, 0);
 
             await fix.nuggswap.connect(accounts.dee).submitSwap(fix.mockERC721Nuggable.address, 0, 5, toEth('.02000'));
 
