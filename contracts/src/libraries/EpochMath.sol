@@ -10,7 +10,7 @@ library EpochMath {
     }
 
     struct Epoch {
-        uint64 id;
+        uint48 id;
         uint256 startblock;
         uint256 endblock;
         Status status;
@@ -36,7 +36,7 @@ library EpochMath {
 
     function getEpoch(
         uint256 state,
-        uint64 id,
+        uint48 id,
         uint256 blocknum
     ) internal pure returns (EpochMath.Epoch memory res) {
         res = EpochMath.Epoch({
@@ -49,7 +49,7 @@ library EpochMath {
 
     function getStatus(
         uint256 state,
-        uint64 id,
+        uint48 id,
         uint256 blocknum
     ) internal pure returns (Status res) {
         if (getIdFromBlocknum(state, blocknum) == id) res = Status.ACTIVE;
@@ -61,7 +61,7 @@ library EpochMath {
      * @dev #TODO
      * @return res
      */
-    function getStartBlockFromId(uint256 state, uint64 id) internal pure returns (uint256 res) {
+    function getStartBlockFromId(uint256 state, uint48 id) internal pure returns (uint256 res) {
         res = id * decodeInterval(state) + decodeGenesis(state);
     }
 
@@ -69,11 +69,11 @@ library EpochMath {
      * @dev #TODO
      * @return res
      */
-    function getEndBlockFromId(uint256 state, uint64 id) internal pure returns (uint256 res) {
+    function getEndBlockFromId(uint256 state, uint48 id) internal pure returns (uint256 res) {
         res = getStartBlockFromId(state, id + 1) - 1;
     }
 
-    function getIdFromBlocknum(uint256 state, uint256 blocknum) internal pure returns (uint64 res) {
-        res = uint64((blocknum - decodeGenesis(state)) / decodeInterval(state));
+    function getIdFromBlocknum(uint256 state, uint256 blocknum) internal pure returns (uint48 res) {
+        res = uint48((blocknum - decodeGenesis(state)) / decodeInterval(state));
     }
 }
