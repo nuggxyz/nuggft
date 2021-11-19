@@ -8,7 +8,7 @@ library ShiftLib {
             address leader,
             uint48 epoch,
             uint16 amount,
-            uint8 percision,
+            uint8 precision,
             bool tokenClaimed,
             bool exists,
             bool is1155
@@ -16,10 +16,10 @@ library ShiftLib {
     {
         assembly {
             is1155 := shr(248, data)
-            exists := shr(240, data)
-            tokenClaimed := shr(232, data)
-            percision := shr(224, data)
-            amount := shr(216, data)
+            exists := shr(248, shl(8, data))
+            tokenClaimed := shr(248, shl(16, data))
+            precision := shr(224, data)
+            amount := shr(208, data)
             epoch := shr(160, data)
             leader := data
         }
@@ -29,7 +29,7 @@ library ShiftLib {
         address leader,
         uint48 epoch,
         uint16 amount,
-        uint8 percision,
+        uint8 precision,
         bool tokenClaimed,
         bool exists,
         bool is1155
@@ -38,8 +38,8 @@ library ShiftLib {
             res := or(
                 or(
                     or(
-                        or(or(or(shl(248, is1155), shl(240, exists)), shl(232, tokenClaimed)), shl(224, percision)),
-                        shl(216, amount)
+                        or(or(or(shl(248, is1155), shl(240, exists)), shl(232, tokenClaimed)), shl(224, precision)),
+                        shl(208, amount)
                     ),
                     shl(160, epoch)
                 ),

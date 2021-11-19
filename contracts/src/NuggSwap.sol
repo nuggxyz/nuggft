@@ -228,15 +228,13 @@ contract NuggSwap is INuggSwap, ERC721Holder, ERC1155Holder, Testable, Epochable
         uint256 amount
     ) internal {
         (bool found, address receiver, uint256 bps) = SwapLib.checkRoyalties(token, tokenid, _royalty[token]);
+        uint256 royalties;
+        if (found && receiver != address(xnugg)) {
+            royalties = (amount * bps) / SwapLib.FULL_ROYALTY_BPS;
+            payable(receiver).sendValue(royalties);
+        }
 
-        // if (found || receiver == address(xnugg)) {
-        //     require(remainder > royalties, 'NS:PR:0');
-
-        //     remainder -= royalties;
-        //     payable(receiver).sendValue(royalties);
-        // }
-
-        // payable(address(xnugg)).sendValue(remainder);
+        payable(address(xnugg)).sendValue(amount - royalties);
     }
 
     function loadData(
@@ -244,39 +242,40 @@ contract NuggSwap is INuggSwap, ERC721Holder, ERC1155Holder, Testable, Epochable
         uint256 tokenid,
         address account
     ) internal view returns (SwapLib.SwapData memory swap, SwapLib.OfferData memory offer) {
-        uint256 swapnum = _swapOwners[token][tokenid].length;
+        swap.token = token;
+        swap.tokenid = tokenid;
+        swap.num = _swapOwners[token][tokenid].length;
+        swap.activeEpoch = currentEpochId();
+        swap.owner = swap.num == 0 ? address(0) : _swapOwners[token][tokenid][swap.num - 1];
 
-        (
-            address leader,
-            uint48 epoch,
-            uint16 tokenAmount,
-            uint8 precision,
-            bool tokenClaimed,
-            bool exists,
-            bool is1155
-        ) = ShiftLib.decodeSwapData(_encodedSwapData[token][tokenid][swapnum]);
+        (swap.leader, swap.epoch, swap.amount, swap.precision, swap.tokenClaimed, swap.exists, swap.is1155) = ShiftLib
+            .decodeSwapData(_encodedSwapData[swap.token][swap.tokenid][swap.num]);
 
-        (uint128 leaderAmount, ) = ShiftLib.decodeOfferData(_encodedOfferData[token][tokenid][swapnum][leader]);
+        (swap.leaderAmount, ) = ShiftLib.decodeOfferData(
+            _encodedOfferData[swap.token][swap.tokenid][swap.num][swap.leader]
+        );
 
-        swap = SwapLib.SwapData({
-            token: token,
-            tokenid: tokenid,
-            is1155: is1155,
-            num: swapnum,
-            leader: leader,
-            leaderAmount: leaderAmount,
-            epoch: epoch,
-            exists: exists,
-            amount: tokenAmount,
-            precision: precision,
-            tokenClaimed: tokenClaimed,
-            owner: swapnum == 0 ? address(0) : _swapOwners[token][tokenid][swapnum - 1],
-            activeEpoch: currentEpochId()
-        });
+        // swap = SwapLib.SwapData({
+        //     token: token,
+        //     tokenid: tokenid,
+        //     is1155: is1155,
+        //     num: swapnum,
+        //     leader: leader,
+        //     leaderAmount: leaderAmount,
+        //     epoch: epoch,
+        //     exists: exists,
+        //     amount: tokenAmount,
+        //     precision: precision,
+        //     tokenClaimed: tokenClaimed,
+        //     owner: swapnum == 0 ? address(0) : _swapOwners[token][tokenid][swapnum - 1],
+        //     activeEpoch: currentEpochId()
+        // });
 
-        (uint128 amount, bool claimed) = ShiftLib.decodeOfferData(_encodedOfferData[token][tokenid][swapnum][account]);
+        offer.account = account;
 
-        offer = SwapLib.OfferData({claimed: claimed, amount: amount, account: account});
+        (offer.amount, offer.claimed) = ShiftLib.decodeOfferData(_encodedOfferData[token][tokenid][swap.num][account]);
+
+        // offer = SwapLib.OfferData({claimed: claimed, amount: amount, account: account});
     }
 
     function saveData(SwapLib.SwapData memory swap, SwapLib.OfferData memory offer) internal {
