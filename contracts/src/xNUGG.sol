@@ -77,9 +77,9 @@ contract xNUGG is IxNUGG, ERC20 {
 
     function _recieve() internal {
         if (msg.value > 0) {
-            uint256 t = (msg.value * 100) / 1000;
-            onValueAdd(msg.sender, msg.value - t);
-            tummy.sendValue(t);
+            // uint256 t = (msg.value * 100) / 1000;
+            onValueAdd(msg.sender, msg.value);
+            // tummy.sendValue(t);
         }
     }
 
@@ -109,6 +109,8 @@ contract xNUGG is IxNUGG, ERC20 {
     function onShareAdd(address account, uint256 value) internal {
         StakeMath.State memory state = _state.decodeState();
         StakeMath.Position memory pos = StakeMath.Position(_shares_owned[account]);
+
+        state.tSupply -= msg.value;
 
         uint256 shares = state.applyShareAdd(pos, value);
 
@@ -153,11 +155,11 @@ contract xNUGG is IxNUGG, ERC20 {
      * @param value the amount the total reward is being increased
      */
     function onValueAdd(address from, uint256 value) internal virtual {
-        StakeMath.State memory state = _state.decodeState();
+        // StakeMath.State memory state = _state.decodeState();
 
-        state.applyValueAdd(value);
+        // state.applyValueAdd(value);
 
-        _state = state.encodeState();
+        // _state = state.encodeState();
 
         emit ValueAdd(from, value);
     }

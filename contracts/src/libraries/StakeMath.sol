@@ -20,13 +20,19 @@ library StakeMath {
         uint256 rSupply;
     }
 
-    function decodeState(uint256 state) internal pure returns (State memory res) {
-        res.tSupply = state >> 128;
-        res.rSupply = uint256(uint128(state));
+    function decodeState(uint256 state) internal view returns (State memory res) {
+        // res.tSupply = state >> 128;
+        uint256 bal;
+        assembly {
+            bal := selfbalance()
+        }
+        res.tSupply = bal;
+        res.rSupply = state;
     }
 
     function encodeState(State memory state) internal pure returns (uint256 res) {
-        res = (state.tSupply << 128) | state.rSupply;
+        // res = (state.tSupply << 128) | state.rSupply;
+        res = state.rSupply;
     }
 
     function getBalance(State memory state, Position memory pos) internal pure returns (uint256 res) {
@@ -100,7 +106,7 @@ library StakeMath {
         posTo.rOwned += amountR;
     }
 
-    function applyValueAdd(State memory state, uint256 amount) internal pure {
-        state.tSupply += amount;
-    }
+    // function applyValueAdd(State memory state, uint256 amount) internal pure {
+    //     state.tSupply += amount;
+    // }
 }
