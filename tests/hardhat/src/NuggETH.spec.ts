@@ -37,6 +37,9 @@ describe('uint tests', async function () {
         it('should revert if shares = 0', async () => {
             await fix.xnugg.connect(accounts.dee).mint({ value: toEth('5') });
             const res = await fix.xnugg.balanceOf(accounts.dee.address);
+
+            // await fix.xnugg.connect(accounts.frank).fallback({ value: toEth('5') });
+
             await fix.nuggswap
                 .connect(accounts.mac)
                 .submitOffer(fix.mockERC721Mintable.address, BigNumber.from(0), { value: toEth('2.000') });
