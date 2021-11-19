@@ -25,9 +25,6 @@ contract NuggSwap is INuggSwap, ERC721Holder, ERC1155Holder, Testable, Epochable
     using CheapMath for uint256;
     using ShiftLib for uint256;
 
-    uint16 MAX_ROYALTY_BPS = 1000;
-    uint16 FULL_ROYALTY_BPS = 10000;
-
     mapping(address => mapping(uint256 => address[])) internal _swapOwners;
 
     mapping(address => uint256) internal _royalty;
@@ -97,7 +94,6 @@ contract NuggSwap is INuggSwap, ERC721Holder, ERC1155Holder, Testable, Epochable
         uint16 bps
     ) external payable {
         require(SwapLib.checkOwner(token, msg.sender), 'NS:SRB:0');
-        if (bps > MAX_ROYALTY_BPS) bps = MAX_ROYALTY_BPS;
         require(msg.value > 10**15, 'NS:SRB:1');
 
         payable(receiver).sendValue(msg.value);
@@ -232,20 +228,7 @@ contract NuggSwap is INuggSwap, ERC721Holder, ERC1155Holder, Testable, Epochable
         uint256 bps;
         address receiver;
 
-        (receiver, bps) = ShiftLib.decodeRoyaltyData(_royalty[nft]);
-
-        if (receiver == address(0)) {
-            try IERC165(nft).supportsInterface(type(IERC2981).interfaceId) returns (bool res) {
-                if (res) {
-                    (receiver, bps) = IERC2981(nft).royaltyInfo(tokenid, FULL_ROYALTY_BPS);
-                }
-            } catch {
-                require(false, 'NS:PR:0');
-            }
-        }
-
         if (receiver != address(0) && receiver != address(xnugg)) {
-            royalties = (remainder * (bps < MAX_ROYALTY_BPS ? bps : MAX_ROYALTY_BPS)) / FULL_ROYALTY_BPS;
             require(remainder > royalties, 'NS:PR:0');
 
             remainder -= royalties;
@@ -306,36 +289,46 @@ contract NuggSwap is INuggSwap, ERC721Holder, ERC1155Holder, Testable, Epochable
         address
     ) internal pure {
         require(swap.owner != offer.account, 'SL:HSO:0');
+        require(!offer.claimed, 'SL:HSO:1');
 
         offer.amount += uint128(amount);
 
-        require(swap.isActive(), 'SL:OBP:0');
-        require(swap.validateOfferIncrement(offer), 'SL:OBP:1');
+        require(swap.isActive(), 'SL:OBP:3');
+        require(swap.validateOfferIncrement(offer), 'SL:OBP:4');
 
         swap.leader = offer.account;
     }
 
+    // TODO VUNERABLE TO REENTRANCY
     function handleSubmitClaim(
         SwapLib.SwapData memory swap,
         SwapLib.OfferData memory offer,
         address to
     ) internal {
         require(swap.exists, 'SL:HBC:0');
-        require(!offer.claimed, 'AUC:CLM:0');
-        require(offer.amount > 0, 'AUC:CLM:1');
+
+        SwapLib.ClaimerStatus status = swap.checkClaimer(offer);
 
         offer.claimed = true;
 
-        if (swap.isOver()) {
-            if (offer.account == swap.leader) {
-                SwapLib.moveERC721(swap.nft, swap.tokenid, address(this), to);
-            } else {
-                payable(to).sendValue(offer.amount);
-            }
-        } else {
-            require(offer.account == swap.leader && offer.account == swap.owner, 'AUC:CLM:2');
+        require(
+            status != SwapLib.ClaimerStatus.DID_NOT_OFFER &&
+                status != SwapLib.ClaimerStatus.HAS_ALREADY_CLAIMED &&
+                status != SwapLib.ClaimerStatus.WISE_GUY,
+            'SL:HBC:1'
+        );
+
+        if (
+            status == SwapLib.ClaimerStatus.WINNER ||
+            status == SwapLib.ClaimerStatus.OWNER_NO_OFFERS ||
+            status == SwapLib.ClaimerStatus.OWNER_PAPERHAND
+        ) {
+            SwapLib.moveERC721(swap.nft, swap.tokenid, address(this), to);
             swap.claimedByOwner = true;
+            return;
         }
+
+        payable(to).sendValue(offer.amount);
     }
 
     function handleSubmitSwap(
