@@ -6,7 +6,7 @@ import './IEpochable.sol';
 interface INuggSwap is IEpochable {
     event SubmitOffer(address nft, uint256 tokenid, uint256 swapnum, address account, uint256 amount);
 
-    event SubmitSwap(address nft, uint256 tokenid, uint256 swapnum, address account, uint256 amount, uint64 epoch);
+    event SubmitSwap(address nft, uint256 tokenid, uint256 swapnum, address account, uint256 amount, uint48 epoch);
 
     event SubmitClaim(address nft, uint256 tokenid, uint256 swapnum, address account);
 
@@ -15,7 +15,7 @@ interface INuggSwap is IEpochable {
     function submitSwap(
         address nft,
         uint256 tokenid,
-        uint64 requestedEpoch,
+        uint48 requestedEpoch,
         uint128 requestedFloor
     ) external;
 
@@ -42,9 +42,12 @@ interface INuggSwap is IEpochable {
             uint256 swapnum,
             address leader,
             uint128 leaderAmount,
-            uint64 epoch,
-            bool claimedByOwner,
-            bool exists
+            uint16 amount,
+            uint16 precision,
+            uint48 epoch,
+            bool tokenClaimed,
+            bool exists,
+            bool is1155
         );
 
     function getSwap(
@@ -58,8 +61,11 @@ interface INuggSwap is IEpochable {
             uint256 swapnum,
             address leader,
             uint128 leaderAmount,
-            uint64 epoch,
-            bool claimedByOwner,
-            bool exists
+            uint16 amount,
+            uint16 precision,
+            uint48 epoch,
+            bool tokenClaimed,
+            bool exists,
+            bool is1155
         );
 }

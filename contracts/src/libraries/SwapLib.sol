@@ -1,6 +1,8 @@
 pragma solidity 0.8.4;
 
 import '../erc721/IERC721.sol';
+import '../erc1155/IERC1155.sol';
+
 import '../erc2981/IERC2981.sol';
 
 import './ShiftLib.sol';
@@ -33,15 +35,18 @@ library SwapLib {
     }
 
     struct SwapData {
-        address nft;
+        address token;
+        bool is1155;
         uint256 tokenid;
         uint256 num;
+        uint16 amount;
+        uint8 precision;
         address leader;
         uint128 leaderAmount;
-        uint64 epoch;
+        uint48 epoch;
         address owner;
-        bool claimedByOwner;
-        uint64 activeEpoch;
+        bool tokenClaimed;
+        uint48 activeEpoch;
         bool exists;
     }
 
@@ -124,16 +129,32 @@ library SwapLib {
     }
 
     function moveERC721(
-        address nft,
+        address token,
         uint256 tokenid,
         address from,
         address to
     ) internal {
-        require(IERC721(nft).ownerOf(tokenid) == from, 'AUC:TT:1');
+        require(IERC721(token).ownerOf(tokenid) == from, 'AUC:TT:1');
 
-        IERC721(nft).safeTransferFrom(from, to, tokenid);
+        IERC721(token).safeTransferFrom(from, to, tokenid);
 
-        require(IERC721(nft).ownerOf(tokenid) == to, 'AUC:TT:3');
+        require(IERC721(token).ownerOf(tokenid) == to, 'AUC:TT:3');
+    }
+
+    function moveERC1155(
+        address token,
+        uint256 tokenid,
+        uint256 amount,
+        address from,
+        address to
+    ) internal {
+        uint256 toStart = IERC1155(token).balanceOf(to, tokenid);
+
+        require(IERC1155(token).balanceOf(from, tokenid) >= amount, 'AUC:TT:1');
+
+        IERC1155(token).safeTransferFrom(from, to, tokenid, amount, '');
+
+        require(IERC1155(token).balanceOf(to, tokenid) - toStart == amount, 'AUC:TT:3');
     }
 
     function validateOfferIncrement(SwapData memory swap, OfferData memory offer) internal pure returns (bool) {
@@ -145,11 +166,11 @@ library SwapLib {
     }
 
     function isOver(SwapData memory swap) internal pure returns (bool) {
-        return swap.exists && (swap.activeEpoch > swap.epoch || swap.claimedByOwner);
+        return swap.exists && (swap.activeEpoch > swap.epoch || swap.tokenClaimed);
     }
 
     function isActive(SwapData memory swap) internal pure returns (bool) {
-        return swap.exists && !swap.claimedByOwner && swap.activeEpoch <= swap.epoch;
+        return swap.exists && !swap.tokenClaimed && swap.activeEpoch <= swap.epoch;
     }
 }
 
@@ -164,6 +185,6 @@ library SwapLib {
 //         }
 //     } else {
 //         require(offer.account == swap.leader && offer.account == swap.owner, 'AUC:CLM:2');
-//         swap.claimedByOwner = true;
+//         swap.tokenClaimed = true;
 //     }
 // }

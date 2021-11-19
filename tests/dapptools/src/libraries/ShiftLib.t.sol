@@ -3,37 +3,38 @@ pragma solidity ^0.8.4;
 
 import '../../lib/DSTestExtended.sol';
 
-import '../../../../contracts/src/libraries/SwapLib.sol';
-import '../mocks/SwapLib.m.sol';
+import '../../../../contracts/src/libraries/ShiftLib.sol';
 
-contract SwapLibTest is DSTestExtended {
+import '../mocks/ShiftLib.mock.sol';
+
+contract ShiftLibTest is DSTestExtended {
     function test_unit_encodeSwapData_raw_0() public {
-        uint256 res = SwapLib.encodeSwapData(msg.sender, 77, true, true);
+        uint256 res = ShiftLib.encodeSwapData(msg.sender, 77, true, true);
         assertEq(res, 0x00000101000000000000004d00a329c0648769a73afac7f9381e08fb43dbea72);
     }
 
     function test_unit_encodeSwapData_raw_1() public {
-        uint256 res = SwapLib.encodeSwapData(address(0), 0, true, false);
+        uint256 res = ShiftLib.encodeSwapData(address(0), 0, true, false);
         emit log_bytes32(bytes32(res));
         assertEq(res, 0x0000000100000000000000000000000000000000000000000000000000000000);
     }
 
     function test_unit_encodeSwapData_raw_2() public {
-        uint256 res = SwapLib.encodeSwapData(address(0), 0, false, true);
+        uint256 res = ShiftLib.encodeSwapData(address(0), 0, false, true);
         emit log_bytes32(bytes32(res));
 
         assertEq(res, 0x0000010000000000000000000000000000000000000000000000000000000000);
     }
 
     function test_unit_encodeSwapData_mock_0() public {
-        uint256 res = SwapLib.encodeSwapData(msg.sender, 77, true, true);
-        uint256 mock_res = MockSwapLib.mock_encodeSwapData(msg.sender, 77, true, true);
+        uint256 res = ShiftLib.encodeSwapData(msg.sender, 77, true, true);
+        uint256 mock_res = MockShiftLib.mock_encodeSwapData(msg.sender, 77, true, true);
         assertEq(res, mock_res);
     }
 
     function test_unit_decodeSwapData_raw_0() public {
         uint256 input = 0x00000101000000000000004d00a329c0648769a73afac7f9381e08fb43dbea72;
-        (address leader, uint64 epoch, bool claimedByOwner, bool exists) = SwapLib.decodeSwapData(input);
+        (address leader, uint64 epoch, bool claimedByOwner, bool exists) = ShiftLib.decodeSwapData(input);
         assertEq(leader, msg.sender);
         assertEq(epoch, 77);
         assertTrue(claimedByOwner);
@@ -42,7 +43,7 @@ contract SwapLibTest is DSTestExtended {
 
     function test_unit_decodeSwapData_raw_1() public {
         uint256 input = 0x0000000100000000000000000000000000000000000000000000000000000000;
-        (address leader, uint64 epoch, bool claimedByOwner, bool exists) = SwapLib.decodeSwapData(input);
+        (address leader, uint64 epoch, bool claimedByOwner, bool exists) = ShiftLib.decodeSwapData(input);
         assertEq(leader, address(0));
         assertEq(epoch, 0);
         assertTrue(claimedByOwner);
@@ -51,7 +52,7 @@ contract SwapLibTest is DSTestExtended {
 
     function test_unit_decodeSwapData_raw_2() public {
         uint256 input = 0x0000010000000000000000000000000000000000000000000000000000000000;
-        (address leader, uint64 epoch, bool claimedByOwner, bool exists) = SwapLib.decodeSwapData(input);
+        (address leader, uint64 epoch, bool claimedByOwner, bool exists) = ShiftLib.decodeSwapData(input);
         assertEq(leader, address(0));
         assertEq(epoch, 0);
         assertTrue(!claimedByOwner);
@@ -60,8 +61,8 @@ contract SwapLibTest is DSTestExtended {
 
     function test_unit_decodeSwapData_mock_0() public {
         uint256 _unparsed = 0x00000101000000000000004d00a329c0648769a73afac7f9381e08fb43dbea72;
-        (address leader, uint64 epoch, bool claimedByOwner, bool exists) = SwapLib.decodeSwapData(_unparsed);
-        (address mock_leader, uint64 mock_epoch, bool mock_claimedByOwner, bool mock_exists) = MockSwapLib
+        (address leader, uint64 epoch, bool claimedByOwner, bool exists) = ShiftLib.decodeSwapData(_unparsed);
+        (address mock_leader, uint64 mock_epoch, bool mock_claimedByOwner, bool mock_exists) = MockShiftLib
             .mock_decodeSwapData(_unparsed);
 
         assertEq(leader, mock_leader);
@@ -76,13 +77,13 @@ contract SwapLibTest is DSTestExtended {
         bool expectedClaimedByOwner = true;
         bool expectedExists = true;
 
-        uint256 _unparsed = SwapLib.encodeSwapData(
+        uint256 _unparsed = ShiftLib.encodeSwapData(
             expectedLeader,
             expectedEpoch,
             expectedClaimedByOwner,
             expectedExists
         );
-        (address gotLeader, uint64 gotEpoch, bool gotClaimedByOwner, bool gotExists) = SwapLib.decodeSwapData(
+        (address gotLeader, uint64 gotEpoch, bool gotClaimedByOwner, bool gotExists) = ShiftLib.decodeSwapData(
             _unparsed
         );
 
@@ -98,13 +99,13 @@ contract SwapLibTest is DSTestExtended {
         bool expectedClaimedByOwner = false;
         bool expectedExists = true;
 
-        uint256 _unparsed = SwapLib.encodeSwapData(
+        uint256 _unparsed = ShiftLib.encodeSwapData(
             expectedLeader,
             expectedEpoch,
             expectedClaimedByOwner,
             expectedExists
         );
-        (address gotLeader, uint64 gotEpoch, bool gotClaimedByOwner, bool gotExists) = SwapLib.decodeSwapData(
+        (address gotLeader, uint64 gotEpoch, bool gotClaimedByOwner, bool gotExists) = ShiftLib.decodeSwapData(
             _unparsed
         );
 
@@ -120,8 +121,8 @@ contract SwapLibTest is DSTestExtended {
         bool claimedByOwner,
         bool exists
     ) public {
-        uint256 _unparsed = SwapLib.encodeSwapData(leader, epoch, claimedByOwner, exists);
-        (address gotLeader, uint64 gotEpoch, bool gotClaimedByOwner, bool gotExists) = SwapLib.decodeSwapData(
+        uint256 _unparsed = ShiftLib.encodeSwapData(leader, epoch, claimedByOwner, exists);
+        (address gotLeader, uint64 gotEpoch, bool gotClaimedByOwner, bool gotExists) = ShiftLib.decodeSwapData(
             _unparsed
         );
 
@@ -131,20 +132,20 @@ contract SwapLibTest is DSTestExtended {
         assertTrue(exists == gotExists);
     }
 
-    function test_unit_encodeSwapId_raw_0() public {
-        uint256 res = SwapLib.encodeSwapId(msg.sender, 384823748, 3434334356);
-        assertEq(bytes32(res), bytes32(0xccb3c8940000000016eff1c400a329c0648769a73afac7f9381e08fb43dbea72));
-    }
+    // function test_unit_encodeSwapId_raw_0() public {
+    //     uint256 res = ShiftLib.encodeSwapId(msg.sender, 384823748, 3434334356);
+    //     assertEq(bytes32(res), bytes32(0xccb3c8940000000016eff1c400a329c0648769a73afac7f9381e08fb43dbea72));
+    // }
 
     // function test_unit_encodeSwapId_mock_0() public {
-    //     uint256 res = SwapLib.encodeSwapId(msg.sender, 384823748, 3434334356);
-    //     uint256 mock_res = MockSwapLib.mock_encodeSwapId(msg.sender, 384823748, 3434334356);
+    //     uint256 res = ShiftLib.encodeSwapId(msg.sender, 384823748, 3434334356);
+    //     uint256 mock_res = MockShiftLib.mock_encodeSwapId(msg.sender, 384823748, 3434334356);
     //     assertEq(res, mock_res);
     // }
 
     // function test_unit_decodeSwapId_raw_0() public {
     //     uint256 input = 0xccb3c8940000000016eff1c400a329c0648769a73afac7f9381e08fb43dbea72;
-    //     (address nft, uint64 tokenId, uint32 swapNum) = SwapLib.decodeSwapId(input);
+    //     (address nft, uint64 tokenId, uint32 swapNum) = ShiftLib.decodeSwapId(input);
 
     //     assertEq(nft, msg.sender);
     //     assertEq(tokenId, 384823748);
@@ -153,8 +154,8 @@ contract SwapLibTest is DSTestExtended {
 
     // function test_unit_decodeSwapId_mock_0() public {
     //     uint256 input = 0xccb3c8940000000016eff1c400a329c0648769a73afac7f9381e08fb43dbea72;
-    //     (address nft, uint64 tokenId, uint32 swapNum) = SwapLib.decodeSwapId(input);
-    //     (address mock_nft, uint64 mock_tokenId, uint32 mock_swapNum) = MockSwapLib.mock_decodeSwapId(input);
+    //     (address nft, uint64 tokenId, uint32 swapNum) = ShiftLib.decodeSwapId(input);
+    //     (address mock_nft, uint64 mock_tokenId, uint32 mock_swapNum) = MockShiftLib.mock_decodeSwapId(input);
     //     assertEq(nft, mock_nft);
     //     assertEq(tokenId, mock_tokenId);
     //     assertEq(swapNum, mock_swapNum);
@@ -165,9 +166,9 @@ contract SwapLibTest is DSTestExtended {
     //     uint64 input_tokenId = 384823748;
     //     uint32 input_swapNum = 3434334356;
 
-    //     uint256 res = SwapLib.encodeSwapId(msg.sender, 384823748, 3434334356);
+    //     uint256 res = ShiftLib.encodeSwapId(msg.sender, 384823748, 3434334356);
 
-    //     (address nft, uint64 tokenId, uint32 swapNum) = SwapLib.decodeSwapId(res);
+    //     (address nft, uint64 tokenId, uint32 swapNum) = ShiftLib.decodeSwapId(res);
 
     //     assertEq(nft, input_nft);
     //     assertEq(tokenId, input_tokenId);
@@ -175,19 +176,19 @@ contract SwapLibTest is DSTestExtended {
     // }
 
     function test_unit_encodeOfferData_raw_0() public {
-        uint256 res = SwapLib.encodeOfferData(uint128(3434334356), true);
+        uint256 res = ShiftLib.encodeOfferData(uint128(3434334356), true);
         assertEq(bytes32(res), bytes32(0x00000000000000000000000000000001000000000000000000000000ccb3c894));
     }
 
     function test_unit_encodeOfferData_mock_0() public {
-        uint256 res = SwapLib.encodeOfferData(uint128(3434334356), true);
-        uint256 mock_res = MockSwapLib.mock_encodeOfferData(uint128(3434334356), true);
+        uint256 res = ShiftLib.encodeOfferData(uint128(3434334356), true);
+        uint256 mock_res = MockShiftLib.mock_encodeOfferData(uint128(3434334356), true);
         assertEq(res, mock_res);
     }
 
     function test_unit_decodeOfferData_raw_0() public {
         uint256 input = 0x00000000000000000000000000000001000000000000000000000000ccb3c894;
-        (uint128 amount, bool claimed) = SwapLib.decodeOfferData(input);
+        (uint128 amount, bool claimed) = ShiftLib.decodeOfferData(input);
 
         assertEq(amount, uint128(3434334356));
         assertTrue(claimed == true);
@@ -195,8 +196,8 @@ contract SwapLibTest is DSTestExtended {
 
     function test_unit_decodeOfferData_mock_0() public {
         uint256 input = 0x00000000000000000000000000000001000000000000000000000000ccb3c894;
-        (uint128 amount, bool claimed) = SwapLib.decodeOfferData(input);
-        (uint128 mock_amount, bool mock_claimed) = MockSwapLib.mock_decodeOfferData(input);
+        (uint128 amount, bool claimed) = ShiftLib.decodeOfferData(input);
+        (uint128 mock_amount, bool mock_claimed) = MockShiftLib.mock_decodeOfferData(input);
         assertEq(amount, mock_amount);
         assertTrue(claimed == mock_claimed);
     }
@@ -205,9 +206,9 @@ contract SwapLibTest is DSTestExtended {
         uint128 input_amount = uint128(3434334356);
         bool input_claimed = true;
 
-        uint256 res = SwapLib.encodeOfferData(input_amount, input_claimed);
+        uint256 res = ShiftLib.encodeOfferData(input_amount, input_claimed);
 
-        (uint128 amount, bool claimed) = SwapLib.decodeOfferData(res);
+        (uint128 amount, bool claimed) = ShiftLib.decodeOfferData(res);
 
         assertEq(amount, input_amount);
         assertTrue(claimed == input_claimed);

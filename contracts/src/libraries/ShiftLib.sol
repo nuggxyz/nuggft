@@ -1,32 +1,50 @@
 pragma solidity 0.8.4;
 
 library ShiftLib {
-    function decodeSwapData(uint256 _unparsed)
+    function decodeSwapData(uint256 data)
         internal
         pure
         returns (
             address leader,
-            uint64 epoch,
-            bool claimedByOwner,
-            bool exists
+            uint48 epoch,
+            uint16 amount,
+            uint8 percision,
+            bool tokenClaimed,
+            bool exists,
+            bool is1155
         )
     {
         assembly {
-            exists := shr(232, _unparsed)
-            claimedByOwner := shr(248, shl(24, _unparsed))
-            epoch := shr(160, _unparsed)
-            leader := _unparsed
+            is1155 := shr(248, data)
+            exists := shr(240, data)
+            tokenClaimed := shr(232, data)
+            percision := shr(224, data)
+            amount := shr(216, data)
+            epoch := shr(160, data)
+            leader := data
         }
     }
 
     function encodeSwapData(
         address leader,
-        uint64 epoch,
-        bool claimedByOwner,
-        bool exists
+        uint48 epoch,
+        uint16 amount,
+        uint8 percision,
+        bool tokenClaimed,
+        bool exists,
+        bool is1155
     ) internal pure returns (uint256 res) {
         assembly {
-            res := or(or(or(shl(232, exists), shl(224, claimedByOwner)), shl(160, epoch)), leader)
+            res := or(
+                or(
+                    or(
+                        or(or(or(shl(248, is1155), shl(240, exists)), shl(232, tokenClaimed)), shl(224, percision)),
+                        shl(216, amount)
+                    ),
+                    shl(160, epoch)
+                ),
+                leader
+            )
         }
     }
 

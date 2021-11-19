@@ -1,7 +1,6 @@
 // SPDX-License-Identifier: MIT
 
 pragma solidity 0.8.4;
-import '../interfaces/IEpochable.sol';
 
 import '../interfaces/IEpochable.sol';
 import '../libraries/EpochMath.sol';
@@ -100,11 +99,11 @@ abstract contract Epochable is IEpochable {
      * @dev public wrapper for internal _currentEpoch() - to save on gas
      * @inheritdoc IEpochable
      */
-    function currentEpochId() public view override returns (uint64 res) {
+    function currentEpochId() public view override returns (uint48 res) {
         res = _state.getIdFromBlocknum(block.number);
     }
 
-    function epochFromId(uint64 id) public view returns (EpochMath.Epoch memory res) {
+    function epochFromId(uint48 id) public view returns (EpochMath.Epoch memory res) {
         res = _state.getEpoch(id, block.number);
     }
 
@@ -118,14 +117,14 @@ abstract contract Epochable is IEpochable {
     /**
      * @dev public wrapper for internal blocknumFirstFromEpoch() - to save on gas
      */
-    function epochStatus(uint64 id) public view returns (EpochMath.Status res) {
+    function epochStatus(uint48 id) public view returns (EpochMath.Status res) {
         return _state.getStatus(id, block.number);
     }
 
     /**
      * @dev public wrapper for internal blocknumFirstFromEpoch() - to save on gas
      */
-    function blocknumFromId(uint64 id) public view returns (uint256) {
+    function blocknumFromId(uint48 id) public view returns (uint256) {
         return _state.getStartBlockFromId(id);
     }
 }
