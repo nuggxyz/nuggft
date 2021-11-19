@@ -41,6 +41,14 @@ contract NuggSwap is INuggSwap, ERC721Holder, ERC1155Holder, Testable, Epochable
         xnugg = _xnugg;
     }
 
+    // function submitMintOffer(address token, uint256 tokenid) external payable override {
+    //     _submitMintOffer(token, tokenid, msg_sender(), msg_sender(), uint128(msg_value()));
+    // }
+
+    function submitOffer(address token, uint256 tokenid) external payable override {
+        _submitOffer(token, tokenid, msg_sender(), msg_sender(), uint128(msg_value()));
+    }
+
     function getSwap(address token, uint256 tokenid)
         external
         view
@@ -97,7 +105,7 @@ contract NuggSwap is INuggSwap, ERC721Holder, ERC1155Holder, Testable, Epochable
         address receiver,
         uint16 bps
     ) external payable {
-        require(SwapLib.checkOwner(token, msg.sender), 'NS:SRB:0');
+        require(SwapLib.checkOwner(token, msg.sender) || token == msg.sender, 'NS:SRB:0');
         require(msg.value > 10**15, 'NS:SRB:1');
 
         payable(receiver).sendValue(msg.value);
@@ -112,10 +120,6 @@ contract NuggSwap is INuggSwap, ERC721Holder, ERC1155Holder, Testable, Epochable
         uint128 requestedFloor
     ) external override {
         _submitSwap(token, tokenid, msg_sender(), requestedEpoch, requestedFloor);
-    }
-
-    function submitOffer(address token, uint256 tokenid) external payable override {
-        _submitOffer(token, tokenid, msg_sender(), msg_sender(), uint128(msg_value()));
     }
 
     function submitOfferTo(
@@ -173,7 +177,7 @@ contract NuggSwap is INuggSwap, ERC721Holder, ERC1155Holder, Testable, Epochable
     ) internal {
         (SwapLib.SwapData memory swap, SwapLib.OfferData memory offer) = loadData(token, tokenid, to);
 
-        if (!swap.exists) mintToken(swap);
+        if (!swap.exists) mintToken(swap, offer);
 
         handleSubmitOffer(swap, offer, value, sender);
 
@@ -183,6 +187,33 @@ contract NuggSwap is INuggSwap, ERC721Holder, ERC1155Holder, Testable, Epochable
 
         emit SubmitOffer(swap.token, swap.tokenid, swap.num, offer.account, offer.amount);
     }
+
+    // function _submitMintOffer(
+    //     address token,
+    //     uint256 tokenid,
+    //     address sender,
+    //     address to,
+    //     uint128 value
+    // ) internal {
+    //     require(_encodedSwapData[token][tokenid][0] == 0, 'NS:SMO:0');
+
+    //     SwapLib.SwapData memory swap;
+    //     SwapLib.OfferData memory offer;
+
+    //     swap.token = token;
+    //     swap.tokenid = tokenid;
+    //     offer.account = to;
+
+    //     mintToken(swap, offer);
+
+    //     handleSubmitOffer(swap, offer, value, sender);
+
+    //     saveData(swap, offer);
+
+    //     payRoyalties(token, tokenid, offer.amount - swap.leaderAmount);
+
+    //     emit SubmitOffer(swap.token, swap.tokenid, swap.num, offer.account, offer.amount);
+    // }
 
     // todo - we need to make sure that if any of this fails the transaction still goes through (sending value to xnugg should never fail)
 
@@ -203,19 +234,26 @@ contract NuggSwap is INuggSwap, ERC721Holder, ERC1155Holder, Testable, Epochable
         emit SubmitClaim(swap.token, swap.tokenid, swap.num, offer.account);
     }
 
-    function mintToken(SwapLib.SwapData memory swap) internal {
+    function mintToken(SwapLib.SwapData memory swap, SwapLib.OfferData memory offer) internal {
         try
             IERC721(swap.token).safeTransferFrom(address(0), address(this), swap.tokenid, abi.encode(swap.activeEpoch))
         {} catch {
             require(false, 'NS:MT:0');
         }
 
-        handleSubmitSwap(
-            swap,
-            SwapLib.OfferData({account: address(0), amount: 0, claimed: false}),
-            swap.activeEpoch,
-            0
-        );
+        swap.epoch = swap.activeEpoch;
+
+        swap.leader = offer.account;
+        swap.exists = true;
+
+        // offer.amount = 0;
+
+        // handleSubmitSwap(
+        //     swap,
+        //     SwapLib.OfferData({account: address(0), amount: 0, claimed: false}),
+        //     swap.activeEpoch,
+        //     0
+        // );
     }
 
     /*
@@ -233,7 +271,12 @@ contract NuggSwap is INuggSwap, ERC721Holder, ERC1155Holder, Testable, Epochable
             payable(receiver).sendValue(royalties);
         }
 
+        // payable(address(xnugg)).sendValue(amount);
         payable(address(xnugg)).sendValue(amount - royalties);
+    }
+
+    function getSwapnum(address token, uint256 tokenid) internal view returns (uint256) {
+        return _swapOwners[token][tokenid].length;
     }
 
     function loadData(
@@ -243,18 +286,24 @@ contract NuggSwap is INuggSwap, ERC721Holder, ERC1155Holder, Testable, Epochable
     ) internal view returns (SwapLib.SwapData memory swap, SwapLib.OfferData memory offer) {
         swap.token = token;
         swap.tokenid = tokenid;
+        offer.account = account;
         swap.num = _swapOwners[token][tokenid].length;
+
+        uint256 swapData = _encodedSwapData[swap.token][swap.tokenid][swap.num];
+
+        if (swapData == 0) {
+            return (swap, offer);
+        }
+
         swap.activeEpoch = currentEpochId();
         swap.owner = swap.num == 0 ? address(0) : _swapOwners[token][tokenid][swap.num - 1];
 
         (swap.leader, swap.epoch, swap.amount, swap.precision, swap.tokenClaimed, swap.exists, swap.is1155) = ShiftLib
-            .decodeSwapData(_encodedSwapData[swap.token][swap.tokenid][swap.num]);
+            .decodeSwapData(swapData);
 
         (swap.leaderAmount, ) = ShiftLib.decodeOfferData(
             _encodedOfferData[swap.token][swap.tokenid][swap.num][swap.leader]
         );
-
-        offer.account = account;
 
         (offer.amount, offer.claimed) = ShiftLib.decodeOfferData(_encodedOfferData[token][tokenid][swap.num][account]);
     }
