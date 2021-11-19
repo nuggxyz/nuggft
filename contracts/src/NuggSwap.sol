@@ -4,11 +4,11 @@ pragma solidity 0.8.4;
 
 import './libraries/SwapLib.sol';
 import './interfaces/INuggSwap.sol';
-import './interfaces/IERC721Nuggable.sol';
+// import './interfaces/IERC721Nuggable.sol';
 import './libraries/CheapMath.sol';
 import './libraries/ShiftLib.sol';
 
-import './interfaces/INuggSwapable.sol';
+// import './interfaces/INuggSwapable.sol';
 import './interfaces/IxNUGG.sol';
 
 import './erc721/IERC721.sol';
@@ -147,15 +147,19 @@ contract NuggSwap is INuggSwap, ERC721Holder, ERC1155Holder, Testable, Epochable
     ) internal {
         SwapLib.moveERC721(token, tokenid, account, address(this));
 
-        address[] storage prevSwapOwners = _swapOwners[token][tokenid];
-
-        prevSwapOwners.push(account);
+        _swapOwners[token][tokenid].push(account);
 
         (SwapLib.SwapData memory swap, SwapLib.OfferData memory offer) = loadData(token, tokenid, account);
 
         handleSubmitSwap(swap, offer, requestedEpoch, requestedFloor);
 
+        swapChanges(swap, offer);
+
         saveData(swap, offer);
+
+        swapActions(swap, offer);
+
+        swapEvents(swap, offer);
 
         emit SubmitSwap(swap.token, swap.tokenid, swap.num, offer.account, offer.amount, swap.epoch);
     }
@@ -200,16 +204,11 @@ contract NuggSwap is INuggSwap, ERC721Holder, ERC1155Holder, Testable, Epochable
     }
 
     function mintToken(SwapLib.SwapData memory swap) internal {
-        IERC721 _token = IERC721(swap.token);
-
-        require(_token.supportsInterface(type(IERC721Nuggable).interfaceId), 'AUC:MT:0');
-
-        uint256 tokenid = IERC721Nuggable(address(swap.token)).nsMint(swap.activeEpoch);
-
-        ensureActiveSeed();
-
-        require(tokenid == swap.tokenid, 'AUC:MT:2');
-        require((_token.ownerOf(swap.tokenid) == address(this)), 'AUC:MT:3');
+        try
+            IERC721(swap.token).safeTransferFrom(address(0), address(this), swap.tokenid, abi.encode(swap.activeEpoch))
+        {} catch {
+            require(false, 'NS:MT:0');
+        }
 
         handleSubmitSwap(
             swap,
@@ -255,30 +254,14 @@ contract NuggSwap is INuggSwap, ERC721Holder, ERC1155Holder, Testable, Epochable
             _encodedOfferData[swap.token][swap.tokenid][swap.num][swap.leader]
         );
 
-        // swap = SwapLib.SwapData({
-        //     token: token,
-        //     tokenid: tokenid,
-        //     is1155: is1155,
-        //     num: swapnum,
-        //     leader: leader,
-        //     leaderAmount: leaderAmount,
-        //     epoch: epoch,
-        //     exists: exists,
-        //     amount: tokenAmount,
-        //     precision: precision,
-        //     tokenClaimed: tokenClaimed,
-        //     owner: swapnum == 0 ? address(0) : _swapOwners[token][tokenid][swapnum - 1],
-        //     activeEpoch: currentEpochId()
-        // });
-
         offer.account = account;
 
         (offer.amount, offer.claimed) = ShiftLib.decodeOfferData(_encodedOfferData[token][tokenid][swap.num][account]);
-
-        // offer = SwapLib.OfferData({claimed: claimed, amount: amount, account: account});
     }
 
     function saveData(SwapLib.SwapData memory swap, SwapLib.OfferData memory offer) internal {
+        ensureActiveSeed();
+
         _encodedSwapData[swap.token][swap.tokenid][swap.num] = ShiftLib.encodeSwapData(
             swap.leader,
             swap.epoch,
@@ -359,4 +342,26 @@ contract NuggSwap is INuggSwap, ERC721Holder, ERC1155Holder, Testable, Epochable
 
         offer.amount = floor;
     }
+
+    function offerValidations(SwapLib.SwapData memory swap, SwapLib.OfferData memory offer) internal {}
+
+    function offerChanges(SwapLib.SwapData memory swap, SwapLib.OfferData memory offer) internal {}
+
+    function offerActions(SwapLib.SwapData memory swap, SwapLib.OfferData memory offer) internal {}
+
+    function offerEvents(SwapLib.SwapData memory swap, SwapLib.OfferData memory offer) internal {}
+
+    function claimValidations(SwapLib.SwapData memory swap, SwapLib.OfferData memory offer) internal {}
+
+    function claimChanges(SwapLib.SwapData memory swap, SwapLib.OfferData memory offer) internal {}
+
+    function claimActions(SwapLib.SwapData memory swap, SwapLib.OfferData memory offer) internal {}
+
+    function claimEvents(SwapLib.SwapData memory swap, SwapLib.OfferData memory offer) internal {}
+
+    function swapChanges(SwapLib.SwapData memory swap, SwapLib.OfferData memory offer) internal {}
+
+    function swapActions(SwapLib.SwapData memory swap, SwapLib.OfferData memory offer) internal {}
+
+    function swapEvents(SwapLib.SwapData memory swap, SwapLib.OfferData memory offer) internal {}
 }
