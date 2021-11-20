@@ -56,7 +56,7 @@ contract NuggSwap is INuggSwap, ERC721Holder, ERC1155Holder, Testable, Epochable
             ? _swapOwners[token][tokenid].length
             : uint256(_swapnum);
 
-        (res.leader, res.epoch, res.bps, res.tokenClaimed, res.royClaimed, res.is1155) = ShiftLib.decodeSwapData(
+        (res.leader, res.epoch, res.bps, res.is1155, res.tokenClaimed, res.royClaimed) = ShiftLib.decodeSwapData(
             _encodedSwapData[token][tokenid][res.swapnum]
         );
 
@@ -212,9 +212,13 @@ contract NuggSwap is INuggSwap, ERC721Holder, ERC1155Holder, Testable, Epochable
         swap.activeEpoch = currentEpochId();
         swap.owner = swap.num == 0 ? address(0) : _swapOwners[token][tokenid][swap.num - 1];
 
-        (swap.leader, swap.epoch, swap.bps, swap.tokenClaimed, swap.royClaimed, swap.is1155) = ShiftLib.decodeSwapData(
+        (swap.leader, swap.epoch, swap.bps, swap.is1155, swap.tokenClaimed, swap.royClaimed) = ShiftLib.decodeSwapData(
             swapData
         );
+
+        if (swap.leader == address(0)) {
+            return (swap, offer);
+        }
 
         (swap.eth, ) = ShiftLib.decodeOfferData(_encodedOfferData[swap.token][swap.tokenid][swap.num][swap.leader]);
 
@@ -228,9 +232,9 @@ contract NuggSwap is INuggSwap, ERC721Holder, ERC1155Holder, Testable, Epochable
             swap.leader,
             swap.epoch,
             swap.bps,
+            swap.is1155,
             swap.tokenClaimed,
-            swap.royClaimed,
-            swap.is1155
+            swap.royClaimed
         );
         _encodedOfferData[swap.token][swap.tokenid][swap.num][offer.account] = ShiftLib.encodeOfferData(
             offer.eth,
