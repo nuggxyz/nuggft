@@ -4,7 +4,7 @@ import '../erc721/IERC721.sol';
 import '../erc1155/IERC1155.sol';
 
 import '../erc2981/IERC2981.sol';
-
+import 'hardhat/console.sol';
 import './ShiftLib.sol';
 import './Address.sol';
 import './QuadMath.sol';
@@ -14,6 +14,7 @@ library SwapLib {
     using Address for address;
     using Address for address payable;
     using CheapMath for uint16;
+    using ShiftLib for uint256;
 
     // uint16 constant MAX_ROYALTY_BPS = 1000;
     // uint16 constant FULL_ROYALTY_BPS = 10000;
@@ -68,58 +69,94 @@ library SwapLib {
     }
 
     // most of these are LOSER, but want to make sure we catch any bugs in testing
-    function checkClaimer(SwapData memory swap, OfferData memory offer) internal pure returns (ClaimerStatus) {
-        if (offer.eth == 0) return ClaimerStatus.DID_NOT_OFFER;
+    function checkClaimer(
+        address account,
+        uint256 swapData,
+        uint256 leaderData,
+        uint256 offerData,
+        uint256 activeEpoch
+    ) internal returns (bool winner) {
+        require(swapData != 0 && offerData != 0 && !offerData.isClaimed(), 'SL:CC:1');
 
-        if (offer.claimed) return ClaimerStatus.HAS_ALREADY_CLAIMED;
+        console.logBytes32(bytes32(leaderData));
 
-        if (isOver(swap)) {
-            if (swap.owner == offer.account) {
-                if (swap.owner == swap.leader) {
-                    return ClaimerStatus.OWNER_NO_OFFERS;
-                } else {
-                    return ClaimerStatus.OWNER_DIAMONDHAND;
-                }
-            } else if (swap.leader == offer.account) {
-                return ClaimerStatus.WINNER;
-            } else {
-                return ClaimerStatus.LOSER;
-            }
-        } else {
-            if (swap.owner == offer.account) {
-                if (swap.owner == swap.leader) {
-                    return ClaimerStatus.OWNER_PAPERHAND;
-                } else {
-                    return ClaimerStatus.OWNER_DIAMONDHAND_EARLY;
-                }
-            } else {
-                if (swap.owner == swap.leader) {
-                    return ClaimerStatus.WISE_GUY;
-                } else {
-                    return ClaimerStatus.PREMADONA;
-                }
-            }
+        if (leaderData.isOwner()) {
+            assert(offerData.isOwner());
+            return true; // B
         }
+
+        // bool over = activeEpoch > swapData.epoch() || swapData.isTokenClaimed();
+        bool over = activeEpoch > swapData.epoch();
+
+        console.log(activeEpoch, swapData.epoch());
+
+        if (account == address(uint160(swapData))) {
+            require(over, 'SL:CC:0');
+            return true; // B
+            // else // A
+        }
+        // if (over && account == address(uint160(swapData))) // B
+        // if (!over && account == address(uint160(swapData))) //A
+
+        // if (offerData.eth() == 0) return ClaimerStatus.DID_NOT_OFFER; // A
+        // if (offerData.isClaimed()) return ClaimerStatus.HAS_ALREADY_CLAIMED; // A
+        // if (over) {
+        //     if (leaderData.isOwner()) {
+        //         assert(offerData.isOwner());
+        //         return ClaimerStatus.OWNER_NO_OFFERS; // B
+        //     }
+        //     if (account == address(uint160(swapData))) return ClaimerStatus.OWNER_NO_OFFERS; // B
+        // } else {
+        //     if (leaderData.isOwner()) return ClaimerStatus.OWNER_PAPERHAND; // B
+        //     else (account == address(uint160(swapData))) return ClaimerStatus.WISE_GUY; // A
+        // }
+        // if (over) {
+        //     if (offerData.isOwner()) {
+        //         if (swap.owner == swap.leader) {
+        //             return ClaimerStatus.OWNER_NO_OFFERS; // B
+        //         } else {
+        //             return ClaimerStatus.OWNER_DIAMONDHAND;
+        //         }
+        //     } else if (swap.leader == offer.account) {
+        //         return ClaimerStatus.WINNER; // B
+        //     } else {
+        //         return ClaimerStatus.LOSER;
+        //     }
+        // } else {
+        //     if (swap.owner == offer.account) {
+        //         if (swap.owner == swap.leader) {
+        //             return ClaimerStatus.OWNER_PAPERHAND; // B
+        //         } else {
+        //             return ClaimerStatus.OWNER_DIAMONDHAND_EARLY;
+        //         }
+        //     } else {
+        //         if (offer.account == swap.leader) {
+        //             return ClaimerStatus.WISE_GUY; // A
+        //         } else {
+        //             return ClaimerStatus.PREMADONA;
+        //         }
+        //     }
+        // }
     }
 
-    function checkRoyalties(
-        address token,
-        uint256 tokenid,
-        uint256 encodedRoyaltyData
-    ) internal view returns (uint16 res) {
-        (address receiver, uint256 bps) = ShiftLib.decodeRoyaltyData(encodedRoyaltyData);
-        if (bps > 0) return uint16(bps);
-        if (receiver == address(0)) {
-            // for projects that indicate no royalties
-            try IERC165(token).supportsInterface(type(IERC2981).interfaceId) returns (bool support) {
-                if (support) {
-                    try IERC2981(token).royaltyInfo(tokenid, 10000) returns (address, uint256 _bps) {
-                        return uint16(_bps);
-                    } catch {}
-                }
-            } catch {}
-        } else {}
-    }
+    // function checkRoyalties(
+    //     address token,
+    //     uint256 tokenid,
+    //     uint256 encodedRoyaltyData
+    // ) internal view returns (uint16 res) {
+    //     (address receiver, uint256 bps) = ShiftLib.decodeRoyaltyData(encodedRoyaltyData);
+    //     if (bps > 0) return uint16(bps);
+    //     if (receiver == address(0)) {
+    //         // for projects that indicate no royalties
+    //         try IERC165(token).supportsInterface(type(IERC2981).interfaceId) returns (bool support) {
+    //             if (support) {
+    //                 try IERC2981(token).royaltyInfo(tokenid, 10000) returns (address, uint256 _bps) {
+    //                     return uint16(_bps);
+    //                 } catch {}
+    //             }
+    //         } catch {}
+    //     } else {}
+    // }
 
     function takeBPS(uint256 total, uint256 bps) internal pure returns (uint256 res) {
         res = QuadMath.mulDiv(total, bps < 1000 ? bps : 1000, 10000);
