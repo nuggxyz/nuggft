@@ -55,7 +55,9 @@ describe('uint tests', async function () {
             await fix.mockERC721Mintable.connect(accounts.dee).approve(fix.nuggswap.address, 0);
             await fix.nuggswap.connect(accounts.mac).submitClaim(fix.mockERC721Mintable.address, 0);
 
-            await fix.nuggswap.connect(accounts.dee).submitSwap(fix.mockERC721Mintable.address, 0, 5, toEth('.02000'));
+            await fix.nuggswap
+                .connect(accounts.dee)
+                ['submitSwap(address,uint256,uint48,uint128,bytes)'](fix.mockERC721Mintable.address, 0, 5, toEth('.02000'), []);
 
             const positionDee0 = await fix.xnugg.balanceOf(accounts.dee.address);
             const positionMac0 = await fix.xnugg.balanceOf(accounts.mac.address);

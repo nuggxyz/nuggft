@@ -16,7 +16,8 @@ interface INuggSwap is IEpochable {
         address nft,
         uint256 tokenid,
         uint48 requestedEpoch,
-        uint128 requestedFloor
+        uint128 requestedFloor,
+        bool is1155
     ) external;
 
     function submitOffer(address nft, uint256 tokenid) external payable;
@@ -35,37 +36,20 @@ interface INuggSwap is IEpochable {
         address to
     ) external;
 
-    function getSwap(address nft, uint256 tokenid)
-        external
-        view
-        returns (
-            uint256 swapnum,
-            address leader,
-            uint128 leaderAmount,
-            uint16 amount,
-            uint16 precision,
-            uint48 epoch,
-            bool tokenClaimed,
-            bool exists,
-            bool is1155
-        );
+    struct SwapData {
+        uint256 swapnum;
+        address leader;
+        uint128 amount;
+        uint56 epoch;
+        uint16 bps;
+        bool is1155;
+        bool tokenClaimed;
+        bool royClaimed;
+    }
 
     function getSwap(
         address nft,
         uint256 tokenid,
-        uint256 _swapnum
-    )
-        external
-        view
-        returns (
-            uint256 swapnum,
-            address leader,
-            uint128 leaderAmount,
-            uint16 amount,
-            uint16 precision,
-            uint48 epoch,
-            bool tokenClaimed,
-            bool exists,
-            bool is1155
-        );
+        uint256 swapnum
+    ) external view returns (SwapData memory);
 }

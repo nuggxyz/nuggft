@@ -8,4 +8,10 @@ library CheapMath {
             res := add(a, b)
         }
     }
+
+    function pow10(uint16 a, uint8 b) internal pure returns (uint256 res) {
+        assembly {
+            res := exp(a, mul(b, 10))
+        }
+    }
 }

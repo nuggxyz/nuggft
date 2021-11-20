@@ -7,13 +7,16 @@ import '../erc2981/IERC2981.sol';
 
 import './ShiftLib.sol';
 import './Address.sol';
+import './QuadMath.sol';
+import './CheapMath.sol';
 
 library SwapLib {
     using Address for address;
     using Address for address payable;
+    using CheapMath for uint16;
 
-    uint16 constant MAX_ROYALTY_BPS = 1000;
-    uint16 constant FULL_ROYALTY_BPS = 10000;
+    // uint16 constant MAX_ROYALTY_BPS = 1000;
+    // uint16 constant FULL_ROYALTY_BPS = 10000;
 
     enum ClaimerStatus {
         OWNER_PAPERHAND,
@@ -31,29 +34,32 @@ library SwapLib {
     struct OfferData {
         bool claimed;
         address account;
-        uint128 amount;
+        uint128 eth;
     }
 
     struct SwapData {
         address token;
-        bool is1155;
         uint256 tokenid;
         uint256 num;
-        uint16 amount;
-        uint8 precision;
         address leader;
-        uint128 leaderAmount;
+        uint128 eth;
         uint48 epoch;
-        address owner;
-        bool tokenClaimed;
         uint48 activeEpoch;
-        bool exists;
+        address owner;
+        uint16 bps;
+        bool tokenClaimed;
+        bool royClaimed;
+        bool is1155;
     }
 
-    function decodeSwapData(uint256 encodedSwapData) internal returns (SwapData memory res) {
-        (res.leader, res.epoch, res.amount, res.precision, res.tokenClaimed, res.exists, res.is1155) = ShiftLib
-            .decodeSwapData(encodedSwapData);
-    }
+    // function decodeSwapData(uint256 encodedSwapData) internal returns (SwapData memory res) {
+    //     (res.leader, res.epoch, res.eth, res.precision, res.bps, res.tokenClaimed) = ShiftLib.decodeSwapData(
+    //         encodedSwapData
+    //     );
+
+    //     res.exists = res.leader != address(0);
+    //     res.is1155 = res.eth != 0;
+    // }
 
     function checkOwner(address token, address asker) internal view returns (bool res) {
         (bool ok, bytes memory returnData) = token.staticcall(abi.encodeWithSignature('owner()'));
@@ -63,7 +69,7 @@ library SwapLib {
 
     // most of these are LOSER, but want to make sure we catch any bugs in testing
     function checkClaimer(SwapData memory swap, OfferData memory offer) internal pure returns (ClaimerStatus) {
-        if (offer.amount == 0) return ClaimerStatus.DID_NOT_OFFER;
+        if (offer.eth == 0) return ClaimerStatus.DID_NOT_OFFER;
 
         if (offer.claimed) return ClaimerStatus.HAS_ALREADY_CLAIMED;
 
@@ -100,37 +106,23 @@ library SwapLib {
         address token,
         uint256 tokenid,
         uint256 encodedRoyaltyData
-    )
-        internal
-        view
-        returns (
-            bool found,
-            address receiver,
-            uint256 bps
-        )
-    {
-        (receiver, bps) = ShiftLib.decodeRoyaltyData(encodedRoyaltyData);
-
+    ) internal view returns (uint16 res) {
+        (address receiver, uint256 bps) = ShiftLib.decodeRoyaltyData(encodedRoyaltyData);
+        if (bps > 0) return uint16(bps);
         if (receiver == address(0)) {
-            try IERC165(token).supportsInterface(type(IERC2981).interfaceId) returns (bool res) {
-                if (res) {
-                    try IERC2981(token).royaltyInfo(tokenid, FULL_ROYALTY_BPS) returns (
-                        address _receiver,
-                        uint256 _bps
-                    ) {
-                        receiver = _receiver;
-                        bps = _bps;
-                        found = true;
+            // for projects that indicate no royalties
+            try IERC165(token).supportsInterface(type(IERC2981).interfaceId) returns (bool support) {
+                if (support) {
+                    try IERC2981(token).royaltyInfo(tokenid, 10000) returns (address, uint256 _bps) {
+                        return uint16(_bps);
                     } catch {}
                 }
             } catch {}
-        } else {
-            found = true;
-        }
+        } else {}
     }
 
     function takeBPS(uint256 total, uint256 bps) internal pure returns (uint256 res) {
-        res = (total * (bps < MAX_ROYALTY_BPS ? bps : MAX_ROYALTY_BPS)) / FULL_ROYALTY_BPS;
+        res = QuadMath.mulDiv(total, bps < 1000 ? bps : 1000, 10000);
     }
 
     function moveERC721(
@@ -149,21 +141,20 @@ library SwapLib {
     function moveERC1155(
         address token,
         uint256 tokenid,
-        uint256 amount,
         address from,
         address to
     ) internal {
         uint256 toStart = IERC1155(token).balanceOf(to, tokenid);
 
-        require(IERC1155(token).balanceOf(from, tokenid) >= amount, 'AUC:TT:1');
+        require(IERC1155(token).balanceOf(from, tokenid) >= 1, 'AUC:TT:1');
 
-        IERC1155(token).safeTransferFrom(from, to, tokenid, amount, '');
+        IERC1155(token).safeTransferFrom(from, to, tokenid, 1, '');
 
-        require(IERC1155(token).balanceOf(to, tokenid) - toStart == amount, 'AUC:TT:3');
+        require(IERC1155(token).balanceOf(to, tokenid) - toStart == 1, 'AUC:TT:3');
     }
 
     function validateOfferIncrement(SwapData memory swap, OfferData memory offer) internal pure returns (bool) {
-        return offer.amount > swap.leaderAmount + ((swap.leaderAmount * 100) / 10000);
+        return offer.eth > swap.eth + ((swap.eth * 100) / 10000);
     }
 
     function hasVaildEpoch(SwapData memory swap) internal pure returns (bool) {
@@ -171,11 +162,11 @@ library SwapLib {
     }
 
     function isOver(SwapData memory swap) internal pure returns (bool) {
-        return swap.exists && (swap.activeEpoch > swap.epoch || swap.tokenClaimed);
+        return swap.eth > 0 && (swap.activeEpoch > swap.epoch || swap.tokenClaimed);
     }
 
     function isActive(SwapData memory swap) internal pure returns (bool) {
-        return swap.exists && !swap.tokenClaimed && swap.activeEpoch <= swap.epoch;
+        return swap.eth > 0 && !swap.tokenClaimed && swap.activeEpoch <= swap.epoch;
     }
 }
 
