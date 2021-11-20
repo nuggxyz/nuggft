@@ -162,11 +162,11 @@ library SwapLib {
     }
 
     function isOver(SwapData memory swap) internal pure returns (bool) {
-        return swap.eth > 0 && (swap.activeEpoch > swap.epoch || swap.tokenClaimed);
+        return (swap.activeEpoch > swap.epoch || swap.tokenClaimed);
     }
 
     function isActive(SwapData memory swap) internal pure returns (bool) {
-        return swap.eth > 0 && !swap.tokenClaimed && swap.activeEpoch <= swap.epoch;
+        return !swap.tokenClaimed && swap.activeEpoch <= swap.epoch;
     }
 }
 
