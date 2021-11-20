@@ -23,7 +23,21 @@ abstract contract Epochable is IEpochable {
     constructor(uint128 _interval, uint128 _baseblock) {
         // _baseblock += 1;
         _state = EpochMath.encodeData(_interval, _baseblock);
-        // emit Genesis(_interval, _baseblock);
+        emit Genesis(_interval, _baseblock);
+    }
+
+    function ensureActiveSeed() internal {
+        if (!seedExists(currentEpochId())) {
+            _seeds[currentEpochId()] = currentSeed();
+        }
+    }
+
+    /**
+     * @dev public wrapper for internal _currentEpoch() - to save on gas
+     * @inheritdoc IEpochable
+     */
+    function currentEpochId() public view override returns (uint48 res) {
+        res = _state.getIdFromBlocknum(block.number);
     }
 
     /**
@@ -74,11 +88,6 @@ abstract contract Epochable is IEpochable {
      * @dev
      * @return
      */
-    function ensureActiveSeed() internal {
-        if (!seedExists(currentEpochId())) {
-            _seeds[currentEpochId()] = currentSeed();
-        }
-    }
 
     /**
      * @dev public wrapper for internal _genesisBlock - to save on gas
@@ -94,14 +103,6 @@ abstract contract Epochable is IEpochable {
      */
     function interval() public view override returns (uint256 res) {
         res = _state.decodeInterval();
-    }
-
-    /**
-     * @dev public wrapper for internal _currentEpoch() - to save on gas
-     * @inheritdoc IEpochable
-     */
-    function currentEpochId() public view override returns (uint48 res) {
-        res = _state.getIdFromBlocknum(block.number);
     }
 
     function epochFromId(uint48 id) public view returns (EpochMath.Epoch memory res) {

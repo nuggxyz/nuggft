@@ -15,24 +15,35 @@ interface INuggSwap is IEpochable {
     function submitSwap(
         address nft,
         uint256 tokenid,
+        uint256 swapnum,
         uint48 requestedEpoch,
         uint128 requestedFloor,
         bool is1155
     ) external;
 
-    function submitOffer(address nft, uint256 tokenid) external payable;
+    function submitOffer(
+        address nft,
+        uint256 tokenid,
+        uint256 swapnum
+    ) external payable;
 
-    function submitClaim(address nft, uint256 tokenid) external;
+    function submitClaim(
+        address nft,
+        uint256 tokenid,
+        uint256 swapnum
+    ) external;
 
     function submitOfferTo(
         address nft,
         uint256 tokenid,
+        uint256 swapnum,
         address to
     ) external payable;
 
     function submitClaimTo(
         address nft,
         uint256 tokenid,
+        uint256 swapnum,
         address to
     ) external;
 
