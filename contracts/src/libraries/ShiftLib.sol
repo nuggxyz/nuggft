@@ -7,44 +7,62 @@ library ShiftLib {
         returns (
             address leader,
             uint48 epoch,
-            uint16 amount,
-            uint8 precision,
+            uint16 bps,
+            bool is1155,
             bool tokenClaimed,
-            bool exists,
-            bool is1155
+            bool royClaimed
         )
+    // bool mint
     {
+        // leader = data;
+
         assembly {
-            is1155 := shr(248, data)
-            exists := shr(248, shl(8, data))
-            tokenClaimed := shr(248, shl(16, data))
-            precision := shr(224, data)
-            amount := shr(208, data)
-            epoch := shr(160, data)
             leader := data
+            data := shr(160, data)
+
+            epoch := data
+            data := shr(48, data)
+
+            bps := data
+            data := shr(16, data)
+
+            is1155 := shl(248, data)
+            data := shr(8, data)
+
+            tokenClaimed := shl(248, data)
+            data := shr(8, data)
+
+            royClaimed := data
         }
     }
 
     function encodeSwapData(
         address leader,
         uint48 epoch,
-        uint16 amount,
-        uint8 precision,
+        uint16 bps,
+        bool is1155,
         bool tokenClaimed,
-        bool exists,
-        bool is1155
-    ) internal pure returns (uint256 res) {
+        bool royClaimed
+    )
+        internal
+        pure
+        returns (
+            // bool mint
+            uint256 res
+        )
+    {
         assembly {
-            res := or(
-                or(
-                    or(
-                        or(or(or(shl(248, is1155), shl(240, exists)), shl(232, tokenClaimed)), shl(224, precision)),
-                        shl(208, amount)
-                    ),
-                    shl(160, epoch)
-                ),
-                leader
-            )
+            res := royClaimed
+
+            res := or(shl(8, res), tokenClaimed)
+
+            res := or(shl(8, res), is1155)
+
+            res := or(shl(16, res), bps)
+
+            res := or(shl(48, res), epoch)
+
+            res := or(shl(160, res), leader)
         }
     }
 
