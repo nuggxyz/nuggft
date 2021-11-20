@@ -18,7 +18,7 @@ contract ExternalTest is DSTestExtended {
     MockERC721 normal;
 
     function setUp() public {
-        nuggswap = new NuggSwap(new xNUGG());
+        nuggswap = new NuggSwap(address(new xNUGG()));
         ownable = new MockERC721Ownable();
         normal = new MockERC721();
     }

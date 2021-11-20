@@ -39,8 +39,8 @@ contract NuggSwap is INuggSwap, ERC721Holder, ERC1155Holder, Testable, Epochable
 
     IxNUGG public immutable override xnugg;
 
-    constructor(IxNUGG _xnugg) Epochable(25, uint128(block.number)) {
-        xnugg = _xnugg;
+    constructor(address _xnugg) Epochable(25, uint128(block.number)) {
+        xnugg = IxNUGG(_xnugg);
     }
 
     function submitOffer(address token, uint256 tokenid) external payable override {
@@ -226,7 +226,7 @@ contract NuggSwap is INuggSwap, ERC721Holder, ERC1155Holder, Testable, Epochable
     }
 
     function saveData(SwapLib.SwapData memory swap, SwapLib.OfferData memory offer) internal {
-        ensureActiveSeed();
+        // ensureActiveSeed();
 
         _encodedSwapData[swap.token][swap.tokenid][swap.num] = ShiftLib.encodeSwapData(
             swap.leader,
