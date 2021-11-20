@@ -124,12 +124,12 @@ describe('uint tests', async function () {
             await fix.xnugg.connect(accounts.dennis).burn(toEth('1.696969696970000'));
             await fix.xnugg.connect(accounts.dennis).burn(toEth('1.696969696970000'));
             await fix.xnugg.connect(accounts.dennis).burn(toEth('1.696969696970000'));
-            await fix.xnugg.connect(accounts.dennis).burn(toEth('1.696969696970000'));
-            await fix.xnugg.connect(accounts.dennis).burn(toEth('1.696969696970000'));
-            await fix.xnugg.connect(accounts.dennis).burn(toEth('1.696969696970000'));
-            await fix.xnugg.connect(accounts.dennis).burn(toEth('1.696969696970000'));
-            await fix.xnugg.connect(accounts.dennis).burn(toEth('1.696969696970000'));
-            await fix.xnugg.connect(accounts.dennis).burn(toEth('1.696969696970000'));
+            // await fix.xnugg.connect(accounts.dennis).burn(toEth('1.696969696970000'));
+            // await fix.xnugg.connect(accounts.dennis).burn(toEth('1.696969696970000'));
+            // await fix.xnugg.connect(accounts.dennis).burn(toEth('1.696969696970000'));
+            // await fix.xnugg.connect(accounts.dennis).burn(toEth('1.696969696970000'));
+            // await fix.xnugg.connect(accounts.dennis).burn(toEth('1.696969696970000'));
+            // await fix.xnugg.connect(accounts.dennis).burn(toEth('1.696969696970000'));
             // await fix.seller.connect(accounts.frank).submitOffer(BigNumber.from(1), toEth('2'), 0, { value: toEth('2.000') });
 
             // await fix.xnugg.connect(accounts.dee).burn(toEth('41'));

@@ -6,7 +6,7 @@ import './IEpochable.sol';
 interface INuggSwap is IEpochable {
     event SubmitOffer(address nft, uint256 tokenid, uint256 swapnum, address account, uint256 amount);
 
-    event SubmitSwap(address nft, uint256 tokenid, uint256 swapnum, address account, uint256 amount, uint48 epoch);
+    event SubmitSwap(address nft, uint256 tokenid, uint256 swapnum, address account, uint256 amount, uint256 epoch);
 
     event SubmitClaim(address nft, uint256 tokenid, uint256 swapnum, address account);
 
@@ -39,9 +39,9 @@ interface INuggSwap is IEpochable {
     struct SwapData {
         uint256 swapnum;
         address leader;
-        uint128 amount;
-        uint56 epoch;
-        uint16 bps;
+        uint256 amount;
+        uint256 epoch;
+        uint256 bps;
         bool is1155;
         bool tokenClaimed;
         bool royClaimed;
