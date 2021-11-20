@@ -21,8 +21,9 @@ abstract contract Epochable is IEpochable {
     event Genesis(uint128 interval, uint128 baseblock);
 
     constructor(uint128 _interval, uint128 _baseblock) {
+        // _baseblock += 1;
         _state = EpochMath.encodeData(_interval, _baseblock);
-        emit Genesis(_interval, _baseblock);
+        // emit Genesis(_interval, _baseblock);
     }
 
     /**
