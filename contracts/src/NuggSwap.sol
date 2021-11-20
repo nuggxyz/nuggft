@@ -47,33 +47,6 @@ contract NuggSwap is INuggSwap, ERC721Holder, ERC1155Holder, Testable, Epochable
         _submitOffer(token, tokenid, msg_sender(), msg_sender(), uint128(msg_value()));
     }
 
-    // function getSwap(address token, uint256 tokenid)
-    //     external
-    //     view
-    //     override
-    //     returns (
-    //         uint256 swapnum,
-    //         address leader,
-    //         uint128 leaderAmount,
-    //         uint16 amount,
-    //         uint16 precision,
-    //         uint48 epoch,
-    //         bool tokenClaimed,
-    //         uint16 bps,
-    //         bool exists,
-    //         bool is1155,
-    //         bool mint
-    //     )
-    // {
-    //     swapnum = _swapOwners[token][tokenid].length;
-    //     (leader, epoch, amount, precision, bps, tokenClaimed) = ShiftLib.decodeSwapData(
-    //         _encodedSwapData[token][tokenid][swapnum]
-    //     );
-    //     (leaderAmount, ) = ShiftLib.decodeOfferData(_encodedOfferData[token][tokenid][swapnum][leader]);
-
-    //     mint = _swapOwners[token][tokenid].length == 0;
-    // }
-
     function getSwap(
         address token,
         uint256 tokenid,
@@ -110,18 +83,8 @@ contract NuggSwap is INuggSwap, ERC721Holder, ERC1155Holder, Testable, Epochable
         uint128 requestedFloor,
         bool is1155
     ) external override {
-        // hello
         _submitSwap(token, tokenid, msg_sender(), requestedEpoch, requestedFloor, is1155);
     }
-
-    // function submitSwap(
-    //     address token,
-    //     uint256 tokenid,
-    //     uint48 requestedEpoch,
-    //     uint128 requestedFloor
-    // ) external override {
-    //     _submitSwap(token, tokenid, msg_sender(), requestedEpoch, requestedFloor, '');
-    // }
 
     function submitOfferTo(
         address token,
@@ -162,13 +125,7 @@ contract NuggSwap is INuggSwap, ERC721Holder, ERC1155Holder, Testable, Epochable
 
         handleSubmitSwap(swap, offer, requestedEpoch, requestedFloor);
 
-        // swapChanges(swap, offer);
-
         saveData(swap, offer);
-
-        // swapActions(swap, offer);
-
-        // swapEvents(swap, offer);
 
         emit SubmitSwap(swap.token, swap.tokenid, swap.num, offer.account, offer.eth, swap.epoch);
     }
@@ -182,7 +139,7 @@ contract NuggSwap is INuggSwap, ERC721Holder, ERC1155Holder, Testable, Epochable
     ) internal {
         (SwapLib.SwapData memory swap, SwapLib.OfferData memory offer) = loadData(token, tokenid, to);
 
-        if (swap.leader == address(0)) mintToken(swap, offer);
+        if (swap.leader == address(0)) mintToken(swap);
 
         handleSubmitOffer(swap, offer, value, sender);
 
@@ -212,7 +169,7 @@ contract NuggSwap is INuggSwap, ERC721Holder, ERC1155Holder, Testable, Epochable
         emit SubmitClaim(swap.token, swap.tokenid, swap.num, offer.account);
     }
 
-    function mintToken(SwapLib.SwapData memory swap, SwapLib.OfferData memory offer) internal {
+    function mintToken(SwapLib.SwapData memory swap) internal {
         // TODO mint 1155
         try
             IERC721(swap.token).safeTransferFrom(address(0), address(this), swap.tokenid, abi.encode(swap.activeEpoch))
@@ -221,35 +178,14 @@ contract NuggSwap is INuggSwap, ERC721Holder, ERC1155Holder, Testable, Epochable
         }
 
         swap.epoch = swap.activeEpoch;
-
-        // swap.leader = offer.account;
-        // swap.exists = true;
-
-        // offer.eth = 0;
-
-        // handleSubmitSwap(
-        //     swap,
-        //     SwapLib.OfferData({account: address(0), amount: 0, claimed: false}),
-        //     swap.activeEpoch,
-        //     0
-        // );
     }
 
     /*
      *  this https://eips.ethereum.org/EIPS/eip-721
      */
     function payRoyalties(SwapLib.SwapData memory swap, uint256 amount) internal {
-        // (bool found, address receiver, uint256 bps) = SwapLib.checkRoyalties(token, tokenid, _royalty[token]);
-        // uint256 royalties;
-        // if (found && receiver != address(xnugg)) {
-        //     // payable(receiver).sendValue(royalties);
-        // }
         if (swap.bps > 0) amount -= SwapLib.takeBPS(amount, swap.bps);
 
-        // uint256 fee = SwapLib.takeBPS(amount, 1000);
-        // // _vault += fee;
-        // amount -= fee;
-        // payable(address(xnugg)).sendValue(amount);
         payable(address(xnugg)).sendValue(amount);
     }
 
