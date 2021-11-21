@@ -4,7 +4,6 @@ import '../erc721/IERC721.sol';
 import '../erc1155/IERC1155.sol';
 
 import '../erc2981/IERC2981.sol';
-import 'hardhat/console.sol';
 import './ShiftLib.sol';
 import './Address.sol';
 import './QuadMath.sol';
@@ -72,71 +71,26 @@ library SwapLib {
     function checkClaimer(
         address account,
         uint256 swapData,
-        uint256 leaderData,
         uint256 offerData,
         uint256 activeEpoch
     ) internal returns (bool winner) {
-        require(swapData != 0 && offerData != 0 && !offerData.isClaimed(), 'SL:CC:1');
+        require(swapData != 0 && !offerData.isTokenClaimed(), 'SL:CC:1');
 
-        console.logBytes32(bytes32(leaderData));
-
-        if (leaderData.isOwner()) {
-            assert(offerData.isOwner());
+        if (swapData.isFeeClaimed() && offerData == 0) {
+            // assert(offerData.isOwner());
             return true; // B
         }
 
         // bool over = activeEpoch > swapData.epoch() || swapData.isTokenClaimed();
         bool over = activeEpoch > swapData.epoch();
 
-        console.log(activeEpoch, swapData.epoch());
-
         if (account == address(uint160(swapData))) {
-            require(over, 'SL:CC:0');
+            require(over && !swapData.isTokenClaimed(), 'SL:CC:0');
             return true; // B
             // else // A
         }
-        // if (over && account == address(uint160(swapData))) // B
-        // if (!over && account == address(uint160(swapData))) //A
 
-        // if (offerData.eth() == 0) return ClaimerStatus.DID_NOT_OFFER; // A
-        // if (offerData.isClaimed()) return ClaimerStatus.HAS_ALREADY_CLAIMED; // A
-        // if (over) {
-        //     if (leaderData.isOwner()) {
-        //         assert(offerData.isOwner());
-        //         return ClaimerStatus.OWNER_NO_OFFERS; // B
-        //     }
-        //     if (account == address(uint160(swapData))) return ClaimerStatus.OWNER_NO_OFFERS; // B
-        // } else {
-        //     if (leaderData.isOwner()) return ClaimerStatus.OWNER_PAPERHAND; // B
-        //     else (account == address(uint160(swapData))) return ClaimerStatus.WISE_GUY; // A
-        // }
-        // if (over) {
-        //     if (offerData.isOwner()) {
-        //         if (swap.owner == swap.leader) {
-        //             return ClaimerStatus.OWNER_NO_OFFERS; // B
-        //         } else {
-        //             return ClaimerStatus.OWNER_DIAMONDHAND;
-        //         }
-        //     } else if (swap.leader == offer.account) {
-        //         return ClaimerStatus.WINNER; // B
-        //     } else {
-        //         return ClaimerStatus.LOSER;
-        //     }
-        // } else {
-        //     if (swap.owner == offer.account) {
-        //         if (swap.owner == swap.leader) {
-        //             return ClaimerStatus.OWNER_PAPERHAND; // B
-        //         } else {
-        //             return ClaimerStatus.OWNER_DIAMONDHAND_EARLY;
-        //         }
-        //     } else {
-        //         if (offer.account == swap.leader) {
-        //             return ClaimerStatus.WISE_GUY; // A
-        //         } else {
-        //             return ClaimerStatus.PREMADONA;
-        //         }
-        //     }
-        // }
+        require(offerData != 0 && !offerData.isTokenClaimed(), 'SL:CC:1');
     }
 
     // function checkRoyalties(

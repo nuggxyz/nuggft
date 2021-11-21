@@ -1,53 +1,53 @@
 pragma solidity 0.8.4;
 
 library ShiftLib {
-    function isOwner(uint256 input) internal pure returns (bool res) {
-        assembly {
-            res := and(shr(128, input), 0xff)
-        }
-    }
+    // function isOwner(uint256 input) internal pure returns (bool res) {
+    //     assembly {
+    //         res := and(shr(128, input), 0xff)
+    //     }
+    // }
 
-    function isClaimed(uint256 input) internal pure returns (bool res) {
-        assembly {
-            res := and(shr(136, input), 0xff)
-        }
-    }
+    // function isClaimed(uint256 input) internal pure returns (bool res) {
+    //     assembly {
+    //         res := and(shr(136, input), 0xff)
+    //     }
+    // }
 
     function is1155(uint256 input) internal pure returns (bool res) {
         assembly {
-            res := and(shr(208, input), 0xff)
+            res := and(shr(252, input), 0x1)
         }
     }
 
     function isTokenClaimed(uint256 input) internal pure returns (bool res) {
         assembly {
-            res := and(shr(216, input), 0xff)
+            res := and(shr(253, input), 0x1)
         }
     }
 
     function isRoyaltyClaimed(uint256 input) internal pure returns (bool res) {
         assembly {
-            res := and(shr(224, input), 0xff)
+            res := and(shr(254, input), 0x1)
         }
     }
 
     function isFeeClaimed(uint256 input) internal pure returns (bool res) {
         assembly {
-            res := and(shr(232, input), 0xff)
+            res := and(shr(255, input), 0x1)
         }
     }
 
-    function isActive(uint256 input, uint256 activeEpoch) internal pure returns (bool res) {
-        assembly {
-            input := and(shr(160, input), 0x7FFFFFFF)
+    // function isActive(uint256 input, uint256 activeEpoch) internal pure returns (bool res) {
+    //     assembly {
+    //         input := and(shr(160, input), 0x7FFFFFFF)
 
-            res := or(lt(input, activeEpoch), eq(input, activeEpoch))
+    //         res := or(lt(input, activeEpoch), eq(input, activeEpoch))
 
-            input := and(shr(48, input), 0xFF)
+    //         input := and(shr(48, input), 0xFF)
 
-            res := or(res, input)
-        }
-    }
+    //         res := or(res, input)
+    //     }
+    // }
 
     // function isValidIncrement(uint256 input, uint256 amount) pure internal returns (bool res) {
     //     assembly {
@@ -58,13 +58,16 @@ library ShiftLib {
 
     function eth(uint256 input) internal pure returns (uint256 res) {
         assembly {
-            res := and(input, 0xffffffffffffffffffffffffffffffff)
+            res := and(shr(160, input), 0xFFFFFFFFFFFFFF)
+            let i := and(res, 0xf)
+            // res := shr(4, res)
+            res := shl(mul(4, i), shr(4, res))
         }
     }
 
     function epoch(uint256 input) internal pure returns (uint256 res) {
         assembly {
-            res := and(shr(160, input), 0xFFFFFFFFFFFF)
+            res := and(shr(216, input), 0xFFFFFFFFF)
         }
     }
 
@@ -77,21 +80,63 @@ library ShiftLib {
         }
     }
 
-    function setEpoch(uint256 input, uint256 update) internal pure returns (uint256 res) {
-        assert(update <= type(uint48).max);
+    // 14 f's
+    function setEth(uint256 input, uint256 update) internal pure returns (uint256 res) {
+        // assert(input < 0xFFFFFFFFFFFFFFFFFFFFFFFFFFFF); // 13 + 15
         assembly {
-            //                0xfffffffffffffffddffffffffffffffccfffffffffffffffffffffffffffffff)
-            res := and(input, 0xffffffffffff000000000000ffffffffffffffffffffffffffffffffffffffff)
-            res := or(res, shl(160, update))
+            let i := 0x00
+            let o := update
+            for {
+
+            } gt(update, 0xFFFFFFFFFFFF) {
+                // 13
+            } {
+                res := add(res, 0x01)
+                update := shr(4, update)
+            }
+            update := or(shl(8, update), res)
+            //                  0xfffffffffffffffddffffffffffffffccfffffffffffffffffffffffffffffff)
+            input := and(input, 0xffffffffff00000000000000ffffffffffffffffffffffffffffffffffffffff)
+            res := or(input, shl(160, update))
         }
     }
+
+    // 9 f's
+    function setEpoch(uint256 input, uint256 update) internal pure returns (uint256 res) {
+        assert(update <= 0xFFFFFFFFF);
+        assembly {
+            //                0xfffffffffffffffddffffffffffffffccfffffffffffffffffffffffffffffff)
+            res := and(input, 0xf000000000ffffffffffffffffffffffffffffffffffffffffffffffffffffff)
+            res := or(res, shl(216, update))
+        }
+    }
+
+    // function setIsOwnerOnSwap(uint256 input) internal pure returns (uint256 res) {
+    //     // assert(update <= type(uint48).max);
+    //     assembly {
+    //         //                0xfffffffffffffffffffffffffffffffccfffffffffffffffffffffffffffffff)
+    //         // res := and(input, 0xffffffffff00ffffffffffffffffffffffffffffffffffffffffffffffffffff)
+    //         res := or(input, shl(251, 0x1))
+    //         // res := and(input, shl(208, 0x01))
+    //     }
+    // }
+
+    // function unSetIsOwnerOnSwap(uint256 input) internal pure returns (uint256 res) {
+    //     // assert(update <= type(uint48).max);
+    //     assembly {
+    //         //                0xfffffffffffffffffffffffffffffffccfffffffffffffffffffffffffffffff)
+    //         // res := and(input, 0xffffffffff00ffffffffffffffffffffffffffffffffffffffffffffffffffff)
+    //         res := and(input, shl(251, 0x0))
+    //         // res := and(input, shl(208, 0x01))
+    //     }
+    // }
 
     function setIs1155(uint256 input) internal pure returns (uint256 res) {
         // assert(update <= type(uint48).max);
         assembly {
             //                0xfffffffffffffffffffffffffffffffccfffffffffffffffffffffffffffffff)
-            res := and(input, 0xffffffffff00ffffffffffffffffffffffffffffffffffffffffffffffffffff)
-            res := or(res, shl(208, 0x01))
+            // res := and(input, 0xffffffffff00ffffffffffffffffffffffffffffffffffffffffffffffffffff)
+            res := or(input, shl(252, 0x1))
             // res := and(input, shl(208, 0x01))
         }
     }
@@ -100,8 +145,8 @@ library ShiftLib {
         // assert(update <= type(uint48).max);
         assembly {
             //                0xfffffffffffffffffffffffffffffffccfffffffffffffffffffffffffffffff)
-            res := and(input, 0xffffffff00ffffffffffffffffffffffffffffffffffffffffffffffffffffff)
-            res := or(res, shl(216, 0x1))
+            // res := and(input, 0xffffffff00ffffffffffffffffffffffffffffffffffffffffffffffffffffff)
+            res := or(input, shl(253, 0x1))
         }
     }
 
@@ -109,8 +154,8 @@ library ShiftLib {
         // assert(update <= type(uint48).max);
         assembly {
             //                0xfffffffffffffffffffffffffffffffccfffffffffffffffffffffffffffffff)
-            res := and(input, 0xffffff00ffffffffffffffffffffffffffffffffffffffffffffffffffffffff)
-            res := or(res, shl(224, 0x1))
+            // res := and(input, 0xffffff00ffffffffffffffffffffffffffffffffffffffffffffffffffffffff)
+            res := or(input, shl(254, 0x1))
         }
     }
 
@@ -118,46 +163,46 @@ library ShiftLib {
         // assert(update <= type(uint48).max);
         assembly {
             //                0xfffffffffffffffffffffffffffffffccfffffffffffffffffffffffffffffff)
-            res := and(input, 0xffff00ffffffffffffffffffffffffffffffffffffffffffffffffffffffffff)
-            res := or(res, shl(232, 0x1))
+            // res := and(input, 0xffff00ffffffffffffffffffffffffffffffffffffffffffffffffffffffffff)
+            res := or(input, shl(255, 0x1))
         }
     }
 
-    function setClaimed(uint256 input) internal pure returns (uint256 res) {
-        // assert(update <= type(uint48).max);
-        assembly {
-            //                0xfffffffffffffffffffffffffffffffccfffffffffffffffffffffffffffffff)
-            res := and(input, 0xffffffffffffffffffffffffffff00ffffffffffffffffffffffffffffffffff)
-            res := or(res, shl(136, 0x1))
-        }
-    }
+    // function setClaimed(uint256 input) internal pure returns (uint256 res) {
+    //     // assert(update <= type(uint48).max);
+    //     assembly {
+    //         //                0xfffffffffffffffffffffffffffffffccfffffffffffffffffffffffffffffff)
+    //         res := and(input, 0xffffffffffffffffffffffffffff00ffffffffffffffffffffffffffffffffff)
+    //         res := or(res, shl(136, 0x1))
+    //     }
+    // }
 
-    function setOwner(uint256 input) internal pure returns (uint256 res) {
-        // assert(update <= type(uint48).max);
-        assembly {
-            //                0xfffffffffffffffffffffffffffffffccfffffffffffffffffffffffffffffff)
-            res := and(input, 0xffffffffffffffffffffffffffffff00ffffffffffffffffffffffffffffffff)
-            res := or(res, shl(128, 0x1))
-        }
-    }
+    // function setOwner(uint256 input) internal pure returns (uint256 res) {
+    //     // assert(update <= type(uint48).max);
+    //     assembly {
+    //         //                0xfffffffffffffffffffffffffffffffccfffffffffffffffffffffffffffffff)
+    //         res := and(input, 0xffffffffffffffffffffffffffffff00ffffffffffffffffffffffffffffffff)
+    //         res := or(res, shl(128, 0x1))
+    //     }
+    // }
 
-    function setEth(uint256 input, uint256 val) internal pure returns (uint256 res) {
-        assert(val <= type(uint128).max);
-        assembly {
-            // if eq(input, 0) {
-            //     return(0x0, val)
-            // }
-            //                0xfffffffffffffffffffffffffffffffccfffffffffffffffffffffffffffffff)
-            res := and(input, 0xffffffffffffffffffffffffffffffff00000000000000000000000000000000)
-            res := or(res, val)
-        }
-    }
+    // function setEth(uint256 input, uint256 val) internal pure returns (uint256 res) {
+    //     assert(val <= type(uint128).max);
+    //     assembly {
+    //         // if eq(input, 0) {
+    //         //     return(0x0, val)
+    //         // }
+    //         //                0xfffffffffffffffffffffffffffffffccfffffffffffffffffffffffffffffff)
+    //         res := and(input, 0xffffffffffffffffffffffffffffffff00000000000000000000000000000000)
+    //         res := or(res, val)
+    //     }
+    // }
 
-    function setOffer(uint128 amount, bool owner) internal pure returns (uint256 res) {
-        assembly {
-            res := or(shl(128, shl(8, owner)), amount)
-        }
-    }
+    // function setOffer(uint128 amount, bool owner) internal pure returns (uint256 res) {
+    //     assembly {
+    //         res := or(shl(128, shl(8, owner)), amount)
+    //     }
+    // }
 }
 
 // function decodeSwapId(uint256 _unparsed)
