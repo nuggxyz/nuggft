@@ -30,10 +30,10 @@ abstract contract Epochable is IEpochable {
 
     function setActiveSeed(address sender) internal {
         uint256 curr = block.number / 25;
-        if (_seeds[curr] == 0) {
-            _seeds[curr] = currentSeed();
-            // _setters[curr] = sender;
-        }
+        // if (_seeds[curr] == 0) {
+        _seeds[curr] = currentSeed();
+        // _setters[curr] = sender;
+        // }
     }
 
     function ensureActiveSeed() internal {

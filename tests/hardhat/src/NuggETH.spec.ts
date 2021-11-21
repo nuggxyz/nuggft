@@ -41,9 +41,7 @@ describe('uint tests', async function () {
 
             // await fix.xnugg.connect(accounts.frank).fallback({ value: toEth('5') });
             console.log(fix.toNuggSwapTokenId(0)._hex);
-            await fix.nuggswap
-                .connect(accounts.mac)
-                .submitOffer(fix.mockERC721Mintable.address, fix.toNuggSwapTokenId(0), 0, { value: toEth('2.000') });
+            await fix.nuggswap.connect(accounts.mac).submitOfferSimple(fix.mockERC721Mintable.address, { value: toEth('2.000') });
 
             await fix.nuggswap
                 .connect(accounts.dee)
@@ -112,12 +110,12 @@ describe('uint tests', async function () {
                 .submitOffer(fix.mockERC721Mintable.address, fix.toNuggSwapTokenId(0), 1, { value: toEth('33.000') });
 
             await fix.xnugg.connect(accounts.frank).mint({ value: toEth('1') });
-            console.log('NOPE');
+            // console.log('NOPE');
 
-            console.log('yououououoi');
+            // console.log('yououououoi');
             const res99 = await fix.nuggswap['getSwap(address,uint256,uint256)'](fix.mockERC721Mintable.address, 0, 0);
 
-            console.log({ res99 });
+            // console.log({ res99 });
 
             const positionDee2 = await fix.xnugg.balanceOf(accounts.dee.address);
             const positionMac2 = await fix.xnugg.balanceOf(accounts.mac.address);
