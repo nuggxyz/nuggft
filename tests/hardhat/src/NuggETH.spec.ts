@@ -52,7 +52,7 @@ describe('uint tests', async function () {
 
             await Mining.advanceBlockTo(50);
             await fix.nuggswap.connect(accounts.dee).submitClaim(fix.mockERC721Mintable.address, 0, 0);
-            await fix.mockERC721Mintable.connect(accounts.dee).approve(fix.nuggswap.address, 0);
+            // await fix.mockERC721Mintable.connect(accounts.dee).approve(fix.nuggswap.address, 0);
             await fix.nuggswap.connect(accounts.mac).submitClaim(fix.mockERC721Mintable.address, 0, 0);
 
             await fix.nuggswap.connect(accounts.dee).submitSwap(fix.mockERC721Mintable.address, 0, 1, 5, toEth('.02000'), false);
