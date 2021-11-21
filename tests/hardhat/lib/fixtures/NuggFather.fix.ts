@@ -1,6 +1,6 @@
 import { Fixture, MockProvider } from 'ethereum-waffle';
 import { ethers } from 'hardhat';
-import { BigNumber, Wallet, Contract } from 'ethers';
+import { BigNumber, Wallet, Contract, BigNumberish } from 'ethers';
 
 import { ensureWETH, getHRE } from '../shared/deployment';
 import { NuggSwap } from '../../../../typechain/NuggSwap';
@@ -44,6 +44,7 @@ export interface NuggFatherFixture {
     tummyStartBal: BigNumber;
     hre: HardhatRuntimeEnvironment;
     blockOffset: BigNumber;
+    toNuggSwapTokenId(b: BigNumberish): BigNumber;
 }
 
 export const NuggFatherFix: Fixture<NuggFatherFixture> = async function (
@@ -111,7 +112,12 @@ export const NuggFatherFix: Fixture<NuggFatherFixture> = async function (
     hre.tracer.nameTags[nuggswap.address] = 'NuggSwap';
     hre.tracer.nameTags[tummy] = 'Tummy';
 
+    function toNuggSwapTokenId(b: BigNumberish): BigNumber {
+        return ethers.BigNumber.from(nuggswap.address).shl(96).add(b);
+    }
+
     return {
+        toNuggSwapTokenId,
         mockERC721,
         mockERC721Royalties,
         mockERC721Nuggable,
