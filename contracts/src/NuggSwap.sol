@@ -39,7 +39,7 @@ contract NuggSwap is INuggSwap, ERC721Holder, ERC1155Holder, Testable, Epochable
 
     IxNUGG public immutable override xnugg;
 
-    constructor(address _xnugg) Epochable(25, uint128(block.number)) {
+    constructor(address _xnugg) {
         xnugg = IxNUGG(_xnugg);
     }
 
@@ -108,7 +108,10 @@ contract NuggSwap is INuggSwap, ERC721Holder, ERC1155Holder, Testable, Epochable
                 activeEpoch == tokenid.formattedTokenEpoch() && tokenid.formattedTokenAddress() == address(this),
                 'SL:-1:0'
             );
+
             (uint256 epochInterval, bool is1155) = mintToken(token, tokenid);
+
+            ensureActiveSeed();
 
             newSwapData = newSwapData.setEpoch(activeEpoch + epochInterval);
 
@@ -162,24 +165,34 @@ contract NuggSwap is INuggSwap, ERC721Holder, ERC1155Holder, Testable, Epochable
         address account,
         uint48 requestedEpoch,
         uint256 requestedFloor,
-        bool is1155 // uint16 tokenAmount, // uint8 tokenPrecision
+        bool is1155
     ) internal {
+        // only minting swaps can be numbered 0
         require(swapnum > 0, 'NS:SS:-1');
 
         (Storage storage s, uint256 swapData, ) = loadStorage(token, tokenid, swapnum, account);
 
+        // make sure swap does not exist
         require(swapData == 0, 'NS:SS:0');
+
+        // force swaps to be started in sequential order
         if (swapnum != 1) require(s.datas[swapnum - 1] != 0, 'NS:SS:1');
 
+        // calculate epoch
         uint256 epoch = currentEpochId() + requestedEpoch;
 
-        (swapData, ) = uint256(uint160(account)).setEpoch(epoch).setFeeClaimed().setEth(requestedFloor);
+        // build starting swap data
+        (swapData, ) = swapData.setAccount(account).setEpoch(epoch).setOfferIsOwner().setEth(requestedFloor);
 
+        // move the token
         if (is1155) {
             SwapLib.moveERC1155(token, tokenid, account, address(this));
             swapData = swapData.setIs1155();
-        } else SwapLib.moveERC721(token, tokenid, account, address(this));
+        } else {
+            SwapLib.moveERC721(token, tokenid, account, address(this));
+        }
 
+        // sstore swapdata
         s.datas[swapnum] = swapData;
 
         emit SubmitSwap(token, tokenid, swapnum, account, requestedFloor, epoch);
