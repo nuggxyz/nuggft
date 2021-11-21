@@ -1,9 +1,8 @@
 pragma solidity 0.8.4;
 
 import './IxNUGG.sol';
-import './IEpochable.sol';
 
-interface INuggSwap is IEpochable {
+interface INuggSwap {
     event SubmitOffer(address token, uint256 tokenid, uint256 swapnum, address account, uint256 amount);
 
     event SubmitSwap(address token, uint256 tokenid, uint256 swapnum, address account, uint256 amount, uint256 epoch);
