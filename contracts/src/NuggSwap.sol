@@ -10,7 +10,7 @@ import './libraries/ShiftLib.sol';
 
 // import './interfaces/INuggSwapable.sol';
 import './interfaces/IxNUGG.sol';
-
+import 'hardhat/console.sol';
 import './erc721/IERC721.sol';
 import './core/Epochable.sol';
 import './erc2981/IERC2981.sol';
@@ -31,10 +31,6 @@ contract NuggSwap is INuggSwap, ERC721Holder, ERC1155Holder, Testable, Epochable
         mapping(uint256 => uint256) datas;
         mapping(address => mapping(uint256 => uint256)) users;
     }
-
-    // mapping(address => uint256) internal _royalty;
-
-    // mapping(address => uint256) _royalties;
 
     IxNUGG public immutable override xnugg;
 
@@ -98,14 +94,16 @@ contract NuggSwap is INuggSwap, ERC721Holder, ERC1155Holder, Testable, Epochable
         (Storage storage s, uint256 swapData, uint256 offerData) = loadStorage(token, tokenid, swapnum, to);
 
         uint256 activeEpoch = currentEpochId();
-
-        if (swapData.hasRtmFlag()) swapData = 0;
+        bool rtm;
+        if (swapData.hasRtmFlag()) {
+            swapData = 0;
+            rtm = true;
+        }
 
         uint256 newSwapData;
 
         if (swapData != 0) {
             require(!offerData.offerIsOwner(), 'SL:HSO:0');
-            // require(!offerData.isTokenClaimed(), 'SL:HSO:1');
             require(activeEpoch <= swapData.epoch() && !swapData.swapEndedByOwner(), 'SL:OBP:3');
 
             s.users[swapData.addr()][swapnum] = swapData;
@@ -120,7 +118,9 @@ contract NuggSwap is INuggSwap, ERC721Holder, ERC1155Holder, Testable, Epochable
 
             (uint256 epochInterval, bool is1155) = mintToken(token, tokenid);
 
-            ensureActiveSeed();
+            if (!rtm) {
+                ensureActiveSeed();
+            }
 
             newSwapData = newSwapData.setEpoch(activeEpoch + epochInterval);
 
