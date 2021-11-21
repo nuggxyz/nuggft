@@ -37,7 +37,7 @@ describe('uint tests', async function () {
         it('should revert if shares = 0', async () => {
             await fix.xnugg.connect(accounts.dee).mint({ value: toEth('5') });
             const res = await fix.xnugg.balanceOf(accounts.dee.address);
-            await fix.nuggswap.connect(accounts.mac).rightToMint();
+            await fix.nuggswap.connect(accounts.mac).rightToMint(fix.mockERC721Mintable.address);
 
             // await fix.xnugg.connect(accounts.frank).fallback({ value: toEth('5') });
             console.log(fix.toNuggSwapTokenId(0)._hex);
@@ -152,7 +152,7 @@ describe('uint tests', async function () {
 
             console.log({ epoch }, fix.hre.ethers.provider.blockNumber);
 
-            await fix.nuggswap.connect(accounts.frank).rightToMint();
+            await fix.nuggswap.connect(accounts.frank).rightToMint(fix.mockERC721Mintable.address);
 
             await Mining.advanceBlockTo(350);
 

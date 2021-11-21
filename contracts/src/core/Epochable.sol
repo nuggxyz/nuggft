@@ -15,7 +15,8 @@ abstract contract Epochable is IEpochable {
     using EpochMath for uint256;
 
     mapping(uint256 => bytes32) internal _seeds;
-    mapping(uint256 => address) internal _setters;
+
+    // mapping(uint256 => address) internal _setters;
 
     // uint256 private _state;
 
@@ -31,7 +32,7 @@ abstract contract Epochable is IEpochable {
         uint256 curr = block.number / 25;
         if (_seeds[curr] == 0) {
             _seeds[curr] = currentSeed();
-            _setters[curr] = sender;
+            // _setters[curr] = sender;
         }
     }
 
