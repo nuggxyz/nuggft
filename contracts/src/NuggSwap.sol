@@ -14,7 +14,6 @@ import './interfaces/IxNUGG.sol';
 import './erc721/IERC721.sol';
 import './core/Epochable.sol';
 import './erc2981/IERC2981.sol';
-// import 'hardhat/console.sol';
 import './common/Testable.sol';
 import './erc721/ERC721Holder.sol';
 import './erc1155/ERC1155Holder.sol';
@@ -100,6 +99,8 @@ contract NuggSwap is INuggSwap, ERC721Holder, ERC1155Holder, Testable, Epochable
 
         uint256 activeEpoch = currentEpochId();
 
+        if (swapData.hasRtmFlag()) swapData = 0;
+
         uint256 newSwapData;
 
         if (swapData != 0) {
@@ -153,15 +154,12 @@ contract NuggSwap is INuggSwap, ERC721Holder, ERC1155Holder, Testable, Epochable
         uint256 activeEpoch = currentEpochId();
 
         bool winner;
-        // console.log('blahhhhhhhhh', address(this), tokenid, tokenid.formattedTokenAddress());
-        // console.log('yoyouo', swapData);
-        if (swapData == 0) {
+        if (swapData.hasRtmFlag()) {
             require(activeEpoch > tokenid.formattedTokenEpoch(), 'SC:SD:1');
-            // console.log('sadjfhskdjhf', address(this), tokenid, tokenid.formattedTokenAddress());
             require(address(this) == tokenid.formattedTokenAddress(), 'SC:SD:2');
-            winner = _setters[tokenid.formattedTokenEpoch()] == account;
+            winner = swapData.addr() == account;
             require(winner, 'SC:0:0');
-            swapData = swapData.setAccount(account).setEpoch(tokenid.formattedTokenEpoch());
+            swapData = uint256(0).setAccount(account).setEpoch(tokenid.formattedTokenEpoch());
         } else {
             winner = SwapLib.checkClaimer(account, swapData, offerData, activeEpoch);
         }
@@ -256,7 +254,6 @@ contract NuggSwap is INuggSwap, ERC721Holder, ERC1155Holder, Testable, Epochable
             s.slot := keccak256(ptr, 64)
             // tmp := s.slot
         }
-        // console.log('hhhhhhh', tmp);
         swapData = s.datas[swapnum];
 
         if (swapData == 0) {
@@ -267,7 +264,9 @@ contract NuggSwap is INuggSwap, ERC721Holder, ERC1155Holder, Testable, Epochable
         else offerData = swapData;
     }
 
-    function rightToMint() external {
+    function rightToMint(address token) external {
         setActiveSeed(msg.sender);
+        (Storage storage s, uint256 swapData, ) = loadStorage(token, currentTokenId(), 0, msg.sender);
+        if (swapData == 0) s.datas[0] = swapData.setRtmFlag().setAccount(msg.sender);
     }
 }
