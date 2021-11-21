@@ -146,15 +146,15 @@ describe('uint tests', async function () {
             // await fix.seller.connect(accounts.frank).submitOffer(BigNumber.from(1), toEth('2'), 0, { value: toEth('2.000') });
             await Mining.advanceBlockTo(250);
             await Mining.advanceBlock();
-            const epoch = await fix.nuggswap.currentEpochId();
+            // const epoch = await fix.nuggswap.currentEpochId();
 
-            console.log({ epoch }, fix.hre.ethers.provider.blockNumber);
+            // console.log({ epoch }, fix.hre.ethers.provider.blockNumber);
 
             await fix.nuggswap.connect(accounts.frank).rightToMint(fix.mockERC721Mintable.address);
 
             await Mining.advanceBlockTo(350);
 
-            await fix.nuggswap.connect(accounts.frank).submitClaimSimple(fix.mockERC721Mintable.address, epoch);
+            await fix.nuggswap.connect(accounts.frank).submitClaimSimple(fix.mockERC721Mintable.address, 10);
 
             // await fix.xnugg.connect(accounts.dee).burn(toEth('41'));
 

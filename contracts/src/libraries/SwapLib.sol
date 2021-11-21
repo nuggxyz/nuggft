@@ -7,59 +7,59 @@ import '../erc2981/IERC2981.sol';
 import './ShiftLib.sol';
 import './Address.sol';
 import './QuadMath.sol';
-import './CheapMath.sol';
+import './StorageLib.sol';
 
 library SwapLib {
     using Address for address;
     using Address for address payable;
-    using CheapMath for uint16;
     using ShiftLib for uint256;
 
-    // uint16 constant MAX_ROYALTY_BPS = 1000;
-    // uint16 constant FULL_ROYALTY_BPS = 10000;
-
-    enum ClaimerStatus {
-        OWNER_PAPERHAND,
-        OWNER_DIAMONDHAND,
-        OWNER_DIAMONDHAND_EARLY,
-        OWNER_NO_OFFERS,
-        WINNER,
-        LOSER,
-        PREMADONA,
-        DID_NOT_OFFER,
-        HAS_ALREADY_CLAIMED,
-        WISE_GUY
+    struct Storage {
+        mapping(uint256 => uint256) datas;
+        mapping(address => mapping(uint256 => uint256)) users;
     }
 
-    struct OfferData {
-        bool claimed;
-        address account;
-        uint128 eth;
+    function loadStorage(
+        address token,
+        uint256 tokenid,
+        uint256 swapnum,
+        address account
+    )
+        internal
+        view
+        returns (
+            Storage storage s,
+            uint256 swapData,
+            uint256 offerData
+        )
+    {
+        uint256 ptr = StorageLib.pointer(uint160(token), tokenid);
+
+        assembly {
+            s.slot := ptr
+        }
+
+        swapData = s.datas[swapnum];
+
+        if (swapData == 0) return (s, 0, 0);
+
+        if (account != address(uint160(swapData))) offerData = s.users[account][swapnum];
+        else offerData = swapData;
     }
 
-    struct SwapData {
-        address token;
-        uint256 tokenid;
-        uint256 num;
-        address leader;
-        uint128 eth;
-        uint48 epoch;
-        uint48 activeEpoch;
-        address owner;
-        uint16 bps;
-        bool tokenClaimed;
-        bool royClaimed;
-        bool is1155;
+    function mintToken(address token, uint256 tokenid) internal view returns (bool is1155) {
+        try IERC721(token).ownerOf(tokenid) returns (address addr) {
+            require(addr == address(this), 'NS:MT:0');
+            return (false);
+        } catch {
+            try IERC1155(token).balanceOf(address(this), tokenid) returns (uint256 amount) {
+                require(amount > 0, 'NS:MT:1');
+                return (true);
+            } catch {
+                require(false, 'NS:MT:0');
+            }
+        }
     }
-
-    // function decodeSwapData(uint256 encodedSwapData) internal returns (SwapData memory res) {
-    //     (res.leader, res.epoch, res.eth, res.precision, res.bps, res.tokenClaimed) = ShiftLib.decodeSwapData(
-    //         encodedSwapData
-    //     );
-
-    //     res.exists = res.leader != address(0);
-    //     res.is1155 = res.eth != 0;
-    // }
 
     function checkOwner(address token, address asker) internal view returns (bool res) {
         (bool ok, bytes memory returnData) = token.staticcall(abi.encodeWithSignature('owner()'));
@@ -67,7 +67,6 @@ library SwapLib {
         return abi.decode(returnData, (address)) == asker;
     }
 
-    // most of these are LOSER, but want to make sure we catch any bugs in testing
     function checkClaimer(
         address account,
         uint256 swapData,
@@ -109,8 +108,16 @@ library SwapLib {
     //     } else {}
     // }
 
-    function takeBPS(uint256 total, uint256 bps) internal pure returns (uint256 res) {
-        res = QuadMath.mulDiv(total, bps < 1000 ? bps : 1000, 10000);
+    // function takeBPS(uint256 total, uint256 bps) internal pure returns (uint256 res) {
+    //     res = QuadMath.mulDiv(total, bps < 1000 ? bps : 1000, 10000);
+    // }
+
+    function points(uint256 total, uint256 bps) internal pure returns (uint256 res) {
+        res = QuadMath.mulDiv(total, bps, 10000);
+    }
+
+    function pointsWith(uint256 total, uint256 bps) internal pure returns (uint256 res) {
+        res = points(total, bps) + total;
     }
 
     function moveERC721(
@@ -140,35 +147,4 @@ library SwapLib {
 
         require(IERC1155(token).balanceOf(to, tokenid) - toStart == 1, 'AUC:TT:3');
     }
-
-    function validateOfferIncrement(SwapData memory swap, OfferData memory offer) internal pure returns (bool) {
-        return offer.eth > swap.eth + ((swap.eth * 100) / 10000);
-    }
-
-    function hasVaildEpoch(SwapData memory swap) internal pure returns (bool) {
-        return swap.epoch >= swap.activeEpoch && swap.epoch - swap.activeEpoch <= 1000;
-    }
-
-    function isOver(SwapData memory swap) internal pure returns (bool) {
-        return (swap.activeEpoch > swap.epoch || swap.tokenClaimed);
-    }
-
-    function isActive(SwapData memory swap) internal pure returns (bool) {
-        return !swap.tokenClaimed && swap.activeEpoch <= swap.epoch;
-    }
 }
-
-// if (swap.owner == offer.account) {
-//     if (offer.account == swap.leader) {}
-
-//     if (isOver(swap)) {
-//         if (offer.account == swap.leader) {
-//             return ClaimerStatus.WINNER;
-//         } else {
-//             return ClaimerStatus.LOSER;
-//         }
-//     } else {
-//         require(offer.account == swap.leader && offer.account == swap.owner, 'AUC:CLM:2');
-//         swap.tokenClaimed = true;
-//     }
-// }
