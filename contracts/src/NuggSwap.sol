@@ -14,11 +14,12 @@ import './interfaces/IxNUGG.sol';
 import './erc721/IERC721.sol';
 import './core/Epochable.sol';
 import './erc2981/IERC2981.sol';
-
+import 'hardhat/console.sol';
 import './common/Testable.sol';
 import './erc721/ERC721Holder.sol';
 import './erc1155/ERC1155Holder.sol';
 
+// 80000000071158E460913D050272BE2A172EBEA775FD7ED68C32B0DC1032C55D
 contract NuggSwap is INuggSwap, ERC721Holder, ERC1155Holder, Testable, Epochable {
     using Address for address payable;
     using SwapLib for SwapLib.SwapData;
@@ -28,7 +29,7 @@ contract NuggSwap is INuggSwap, ERC721Holder, ERC1155Holder, Testable, Epochable
     struct Storage {
         // uint256[] datas;
         mapping(uint256 => uint256) datas;
-        mapping(address => uint256) users;
+        mapping(address => mapping(uint256 => uint256)) users;
     }
 
     mapping(address => uint256) internal _royalty;
@@ -142,8 +143,11 @@ contract NuggSwap is INuggSwap, ERC721Holder, ERC1155Holder, Testable, Epochable
         uint256 activeEpoch = currentEpochId();
 
         if (swapData != 0) {
-            s.users[address(uint160(swapData))] = swapData;
+            console.log(swapData);
+
+            s.users[address(uint160(swapData))][swapnum] = swapData;
         }
+        // 8000000007246DDF97976605CD45D2C3D3B277095ECB8C9A7EBA48BE9BF8261A
 
         if (swapData == 0 && swapnum == 0) {
             bool is1155 = mintToken(token, tokenid, activeEpoch);
@@ -154,12 +158,28 @@ contract NuggSwap is INuggSwap, ERC721Holder, ERC1155Holder, Testable, Epochable
         } else {
             require(swapData != 0, 'SL:HSO:-1');
         }
-
+        console.log(offerData);
         require(!offerData.isFeeClaimed(), 'SL:HSO:0'); // isFeeClaimed == isOwner if in offerData
         require(!offerData.isTokenClaimed(), 'SL:HSO:1');
-
-        offerData = offerData.setEth(offerData.eth() + value);
-
+        // console.log('HERE:', swapData.eth(), offerData.eth(), value);
+        // console.log(
+        //     'HERE:',
+        //     swapData.setEth(swapData.eth() + value).eth(),
+        //     offerData.setEth(offerData.eth() + value).eth(),
+        //     value
+        // );
+        // console.log('---------');
+        offerData = offerData == 0
+            ? swapData.setEth(swapData.eth() + value)
+            : offerData.setEth(offerData.eth() + value);
+        // console.log('HERE:', swapData.eth(), offerData.eth(), value);
+        // console.log(
+        //     'HERE:',
+        //     swapData.setEth(swapData.eth() + value).eth(),
+        //     offerData.setEth(offerData.eth() + value).eth(),
+        //     value
+        // );
+        // 32000000000000000000
         require(activeEpoch <= swapData.epoch() && !swapData.isTokenClaimed(), 'SL:OBP:3');
         require(swapData.eth() < offerData.eth(), 'SL:OBP:4');
 
@@ -191,6 +211,9 @@ contract NuggSwap is INuggSwap, ERC721Holder, ERC1155Holder, Testable, Epochable
             SwapLib.moveERC721(token, tokenid, address(this), to);
             s.datas[swapnum] = swapData.setTokenClaimed();
         } else {
+            // console.log(offerData.eth());
+            s.users[account][swapnum] = swapData.setTokenClaimed();
+
             payable(to).sendValue(offerData.eth());
         }
 
@@ -234,8 +257,8 @@ contract NuggSwap is INuggSwap, ERC721Holder, ERC1155Holder, Testable, Epochable
         swapData = s.datas[swapnum];
 
         if (swapData == 0) return (s, 0, 0);
-
-        if (account != address(uint160(swapData))) offerData = s.users[account];
+        // 8000000007   1158E460913D   05       0272BE2A172EBEA775FD7ED68C32B0DC1032C55D
+        if (account != address(uint160(swapData))) offerData = s.users[account][swapnum];
         // else offerData = swapData;
     }
 }

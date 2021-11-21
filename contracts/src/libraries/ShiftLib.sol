@@ -61,7 +61,7 @@ library ShiftLib {
             res := and(shr(160, input), 0xFFFFFFFFFFFFFF)
             let i := and(res, 0xf)
             // res := shr(4, res)
-            res := shl(mul(4, i), shr(4, res))
+            res := shl(mul(4, i), shr(8, res))
         }
     }
 
