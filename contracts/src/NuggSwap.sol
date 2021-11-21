@@ -33,9 +33,9 @@ contract NuggSwap is INuggSwap, ERC721Holder, ERC1155Holder, Testable, Epochable
         mapping(address => mapping(uint256 => uint256)) users;
     }
 
-    mapping(address => uint256) internal _royalty;
+    // mapping(address => uint256) internal _royalty;
 
-    mapping(address => uint256) _royalties;
+    // mapping(address => uint256) _royalties;
 
     IxNUGG public immutable override xnugg;
 
@@ -48,21 +48,7 @@ contract NuggSwap is INuggSwap, ERC721Holder, ERC1155Holder, Testable, Epochable
         uint256 tokenid,
         uint256 swapnum
     ) external payable override {
-        // uint256 gas = gasleft();
         _submitOffer(token, tokenid, swapnum, msg_sender(), msg_sender(), uint128(msg_value()));
-        // uint256 gas2 = gasleft();
-
-        // console.log('HREwwww: ', gas - gas2);
-    }
-
-    function getSwap(
-        address token,
-        uint256 tokenid,
-        uint256 swapnum
-    ) external view override returns (SwapData memory res) {
-        // var (, , , ) = loadStorage(token, tokenid, swapnum, address(0));
-        // res.swapnum = _swapnum > numSwaps ? numSwaps : _swapnum;
-        // res.amount = uint128(leaderData);
     }
 
     function submitSwap(
@@ -76,15 +62,6 @@ contract NuggSwap is INuggSwap, ERC721Holder, ERC1155Holder, Testable, Epochable
         _submitSwap(token, tokenid, swapnum, msg_sender(), requestedEpoch, requestedFloor, is1155);
     }
 
-    function submitOfferTo(
-        address token,
-        uint256 tokenid,
-        uint256 swapnum,
-        address to
-    ) external payable override {
-        _submitOffer(token, tokenid, swapnum, msg_sender(), to, uint128(msg_value()));
-    }
-
     function submitClaim(
         address token,
         uint256 tokenid,
@@ -93,13 +70,89 @@ contract NuggSwap is INuggSwap, ERC721Holder, ERC1155Holder, Testable, Epochable
         _submitClaim(token, tokenid, swapnum, msg_sender(), msg_sender());
     }
 
-    function submitClaimTo(
+    function getSwap(
+        address token,
+        uint256 tokenid,
+        uint256 swapnum
+    ) external view override returns (SwapData memory res) {
+        // var (, , , ) = loadStorage(token, tokenid, swapnum, address(0));
+        // res.swapnum = _swapnum > numSwaps ? numSwaps : _swapnum;
+        // res.amount = uint128(leaderData);
+    }
+
+    function _submitOffer(
         address token,
         uint256 tokenid,
         uint256 swapnum,
+        address account,
+        address to,
+        uint256 value
+    ) internal {
+        (Storage storage s, uint256 swapData, uint256 offerData) = loadStorage(token, tokenid, swapnum, to);
+
+        uint256 activeEpoch = currentEpochId();
+
+        uint256 newSwapData;
+
+        if (swapData != 0) {
+            require(!offerData.offerIsOwner(), 'SL:HSO:0');
+            // require(!offerData.isTokenClaimed(), 'SL:HSO:1');
+            require(activeEpoch <= swapData.epoch() && !swapData.swapEndedByOwner(), 'SL:OBP:3');
+
+            s.users[swapData.addr()][swapnum] = swapData;
+
+            newSwapData = newSwapData.setEpoch(swapData.epoch());
+            if (swapData.is1155()) newSwapData = newSwapData.setIs1155();
+        } else if (swapnum == 0) {
+            require(
+                activeEpoch == tokenid.formattedTokenEpoch() && tokenid.formattedTokenAddress() == address(this),
+                'SL:-1:0'
+            );
+            (uint256 epochInterval, bool is1155) = mintToken(token, tokenid);
+
+            newSwapData = newSwapData.setEpoch(activeEpoch + epochInterval);
+
+            if (is1155) newSwapData = newSwapData.setIs1155();
+        } else {
+            require(false, 'NS:SO:0');
+        }
+
+        newSwapData = newSwapData.setAccount(to);
+
+        uint256 dust;
+        (newSwapData, dust) = newSwapData.setEth(offerData.eth() + value);
+
+        require(swapData.eth() < newSwapData.eth(), 'SL:OBP:4');
+        s.datas[swapnum] = newSwapData;
+
+        if (dust > 0) payable(account).sendValue(dust);
+
+        emit SubmitOffer(token, tokenid, swapnum, to, value);
+    }
+
+    function _submitClaim(
+        address token,
+        uint256 tokenid,
+        uint256 swapnum,
+        address account,
         address to
-    ) external override {
-        _submitClaim(token, tokenid, swapnum, msg_sender(), to);
+    ) internal {
+        (Storage storage s, uint256 swapData, uint256 offerData) = loadStorage(token, tokenid, swapnum, account);
+
+        uint256 activeEpoch = currentEpochId();
+
+        bool winner = SwapLib.checkClaimer(account, swapData, offerData, activeEpoch);
+
+        if (winner) {
+            SwapLib.moveERC721(token, tokenid, address(this), to);
+            s.datas[swapnum] = swapData.setTokenClaimed();
+        } else {
+            // s.users[account][swapnum] = swapData.setTokenClaimed();
+            delete s.users[account][swapnum];
+            payable(to).sendValue(offerData.eth());
+        }
+
+        emit SubmitClaim(token, tokenid, swapnum, account);
     }
 
     function _submitSwap(
@@ -133,84 +186,7 @@ contract NuggSwap is INuggSwap, ERC721Holder, ERC1155Holder, Testable, Epochable
         emit SubmitSwap(token, tokenid, swapnum, account, requestedFloor, epoch);
     }
 
-    function _submitOffer(
-        address token,
-        uint256 tokenid,
-        uint256 swapnum,
-        address account,
-        address to,
-        uint256 value
-    ) internal {
-        (Storage storage s, uint256 swapData, uint256 offerData) = loadStorage(token, tokenid, swapnum, account);
-
-        uint256 activeEpoch = currentEpochId();
-
-        uint256 newSwapData;
-
-        if (swapData != 0) {
-            require(!offerData.isFeeClaimed(), 'SL:HSO:0');
-
-            require(!offerData.isTokenClaimed(), 'SL:HSO:1');
-
-            require(activeEpoch <= swapData.epoch() && !swapData.isTokenClaimed(), 'SL:OBP:3');
-
-            s.users[address(uint160(swapData))][swapnum] = swapData;
-
-            newSwapData = newSwapData.setEpoch(swapData.epoch());
-
-            if (swapData.is1155()) newSwapData = newSwapData.setIs1155();
-        } else if (swapnum == 0) {
-            require(activeEpoch == uint96(tokenid) && address(uint160(tokenid >> 96)) == address(this), 'SL:-1:0');
-
-            (uint256 epochInterval, bool is1155) = mintToken(token, tokenid);
-
-            newSwapData = newSwapData.setEpoch(activeEpoch + epochInterval);
-
-            if (is1155) newSwapData = newSwapData.setIs1155();
-        } else {
-            require(false, 'NS:SO:0');
-        }
-
-        newSwapData = newSwapData.setAccount(account);
-
-        uint256 dust;
-
-        (newSwapData, dust) = newSwapData.setEth(offerData.eth() + value);
-
-        require(swapData.eth() < newSwapData.eth(), 'SL:OBP:4');
-        s.datas[swapnum] = newSwapData;
-
-        if (dust > 0) payable(account).sendValue(dust);
-
-        emit SubmitOffer(token, tokenid, swapnum, account, value);
-    }
-
-    function _submitClaim(
-        address token,
-        uint256 tokenid,
-        uint256 swapnum,
-        address account,
-        address to
-    ) internal {
-        (Storage storage s, uint256 swapData, uint256 offerData) = loadStorage(token, tokenid, swapnum, account);
-
-        uint256 activeEpoch = currentEpochId();
-
-        bool winner = SwapLib.checkClaimer(account, swapData, offerData, activeEpoch);
-
-        if (winner) {
-            SwapLib.moveERC721(token, tokenid, address(this), to);
-            s.datas[swapnum] = swapData.setTokenClaimed();
-        } else {
-            // s.users[account][swapnum] = swapData.setTokenClaimed();
-            delete s.users[account][swapnum];
-            payable(to).sendValue(offerData.eth());
-        }
-
-        emit SubmitClaim(token, tokenid, swapnum, account);
-    }
-
-    function mintToken(address token, uint256 tokenid) internal returns (uint256 epochInterval, bool is1155) {
+    function mintToken(address token, uint256 tokenid) internal view returns (uint256 epochInterval, bool is1155) {
         try IERC721(token).ownerOf(tokenid) returns (address addr) {
             require(addr == address(this), 'NS:MT:0');
 
