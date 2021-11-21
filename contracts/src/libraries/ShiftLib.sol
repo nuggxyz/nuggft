@@ -124,6 +124,40 @@ library ShiftLib {
         }
     }
 
+
+
+    function addr(uint256 input) internal pure returns (address res) {
+        assembly {
+            res := input
+        }
+    }
+
+    function offerIsOwner(uint256 input) internal pure returns (bool res) {
+        res = isFeeClaimed(input);
+
+    }
+
+        function swapEndedByOwner(uint256 input) internal pure returns (bool res) {
+        res = isTokenClaimed(input);
+
+    }
+
+            function formattedTokenEpoch(uint256 input) internal pure returns (uint256 res) {
+        assembly {
+            res := and(input, 0xffffffffffff)
+        }
+    }
+
+
+            function formattedTokenAddress(uint256 input) internal pure returns (address res) {
+        assembly {
+            res := shr(96, input)
+        }
+
+    }
+
+
+
     // function setIsOwnerOnSwap(uint256 input) internal pure returns (uint256 res) {
     //     // assert(update <= type(uint48).max);
     //     assembly {

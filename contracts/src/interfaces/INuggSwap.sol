@@ -4,16 +4,16 @@ import './IxNUGG.sol';
 import './IEpochable.sol';
 
 interface INuggSwap is IEpochable {
-    event SubmitOffer(address nft, uint256 tokenid, uint256 swapnum, address account, uint256 amount);
+    event SubmitOffer(address token, uint256 tokenid, uint256 swapnum, address account, uint256 amount);
 
-    event SubmitSwap(address nft, uint256 tokenid, uint256 swapnum, address account, uint256 amount, uint256 epoch);
+    event SubmitSwap(address token, uint256 tokenid, uint256 swapnum, address account, uint256 amount, uint256 epoch);
 
-    event SubmitClaim(address nft, uint256 tokenid, uint256 swapnum, address account);
+    event SubmitClaim(address token, uint256 tokenid, uint256 swapnum, address account);
 
     function xnugg() external view returns (IxNUGG);
 
     function submitSwap(
-        address nft,
+        address token,
         uint256 tokenid,
         uint256 swapnum,
         uint48 requestedEpoch,
@@ -22,29 +22,15 @@ interface INuggSwap is IEpochable {
     ) external;
 
     function submitOffer(
-        address nft,
+        address token,
         uint256 tokenid,
         uint256 swapnum
     ) external payable;
 
     function submitClaim(
-        address nft,
+        address token,
         uint256 tokenid,
         uint256 swapnum
-    ) external;
-
-    function submitOfferTo(
-        address nft,
-        uint256 tokenid,
-        uint256 swapnum,
-        address to
-    ) external payable;
-
-    function submitClaimTo(
-        address nft,
-        uint256 tokenid,
-        uint256 swapnum,
-        address to
     ) external;
 
     struct SwapData {
@@ -59,7 +45,7 @@ interface INuggSwap is IEpochable {
     }
 
     function getSwap(
-        address nft,
+        address token,
         uint256 tokenid,
         uint256 swapnum
     ) external view returns (SwapData memory);
