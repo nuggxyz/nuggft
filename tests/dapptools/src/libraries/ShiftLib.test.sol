@@ -39,7 +39,7 @@ contract ShiftLibTest is DSTestExtended {
     // tokenClaimed:    false
     // royaltyClaimed:  false
     // feeClaimed:      true ========= d
-    uint256 swap_sample1 = 0x9000fda3450000006A596082900BD824B016326A401d083B33D092293333A830; // good
+    uint256 swap_sample1 = 0x9000fda3450006A596082900829BD824B016326A401d083B33D092293333A830; // good
     // leader:          0xB8001C3eC9AA1985f6c747E25c28324E4A361ec1
     // eths             fda345 - 16622405
     // epoch:           1
@@ -170,6 +170,15 @@ contract ShiftLibTest is DSTestExtended {
         assertTrue(swap_sample5.isFeeClaimed(), 'swap_sample5');
     }
 
+    function test_eth() public {
+        assertEq(swap_sample0.eth(), 295147905179351777280, 'swap_sample0');
+        assertEq(swap_sample1.eth(), 28547876905, 'swap_sample1');
+        assertEq(swap_sample2.eth(), 16622405, 'swap_sample2');
+        assertEq(swap_sample3.eth(), 5555555555555, 'swap_sample3');
+        assertEq(swap_sample4.eth(), 0, 'swap_sample4');
+        // assertEq(swap_sample5.eth(), , 'swap_sample5');
+    }
+
     // function test_isActive() public {
     //     assertTrue(!offer_sample0.isActive(69), 'offer_sample0');
     //     assertTrue(offer_sample1.isActive(6969695), 'offer_sample1');
@@ -198,6 +207,18 @@ contract ShiftLibTest is DSTestExtended {
         assertEq(two, 0x0000000000FFFFFFFFFaad010000000000000000000000000000000000000000, 'swap_sample4');
         assertEq(thr, 0xffffffffff00000000000000ffffffffffffffffffffffffffffffffffffffff, 'swap_sample5');
     }
+
+    function test_setEth2() public {
+        uint256 two = swap_sample4.setEth(2000000000000000000);
+        //              A000010001000000000000000DB143EDE6805F23922535BAD7ACB3E9AA5D2F7B
+        assertEq(two, 0x00000000001BC16D674EC8040000000000000000000000000000000000000000, 'swap_sample4');
+    }
+
+    // function test_setEth2() public {
+    //     uint256 two = swap_sample4.setEth(2000000000000000000);
+    //     //              A000010001000000000000000DB143EDE6805F23922535BAD7ACB3E9AA5D2F7B
+    //     assertEq(two, 0x00000000001BC16D674EC8040000000000000000000000000000000000000000, 'swap_sample4');
+    // }
 
     function test_setEpoch() public {
         uint256 one = swap_sample3.setEpoch(777888);
