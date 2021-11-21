@@ -59,9 +59,10 @@ library ShiftLib {
     function eth(uint256 input) internal pure returns (uint256 res) {
         assembly {
             res := and(shr(160, input), 0xFFFFFFFFFFFFFF)
-            let i := and(res, 0xf)
+            let i := and(res, 0xff)
             // res := shr(4, res)
             res := shl(mul(4, i), shr(8, res))
+            res := mul(res, 0xE8D4A51000)
         }
     }
 
@@ -81,23 +82,35 @@ library ShiftLib {
     }
 
     // 14 f's
-    function setEth(uint256 input, uint256 update) internal pure returns (uint256 res) {
+    function setEth(uint256 input, uint256 update) internal pure returns (uint256 res, uint256 rem) {
         // assert(input < 0xFFFFFFFFFFFFFFFFFFFFFFFFFFFF); // 13 + 15
         assembly {
-            let i := 0x00
-            let o := update
+            let in := update
+            update := div(update, 0xE8D4A51000)
+            // assert(gt(input, 0))
+            // let i := 0x00
             for {
 
             } gt(update, 0xFFFFFFFFFFFF) {
                 // 13
             } {
                 res := add(res, 0x01)
+
                 update := shr(4, update)
             }
+
             update := or(shl(8, update), res)
-            //                  0xfffffffffffffffddffffffffffffffccfffffffffffffffffffffffffffffff)
+
+
+
+             let out := shl(mul(4, res), shr(8, update))
+            rem := sub(in, mul(out, 0xE8D4A51000))
+
+
             input := and(input, 0xffffffffff00000000000000ffffffffffffffffffffffffffffffffffffffff)
             res := or(input, shl(160, update))
+
+
         }
     }
 

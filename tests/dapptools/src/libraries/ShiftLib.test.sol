@@ -25,7 +25,7 @@ contract ShiftLibTest is DSTestExtended {
     }
 
     // leader:          0x0DB143eDe6805F23922535Bad7Acb3e9Aa5D2F7b
-    // ether            295147905179351777280 - FFFFFFFFFFFF00000 - FFFFFFFFFFFF05
+    // ether            295147905179351777280000000000000 - FFFFFFFFFFFF00000 - FFFFFFFFFFFF05
     // epoch:           57997416675 - D80EA58E3
     // is1155:          true
     // tokenClaimed:    true
@@ -171,10 +171,10 @@ contract ShiftLibTest is DSTestExtended {
     }
 
     function test_eth() public {
-        assertEq(swap_sample0.eth(), 295147905179351777280, 'swap_sample0');
-        assertEq(swap_sample1.eth(), 28547876905, 'swap_sample1');
-        assertEq(swap_sample2.eth(), 16622405, 'swap_sample2');
-        assertEq(swap_sample3.eth(), 5555555555555, 'swap_sample3');
+        assertEq(swap_sample0.eth(), 295147905179351777280000000000000, 'swap_sample0');
+        assertEq(swap_sample1.eth(), 28547876905000000000000, 'swap_sample1');
+        assertEq(swap_sample2.eth(), 16622405000000000000, 'swap_sample2');
+        assertEq(swap_sample3.eth(), 5555555555555000000000000, 'swap_sample3');
         assertEq(swap_sample4.eth(), 0, 'swap_sample4');
         // assertEq(swap_sample5.eth(), , 'swap_sample5');
     }
@@ -199,19 +199,19 @@ contract ShiftLibTest is DSTestExtended {
     }
 
     function test_setEth() public {
-        uint256 one = swap_sample3.setEth(1);
-        uint256 two = swap_sample4.setEth(4503599627348691);
-        uint256 thr = swap_sample5.setEth(0);
+        (uint256 one, uint256 rem1) = swap_sample3.setEth(1000000000000);
+        (uint256 two, uint256 rem2) = swap_sample4.setEth(4503599627348691000000000000);
+        (uint256 thr, uint256 rem3) = swap_sample5.setEth(0);
         //              A000010001000000000000000DB143EDE6805F23922535BAD7ACB3E9AA5D2F7B
-        assertEq(one, 0xa000010001000000000001000DB143eDe6805F23922535Bad7Acb3e9Aa5D2F7b, 'swap_sample3');
-        assertEq(two, 0x0000000000FFFFFFFFFaad010000000000000000000000000000000000000000, 'swap_sample4');
-        assertEq(thr, 0xffffffffff00000000000000ffffffffffffffffffffffffffffffffffffffff, 'swap_sample5');
+        assertEq(one.eth() + rem1, 1000000000000, 'swap_sample3');
+        assertEq(two.eth() + rem2, 4503599627348691000000000000, 'swap_sample4');
+        assertEq(thr.eth() + rem3, 0, 'swap_sample5');
     }
 
     function test_setEth2() public {
-        uint256 two = swap_sample4.setEth(2000000000000000000);
+        (uint256 two, ) = swap_sample4.setEth(2000000000000000000);
         //              A000010001000000000000000DB143EDE6805F23922535BAD7ACB3E9AA5D2F7B
-        assertEq(two, 0x00000000001BC16D674EC8040000000000000000000000000000000000000000, 'swap_sample4');
+        assertEq(two, 0x00000000000000001E8480000000000000000000000000000000000000000000, 'swap_sample4');
     }
 
     // function test_setEth2() public {
