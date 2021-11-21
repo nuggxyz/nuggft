@@ -73,7 +73,20 @@ library SwapLib {
         uint256 swapData,
         uint256 offerData,
         uint256 activeEpoch
-    ) internal returns (bool winner) {
+    )
+        internal
+        returns (
+            // bool rightToMintPtr
+            bool winner
+        )
+    {
+        // if (swapData == 0) {
+        //     assembly {
+        //         winner := eq(sload(rightToMintPtr), account)
+        //     }
+        //     require(winner, 'CC:):00');
+        //     return winner;
+        // }
         require(swapData != 0 && !offerData.isTokenClaimed(), 'SL:CC:1');
 
         if (swapData.isFeeClaimed() && offerData == 0) {
@@ -84,13 +97,13 @@ library SwapLib {
         // bool over = activeEpoch > swapData.epoch() || swapData.isTokenClaimed();
         bool over = activeEpoch > swapData.epoch();
 
-        if (account == address(uint160(swapData))) {
+        if (account == swapData.addr()) {
             require(over && !swapData.isTokenClaimed(), 'SL:CC:0');
             return true; // B
             // else // A
         }
 
-        require(offerData != 0 && !offerData.isTokenClaimed(), 'SL:CC:1');
+        require(offerData != 0 && !offerData.isTokenClaimed(), 'SL:CC:2');
     }
 
     // function checkRoyalties(
