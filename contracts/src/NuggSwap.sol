@@ -14,7 +14,7 @@ import './interfaces/IxNUGG.sol';
 import './erc721/IERC721.sol';
 import './core/Epochable.sol';
 import './erc2981/IERC2981.sol';
-// import 'hardhat/console.sol';
+import 'hardhat/console.sol';
 import './common/Testable.sol';
 import './erc721/ERC721Holder.sol';
 import './erc1155/ERC1155Holder.sol';
@@ -48,7 +48,11 @@ contract NuggSwap is INuggSwap, ERC721Holder, ERC1155Holder, Testable, Epochable
         uint256 tokenid,
         uint256 swapnum
     ) external payable override {
+        // uint256 gas = gasleft();
         _submitOffer(token, tokenid, swapnum, msg_sender(), msg_sender(), uint128(msg_value()));
+        // uint256 gas2 = gasleft();
+
+        // console.log('HREwwww: ', gas - gas2);
     }
 
     function getSwap(
@@ -109,7 +113,10 @@ contract NuggSwap is INuggSwap, ERC721Holder, ERC1155Holder, Testable, Epochable
     ) internal {
         Storage storage s;
         assembly {
-            s.slot := keccak256(token, tokenid)
+            let ptr := mload(0x40)
+            mstore(add(ptr, 0x00), token)
+            mstore(add(ptr, 0x20), tokenid)
+            s.slot := keccak256(ptr, 52)
         }
 
         uint256 epoch = currentEpochId() + requestedEpoch;
@@ -134,29 +141,31 @@ contract NuggSwap is INuggSwap, ERC721Holder, ERC1155Holder, Testable, Epochable
         address to,
         uint256 value
     ) internal {
-        assert(value <= type(uint128).max); // bc it will always be msg.value
-
         (Storage storage s, uint256 swapData, uint256 offerData) = loadStorage(token, tokenid, swapnum, account);
-        // assert(offerData == 0 || o)
+
         uint256 activeEpoch = currentEpochId();
 
         uint256 newSwapData;
 
         if (swapData != 0) {
-            // require(offerData != 0, 'SL:HSO:-1');
             require(!offerData.isFeeClaimed(), 'SL:HSO:0');
+
             require(!offerData.isTokenClaimed(), 'SL:HSO:1');
+
             require(activeEpoch <= swapData.epoch() && !swapData.isTokenClaimed(), 'SL:OBP:3');
 
             s.users[address(uint160(swapData))][swapnum] = swapData;
 
             newSwapData = newSwapData.setEpoch(swapData.epoch());
-            if (swapData.is1155()) newSwapData = newSwapData.setIs1155();
 
-            // swapData = 0;
+            if (swapData.is1155()) newSwapData = newSwapData.setIs1155();
         } else if (swapnum == 0) {
-            bool is1155 = mintToken(token, tokenid, activeEpoch);
-            newSwapData = newSwapData.setEpoch(activeEpoch);
+            require(activeEpoch == uint96(tokenid) && address(uint160(tokenid >> 96)) == address(this), 'SL:-1:0');
+
+            (uint256 epochInterval, bool is1155) = mintToken(token, tokenid);
+
+            newSwapData = newSwapData.setEpoch(activeEpoch + epochInterval);
+
             if (is1155) newSwapData = newSwapData.setIs1155();
         } else {
             require(false, 'NS:SO:0');
@@ -169,7 +178,6 @@ contract NuggSwap is INuggSwap, ERC721Holder, ERC1155Holder, Testable, Epochable
         (newSwapData, dust) = newSwapData.setEth(offerData.eth() + value);
 
         require(swapData.eth() < newSwapData.eth(), 'SL:OBP:4');
-
         s.datas[swapnum] = newSwapData;
 
         if (dust > 0) payable(account).sendValue(dust);
@@ -202,16 +210,15 @@ contract NuggSwap is INuggSwap, ERC721Holder, ERC1155Holder, Testable, Epochable
         emit SubmitClaim(token, tokenid, swapnum, account);
     }
 
-    function mintToken(
-        address token,
-        uint256 tokenid,
-        uint256 activeEpoch
-    ) internal returns (bool res) {
-        try IERC721(token).safeTransferFrom(address(0), address(this), tokenid, abi.encode(activeEpoch)) {
-            return false;
+    function mintToken(address token, uint256 tokenid) internal returns (uint256 epochInterval, bool is1155) {
+        try IERC721(token).ownerOf(tokenid) returns (address addr) {
+            require(addr == address(this), 'NS:MT:0');
+
+            return (epochInterval, false);
         } catch {
-            try IERC1155(token).safeTransferFrom(address(0), address(this), tokenid, 1, abi.encode(activeEpoch)) {
-                return true;
+            try IERC1155(token).balanceOf(address(this), tokenid) returns (uint256 amount) {
+                require(amount > 0, 'NS:MT:1');
+                return (0, true);
             } catch {
                 require(false, 'NS:MT:0');
             }
@@ -233,12 +240,17 @@ contract NuggSwap is INuggSwap, ERC721Holder, ERC1155Holder, Testable, Epochable
         )
     {
         assembly {
-            s.slot := keccak256(token, tokenid)
+            let ptr := mload(0x40)
+            mstore(add(ptr, 0x00), token)
+            mstore(add(ptr, 0x20), tokenid)
+            s.slot := keccak256(ptr, 52)
         }
 
         swapData = s.datas[swapnum];
 
-        if (swapData == 0) return (s, 0, 0);
+        if (swapData == 0) {
+            return (s, 0, 0);
+        }
 
         if (account != address(uint160(swapData))) offerData = s.users[account][swapnum];
         else offerData = swapData;
