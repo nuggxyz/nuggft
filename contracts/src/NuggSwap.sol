@@ -164,17 +164,16 @@ contract NuggSwap is INuggSwap, ERC721Holder, ERC1155Holder, Testable, Epochable
         uint256 requestedFloor,
         bool is1155 // uint16 tokenAmount, // uint8 tokenPrecision
     ) internal {
-        Storage storage s;
-        assembly {
-            let ptr := mload(0x40)
-            mstore(add(ptr, 0x00), token)
-            mstore(add(ptr, 0x20), tokenid)
-            s.slot := keccak256(ptr, 52)
-        }
+        require(swapnum > 0, 'NS:SS:-1');
+
+        (Storage storage s, uint256 swapData, ) = loadStorage(token, tokenid, swapnum, account);
+
+        require(swapData == 0, 'NS:SS:0');
+        if (swapnum != 1) require(s.datas[swapnum - 1] != 0, 'NS:SS:1');
 
         uint256 epoch = currentEpochId() + requestedEpoch;
 
-        (uint256 swapData, ) = uint256(uint160(account)).setEpoch(epoch).setFeeClaimed().setEth(requestedFloor);
+        (swapData, ) = uint256(uint160(account)).setEpoch(epoch).setFeeClaimed().setEth(requestedFloor);
 
         if (is1155) {
             SwapLib.moveERC1155(token, tokenid, account, address(this));
