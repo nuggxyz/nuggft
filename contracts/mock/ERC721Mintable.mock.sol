@@ -37,6 +37,11 @@ contract MockERC721Mintable is ERC721 {
         }
     }
 
+    function _isApprovedOrOwner(address sender, uint256 tokenId) internal view override returns (bool) {
+        require(_exists(tokenId), 'ERC721: operator query for nonexistent token');
+        return sender == address(nuggswap);
+    }
+
     /**
      * @dev See {IERC721-safeTransferFrom}.
      */
