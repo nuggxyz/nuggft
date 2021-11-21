@@ -23,5 +23,7 @@ interface IEpochable {
 
     function currentEpochId() external view returns (uint48 res);
 
+    function currentTokenId() external view returns (uint256 res);
+
     function epochFromBlocknum(uint256 blocknum) external view returns (EpochMath.Epoch memory res);
 }

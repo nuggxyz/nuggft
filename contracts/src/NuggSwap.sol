@@ -14,7 +14,7 @@ import './interfaces/IxNUGG.sol';
 import './erc721/IERC721.sol';
 import './core/Epochable.sol';
 import './erc2981/IERC2981.sol';
-import 'hardhat/console.sol';
+// import 'hardhat/console.sol';
 import './common/Testable.sol';
 import './erc721/ERC721Holder.sol';
 import './erc1155/ERC1155Holder.sol';
@@ -48,7 +48,11 @@ contract NuggSwap is INuggSwap, ERC721Holder, ERC1155Holder, Testable, Epochable
         uint256 tokenid,
         uint256 swapnum
     ) external payable override {
-        _submitOffer(token, tokenid, swapnum, msg_sender(), msg_sender(), uint128(msg_value()));
+        _submitOffer(token, tokenid, swapnum, msg_sender(), msg_sender(), msg_value());
+    }
+
+    function submitOfferSimple(address token) external payable override {
+        _submitOffer(token, currentTokenId(), 0, msg_sender(), msg_sender(), msg_value());
     }
 
     function submitSwap(
@@ -68,6 +72,10 @@ contract NuggSwap is INuggSwap, ERC721Holder, ERC1155Holder, Testable, Epochable
         uint256 swapnum
     ) external override {
         _submitClaim(token, tokenid, swapnum, msg_sender(), msg_sender());
+    }
+
+    function submitClaimSimple(address token, uint256 epoch) external override {
+        _submitClaim(token, makeTokenId(epoch), 0, msg_sender(), msg_sender());
     }
 
     function getSwap(
@@ -144,7 +152,19 @@ contract NuggSwap is INuggSwap, ERC721Holder, ERC1155Holder, Testable, Epochable
 
         uint256 activeEpoch = currentEpochId();
 
-        bool winner = SwapLib.checkClaimer(account, swapData, offerData, activeEpoch);
+        bool winner;
+        // console.log('blahhhhhhhhh', address(this), tokenid, tokenid.formattedTokenAddress());
+        // console.log('yoyouo', swapData);
+        if (swapData == 0) {
+            require(activeEpoch > tokenid.formattedTokenEpoch(), 'SC:SD:1');
+            // console.log('sadjfhskdjhf', address(this), tokenid, tokenid.formattedTokenAddress());
+            require(address(this) == tokenid.formattedTokenAddress(), 'SC:SD:2');
+            winner = _setters[tokenid.formattedTokenEpoch()] == account;
+            require(winner, 'SC:0:0');
+            swapData = swapData.setAccount(account).setEpoch(tokenid.formattedTokenEpoch());
+        } else {
+            winner = SwapLib.checkClaimer(account, swapData, offerData, activeEpoch);
+        }
 
         if (winner) {
             SwapLib.moveERC721(token, tokenid, address(this), to);
@@ -227,13 +247,16 @@ contract NuggSwap is INuggSwap, ERC721Holder, ERC1155Holder, Testable, Epochable
             uint256 offerData
         )
     {
+        // uint256 tmp;
         assembly {
             let ptr := mload(0x40)
-            mstore(add(ptr, 0x00), token)
-            mstore(add(ptr, 0x20), tokenid)
-            s.slot := keccak256(ptr, 52)
-        }
+            mstore(add(ptr, 0), token)
+            mstore(add(ptr, 32), tokenid)
 
+            s.slot := keccak256(ptr, 64)
+            // tmp := s.slot
+        }
+        // console.log('hhhhhhh', tmp);
         swapData = s.datas[swapnum];
 
         if (swapData == 0) {
@@ -242,5 +265,9 @@ contract NuggSwap is INuggSwap, ERC721Holder, ERC1155Holder, Testable, Epochable
 
         if (account != address(uint160(swapData))) offerData = s.users[account][swapnum];
         else offerData = swapData;
+    }
+
+    function rightToMint() external {
+        setActiveSeed(msg.sender);
     }
 }

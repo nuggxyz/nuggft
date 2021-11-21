@@ -4,19 +4,13 @@ import { BigNumber, Wallet, Contract, BigNumberish } from 'ethers';
 
 import { ensureWETH, getHRE } from '../shared/deployment';
 import { NuggSwap } from '../../../../typechain/NuggSwap';
-import {
-    XNUGG as xNUGG,
-    XNUGG__factory as xNUGG__factory,
-    NuggSwap__factory,
-    MockERC721Nuggable__factory,
-    MockERC721Royalties__factory,
-} from '../../../../typechain';
+import { XNUGG as xNUGG, XNUGG__factory as xNUGG__factory, NuggSwap__factory, MockERC721Royalties__factory } from '../../../../typechain';
 import { deployContractWithSalt } from '../shared';
 import { toEth } from '../shared/conversion';
 import { MockDotNugg } from '../../../../typechain/MockDotNugg';
 import { MockFileResolver } from '../../../../typechain/MockFileResolver';
 import { HardhatRuntimeEnvironment } from 'hardhat/types';
-import { MockERC721Nuggable } from '../../../../typechain/MockERC721Nuggable';
+import {} from '../../../../typechain/MockERC721Nuggable';
 import { MockERC721Royalties } from '../../../../typechain/MockERC721Royalties';
 import { MockERC721__factory } from '../../../../typechain/factories/MocKERC721__factory';
 import { MockERC721 } from '../../../../typechain/MocKERC721';
@@ -28,7 +22,7 @@ import { MockERC721Mintable__factory } from '../../../../typechain/factories/Moc
 type Mock721s = {
     normal: MockERC721[];
     royalties: MockERC721Royalties[];
-    nuggable: MockERC721Nuggable[];
+    nuggable: [];
     named: { [_: string]: MockERC721 };
 };
 
@@ -37,7 +31,6 @@ export interface NuggFatherFixture {
     xnugg: xNUGG;
     mockERC721: MockERC721;
     mockERC721Royalties: MockERC721Royalties;
-    mockERC721Nuggable: MockERC721Nuggable;
     mockERC721Ownable: MockERC721Ownable;
     mockERC721Mintable: MockERC721Mintable;
     tummy: string;
@@ -80,12 +73,6 @@ export const NuggFatherFix: Fixture<NuggFatherFixture> = async function (
         args: [eoaOwner.address],
     });
 
-    const mockERC721Nuggable = await deployContractWithSalt<MockERC721Nuggable__factory>({
-        factory: 'MockERC721Nuggable',
-        from: eoaDeployer,
-        args: [eoaOwner.address, nuggswap.address],
-    });
-
     const mockERC721Ownable = await deployContractWithSalt<MockERC721Ownable__factory>({
         factory: 'MockERC721Ownable',
         from: eoaDeployer,
@@ -100,7 +87,6 @@ export const NuggFatherFix: Fixture<NuggFatherFixture> = async function (
 
     hre.tracer.nameTags[mockERC721.address] = `mockERC721`;
     hre.tracer.nameTags[mockERC721Royalties.address] = `mockERC721Royalties`;
-    hre.tracer.nameTags[mockERC721Nuggable.address] = `mockERC721Nuggable`;
     hre.tracer.nameTags[mockERC721Ownable.address] = `mockERC721Ownable`;
     hre.tracer.nameTags[mockERC721Mintable.address] = `mockERC721Mintable`;
 
@@ -120,7 +106,6 @@ export const NuggFatherFix: Fixture<NuggFatherFixture> = async function (
         toNuggSwapTokenId,
         mockERC721,
         mockERC721Royalties,
-        mockERC721Nuggable,
         mockERC721Ownable,
         mockERC721Mintable,
         xnugg,

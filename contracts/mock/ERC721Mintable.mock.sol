@@ -25,7 +25,7 @@ contract MockERC721Mintable is ERC721 {
 
     constructor(address royalty, address _nuggswap) ERC721('Mock ERC721 Mintable', 'MockERC721Mintable') {
         nuggswap = INuggSwap(_nuggswap);
-        epochOffset = nuggswap.currentEpochId();
+        // epochOffset = nuggswap.currentEpochId();
         owner = royalty;
     }
 
@@ -57,10 +57,10 @@ contract MockERC721Mintable is ERC721 {
                 _safeMint(to, tokenId);
             } else {
                 require(_data.length > 0, 'STG:721:0');
-                uint48 currentEpoch = abi.decode(_data, (uint48));
+                // uint48 currentEpoch = abi.decode(_data, (uint48));
                 require(to == address(nuggswap), 'STG:721:1');
                 require(from == address(0), 'STG:721:2');
-                require(tokenId == epochToTokenId(currentEpoch), 'STG:721:3');
+                // require(tokenId == epochToTokenId(currentEpoch), 'STG:721:3');
             }
             return;
         }
@@ -73,7 +73,7 @@ contract MockERC721Mintable is ERC721 {
     }
 
     function currentTokenId() public view returns (uint256 tokenId) {
-        tokenId = epochToTokenId(nuggswap.currentEpochId());
+        // tokenId = epochToTokenId(nuggswap.currentEpochId());
     }
 
     /**

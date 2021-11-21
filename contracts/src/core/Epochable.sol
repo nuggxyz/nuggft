@@ -14,7 +14,8 @@ import '../libraries/EpochMath.sol';
 abstract contract Epochable is IEpochable {
     using EpochMath for uint256;
 
-    mapping(uint256 => bytes32) private _seeds;
+    mapping(uint256 => bytes32) internal _seeds;
+    mapping(uint256 => address) internal _setters;
 
     // uint256 private _state;
 
@@ -26,6 +27,14 @@ abstract contract Epochable is IEpochable {
         // emit Genesis(25, 0);
     }
 
+    function setActiveSeed(address sender) internal {
+        uint256 curr = block.number / 25;
+        if (_seeds[curr] == 0) {
+            _seeds[curr] = currentSeed();
+            _setters[curr] = sender;
+        }
+    }
+
     function ensureActiveSeed() internal {
         uint256 curr = currentEpochId();
         if (_seeds[curr] == 0) {
@@ -33,9 +42,16 @@ abstract contract Epochable is IEpochable {
         }
     }
 
+    function currentTokenId() public view override returns (uint256 res) {
+        res = makeTokenId(currentEpochId());
+    }
+
+    function makeTokenId(uint256 epoch) internal view returns (uint256 res) {
+        res = (uint256(uint160(address(this))) << 96) | epoch;
+    }
+
     /**
      * @dev public wrapper for internal _currentEpoch() - to save on gas
-     * @inheritdoc IEpochable
      */
     function currentEpochId() public view override returns (uint48 res) {
         res = EpochMath.getIdFromBlocknum(block.number);

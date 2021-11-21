@@ -12,6 +12,8 @@ interface INuggSwap is IEpochable {
 
     function xnugg() external view returns (IxNUGG);
 
+    function submitClaimSimple(address token, uint256 epoch) external;
+
     function submitSwap(
         address token,
         uint256 tokenid,
@@ -26,6 +28,8 @@ interface INuggSwap is IEpochable {
         uint256 tokenid,
         uint256 swapnum
     ) external payable;
+
+    function submitOfferSimple(address token) external payable;
 
     function submitClaim(
         address token,

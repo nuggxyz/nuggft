@@ -37,6 +37,7 @@ describe('uint tests', async function () {
         it('should revert if shares = 0', async () => {
             await fix.xnugg.connect(accounts.dee).mint({ value: toEth('5') });
             const res = await fix.xnugg.balanceOf(accounts.dee.address);
+            await fix.nuggswap.connect(accounts.mac).rightToMint();
 
             // await fix.xnugg.connect(accounts.frank).fallback({ value: toEth('5') });
             console.log(fix.toNuggSwapTokenId(0)._hex);
@@ -145,6 +146,17 @@ describe('uint tests', async function () {
             // await fix.xnugg.connect(accounts.dennis).burn(toEth('1.696969696970000'));
             // await fix.xnugg.connect(accounts.dennis).burn(toEth('1.696969696970000'));
             // await fix.seller.connect(accounts.frank).submitOffer(BigNumber.from(1), toEth('2'), 0, { value: toEth('2.000') });
+            await Mining.advanceBlockTo(250);
+            await Mining.advanceBlock();
+            const epoch = await fix.nuggswap.currentEpochId();
+
+            console.log({ epoch }, fix.hre.ethers.provider.blockNumber);
+
+            await fix.nuggswap.connect(accounts.frank).rightToMint();
+
+            await Mining.advanceBlockTo(350);
+
+            await fix.nuggswap.connect(accounts.frank).submitClaimSimple(fix.mockERC721Mintable.address, epoch);
 
             // await fix.xnugg.connect(accounts.dee).burn(toEth('41'));
 
