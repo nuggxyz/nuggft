@@ -16,19 +16,20 @@ abstract contract Epochable is IEpochable {
 
     mapping(uint256 => bytes32) private _seeds;
 
-    uint256 private _state;
+    // uint256 private _state;
 
-    event Genesis(uint128 interval, uint128 baseblock);
+    // event Genesis(uint128 interval, uint128 baseblock);
 
-    constructor(uint128 _interval, uint128 _baseblock) {
+    constructor() {
         // _baseblock += 1;
-        _state = EpochMath.encodeData(_interval, _baseblock);
-        emit Genesis(_interval, _baseblock);
+        // _state = EpochMath.encodeData(_interval, _baseblock);
+        // emit Genesis(25, 0);
     }
 
     function ensureActiveSeed() internal {
-        if (!seedExists(currentEpochId())) {
-            _seeds[currentEpochId()] = currentSeed();
+        uint256 curr = currentEpochId();
+        if (_seeds[curr] == 0) {
+            _seeds[curr] = currentSeed();
         }
     }
 
@@ -37,7 +38,7 @@ abstract contract Epochable is IEpochable {
      * @inheritdoc IEpochable
      */
     function currentEpochId() public view override returns (uint48 res) {
-        res = _state.getIdFromBlocknum(block.number);
+        res = EpochMath.getIdFromBlocknum(block.number);
     }
 
     /**
@@ -47,8 +48,11 @@ abstract contract Epochable is IEpochable {
      * pull it off and make their own custom nugg, that would be really fucking cool.
      */
     function currentSeed() public view override returns (bytes32 res) {
-        uint256 num = blocknumFromId(currentEpochId()) - 1;
+        uint256 bn = block.number;
+
+        uint256 num = blocknumFromId(EpochMath.getIdFromBlocknum(bn));
         res = blockhash(num);
+        if (num == bn) return bytes32(uint256(0x42069));
         require(res != 0, 'EPC:SBL');
         res = keccak256(abi.encodePacked(res, num));
     }
@@ -93,40 +97,40 @@ abstract contract Epochable is IEpochable {
      * @dev public wrapper for internal _genesisBlock - to save on gas
      * @inheritdoc IEpochable
      */
-    function genesisBlock() public view override returns (uint256 res) {
-        res = _state.decodeGenesis();
+    function genesisBlock() public pure override returns (uint256 res) {
+        res = EpochMath.decodeGenesis();
     }
 
     /**
      * @dev public wrapper for internal _interval - to save on gas
      * @inheritdoc IEpochable
      */
-    function interval() public view override returns (uint256 res) {
-        res = _state.decodeInterval();
+    function interval() public pure override returns (uint256 res) {
+        res = EpochMath.decodeInterval();
     }
 
     function epochFromId(uint48 id) public view returns (EpochMath.Epoch memory res) {
-        res = _state.getEpoch(id, block.number);
+        res = EpochMath.getEpoch(id, block.number);
     }
 
     /**
      * @dev public wrapper for internal blocknumFirstFromEpoch() - to save on gas
      */
     function epochFromBlocknum(uint256 blocknum) public view override returns (EpochMath.Epoch memory res) {
-        res = _state.getEpoch(_state.getIdFromBlocknum(blocknum), block.number);
+        res = EpochMath.getEpoch(EpochMath.getIdFromBlocknum(blocknum), block.number);
     }
 
     /**
      * @dev public wrapper for internal blocknumFirstFromEpoch() - to save on gas
      */
     function epochStatus(uint48 id) public view returns (EpochMath.Status res) {
-        return _state.getStatus(id, block.number);
+        return EpochMath.getStatus(id, block.number);
     }
 
     /**
      * @dev public wrapper for internal blocknumFirstFromEpoch() - to save on gas
      */
-    function blocknumFromId(uint48 id) public view returns (uint256) {
-        return _state.getStartBlockFromId(id);
+    function blocknumFromId(uint48 id) public pure returns (uint256) {
+        return EpochMath.getStartBlockFromId(id);
     }
 }

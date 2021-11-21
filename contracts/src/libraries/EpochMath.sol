@@ -22,38 +22,30 @@ library EpochMath {
         }
     }
 
-    function decodeGenesis(uint256 _state) internal pure returns (uint256 res) {
+    function decodeGenesis() internal pure returns (uint256 res) {
         assembly {
-            res := shr(128, _state)
+            res := 0
         }
     }
 
-    function decodeInterval(uint256 _state) internal pure returns (uint256 res) {
+    function decodeInterval() internal pure returns (uint256 res) {
         assembly {
-            res := shr(128, shl(128, _state))
+            res := 25
         }
     }
 
-    function getEpoch(
-        uint256 state,
-        uint48 id,
-        uint256 blocknum
-    ) internal pure returns (EpochMath.Epoch memory res) {
+    function getEpoch(uint48 id, uint256 blocknum) internal pure returns (EpochMath.Epoch memory res) {
         res = EpochMath.Epoch({
             id: id,
-            startblock: getStartBlockFromId(state, id),
-            endblock: getEndBlockFromId(state, id),
-            status: getStatus(state, id, blocknum)
+            startblock: getStartBlockFromId(id),
+            endblock: getEndBlockFromId(id),
+            status: getStatus(id, blocknum)
         });
     }
 
-    function getStatus(
-        uint256 state,
-        uint48 id,
-        uint256 blocknum
-    ) internal pure returns (Status res) {
-        if (getIdFromBlocknum(state, blocknum) == id) res = Status.ACTIVE;
-        else if (getEndBlockFromId(state, id) < blocknum) res = Status.OVER;
+    function getStatus(uint48 id, uint256 blocknum) internal pure returns (Status res) {
+        if (getIdFromBlocknum(blocknum) == id) res = Status.ACTIVE;
+        else if (getEndBlockFromId(id) < blocknum) res = Status.OVER;
         else res = Status.PENDING;
     }
 
@@ -61,19 +53,19 @@ library EpochMath {
      * @dev #TODO
      * @return res
      */
-    function getStartBlockFromId(uint256 state, uint48 id) internal pure returns (uint256 res) {
-        res = id * decodeInterval(state) + decodeGenesis(state);
+    function getStartBlockFromId(uint48 id) internal pure returns (uint256 res) {
+        res = id * decodeInterval() + decodeGenesis();
     }
 
     /**
      * @dev #TODO
      * @return res
      */
-    function getEndBlockFromId(uint256 state, uint48 id) internal pure returns (uint256 res) {
-        res = getStartBlockFromId(state, id + 1) - 1;
+    function getEndBlockFromId(uint48 id) internal pure returns (uint256 res) {
+        res = getStartBlockFromId(id + 1) - 1;
     }
 
-    function getIdFromBlocknum(uint256 state, uint256 blocknum) internal pure returns (uint48 res) {
-        res = uint48((blocknum - decodeGenesis(state)) / decodeInterval(state));
+    function getIdFromBlocknum(uint256 blocknum) internal pure returns (uint48 res) {
+        res = uint48((blocknum - decodeGenesis()) / decodeInterval());
     }
 }

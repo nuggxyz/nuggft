@@ -215,6 +215,12 @@ library ShiftLib {
         }
     }
 
+        function setOfferIsOwner(uint256 input) internal pure returns (uint256 res) {
+        // assert(update <= type(uint48).max);
+        res = setFeeClaimed(input);
+    }
+
+
     // function setClaimed(uint256 input) internal pure returns (uint256 res) {
     //     // assert(update <= type(uint48).max);
     //     assembly {
