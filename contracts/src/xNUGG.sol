@@ -27,12 +27,14 @@ contract xNUGG is IxNUGG, ERC20 {
         tummy = payable(msg.sender);
     }
 
+    // receive() external payable {}
+
     receive() external payable {
-        _recieve();
+        emit ValueAdd(msg.sender, msg.value);
     }
 
     fallback() external payable {
-        _recieve();
+        emit ValueAdd(msg.sender, msg.value);
     }
 
     function mint() external payable override {
@@ -76,11 +78,11 @@ contract xNUGG is IxNUGG, ERC20 {
     }
 
     function _recieve() internal {
-        if (msg.value > 0) {
-            // uint256 t = (msg.value * 100) / 1000;
-            onValueAdd(msg.sender, msg.value);
-            // tummy.sendValue(t);
-        }
+        // if (msg.value > 0) {
+        //     // uint256 t = (msg.value * 100) / 1000;
+        //     onValueAdd(msg.sender, msg.value);
+        //     // tummy.sendValue(t);
+        // }
     }
 
     function _transfer(

@@ -14,7 +14,7 @@ import './erc721/ERC721Holder.sol';
 import './erc1155/ERC1155Holder.sol';
 
 contract NuggSwap is INuggSwap, ERC721Holder, ERC1155Holder {
-    using Address for address payable;
+    using Address for address;
     using EpochLib for uint256;
     using ShiftLib for uint256;
     using SwapLib for uint256;
@@ -123,9 +123,13 @@ contract NuggSwap is INuggSwap, ERC721Holder, ERC1155Holder {
 
         require(swapData.eth().pointsWith(100) < newSwapData.eth(), 'SL:OBP:4');
 
+        uint256 increase = newSwapData.eth() - swapData.eth();
+
         s.datas[swapnum] = newSwapData;
 
-        if (dust > 0) payable(account).sendValue(dust);
+        if (dust > 0) account.sendValue(dust);
+
+        address(xnugg).sendValue(increase);
 
         emit SubmitOffer(token, tokenid, swapnum, to, value);
     }
@@ -167,7 +171,7 @@ contract NuggSwap is INuggSwap, ERC721Holder, ERC1155Holder {
             s.datas[swapnum] = swapData.setTokenClaimed();
         } else {
             delete s.users[account][swapnum];
-            payable(to).sendValue(offerData.eth());
+            to.sendValue(offerData.eth());
         }
 
         emit SubmitClaim(token, tokenid, swapnum, account);
