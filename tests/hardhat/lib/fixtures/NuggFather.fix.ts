@@ -92,7 +92,7 @@ export const NuggFatherFix: Fixture<NuggFatherFixture> = async function (
 
     const blockOffset = BigNumber.from(await hre.ethers.provider.getBlockNumber());
 
-    const tummy = await xnugg.tummy();
+    const tummy = eoaDeployer.address;
 
     hre.tracer.nameTags[xnugg.address] = 'xNUGG';
     hre.tracer.nameTags[nuggswap.address] = 'NuggSwap';

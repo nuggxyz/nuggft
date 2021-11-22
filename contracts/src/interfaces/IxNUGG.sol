@@ -9,11 +9,12 @@ import '../erc20/IERC20.sol';
  * @dev interface for Seedable.sol
  */
 interface IxNUGG is IERC20 {
-    event ShareAdd(address indexed account, uint256 shares, uint256 value);
-    event ShareSub(address indexed account, uint256 shares, uint256 value);
-    event ValueAdd(address indexed sender, uint256 value);
+    event Mint(address account, uint256 shares, uint256 eth);
+    event Burn(address account, uint256 shares, uint256 eth);
+    event Move(address from, address to, uint256 shares, uint256 eth);
+    event Take(address sender, uint256 eth);
 
-    function ownershipOfX128(address account) external view returns (uint256 res);
+    function ownershipOf(address account) external view returns (uint256 res);
 
     function totalShares() external view returns (uint256 res);
 

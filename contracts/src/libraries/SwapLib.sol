@@ -43,7 +43,7 @@ library SwapLib {
 
         if (swapData == 0) return (s, 0, 0);
 
-        if (account != address(uint160(swapData))) offerData = s.users[account][swapnum];
+        if (account != swapData.addr()) offerData = s.users[account][swapnum];
         else offerData = swapData;
     }
 
@@ -61,10 +61,11 @@ library SwapLib {
         }
     }
 
-    function checkOwner(address token, address asker) internal view returns (bool res) {
-        (bool ok, bytes memory returnData) = token.staticcall(abi.encodeWithSignature('owner()'));
-        if (!ok) return false;
-        return abi.decode(returnData, (address)) == asker;
+    function checkOwner(address token) internal view returns (bool ok, address owner) {
+        bytes memory returnData;
+        (ok, returnData) = token.staticcall(abi.encodeWithSignature('owner()'));
+        if (!ok) return (false, address(0));
+        owner = abi.decode(returnData, (address));
     }
 
     function checkClaimer(
@@ -89,13 +90,35 @@ library SwapLib {
         require(offerData != 0 && !offerData.isTokenClaimed(), 'SL:CC:2');
     }
 
+    function checkRoyalties(address token, uint256 tokenid)
+        internal
+        view
+        returns (
+            bool ok,
+            address res,
+            uint256 bps
+        )
+    {
+        bytes memory returnData;
+        (ok, returnData) = token.staticcall(
+            abi.encodeWithSignature('supportsInterface(bytes4)', type(IERC2981).interfaceId)
+        );
+        if (!ok) return (false, address(0), 0);
+
+        if (!abi.decode(returnData, (bool))) return (false, address(0), 0);
+
+        (ok, returnData) = token.staticcall(abi.encodeWithSignature('royaltyInfo(uint256,uint256)', tokenid, 10000));
+        if (!ok) return (false, address(0), 0);
+        (res, bps) = abi.decode(returnData, (address, uint256));
+    }
+
     // function checkRoyalties(
     //     address token,
     //     uint256 tokenid,
     //     uint256 encodedRoyaltyData
     // ) internal view returns (uint16 res) {
-    //     (address receiver, uint256 bps) = ShiftLib.decodeRoyaltyData(encodedRoyaltyData);
-    //     if (bps > 0) return uint16(bps);
+    //     // (address receiver, uint256 bps) = ShiftLib.decodeRoyaltyData(encodedRoyaltyData);
+    //     // if (bps > 0) return uint16(bps);
     //     if (receiver == address(0)) {
     //         // for projects that indicate no royalties
     //         try IERC165(token).supportsInterface(type(IERC2981).interfaceId) returns (bool support) {

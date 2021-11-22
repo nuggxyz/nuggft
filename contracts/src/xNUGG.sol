@@ -5,7 +5,7 @@ pragma solidity 0.8.4;
 import './interfaces/IxNUGG.sol';
 import './erc20/ERC20.sol';
 import './libraries/Address.sol';
-import './libraries/StakeMath.sol';
+import './libraries/StakeLib.sol';
 
 /**
  * @title xNUGG
@@ -13,185 +13,69 @@ import './libraries/StakeMath.sol';
  * @notice leggo
  */
 contract xNUGG is IxNUGG, ERC20 {
-    using Address for address payable;
-    using StakeMath for uint256;
-    using StakeMath for StakeMath.State;
+    using Address for address;
 
-    address payable public tummy;
+    using StakeLib for address;
 
-    uint256 internal _state;
-
-    mapping(address => uint256) internal _shares_owned;
-
-    constructor() ERC20('Staked NUGG', 'xNUGG') {
-        tummy = payable(msg.sender);
-    }
-
-    // receive() external payable {}
+    constructor() ERC20('Staked NUGG', 'xNUGG') {}
 
     receive() external payable {
-        emit ValueAdd(msg.sender, msg.value);
+        emit Take(msg.sender, msg.value);
     }
 
     fallback() external payable {
-        emit ValueAdd(msg.sender, msg.value);
+        emit Take(msg.sender, msg.value);
     }
 
     function mint() external payable override {
-        _mint(msg.sender, msg.value);
+        uint256 mintedShares = msg.sender.add(msg.value);
+        emit Mint(msg.sender, mintedShares, msg.value);
     }
 
-    function burn(uint256 amount) external override {
-        _burn(msg.sender, amount);
+    function burn(uint256 eth) external override {
+        uint256 burnedShares = msg.sender.sub(eth);
+        msg.sender.sendValue(eth);
+        emit Burn(msg.sender, burnedShares, eth);
+    }
+
+    function _transfer(
+        address from,
+        address to,
+        uint256 eth
+    ) internal override {
+        uint256 movedShares = from.move(to, eth);
+        emit Move(from, to, movedShares, eth);
     }
 
     /**
      * @dev in regards to this contract, this could just be earningsOf + sharesOf
      */
     function totalSupply() public view virtual override(ERC20, IxNUGG) returns (uint256 res) {
-        res = _state.decodeState().tSupply;
+        res = StakeLib.loadBalance();
     }
 
     /**
      * @dev in regards to this contract, this could just be earningsOf + sharesOf
      */
     function balanceOf(address account) public view override(ERC20, IxNUGG) returns (uint256 res) {
-        res = _state.decodeState().getBalance(StakeMath.Position(_shares_owned[account]));
+        res = account.getActiveBalanceOf();
     }
 
     /**
      * @dev external wrapper for _shares - to save on gas
      */
     function totalShares() public view override returns (uint256 res) {
-        res = _state.decodeState().rSupply;
+        res = StakeLib.getActiveShares();
     }
 
     /**
      * @dev external wrapper for _shares - to save on gas
      */
     function sharesOf(address account) public view override returns (uint256 res) {
-        res = _shares_owned[account];
+        res = account.getActiveSharesOf();
     }
 
-    function ownershipOfX128(address account) public view override returns (uint256 res) {
-        res = _state.decodeState().getOwnershipX128(StakeMath.Position(_shares_owned[account]));
+    function ownershipOf(address account) public view override returns (uint256 res) {
+        res = account.getActiveOwnershipOf();
     }
-
-    // function _recieve() internal {
-    //     // if (msg.value > 0) {
-    //     //     // uint256 t = (msg.value * 100) / 1000;
-    //     //     onValueAdd(msg.sender, msg.value);
-    //     //     // tummy.sendValue(t);
-    //     // }
-    // }
-
-    function _transfer(
-        address from,
-        address to,
-        uint256 amount
-    ) internal override {
-        StakeMath.State memory state = _state.decodeState();
-        StakeMath.Position memory posFrom = StakeMath.Position(_shares_owned[from]);
-        StakeMath.Position memory posTo = StakeMath.Position(_shares_owned[to]);
-
-        uint256 shares = state.applyShareMove(posFrom, posTo, amount);
-
-        _shares_owned[from] = posFrom.rOwned;
-        _shares_owned[to] = posTo.rOwned;
-
-        emit ShareSub(from, shares, amount);
-        emit ShareAdd(to, shares, amount);
-    }
-
-    function _mint(address account, uint256 amount) internal override {
-        StakeMath.State memory state = _state.decodeState();
-        StakeMath.Position memory pos = StakeMath.Position(_shares_owned[account]);
-
-        state.tSupply -= amount;
-
-        uint256 shares = state.applyShareAdd(pos, amount);
-
-        _state = state.encodeState();
-        _shares_owned[account] = pos.rOwned;
-
-        emit ShareAdd(account, shares, amount);
-    }
-
-    function _burn(address account, uint256 amount) internal override {
-        StakeMath.State memory state = _state.decodeState();
-        StakeMath.Position memory pos = StakeMath.Position(_shares_owned[account]);
-
-        uint256 shares = state.applyShareSub(pos, amount);
-
-        _state = state.encodeState();
-        _shares_owned[account] = pos.rOwned;
-
-        emit ShareSub(account, shares, amount);
-
-        payable(account).sendValue(amount);
-    }
-
-    // /**
-    //  * @dev increases a users total staked shares in a given epoch
-    //  * @param account the user who is adding shares
-    //  * @param value the amount shares is being increased
-    //  * @custom:assump earnings should stay same
-    //  */
-    // function onShareAdd(address account, uint256 value) internal {
-    //     StakeMath.State memory state = _state.decodeState();
-    //     StakeMath.Position memory pos = StakeMath.Position(_shares_owned[account]);
-
-    //     state.tSupply -= msg.value;
-
-    //     uint256 shares = state.applyShareAdd(pos, value);
-
-    //     _state = state.encodeState();
-    //     _shares_owned[account] = pos.rOwned;
-
-    //     emit ShareAdd(account, shares, value);
-    // }
-
-    // function onShareSub(address account, uint256 value) internal {
-    //     StakeMath.State memory state = _state.decodeState();
-    //     StakeMath.Position memory pos = StakeMath.Position(_shares_owned[account]);
-
-    //     uint256 shares = state.applyShareSub(pos, value);
-
-    //     _state = state.encodeState();
-    //     _shares_owned[account] = pos.rOwned;
-
-    //     emit ShareSub(account, shares, value);
-    // }
-
-    // function onShareMove(
-    //     address from,
-    //     address to,
-    //     uint256 value
-    // ) internal {
-    //     StakeMath.State memory state = _state.decodeState();
-    //     StakeMath.Position memory posFrom = StakeMath.Position(_shares_owned[from]);
-    //     StakeMath.Position memory posTo = StakeMath.Position(_shares_owned[to]);
-
-    //     uint256 shares = state.applyShareMove(posFrom, posTo, value);
-
-    //     _shares_owned[from] = posFrom.rOwned;
-    //     _shares_owned[to] = posTo.rOwned;
-
-    //     emit ShareSub(from, shares, value);
-    //     emit ShareAdd(to, shares, value);
-    // }
-
-    // /**
-    //  * @notice increases the overall eps from an increase in total rewards
-    //  * @param value the amount the total reward is being increased
-    //  */
-    // function onValueAdd(address from, uint256 value) internal virtual {
-    //     // StakeMath.State memory state = _state.decodeState();
-
-    //     // state.applyValueAdd(value);
-
-    //     // _state = state.encodeState();
-
-    //     emit ValueAdd(from, value);
-    // }
 }

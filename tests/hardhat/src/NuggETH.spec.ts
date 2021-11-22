@@ -60,14 +60,14 @@ describe('uint tests', async function () {
 
             const positionDee0 = await fix.xnugg.balanceOf(accounts.dee.address);
             const positionMac0 = await fix.xnugg.balanceOf(accounts.mac.address);
-            const ownershipMac0 = await fix.xnugg.ownershipOfX128(accounts.mac.address);
-            const ownershipDee0 = await fix.xnugg.ownershipOfX128(accounts.dee.address);
+            const ownershipMac0 = await fix.xnugg.ownershipOf(accounts.mac.address);
+            const ownershipDee0 = await fix.xnugg.ownershipOf(accounts.dee.address);
             const positionDennis0 = await fix.xnugg.balanceOf(accounts.dennis.address);
             const positionFrank0 = await fix.xnugg.balanceOf(accounts.frank.address);
-            const ownershipFrank0 = await fix.xnugg.ownershipOfX128(accounts.frank.address);
-            const ownershipDennis0 = await fix.xnugg.ownershipOfX128(accounts.dennis.address);
+            const ownershipFrank0 = await fix.xnugg.ownershipOf(accounts.frank.address);
+            const ownershipDennis0 = await fix.xnugg.ownershipOf(accounts.dennis.address);
             const positionCharlie0 = await fix.xnugg.balanceOf(accounts.charile.address);
-            const ownershipCharlie0 = await fix.xnugg.ownershipOfX128(accounts.charile.address);
+            const ownershipCharlie0 = await fix.xnugg.ownershipOf(accounts.charile.address);
             await fix.xnugg.connect(accounts.mac).mint({ value: toEth('40') });
             await fix.xnugg.connect(accounts.charile).mint({ value: toEth('1.696969696969696') });
             await fix.xnugg.connect(accounts.mac).transfer(accounts.frank.address, toEth('1.69'));
@@ -78,14 +78,14 @@ describe('uint tests', async function () {
 
             const positionDee1 = await fix.xnugg.balanceOf(accounts.dee.address);
             const positionMac1 = await fix.xnugg.balanceOf(accounts.mac.address);
-            const ownershipMac1 = await fix.xnugg.ownershipOfX128(accounts.mac.address);
-            const ownershipDee1 = await fix.xnugg.ownershipOfX128(accounts.dee.address);
+            const ownershipMac1 = await fix.xnugg.ownershipOf(accounts.mac.address);
+            const ownershipDee1 = await fix.xnugg.ownershipOf(accounts.dee.address);
             const positionDennis1 = await fix.xnugg.balanceOf(accounts.dennis.address);
             const positionFrank1 = await fix.xnugg.balanceOf(accounts.frank.address);
-            const ownershipFrank1 = await fix.xnugg.ownershipOfX128(accounts.frank.address);
-            const ownershipDennis1 = await fix.xnugg.ownershipOfX128(accounts.dennis.address);
+            const ownershipFrank1 = await fix.xnugg.ownershipOf(accounts.frank.address);
+            const ownershipDennis1 = await fix.xnugg.ownershipOf(accounts.dennis.address);
             const positionCharlie1 = await fix.xnugg.balanceOf(accounts.charile.address);
-            const ownershipCharlie1 = await fix.xnugg.ownershipOfX128(accounts.charile.address);
+            const ownershipCharlie1 = await fix.xnugg.ownershipOf(accounts.charile.address);
 
             await fix.xnugg.connect(accounts.dennis).mint({ value: toEth('13') });
             await fix.xnugg.connect(accounts.frank).mint({ value: toEth('1') });
@@ -119,14 +119,14 @@ describe('uint tests', async function () {
 
             const positionDee2 = await fix.xnugg.balanceOf(accounts.dee.address);
             const positionMac2 = await fix.xnugg.balanceOf(accounts.mac.address);
-            const ownershipMac2 = await fix.xnugg.ownershipOfX128(accounts.mac.address);
-            const ownershipDee2 = await fix.xnugg.ownershipOfX128(accounts.dee.address);
+            const ownershipMac2 = await fix.xnugg.ownershipOf(accounts.mac.address);
+            const ownershipDee2 = await fix.xnugg.ownershipOf(accounts.dee.address);
             const positionDennis2 = await fix.xnugg.balanceOf(accounts.dennis.address);
             const positionFrank2 = await fix.xnugg.balanceOf(accounts.frank.address);
-            const ownershipFrank2 = await fix.xnugg.ownershipOfX128(accounts.frank.address);
-            const ownershipDennis2 = await fix.xnugg.ownershipOfX128(accounts.dennis.address);
+            const ownershipFrank2 = await fix.xnugg.ownershipOf(accounts.frank.address);
+            const ownershipDennis2 = await fix.xnugg.ownershipOf(accounts.dennis.address);
             const positionCharlie2 = await fix.xnugg.balanceOf(accounts.charile.address);
-            const ownershipCharlie2 = await fix.xnugg.ownershipOfX128(accounts.charile.address);
+            const ownershipCharlie2 = await fix.xnugg.ownershipOf(accounts.charile.address);
             const res3 = await fix.xnugg.balanceOf(accounts.charile.address);
             console.log(res3.toString());
 
@@ -137,12 +137,12 @@ describe('uint tests', async function () {
             await fix.xnugg.connect(accounts.dennis).burn(toEth('1.696969696970000'));
             await fix.xnugg.connect(accounts.dennis).burn(toEth('1.696969696970000'));
             await fix.xnugg.connect(accounts.dennis).burn(toEth('1.696969696970000'));
-            // await fix.xnugg.connect(accounts.dennis).burn(toEth('1.696969696970000'));
-            // await fix.xnugg.connect(accounts.dennis).burn(toEth('1.696969696970000'));
-            // await fix.xnugg.connect(accounts.dennis).burn(toEth('1.696969696970000'));
-            // await fix.xnugg.connect(accounts.dennis).burn(toEth('1.696969696970000'));
-            // await fix.xnugg.connect(accounts.dennis).burn(toEth('1.696969696970000'));
-            // await fix.xnugg.connect(accounts.dennis).burn(toEth('1.696969696970000'));
+            await fix.xnugg.connect(accounts.dennis).burn(toEth('1.696969696970000'));
+            await fix.xnugg.connect(accounts.dennis).burn(toEth('1.696969696970000'));
+            await fix.xnugg.connect(accounts.dennis).burn(toEth('1.696969696970000'));
+            await fix.xnugg.connect(accounts.dennis).burn(toEth('1.696969696970000'));
+            await fix.xnugg.connect(accounts.dennis).burn(toEth('1.696969696970000'));
+            await fix.xnugg.connect(accounts.dennis).burn(toEth('5'));
             // await fix.seller.connect(accounts.frank).submitOffer(BigNumber.from(1), toEth('2'), 0, { value: toEth('2.000') });
             await Mining.advanceBlockTo(250);
             await Mining.advanceBlock();
@@ -163,15 +163,15 @@ describe('uint tests', async function () {
 
             const res4 = await fix.xnugg.balanceOf(accounts.dee.address);
             const positionDee3 = await fix.xnugg.balanceOf(accounts.dee.address);
-            const ownershipMac3 = await fix.xnugg.ownershipOfX128(accounts.mac.address);
-            const ownershipDee3 = await fix.xnugg.ownershipOfX128(accounts.dee.address);
+            const ownershipMac3 = await fix.xnugg.ownershipOf(accounts.mac.address);
+            const ownershipDee3 = await fix.xnugg.ownershipOf(accounts.dee.address);
             const positionMac3 = await fix.xnugg.balanceOf(accounts.mac.address);
             const positionDennis3 = await fix.xnugg.balanceOf(accounts.dennis.address);
             const positionFrank3 = await fix.xnugg.balanceOf(accounts.frank.address);
-            const ownershipFrank3 = await fix.xnugg.ownershipOfX128(accounts.frank.address);
-            const ownershipDennis3 = await fix.xnugg.ownershipOfX128(accounts.dennis.address);
+            const ownershipFrank3 = await fix.xnugg.ownershipOf(accounts.frank.address);
+            const ownershipDennis3 = await fix.xnugg.ownershipOf(accounts.dennis.address);
             const positionCharlie3 = await fix.xnugg.balanceOf(accounts.charile.address);
-            const ownershipCharlie3 = await fix.xnugg.ownershipOfX128(accounts.charile.address);
+            const ownershipCharlie3 = await fix.xnugg.ownershipOf(accounts.charile.address);
 
             console.log('positionDee0: ', fromEth(positionDee0));
             console.log('positionDee1: ', fromEth(positionDee1));
