@@ -8,57 +8,6 @@ pragma solidity 0.8.4;
  * @dev #TODO
  */
 library QuadMath {
-    struct Uint512 {
-        uint256 a;
-        uint256 b;
-    }
-    /**
-     * Max Value of Quad Percion Binary 128
-     * Equal to 340282366920938463463374607431768211456 or 2^128
-     */
-    // uint256 internal constant _BINARY128 = 0x100000000000000000000000000000000;
-    uint256 internal constant _BINARY128 = 0x100000000000000000000000000000000;
-
-    /**
-     * @notice #TODO
-     * @param base_ the amount to take a percent of
-     * @param percent_ the percent out of 100 to be taken
-     * @return res precent_ of base_
-     * @dev #TODO
-     */
-    function percent(uint256 base_, uint8 percent_) internal pure returns (uint256 res) {
-        require(percent_ <= 100);
-        res = mulDiv(base_, percent_ * _BINARY128, 100 * _BINARY128);
-    }
-
-    function mulDivRoundingUnsafe(
-        uint256 a,
-        uint256 b,
-        uint256 denominator
-    ) internal pure returns (uint256 result) {
-        result = mulDiv(a, b, denominator);
-        if (mulmod(a, b, denominator) >= denominator / 2) {
-            require(result < type(uint256).max);
-            result++;
-        }
-    }
-
-    function mulDivQuad(
-        uint256 a,
-        uint256 b,
-        uint256 denominator
-    ) internal pure returns (uint256 result) {
-        result = mulDiv(mulDiv(a, _BINARY128, denominator), b, _BINARY128);
-    }
-
-    function mulDivQuadUp(
-        uint256 a,
-        uint256 b,
-        uint256 denominator
-    ) internal pure returns (uint256 result) {
-        result = mulDivRoundingUp(mulDivRoundingUp(a, _BINARY128, denominator), b, _BINARY128);
-    }
-
     /**
      * @notice Calculates ceil(a×b÷denominator) with full precision. Throws if result overflows a uint256 or denominator == 0
      * @param a The multiplicand

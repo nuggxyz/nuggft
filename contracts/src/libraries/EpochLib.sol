@@ -55,18 +55,6 @@ library EpochLib {
         res = 25;
     }
 
-    // /**
-    //  * @dev #TODO
-    //  */
-    // function decodeFormattedToken(uint256 input) internal pure returns (address addr, uint256 epoch) {
-    //     addr = input.formattedTokenAddress();
-    //     epoch = input.formattedTokenEpoch();
-    // }
-
-    // function encodeFormattedToken(uint256 epoch) internal view returns (uint256 res) {
-    //     res = (uint256(uint160(address(this))) << 96) | epoch;
-    // }
-
     /**
      * @dev #TODO
      * @return res
