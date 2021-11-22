@@ -55,19 +55,18 @@ contract ExternalTest is DSTestExtended {
     }
 
     function test_owner() public {
-        bool res = SwapLib.checkOwner(address(ownable), address(this));
-
-        assertTrue(res);
+        (bool ok, address res) = SwapLib.checkOwner(address(ownable));
+        assertTrue(ok && res == address(this));
     }
 
     function test_not_owner() public {
-        bool res = SwapLib.checkOwner(address(ownable), msg.sender);
-        assertTrue(!res);
+        (bool ok, address res) = SwapLib.checkOwner(address(normal));
+        assertTrue(!ok && res != address(this));
     }
 
     function test_not_implementer() public {
-        bool res = SwapLib.checkOwner(address(normal), address(this));
-        assertTrue(!res);
+        (bool ok, address res) = SwapLib.checkOwner(address(normal));
+        assertTrue(!ok && res != address(this));
     }
 
     // function test_not_implementers() public {

@@ -1,6 +1,24 @@
 pragma solidity 0.8.4;
-
+// import "hardhat/console.sol";
 library ShiftLib {
+
+    function unmask(uint256 input) internal pure returns (uint256 res) {
+        assembly {
+            res := input
+            if eq(res, not(0)) {
+                res := 0
+            }
+        }
+    }
+
+    function mask(uint256 input) internal pure returns (uint256 res) {
+        assembly {
+            res := input
+            if eq(res, 0) {
+                res := not(0)
+            }
+        }
+    }
 
 
     function is1155(uint256 input) internal pure returns (bool res) {
@@ -149,7 +167,6 @@ library ShiftLib {
 
     function setFeeClaimed(uint256 input) internal pure returns (uint256 res) {
         assembly {
-
             res := or(input, shl(255, 0x1))
         }
     }
