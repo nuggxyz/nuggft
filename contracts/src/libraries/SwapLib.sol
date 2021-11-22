@@ -19,6 +19,11 @@ library SwapLib {
         mapping(address => mapping(uint256 => uint256)) users;
     }
 
+    struct Fees {
+        uint256 fees;
+        mapping(address => uint256) royalties;
+    }
+
     function loadStorage(
         address token,
         uint256 tokenid,
@@ -61,6 +66,55 @@ library SwapLib {
         }
     }
 
+    function loadFees() internal pure returns (Fees storage s) {
+        uint256 ptr = StorageLib.pointer('fees');
+        assembly {
+            s.slot := ptr
+        }
+    }
+
+    function fees() internal view returns (uint256 res) {
+        res = loadFees().fees.unmask();
+    }
+
+    function clearFees() internal returns (uint256 res) {
+        Fees storage s = loadFees();
+
+        // console.log('s.fees c', s.fees);
+
+        uint256 masked = s.fees;
+        res = masked.unmask();
+        s.fees = uint256(0).mask();
+        // console.log('res', res);
+        // console.log('masked', res);
+
+        // console.log('s.fees', s.fees);
+    }
+
+    function addFeeAndRoyalty(
+        address token,
+        uint256 fee,
+        uint256 royalty
+    ) internal {
+        Fees storage s = loadFees();
+        // console.log('s.fees a', s.fees);
+
+        s.fees += fee;
+        // console.log('s.fees v', s.fees);
+
+        s.royalties[token] += royalty;
+    }
+
+    function royalties(address token) internal view returns (uint256 res) {
+        res = loadFees().royalties[token].unmask();
+    }
+
+    function clearRoyalties(address token) internal returns (uint256 res) {
+        Fees storage s = loadFees();
+        res = s.royalties[token].unmask();
+        s.royalties[token] = uint256(0).mask();
+    }
+
     function checkOwner(address token) internal view returns (bool ok, address owner) {
         bytes memory returnData;
         (ok, returnData) = token.staticcall(abi.encodeWithSignature('owner()'));
@@ -87,7 +141,14 @@ library SwapLib {
             return true;
         }
 
-        require(offerData != 0 && !offerData.isTokenClaimed(), 'SL:CC:2');
+        require(offerData != 0, 'SL:CC:2');
+    }
+
+    function checkOwnerOrRoyalty(address token, uint256 tokenid) internal view returns (bool ok, address res) {
+        (ok, res, ) = checkRoyalties(token, tokenid);
+        if (!ok) {
+            (ok, res) = checkOwner(token);
+        }
     }
 
     function checkRoyalties(address token, uint256 tokenid)

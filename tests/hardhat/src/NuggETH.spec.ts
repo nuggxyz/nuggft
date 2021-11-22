@@ -142,7 +142,7 @@ describe('uint tests', async function () {
             await fix.xnugg.connect(accounts.dennis).burn(toEth('1.696969696970000'));
             await fix.xnugg.connect(accounts.dennis).burn(toEth('1.696969696970000'));
             await fix.xnugg.connect(accounts.dennis).burn(toEth('1.696969696970000'));
-            await fix.xnugg.connect(accounts.dennis).burn(toEth('5'));
+            // await fix.xnugg.connect(accounts.dennis).burn(toEth('5'));
             // await fix.seller.connect(accounts.frank).submitOffer(BigNumber.from(1), toEth('2'), 0, { value: toEth('2.000') });
             await Mining.advanceBlockTo(250);
             await Mining.advanceBlock();
@@ -155,6 +155,10 @@ describe('uint tests', async function () {
             await Mining.advanceBlockTo(350);
 
             await fix.nuggswap.connect(accounts.frank).submitClaimSimple(fix.mockERC721Mintable.address, 10);
+
+            await fix.nuggswap.connect(accounts.dee).submitClaim(fix.mockERC721Mintable.address, fix.toNuggSwapTokenId(0), 1);
+
+            await fix.nuggswap.connect(accounts.deployer).claimFees();
 
             // await fix.xnugg.connect(accounts.dee).burn(toEth('41'));
 
@@ -235,7 +239,7 @@ describe('uint tests', async function () {
                 fromEth(positionCharlie.add(positionFrank).add(positionDee).add(positionMac).add(positionDennis)),
             );
             console.log('(real) supply:', fromEth(await fix.xnugg.totalSupply()));
-            console.log('(tummy) supply:', fromEth((await fix.hre.ethers.provider.getBalance(fix.tummy)).sub(fix.tummyStartBal)));
+            console.log('(owner) supply:', fromEth((await fix.hre.ethers.provider.getBalance(fix.owner)).sub(fix.ownerStartBal)));
 
             console.log(
                 '(expe) owners:',

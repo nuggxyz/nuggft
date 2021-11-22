@@ -33,8 +33,8 @@ export interface NuggFatherFixture {
     mockERC721Royalties: MockERC721Royalties;
     mockERC721Ownable: MockERC721Ownable;
     mockERC721Mintable: MockERC721Mintable;
-    tummy: string;
-    tummyStartBal: BigNumber;
+    owner: string;
+    ownerStartBal: BigNumber;
     hre: HardhatRuntimeEnvironment;
     blockOffset: BigNumber;
     toNuggSwapTokenId(b: BigNumberish): BigNumber;
@@ -92,14 +92,14 @@ export const NuggFatherFix: Fixture<NuggFatherFixture> = async function (
 
     const blockOffset = BigNumber.from(await hre.ethers.provider.getBlockNumber());
 
-    const tummy = eoaDeployer.address;
+    const owner = eoaDeployer.address;
 
     hre.tracer.nameTags[xnugg.address] = 'xNUGG';
     hre.tracer.nameTags[nuggswap.address] = 'NuggSwap';
-    hre.tracer.nameTags[tummy] = 'Tummy';
+    hre.tracer.nameTags[owner] = 'Owner';
 
-    function toNuggSwapTokenId(b: BigNumberish): BigNumber {
-        return ethers.BigNumber.from(nuggswap.address).shl(96).add(b);
+    function toNuggSwapTokenId(epoch: BigNumberish): BigNumber {
+        return ethers.BigNumber.from(nuggswap.address).shl(96).add(epoch);
     }
 
     return {
@@ -110,9 +110,9 @@ export const NuggFatherFix: Fixture<NuggFatherFixture> = async function (
         mockERC721Mintable,
         xnugg,
         blockOffset,
-        tummy,
+        owner,
         nuggswap,
         hre: getHRE(),
-        tummyStartBal: await getHRE().ethers.provider.getBalance(tummy),
+        ownerStartBal: await getHRE().ethers.provider.getBalance(owner),
     };
 };

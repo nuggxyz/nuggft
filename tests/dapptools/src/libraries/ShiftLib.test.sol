@@ -272,6 +272,33 @@ contract ShiftLibTest is DSTestExtended {
         assertEq(thr, 0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff, 'swap_sample5');
     }
 
+    function test_mask() public {
+        uint256 one = uint256(0).mask();
+        uint256 two = uint256(type(uint128).max).mask();
+        uint256 thr = uint256(two + 1);
+
+        assertEq(one, ~uint256(0));
+        assertEq(two, 0x00000000000000000000000000000000ffffffffffffffffffffffffffffffff);
+        assertEq(thr, 0x0000000000000000000000000000000100000000000000000000000000000000);
+    }
+
+    function test_unmask() public {
+        uint256 one = uint256(0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff).unmask();
+        uint256 two = uint256(0x00000000000000000000000000000000ffffffffffffffffffffffffffffffff).unmask();
+        uint256 thr = uint256(0x00000000000000000000000000000000ffffffffffffffffffffffffffffffff).unmask();
+        uint256 fou = uint256(thr.mask() + 1).unmask();
+
+        assertEq(one, 0x0);
+        assertEq(two, 0x00000000000000000000000000000000ffffffffffffffffffffffffffffffff);
+        assertEq(thr, 0x00000000000000000000000000000000ffffffffffffffffffffffffffffffff);
+        assertEq(fou, 0x0000000000000000000000000000000100000000000000000000000000000000);
+    }
+
+    function test_itg_maskers(uint256 input) public {
+        assertEq(uint256(input).mask().unmask(), input);
+        assertTrue(input.mask() != 0);
+    }
+
     // function test_setClaimed() public {
     //     uint256 one = offer_sample3.setClaimed();
     //     uint256 two = offer_sample4.setClaimed();

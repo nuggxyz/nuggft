@@ -7,7 +7,7 @@ import './interfaces/INuggSwap.sol';
 import './libraries/EpochLib.sol';
 import './libraries/ShiftLib.sol';
 import './interfaces/IxNUGG.sol';
-import 'hardhat/console.sol';
+// import 'hardhat/console.sol';
 import './erc721/IERC721.sol';
 import './erc2981/IERC2981.sol';
 import './erc721/ERC721Holder.sol';
@@ -21,8 +21,18 @@ contract NuggSwap is INuggSwap, ERC721Holder, ERC1155Holder {
 
     IxNUGG public immutable override xnugg;
 
+    uint256 public fees;
+
+    mapping(address => uint256) royalties;
+
+    address public owner;
+
     constructor(address _xnugg) {
         xnugg = IxNUGG(_xnugg);
+        owner = msg.sender;
+        SwapLib.clearFees();
+
+        // console.log('dafees', SwapLib.fees());
     }
 
     function submitOffer(
@@ -58,6 +68,39 @@ contract NuggSwap is INuggSwap, ERC721Holder, ERC1155Holder {
 
     function submitClaimSimple(address token, uint256 epoch) external override {
         _submitClaim(token, epoch.formattedToken(), 0, msg.sender, msg.sender);
+    }
+
+    event FeesClaimed(uint256 amount);
+
+    event RoyaltiesClaimed(address token, address projectOwner, uint256 amount);
+
+    function claimFees() external {
+        require(msg.sender == owner, 'NS:CF:0');
+
+        uint256 amount = SwapLib.clearFees();
+
+        msg.sender.sendValue(amount);
+
+        emit FeesClaimed(amount);
+    }
+
+    function claimRoyalties(address token, uint256 tokenid) external {
+        if (msg.sender != owner) {
+            (bool ok, address addr) = SwapLib.checkOwnerOrRoyalty(token, tokenid);
+            require(ok && addr == msg.sender, 'NS:CR:0');
+        }
+
+        uint256 amount = SwapLib.clearRoyalties(token);
+
+        msg.sender.sendValue(amount);
+
+        emit RoyaltiesClaimed(token, msg.sender, amount);
+    }
+
+    function setOwner(address _owner) external {
+        require(msg.sender == owner);
+        // emit OwnerChanged(owner, _owner);
+        owner = _owner;
     }
 
     function getSwap(
@@ -123,13 +166,15 @@ contract NuggSwap is INuggSwap, ERC721Holder, ERC1155Holder {
 
         require(swapData.eth().pointsWith(100) < newSwapData.eth(), 'SL:OBP:4');
 
-        uint256 increase = newSwapData.eth() - swapData.eth();
-
         s.datas[swapnum] = newSwapData;
 
         if (dust > 0) account.sendValue(dust);
 
-        address(xnugg).sendValue(increase);
+        uint256 increase = newSwapData.eth() - swapData.eth();
+        uint256 fee = increase.points(1000);
+        address(xnugg).sendValue(increase - fee);
+        // fees += fee;
+        // SwapLi
 
         emit SubmitOffer(token, tokenid, swapnum, to, value);
     }
@@ -171,7 +216,17 @@ contract NuggSwap is INuggSwap, ERC721Holder, ERC1155Holder {
             s.datas[swapnum] = swapData.setTokenClaimed();
         } else {
             delete s.users[account][swapnum];
-            to.sendValue(offerData.eth());
+
+            if (offerData.offerIsOwner()) {
+                uint256 royalty = offerData.eth().points(1000);
+                uint256 fee = (swapData.eth() - offerData.eth()).points(1000);
+
+                SwapLib.addFeeAndRoyalty(token, fee, royalty);
+
+                to.sendValue(offerData.eth() - (royalty));
+            } else {
+                to.sendValue(offerData.eth());
+            }
         }
 
         emit SubmitClaim(token, tokenid, swapnum, account);
