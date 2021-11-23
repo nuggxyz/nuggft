@@ -6,6 +6,7 @@ import './interfaces/IxNUGG.sol';
 import './erc20/ERC20.sol';
 import './libraries/Address.sol';
 import './libraries/StakeLib.sol';
+import './libraries/EpochLib.sol';
 
 /**
  * @title xNUGG
@@ -14,7 +15,7 @@ import './libraries/StakeLib.sol';
  */
 contract xNUGG is IxNUGG, ERC20 {
     using Address for address;
-
+    using EpochLib for address;
     using StakeLib for address;
 
     constructor() ERC20('Staked NUGG', 'xNUGG') {}
@@ -30,12 +31,14 @@ contract xNUGG is IxNUGG, ERC20 {
     function mint() external payable override {
         uint256 mintedShares = msg.sender.add(msg.value);
         emit Mint(msg.sender, mintedShares, msg.value);
+        EpochLib.setSeed();
     }
 
     function burn(uint256 eth) external override {
         uint256 burnedShares = msg.sender.sub(eth);
         msg.sender.sendValue(eth);
         emit Burn(msg.sender, burnedShares, eth);
+        EpochLib.setSeed();
     }
 
     function _transfer(
@@ -45,6 +48,7 @@ contract xNUGG is IxNUGG, ERC20 {
     ) internal override {
         uint256 movedShares = from.move(to, eth);
         emit Move(from, to, movedShares, eth);
+        EpochLib.setSeed();
     }
 
     /**
