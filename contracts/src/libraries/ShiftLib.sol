@@ -142,18 +142,18 @@ library ShiftLib {
 
     }
 
-
-    function setIs1155(uint256 input) internal pure returns (uint256 res) {
-        // assert(update <= type(uint48).max);
+    // cannot unset, only set or notset
+    function setIs1155(uint256 input, bool to) internal pure returns (uint256 res) {
         assembly {
-
-            res := or(input, shl(252, 0x1))
+            res := input
+            if to {
+                 res := or(res, shl(252, 0x1))
+            }
         }
     }
 
     function setTokenClaimed(uint256 input) internal pure returns (uint256 res) {
         assembly {
-
             res := or(input, shl(253, 0x1))
         }
     }

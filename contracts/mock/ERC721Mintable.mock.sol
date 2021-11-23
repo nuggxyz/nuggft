@@ -53,15 +53,15 @@ contract MockERC721Mintable is ERC721 {
     ) public override {
         if (msg.sender == address(nuggswap) && !_exists(tokenId)) {
             // this will only be called if nuggswap "minted" it
-            if (from == address(nuggswap)) {
-                _safeMint(to, tokenId);
-            } else {
-                require(_data.length > 0, 'STG:721:0');
-                // uint48 currentEpoch = abi.decode(_data, (uint48));
-                require(to == address(nuggswap), 'STG:721:1');
-                require(from == address(0), 'STG:721:2');
-                // require(tokenId == epochToTokenId(currentEpoch), 'STG:721:3');
-            }
+            // if (from == address(nuggswap)) {
+            _safeMint(to, tokenId);
+            // } else {
+            //     require(_data.length > 0, 'STG:721:0');
+            //     // uint48 currentEpoch = abi.decode(_data, (uint48));
+            //     require(to == address(nuggswap), 'STG:721:1');
+            //     require(from == address(0), 'STG:721:2');
+            //     // require(tokenId == epochToTokenId(currentEpoch), 'STG:721:3');
+            // }
             return;
         }
 

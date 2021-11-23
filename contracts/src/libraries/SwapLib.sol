@@ -11,24 +11,19 @@ import './StorageLib.sol';
 
 library SwapLib {
     using Address for address;
-    using Address for address payable;
     using ShiftLib for uint256;
 
     struct Storage {
+        uint256 index;
         mapping(uint256 => uint256) datas;
-        mapping(address => mapping(uint256 => uint256)) users;
-    }
-
-    struct Fees {
-        uint256 fees;
-        mapping(address => uint256) royalties;
+        mapping(uint256 => mapping(address => uint256)) users;
     }
 
     function loadStorage(
         address token,
         uint256 tokenid,
-        uint256 swapnum,
-        address account
+        address account,
+        uint256 index
     )
         internal
         view
@@ -44,11 +39,41 @@ library SwapLib {
             s.slot := ptr
         }
 
-        swapData = s.datas[swapnum];
+        swapData = s.datas[index];
 
         if (swapData == 0) return (s, 0, 0);
 
-        if (account != swapData.addr()) offerData = s.users[account][swapnum];
+        if (account != swapData.addr()) offerData = s.users[index][account];
+        else offerData = swapData;
+    }
+
+    function loadStorage(
+        address token,
+        uint256 tokenid,
+        address account
+    )
+        internal
+        view
+        returns (
+            Storage storage s,
+            uint256 swapData,
+            uint256 offerData,
+            uint256 index
+        )
+    {
+        uint256 ptr = StorageLib.pointer(uint160(token), tokenid);
+
+        assembly {
+            s.slot := ptr
+        }
+
+        index = s.index;
+
+        swapData = s.datas[index];
+
+        if (swapData == 0) return (s, 0, 0, 0);
+
+        if (account != swapData.addr()) offerData = s.users[index][account];
         else offerData = swapData;
     }
 
@@ -64,62 +89,6 @@ library SwapLib {
                 require(false, 'NS:MT:0');
             }
         }
-    }
-
-    function loadFees() internal pure returns (Fees storage s) {
-        uint256 ptr = StorageLib.pointer('fees');
-        assembly {
-            s.slot := ptr
-        }
-    }
-
-    function fees() internal view returns (uint256 res) {
-        res = loadFees().fees.unmask();
-    }
-
-    function clearFees() internal returns (uint256 res) {
-        Fees storage s = loadFees();
-
-        // console.log('s.fees c', s.fees);
-
-        uint256 masked = s.fees;
-        res = masked.unmask();
-        s.fees = uint256(0).mask();
-        // console.log('res', res);
-        // console.log('masked', res);
-
-        // console.log('s.fees', s.fees);
-    }
-
-    function addFeeAndRoyalty(
-        address token,
-        uint256 fee,
-        uint256 royalty
-    ) internal {
-        Fees storage s = loadFees();
-        // console.log('s.fees a', s.fees);
-
-        s.fees += fee;
-        // console.log('s.fees v', s.fees);
-
-        s.royalties[token] += royalty;
-    }
-
-    function royalties(address token) internal view returns (uint256 res) {
-        res = loadFees().royalties[token].unmask();
-    }
-
-    function clearRoyalties(address token) internal returns (uint256 res) {
-        Fees storage s = loadFees();
-        res = s.royalties[token].unmask();
-        s.royalties[token] = uint256(0).mask();
-    }
-
-    function checkOwner(address token) internal view returns (bool ok, address owner) {
-        bytes memory returnData;
-        (ok, returnData) = token.staticcall(abi.encodeWithSignature('owner()'));
-        if (!ok) return (false, address(0));
-        owner = abi.decode(returnData, (address));
     }
 
     function checkClaimer(
@@ -143,58 +112,6 @@ library SwapLib {
 
         require(offerData != 0, 'SL:CC:2');
     }
-
-    function checkOwnerOrRoyalty(address token, uint256 tokenid) internal view returns (bool ok, address res) {
-        (ok, res, ) = checkRoyalties(token, tokenid);
-        if (!ok) {
-            (ok, res) = checkOwner(token);
-        }
-    }
-
-    function checkRoyalties(address token, uint256 tokenid)
-        internal
-        view
-        returns (
-            bool ok,
-            address res,
-            uint256 bps
-        )
-    {
-        bytes memory returnData;
-        (ok, returnData) = token.staticcall(
-            abi.encodeWithSignature('supportsInterface(bytes4)', type(IERC2981).interfaceId)
-        );
-        if (!ok) return (false, address(0), 0);
-
-        if (!abi.decode(returnData, (bool))) return (false, address(0), 0);
-
-        (ok, returnData) = token.staticcall(abi.encodeWithSignature('royaltyInfo(uint256,uint256)', tokenid, 10000));
-        if (!ok) return (false, address(0), 0);
-        (res, bps) = abi.decode(returnData, (address, uint256));
-    }
-
-    // function checkRoyalties(
-    //     address token,
-    //     uint256 tokenid,
-    //     uint256 encodedRoyaltyData
-    // ) internal view returns (uint16 res) {
-    //     // (address receiver, uint256 bps) = ShiftLib.decodeRoyaltyData(encodedRoyaltyData);
-    //     // if (bps > 0) return uint16(bps);
-    //     if (receiver == address(0)) {
-    //         // for projects that indicate no royalties
-    //         try IERC165(token).supportsInterface(type(IERC2981).interfaceId) returns (bool support) {
-    //             if (support) {
-    //                 try IERC2981(token).royaltyInfo(tokenid, 10000) returns (address, uint256 _bps) {
-    //                     return uint16(_bps);
-    //                 } catch {}
-    //             }
-    //         } catch {}
-    //     } else {}
-    // }
-
-    // function takeBPS(uint256 total, uint256 bps) internal pure returns (uint256 res) {
-    //     res = QuadMath.mulDiv(total, bps < 1000 ? bps : 1000, 10000);
-    // }
 
     function points(uint256 total, uint256 bps) internal pure returns (uint256 res) {
         res = QuadMath.mulDiv(total, bps, 10000);
