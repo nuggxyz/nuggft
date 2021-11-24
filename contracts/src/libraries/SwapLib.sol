@@ -8,144 +8,172 @@ import './ShiftLib.sol';
 import './Address.sol';
 import './QuadMath.sol';
 import './StorageLib.sol';
+import './RoyaltyLib.sol';
+import './TokenLib.sol';
+
+import '../modules/Swap.mod.sol';
 
 library SwapLib {
     using Address for address;
-    using ShiftLib for uint256;
+    using TokenLib for address;
+    using SwapMod for uint256;
+    using RoyaltyLib for uint256;
+    using QuadMath for uint256;
 
-    struct Storage {
-        uint256 index;
-        mapping(uint256 => uint256) datas;
-        mapping(uint256 => mapping(address => uint256)) users;
-    }
+    // if swap is finalized traditionally :
+    // - buyer pays :  execution price (+) 5% fee  - .20 nugglabs - 1.80% to xnugg - 34% royalty
+    // - seller gets:  execution price (-) 5% fee - .20 nugglabs - 1.80% to xnugg - 34% royalty
 
-    function loadStorage(
+    // requirement for sell off - execution price MUST be >= 110 % of origin price
+    // - essentially what happens is that the buyer has a 10% fee
+    // - otherwise it is executed under tradtional rules
+
+    // if swap is finalized by sell off  && diff >
+    // - buyer pays : execution price (+) 0% fee - -
+    // - seller gets: origin price    (-) 0% fee - .
+    // - xnugg gets:  execution price (-) fees flip (xnugg gets 90%, 10% to royalties)
+
+    function acceptOffer(
         address token,
         uint256 tokenid,
-        address account,
-        uint256 index
-    )
-        internal
-        view
-        returns (
-            Storage storage s,
-            uint256 swapData,
-            uint256 offerData
-        )
-    {
-        uint256 ptr = StorageLib.pointer(uint160(token), tokenid);
+        address user,
+        address offerer,
+        address staker
+    ) internal returns (uint256 owed) {
+        (, uint256 swapData, uint256 offerData) = SwapMod.loadStorage(token, tokenid, offerer);
 
-        assembly {
-            s.slot := ptr
-        }
+        require(swapData.account() == user, 'SL:HSO:0');
+        require(swapData.isTraditional(), 'SL:HSO:1');
+        require(swapData.isOwner(), 'SL:HSO:2');
 
-        swapData = s.datas[index];
+        SwapMod.updatePointer(token, tokenid);
 
-        if (swapData == 0) return (s, 0, 0);
+        TokenLib.move(token, tokenid, user, offerer, swapData.is1155());
 
-        if (account != swapData.addr()) offerData = s.users[index][account];
-        else offerData = swapData;
+        owed = RoyaltyLib.executeFull(staker, token, offerData.eth());
     }
 
-    function loadStorage(
+    function traditionalOffer(
         address token,
         uint256 tokenid,
-        address account
-    )
-        internal
-        view
-        returns (
-            Storage storage s,
-            uint256 swapData,
-            uint256 offerData,
-            uint256 index
-        )
-    {
-        uint256 ptr = StorageLib.pointer(uint160(token), tokenid);
+        address user
+    ) internal returns (uint256 newSwapData) {
+        (SwapMod.Storage storage s, uint256 swapData, uint256 offerData) = SwapMod.loadStorage(token, tokenid, user);
 
-        assembly {
-            s.slot := ptr
-        }
+        token.validateOwnership(tokenid, swapData.account(), swapData.is1155());
 
-        index = s.index;
+        require(!offerData.isOwner(), 'SL:HSO:0');
+        require(swapData.isTraditional());
 
-        swapData = s.datas[index];
+        (newSwapData, ) = uint256(0).account(user).isTraditional(true).eth(offerData.eth() + msg.value);
 
-        if (swapData == 0) return (s, 0, 0, 0);
-
-        if (account != swapData.addr()) offerData = s.users[index][account];
-        else offerData = swapData;
+        s.users[user] = newSwapData;
     }
 
-    function mintToken(address token, uint256 tokenid) internal view returns (bool is1155) {
-        try IERC721(token).ownerOf(tokenid) returns (address addr) {
-            require(addr == address(this), 'NS:MT:0');
-            return (false);
-        } catch {
-            try IERC1155(token).balanceOf(address(this), tokenid) returns (uint256 amount) {
-                require(amount > 0, 'NS:MT:1');
-                return (true);
-            } catch {
-                require(false, 'NS:MT:0');
-            }
-        }
-    }
-
-    function checkClaimer(
-        address account,
-        uint256 swapData,
-        uint256 offerData,
-        uint256 activeEpoch
-    ) internal pure returns (bool winner) {
-        require(swapData != 0 && !offerData.isTokenClaimed(), 'SL:CC:1');
-
-        if (swapData.isFeeClaimed() && offerData == 0) {
-            return true;
-        }
-
-        bool over = activeEpoch > swapData.epoch();
-
-        if (account == swapData.addr()) {
-            require(over && !swapData.isTokenClaimed(), 'SL:CC:0');
-            return true;
-        }
-
-        require(offerData != 0, 'SL:CC:2');
-    }
-
-    function points(uint256 total, uint256 bps) internal pure returns (uint256 res) {
-        res = QuadMath.mulDiv(total, bps, 10000);
-    }
-
-    function pointsWith(uint256 total, uint256 bps) internal pure returns (uint256 res) {
-        res = points(total, bps) + total;
-    }
-
-    function moveERC721(
+    function offer(
         address token,
         uint256 tokenid,
-        address from,
-        address to
-    ) internal {
-        require(IERC721(token).ownerOf(tokenid) == from, 'AUC:TT:1');
+        uint256 activeEpoch,
+        address user,
+        address staker
+    ) internal returns (uint256 newSwapData) {
+        (SwapMod.Storage storage s, uint256 swapData, uint256 offerData) = SwapMod.loadStorage(token, tokenid, user);
 
-        IERC721(token).safeTransferFrom(from, to, tokenid);
+        require(!offerData.isOwner(), 'SL:HSO:0');
+        require(!swapData.isTraditional());
+        require(activeEpoch <= swapData.epoch(), 'SL:OBP:3');
 
-        require(IERC721(token).ownerOf(tokenid) == to, 'AUC:TT:3');
+        (newSwapData, ) = uint256(0).account(user).eth(offerData.eth() + msg.value);
+
+        s.users[swapData.account()] = swapData;
+
+        s.data = newSwapData;
+
+        // IS FIST OFFER ?
+        if (swapData.isOwner()) {
+            uint256 init = swapData.eth().mulDiv(110, 100);
+            require(init < newSwapData.eth(), 'SL:OBP:4');
+
+            RoyaltyLib.executeFull(staker, token, init);
+            RoyaltyLib.executeIncrement(staker, token, newSwapData.eth() - init);
+
+            token.move(tokenid, user, address(this), swapData.is1155());
+        } else {
+            uint256 init = swapData.eth().mulDiv(101, 100);
+            require(init < newSwapData.eth(), 'SL:OBP:4');
+            RoyaltyLib.executeIncrement(staker, token, newSwapData.eth() - swapData.eth());
+        }
     }
 
-    function moveERC1155(
+    function claim(
         address token,
         uint256 tokenid,
-        address from,
-        address to
-    ) internal {
-        uint256 toStart = IERC1155(token).balanceOf(to, tokenid);
+        address user
+    ) internal returns (uint256 data) {
+        (SwapMod.Storage storage s, uint256 swapData, uint256 offerData) = SwapMod.loadStorage(token, tokenid, user);
 
-        require(IERC1155(token).balanceOf(from, tokenid) >= 1, 'AUC:TT:1');
+        require(swapData.account() != user, '');
+        require(offerData != 0);
 
-        IERC1155(token).safeTransferFrom(from, to, tokenid, 1, '');
+        delete s.users[user];
 
-        require(IERC1155(token).balanceOf(to, tokenid) - toStart == 1, 'AUC:TT:3');
+        return offerData;
+    }
+
+    function claimWin(
+        address token,
+        uint256 tokenid,
+        uint256 activeEpoch,
+        address user
+    ) internal returns (uint256 data) {
+        (, uint256 swapData, ) = SwapMod.loadStorage(token, tokenid, user);
+
+        require(swapData.account() == user, '');
+        require(activeEpoch > swapData.epoch(), '');
+
+        SwapMod.updatePointer(token, tokenid);
+
+        TokenLib.move(token, tokenid, user, address(this), swapData.is1155());
+
+        return swapData;
+    }
+
+    function startTraditionalSwap(
+        address token,
+        uint256 tokenid,
+        address user,
+        uint256 price,
+        bool is1155
+    ) internal returns (uint256 data) {
+        (SwapMod.Storage storage s, uint256 swapData, ) = SwapMod.loadStorage(token, tokenid, user);
+
+        require(swapData == 0);
+
+        // do not need to validate the token is sendable for traditional, need to validate ownership tho
+
+        token.validateOwnership(tokenid, user, is1155);
+
+        (data, ) = uint256(0).account(user).isTraditional(true).eth(price);
+
+        s.data = data;
+    }
+
+    function startSwap(
+        address token,
+        uint256 tokenid,
+        address user,
+        uint256 price,
+        bool is1155
+    ) internal returns (uint256 data) {
+        (SwapMod.Storage storage s, uint256 swapData, ) = SwapMod.loadStorage(token, tokenid, user);
+
+        require(swapData == 0);
+
+        // do not need to validate the token is sendable for traditional, need to validate ownership tho
+        token.validateApproval(tokenid, user, is1155);
+
+        (data, ) = uint256(0).account(user).eth(price);
+
+        s.data = data;
     }
 }
