@@ -3,25 +3,25 @@ import './Address.sol';
 import './QuadMath.sol';
 import './StorageLib.sol';
 
-import '../erc721/IERC721.sol';
-import '../erc1155/IERC1155.sol';
+import '../ercs/erc721/IERC721.sol';
+import '../ercs/erc1155/IERC1155.sol';
 
-import '../erc2981/IERC2981.sol';
+import '../ercs/erc2981/IERC2981.sol';
 
 library TokenLib {
     using ShiftLib for uint256;
 
-    function mintToken(address token, uint256 tokenid) internal view returns (bool is1155) {
+    function mintToken(address token, uint256 tokenid) internal view {
         try IERC721(token).ownerOf(tokenid) returns (address addr) {
             require(addr == address(this), 'NS:MT:0');
-            return (false);
         } catch {
-            try IERC1155(token).balanceOf(address(this), tokenid) returns (uint256 amount) {
-                require(amount > 0, 'NS:MT:1');
-                return (true);
-            } catch {
-                require(false, 'NS:MT:0');
-            }
+            require(false, 'TL:MT:0');
+            // try IERC1155(token).balanceOf(address(this), tokenid) returns (uint256 amount) {
+            //     require(amount > 0, 'NS:MT:1');
+            //     return (true);
+            // } catch {
+            //     require(false, 'NS:MT:0');
+            // }
         }
     }
 

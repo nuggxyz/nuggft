@@ -13,7 +13,7 @@ library SwapStorage {
     using Address for address;
     using ShiftLib for uint256;
 
-    struct Storage {
+    struct Bin {
         uint256 info;
         uint256 data;
         mapping(address => uint256) offers;
@@ -27,7 +27,7 @@ library SwapStorage {
         internal
         view
         returns (
-            Storage storage s,
+            Bin storage s,
             uint256 swapData,
             uint256 offerData
         )
@@ -46,7 +46,7 @@ library SwapStorage {
         internal
         view
         returns (
-            Storage storage s,
+            Bin storage s,
             uint256 swapData,
             uint256 offerData
         )
@@ -60,7 +60,7 @@ library SwapStorage {
         internal
         view
         returns (
-            Storage storage s,
+            Bin storage s,
             uint256 swapData,
             uint256 offerData
         )
@@ -76,7 +76,7 @@ library SwapStorage {
     }
 
     function incrementPointer(address token, uint256 tokenid) internal {
-        Storage storage s;
+        Bin storage s;
 
         uint256 defaultPtr = StorageLib.pointer(uint160(token), tokenid);
 

@@ -39,10 +39,10 @@ contract NuggSwap is INuggSwap, ERC721Holder, ERC1155Holder {
         owner = msg.sender;
     }
 
-    function submitOffer(address token, uint256 tokenid) external payable override {
+    function submitCoreOffer(address token, uint256 tokenid) external payable override {
         uint256 activeEpoch = EpochLib.activeEpoch();
 
-        (uint256 offer, uint256 fee0, uint256 fee1) = SwapModule.offer(
+        (, , , uint256 offer, uint256 fee0, uint256 fee1) = SwapModule.submitCoreOffer(
             token,
             tokenid,
             activeEpoch,
@@ -50,20 +50,54 @@ contract NuggSwap is INuggSwap, ERC721Holder, ERC1155Holder {
             msg.value
         );
 
-        RoyaltyModule.executeFull(staker, token, fee0);
-        RoyaltyModule.executeIncrement(staker, token, fee1);
+        RoyaltyModule.execute0(staker, token, fee0);
+        RoyaltyModule.execure1(staker, token, fee1);
 
         emit SubmitOffer(token, tokenid, msg.sender, msg.value);
     }
 
-    function submitSwap(
+    function submitBasicOffer(address token, uint256 tokenid) external payable override {
+        (, , , uint256 offer, uint256 fee0, uint256 fee1) = SwapModule.submitBasicOffer(
+            token,
+            tokenid,
+            msg.sender,
+            msg.value
+        );
+
+        emit SubmitOffer(token, tokenid, msg.sender, msg.value);
+    }
+
+    function accept(
+        address token,
+        uint256 tokenid,
+        address offerer
+    ) external {
+        (, , uint256 offer, ) = acceptBasicOffer(token, tokenid, offerer, msg.sender);
+
+        uint256 owed = RoyaltyMod.execute0(staker, token, offer.eth());
+
+        msg.sender.sendValue(owed);
+    }
+
+    function startBasicSwap(
         address token,
         uint256 tokenid,
         uint256 price,
-        bool is1155,
-        bool isTraditional
+        bool is1155
     ) external override {
-        _submitSwap(token, tokenid, msg.sender, requestedEpoch, price, is1155);
+        startBasicSwap(token, tokenid, msg.sender, requestedEpoch, price);
+
+        emit SubmitSwap(token, tokenid, msg.sender, price, epoch);
+    }
+
+    function startCoreSwap(
+        address token,
+        uint256 tokenid,
+        uint256 price,
+        bool is1155
+    ) external override {
+        startCoreSwap(token, tokenid, msg.sender, requestedEpoch, price);
+
         emit SubmitSwap(token, tokenid, msg.sender, price, epoch);
     }
 
