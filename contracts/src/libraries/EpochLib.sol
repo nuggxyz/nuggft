@@ -4,34 +4,6 @@ import './ShiftLib.sol';
 library EpochLib {
     using ShiftLib for uint256;
 
-    struct Storage {
-        mapping(uint256 => bytes32) seeds;
-    }
-
-    function loadStorage() internal pure returns (Storage storage s) {
-        uint256 ptr = StorageLib.pointer('epoch');
-        assembly {
-            s.slot := ptr
-        }
-    }
-
-    function setSeed()
-        internal
-        returns (
-            bytes32 seed,
-            uint256 epoch,
-            uint256 blocknum
-        )
-    {
-        blocknum = block.number;
-        (seed, epoch) = calculateSeed(blocknum);
-        loadStorage().seeds[epoch] = seed;
-    }
-
-    /**
-     * @dev #TODO
-     * @return res
-     */
     function activeEpoch() internal view returns (uint256 res) {
         res = toEpoch(block.number);
     }
@@ -55,18 +27,10 @@ library EpochLib {
         res = 25;
     }
 
-    /**
-     * @dev #TODO
-     * @return res
-     */
     function toStartBlock(uint256 epoch) internal pure returns (uint256 res) {
         res = epoch * interval();
     }
 
-    /**
-     * @dev #TODO
-     * @return res
-     */
     function toEndBlock(uint256 epoch) internal pure returns (uint256 res) {
         res = toStartBlock(epoch + 1) - 1;
     }

@@ -1,25 +1,81 @@
 pragma solidity 0.8.4;
 
-import '../erc721/IERC721.sol';
-import '../erc1155/IERC1155.sol';
+import '../ercs/erc721/IERC721.sol';
+import '../ercs/erc1155/IERC1155.sol';
 
-import '../erc2981/IERC2981.sol';
+import '../ercs/erc2981/IERC2981.sol';
 import '../libraries/ShiftLib.sol';
 import '../libraries/Address.sol';
 import '../libraries/QuadMath.sol';
 import '../libraries/StorageLib.sol';
 
-library SwapMod {
+library SwapStorage {
     using Address for address;
     using ShiftLib for uint256;
 
     struct Storage {
         uint256 info;
         uint256 data;
-        mapping(address => uint256) users;
+        mapping(address => uint256) offers;
     }
 
-    function updatePointer(address token, uint256 tokenid) internal {
+    function load(
+        address token,
+        uint256 tokenid,
+        address user
+    )
+        internal
+        view
+        returns (
+            Storage storage s,
+            uint256 swapData,
+            uint256 offerData
+        )
+    {
+        uint256 ptr = StorageLib.pointer(uint160(token), tokenid);
+
+        return loadPtr(ptr, user);
+    }
+
+    function load(
+        address token,
+        uint256 tokenid,
+        address user,
+        uint256 i
+    )
+        internal
+        view
+        returns (
+            Storage storage s,
+            uint256 swapData,
+            uint256 offerData
+        )
+    {
+        uint256 ptr = StorageLib.pointer(uint160(token), tokenid, i);
+
+        return loadPtr(ptr, user);
+    }
+
+    function loadPtr(uint256 ptr, address user)
+        internal
+        view
+        returns (
+            Storage storage s,
+            uint256 swapData,
+            uint256 offerData
+        )
+    {
+        assembly {
+            s.slot := ptr
+        }
+
+        swapData = s.data;
+        if (swapData == 0) return (s, 0, 0);
+        if (user != account(swapData)) offerData = s.offers[user];
+        else offerData = swapData;
+    }
+
+    function incrementPointer(address token, uint256 tokenid) internal {
         Storage storage s;
 
         uint256 defaultPtr = StorageLib.pointer(uint160(token), tokenid);
@@ -37,31 +93,6 @@ library SwapMod {
         }
 
         s.info = info;
-    }
-
-    function loadStorage(
-        address token,
-        uint256 tokenid,
-        address user
-    )
-        internal
-        view
-        returns (
-            Storage storage s,
-            uint256 swapData,
-            uint256 offerData
-        )
-    {
-        uint256 ptr = StorageLib.pointer(uint160(token), tokenid);
-
-        assembly {
-            s.slot := ptr
-        }
-
-        swapData = s.data;
-        if (swapData == 0) return (s, 0, 0);
-        if (user != account(swapData)) offerData = s.users[user];
-        else offerData = swapData;
     }
 
     function is1155(uint256 input) internal pure returns (bool res) {

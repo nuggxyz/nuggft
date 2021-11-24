@@ -6,21 +6,21 @@ import './libraries/SwapLib.sol';
 import './interfaces/INuggSwap.sol';
 import './libraries/EpochLib.sol';
 import './libraries/RoyaltyLib.sol';
-import './modules/Swap.mod.sol';
+import './modules/SwapModule.sol';
 
 import './libraries/ShiftLib.sol';
 import './interfaces/IxNUGG.sol';
 // import 'hardhat/console.sol';
-import './erc721/IERC721.sol';
-import './erc2981/IERC2981.sol';
-import './erc721/ERC721Holder.sol';
-import './erc1155/ERC1155Holder.sol';
+import './ercs/erc721/IERC721.sol';
+import './ercs/erc2981/IERC2981.sol';
+import './ercs/erc721/ERC721Holder.sol';
+import './ercs/erc1155/ERC1155Holder.sol';
 
 contract NuggSwap is INuggSwap, ERC721Holder, ERC1155Holder {
     using Address for address;
     using EpochLib for uint256;
     using ShiftLib for uint256;
-    using SwapMod for uint256;
+    using SwapModule for uint256;
 
     IxNUGG public immutable override xnugg;
 
@@ -42,22 +42,29 @@ contract NuggSwap is INuggSwap, ERC721Holder, ERC1155Holder {
     function submitOffer(address token, uint256 tokenid) external payable override {
         uint256 activeEpoch = EpochLib.activeEpoch();
 
-        uint256 increase = SwapLib.offer(token, tokenid, activeEpoch, msg.sender);
+        (uint256 offer, uint256 fee0, uint256 fee1) = SwapModule.offer(
+            token,
+            tokenid,
+            activeEpoch,
+            msg.sender,
+            msg.value
+        );
+
+        RoyaltyModule.executeFull(staker, token, fee0);
+        RoyaltyModule.executeIncrement(staker, token, fee1);
 
         emit SubmitOffer(token, tokenid, msg.sender, msg.value);
     }
 
-    // function submitOfferSimple(address token) external payable override {
-
     function submitSwap(
         address token,
         uint256 tokenid,
-        uint256 floor,
+        uint256 price,
         bool is1155,
         bool isTraditional
     ) external override {
-        _submitSwap(token, tokenid, msg.sender, requestedEpoch, requestedFloor, is1155);
-        emit SubmitSwap(token, tokenid, index, account, requestedFloor, epoch);
+        _submitSwap(token, tokenid, msg.sender, requestedEpoch, price, is1155);
+        emit SubmitSwap(token, tokenid, msg.sender, price, epoch);
     }
 
     function submitClaim(
@@ -65,7 +72,7 @@ contract NuggSwap is INuggSwap, ERC721Holder, ERC1155Holder {
         uint256 tokenid,
         uint256 index
     ) external override {
-        emit SubmitClaim(token, tokenid, index, account);
+        emit SubmitClaim(token, tokenid, index, msg.sender);
     }
 
     function claimFees() external {
@@ -83,6 +90,12 @@ contract NuggSwap is INuggSwap, ERC721Holder, ERC1155Holder {
         uint256 amount = RoyaltyLib.clearRoyalties(token);
         msg.sender.sendValue(amount);
         emit RoyaltiesClaimed(token, msg.sender, amount);
+    }
+
+    function setProjectOwner(address _owner) external {
+        require(msg.sender == owner);
+        owner = _owner;
+        // emit ProjectOwnerChanged(owner, _owner);
     }
 
     function setOwner(address _owner) external {
