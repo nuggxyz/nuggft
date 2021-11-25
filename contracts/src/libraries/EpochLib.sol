@@ -8,14 +8,7 @@ library EpochLib {
         mapping(uint256 => bytes32) seeds;
     }
 
-    function loadStorage() internal pure returns (Storage storage s) {
-        uint256 ptr = StorageLib.pointer('epoch');
-        assembly {
-            s.slot := ptr
-        }
-    }
-
-    function setSeed(uint256 genesis)
+    function setSeed(Storage storage s, uint256 genesis)
         internal
         returns (
             bytes32 seed,
@@ -23,9 +16,11 @@ library EpochLib {
             uint256 blocknum
         )
     {
-        blocknum = block.number;
-        (seed, epoch) = calculateSeed(genesis, blocknum);
-        loadStorage().seeds[epoch] = seed;
+        if (s.seeds[activeEpoch(genesis)] == 0) {
+            blocknum = block.number;
+            (seed, epoch) = calculateSeed(genesis, blocknum);
+            s.seeds[epoch] = seed;
+        }
     }
 
     /**
