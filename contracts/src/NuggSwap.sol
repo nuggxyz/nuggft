@@ -29,26 +29,21 @@ contract NuggSwap is INuggSwap, ERC721Holder, ERC1155Holder {
         random = _random;
     }
 
-    function submitOffer(
-        address token,
-        uint256 tokenid,
-        uint256 index
-    ) external payable override {
-        _submitOffer(token, tokenid, index, msg.sender, msg.value);
+    function submitOffer(address token, uint256 tokenid) external payable override {
+        _submitOffer(token, tokenid, msg.sender, msg.value);
     }
 
     function submitOfferSimple(address token) external payable override {
-        _submitOffer(token, EpochLib.activeEpoch(), 0, msg.sender, msg.value);
+        _submitOffer(token, EpochLib.activeEpoch(), msg.sender, msg.value);
     }
 
     function submitSwap(
         address token,
         uint256 tokenid,
-        uint256 index,
         uint48 requestedEpoch,
         uint128 requestedFloor
     ) external override {
-        _submitSwap(token, tokenid, index, msg.sender, requestedEpoch, requestedFloor);
+        _submitSwap(token, tokenid, msg.sender, requestedEpoch, requestedFloor);
     }
 
     function submitClaim(
@@ -76,15 +71,13 @@ contract NuggSwap is INuggSwap, ERC721Holder, ERC1155Holder {
     function _submitOffer(
         address token,
         uint256 tokenid,
-        uint256 index,
         address account,
         uint256 value
     ) internal {
-        (SwapLib.Storage storage s, uint256 swapData, uint256 offerData) = SwapLib.loadStorage(
+        (SwapLib.Storage storage s, uint256 swapData, uint256 offerData, uint256 index) = SwapLib.loadStorage(
             token,
             tokenid,
-            account,
-            index
+            account
         );
 
         uint256 activeEpoch = EpochLib.activeEpoch();
@@ -101,8 +94,8 @@ contract NuggSwap is INuggSwap, ERC721Holder, ERC1155Holder {
             // make sure swap is still active
             require(activeEpoch <= swapData.epoch(), 'SL:OBP:3');
 
-            // save prev users data
-            s.users[index][swapData.addr()] = swapData;
+            // save prev offers data
+            s.offers[swapData.addr()] = swapData;
 
             // copy relevent items from swapData to newSwapData
             newSwapData = newSwapData.setEpoch(swapData.epoch());
@@ -120,7 +113,7 @@ contract NuggSwap is INuggSwap, ERC721Holder, ERC1155Holder {
 
         require(swapData.eth().pointsWith(100) < newSwapData.eth(), 'SL:OBP:4');
 
-        s.datas[index] = newSwapData;
+        s.data = newSwapData;
 
         address(xnugg).sendValue(newSwapData.eth() - swapData.eth());
 
@@ -143,11 +136,14 @@ contract NuggSwap is INuggSwap, ERC721Holder, ERC1155Holder {
 
         uint256 activeEpoch = EpochLib.activeEpoch();
 
-        delete s.users[index][account];
+        delete s.offers[account];
 
         if (SwapLib.checkClaimer(account, swapData, offerData, activeEpoch)) {
+            delete s.data;
+
             SwapLib.moveERC721(token, tokenid, address(this), to);
-            delete s.datas[index];
+
+            SwapLib.incrementIndex(token, tokenid);
         } else {
             to.sendValue(offerData.eth());
         }
@@ -158,21 +154,19 @@ contract NuggSwap is INuggSwap, ERC721Holder, ERC1155Holder {
     function _submitSwap(
         address token,
         uint256 tokenid,
-        uint256 index,
         address account,
         uint48 requestedEpoch,
         uint256 requestedFloor
     ) internal {
+        (SwapLib.Storage storage s, uint256 swapData, , uint256 index) = SwapLib.loadStorage(token, tokenid, account);
         // only minting swaps can be numbered 0
         require(index > 0, 'NS:SS:-1');
-
-        (SwapLib.Storage storage s, uint256 swapData, ) = SwapLib.loadStorage(token, tokenid, account, index);
 
         // make sure swap does not exist
         require(swapData == 0, 'NS:SS:0');
 
         // force swaps to be started in sequential order
-        if (index != 1) require(s.datas[index - 1] != 0, 'NS:SS:1');
+        // if (index != 1) require(s.data[index - 1] != 0, 'NS:SS:1');
 
         // calculate epoch
         uint256 epoch = EpochLib.activeEpoch() + requestedEpoch;
@@ -183,7 +177,7 @@ contract NuggSwap is INuggSwap, ERC721Holder, ERC1155Holder {
         SwapLib.moveERC721(token, tokenid, account, address(this));
 
         // sstore swapdata
-        s.datas[index] = swapData;
+        s.data = swapData;
 
         emit SubmitSwap(token, tokenid, index, account, requestedFloor, epoch);
     }
