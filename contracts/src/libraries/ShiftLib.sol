@@ -27,7 +27,7 @@ library ShiftLib {
         }
     }
 
-    function isTokenClaimed(uint256 input) internal pure returns (bool res) {
+    function isClaimed(uint256 input) internal pure returns (bool res) {
         assembly {
             res := and(shr(253, input), 0x1)
         }
@@ -39,7 +39,7 @@ library ShiftLib {
         }
     }
 
-    function isFeeClaimed(uint256 input) internal pure returns (bool res) {
+    function isOwner(uint256 input) internal pure returns (bool res) {
         assembly {
             res := and(shr(255, input), 0x1)
         }
@@ -112,35 +112,7 @@ library ShiftLib {
         }
     }
 
-    function offerIsOwner(uint256 input) internal pure returns (bool res) {
-        res = isFeeClaimed(input);
 
-    }
-
-    function swapEndedByOwner(uint256 input) internal pure returns (bool res) {
-        res = isTokenClaimed(input);
-    }
-
-
-    function formattedToken(uint256 e) internal view returns (uint256 res) {
-        assembly {
-            res := or(shl(96 , address()) , e)
-        }
-    }
-
-    function formattedTokenEpoch(uint256 input) internal pure returns (uint256 res) {
-        assembly {
-            res := and(input, 0xffffffffffff)
-        }
-    }
-
-
-    function formattedTokenAddress(uint256 input) internal pure returns (address res) {
-        assembly {
-            res := shr(96, input)
-        }
-
-    }
 
     // cannot unset, only set or notset
     function setIs1155(uint256 input, bool to) internal pure returns (uint256 res) {
@@ -152,7 +124,7 @@ library ShiftLib {
         }
     }
 
-    function setTokenClaimed(uint256 input) internal pure returns (uint256 res) {
+    function setClaimed(uint256 input) internal pure returns (uint256 res) {
         assembly {
             res := or(input, shl(253, 0x1))
         }
@@ -165,15 +137,13 @@ library ShiftLib {
         }
     }
 
-    function setFeeClaimed(uint256 input) internal pure returns (uint256 res) {
+    function setIsOwner(uint256 input) internal pure returns (uint256 res) {
         assembly {
             res := or(input, shl(255, 0x1))
         }
     }
 
-    function setOfferIsOwner(uint256 input) internal pure returns (uint256 res) {
-        res = setFeeClaimed(input);
-    }
+
 
     function hasRtmFlag(uint256 input) internal pure returns (bool res) {
         assembly {

@@ -18,8 +18,7 @@ interface INuggSwap {
         uint256 tokenid,
         uint256 swapnum,
         uint48 requestedEpoch,
-        uint128 requestedFloor,
-        bool is1155
+        uint128 requestedFloor
     ) external;
 
     function submitOffer(

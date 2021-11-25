@@ -5,7 +5,6 @@ pragma solidity 0.8.4;
 import './libraries/SwapLib.sol';
 import './interfaces/INuggSwap.sol';
 import './libraries/EpochLib.sol';
-import './libraries/RoyaltyLib.sol';
 
 import './libraries/ShiftLib.sol';
 import './interfaces/IxNUGG.sol';
@@ -21,17 +20,10 @@ contract NuggSwap is INuggSwap, ERC721Holder, ERC1155Holder {
     using ShiftLib for uint256;
     using SwapLib for uint256;
 
-    IxNUGG public immutable override xnugg;
-
-    uint256 public fees;
-
-    mapping(address => uint256) royalties;
-
-    address public owner;
+    IxNUGG public override xnugg;
 
     constructor(address _xnugg) {
         xnugg = IxNUGG(_xnugg);
-        owner = msg.sender;
     }
 
     function submitOffer(
@@ -39,11 +31,11 @@ contract NuggSwap is INuggSwap, ERC721Holder, ERC1155Holder {
         uint256 tokenid,
         uint256 index
     ) external payable override {
-        _submitOffer(token, tokenid, index, msg.sender, msg.sender, msg.value);
+        _submitOffer(token, tokenid, index, msg.sender, msg.value);
     }
 
     function submitOfferSimple(address token) external payable override {
-        _submitOffer(token, EpochLib.activeEpoch().formattedToken(), 0, msg.sender, msg.sender, msg.value);
+        _submitOffer(token, EpochLib.activeEpoch(), 0, msg.sender, msg.value);
     }
 
     function submitSwap(
@@ -51,10 +43,9 @@ contract NuggSwap is INuggSwap, ERC721Holder, ERC1155Holder {
         uint256 tokenid,
         uint256 index,
         uint48 requestedEpoch,
-        uint128 requestedFloor,
-        bool is1155
+        uint128 requestedFloor
     ) external override {
-        _submitSwap(token, tokenid, index, msg.sender, requestedEpoch, requestedFloor, is1155);
+        _submitSwap(token, tokenid, index, msg.sender, requestedEpoch, requestedFloor);
     }
 
     function submitClaim(
@@ -66,34 +57,7 @@ contract NuggSwap is INuggSwap, ERC721Holder, ERC1155Holder {
     }
 
     function submitClaimSimple(address token, uint256 epoch) external override {
-        _submitClaim(token, epoch.formattedToken(), 0, msg.sender, msg.sender);
-    }
-
-    event FeesClaimed(uint256 amount);
-    event OwnerChanged(address oldOwner, address newOwner);
-    event RoyaltiesClaimed(address token, address projectOwner, uint256 amount);
-
-    function claimFees() external {
-        require(msg.sender == owner, 'NS:CF:0');
-        uint256 amount = RoyaltyLib.clearFees();
-        msg.sender.sendValue(amount);
-        emit FeesClaimed(amount);
-    }
-
-    function claimRoyalties(address token, uint256 tokenid) external {
-        if (msg.sender != owner) {
-            (bool ok, address addr) = RoyaltyLib.checkOwnerOrRoyalty(token, tokenid);
-            require(ok && addr == msg.sender, 'NS:CR:0');
-        }
-        uint256 amount = RoyaltyLib.clearRoyalties(token);
-        msg.sender.sendValue(amount);
-        emit RoyaltiesClaimed(token, msg.sender, amount);
-    }
-
-    function setOwner(address _owner) external {
-        require(msg.sender == owner);
-        emit OwnerChanged(owner, _owner);
-        owner = _owner;
+        _submitClaim(token, epoch, 0, msg.sender, msg.sender);
     }
 
     function getSwap(
@@ -111,73 +75,53 @@ contract NuggSwap is INuggSwap, ERC721Holder, ERC1155Holder {
         uint256 tokenid,
         uint256 index,
         address account,
-        address to,
         uint256 value
     ) internal {
         (SwapLib.Storage storage s, uint256 swapData, uint256 offerData) = SwapLib.loadStorage(
             token,
             tokenid,
-            to,
+            account,
             index
         );
 
         uint256 activeEpoch = EpochLib.activeEpoch();
 
-        bool rtm;
         uint256 newSwapData;
-        uint256 dust;
 
-        if (swapData.hasRtmFlag()) {
-            swapData = 0;
-            rtm = true;
-        }
+        require(swapData != 0 || index == 0);
 
         // if swap exists
         if (swapData != 0) {
             // make sure user is not the owner of swap
-            require(!offerData.offerIsOwner(), 'SL:HSO:0');
+            require(!offerData.isOwner(), 'SL:HSO:0');
 
             // make sure swap is still active
-            require(activeEpoch <= swapData.epoch() && !swapData.swapEndedByOwner(), 'SL:OBP:3');
+            require(activeEpoch <= swapData.epoch(), 'SL:OBP:3');
 
             // save prev users data
             s.users[index][swapData.addr()] = swapData;
 
             // copy relevent items from swapData to newSwapData
-            newSwapData = newSwapData.setEpoch(swapData.epoch()).setIs1155(swapData.is1155());
+            newSwapData = newSwapData.setEpoch(swapData.epoch());
         } else if (index == 0) {
-            // make sure that token id matches NuggSwap Mintable Token format
-            // ie: 0x....NUGGSWAP-ADDRESS....ACTIVE-EPOCH
-            require(activeEpoch == tokenid.formattedTokenEpoch(), 'SL:-1:0');
-            require(tokenid.formattedTokenAddress() == address(this), 'SL:0:0');
-
             // attempt to mint token - reverts if it cannot
             // checks if nuggswap already owns token
-            bool is1155 = SwapLib.mintToken(token, tokenid);
+            SwapLib.mintToken(token, activeEpoch);
 
             // set relevent data to newSwapData
-            newSwapData = newSwapData.setIs1155(is1155).setEpoch(activeEpoch);
-
-            // if no one called RightToMint, check and generate current seed
-            if (!rtm) EpochLib.setSeed();
-        } else {
-            require(false, 'NS:SO:0');
+            newSwapData = newSwapData.setEpoch(activeEpoch);
         }
 
         // set
-        (newSwapData, dust) = newSwapData.setAccount(to).setEth(offerData.eth() + value);
+        (newSwapData, ) = newSwapData.setAccount(account).setEth(offerData.eth() + value);
 
         require(swapData.eth().pointsWith(100) < newSwapData.eth(), 'SL:OBP:4');
 
         s.datas[index] = newSwapData;
 
-        if (dust > 0) account.sendValue(dust);
+        address(xnugg).sendValue(newSwapData.eth() - swapData.eth());
 
-        uint256 increase = newSwapData.eth() - swapData.eth();
-        uint256 fee = increase.points(1000);
-        address(xnugg).sendValue(increase - fee);
-
-        emit SubmitOffer(token, tokenid, index, to, value);
+        emit SubmitOffer(token, tokenid, index, account, value);
     }
 
     function _submitClaim(
@@ -197,46 +141,20 @@ contract NuggSwap is INuggSwap, ERC721Holder, ERC1155Holder {
         uint256 activeEpoch = EpochLib.activeEpoch();
 
         bool winner;
-        if (swapData.hasRtmFlag()) {
-            uint256 epoch = tokenid.formattedTokenEpoch();
 
-            require(activeEpoch > epoch, 'SC:SD:1');
-            require(address(this) == tokenid.formattedTokenAddress(), 'SC:SD:2');
+        winner = SwapLib.checkClaimer(account, swapData, offerData, activeEpoch);
 
-            winner = swapData.addr() == account;
-
-            require(winner, 'SC:0:0');
-
-            swapData = uint256(0).setAccount(account).setEpoch(epoch);
-        } else {
-            winner = SwapLib.checkClaimer(account, swapData, offerData, activeEpoch);
-        }
+        delete s.users[index][account];
 
         if (winner) {
             SwapLib.moveERC721(token, tokenid, address(this), to);
-            s.datas[index] = swapData.setTokenClaimed();
-
-            // if (index == 0)
+            delete s.datas[index];
         } else {
-            delete s.users[index][account];
-
-            if (offerData.offerIsOwner()) {
-                uint256 royalty = offerData.eth().points(1000);
-                uint256 fee = (swapData.eth() - offerData.eth()).points(1000);
-
-                RoyaltyLib.addFeeAndRoyalty(token, fee, royalty);
-
-                to.sendValue(offerData.eth() - royalty);
-            } else {
-                to.sendValue(offerData.eth());
-            }
+            to.sendValue(offerData.eth());
         }
 
         emit SubmitClaim(token, tokenid, index, account);
     }
-
-    //     function startRescueSwap(address token,         uint256 tokenid
-    // )
 
     function _submitSwap(
         address token,
@@ -244,8 +162,7 @@ contract NuggSwap is INuggSwap, ERC721Holder, ERC1155Holder {
         uint256 index,
         address account,
         uint48 requestedEpoch,
-        uint256 requestedFloor,
-        bool is1155
+        uint256 requestedFloor
     ) internal {
         // only minting swaps can be numbered 0
         require(index > 0, 'NS:SS:-1');
@@ -262,25 +179,13 @@ contract NuggSwap is INuggSwap, ERC721Holder, ERC1155Holder {
         uint256 epoch = EpochLib.activeEpoch() + requestedEpoch;
 
         // build starting swap data
-        (swapData, ) = swapData.setAccount(account).setEpoch(epoch).setOfferIsOwner().setEth(requestedFloor);
+        (swapData, ) = swapData.setAccount(account).setEpoch(epoch).setIsOwner().setEth(requestedFloor);
 
-        // move the token
-        if (is1155) {
-            SwapLib.moveERC1155(token, tokenid, account, address(this));
-            swapData = swapData.setIs1155(true);
-        } else {
-            SwapLib.moveERC721(token, tokenid, account, address(this));
-        }
+        SwapLib.moveERC721(token, tokenid, account, address(this));
 
         // sstore swapdata
         s.datas[index] = swapData;
 
         emit SubmitSwap(token, tokenid, index, account, requestedFloor, epoch);
-    }
-
-    function rightToMint(address token) external {
-        (, uint256 epoch, ) = EpochLib.setSeed();
-        (SwapLib.Storage storage s, uint256 data, ) = SwapLib.loadStorage(token, epoch.formattedToken(), msg.sender, 0);
-        if (data == 0) s.datas[0] = data.setRtmFlag().setAccount(msg.sender);
     }
 }
