@@ -15,6 +15,8 @@ interface INuggSwap {
 
     function xnugg() external view returns (IxNUGG);
 
+    function delegate(address token, uint256 tokenid) external payable;
+
     function mint(address token, uint256 tokenid) external payable;
 
     function commit(address token, uint256 tokenid) external payable;
