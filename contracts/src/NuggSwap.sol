@@ -8,7 +8,7 @@ import './libraries/EpochLib.sol';
 
 import './libraries/ShiftLib.sol';
 import './interfaces/IxNUGG.sol';
-// import 'hardhat/console.sol';
+import 'hardhat/console.sol';
 import './erc721/IERC721.sol';
 import './erc2981/IERC2981.sol';
 import './erc721/ERC721Holder.sol';
@@ -67,7 +67,17 @@ contract NuggSwap is INuggSwap, ERC721Holder, ERC1155Holder {
         amount = offerData.eth();
     }
 
-    function mint(address token, uint256 tokenid) external payable override {
+    function delegate(address token, uint256 tokenid) external payable override {
+        uint256 activeEpoch = EpochLib.activeEpoch();
+
+        (, uint256 swapData, uint256 offerData) = SwapLib.loadStorage(token, tokenid, msg.sender);
+
+        if (activeEpoch == tokenid && swapData == 0) mint(token, tokenid);
+        else if (offerData == 0 && swapData.isOwner()) commit(token, tokenid);
+        else offer(token, tokenid);
+    }
+
+    function mint(address token, uint256 tokenid) public payable override {
         uint256 activeEpoch = EpochLib.activeEpoch();
 
         // we do not need this, could take tokenid out as an argument - but do not want to give users
@@ -87,7 +97,7 @@ contract NuggSwap is INuggSwap, ERC721Holder, ERC1155Holder {
         emit Mint(token, activeEpoch, msg.sender, newSwapData);
     }
 
-    function commit(address token, uint256 tokenid) external payable override {
+    function commit(address token, uint256 tokenid) public payable override {
         (SwapLib.Storage storage s, uint256 swapData, uint256 offerData) = SwapLib.loadStorage(
             token,
             tokenid,
@@ -116,7 +126,7 @@ contract NuggSwap is INuggSwap, ERC721Holder, ERC1155Holder {
         emit Commit(token, tokenid, epoch, msg.sender, newSwapData.eth());
     }
 
-    function offer(address token, uint256 tokenid) external payable override {
+    function offer(address token, uint256 tokenid) public payable override {
         (SwapLib.Storage storage s, uint256 swapData, uint256 offerData) = SwapLib.loadStorage(
             token,
             tokenid,
@@ -193,6 +203,8 @@ contract NuggSwap is INuggSwap, ERC721Holder, ERC1155Holder {
 
         // build starting swap data
         (swapData, ) = swapData.account(msg.sender).isOwner(true).eth(requestedFloor);
+
+        console.logBytes32(bytes32(swapData));
 
         s.data = swapData;
 

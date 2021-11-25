@@ -37,10 +37,10 @@ describe('uint tests', async function () {
         it('should revert if shares = 0', async () => {
             await fix.xnugg.connect(accounts.dee).mint({ value: toEth('5') });
             const res = await fix.xnugg.balanceOf(accounts.dee.address);
-            await fix.nuggswap.connect(accounts.mac).mint(fix.mockERC721Mintable.address, 0, { value: toEth('1') });
+            await fix.nuggswap.connect(accounts.mac).delegate(fix.mockERC721Mintable.address, 0, { value: toEth('1') });
 
             // await fix.xnugg.connect(accounts.frank).fallback({ value: toEth('5') });
-            // await fix.nuggswap.connect(accounts.mac).offer(fix.mockERC721Mintable.address, { value: toEth('2.000') });
+            // await fix.nuggswap.connect(accounts.mac).delegate(fix.mockERC721Mintable.address, { value: toEth('2.000') });
 
             await fix.nuggswap.connect(accounts.dee).offer(fix.mockERC721Mintable.address, 0, { value: toEth('3.000') });
 
@@ -131,7 +131,7 @@ describe('uint tests', async function () {
             // const epoch = await fix.nuggswap.currentEpochId();
 
             // console.log({ epoch }, fix.hre.ethers.provider.blockNumber);
-
+            throw new Error();
             await fix.nuggswap.connect(accounts.frank).mint(fix.mockERC721Mintable.address, 10, { value: toEth('88') });
             const res99 = await fix.nuggswap.getOfferLeader(fix.mockERC721Mintable.address, 10, 10);
 
