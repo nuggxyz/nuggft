@@ -19,7 +19,7 @@ import '../src/interfaces/INuggSwap.sol';
  * Note: epochs are 256 blocks long as block hashes only exist for 256 blocks
  */
 contract MockERC721Mintable is ERC721 {
-    INuggSwap public nuggswap;
+    INuggSwap public immutable nuggswap;
     uint256 public epochOffset;
     address public owner;
 
@@ -42,6 +42,14 @@ contract MockERC721Mintable is ERC721 {
         return sender == address(nuggswap);
     }
 
+    function _beforeTokenTransfer(
+        address,
+        address,
+        uint256
+    ) internal view override {
+        require(msg.sender == address(nuggswap), 'NFT:BTT:0');
+    }
+
     /**
      * @dev See {IERC721-safeTransferFrom}.
      */
@@ -51,29 +59,8 @@ contract MockERC721Mintable is ERC721 {
         uint256 tokenId,
         bytes memory _data
     ) public override {
-        if (msg.sender == address(nuggswap) && !_exists(tokenId)) {
-            // this will only be called if nuggswap "minted" it
-            // if (from == address(nuggswap)) {
-            _safeMint(to, tokenId);
-            // } else {
-            //     require(_data.length > 0, 'STG:721:0');
-            //     // uint48 currentEpoch = abi.decode(_data, (uint48));
-            //     require(to == address(nuggswap), 'STG:721:1');
-            //     require(from == address(0), 'STG:721:2');
-            //     // require(tokenId == epochToTokenId(currentEpoch), 'STG:721:3');
-            // }
-            return;
-        }
-
-        super.safeTransferFrom(from, to, tokenId, _data);
-    }
-
-    function epochToTokenId(uint256 epoch) internal view returns (uint256 tokenId) {
-        tokenId = epoch - epochOffset;
-    }
-
-    function currentTokenId() public view returns (uint256 tokenId) {
-        // tokenId = epochToTokenId(nuggswap.currentEpochId());
+        if (!_exists(tokenId)) _safeMint(to, tokenId);
+        else super.safeTransferFrom(from, to, tokenId, _data);
     }
 
     /**
