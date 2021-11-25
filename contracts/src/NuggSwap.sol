@@ -20,10 +20,13 @@ contract NuggSwap is INuggSwap, ERC721Holder, ERC1155Holder {
     using ShiftLib for uint256;
     using SwapLib for uint256;
 
+    address immutable random;
+
     IxNUGG public override xnugg;
 
-    constructor(address _xnugg) {
+    constructor(address _xnugg, address _random) {
         xnugg = IxNUGG(_xnugg);
+        random = _random;
     }
 
     function submitOffer(
@@ -106,7 +109,7 @@ contract NuggSwap is INuggSwap, ERC721Holder, ERC1155Holder {
         } else if (index == 0) {
             // attempt to mint token - reverts if it cannot
             // checks if nuggswap already owns token
-            SwapLib.mintToken(token, activeEpoch);
+            // SwapLib.mintToken(token, activeEpoch);
 
             // set relevent data to newSwapData
             newSwapData = newSwapData.setEpoch(activeEpoch);
@@ -140,13 +143,9 @@ contract NuggSwap is INuggSwap, ERC721Holder, ERC1155Holder {
 
         uint256 activeEpoch = EpochLib.activeEpoch();
 
-        bool winner;
-
-        winner = SwapLib.checkClaimer(account, swapData, offerData, activeEpoch);
-
         delete s.users[index][account];
 
-        if (winner) {
+        if (SwapLib.checkClaimer(account, swapData, offerData, activeEpoch)) {
             SwapLib.moveERC721(token, tokenid, address(this), to);
             delete s.datas[index];
         } else {

@@ -4,9 +4,9 @@ pragma solidity ^0.8.4;
 import '../../lib/DSTestExtended.sol';
 
 contract constantVsInline is DSTestExtended {
-    uint256 I_AM_CONSTANT = 1000;
+    uint256 constant I_AM_CONSTANT = 1000;
     uint256 I_AM_NOT_CONSTANT = 1000;
-    uint256 I_AM_IMMUTABLE = 1000;
+    uint256 immutable I_AM_IMMUTABLE = 1000;
 
     // winner
     function test_inline() public {

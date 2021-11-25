@@ -55,18 +55,20 @@ export const NuggFatherFix: Fixture<NuggFatherFixture> = async function (
         args: [],
     });
 
-    const nuggswap = await deployContractWithSalt<NuggSwap__factory>({
-        factory: 'NuggSwap',
-        from: eoaDeployer,
-        args: [xnugg.address],
-    });
-
     const mockERC721 = await deployContractWithSalt<MockERC721__factory>({
         factory: 'MockERC721',
         from: eoaDeployer,
         args: [],
     });
 
+    const nuggswap = await deployContractWithSalt<NuggSwap__factory>({
+        factory: 'NuggSwap',
+        from: eoaDeployer,
+        args: [xnugg.address, xnugg.address],
+    });
+
+    //0x435ccc2eaa41633658be26d804be5A01fEcC9337
+    //0x770f070388b13A597b84B557d6B8D1CD94Fc9925
     const mockERC721Royalties = await deployContractWithSalt<MockERC721Royalties__factory>({
         factory: 'MockERC721Royalties',
         from: eoaDeployer,
