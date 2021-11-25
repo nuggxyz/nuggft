@@ -18,12 +18,12 @@ library StakeLib {
         mapping(address => uint256) owned;
     }
 
-    function load() internal pure returns (Storage storage s) {
-        uint256 ptr = StorageLib.pointer('epoch');
-        assembly {
-            s.slot := ptr
-        }
-    }
+    // function load() internal pure returns (Storage storage s) {
+    //     uint256 ptr = StorageLib.pointer('epoch');
+    //     assembly {
+    //         s.slot := ptr
+    //     }
+    // }
 
     function getActiveEth() internal view returns (uint256 res) {
         assembly {
@@ -31,17 +31,20 @@ library StakeLib {
         }
     }
 
-    function getActiveEthOf(address account) internal view returns (uint256 res) {
-        Storage storage s = load();
+    function getActiveValue() internal view returns (uint256 res) {
+        res = getActiveEth() + 10**20;
+    }
+
+    function getActiveEthOf(Storage storage s, address account) internal view returns (uint256 res) {
         res = sharesToSupply(s.owned[account], getActiveEth(), s.shares, false);
     }
 
-    function getActiveSharesOf(address account) internal view returns (uint256 res) {
-        res = load().owned[account];
+    function getActiveSharesOf(Storage storage s, address account) internal view returns (uint256 res) {
+        res = s.owned[account];
     }
 
-    function getActiveShares() internal view returns (uint256 res) {
-        res = load().shares;
+    function getActiveShares(Storage storage s) internal view returns (uint256 res) {
+        res = s.shares;
     }
 
     /**
@@ -49,18 +52,32 @@ library StakeLib {
      * @return res shares
      * @dev #TODO
      */
-    function getActiveOwnershipOf(address account) internal view returns (uint256 res) {
-        Storage storage s = load();
+    function getActiveOwnershipOf(Storage storage s, address account) internal view returns (uint256 res) {
         return s.owned[account].mulDiv(0x100000000000000000000000000000000, s.shares);
     }
 
-    function add(address account, uint256 eth) internal returns (uint256 shares) {
+    function start(Storage storage s, address account) internal returns (uint256 res) {
+        uint256 ethBalance = getActiveEth();
+        uint256 activeShares = s.shares;
+
+        require(ethBalance == 0);
+        require(activeShares == s.shares);
+
+        res = 10**20;
+
+        s.shares = res;
+        s.owned[account] = res;
+    }
+
+    function add(
+        Storage storage s,
+        address account,
+        uint256 eth
+    ) internal returns (uint256 shares) {
         // uint256 eth = msg.value;
         require(eth > 0, 'SL:ADD:0');
 
-        Storage storage s = load();
-
-        uint256 ethBalance = getActiveEth();
+        uint256 ethBalance = getActiveValue();
         uint256 activeShares = s.shares;
 
         if (activeShares == 0) {
@@ -75,13 +92,15 @@ library StakeLib {
         s.owned[account] += shares;
     }
 
-    function sub(address account, uint256 shares) internal returns (uint256 eth) {
-        Storage storage s = load();
-
-        uint256 ethBalance = getActiveEth();
+    function sub(
+        Storage storage s,
+        address account,
+        uint256 shares
+    ) internal returns (uint256 eth) {
+        uint256 ethBalance = getActiveValue();
         uint256 activeShares = s.shares;
 
-        require(shares <= activeShares, 'SL:SUB:0');
+        // require(shares <= s.owned[account], 'SL:SUB:0');
 
         eth = sharesToSupply(shares, ethBalance, activeShares, false);
 
@@ -90,16 +109,12 @@ library StakeLib {
     }
 
     function move(
+        Storage storage s,
         address from,
         address to,
-        uint256 eth
-    ) internal returns (uint256 shares) {
-        Storage storage s = load();
-
-        uint256 ethBalance = getActiveEth();
-        uint256 activeShares = s.shares;
-
-        shares = supplyToShares(eth, ethBalance, activeShares, true);
+        uint256 shares
+    ) internal {
+        // require(shares <= s.owned[from], 'SL:SUB:0');
 
         s.owned[from] -= shares;
         s.owned[to] += shares;
