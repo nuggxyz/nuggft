@@ -3,15 +3,15 @@ pragma solidity 0.8.4;
 import './IxNUGG.sol';
 
 interface INuggSwap {
-    event Mint(address token, uint256 epoch, address account, uint256 amount);
+    event Mint(address token, uint256 epoch, address account, uint256 eth);
 
-    event Commit(address token, uint256 tokenid, uint256 index, address account, uint256 amount);
+    event Commit(address token, uint256 tokenid, uint256 index, address account, uint256 eth);
 
-    event Offer(address token, uint256 tokenid, uint256 index, address account, uint256 amount);
+    event Offer(address token, uint256 tokenid, uint256 index, address account, uint256 eth);
 
     event Claim(address token, uint256 tokenid, uint256 index, address account);
 
-    event Swap(address token, uint256 tokenid, address account, uint256 amount);
+    event Swap(address token, uint256 tokenid, address account, uint256 eth);
 
     function xnugg() external view returns (IxNUGG);
 
@@ -40,20 +40,20 @@ interface INuggSwap {
         uint256 tokenid,
         uint256 index,
         address account
-    ) external view returns (uint256 amount);
+    ) external view returns (uint256 eth);
 
     function getOfferLeader(
         address token,
         uint256 tokenid,
         uint256 index
-    ) external view returns (address leader, uint256 amount);
+    ) external view returns (address leader, uint256 eth);
 
     function getActiveSwap(address token, uint256 tokenid)
         external
         view
         returns (
             address leader,
-            uint256 amount,
+            uint256 eth,
             uint256 epoch,
             bool isOwner
         );
