@@ -3,7 +3,6 @@
 pragma solidity 0.8.4;
 
 import './QuadMath.sol';
-import './StorageLib.sol';
 
 /**
  * @title StakeMath
