@@ -2,7 +2,7 @@
 
 pragma solidity 0.8.4;
 
-import '../../src/erc20/IERC20.sol';
+import '@openzeppelin/contracts/token/ERC20/IERC20.sol';
 
 /// @title Interface for WETH9
 interface IWETH9 is IERC20 {

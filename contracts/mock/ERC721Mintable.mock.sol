@@ -2,7 +2,7 @@
 
 pragma solidity 0.8.4;
 
-import '../src/erc721/ERC721.sol';
+import '@openzeppelin/contracts/token/ERC721/ERC721.sol';
 import '../src/interfaces/INuggSwap.sol';
 
 // import '../src/interfaces/IERC721Nuggable.sol';
@@ -19,27 +19,28 @@ import '../src/interfaces/INuggSwap.sol';
  * Note: epochs are 256 blocks long as block hashes only exist for 256 blocks
  */
 contract MockERC721Mintable is ERC721 {
-    INuggSwap public immutable nuggswap;
-    uint256 public epochOffset;
-    address public owner;
+    address public immutable nuggswap;
 
-    constructor(address royalty, address _nuggswap) ERC721('Mock ERC721 Mintable', 'MockERC721Mintable') {
-        nuggswap = INuggSwap(_nuggswap);
-        // epochOffset = nuggswap.currentEpochId();
-        owner = royalty;
+    // address public owner;
+
+    constructor(address _nuggswap) ERC721('Mock ERC721 Mintable', 'MockERC721Mintable') {
+        nuggswap = _nuggswap;
     }
 
-    function ownerOf(uint256 tokenId) public view virtual override returns (address res) {
-        res = _owners[tokenId];
-        if (res == address(0)) {
-            if (msg.sender == address(nuggswap)) return address(nuggswap);
-            require(false, 'ERC721: owner query for nonexistent token');
-        }
-    }
+    // function ownerOf(uint256 tokenId) public view virtual override returns (address res) {
+    //     bool tmp = _exists(tokenId);
+    //     if (tmp) return super. else {
+
+    //     }
+    //     if (res == address(0)) {
+    //         if (msg.sender == nuggswap) return nuggswap;
+    //         require(false, 'ERC721: owner query for nonexistent token');
+    //     }
+    // }
 
     function _isApprovedOrOwner(address sender, uint256 tokenId) internal view override returns (bool) {
-        require(_exists(tokenId), 'ERC721: operator query for nonexistent token');
-        return sender == address(nuggswap);
+        // require(_exists(tokenId), 'ERC721: operator query for nonexistent token');
+        return sender == nuggswap;
     }
 
     function _beforeTokenTransfer(
@@ -47,7 +48,7 @@ contract MockERC721Mintable is ERC721 {
         address,
         uint256
     ) internal view override {
-        require(msg.sender == address(nuggswap), 'NFT:BTT:0');
+        require(msg.sender == nuggswap, 'NFT:BTT:0');
     }
 
     /**
@@ -59,7 +60,7 @@ contract MockERC721Mintable is ERC721 {
         uint256 tokenId,
         bytes memory _data
     ) public override {
-        if (!_exists(tokenId)) _safeMint(to, tokenId);
+        if (!_exists(tokenId) && msg.sender == nuggswap) _safeMint(to, tokenId);
         else super.safeTransferFrom(from, to, tokenId, _data);
     }
 

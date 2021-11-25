@@ -13,7 +13,7 @@ interface INuggSwap {
 
     event Swap(address token, uint256 tokenid, address account, uint256 eth);
 
-    function xnugg() external view returns (IxNUGG);
+    function xnugg() external view returns (address payable);
 
     function delegate(address token, uint256 tokenid) external payable;
 

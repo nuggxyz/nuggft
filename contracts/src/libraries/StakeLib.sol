@@ -54,7 +54,7 @@ library StakeLib {
         return s.owned[account].mulDiv(0x100000000000000000000000000000000, s.shares);
     }
 
-    function add(address account, uint256 eth) internal returns (uint256 sharesAdded) {
+    function add(address account, uint256 eth) internal returns (uint256 shares) {
         // uint256 eth = msg.value;
         require(eth > 0, 'SL:ADD:0');
 
@@ -65,26 +65,28 @@ library StakeLib {
 
         if (activeShares == 0) {
             require(ethBalance == eth, 'SL:SA:0');
-            sharesAdded = eth;
+            shares = eth;
         } else {
             uint256 prev_eth_balance = ethBalance - eth;
-            sharesAdded = supplyToShares(eth, prev_eth_balance, activeShares, false);
+            shares = supplyToShares(eth, prev_eth_balance, activeShares, false);
         }
 
-        s.shares += sharesAdded;
-        s.owned[account] += sharesAdded;
+        s.shares += shares;
+        s.owned[account] += shares;
     }
 
-    function sub(address account, uint256 eth) internal returns (uint256 sharesSubtracted) {
+    function sub(address account, uint256 shares) internal returns (uint256 eth) {
         Storage storage s = load();
 
         uint256 ethBalance = getActiveEth();
         uint256 activeShares = s.shares;
 
-        sharesSubtracted = supplyToShares(eth, ethBalance, activeShares, true);
+        require(shares <= activeShares, 'SL:SUB:0');
 
-        s.shares -= sharesSubtracted;
-        s.owned[account] -= sharesSubtracted;
+        eth = sharesToSupply(shares, ethBalance, activeShares, false);
+
+        s.shares -= shares;
+        s.owned[account] -= shares;
     }
 
     function move(

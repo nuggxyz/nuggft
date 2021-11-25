@@ -2,29 +2,29 @@
 
 pragma solidity 0.8.4;
 
-import './libraries/SwapLib.sol';
+import '@openzeppelin/contracts/token/ERC721/IERC721.sol';
+import '@openzeppelin/contracts/token/ERC721/utils/ERC721Holder.sol';
+import '@openzeppelin/contracts/utils/Address.sol';
+
 import './interfaces/INuggSwap.sol';
-import './libraries/EpochLib.sol';
-
-import './libraries/ShiftLib.sol';
 import './interfaces/IxNUGG.sol';
-import './erc721/IERC721.sol';
-import './erc2981/IERC2981.sol';
-import './erc721/ERC721Holder.sol';
-import './erc1155/ERC1155Holder.sol';
 
-contract NuggSwap is INuggSwap, ERC721Holder, ERC1155Holder {
-    using Address for address;
+import './libraries/SwapLib.sol';
+import './libraries/EpochLib.sol';
+import './libraries/ShiftLib.sol';
+
+contract NuggSwap is INuggSwap, ERC721Holder {
+    using Address for address payable;
     using EpochLib for uint256;
     using ShiftLib for uint256;
     using SwapLib for uint256;
 
-    IxNUGG public immutable override xnugg;
+    address payable public immutable override xnugg;
 
     uint256 private immutable genesis;
 
     constructor(address _xnugg) {
-        xnugg = IxNUGG(_xnugg);
+        xnugg = payable(_xnugg);
         genesis = IxNUGG(_xnugg).genesis();
     }
 
@@ -94,7 +94,7 @@ contract NuggSwap is INuggSwap, ERC721Holder, ERC1155Holder {
 
         s.data = newSwapData;
 
-        address(xnugg).sendValue(msg.value);
+        xnugg.sendValue(msg.value);
 
         emit Mint(token, activeEpoch, msg.sender, newSwapData.eth());
     }
@@ -123,7 +123,7 @@ contract NuggSwap is INuggSwap, ERC721Holder, ERC1155Holder {
 
         uint256 increase = newSwapData.eth() - swapData.eth() + dust;
 
-        address(xnugg).sendValue(increase);
+        xnugg.sendValue(increase);
 
         emit Commit(token, tokenid, epoch, msg.sender, newSwapData.eth());
     }
@@ -161,7 +161,7 @@ contract NuggSwap is INuggSwap, ERC721Holder, ERC1155Holder {
 
         uint256 increase = newSwapData.eth() - swapData.eth() + dust;
 
-        address(xnugg).sendValue(increase);
+        xnugg.sendValue(increase);
 
         emit Offer(token, tokenid, swapData.epoch(), msg.sender, newSwapData.eth());
     }
@@ -187,7 +187,7 @@ contract NuggSwap is INuggSwap, ERC721Holder, ERC1155Holder {
 
             SwapLib.moveERC721(token, tokenid, address(this), msg.sender);
         } else {
-            msg.sender.sendValue(offerData.eth());
+            payable(msg.sender).sendValue(offerData.eth());
         }
 
         emit Claim(token, tokenid, index, msg.sender);
