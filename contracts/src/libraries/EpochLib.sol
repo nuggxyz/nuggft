@@ -15,7 +15,7 @@ library EpochLib {
         }
     }
 
-    function setSeed()
+    function setSeed(uint256 genesis)
         internal
         returns (
             bytes32 seed,
@@ -24,7 +24,7 @@ library EpochLib {
         )
     {
         blocknum = block.number;
-        (seed, epoch) = calculateSeed(blocknum);
+        (seed, epoch) = calculateSeed(genesis, blocknum);
         loadStorage().seeds[epoch] = seed;
     }
 
@@ -32,8 +32,8 @@ library EpochLib {
      * @dev #TODO
      * @return res
      */
-    function activeEpoch() internal view returns (uint256 res) {
-        res = toEpoch(block.number);
+    function activeEpoch(uint256 genesis) internal view returns (uint256 res) {
+        res = toEpoch(genesis, block.number);
     }
 
     /**
@@ -42,9 +42,9 @@ library EpochLib {
      * We considered making this harder to manipulate, but we decided that if someone were able to
      * pull it off and make their own custom nugg, that would be really fucking cool.
      */
-    function calculateSeed(uint256 blocknum) internal view returns (bytes32 res, uint256 epoch) {
-        epoch = toEpoch(blocknum);
-        uint256 startblock = toStartBlock(epoch);
+    function calculateSeed(uint256 genesis, uint256 blocknum) internal view returns (bytes32 res, uint256 epoch) {
+        epoch = toEpoch(genesis, blocknum);
+        uint256 startblock = toStartBlock(genesis, epoch);
         res = blockhash(startblock);
         if (startblock == blocknum) return (bytes32(uint256(0x42069)), 0);
         require(res != 0, 'EPC:SBL');
@@ -59,19 +59,19 @@ library EpochLib {
      * @dev #TODO
      * @return res
      */
-    function toStartBlock(uint256 epoch) internal pure returns (uint256 res) {
-        res = epoch * interval();
+    function toStartBlock(uint256 genesis, uint256 epoch) internal pure returns (uint256 res) {
+        res = (epoch * interval()) + genesis;
     }
 
     /**
      * @dev #TODO
      * @return res
      */
-    function toEndBlock(uint256 epoch) internal pure returns (uint256 res) {
-        res = toStartBlock(epoch + 1) - 1;
+    function toEndBlock(uint256 genesis, uint256 epoch) internal pure returns (uint256 res) {
+        res = toStartBlock(genesis, epoch + 1) - 1;
     }
 
-    function toEpoch(uint256 blocknum) internal pure returns (uint256 res) {
-        res = blocknum / interval();
+    function toEpoch(uint256 genesis, uint256 blocknum) internal pure returns (uint256 res) {
+        res = (blocknum - genesis) / interval();
     }
 }

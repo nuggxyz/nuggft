@@ -22,8 +22,11 @@ contract NuggSwap is INuggSwap, ERC721Holder, ERC1155Holder {
 
     IxNUGG public immutable override xnugg;
 
+    uint256 private immutable genesis;
+
     constructor(address _xnugg) {
         xnugg = IxNUGG(_xnugg);
+        genesis = IxNUGG(_xnugg).genesis();
     }
 
     function getActiveSwap(address token, uint256 tokenid)
@@ -68,7 +71,7 @@ contract NuggSwap is INuggSwap, ERC721Holder, ERC1155Holder {
     }
 
     function delegate(address token, uint256 tokenid) external payable override {
-        uint256 activeEpoch = EpochLib.activeEpoch();
+        uint256 activeEpoch = genesis.activeEpoch();
 
         (, uint256 swapData, uint256 offerData) = SwapLib.loadStorage(token, tokenid, msg.sender);
 
@@ -78,7 +81,7 @@ contract NuggSwap is INuggSwap, ERC721Holder, ERC1155Holder {
     }
 
     function mint(address token, uint256 tokenid) public payable override {
-        uint256 activeEpoch = EpochLib.activeEpoch();
+        uint256 activeEpoch = genesis.activeEpoch();
 
         // we do not need this, could take tokenid out as an argument - but do not want to give users
         // the ability to accidently place an offer for nugg A and end up minting nugg B.
@@ -94,7 +97,7 @@ contract NuggSwap is INuggSwap, ERC721Holder, ERC1155Holder {
 
         address(xnugg).sendValue(msg.value);
 
-        emit Mint(token, activeEpoch, msg.sender, newSwapData);
+        emit Mint(token, activeEpoch, msg.sender, newSwapData.eth());
     }
 
     function commit(address token, uint256 tokenid) public payable override {
@@ -108,7 +111,7 @@ contract NuggSwap is INuggSwap, ERC721Holder, ERC1155Holder {
 
         require(swapData.isOwner(), 'SL:HSO:0');
 
-        uint256 epoch = EpochLib.activeEpoch() + 1;
+        uint256 epoch = genesis.activeEpoch() + 1;
 
         // copy relevent items from swapData to newSwapData
         (uint256 newSwapData, uint256 dust) = uint256(0).epoch(epoch).account(msg.sender).eth(msg.value);
@@ -140,7 +143,7 @@ contract NuggSwap is INuggSwap, ERC721Holder, ERC1155Holder {
         require(!offerData.isOwner(), 'SL:HSO:0');
 
         // if (swapData.epoch() == 0 && swapData.isOwner()) swapData = swapData.epoch(activeEpoch + 1);
-        uint256 activeEpoch = EpochLib.activeEpoch();
+        uint256 activeEpoch = genesis.activeEpoch();
 
         // make sure swap is still active
         require(activeEpoch <= swapData.epoch(), 'SL:OBP:3');
@@ -176,7 +179,7 @@ contract NuggSwap is INuggSwap, ERC721Holder, ERC1155Holder {
             index
         );
 
-        uint256 activeEpoch = EpochLib.activeEpoch();
+        uint256 activeEpoch = genesis.activeEpoch();
 
         delete s.offers[index][msg.sender];
 

@@ -134,40 +134,49 @@ contract ShiftLibTest is DSTestExtended {
         assertEq(swap_sample5.epoch(), 68719476735, 'swap_sample5');
     }
 
-    function test_is1155() public {
-        assertTrue(swap_sample0.is1155(), 'swap_sample0');
-        assertTrue(swap_sample1.is1155(), 'swap_sample1');
-        assertTrue(!swap_sample2.is1155(), 'swap_sample2');
-        assertTrue(!swap_sample3.is1155(), 'swap_sample3');
-        assertTrue(!swap_sample4.is1155(), 'swap_sample4');
-        assertTrue(swap_sample5.is1155(), 'swap_sample5');
-    }
+    // function test_is1155() public {
+    //     assertTrue(swap_sample0.is1155(), 'swap_sample0');
+    //     assertTrue(swap_sample1.is1155(), 'swap_sample1');
+    //     assertTrue(!swap_sample2.is1155(), 'swap_sample2');
+    //     assertTrue(!swap_sample3.is1155(), 'swap_sample3');
+    //     assertTrue(!swap_sample4.is1155(), 'swap_sample4');
+    //     assertTrue(swap_sample5.is1155(), 'swap_sample5');
+    // }
 
-    function test_isTokenClaimed() public {
-        assertTrue(swap_sample0.isTokenClaimed(), 'swap_sample0');
-        assertTrue(!swap_sample1.isTokenClaimed(), 'swap_sample1');
-        assertTrue(swap_sample2.isTokenClaimed(), 'swap_sample2');
-        assertTrue(swap_sample3.isTokenClaimed(), 'swap_sample3');
-        assertTrue(!swap_sample4.isTokenClaimed(), 'swap_sample4');
-        assertTrue(swap_sample5.isTokenClaimed(), 'swap_sample5');
-    }
+    // function test_isTokenClaimed() public {
+    //     assertTrue(swap_sample0.isTokenClaimed(), 'swap_sample0');
+    //     assertTrue(!swap_sample1.isTokenClaimed(), 'swap_sample1');
+    //     assertTrue(swap_sample2.isTokenClaimed(), 'swap_sample2');
+    //     assertTrue(swap_sample3.isTokenClaimed(), 'swap_sample3');
+    //     assertTrue(!swap_sample4.isTokenClaimed(), 'swap_sample4');
+    //     assertTrue(swap_sample5.isTokenClaimed(), 'swap_sample5');
+    // }
 
-    function test_isRoyaltyClaimed() public {
-        assertTrue(swap_sample0.isRoyaltyClaimed(), 'swap_sample0');
-        assertTrue(!swap_sample1.isRoyaltyClaimed(), 'swap_sample1');
-        assertTrue(swap_sample2.isRoyaltyClaimed(), 'swap_sample2');
-        assertTrue(!swap_sample3.isRoyaltyClaimed(), 'swap_sample3');
-        assertTrue(!swap_sample4.isRoyaltyClaimed(), 'swap_sample4');
-        assertTrue(swap_sample5.isRoyaltyClaimed(), 'swap_sample5');
-    }
+    // function test_isRoyaltyClaimed() public {
+    //     assertTrue(swap_sample0.isRoyaltyClaimed(), 'swap_sample0');
+    //     assertTrue(!swap_sample1.isRoyaltyClaimed(), 'swap_sample1');
+    //     assertTrue(swap_sample2.isRoyaltyClaimed(), 'swap_sample2');
+    //     assertTrue(!swap_sample3.isRoyaltyClaimed(), 'swap_sample3');
+    //     assertTrue(!swap_sample4.isRoyaltyClaimed(), 'swap_sample4');
+    //     assertTrue(swap_sample5.isRoyaltyClaimed(), 'swap_sample5');
+    // }
 
-    function test_isFeeClaimed() public {
-        assertTrue(swap_sample0.isFeeClaimed(), 'swap_sample0');
-        assertTrue(swap_sample1.isFeeClaimed(), 'swap_sample1');
-        assertTrue(!swap_sample2.isFeeClaimed(), 'swap_sample2');
-        assertTrue(swap_sample3.isFeeClaimed(), 'swap_sample3');
-        assertTrue(!swap_sample4.isFeeClaimed(), 'swap_sample4');
-        assertTrue(swap_sample5.isFeeClaimed(), 'swap_sample5');
+    // function test_isFeeClaimed() public {
+    //     assertTrue(swap_sample0.isFeeClaimed(), 'swap_sample0');
+    //     assertTrue(swap_sample1.isFeeClaimed(), 'swap_sample1');
+    //     assertTrue(!swap_sample2.isFeeClaimed(), 'swap_sample2');
+    //     assertTrue(swap_sample3.isFeeClaimed(), 'swap_sample3');
+    //     assertTrue(!swap_sample4.isFeeClaimed(), 'swap_sample4');
+    //     assertTrue(swap_sample5.isFeeClaimed(), 'swap_sample5');
+    // }
+
+    function test_eth(uint256 input) public {
+        assertEq(swap_sample0.eth(), 295147905179351777280000000000000, 'swap_sample0');
+        assertEq(swap_sample1.eth(), 28547876905000000000000, 'swap_sample1');
+        assertEq(swap_sample2.eth(), 16622405000000000000, 'swap_sample2');
+        assertEq(swap_sample3.eth(), 5555555555555000000000000, 'swap_sample3');
+        assertEq(swap_sample4.eth(), 0, 'swap_sample4');
+        // assertEq(swap_sample5.eth(), , 'swap_sample5');
     }
 
     function test_eth() public {
@@ -189,9 +198,9 @@ contract ShiftLibTest is DSTestExtended {
     // }
 
     function test_setAccount() public {
-        uint256 one = swap_sample3.setAccount(address(0));
-        uint256 two = swap_sample4.setAccount(msg.sender);
-        uint256 thr = swap_sample5.setAccount(address(type(uint160).max));
+        uint256 one = swap_sample3.account(address(0));
+        uint256 two = swap_sample4.account(msg.sender);
+        uint256 thr = swap_sample5.account(address(type(uint160).max));
 
         assertEq(one, 0xa000010001050D80EA58E3000000000000000000000000000000000000000000, 'swap_sample3');
         assertEq(two, 0x00000000000000000000000000a329c0648769a73afac7f9381e08fb43dbea72, 'swap_sample4');
@@ -199,9 +208,9 @@ contract ShiftLibTest is DSTestExtended {
     }
 
     function test_setEth() public {
-        (uint256 one, uint256 rem1) = swap_sample3.setEth(1000000000000);
-        (uint256 two, uint256 rem2) = swap_sample4.setEth(4503599627348691000000000000);
-        (uint256 thr, uint256 rem3) = swap_sample5.setEth(0);
+        (uint256 one, uint256 rem1) = swap_sample3.eth(1000000000000);
+        (uint256 two, uint256 rem2) = swap_sample4.eth(4503599627348691000000000000);
+        (uint256 thr, uint256 rem3) = swap_sample5.eth(0);
         //              A000010001000000000000000DB143EDE6805F23922535BAD7ACB3E9AA5D2F7B
         assertEq(one.eth() + rem1, 1000000000000, 'swap_sample3');
         assertEq(two.eth() + rem2, 4503599627348691000000000000, 'swap_sample4');
@@ -209,7 +218,7 @@ contract ShiftLibTest is DSTestExtended {
     }
 
     function test_setEth2() public {
-        (uint256 two, ) = swap_sample4.setEth(2000000000000000000);
+        (uint256 two, ) = swap_sample4.eth(2000000000000000000);
         //              A000010001000000000000000DB143EDE6805F23922535BAD7ACB3E9AA5D2F7B
         assertEq(two, 0x00000000000000001E8480000000000000000000000000000000000000000000, 'swap_sample4');
     }
@@ -221,9 +230,9 @@ contract ShiftLibTest is DSTestExtended {
     // }
 
     function test_setEpoch() public {
-        uint256 one = swap_sample3.setEpoch(777888);
-        uint256 two = swap_sample4.setEpoch(4294945491);
-        uint256 thr = swap_sample5.setEpoch(0);
+        uint256 one = swap_sample3.epoch(777888);
+        uint256 two = swap_sample4.epoch(4294945491);
+        uint256 thr = swap_sample5.epoch(0);
 
         //    A000000000050D80EA5BFFA00DB143EDE6805F23922535BAD7ACB3E9AA5D2F7B
         assertEq(one, 0xa0000BDEA0050D80EA58E3000DB143eDe6805F23922535Bad7Acb3e9Aa5D2F7b, 'swap_sample3');
@@ -231,46 +240,46 @@ contract ShiftLibTest is DSTestExtended {
         assertEq(thr, 0xf000000000ffffffffffffffffffffffffffffffffffffffffffffffffffffff, 'swap_sample5');
     }
 
-    function test_setIs1155() public {
-        uint256 one = swap_sample3.setIs1155();
-        uint256 two = swap_sample4.setIs1155();
-        uint256 thr = swap_sample5.setIs1155();
+    // function test_setIs1155() public {
+    //     uint256 one = swap_sample3.setIs1155();
+    //     uint256 two = swap_sample4.setIs1155();
+    //     uint256 thr = swap_sample5.setIs1155();
 
-        assertEq(one, 0xb000010001050D80EA58E3000DB143eDe6805F23922535Bad7Acb3e9Aa5D2F7b, 'swap_sample3');
-        assertEq(two, 0x1000000000000000000000000000000000000000000000000000000000000000, 'swap_sample4');
-        assertEq(thr, 0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff, 'swap_sample5');
-    }
+    //     assertEq(one, 0xb000010001050D80EA58E3000DB143eDe6805F23922535Bad7Acb3e9Aa5D2F7b, 'swap_sample3');
+    //     assertEq(two, 0x1000000000000000000000000000000000000000000000000000000000000000, 'swap_sample4');
+    //     assertEq(thr, 0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff, 'swap_sample5');
+    // }
 
-    function test_setTokenClaimed() public {
-        uint256 one = swap_sample3.setTokenClaimed();
-        uint256 two = swap_sample4.setTokenClaimed();
-        uint256 thr = swap_sample5.setTokenClaimed();
+    // function test_setTokenClaimed() public {
+    //     uint256 one = swap_sample3.setTokenClaimed();
+    //     uint256 two = swap_sample4.setTokenClaimed();
+    //     uint256 thr = swap_sample5.setTokenClaimed();
 
-        assertEq(one, 0xa000010001050D80EA58E3000DB143eDe6805F23922535Bad7Acb3e9Aa5D2F7b, 'swap_sample3');
-        assertEq(two, 0x2000000000000000000000000000000000000000000000000000000000000000, 'swap_sample4');
-        assertEq(thr, 0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff, 'swap_sample5');
-    }
+    //     assertEq(one, 0xa000010001050D80EA58E3000DB143eDe6805F23922535Bad7Acb3e9Aa5D2F7b, 'swap_sample3');
+    //     assertEq(two, 0x2000000000000000000000000000000000000000000000000000000000000000, 'swap_sample4');
+    //     assertEq(thr, 0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff, 'swap_sample5');
+    // }
 
-    function test_setRoyaltyClaimed() public {
-        uint256 one = swap_sample3.setRoyaltyClaimed();
-        uint256 two = swap_sample4.setRoyaltyClaimed();
-        uint256 thr = swap_sample5.setRoyaltyClaimed();
+    // function test_setRoyaltyClaimed() public {
+    //     uint256 one = swap_sample3.setRoyaltyClaimed();
+    //     uint256 two = swap_sample4.setRoyaltyClaimed();
+    //     uint256 thr = swap_sample5.setRoyaltyClaimed();
 
-        assertEq(one, 0xe000010001050D80EA58E3000DB143eDe6805F23922535Bad7Acb3e9Aa5D2F7b, 'swap_sample3');
-        assertEq(two, 0x4000000000000000000000000000000000000000000000000000000000000000, 'swap_sample4');
-        assertEq(thr, 0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff, 'swap_sample5');
-    }
+    //     assertEq(one, 0xe000010001050D80EA58E3000DB143eDe6805F23922535Bad7Acb3e9Aa5D2F7b, 'swap_sample3');
+    //     assertEq(two, 0x4000000000000000000000000000000000000000000000000000000000000000, 'swap_sample4');
+    //     assertEq(thr, 0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff, 'swap_sample5');
+    // }
 
-    function test_setFeeClaimed() public {
-        uint256 one = swap_sample3.setFeeClaimed();
-        uint256 two = swap_sample4.setFeeClaimed();
-        uint256 thr = swap_sample5.setFeeClaimed();
-        // 400000000000000000000000000000
-        // 4000000000000000000000000000000000000000000000000000000000000000
-        assertEq(one, 0xa000010001050D80EA58E3000DB143eDe6805F23922535Bad7Acb3e9Aa5D2F7b, 'swap_sample3');
-        assertEq(two, 0x8000000000000000000000000000000000000000000000000000000000000000, 'swap_sample4');
-        assertEq(thr, 0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff, 'swap_sample5');
-    }
+    // function test_setFeeClaimed() public {
+    //     uint256 one = swap_sample3.setFeeClaimed();
+    //     uint256 two = swap_sample4.setFeeClaimed();
+    //     uint256 thr = swap_sample5.setFeeClaimed();
+    //     // 400000000000000000000000000000
+    //     // 4000000000000000000000000000000000000000000000000000000000000000
+    //     assertEq(one, 0xa000010001050D80EA58E3000DB143eDe6805F23922535Bad7Acb3e9Aa5D2F7b, 'swap_sample3');
+    //     assertEq(two, 0x8000000000000000000000000000000000000000000000000000000000000000, 'swap_sample4');
+    //     assertEq(thr, 0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff, 'swap_sample5');
+    // }
 
     function test_mask() public {
         uint256 one = uint256(0).mask();

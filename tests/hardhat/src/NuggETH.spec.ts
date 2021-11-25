@@ -131,7 +131,6 @@ describe('uint tests', async function () {
             // const epoch = await fix.nuggswap.currentEpochId();
 
             // console.log({ epoch }, fix.hre.ethers.provider.blockNumber);
-            throw new Error();
             await fix.nuggswap.connect(accounts.frank).mint(fix.mockERC721Mintable.address, 10, { value: toEth('88') });
             const res99 = await fix.nuggswap.getOfferLeader(fix.mockERC721Mintable.address, 10, 10);
 

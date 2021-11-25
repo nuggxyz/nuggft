@@ -15,10 +15,15 @@ import './libraries/EpochLib.sol';
  */
 contract xNUGG is IxNUGG, ERC20 {
     using Address for address;
-    using EpochLib for address;
     using StakeLib for address;
 
-    constructor() ERC20('Staked NUGG', 'xNUGG') {}
+    using EpochLib for uint256;
+
+    uint256 public immutable override genesis;
+
+    constructor() ERC20('Staked NUGG', 'xNUGG') {
+        genesis = block.number;
+    }
 
     receive() external payable {
         emit Take(msg.sender, msg.value);
@@ -31,14 +36,14 @@ contract xNUGG is IxNUGG, ERC20 {
     function mint() external payable override {
         uint256 mintedShares = msg.sender.add(msg.value);
         emit Mint(msg.sender, mintedShares, msg.value);
-        EpochLib.setSeed();
+        genesis.setSeed();
     }
 
     function burn(uint256 eth) external override {
         uint256 burnedShares = msg.sender.sub(eth);
         msg.sender.sendValue(eth);
         emit Burn(msg.sender, burnedShares, eth);
-        EpochLib.setSeed();
+        genesis.setSeed();
     }
 
     function _transfer(
@@ -48,7 +53,7 @@ contract xNUGG is IxNUGG, ERC20 {
     ) internal override {
         uint256 movedShares = from.move(to, eth);
         emit Move(from, to, movedShares, eth);
-        EpochLib.setSeed();
+        genesis.setSeed();
     }
 
     /**

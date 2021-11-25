@@ -54,20 +54,20 @@ contract ExternalTest is DSTestExtended {
         mock_nuggswap = new MockNuggSwapTest();
     }
 
-    function test_owner() public {
-        (bool ok, address res) = SwapLib.checkOwner(address(ownable));
-        assertTrue(ok && res == address(this));
-    }
+    // function test_owner() public {
+    //     (bool ok, address res) = SwapLib.checkOwner(address(ownable));
+    //     assertTrue(ok && res == address(this));
+    // }
 
-    function test_not_owner() public {
-        (bool ok, address res) = SwapLib.checkOwner(address(normal));
-        assertTrue(!ok && res != address(this));
-    }
+    // function test_not_owner() public {
+    //     (bool ok, address res) = SwapLib.checkOwner(address(normal));
+    //     assertTrue(!ok && res != address(this));
+    // }
 
-    function test_not_implementer() public {
-        (bool ok, address res) = SwapLib.checkOwner(address(normal));
-        assertTrue(!ok && res != address(this));
-    }
+    // function test_not_implementer() public {
+    //     (bool ok, address res) = SwapLib.checkOwner(address(normal));
+    //     assertTrue(!ok && res != address(this));
+    // }
 
     // function test_not_implementers() public {
     //     bool res = SwapLib.checkOwner(address(normal), address(this));
