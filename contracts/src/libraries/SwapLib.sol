@@ -20,10 +20,6 @@ library SwapLib {
         mapping(uint256 => mapping(address => uint256)) offers;
     }
 
-    struct Default {
-        Storage d;
-    }
-
     function loadStorage(
         address token,
         uint256 tokenid,

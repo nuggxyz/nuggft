@@ -38,16 +38,18 @@ contract xNUGG is IxNUGG, ERC20 {
     }
 
     function mint() external payable override {
-        uint256 mintedShares = msg.sender.add(msg.value);
-        emit Mint(msg.sender, mintedShares, msg.value);
+        uint256 mintedShares = StakeLib.add(msg.sender, msg.value);
+
         genesis.setSeed();
+
+        emit Transfer(address(0), msg.sender, mintedShares);
     }
 
     function burn(uint256 eth) external override {
-        uint256 burnedShares = msg.sender.sub(eth);
+        uint256 burnedShares = StakeLib.sub(msg.sender, eth);
         msg.sender.sendValue(eth);
-        emit Burn(msg.sender, burnedShares, eth);
         genesis.setSeed();
+        emit Transfer(msg.sender, address(0), burnedShares);
     }
 
     function _transfer(
@@ -55,37 +57,39 @@ contract xNUGG is IxNUGG, ERC20 {
         address to,
         uint256 eth
     ) internal override {
-        uint256 movedShares = from.move(to, eth);
-        emit Move(from, to, movedShares, eth);
+        uint256 movedShares = StakeLib.move(from, to, eth);
+
         genesis.setSeed();
+
+        emit Transfer(from, to, movedShares);
     }
 
     /**
      * @dev in regards to this contract, this could just be earningsOf + sharesOf
      */
     function totalSupply() public view virtual override(ERC20, IxNUGG) returns (uint256 res) {
-        res = StakeLib.balance();
+        res = StakeLib.getActiveShares();
     }
 
     /**
      * @dev in regards to this contract, this could just be earningsOf + sharesOf
      */
     function balanceOf(address account) public view override(ERC20, IxNUGG) returns (uint256 res) {
-        res = account.getActiveBalanceOf();
-    }
-
-    /**
-     * @dev external wrapper for _shares - to save on gas
-     */
-    function totalShares() public view override returns (uint256 res) {
-        res = StakeLib.getActiveShares();
-    }
-
-    /**
-     * @dev external wrapper for _shares - to save on gas
-     */
-    function sharesOf(address account) public view override returns (uint256 res) {
         res = account.getActiveSharesOf();
+    }
+
+    /**
+     * @dev external wrapper for _shares - to save on gas
+     */
+    function totalEth() public view override returns (uint256 res) {
+        res = StakeLib.getActiveEth();
+    }
+
+    /**
+     * @dev external wrapper for _shares - to save on gas
+     */
+    function ethOf(address account) public view override returns (uint256 res) {
+        res = account.getActiveEthOf();
     }
 
     function ownershipOf(address account) public view override returns (uint256 res) {
