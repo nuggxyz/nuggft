@@ -16,16 +16,11 @@ interface INuggSwap {
     function submitSwap(
         address token,
         uint256 tokenid,
-        uint256 swapnum,
         uint48 requestedEpoch,
         uint128 requestedFloor
     ) external;
 
-    function submitOffer(
-        address token,
-        uint256 tokenid,
-        uint256 swapnum
-    ) external payable;
+    function submitOffer(address token, uint256 tokenid) external payable;
 
     function submitOfferSimple(address token) external payable;
 

@@ -15,4 +15,18 @@ library StorageLib {
             ptr := keccak256(ptr, 64)
         }
     }
+
+    function pointer(
+        uint256 refA,
+        uint256 refB,
+        uint256 refC
+    ) internal pure returns (uint256 ptr) {
+        assembly {
+            ptr := mload(0x40)
+            mstore(add(ptr, 0), refA)
+            mstore(add(ptr, 32), refB)
+            mstore(add(ptr, 64), refC)
+            ptr := keccak256(ptr, 96)
+        }
+    }
 }

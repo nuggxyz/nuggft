@@ -8,6 +8,7 @@ import './ShiftLib.sol';
 import './Address.sol';
 import './QuadMath.sol';
 import './StorageLib.sol';
+import 'hardhat/console.sol';
 
 library SwapLib {
     using Address for address;
@@ -15,8 +16,12 @@ library SwapLib {
 
     struct Storage {
         uint256 index;
-        mapping(uint256 => uint256) datas;
-        mapping(uint256 => mapping(address => uint256)) users;
+        uint256 data;
+        mapping(address => uint256) offers;
+    }
+
+    struct Default {
+        Storage d;
     }
 
     function loadStorage(
@@ -33,15 +38,37 @@ library SwapLib {
             uint256 offerData
         )
     {
-        uint256 ptr = StorageLib.pointer(uint160(token), tokenid);
+        uint256 ptr = StorageLib.pointer(uint160(token), tokenid, index);
 
         assembly {
             s.slot := ptr
         }
 
-        swapData = s.datas[index];
+        swapData = s.data;
 
-        offerData = (account != swapData.addr()) ? s.users[index][account] : swapData;
+        offerData = account != swapData.addr() ? s.offers[account] : swapData;
+    }
+
+    function incrementIndex(
+        address token,
+        uint256 tokenid,
+        uint256 curr
+    ) internal {
+        uint256 ptr = StorageLib.pointer(uint160(token), tokenid, curr + 1);
+
+        Storage storage s;
+        assembly {
+            s.slot := ptr
+        }
+        console.log('s.index', s.index);
+        uint256 tmp = s.index + 1;
+        uint256 ptr2 = StorageLib.pointer(uint160(token), tokenid, tmp);
+
+        assembly {
+            sstore(s.slot, ptr2)
+        }
+
+        console.log('s.index', s.index);
     }
 
     function loadStorage(
@@ -50,7 +77,6 @@ library SwapLib {
         address account
     )
         internal
-        view
         returns (
             Storage storage s,
             uint256 swapData,
@@ -65,24 +91,17 @@ library SwapLib {
         }
 
         index = s.index;
+        swapData = s.data;
 
-        swapData = s.datas[index];
+        if (index == 0 && swapData == 0) {
+            ptr = StorageLib.pointer(uint160(token), tokenid, 0);
 
-        offerData = (account == swapData.addr()) ? swapData : s.users[index][account];
-    }
-
-    function mintToken(address token, uint256 tokenid) internal view returns (bool is1155) {
-        try IERC721(token).ownerOf(tokenid) returns (address addr) {
-            require(addr == address(this), 'NS:MT:0');
-            return (false);
-        } catch {
-            try IERC1155(token).balanceOf(address(this), tokenid) returns (uint256 amount) {
-                require(amount > 0, 'NS:MT:1');
-                return (true);
-            } catch {
-                require(false, 'NS:MT:0');
+            assembly {
+                sstore(s.slot, ptr)
             }
         }
+
+        offerData = (account == swapData.addr()) ? swapData : s.offers[account];
     }
 
     function checkClaimer(
