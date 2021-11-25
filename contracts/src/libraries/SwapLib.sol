@@ -41,10 +41,7 @@ library SwapLib {
 
         swapData = s.datas[index];
 
-        if (swapData == 0) return (s, 0, 0);
-
-        if (account != swapData.addr()) offerData = s.users[index][account];
-        else offerData = swapData;
+        offerData = (account != swapData.addr()) ? s.users[index][account] : swapData;
     }
 
     function loadStorage(
@@ -71,10 +68,7 @@ library SwapLib {
 
         swapData = s.datas[index];
 
-        if (swapData == 0) return (s, 0, 0, 0);
-
-        if (account != swapData.addr()) offerData = s.users[index][account];
-        else offerData = swapData;
+        offerData = (account == swapData.addr()) ? swapData : s.users[index][account];
     }
 
     function mintToken(address token, uint256 tokenid) internal view returns (bool is1155) {
@@ -97,20 +91,11 @@ library SwapLib {
         uint256 offerData,
         uint256 activeEpoch
     ) internal pure returns (bool winner) {
-        require(swapData != 0 && !offerData.isTokenClaimed(), 'SL:CC:1');
-
-        if (swapData.isFeeClaimed() && offerData == 0) {
-            return true;
-        }
+        require(offerData != 0, 'SL:CC:1');
 
         bool over = activeEpoch > swapData.epoch();
 
-        if (account == swapData.addr()) {
-            require(over && !swapData.isTokenClaimed(), 'SL:CC:0');
-            return true;
-        }
-
-        require(offerData != 0, 'SL:CC:2');
+        return swapData.isOwner() || (account == swapData.addr() && over);
     }
 
     function points(uint256 total, uint256 bps) internal pure returns (uint256 res) {
@@ -132,20 +117,5 @@ library SwapLib {
         IERC721(token).safeTransferFrom(from, to, tokenid);
 
         require(IERC721(token).ownerOf(tokenid) == to, 'AUC:TT:3');
-    }
-
-    function moveERC1155(
-        address token,
-        uint256 tokenid,
-        address from,
-        address to
-    ) internal {
-        uint256 toStart = IERC1155(token).balanceOf(to, tokenid);
-
-        require(IERC1155(token).balanceOf(from, tokenid) >= 1, 'AUC:TT:1');
-
-        IERC1155(token).safeTransferFrom(from, to, tokenid, 1, '');
-
-        require(IERC1155(token).balanceOf(to, tokenid) - toStart == 1, 'AUC:TT:3');
     }
 }
