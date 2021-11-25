@@ -3,47 +3,56 @@ pragma solidity 0.8.4;
 import './IxNUGG.sol';
 
 interface INuggSwap {
-    event SubmitOffer(address token, uint256 tokenid, uint256 swapnum, address account, uint256 amount);
+    event Mint(address token, uint256 tokenid, address account, uint256 amount);
 
-    event SubmitSwap(address token, uint256 tokenid, uint256 swapnum, address account, uint256 amount, uint256 epoch);
+    event Commit(address token, uint256 tokenid, uint256 index, address account, uint256 amount);
 
-    event SubmitClaim(address token, uint256 tokenid, uint256 swapnum, address account);
+    event Offer(address token, uint256 tokenid, uint256 index, address account, uint256 amount);
+
+    event Claim(address token, uint256 tokenid, uint256 index, address account);
+
+    event Swap(address token, uint256 tokenid, address account, uint256 amount);
 
     function xnugg() external view returns (IxNUGG);
 
-    function submitClaimSimple(address token, uint256 epoch) external;
+    function mint(address token, uint256 tokenid) external payable;
 
-    function submitSwap(
+    function commit(address token, uint256 tokenid) external payable;
+
+    function offer(address token, uint256 tokenid) external payable;
+
+    function claim(
         address token,
         uint256 tokenid,
-        uint48 requestedEpoch,
-        uint128 requestedFloor
+        uint256 index
     ) external;
 
-    function submitOffer(address token, uint256 tokenid) external payable;
-
-    function submitOfferSimple(address token) external payable;
-
-    function submitClaim(
+    function swap(
         address token,
         uint256 tokenid,
-        uint256 swapnum
+        uint256 floor
     ) external;
 
-    struct SwapData {
-        uint256 swapnum;
-        address leader;
-        uint256 amount;
-        uint256 epoch;
-        uint256 bps;
-        bool is1155;
-        bool tokenClaimed;
-        bool royClaimed;
-    }
-
-    function getSwap(
+    function getOfferByAccount(
         address token,
         uint256 tokenid,
-        uint256 swapnum
-    ) external view returns (SwapData memory);
+        uint256 index,
+        address account
+    ) external view returns (uint256 amount);
+
+    function getOfferLeader(
+        address token,
+        uint256 tokenid,
+        uint256 index
+    ) external view returns (address leader, uint256 amount);
+
+    function getActiveSwap(address token, uint256 tokenid)
+        external
+        view
+        returns (
+            address leader,
+            uint256 amount,
+            uint256 epoch,
+            bool isOwner
+        );
 }
