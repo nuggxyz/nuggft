@@ -20,7 +20,7 @@ contract NuggSwap is INuggSwap, ERC721Holder, ERC1155Holder {
     using ShiftLib for uint256;
     using SwapLib for uint256;
 
-    IxNUGG public override xnugg;
+    IxNUGG public immutable override xnugg;
 
     constructor(address _xnugg) {
         xnugg = IxNUGG(_xnugg);
@@ -203,8 +203,6 @@ contract NuggSwap is INuggSwap, ERC721Holder, ERC1155Holder {
 
         // build starting swap data
         (swapData, ) = swapData.account(msg.sender).isOwner(true).eth(requestedFloor);
-
-        console.logBytes32(bytes32(swapData));
 
         s.data = swapData;
 
