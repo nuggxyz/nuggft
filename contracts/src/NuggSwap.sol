@@ -17,11 +17,14 @@ contract NuggSwap is INuggSwap, ERC721Holder {
     using Address for address payable;
     using EpochLib for uint256;
     using ShiftLib for uint256;
-    using SwapLib for uint256;
+    using QuadMath for uint256;
+    using SwapLib for SwapLib.Storage;
 
     address payable public immutable override xnugg;
 
-    uint256 private immutable genesis;
+    uint256 internal immutable genesis;
+
+    SwapLib.Storage internal sl_state;
 
     constructor(address _xnugg) {
         xnugg = payable(_xnugg);
@@ -39,7 +42,7 @@ contract NuggSwap is INuggSwap, ERC721Holder {
             bool isOwner
         )
     {
-        (, uint256 swapData, ) = SwapLib.loadStorage(token, tokenid, address(0));
+        (uint256 swapData, ) = sl_state.loadStorage(token, tokenid, address(0));
         require(swapData != 0, 'NS:GS:0');
         leader = swapData.account();
         amount = swapData.eth();
@@ -47,16 +50,16 @@ contract NuggSwap is INuggSwap, ERC721Holder {
         isOwner = swapData.isOwner();
     }
 
-    function getOfferLeader(
-        address token,
-        uint256 tokenid,
-        uint256 index
-    ) external view override returns (address leader, uint256 amount) {
-        (, uint256 swapData, ) = SwapLib.loadStorage(token, tokenid, address(0), index);
-        require(swapData != 0, 'NS:GS:0');
-        leader = swapData.account();
-        amount = swapData.eth();
-    }
+    // function getOfferLeader(
+    //     address token,
+    //     uint256 tokenid,
+    //     uint256 index
+    // ) external view override returns (address leader, uint256 amount) {
+    //     (, uint256 swapData, ) = sl_state.loadStorage(token, tokenid, address(0), index);
+    //     require(swapData != 0, 'NS:GS:0');
+    //     leader = swapData.account();
+    //     amount = swapData.eth();
+    // }
 
     function getOfferByAccount(
         address token,
@@ -64,7 +67,7 @@ contract NuggSwap is INuggSwap, ERC721Holder {
         uint256 index,
         address account
     ) external view override returns (uint256 amount) {
-        (, , uint256 offerData) = SwapLib.loadStorage(token, tokenid, account, index);
+        (, uint256 offerData) = sl_state.loadStorage(token, tokenid, account, index);
         require(offerData != 0, 'NS:GS:0');
         amount = offerData.eth();
     }
@@ -72,7 +75,7 @@ contract NuggSwap is INuggSwap, ERC721Holder {
     function delegate(address token, uint256 tokenid) external payable override {
         uint256 activeEpoch = genesis.activeEpoch();
 
-        (, uint256 swapData, uint256 offerData) = SwapLib.loadStorage(token, tokenid, msg.sender);
+        (uint256 swapData, uint256 offerData) = sl_state.loadStorage(token, tokenid, msg.sender);
 
         if (activeEpoch == tokenid && swapData == 0) mint(token, tokenid);
         else if (offerData == 0 && swapData.isOwner()) commit(token, tokenid);
@@ -86,13 +89,13 @@ contract NuggSwap is INuggSwap, ERC721Holder {
         // the ability to accidently place an offer for nugg A and end up minting nugg B.
         require(activeEpoch == tokenid, 'NS:M:0');
 
-        (SwapLib.Storage storage s, uint256 swapData, ) = SwapLib.loadStorage(token, activeEpoch, msg.sender);
+        (uint256 swapData, ) = sl_state.loadStorage(token, activeEpoch, msg.sender);
 
         require(swapData == 0, 'NS:M:D');
 
         (uint256 newSwapData, ) = uint256(0).epoch(activeEpoch).account(msg.sender).eth(msg.value);
 
-        s.data = newSwapData;
+        sl_state.data = newSwapData;
 
         xnugg.sendValue(msg.value);
 
@@ -100,11 +103,7 @@ contract NuggSwap is INuggSwap, ERC721Holder {
     }
 
     function commit(address token, uint256 tokenid) public payable override {
-        (SwapLib.Storage storage s, uint256 swapData, uint256 offerData) = SwapLib.loadStorage(
-            token,
-            tokenid,
-            msg.sender
-        );
+        (uint256 swapData, uint256 offerData) = sl_state.loadStorage(token, tokenid, msg.sender);
 
         require(offerData == 0, 'SL:HSO:0');
 
@@ -115,11 +114,11 @@ contract NuggSwap is INuggSwap, ERC721Holder {
         // copy relevent items from swapData to newSwapData
         (uint256 newSwapData, uint256 dust) = uint256(0).epoch(epoch).account(msg.sender).eth(msg.value);
 
-        require(swapData.eth().pointsWith(100) < newSwapData.eth(), 'SL:OBP:4');
+        require(swapData.eth().mulDiv(100, 10000) < newSwapData.eth(), 'SL:OBP:4');
 
-        s.offers[epoch][swapData.account()] = swapData;
+        sl_state.offers[epoch][swapData.account()] = swapData;
 
-        s.data = newSwapData;
+        sl_state.data = newSwapData;
 
         uint256 increase = newSwapData.eth() - swapData.eth() + dust;
 
@@ -129,11 +128,7 @@ contract NuggSwap is INuggSwap, ERC721Holder {
     }
 
     function offer(address token, uint256 tokenid) public payable override {
-        (SwapLib.Storage storage s, uint256 swapData, uint256 offerData) = SwapLib.loadStorage(
-            token,
-            tokenid,
-            msg.sender
-        );
+        (uint256 swapData, uint256 offerData) = sl_state.loadStorage(token, tokenid, msg.sender);
 
         require(swapData != 0, 'NS:0:0');
 
@@ -148,16 +143,16 @@ contract NuggSwap is INuggSwap, ERC721Holder {
         require(activeEpoch <= swapData.epoch(), 'SL:OBP:3');
 
         // save prev offers data
-        if (swapData.account() != msg.sender) s.offers[swapData.epoch()][swapData.account()] = swapData;
+        if (swapData.account() != msg.sender) sl_state.offers[swapData.epoch()][swapData.account()] = swapData;
 
         // copy relevent items from swapData to newSwapData
         (uint256 newSwapData, uint256 dust) = uint256(0).epoch(swapData.epoch()).account(msg.sender).eth(
             offerData.eth() + msg.value
         );
 
-        require(swapData.eth().pointsWith(100) < newSwapData.eth(), 'SL:OBP:4');
+        require(swapData.eth().mulDiv(100, 10000) < newSwapData.eth(), 'SL:OBP:4');
 
-        s.data = newSwapData;
+        sl_state.data = newSwapData;
 
         uint256 increase = newSwapData.eth() - swapData.eth() + dust;
 
@@ -171,19 +166,14 @@ contract NuggSwap is INuggSwap, ERC721Holder {
         uint256 tokenid,
         uint256 index
     ) external override {
-        (SwapLib.Storage storage s, uint256 swapData, uint256 offerData) = SwapLib.loadStorage(
-            token,
-            tokenid,
-            msg.sender,
-            index
-        );
+        (uint256 swapData, uint256 offerData) = sl_state.loadStorage(token, tokenid, msg.sender, index);
 
         uint256 activeEpoch = genesis.activeEpoch();
 
-        delete s.offers[index][msg.sender];
+        delete sl_state.offers[index][msg.sender];
 
         if (SwapLib.checkClaimer(msg.sender, swapData, offerData, activeEpoch)) {
-            delete s.data;
+            delete sl_state.data;
 
             SwapLib.moveERC721(token, tokenid, address(this), msg.sender);
         } else {
@@ -198,7 +188,7 @@ contract NuggSwap is INuggSwap, ERC721Holder {
         uint256 tokenid,
         uint256 requestedFloor
     ) external override {
-        (SwapLib.Storage storage s, uint256 swapData, ) = SwapLib.loadStorage(token, tokenid, msg.sender);
+        (uint256 swapData, ) = sl_state.loadStorage(token, tokenid, msg.sender);
 
         // make sure swap does not exist
         require(swapData == 0, 'NS:SS:0');
@@ -206,7 +196,7 @@ contract NuggSwap is INuggSwap, ERC721Holder {
         // build starting swap data
         (swapData, ) = swapData.account(msg.sender).isOwner(true).eth(requestedFloor);
 
-        s.data = swapData;
+        sl_state.data = swapData;
 
         SwapLib.moveERC721(token, tokenid, msg.sender, address(this));
 

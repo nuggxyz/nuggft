@@ -1,4 +1,3 @@
-import './StorageLib.sol';
 import './ShiftLib.sol';
 
 library EpochLib {

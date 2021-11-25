@@ -5,7 +5,6 @@ import '@openzeppelin/contracts/utils/Address.sol';
 
 import './ShiftLib.sol';
 import './QuadMath.sol';
-import './StorageLib.sol';
 
 library SwapLib {
     using Address for address;
@@ -17,49 +16,23 @@ library SwapLib {
     }
 
     function loadStorage(
+        Storage storage s,
         address token,
         uint256 tokenid,
         address account
-    )
-        internal
-        view
-        returns (
-            Storage storage s,
-            uint256 swapData,
-            uint256 offerData
-        )
-    {
-        uint256 ptr = StorageLib.pointer(uint160(token), tokenid);
-
-        assembly {
-            s.slot := ptr
-        }
-
+    ) internal view returns (uint256 swapData, uint256 offerData) {
         swapData = s.data;
 
         offerData = swapData == 0 || account == swapData.account() ? swapData : s.offers[swapData.epoch()][account];
     }
 
     function loadStorage(
+        Storage storage s,
         address token,
         uint256 tokenid,
         address account,
         uint256 epoch
-    )
-        internal
-        view
-        returns (
-            Storage storage s,
-            uint256 swapData,
-            uint256 offerData
-        )
-    {
-        uint256 ptr = StorageLib.pointer(uint160(token), tokenid);
-
-        assembly {
-            s.slot := ptr
-        }
-
+    ) internal view returns (uint256 swapData, uint256 offerData) {
         swapData = s.data;
 
         swapData = swapData.epoch() == epoch ? swapData : 0;

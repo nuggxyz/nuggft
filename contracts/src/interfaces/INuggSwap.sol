@@ -42,12 +42,6 @@ interface INuggSwap {
         address account
     ) external view returns (uint256 eth);
 
-    function getOfferLeader(
-        address token,
-        uint256 tokenid,
-        uint256 index
-    ) external view returns (address leader, uint256 eth);
-
     function getActiveSwap(address token, uint256 tokenid)
         external
         view
