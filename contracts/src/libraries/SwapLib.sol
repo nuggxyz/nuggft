@@ -1,15 +1,11 @@
 pragma solidity 0.8.4;
 
-import '../erc721/IERC721.sol';
-import '../erc1155/IERC1155.sol';
+import '@openzeppelin/contracts/token/ERC721/IERC721.sol';
+import '@openzeppelin/contracts/utils/Address.sol';
 
-import '../erc2981/IERC2981.sol';
 import './ShiftLib.sol';
-import './Address.sol';
 import './QuadMath.sol';
 import './StorageLib.sol';
-
-// import 'hardhat/console.sol';
 
 library SwapLib {
     using Address for address;
@@ -98,7 +94,7 @@ library SwapLib {
         address from,
         address to
     ) internal {
-        require(IERC721(token).ownerOf(tokenid) == from, 'AUC:TT:1');
+        // require(IERC721(token).ownerOf(tokenid) == from, 'AUC:TT:1');
 
         IERC721(token).safeTransferFrom(from, to, tokenid);
 

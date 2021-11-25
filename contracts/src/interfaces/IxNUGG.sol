@@ -2,17 +2,14 @@
 
 pragma solidity 0.8.4;
 
-import '../erc20/IERC20.sol';
+import '@openzeppelin/contracts/token/ERC20/IERC20.sol';
 
 /**
  * @title ISeedable
  * @dev interface for Seedable.sol
  */
 interface IxNUGG is IERC20 {
-    event Mint(address account, uint256 shares, uint256 eth);
-    event Burn(address account, uint256 shares, uint256 eth);
-    event Move(address from, address to, uint256 shares, uint256 eth);
-    event Take(address sender, uint256 eth);
+    event Receive(address sender, uint256 eth);
 
     function ownershipOf(address account) external view returns (uint256 res);
 

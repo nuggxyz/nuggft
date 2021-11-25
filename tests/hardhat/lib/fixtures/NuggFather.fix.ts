@@ -4,34 +4,17 @@ import { BigNumber, Wallet, Contract, BigNumberish } from 'ethers';
 
 import { ensureWETH, getHRE } from '../shared/deployment';
 import { NuggSwap } from '../../../../typechain/NuggSwap';
-import { XNUGG as xNUGG, XNUGG__factory as xNUGG__factory, NuggSwap__factory, MockERC721Royalties__factory } from '../../../../typechain';
+import { XNUGG as xNUGG, XNUGG__factory as xNUGG__factory, NuggSwap__factory } from '../../../../typechain';
 import { deployContractWithSalt } from '../shared';
-import { toEth } from '../shared/conversion';
-import { MockDotNugg } from '../../../../typechain/MockDotNugg';
-import { MockFileResolver } from '../../../../typechain/MockFileResolver';
+
 import { HardhatRuntimeEnvironment } from 'hardhat/types';
-import {} from '../../../../typechain/MockERC721Nuggable';
-import { MockERC721Royalties } from '../../../../typechain/MockERC721Royalties';
-import { MockERC721__factory } from '../../../../typechain/factories/MocKERC721__factory';
-import { MockERC721 } from '../../../../typechain/MocKERC721';
-import { MockERC721Ownable__factory } from '../../../../typechain/factories/MockERC721Ownable__factory';
-import { MockERC721Ownable } from '../../../../typechain/MockERC721Ownable';
+
 import { MockERC721Mintable } from '../../../../typechain/MockERC721Mintable';
 import { MockERC721Mintable__factory } from '../../../../typechain/factories/MockERC721Mintable__factory';
-
-type Mock721s = {
-    normal: MockERC721[];
-    royalties: MockERC721Royalties[];
-    nuggable: [];
-    named: { [_: string]: MockERC721 };
-};
 
 export interface NuggFatherFixture {
     nuggswap: NuggSwap;
     xnugg: xNUGG;
-    mockERC721: MockERC721;
-    mockERC721Royalties: MockERC721Royalties;
-    mockERC721Ownable: MockERC721Ownable;
     mockERC721Mintable: MockERC721Mintable;
     owner: string;
     ownerStartBal: BigNumber;
@@ -55,12 +38,6 @@ export const NuggFatherFix: Fixture<NuggFatherFixture> = async function (
         args: [],
     });
 
-    const mockERC721 = await deployContractWithSalt<MockERC721__factory>({
-        factory: 'MockERC721',
-        from: eoaDeployer,
-        args: [],
-    });
-
     const nuggswap = await deployContractWithSalt<NuggSwap__factory>({
         factory: 'NuggSwap',
         from: eoaDeployer,
@@ -69,27 +46,13 @@ export const NuggFatherFix: Fixture<NuggFatherFixture> = async function (
 
     //0x435ccc2eaa41633658be26d804be5A01fEcC9337
     //0x770f070388b13A597b84B557d6B8D1CD94Fc9925
-    const mockERC721Royalties = await deployContractWithSalt<MockERC721Royalties__factory>({
-        factory: 'MockERC721Royalties',
-        from: eoaDeployer,
-        args: [eoaOwner.address],
-    });
-
-    const mockERC721Ownable = await deployContractWithSalt<MockERC721Ownable__factory>({
-        factory: 'MockERC721Ownable',
-        from: eoaDeployer,
-        args: [],
-    });
 
     const mockERC721Mintable = await deployContractWithSalt<MockERC721Mintable__factory>({
         factory: 'MockERC721Mintable',
         from: eoaDeployer,
-        args: [eoaOwner.address, nuggswap.address],
+        args: [nuggswap.address],
     });
 
-    hre.tracer.nameTags[mockERC721.address] = `mockERC721`;
-    hre.tracer.nameTags[mockERC721Royalties.address] = `mockERC721Royalties`;
-    hre.tracer.nameTags[mockERC721Ownable.address] = `mockERC721Ownable`;
     hre.tracer.nameTags[mockERC721Mintable.address] = `mockERC721Mintable`;
 
     const blockOffset = BigNumber.from(await hre.ethers.provider.getBlockNumber());
@@ -98,6 +61,7 @@ export const NuggFatherFix: Fixture<NuggFatherFixture> = async function (
 
     hre.tracer.nameTags[xnugg.address] = 'xNUGG';
     hre.tracer.nameTags[nuggswap.address] = 'NuggSwap';
+    hre.tracer.nameTags['0x0000000000000000000000000000000000000000'] = 'BLACK_HOLE';
     hre.tracer.nameTags[owner] = 'Owner';
 
     function toNuggSwapTokenId(epoch: BigNumberish): BigNumber {
@@ -106,9 +70,7 @@ export const NuggFatherFix: Fixture<NuggFatherFixture> = async function (
 
     return {
         toNuggSwapTokenId,
-        mockERC721,
-        mockERC721Royalties,
-        mockERC721Ownable,
+
         mockERC721Mintable,
         xnugg,
         blockOffset,

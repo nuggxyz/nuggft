@@ -2,9 +2,11 @@
 
 pragma solidity 0.8.4;
 
+import '@openzeppelin/contracts/token/ERC20/ERC20.sol';
+import '@openzeppelin/contracts/utils/Address.sol';
+
 import './interfaces/IxNUGG.sol';
-import './erc20/ERC20.sol';
-import './libraries/Address.sol';
+
 import './libraries/StakeLib.sol';
 import './libraries/EpochLib.sol';
 
@@ -14,9 +16,8 @@ import './libraries/EpochLib.sol';
  * @notice leggo
  */
 contract xNUGG is IxNUGG, ERC20 {
-    using Address for address;
+    using Address for address payable;
     using StakeLib for address;
-
     using EpochLib for uint256;
 
     uint256 public immutable override genesis;
@@ -30,11 +31,11 @@ contract xNUGG is IxNUGG, ERC20 {
     }
 
     receive() external payable {
-        emit Take(msg.sender, msg.value);
+        emit Receive(msg.sender, msg.value);
     }
 
     fallback() external payable {
-        emit Take(msg.sender, msg.value);
+        emit Receive(msg.sender, msg.value);
     }
 
     function mint() external payable override {
@@ -47,8 +48,11 @@ contract xNUGG is IxNUGG, ERC20 {
 
     function burn(uint256 eth) external override {
         uint256 burnedShares = StakeLib.sub(msg.sender, eth);
-        msg.sender.sendValue(eth);
+
         genesis.setSeed();
+
+        payable(msg.sender).sendValue(eth);
+
         emit Transfer(msg.sender, address(0), burnedShares);
     }
 
