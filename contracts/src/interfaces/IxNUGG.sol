@@ -16,9 +16,9 @@ interface IxNUGG is IERC20 {
 
     function ownershipOf(address account) external view returns (uint256 res);
 
-    function totalShares() external view returns (uint256 res);
+    function totalEth() external view returns (uint256 res);
 
-    function sharesOf(address account) external view returns (uint256 res);
+    function ethOf(address account) external view returns (uint256 res);
 
     function mint() external payable;
 

@@ -25,15 +25,15 @@ library StakeLib {
         }
     }
 
-    function balance() internal view returns (uint256 res) {
+    function getActiveEth() internal view returns (uint256 res) {
         assembly {
             res := selfbalance()
         }
     }
 
-    function getActiveBalanceOf(address account) internal view returns (uint256 res) {
+    function getActiveEthOf(address account) internal view returns (uint256 res) {
         Storage storage s = load();
-        res = sharesToSupply(s.owned[account], balance(), s.shares, false);
+        res = sharesToSupply(s.owned[account], getActiveEth(), s.shares, false);
     }
 
     function getActiveSharesOf(address account) internal view returns (uint256 res) {
@@ -60,7 +60,7 @@ library StakeLib {
 
         Storage storage s = load();
 
-        uint256 ethBalance = balance();
+        uint256 ethBalance = getActiveEth();
         uint256 activeShares = s.shares;
 
         if (activeShares == 0) {
@@ -78,7 +78,7 @@ library StakeLib {
     function sub(address account, uint256 eth) internal returns (uint256 sharesSubtracted) {
         Storage storage s = load();
 
-        uint256 ethBalance = balance();
+        uint256 ethBalance = getActiveEth();
         uint256 activeShares = s.shares;
 
         sharesSubtracted = supplyToShares(eth, ethBalance, activeShares, true);
@@ -94,7 +94,7 @@ library StakeLib {
     ) internal returns (uint256 shares) {
         Storage storage s = load();
 
-        uint256 ethBalance = balance();
+        uint256 ethBalance = getActiveEth();
         uint256 activeShares = s.shares;
 
         shares = supplyToShares(eth, ethBalance, activeShares, true);
