@@ -3,7 +3,7 @@ pragma solidity 0.8.4;
 import './IxNUGG.sol';
 
 interface INuggSwap {
-    event Mint(address token, uint256 tokenid, address account, uint256 amount);
+    event Mint(address token, uint256 epoch, address account, uint256 amount);
 
     event Commit(address token, uint256 tokenid, uint256 index, address account, uint256 amount);
 
