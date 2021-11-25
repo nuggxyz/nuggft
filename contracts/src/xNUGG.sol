@@ -25,6 +25,10 @@ contract xNUGG is IxNUGG, ERC20 {
         genesis = block.number;
     }
 
+    function epoch() external view override returns (uint256 res) {
+        return genesis.activeEpoch();
+    }
+
     receive() external payable {
         emit Take(msg.sender, msg.value);
     }

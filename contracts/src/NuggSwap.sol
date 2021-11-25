@@ -8,7 +8,6 @@ import './libraries/EpochLib.sol';
 
 import './libraries/ShiftLib.sol';
 import './interfaces/IxNUGG.sol';
-import 'hardhat/console.sol';
 import './erc721/IERC721.sol';
 import './erc2981/IERC2981.sol';
 import './erc721/ERC721Holder.sol';

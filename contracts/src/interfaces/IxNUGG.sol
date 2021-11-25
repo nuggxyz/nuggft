@@ -22,9 +22,11 @@ interface IxNUGG is IERC20 {
 
     function mint() external payable;
 
-    function genesis() external returns (uint256 res);
+    function genesis() external view returns (uint256 res);
 
     function burn(uint256 amount) external;
+
+    function epoch() external view returns (uint256 res);
 
     function totalSupply() external view override(IERC20) returns (uint256 res);
 
