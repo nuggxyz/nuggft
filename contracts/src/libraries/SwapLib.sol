@@ -15,9 +15,8 @@ library SwapLib {
     using ShiftLib for uint256;
 
     struct Storage {
-        uint256 index;
         uint256 data;
-        mapping(address => uint256) offers;
+        mapping(uint256 => mapping(address => uint256)) offers;
     }
 
     struct Default {
@@ -27,8 +26,7 @@ library SwapLib {
     function loadStorage(
         address token,
         uint256 tokenid,
-        address account,
-        uint256 index
+        address account
     )
         internal
         view
@@ -38,7 +36,7 @@ library SwapLib {
             uint256 offerData
         )
     {
-        uint256 ptr = StorageLib.pointer(uint160(token), tokenid, index);
+        uint256 ptr = StorageLib.pointer(uint160(token), tokenid);
 
         assembly {
             s.slot := ptr
@@ -46,42 +44,21 @@ library SwapLib {
 
         swapData = s.data;
 
-        offerData = account != swapData.addr() ? s.offers[account] : swapData;
-    }
-
-    function incrementIndex(
-        address token,
-        uint256 tokenid,
-        uint256 curr
-    ) internal {
-        uint256 ptr = StorageLib.pointer(uint160(token), tokenid, curr + 1);
-
-        Storage storage s;
-        assembly {
-            s.slot := ptr
-        }
-        console.log('s.index', s.index);
-        uint256 tmp = s.index + 1;
-        uint256 ptr2 = StorageLib.pointer(uint160(token), tokenid, tmp);
-
-        assembly {
-            sstore(s.slot, ptr2)
-        }
-
-        console.log('s.index', s.index);
+        offerData = swapData == 0 || account == swapData.account() ? swapData : s.offers[swapData.epoch()][account];
     }
 
     function loadStorage(
         address token,
         uint256 tokenid,
-        address account
+        address account,
+        uint256 epoch
     )
         internal
+        view
         returns (
             Storage storage s,
             uint256 swapData,
-            uint256 offerData,
-            uint256 index
+            uint256 offerData
         )
     {
         uint256 ptr = StorageLib.pointer(uint160(token), tokenid);
@@ -90,18 +67,11 @@ library SwapLib {
             s.slot := ptr
         }
 
-        index = s.index;
         swapData = s.data;
 
-        if (index == 0 && swapData == 0) {
-            ptr = StorageLib.pointer(uint160(token), tokenid, 0);
+        swapData = swapData.epoch() == epoch ? swapData : 0;
 
-            assembly {
-                sstore(s.slot, ptr)
-            }
-        }
-
-        offerData = (account == swapData.addr()) ? swapData : s.offers[account];
+        offerData = swapData != 0 && account == swapData.account() ? swapData : s.offers[epoch][account];
     }
 
     function checkClaimer(
@@ -114,7 +84,7 @@ library SwapLib {
 
         bool over = activeEpoch > swapData.epoch();
 
-        return swapData.isOwner() || (account == swapData.addr() && over);
+        return swapData.isOwner() || (account == swapData.account() && over);
     }
 
     function points(uint256 total, uint256 bps) internal pure returns (uint256 res) {

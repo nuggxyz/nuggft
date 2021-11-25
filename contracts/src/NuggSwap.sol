@@ -20,165 +20,184 @@ contract NuggSwap is INuggSwap, ERC721Holder, ERC1155Holder {
     using ShiftLib for uint256;
     using SwapLib for uint256;
 
-    address immutable random;
-
     IxNUGG public override xnugg;
 
-    constructor(address _xnugg, address _random) {
+    constructor(address _xnugg) {
         xnugg = IxNUGG(_xnugg);
-        random = _random;
     }
 
-    function submitOffer(address token, uint256 tokenid) external payable override {
-        _submitOffer(token, tokenid, msg.sender, msg.value);
+    function getActiveSwap(address token, uint256 tokenid)
+        external
+        view
+        override
+        returns (
+            address leader,
+            uint256 amount,
+            uint256 epoch,
+            bool isOwner
+        )
+    {
+        (, uint256 swapData, ) = SwapLib.loadStorage(token, tokenid, address(0));
+        require(swapData != 0, 'NS:GS:0');
+        leader = swapData.account();
+        amount = swapData.eth();
+        epoch = swapData.epoch();
+        isOwner = swapData.isOwner();
     }
 
-    function submitOfferSimple(address token) external payable override {
-        _submitOffer(token, EpochLib.activeEpoch(), msg.sender, msg.value);
-    }
-
-    function submitSwap(
-        address token,
-        uint256 tokenid,
-        uint48 requestedEpoch,
-        uint128 requestedFloor
-    ) external override {
-        _submitSwap(token, tokenid, msg.sender, requestedEpoch, requestedFloor);
-    }
-
-    function submitClaim(
-        address token,
-        uint256 tokenid,
-        uint256 index
-    ) external override {
-        _submitClaim(token, tokenid, index, msg.sender, msg.sender);
-    }
-
-    function submitClaimSimple(address token, uint256 epoch) external override {
-        _submitClaim(token, epoch, 0, msg.sender, msg.sender);
-    }
-
-    function getSwap(
+    function getOfferLeader(
         address token,
         uint256 tokenid,
         uint256 index
-    ) external view override returns (SwapData memory res) {
-        // var (, , , ) = SwapLib.loadStorage(token, tokenid, index, address(0));
-        // res.index = _swapnum > numSwaps ? numSwaps : _swapnum;
-        // res.amount = uint128(leaderData);
+    ) external view override returns (address leader, uint256 amount) {
+        (, uint256 swapData, ) = SwapLib.loadStorage(token, tokenid, address(0), index);
+        require(swapData != 0, 'NS:GS:0');
+        leader = swapData.account();
+        amount = swapData.eth();
     }
 
-    function _submitOffer(
+    function getOfferByAccount(
         address token,
         uint256 tokenid,
-        address account,
-        uint256 value
-    ) internal {
-        (SwapLib.Storage storage s, uint256 swapData, uint256 offerData, uint256 index) = SwapLib.loadStorage(
-            token,
-            tokenid,
-            account
-        );
+        uint256 index,
+        address account
+    ) external view override returns (uint256 amount) {
+        (, , uint256 offerData) = SwapLib.loadStorage(token, tokenid, account, index);
+        require(offerData != 0, 'NS:GS:0');
+        amount = offerData.eth();
+    }
 
+    function mint(address token, uint256 tokenid) external payable override {
         uint256 activeEpoch = EpochLib.activeEpoch();
 
-        uint256 newSwapData;
+        // we do not need this, could take tokenid out as an argument - but do not want to give users
+        // the ability to accidently place an offer for nugg A and end up minting nugg B.
+        require(activeEpoch == tokenid, 'NS:M:0');
 
-        require(swapData != 0 || index == 0);
+        (SwapLib.Storage storage s, uint256 swapData, ) = SwapLib.loadStorage(token, activeEpoch, msg.sender);
 
-        // if swap exists
-        if (swapData != 0) {
-            // make sure user is not the owner of swap
-            require(!offerData.isOwner(), 'SL:HSO:0');
+        require(swapData == 0, 'NS:M:D');
 
-            // make sure swap is still active
-            require(activeEpoch <= swapData.epoch(), 'SL:OBP:3');
+        (uint256 newSwapData, ) = uint256(0).epoch(activeEpoch).account(msg.sender).eth(msg.value);
 
-            // save prev offers data
-            s.offers[swapData.addr()] = swapData;
+        s.data = newSwapData;
 
-            // copy relevent items from swapData to newSwapData
-            newSwapData = newSwapData.setEpoch(swapData.epoch());
-        } else if (index == 0) {
-            // attempt to mint token - reverts if it cannot
-            // checks if nuggswap already owns token
-            // SwapLib.mintToken(token, activeEpoch);
+        address(xnugg).sendValue(msg.value);
 
-            // set relevent data to newSwapData
-            newSwapData = newSwapData.setEpoch(activeEpoch);
-        }
+        emit Mint(token, activeEpoch, msg.sender, newSwapData);
+    }
 
-        // set
-        (newSwapData, ) = newSwapData.setAccount(account).setEth(offerData.eth() + value);
+    function commit(address token, uint256 tokenid) external payable override {
+        (SwapLib.Storage storage s, uint256 swapData, uint256 offerData) = SwapLib.loadStorage(
+            token,
+            tokenid,
+            msg.sender
+        );
+
+        require(offerData == 0, 'SL:HSO:0');
+
+        require(swapData.isOwner(), 'SL:HSO:0');
+
+        uint256 epoch = EpochLib.activeEpoch() + 1;
+
+        // copy relevent items from swapData to newSwapData
+        (uint256 newSwapData, uint256 dust) = uint256(0).epoch(epoch).account(msg.sender).eth(msg.value);
+
+        require(swapData.eth().pointsWith(100) < newSwapData.eth(), 'SL:OBP:4');
+
+        s.offers[epoch][swapData.account()] = swapData;
+
+        s.data = newSwapData;
+
+        uint256 increase = newSwapData.eth() - swapData.eth() + dust;
+
+        address(xnugg).sendValue(increase);
+
+        emit Commit(token, tokenid, epoch, msg.sender, newSwapData.eth());
+    }
+
+    function offer(address token, uint256 tokenid) external payable override {
+        (SwapLib.Storage storage s, uint256 swapData, uint256 offerData) = SwapLib.loadStorage(
+            token,
+            tokenid,
+            msg.sender
+        );
+
+        require(swapData != 0, 'NS:0:0');
+
+        // make sure user is not the owner of swap
+        // we do not know how much to give them when they call "claim" otherwise
+        require(!offerData.isOwner(), 'SL:HSO:0');
+
+        // if (swapData.epoch() == 0 && swapData.isOwner()) swapData = swapData.epoch(activeEpoch + 1);
+        uint256 activeEpoch = EpochLib.activeEpoch();
+
+        // make sure swap is still active
+        require(activeEpoch <= swapData.epoch(), 'SL:OBP:3');
+
+        // save prev offers data
+        if (swapData.account() != msg.sender) s.offers[swapData.epoch()][swapData.account()] = swapData;
+
+        // copy relevent items from swapData to newSwapData
+        (uint256 newSwapData, uint256 dust) = uint256(0).epoch(swapData.epoch()).account(msg.sender).eth(
+            offerData.eth() + msg.value
+        );
 
         require(swapData.eth().pointsWith(100) < newSwapData.eth(), 'SL:OBP:4');
 
         s.data = newSwapData;
 
-        address(xnugg).sendValue(newSwapData.eth() - swapData.eth());
+        uint256 increase = newSwapData.eth() - swapData.eth() + dust;
 
-        emit SubmitOffer(token, tokenid, index, account, value);
+        address(xnugg).sendValue(increase);
+
+        emit Offer(token, tokenid, swapData.epoch(), msg.sender, newSwapData.eth());
     }
 
-    function _submitClaim(
+    function claim(
         address token,
         uint256 tokenid,
-        uint256 index,
-        address account,
-        address to
-    ) internal {
+        uint256 index
+    ) external override {
         (SwapLib.Storage storage s, uint256 swapData, uint256 offerData) = SwapLib.loadStorage(
             token,
             tokenid,
-            account,
+            msg.sender,
             index
         );
 
         uint256 activeEpoch = EpochLib.activeEpoch();
 
-        delete s.offers[account];
+        delete s.offers[index][msg.sender];
 
-        if (SwapLib.checkClaimer(account, swapData, offerData, activeEpoch)) {
+        if (SwapLib.checkClaimer(msg.sender, swapData, offerData, activeEpoch)) {
             delete s.data;
 
-            SwapLib.moveERC721(token, tokenid, address(this), to);
-
-            SwapLib.incrementIndex(token, tokenid);
+            SwapLib.moveERC721(token, tokenid, address(this), msg.sender);
         } else {
-            to.sendValue(offerData.eth());
+            msg.sender.sendValue(offerData.eth());
         }
 
-        emit SubmitClaim(token, tokenid, index, account);
+        emit Claim(token, tokenid, index, msg.sender);
     }
 
-    function _submitSwap(
+    function swap(
         address token,
         uint256 tokenid,
-        address account,
-        uint48 requestedEpoch,
         uint256 requestedFloor
-    ) internal {
-        (SwapLib.Storage storage s, uint256 swapData, , uint256 index) = SwapLib.loadStorage(token, tokenid, account);
-        // only minting swaps can be numbered 0
-        require(index > 0, 'NS:SS:-1');
+    ) external override {
+        (SwapLib.Storage storage s, uint256 swapData, ) = SwapLib.loadStorage(token, tokenid, msg.sender);
 
         // make sure swap does not exist
         require(swapData == 0, 'NS:SS:0');
 
-        // force swaps to be started in sequential order
-        // if (index != 1) require(s.data[index - 1] != 0, 'NS:SS:1');
-
-        // calculate epoch
-        uint256 epoch = EpochLib.activeEpoch() + requestedEpoch;
-
         // build starting swap data
-        (swapData, ) = swapData.setAccount(account).setEpoch(epoch).setIsOwner().setEth(requestedFloor);
+        (swapData, ) = swapData.account(msg.sender).isOwner(true).eth(requestedFloor);
 
-        SwapLib.moveERC721(token, tokenid, account, address(this));
-
-        // sstore swapdata
         s.data = swapData;
 
-        emit SubmitSwap(token, tokenid, index, account, requestedFloor, epoch);
+        SwapLib.moveERC721(token, tokenid, msg.sender, address(this));
+
+        emit Swap(token, tokenid, msg.sender, requestedFloor);
     }
 }

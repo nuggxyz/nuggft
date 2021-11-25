@@ -55,7 +55,7 @@ contract xNUGG is IxNUGG, ERC20 {
      * @dev in regards to this contract, this could just be earningsOf + sharesOf
      */
     function totalSupply() public view virtual override(ERC20, IxNUGG) returns (uint256 res) {
-        res = StakeLib.loadBalance();
+        res = StakeLib.balance();
     }
 
     /**

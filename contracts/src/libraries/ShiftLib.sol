@@ -1,7 +1,7 @@
 pragma solidity 0.8.4;
+
 // import "hardhat/console.sol";
 library ShiftLib {
-
     function unmask(uint256 input) internal pure returns (uint256 res) {
         assembly {
             res := input
@@ -20,22 +20,66 @@ library ShiftLib {
         }
     }
 
+        // function fletcher16(address a) internal pure returns (uint16 res) {
+        // uint16 sum1 = 0;
+        // uint16 sum2 = 0;
+        // for (uint256 index = 0; index < data.length; index++) {
+        //     sum1 = (sum1 + uint8(data[index])) % 255;
+        //     sum2 = (sum2 + sum1) % 255;
+        // }
+        // res = (sum2 << 8) | sum1;
+        // }
 
-    function is1155(uint256 input) internal pure returns (bool res) {
+    // function caddress(address a) internal pure returns (uint112 res) {
+    //     assembly {
+    //         let sum1 := 0
+    //         let sum2 := 0
+    //         let tmp := a
+    //         for {
+    //             let index := 0
+    //         } lt(index, 20) {
+    //             index := add(index, 0x2)
+    //         } {
+    //             sum1 := mod(add(sum1, and(0xffff, tmp)), 0xffff)
+    //             sum2 := mod(add(sum1, sum2), 0xffff)
+    //             tmp := shr(0xf, tmp)
+    //         }
+    //         res := or(and(shr(48, a), 0xFFFFFFFFFFFFFFFFFFFF00000000), or(shl(8, sum2), sum1))
+    //     }
+    // }
+
+    // function caccount(uint256 input) internal pure returns (uint96 res) {
+    //     assembly {
+    //         res := input
+    //     }
+    // }
+
+    // function caccount(uint256 input, address update) internal pure returns (uint256 res) {
+
+    //     assembly {
+    //         input := and(input, 0xffffffffffffffffffffffffffffffffff000000000000000000000000000000)
+    //         res := or(input, update)
+    //     }
+    // }
+
+
+    function account(uint256 input) internal pure returns (address res) {
         assembly {
-            res := and(shr(252, input), 0x1)
+            res := input
         }
     }
 
-    function isClaimed(uint256 input) internal pure returns (bool res) {
+    function account(uint256 input, address update) internal pure returns (uint256 res) {
+
         assembly {
-            res := and(shr(253, input), 0x1)
+            input := and(input, 0xffffffffffffffffffffffff0000000000000000000000000000000000000000)
+            res := or(input, update)
         }
     }
 
-    function isRoyaltyClaimed(uint256 input) internal pure returns (bool res) {
+    function isOwner(uint256 input, bool) internal pure returns (uint256 res) {
         assembly {
-            res := and(shr(254, input), 0x1)
+            res := or(input, shl(255, 0x1))
         }
     }
 
@@ -49,55 +93,33 @@ library ShiftLib {
         assembly {
             res := and(shr(160, input), 0xFFFFFFFFFFFFFF)
             let i := and(res, 0xff)
-            // res := shr(4, res)
             res := shl(mul(4, i), shr(8, res))
             res := mul(res, 0xE8D4A51000)
         }
     }
 
-    function epoch(uint256 input) internal pure returns (uint256 res) {
-        assembly {
-            res := and(shr(216, input), 0xFFFFFFFFF)
-        }
-    }
-
-    function setAccount(uint256 input, address update) internal pure returns (uint256 res) {
-        assembly {
-            input := and(input, 0xffffffffffffffffffffffff0000000000000000000000000000000000000000)
-            res := or(input, update)
-        }
-    }
-
     // 14 f's
-    function setEth(uint256 input, uint256 update) internal pure returns (uint256 res, uint256 rem) {
+    function eth(uint256 input, uint256 update) internal pure returns (uint256 res, uint256 rem) {
         assembly {
             let in := update
             update := div(update, 0xE8D4A51000)
-
             for {
-
             } gt(update, 0xFFFFFFFFFFFF) {
                 // 13
             } {
                 res := add(res, 0x01)
-
                 update := shr(4, update)
             }
-
             update := or(shl(8, update), res)
-
             let out := shl(mul(4, res), shr(8, update))
             rem := sub(in, mul(out, 0xE8D4A51000))
-
             input := and(input, 0xffffffffff00000000000000ffffffffffffffffffffffffffffffffffffffff)
             res := or(input, shl(160, update))
-
-
         }
     }
 
     // 9 f's
-    function setEpoch(uint256 input, uint256 update) internal pure returns (uint256 res) {
+    function epoch(uint256 input, uint256 update) internal pure returns (uint256 res) {
         assert(update <= 0xFFFFFFFFF);
         assembly {
             //                0xfffffffffffffffddffffffffffffffccfffffffffffffffffffffffffffffff)
@@ -106,59 +128,9 @@ library ShiftLib {
         }
     }
 
-    function addr(uint256 input) internal pure returns (address res) {
+    function epoch(uint256 input) internal pure returns (uint256 res) {
         assembly {
-            res := input
+            res := and(shr(216, input), 0xFFFFFFFFF)
         }
     }
-
-
-
-    // cannot unset, only set or notset
-    function setIs1155(uint256 input, bool to) internal pure returns (uint256 res) {
-        assembly {
-            res := input
-            if to {
-                 res := or(res, shl(252, 0x1))
-            }
-        }
-    }
-
-    function setClaimed(uint256 input) internal pure returns (uint256 res) {
-        assembly {
-            res := or(input, shl(253, 0x1))
-        }
-    }
-
-    function setRoyaltyClaimed(uint256 input) internal pure returns (uint256 res) {
-        assembly {
-
-            res := or(input, shl(254, 0x1))
-        }
-    }
-
-    function setIsOwner(uint256 input) internal pure returns (uint256 res) {
-        assembly {
-            res := or(input, shl(255, 0x1))
-        }
-    }
-
-
-
-    function hasRtmFlag(uint256 input) internal pure returns (bool res) {
-        assembly {
-        res := eq(shr(160, input), 0xffffffffffffffffffffffff)
-
-        }
-    }
-
-    function setRtmFlag(uint256 input) internal pure returns (uint256 res) {
-        assembly {
-        res := or(input, 0xffffffffffffffffffffffff0000000000000000000000000000000000000000)
-
-        }
-    }
-
-
-
 }

@@ -18,30 +18,30 @@ library StakeLib {
         mapping(address => uint256) owned;
     }
 
-    function loadStorage() internal pure returns (Storage storage s) {
+    function load() internal pure returns (Storage storage s) {
         uint256 ptr = StorageLib.pointer('epoch');
         assembly {
             s.slot := ptr
         }
     }
 
-    function loadBalance() internal view returns (uint256 res) {
+    function balance() internal view returns (uint256 res) {
         assembly {
             res := selfbalance()
         }
     }
 
     function getActiveBalanceOf(address account) internal view returns (uint256 res) {
-        Storage storage s = loadStorage();
-        res = sharesToSupply(s.owned[account], loadBalance(), s.shares, false);
+        Storage storage s = load();
+        res = sharesToSupply(s.owned[account], balance(), s.shares, false);
     }
 
     function getActiveSharesOf(address account) internal view returns (uint256 res) {
-        res = loadStorage().owned[account];
+        res = load().owned[account];
     }
 
     function getActiveShares() internal view returns (uint256 res) {
-        res = loadStorage().shares;
+        res = load().shares;
     }
 
     /**
@@ -50,7 +50,7 @@ library StakeLib {
      * @dev #TODO
      */
     function getActiveOwnershipOf(address account) internal view returns (uint256 res) {
-        Storage storage s = loadStorage();
+        Storage storage s = load();
         return s.owned[account].mulDiv(0x100000000000000000000000000000000, s.shares);
     }
 
@@ -58,9 +58,9 @@ library StakeLib {
         // uint256 eth = msg.value;
         require(eth > 0, 'SL:ADD:0');
 
-        Storage storage s = loadStorage();
+        Storage storage s = load();
 
-        uint256 ethBalance = loadBalance();
+        uint256 ethBalance = balance();
         uint256 activeShares = s.shares;
 
         if (activeShares == 0) {
@@ -76,9 +76,9 @@ library StakeLib {
     }
 
     function sub(address account, uint256 eth) internal returns (uint256 sharesSubtracted) {
-        Storage storage s = loadStorage();
+        Storage storage s = load();
 
-        uint256 ethBalance = loadBalance();
+        uint256 ethBalance = balance();
         uint256 activeShares = s.shares;
 
         sharesSubtracted = supplyToShares(eth, ethBalance, activeShares, true);
@@ -92,9 +92,9 @@ library StakeLib {
         address to,
         uint256 eth
     ) internal returns (uint256 shares) {
-        Storage storage s = loadStorage();
+        Storage storage s = load();
 
-        uint256 ethBalance = loadBalance();
+        uint256 ethBalance = balance();
         uint256 activeShares = s.shares;
 
         shares = supplyToShares(eth, ethBalance, activeShares, true);
