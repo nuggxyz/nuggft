@@ -6,16 +6,16 @@ pragma solidity 0.8.4;
 
 import '../src/interfaces/INuggSwap.sol';
 // import './ERC721Breakable.mock.sol';
-import '../src/libraries/SatchelLib.sol';
+import '../src/libraries/ItemLib.sol';
 
 // import '../src/interfaces/IERC1155Nuggable.sol';
 
 abstract contract MockERC1155Breakable {
-    using SatchelLib for uint256;
+    using ItemLib for uint256;
 
     address private immutable nuggswap;
 
-    mapping(uint256 => SatchelLib.Storage) private sl_state;
+    mapping(uint256 => ItemLib.Storage) private sl_state;
     mapping(uint256 => uint256) private nuggswap_storage;
 
     constructor(address _nuggswap) {

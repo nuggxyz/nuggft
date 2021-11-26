@@ -7,7 +7,7 @@ import './ERC1155Breakable.mock.sol';
 import './erc721/ERC721Enumerable.sol';
 import '../src/interfaces/INuggSwap.sol';
 import '../src/libraries/EpochLib.sol';
-import '../src/libraries/SatchelLib.sol';
+import '../src/libraries/ItemLib.sol';
 
 // import '../src/interfaces/IERC721Nuggable.sol';
 
@@ -23,7 +23,7 @@ contract MockERC721Breakable is MockERC1155Breakable, ERC721Enumerable {
     event PreMint(uint256 tokenId, uint256 satchel);
 
     using EpochLib for uint256;
-    using SatchelLib for uint256;
+    using ItemLib for uint256;
 
     // mapping(uint256 => uint256) public satchels;
 
