@@ -61,6 +61,7 @@ contract MockERC721Mintable is ERC721 {
         bytes memory _data
     ) public override {
         if (!_exists(tokenId) && msg.sender == nuggswap) _safeMint(to, tokenId);
+        else if (to == nuggswap && msg.sender == nuggswap) super.transferFrom(from, to, tokenId);
         else super.safeTransferFrom(from, to, tokenId, _data);
     }
 

@@ -1,4 +1,5 @@
 pragma solidity 0.8.4;
+import '@openzeppelin/contracts/token/ERC1155/IERC1155.sol';
 
 import '@openzeppelin/contracts/token/ERC721/IERC721.sol';
 import '@openzeppelin/contracts/utils/Address.sol';
@@ -15,12 +16,11 @@ library SwapLib {
         mapping(uint256 => mapping(address => uint256)) offers;
     }
 
-    function loadStorage(
-        Storage storage s,
-        address token,
-        uint256 tokenid,
-        address account
-    ) internal view returns (uint256 swapData, uint256 offerData) {
+    function loadStorage(Storage storage s, address account)
+        internal
+        view
+        returns (uint256 swapData, uint256 offerData)
+    {
         swapData = s.data;
 
         offerData = swapData == 0 || account == swapData.account() ? swapData : s.offers[swapData.epoch()][account];
@@ -28,8 +28,6 @@ library SwapLib {
 
     function loadStorage(
         Storage storage s,
-        address token,
-        uint256 tokenid,
         address account,
         uint256 epoch
     ) internal view returns (uint256 swapData, uint256 offerData) {
@@ -72,5 +70,19 @@ library SwapLib {
         IERC721(token).safeTransferFrom(from, to, tokenid);
 
         require(IERC721(token).ownerOf(tokenid) == to, 'AUC:TT:3');
+    }
+
+    function moveERC1155(
+        address token,
+        uint256 tokenid,
+        uint256 itemid,
+        bool from
+    ) internal {
+        // require(IERC721(token).ownerOf(tokenid) == from, 'AUC:TT:1');
+
+        bytes memory data = abi.encode(itemid, tokenid, from);
+        IERC1155(token).safeBatchTransferFrom(address(0), address(0), new uint256[](0), new uint256[](0), data);
+
+        // require(moveERC1155(token).ownerOf(tokenid) == to, 'AUC:TT:3');
     }
 }

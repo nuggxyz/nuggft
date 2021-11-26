@@ -13,9 +13,26 @@ interface INuggSwap {
 
     event Swap(address token, uint256 tokenid, address account, uint256 eth);
 
+    function swapItem(
+        address token,
+        uint256 tokenid,
+        uint256 requestedFloor,
+        uint256 itemid
+    ) external;
+
     function xnugg() external view returns (address payable);
 
+    function genesis() external view returns (uint256 res);
+
+    function epoch() external view returns (uint256 res);
+
     function delegate(address token, uint256 tokenid) external payable;
+
+    function delegateItem(
+        address token,
+        uint256 tokenid,
+        uint256 itemid
+    ) external payable;
 
     function mint(address token, uint256 tokenid) external payable;
 
@@ -48,7 +65,7 @@ interface INuggSwap {
         returns (
             address leader,
             uint256 eth,
-            uint256 epoch,
+            uint256 _epoch,
             bool isOwner
         );
 }
