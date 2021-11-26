@@ -8,7 +8,6 @@ import '@openzeppelin/contracts/utils/Address.sol';
 import './interfaces/IxNUGG.sol';
 
 import './libraries/StakeLib.sol';
-import './libraries/EpochLib.sol';
 
 /**
  * @title xNUGG
@@ -18,48 +17,31 @@ import './libraries/EpochLib.sol';
 contract xNUGG is IxNUGG, ERC20 {
     using Address for address payable;
     using StakeLib for StakeLib.Storage;
-    using EpochLib for EpochLib.Storage;
-
-    uint256 public immutable override genesis;
 
     StakeLib.Storage internal sl_state;
 
-    EpochLib.Storage internal el_state;
-
     constructor() ERC20('Staked NUGG', 'xNUGG') {
-        genesis = block.number;
-
         uint256 shares = sl_state.start(msg.sender);
-
-        el_state.setSeed(block.number);
 
         emit Transfer(address(0), msg.sender, shares);
     }
 
     receive() external payable {
-        el_state.setSeed(genesis);
-
         emit Receive(msg.sender, msg.value);
     }
 
     fallback() external payable {
-        el_state.setSeed(genesis);
-
         emit Receive(msg.sender, msg.value);
     }
 
     function mint() public payable override {
         uint256 mintedShares = sl_state.add(msg.sender, msg.value);
 
-        el_state.setSeed(genesis);
-
         emit Transfer(address(0), msg.sender, mintedShares);
     }
 
     function burn(uint256 shares) public override {
         uint256 eth = sl_state.sub(msg.sender, shares);
-
-        el_state.setSeed(genesis);
 
         payable(msg.sender).sendValue(eth);
 
@@ -73,13 +55,7 @@ contract xNUGG is IxNUGG, ERC20 {
     ) internal override {
         sl_state.move(from, to, shares);
 
-        el_state.setSeed(genesis);
-
         emit Transfer(from, to, shares);
-    }
-
-    function epoch() public view override returns (uint256 res) {
-        return EpochLib.activeEpoch(genesis);
     }
 
     /**

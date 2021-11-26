@@ -3,24 +3,40 @@ import './ShiftLib.sol';
 library EpochLib {
     using ShiftLib for uint256;
 
-    struct Storage {
-        mapping(uint256 => bytes32) seeds;
-    }
+    // struct Storage {
+    //     mapping(uint256 => uint256) seeds;
+    // }
 
-    function setSeed(Storage storage s, uint256 genesis)
-        internal
-        returns (
-            bytes32 seed,
-            uint256 epoch,
-            uint256 blocknum
-        )
-    {
-        if (s.seeds[activeEpoch(genesis)] == 0) {
-            blocknum = block.number;
-            (seed, epoch) = calculateSeed(genesis, blocknum);
-            s.seeds[epoch] = seed;
-        }
-    }
+    // function setSeed(Storage storage s, uint256 genesis) internal returns (uint256 seed, uint256 epoch) {
+    //     if (s.seeds[activeEpoch(genesis)] == 0) {
+    //         (seed, epoch) = calculateSeed(genesis);
+    //         s.seeds[epoch] = seed;
+    //     }
+    // }
+
+    // /**
+    //  * @dev #TODO
+    //  * @return res
+    //  */
+    // function seedOf(Storage storage s, uint256 epoch) internal view returns (uint256 res) {
+    //     res = s.seeds[epoch];
+    // }
+
+    // /**
+    //  * @dev #TODO
+    //  */
+    // function safeSeedOf(
+    //     Storage storage s,
+    //     uint256 genesis,
+    //     uint256 epoch
+    // ) internal view returns (bool exists, uint256 seed) {
+    //     seed = s.seeds[epoch];
+    //     if (seed == 0 && activeEpoch(genesis) == epoch) {
+    //         (seed, ) = calculateSeed(genesis);
+    //     } else {
+    //         exists = true;
+    //     }
+    // }
 
     /**
      * @dev #TODO
@@ -36,13 +52,14 @@ library EpochLib {
      * We considered making this harder to manipulate, but we decided that if someone were able to
      * pull it off and make their own custom nugg, that would be really fucking cool.
      */
-    function calculateSeed(uint256 genesis, uint256 blocknum) internal view returns (bytes32 res, uint256 epoch) {
-        epoch = toEpoch(genesis, blocknum);
+    function calculateSeed(uint256 genesis) internal view returns (uint256 res, uint256 epoch) {
+        epoch = toEpoch(genesis, block.number);
         uint256 startblock = toStartBlock(genesis, epoch);
-        res = blockhash(startblock);
-        if (startblock == blocknum) return (bytes32(uint256(0x42069)), 0);
-        require(res != 0, 'EPC:SBL');
-        res = keccak256(abi.encodePacked(res, epoch, address(this)));
+        bytes32 bhash = blockhash(startblock - 1);
+        // if (startblock == block.number) return (uint256(uint256(0x42069)), 0);
+        require(bhash != 0, 'EPC:SBL');
+        res = uint256(keccak256(abi.encodePacked(bhash, epoch, address(this))));
+        // res = uint256(b);
     }
 
     function interval() internal pure returns (uint256 res) {

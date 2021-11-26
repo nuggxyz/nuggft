@@ -48,19 +48,7 @@ library ShiftLib {
     //     }
     // }
 
-    // function caccount(uint256 input) internal pure returns (uint96 res) {
-    //     assembly {
-    //         res := input
-    //     }
-    // }
 
-    // function caccount(uint256 input, address update) internal pure returns (uint256 res) {
-
-    //     assembly {
-    //         input := and(input, 0xffffffffffffffffffffffffffffffffff000000000000000000000000000000)
-    //         res := or(input, update)
-    //     }
-    // }
 
 
     function account(uint256 input) internal pure returns (address res) {
