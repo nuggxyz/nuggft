@@ -3,41 +3,6 @@ import './ShiftLib.sol';
 library EpochLib {
     using ShiftLib for uint256;
 
-    // struct Storage {
-    //     mapping(uint256 => uint256) seeds;
-    // }
-
-    // function setSeed(Storage storage s, uint256 genesis) internal returns (uint256 seed, uint256 epoch) {
-    //     if (s.seeds[activeEpoch(genesis)] == 0) {
-    //         (seed, epoch) = calculateSeed(genesis);
-    //         s.seeds[epoch] = seed;
-    //     }
-    // }
-
-    // /**
-    //  * @dev #TODO
-    //  * @return res
-    //  */
-    // function seedOf(Storage storage s, uint256 epoch) internal view returns (uint256 res) {
-    //     res = s.seeds[epoch];
-    // }
-
-    // /**
-    //  * @dev #TODO
-    //  */
-    // function safeSeedOf(
-    //     Storage storage s,
-    //     uint256 genesis,
-    //     uint256 epoch
-    // ) internal view returns (bool exists, uint256 seed) {
-    //     seed = s.seeds[epoch];
-    //     if (seed == 0 && activeEpoch(genesis) == epoch) {
-    //         (seed, ) = calculateSeed(genesis);
-    //     } else {
-    //         exists = true;
-    //     }
-    // }
-
     /**
      * @dev #TODO
      * @return res
@@ -56,10 +21,8 @@ library EpochLib {
         epoch = toEpoch(genesis, block.number);
         uint256 startblock = toStartBlock(genesis, epoch);
         bytes32 bhash = blockhash(startblock - 1);
-        // if (startblock == block.number) return (uint256(uint256(0x42069)), 0);
         require(bhash != 0, 'EPC:SBL');
         res = uint256(keccak256(abi.encodePacked(bhash, epoch, address(this))));
-        // res = uint256(b);
     }
 
     function interval() internal pure returns (uint256 res) {
