@@ -1,20 +1,33 @@
 pragma solidity 0.8.4;
 
-import './IxNUGG.sol';
+interface INuggFT {
+    event PreMint(uint256 tokenId, uint256[] items);
 
-interface INuggSwap {
-    event Mint(address token, uint256 epoch, address account, uint256 eth);
+    event PopItem(uint256 tokenId, uint256 itemId);
 
-    event Commit(address token, uint256 tokenid, uint256 index, address account, uint256 eth);
+    event PushItem(uint256 tokenId, uint256 itemId);
 
-    event Offer(address token, uint256 tokenid, uint256 index, address account, uint256 eth);
+    event Mint(uint256 epoch, address account, uint256 eth);
 
-    event Claim(address token, uint256 tokenid, uint256 index, address account);
+    event Commit(uint256 tokenid, address account, uint256 eth);
 
-    event Swap(address token, uint256 tokenid, address account, uint256 eth);
+    event Offer(uint256 tokenid, address account, uint256 eth);
+
+    event Claim(uint256 tokenid, uint256 endingEpoch, address account);
+
+    event Swap(uint256 tokenid, address account, uint256 eth);
+
+    event CommitItem(uint256 sellingTokenId, uint256 itemId, uint256 buyingTokenId, uint256 eth);
+
+    event OfferItem(uint256 sellingTokenId, uint256 itemId, uint256 buyingTokenId, uint256 eth);
+
+    event ClaimItem(uint256 sellingTokenId, uint256 itemId, uint256 buyingTokenId, uint256 endingEpoch);
+
+    event SwapItem(uint256 sellingTokenId, uint256 itemId, uint256 eth);
+
+    event Genesis();
 
     function swapItem(
-        address token,
         uint256 tokenid,
         uint256 floor,
         uint256 itemid
@@ -26,63 +39,50 @@ interface INuggSwap {
 
     function epoch() external view returns (uint256 res);
 
-    function delegate(address token, uint256 tokenid) external payable;
+    function delegate(uint256 tokenid) external payable;
 
     function delegateItem(
-        address token,
-        uint256 tokenid,
+        uint256 sellerTokenId,
         uint256 itemid,
-        uint256 senderTokenId
+        uint256 buyerTokenId
     ) external payable;
 
-    function mint(address token, uint256 tokenid) external payable;
+    function mint(uint256 tokenid) external payable;
 
-    function commit(address token, uint256 tokenid) external payable;
+    function commit(uint256 tokenid) external payable;
 
     function commitItem(
-        address token,
-        uint256 tokenid,
+        uint256 sellerTokenId,
         uint256 itemid,
-        uint256 senderTokenId
+        uint256 buyerTokenId
     ) external payable;
 
-    function offer(address token, uint256 tokenid) external payable;
+    function offer(uint256 tokenid) external payable;
 
     function offerItem(
-        address token,
-        uint256 tokenid,
+        uint256 sellerTokenId,
         uint256 itemid,
-        uint256 senderTokenId
+        uint256 buyerTokenId
     ) external payable;
 
-    function claim(
-        address token,
-        uint256 tokenid,
-        uint256 index
-    ) external;
+    function claim(uint256 tokenid, uint256 endingEpoch) external;
 
     function claimItem(
-        address token,
-        uint256 tokenid,
+        uint256 sellerTokenId,
         uint256 itemid,
-        uint256 index,
-        uint256 senderTokenId
+        uint256 buyerTokenId,
+        uint256 endingEpoch
     ) external;
 
-    function swap(
-        address token,
-        uint256 tokenid,
-        uint256 floor
-    ) external;
+    function swap(uint256 tokenid, uint256 floor) external;
 
     function getOfferByAccount(
-        address token,
         uint256 tokenid,
         uint256 index,
         address account
     ) external view returns (uint256 eth);
 
-    function getActiveSwap(address token, uint256 tokenid)
+    function getActiveSwap(uint256 tokenid)
         external
         view
         returns (
