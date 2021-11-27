@@ -4,47 +4,38 @@ pragma solidity 0.8.4;
 
 import './ERC1155Breakable.mock.sol';
 
-import './erc721/ERC721Enumerable.sol';
+import './erc721/ERC721.sol';
 import '../src/interfaces/INuggSwap.sol';
 import '../src/libraries/EpochLib.sol';
 import '../src/libraries/ItemLib.sol';
 
 // import '../src/interfaces/IERC721Nuggable.sol';
 
-contract MockERC721Breakable is MockERC1155Breakable, ERC721Enumerable {
+contract MockERC721Breakable is ERC721 {
+    using EpochLib for uint256;
+    using ItemLib for ItemLib.Storage;
+
     address public immutable nuggswap;
 
     address public immutable xnugg;
 
-    // MockERC1155Breakable public immutable
-
     uint256 private immutable genesis;
 
-    event PreMint(uint256 tokenId, uint256 satchel);
+    ItemLib.Storage private il_state;
 
-    using EpochLib for uint256;
-    using ItemLib for uint256;
+    event PreMint(uint256 tokenId, uint256[] items);
+    event PopItem(uint256 tokenId, uint256 itemId);
+    event PushItem(uint256 tokenId, uint256 itemId);
 
-    // mapping(uint256 => uint256) public satchels;
-
-    constructor(address _xnugg, address _nuggswap)
-        ERC721('Mock ERC721 Breakable', 'MockERC721Breakable')
-        MockERC1155Breakable(_nuggswap)
-    {
+    constructor(address _xnugg, address _nuggswap) ERC721('Mock ERC721 Breakable', 'MockERC721Breakable') {
         nuggswap = _nuggswap;
         genesis = INuggSwap(_nuggswap).genesis();
         xnugg = _xnugg;
-        // = new MockERC1155Breakable(_nuggswap);
     }
 
     function ownerOf(uint256 tokenId) public view override returns (address) {
         if (!_exists(tokenId) && _preminted(tokenId)) return nuggswap;
         return super.ownerOf(tokenId);
-    }
-
-    function tokenIdArray(uint256 tokenId, uint256 length) internal pure returns (uint256[] memory res) {
-        res = new uint256[](length);
-        for (uint256 i = 0; i < length; i++) res[i] = tokenId;
     }
 
     /**
@@ -69,55 +60,76 @@ contract MockERC721Breakable is MockERC1155Breakable, ERC721Enumerable {
         uint256 tokenId
     ) internal override {
         require(msg.sender == nuggswap, 'NFT:BTT:0');
-        // uint256[] memory empty;
-        _safeMint(tokenId);
 
         super._beforeTokenTransfer(from, to, tokenId);
     }
 
-    // function updateSachel(uint256 tokenId, uint256 to) public {
-    //     require(msg.sender == address();
-    //     satchels[tokenId] = to;
+    function _preminted(uint256 tokenId) internal view returns (bool) {
+        return il_state.tokenData[tokenId] != 0;
+    }
+
+    // /**
+    //  * @dev Mints `tokenId` and transfers it to `to`.
+    //  *
+    //  * WARNING: Usage of this method is discouraged, use {_safeMint} whenever possible
+    //  *
+    //  * Requirements:
+    //  *
+    //  * - `tokenId` must not exist.
+    //  * - `to` cannot be the zero address.
+    //  *
+    //  * Emits a {Transfer} event.
+    //  */
+    // function _mint(address to, uint256 tokenId) internal override {
+    //     require(to != address(0), 'ERC721: mint to the zero address');
+    //     require(!_exists(tokenId), 'ERC721: token already minted');
+
+    //     _beforeTokenTransfer(address(0), to, tokenId);
+
+    //     _balances[to] += 1;
+    //     _owners[tokenId] = to;
+
+    //     emit Transfer(address(0), to, tokenId);
     // }
 
-    function _preminted(uint256 tokenId) internal view returns (bool) {
-        return get(tokenId) != 0;
-    }
-
-    /**
-     * @dev Mints `tokenId` and transfers it to `to`.
-     *
-     * WARNING: Usage of this method is discouraged, use {_safeMint} whenever possible
-     *
-     * Requirements:
-     *
-     * - `tokenId` must not exist.
-     * - `to` cannot be the zero address.
-     *
-     * Emits a {Transfer} event.
-     */
-    function _mint(address to, uint256 tokenId) internal override {
-        require(to != address(0), 'ERC721: mint to the zero address');
-        require(!_exists(tokenId), 'ERC721: token already minted');
-
-        _beforeTokenTransfer(address(0), to, tokenId);
-
-        _balances[to] += 1;
-        _owners[tokenId] = to;
-
-        emit Transfer(address(0), to, tokenId);
-    }
-
     function _premint(uint256 tokenId) internal {
-        (uint256 satchel, uint256 epoch) = EpochLib.calculateSeed(genesis);
-        require(satchel != 0, '721:MINT:0');
+        (uint256 itemData, uint256 epoch) = EpochLib.calculateSeed(genesis);
+        require(itemData != 0, '721:MINT:0');
         require(epoch == tokenId, '721:MINT:1');
 
-        satchel = satchel.body(satchel.body() % 20).size(0x4);
+        itemData = itemData;
 
-        set(tokenId, satchel);
+        uint256[] memory items = il_state.mint(tokenId, itemData);
 
-        emit PreMint(tokenId, satchel);
+        emit PreMint(tokenId, items);
+    }
+
+    function popItem(uint256 tokenId, uint256 itemId) public {
+        require(msg.sender == nuggswap, '1155:SBTF:0');
+
+        il_state.pop(tokenId, itemId);
+
+        emit PopItem(tokenId, itemId);
+    }
+
+    function pushItem(uint256 tokenId, uint256 itemId) public {
+        require(msg.sender == nuggswap, '1155:SBTF:0');
+
+        il_state.push(tokenId, itemId);
+
+        emit PushItem(tokenId, itemId);
+    }
+
+    function infoOf(uint256 tokenId)
+        public
+        view
+        returns (
+            uint256 base,
+            uint256 size,
+            uint256[] memory items
+        )
+    {
+        return il_state.infoOf(tokenId);
     }
 
     /**

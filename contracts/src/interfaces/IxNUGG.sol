@@ -11,6 +11,12 @@ import '@openzeppelin/contracts/token/ERC20/IERC20.sol';
 interface IxNUGG is IERC20 {
     event Receive(address sender, uint256 eth);
 
+    event Exit(address receiver, uint256 eth);
+
+    event Genesis();
+
+    function genesis() external view returns (uint256 res);
+
     function ownershipOf(address account) external view returns (uint256 res);
 
     function totalEth() external view returns (uint256 res);
