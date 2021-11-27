@@ -16,7 +16,7 @@ interface INuggSwap {
     function swapItem(
         address token,
         uint256 tokenid,
-        uint256 requestedFloor,
+        uint256 floor,
         uint256 itemid
     ) external;
 
@@ -31,19 +31,42 @@ interface INuggSwap {
     function delegateItem(
         address token,
         uint256 tokenid,
-        uint256 itemid
+        uint256 itemid,
+        uint256 senderTokenId
     ) external payable;
 
     function mint(address token, uint256 tokenid) external payable;
 
     function commit(address token, uint256 tokenid) external payable;
 
+    function commitItem(
+        address token,
+        uint256 tokenid,
+        uint256 itemid,
+        uint256 senderTokenId
+    ) external payable;
+
     function offer(address token, uint256 tokenid) external payable;
+
+    function offerItem(
+        address token,
+        uint256 tokenid,
+        uint256 itemid,
+        uint256 senderTokenId
+    ) external payable;
 
     function claim(
         address token,
         uint256 tokenid,
         uint256 index
+    ) external;
+
+    function claimItem(
+        address token,
+        uint256 tokenid,
+        uint256 itemid,
+        uint256 index,
+        uint256 senderTokenId
     ) external;
 
     function swap(

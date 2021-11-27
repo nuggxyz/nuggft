@@ -78,15 +78,17 @@ contract NuggSwap is INuggSwap, ERC721Holder {
     function delegateItem(
         address token,
         uint256 tokenid,
-        uint256 itemid
+        uint256 itemid,
+        uint256 senderTokenId
     ) external payable override {
-        uint256 customtokenid = itemTokenId(itemid, tokenid);
-        uint256 activeEpoch = genesis.activeEpoch();
+        require(tokenid != senderTokenId, 'SL:VS:-1');
+
+        uint256 customtokenid = SwapLib.itemTokenId(itemid, tokenid);
 
         (uint256 swapData, uint256 offerData) = sl_state[token][customtokenid].loadStorage(msg.sender);
 
-        if (offerData == 0 && swapData.isOwner()) commit(token, customtokenid);
-        else offer(token, customtokenid);
+        if (offerData == 0 && swapData.isOwner()) commitItem(token, tokenid, itemid, senderTokenId);
+        else offerItem(token, tokenid, itemid, senderTokenId);
     }
 
     function mint(address token, uint256 tokenid) public payable override {
@@ -112,9 +114,31 @@ contract NuggSwap is INuggSwap, ERC721Holder {
     }
 
     function commit(address token, uint256 tokenid) public payable override {
+        _commit(token, tokenid, msg.sender, false);
+    }
+
+    function commitItem(
+        address token,
+        uint256 tokenid,
+        uint256 itemid,
+        uint256 senderTokenId
+    ) public payable override {
+        require(tokenid != senderTokenId, 'SL:VS:-1');
+        console.logBytes32(bytes32(senderTokenId));
+        console.log(IERC721(token).ownerOf(senderTokenId), msg.sender);
+        require(IERC721(token).ownerOf(senderTokenId) == msg.sender, 'SL:VS:0');
+        _commit(token, SwapLib.itemTokenId(itemid, tokenid), SwapLib.tokenIdToAddress(senderTokenId), true);
+    }
+
+    function _commit(
+        address token,
+        uint256 tokenid,
+        address sender,
+        bool item
+    ) internal {
         require(msg.value > 0, 'SL:COM:2');
 
-        (uint256 swapData, uint256 offerData) = sl_state[token][tokenid].loadStorage(msg.sender);
+        (uint256 swapData, uint256 offerData) = sl_state[token][tokenid].loadStorage(sender);
 
         require(offerData == 0, 'SL:HSO:0');
 
@@ -123,7 +147,7 @@ contract NuggSwap is INuggSwap, ERC721Holder {
         uint256 _epoch = genesis.activeEpoch() + 1;
 
         // copy relevent items from swapData to newSwapData
-        (uint256 newSwapData, uint256 dust) = uint256(0).epoch(_epoch).account(msg.sender).eth(msg.value);
+        (uint256 newSwapData, uint256 dust) = uint256(0).epoch(_epoch).account(sender).eth(msg.value);
 
         require(swapData.eth().mulDiv(100, 10000) < newSwapData.eth(), 'SL:OBP:4');
 
@@ -133,13 +157,35 @@ contract NuggSwap is INuggSwap, ERC721Holder {
 
         xnugg.sendValue(newSwapData.eth() - swapData.eth() + dust);
 
-        emit Commit(token, tokenid, _epoch, msg.sender, newSwapData.eth());
+        emit Commit(token, tokenid, _epoch, sender, newSwapData.eth());
     }
 
     function offer(address token, uint256 tokenid) public payable override {
+        _offer(token, tokenid, msg.sender, false);
+    }
+
+    function offerItem(
+        address token,
+        uint256 tokenid,
+        uint256 itemid,
+        uint256 senderTokenId
+    ) public payable override {
+        require(tokenid != senderTokenId, 'SL:VS:-1');
+
+        require(IERC721(token).ownerOf(senderTokenId) == msg.sender, 'SL:VS:0');
+
+        _offer(token, SwapLib.itemTokenId(itemid, tokenid), SwapLib.tokenIdToAddress(senderTokenId), true);
+    }
+
+    function _offer(
+        address token,
+        uint256 tokenid,
+        address sender,
+        bool item
+    ) internal {
         require(msg.value > 0, 'SL:OBP:2');
 
-        (uint256 swapData, uint256 offerData) = sl_state[token][tokenid].loadStorage(msg.sender);
+        (uint256 swapData, uint256 offerData) = sl_state[token][tokenid].loadStorage(sender);
 
         require(swapData != 0, 'NS:0:0');
 
@@ -154,11 +200,11 @@ contract NuggSwap is INuggSwap, ERC721Holder {
         require(activeEpoch <= swapData.epoch(), 'SL:OBP:3');
 
         // save prev offers data
-        if (swapData.account() != msg.sender)
+        if (swapData.account() != sender)
             sl_state[token][tokenid].offers[swapData.epoch()][swapData.account()] = swapData;
 
         // copy relevent items from swapData to newSwapData
-        (uint256 newSwapData, uint256 dust) = uint256(0).epoch(swapData.epoch()).account(msg.sender).eth(
+        (uint256 newSwapData, uint256 dust) = uint256(0).epoch(swapData.epoch()).account(sender).eth(
             offerData.eth() + msg.value
         );
 
@@ -168,29 +214,53 @@ contract NuggSwap is INuggSwap, ERC721Holder {
 
         xnugg.sendValue(newSwapData.eth() - swapData.eth() + dust);
 
-        emit Offer(token, tokenid, swapData.epoch(), msg.sender, newSwapData.eth());
+        emit Offer(token, tokenid, swapData.epoch(), sender, newSwapData.eth());
     }
 
     function claim(
         address token,
         uint256 tokenid,
         uint256 index
-    ) external override {
-        (uint256 swapData, uint256 offerData) = sl_state[token][tokenid].loadStorage(msg.sender, index);
+    ) public override {
+        _claim(token, tokenid, index, msg.sender, false);
+    }
+
+    function claimItem(
+        address token,
+        uint256 tokenid,
+        uint256 index,
+        uint256 itemid,
+        uint256 senderTokenId
+    ) public override {
+        require(tokenid != senderTokenId, 'SL:VS:-1');
+
+        require(IERC721(token).ownerOf(senderTokenId) == msg.sender, 'SL:VS:0');
+
+        _claim(token, SwapLib.itemTokenId(itemid, tokenid), index, SwapLib.tokenIdToAddress(senderTokenId), true);
+    }
+
+    function _claim(
+        address token,
+        uint256 tokenid,
+        uint256 index,
+        address sender,
+        bool
+    ) internal {
+        (uint256 swapData, uint256 offerData) = sl_state[token][tokenid].loadStorage(sender, index);
 
         uint256 activeEpoch = genesis.activeEpoch();
 
-        delete sl_state[token][tokenid].offers[index][msg.sender];
+        delete sl_state[token][tokenid].offers[index][sender];
 
-        if (SwapLib.checkClaimer(msg.sender, swapData, offerData, activeEpoch)) {
+        if (SwapLib.checkClaimer(sender, swapData, offerData, activeEpoch)) {
             delete sl_state[token][tokenid].data;
 
-            SwapLib.moveERC721(token, tokenid, address(this), msg.sender);
+            SwapLib.moveERC721(token, tokenid, address(this), sender);
         } else {
-            payable(msg.sender).sendValue(offerData.eth());
+            payable(sender).sendValue(offerData.eth());
         }
 
-        emit Claim(token, tokenid, index, msg.sender);
+        emit Claim(token, tokenid, index, sender);
     }
 
     function swap(
@@ -198,23 +268,7 @@ contract NuggSwap is INuggSwap, ERC721Holder {
         uint256 tokenid,
         uint256 floor
     ) external override {
-        (uint256 swapData, ) = sl_state[token][tokenid].loadStorage(msg.sender);
-
-        // make sure swap does not exist
-        require(swapData == 0, 'NS:SS:0');
-
-        // build starting swap data
-        (swapData, ) = swapData.account(msg.sender).isOwner(true).eth(floor);
-
-        sl_state[token][tokenid].data = swapData;
-
-        SwapLib.moveERC721(token, tokenid, msg.sender, address(this));
-
-        emit Swap(token, tokenid, msg.sender, floor);
-    }
-
-    function itemTokenId(uint256 itemid, uint256 tokenid) internal pure returns (uint256 res) {
-        res = (tokenid << 8) | itemid;
+        _swap(token, tokenid, floor, msg.sender, false);
     }
 
     function swapItem(
@@ -223,20 +277,30 @@ contract NuggSwap is INuggSwap, ERC721Holder {
         uint256 floor,
         uint256 itemid
     ) external override {
-        uint256 customtokenid = itemTokenId(itemid, tokenid);
+        // require(tokenid != senderTokenId, 'SL:VS:-1');
+        require(IERC721(token).ownerOf(tokenid) == msg.sender, 'SL:VS:0');
+        _swap(token, SwapLib.itemTokenId(itemid, tokenid), floor, SwapLib.tokenIdToAddress(tokenid), true);
+    }
 
-        (uint256 swapData, ) = sl_state[token][customtokenid].loadStorage(msg.sender);
+    function _swap(
+        address token,
+        uint256 tokenid,
+        uint256 floor,
+        address sender,
+        bool item
+    ) internal {
+        (uint256 swapData, ) = sl_state[token][tokenid].loadStorage(sender);
 
         // make sure swap does not exist
         require(swapData == 0, 'NS:SS:0');
 
         // build starting swap data
-        (swapData, ) = swapData.account(msg.sender).isOwner(true).eth(floor);
+        (swapData, ) = swapData.account(sender).isOwner(true).eth(floor);
 
-        sl_state[token][customtokenid].data = swapData;
+        sl_state[token][tokenid].data = swapData;
 
-        SwapLib.moveERC1155(token, tokenid, itemid, false);
+        !item ? SwapLib.moveERC721(token, tokenid, sender, address(this)) : SwapLib.moveERC1155(token, tokenid, false);
 
-        emit Swap(token, tokenid, msg.sender, floor);
+        emit Swap(token, tokenid, sender, floor);
     }
 }
