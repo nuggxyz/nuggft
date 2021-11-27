@@ -13,10 +13,26 @@ library SwapLib {
 
     struct Storage {
         uint256 data;
-        mapping(uint256 => mapping(address => uint256)) offers;
+        mapping(uint256 => mapping(uint160 => uint256)) offers;
     }
 
     function loadStorage(Storage storage s, address account)
+        internal
+        view
+        returns (uint256 swapData, uint256 offerData)
+    {
+        return loadStorage(s, uint160(account));
+    }
+
+    function loadStorage(
+        Storage storage s,
+        address account,
+        uint256 epoch
+    ) internal view returns (uint256 swapData, uint256 offerData) {
+        return loadStorage(s, uint160(account), epoch);
+    }
+
+    function loadStorage(Storage storage s, uint160 account)
         internal
         view
         returns (uint256 swapData, uint256 offerData)
@@ -28,7 +44,7 @@ library SwapLib {
 
     function loadStorage(
         Storage storage s,
-        address account,
+        uint160 account,
         uint256 epoch
     ) internal view returns (uint256 swapData, uint256 offerData) {
         swapData = s.data;
@@ -39,7 +55,7 @@ library SwapLib {
     }
 
     function checkClaimer(
-        address account,
+        uint160 account,
         uint256 swapData,
         uint256 offerData,
         uint256 activeEpoch
@@ -59,19 +75,18 @@ library SwapLib {
         res = points(total, bps) + total;
     }
 
-    function moveERC721(
-        address token,
-        uint256 tokenid,
-        address from,
-        address to
-    ) internal {
-        // require(IERC721(token).ownerOf(tokenid) == from, 'AUC:TT:1');
-        console.log(to, addressToTokenId(from), isTokenIdAddress(from));
+    // function moveERC721(
+    //     uint256 tokenid,
+    //     address from,
+    //     address to
+    // ) internal {
+    //     // require(IERC721(token).ownerOf(tokenid) == from, 'AUC:TT:1');
+    //     console.log(to, addressToTokenId(from), isTokenIdAddress(from));
 
-        IERC721(token).safeTransferFrom(from, to, tokenid);
+    //     IERC721(token).safeTransferFrom(from, to, tokenid);
 
-        require(IERC721(token).ownerOf(tokenid) == to, 'AUC:TT:3');
-    }
+    //     require(IERC721(token).ownerOf(tokenid) == to, 'AUC:TT:3');
+    // }
 
     function itemTokenId(uint256 itemid, uint256 tokenid) internal pure returns (uint256 res) {
         res = (tokenid << 8) | itemid;
@@ -100,21 +115,21 @@ library SwapLib {
     //     require(msg.sender == sender || IERC721(token).ownerOf(addressToTokenId(sender)) == msg.sender, 'SL:VS:0');
     // }
 
-    function moveERC1155(
-        address token,
-        uint256 itemtokenid,
-        bool from
-    ) internal {
-        // require(IERC721(token).ownerOf(tokenid) == from, 'AUC:TT:1');
+    // function moveERC1155(
+    //     address token,
+    //     uint256 itemtokenid,
+    //     bool from
+    // ) internal {
+    //     // require(IERC721(token).ownerOf(tokenid) == from, 'AUC:TT:1');
 
-        IERC1155(token).safeBatchTransferFrom(
-            address(0),
-            address(0),
-            new uint256[](0),
-            new uint256[](0),
-            abi.encode(uint8(itemtokenid), itemtokenid >> 8, from)
-        );
+    //     IERC1155(token).safeBatchTransferFrom(
+    //         address(0),
+    //         address(0),
+    //         new uint256[](0),
+    //         new uint256[](0),
+    //         abi.encode(uint8(itemtokenid), itemtokenid >> 8, from)
+    //     );
 
-        // require(moveERC1155(token).ownerOf(tokenid) == to, 'AUC:TT:3');
-    }
+    //     // require(moveERC1155(token).ownerOf(tokenid) == to, 'AUC:TT:3');
+    // }
 }
