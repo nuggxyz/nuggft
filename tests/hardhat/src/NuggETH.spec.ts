@@ -98,7 +98,7 @@ describe('uint tests', async function () {
             await fix.nuggswap.connect(accounts.frank).offer(fix.mockERC721.address, 0, { value: toEth('3.000') });
             await fix.nuggswap.connect(accounts.dennis).offer(fix.mockERC721.address, 0, { value: toEth('2.000') });
             await fix.nuggswap.connect(accounts.dennis).offer(fix.mockERC721.address, 0, { value: toEth('2.000') });
-            await fix.nuggswap.connect(accounts.frank).offer(fix.mockERC721.address, 0, { value: toEth('33.000') });
+            await fix.nuggswap.connect(accounts.charile).offer(fix.mockERC721.address, 0, { value: toEth('55.000') });
             await fix.xnugg.connect(accounts.mac).mint({ value: toEth('1.69') });
 
             await fix.xnugg.connect(accounts.frank).mint({ value: toEth('1') });
@@ -141,15 +141,15 @@ describe('uint tests', async function () {
             // const res99 = await fix.nuggswap.getOfferLeader(fix.mockERC721.address, 9, 9);
 
             await Mining.advanceBlockTo(350);
-
             await fix.nuggswap.connect(accounts.frank).claim(fix.mockERC721.address, 9, 9);
 
-            const items = await fix.mockERC721.itemsOf(9);
-            console.log(items[0].toString());
-            await fix.nuggswap.connect(accounts.frank).swapItem(fix.mockERC721.address, 9, 9, items[0]);
-            await fix.nuggswap.connect(accounts.dee).delegateItem(fix.mockERC721.address, 9, items[0], { value: toEth('43') });
+            // await fix.nuggswap.connect(accounts.frank).claim(fix.mockERC721.address, 9, 9);
+            await fix.nuggswap.connect(accounts.charile).claim(fix.mockERC721.address, 0, 3);
 
-            await fix.nuggswap.connect(accounts.dee).claim(fix.mockERC721.address, 0, 3);
+            const items = await fix.mockERC721.itemsOf(9);
+            console.log(items[0].toString(), accounts.dee.address);
+            await fix.nuggswap.connect(accounts.frank).swapItem(fix.mockERC721.address, 9, toEth('14'), items[0]);
+            await fix.nuggswap.connect(accounts.charile).delegateItem(fix.mockERC721.address, 9, items[0], 0, { value: toEth('43') });
 
             // await fix.xnugg.connect(accounts.dee).burn(toEth('41'));
 
