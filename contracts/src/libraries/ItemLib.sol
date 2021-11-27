@@ -5,6 +5,8 @@ import './EpochLib.sol';
 
 library ItemLib {
     event PreMint(uint256 tokenId, uint256[] items);
+    event PopItem(uint256 tokenId, uint256 itemId);
+    event PushItem(uint256 tokenId, uint256 itemId);
 
     using ShiftLib for uint256;
 

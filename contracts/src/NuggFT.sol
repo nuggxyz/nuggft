@@ -16,15 +16,11 @@ contract NuggFT is NuggERC721 {
     using EpochLib for uint256;
     using ItemLib for ItemLib.Storage;
 
-    // address public immutable nuggswap;
+    event Genesis();
 
     address payable public immutable xnugg;
 
     uint256 private immutable genesis;
-
-    event PreMint(uint256 tokenId, uint256[] items);
-    event PopItem(uint256 tokenId, uint256 itemId);
-    event PushItem(uint256 tokenId, uint256 itemId);
 
     ItemLib.Storage private il_state;
 
@@ -34,6 +30,8 @@ contract NuggFT is NuggERC721 {
     constructor(address _xnugg) NuggERC721('NUGGFT', 'Nugg Fungible Token') {
         xnugg = payable(_xnugg);
         genesis = block.number;
+
+        emit Genesis();
     }
 
     function delegate(uint256 tokenid) external payable {

@@ -11,7 +11,7 @@ import '@openzeppelin/contracts/token/ERC20/IERC20.sol';
 interface IxNUGG is IERC20 {
     event Receive(address sender, uint256 eth);
 
-    event Exit(address receiver, uint256 eth);
+    event Send(address receiver, uint256 eth);
 
     event Genesis();
 

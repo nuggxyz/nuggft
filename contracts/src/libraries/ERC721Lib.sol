@@ -84,22 +84,6 @@ library ERC721Lib {
         emit Approval(ownerOf(s, tokenId), address(0), tokenId);
     }
 
-    // function cheapMintToSelf(Storage storage s, uint256 tokenId) internal {
-    //     require(
-    //         msg.sender == ownerOf(s, tokenId) && from == msg.sender,
-    //         'ERC721: transfer caller is not owner nor approved'
-    //     );
-
-    //     // Clear approvals from the previous owner
-    //     clearApprovals(s, tokenId);
-
-    //     s._balances[from] -= 1;
-    //     s._balances[address(this)] += 1;
-    //     s._owners[tokenId] = address(this);
-
-    //     emit Transfer(address(0), address(this), tokenId);
-    // }
-
     function approvedTransferToSelf(
         Storage storage s,
         address from,

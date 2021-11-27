@@ -44,6 +44,7 @@ contract xNUGG is IxNUGG, ERC20 {
         uint256 mintedShares = sl_state.add(msg.sender, msg.value);
 
         emit Transfer(address(0), msg.sender, mintedShares);
+        emit Receive(msg.sender, msg.value);
     }
 
     function burn(uint256 shares) public override {
@@ -52,6 +53,7 @@ contract xNUGG is IxNUGG, ERC20 {
         payable(msg.sender).sendValue(eth);
 
         emit Transfer(msg.sender, address(0), shares);
+        emit Send(msg.sender, eth);
     }
 
     function _transfer(
