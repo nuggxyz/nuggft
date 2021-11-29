@@ -158,6 +158,10 @@ describe('uint tests', async function () {
 
             console.log('epoch', epoch.toString());
 
+            const info0 = await fix.nuggft.infoOf(0);
+
+            await fix.nuggft.connect(accounts.charile).swapItem(0, info0.items[2], toEth('55'));
+
             await fix.nuggft.connect(accounts.charile).claimItem(9, info.items[0], 0, epoch.add(2));
 
             // await fix.xnugg.connect(accounts.dee).burn(toEth('41'));
