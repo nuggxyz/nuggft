@@ -1,6 +1,7 @@
 pragma solidity 0.8.4;
 
-import "hardhat/console.sol";
+import 'hardhat/console.sol';
+
 library ShiftLib {
     function unmask(uint256 input) internal pure returns (uint256 res) {
         assembly {
@@ -20,37 +21,6 @@ library ShiftLib {
         }
     }
 
-        // function fletcher16(address a) internal pure returns (uint16 res) {
-        // uint16 sum1 = 0;
-        // uint16 sum2 = 0;
-        // for (uint256 index = 0; index < data.length; index++) {
-        //     sum1 = (sum1 + uint8(data[index])) % 255;
-        //     sum2 = (sum2 + sum1) % 255;
-        // }
-        // res = (sum2 << 8) | sum1;
-        // }
-
-    // function caddress(address a) internal pure returns (uint112 res) {
-    //     assembly {
-    //         let sum1 := 0
-    //         let sum2 := 0
-    //         let tmp := a
-    //         for {
-    //             let index := 0
-    //         } lt(index, 20) {
-    //             index := add(index, 0x2)
-    //         } {
-    //             sum1 := mod(add(sum1, and(0xffff, tmp)), 0xffff)
-    //             sum2 := mod(add(sum1, sum2), 0xffff)
-    //             tmp := shr(0xf, tmp)
-    //         }
-    //         res := or(and(shr(48, a), 0xFFFFFFFFFFFFFFFFFFFF00000000), or(shl(8, sum2), sum1))
-    //     }
-    // }
-
-
-
-
     function account(uint256 input) internal pure returns (uint160 res) {
         assembly {
             res := input
@@ -58,7 +28,6 @@ library ShiftLib {
     }
 
     function account(uint256 input, uint160 update) internal pure returns (uint256 res) {
-
         assembly {
             input := and(input, 0xffffffffffffffffffffffff0000000000000000000000000000000000000000)
             res := or(input, update)
@@ -124,7 +93,7 @@ library ShiftLib {
 
 
 
-    function pushFirstEmpty(uint256 input, uint8 itemId) internal view returns (uint256 res, uint8 index) {
+    function pushFirstEmpty(uint256 input, uint16 itemId) internal view returns (uint256 res, uint8 index) {
         uint256[] memory _items = items(input);
         for (uint8 i = 0; i < _items.length; i++) {
             if (_items[i] == 0) {
@@ -133,23 +102,23 @@ library ShiftLib {
             }
         }
         console.logBytes32(bytes32(input));
+        console.logBytes2(bytes2(itemId));
 
-        require(index > 0, 'SL:PFM:0');
+        require(index > 0, 'SL:PFM:A');
 
         index--;
 
         res = pushItem(input, itemId, index);
 
         console.logBytes32(bytes32(res));
-
     }
 
-    function popFirstMatch(uint256 input, uint8 itemId)
+    function popFirstMatch(uint256 input, uint16 itemId)
         internal
         view
         returns (
             uint256 res,
-            uint8 popped,
+            uint16 popped,
             uint8 index
         )
     {
@@ -160,13 +129,12 @@ library ShiftLib {
                 break;
             }
         }
-                console.logBytes32(bytes32(input));
-                console.logBytes1(bytes1(itemId));
+        console.logBytes32(bytes32(input));
+        console.logBytes2(bytes2(itemId));
 
         require(index > 0, 'SL:PFM:0');
 
         index--;
-
 
         (res, popped) = popItem(input, index);
 
@@ -178,40 +146,41 @@ library ShiftLib {
     function items(uint256 input) internal pure returns (uint256[] memory res) {
         uint256 s = size(input);
         res = new uint256[](s);
-        input >>= 8;
+        input >>= 16;
         for (uint256 i = 0; i < s; i++) {
-            input >>= 8;
-            res[i] = input & 0xff;
+             res[i] = input & 0xffff;
+                      input >>= 16;
+
         }
     }
 
-    function itemsWithTokenId(uint256 input, uint256 tokenId) internal pure returns (uint256[] memory res) {
-        uint256 s = size(input);
-        res = new uint256[](s + 1);
-        res[0] = tokenId;
-        input >>= 8;
-        for (uint256 i = 1; i < res.length; i++) {
-            input >>= 8;
-            res[i] = input & 0xff;
-        }
-    }
+    // function itemsWithTokenId(uint256 input, uint256 tokenId) internal pure returns (uint256[] memory res) {
+    //     uint256 s = size(input);
+    //     res = new uint256[](s + 1);
+    //     res[0] = tokenId;
+    //     input >>= 8;
+    //     for (uint256 i = 0; i < s; i++) {
+    //         input >>= i == 0 ? 8 : 16;
+    //         res[i] = input & 0xffff;
+    //     }
+    // }
 
     function pushItem(
         uint256 input,
-        uint8 item,
+        uint16 item,
         uint8 at
     ) internal pure returns (uint256 res) {
         assembly {
-            let offset := add(16, mul(8, at))
-            res := and(input, not(shl(offset, 0xff)))
+            let offset := add(16, mul(16, at))
+            res := and(input, not(shl(offset, 0xffff)))
             res := or(input, shl(offset, item))
         }
     }
 
-    function popItem(uint256 input, uint8 at) internal pure returns (uint256 res, uint8 item) {
+    function popItem(uint256 input, uint8 at) internal pure returns (uint256 res, uint16 item) {
         assembly {
-            let offset := add(16, mul(8, at))
-            res := and(input, not(shl(offset, 0xff)))
+            let offset := add(16, mul(16, at))
+            res := and(input, not(shl(offset, 0xffff)))
             item := shr(offset, input)
         }
     }

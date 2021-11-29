@@ -22,6 +22,21 @@ contract NuggFT is NuggERC721, INuggFT {
 
     uint256 public immutable override genesis;
 
+    // protocol store for all items
+    // all tokens (el_state)
+    //
+
+    // for each nugg
+    // item
+    // swap
+    // item swap mapping
+
+    // struct Storage {
+    //     Item.Storage item;
+    //     Swap.Storage swap;
+    //     ItemSwap.Storage itemswap;
+    // }
+
     ItemLib.Storage private il_state;
 
     mapping(uint256 => SwapLib.Storage) internal sl_state;

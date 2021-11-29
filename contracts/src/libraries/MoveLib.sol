@@ -130,7 +130,7 @@ library MoveLib {
         uint160 sendingTokenId,
         address payable xnugg
     ) internal {
-        require(itemId < 256, 'ML:CI:0');
+        require(itemId < 0xffff, 'ML:CI:0');
 
         require(e.ownerOf(sendingTokenId) == msg.sender, 'AUC:TT:3');
 
@@ -281,15 +281,13 @@ library MoveLib {
         uint160 buyingTokenId
     ) internal {
         require(e.ownerOf(buyingTokenId) == msg.sender, 'AUC:TT:3');
-        require(itemid < 256, 'ML:CI:0');
+        require(itemid < 0xffff, 'ML:CI:0');
 
         uint256 activeEpoch = genesis.activeEpoch();
 
         (uint256 swapData, uint256 offerData) = s.loadStorage(buyingTokenId, endingEpoch);
 
         delete s.offers[endingEpoch][buyingTokenId];
-
-        console.logBytes32(bytes32(swapData));
 
         if (SwapLib.checkClaimer(buyingTokenId, swapData, offerData, activeEpoch)) {
             delete s.data;
@@ -333,7 +331,7 @@ library MoveLib {
     ) internal {
         require(e.ownerOf(sellingTokenId) == msg.sender, 'AUC:TT:3');
 
-        require(itemid < 256, 'ML:SI:0');
+        require(itemid < 0xffff, 'ML:SI:0');
 
         (uint256 swapData, ) = s.loadStorage(sellingTokenId);
 

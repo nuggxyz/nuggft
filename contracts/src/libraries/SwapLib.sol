@@ -89,7 +89,7 @@ library SwapLib {
     // }
 
     function itemTokenId(uint256 itemid, uint256 tokenid) internal pure returns (uint256 res) {
-        res = (tokenid << 8) | itemid;
+        res = (tokenid << 16) | itemid;
     }
 
     function tokenIdToAddress(uint256 tokenid) internal pure returns (address res) {
