@@ -5,7 +5,7 @@ import { NamedAccounts } from '../hardhat.config';
 import { XNUGG as xNUGG } from '../typechain/XNUGG';
 import { NuggFT } from '../typechain/NuggFT.d';
 import { fromEth, toEth } from '../tests/hardhat/lib/shared/conversion';
-import { NuggSwap } from '../typechain';
+// import { NuggSwap } from '../typechain';
 
 const deployment = async (hre: HardhatRuntimeEnvironment) => {
     const chainID = await hre.getChainId();
@@ -43,6 +43,13 @@ const deployment = async (hre: HardhatRuntimeEnvironment) => {
             // deterministicDeployment: salts[0],
         });
 
+        const nuggftDeployement = await hre.deployments.deploy('NuggFT', {
+            from: eoaDeployer,
+            log: true,
+            args: [xnuggDeployement.address],
+            // deterministicDeployment: salts[0],
+        });
+
         // const relayDeployment = await hre.deployments.deploy('XNUGGRelay', {
         //     from: eoaDeployer,
         //     log: true,
@@ -71,35 +78,29 @@ const deployment = async (hre: HardhatRuntimeEnvironment) => {
         //     // deterministicDeployment: salts[6],
         // });
 
-        const nuggswapDeployment = await hre.deployments.deploy('NuggSwap', {
-            from: eoaDeployer,
-            log: true,
-            args: [xnuggDeployement.address],
-            // deterministicDeployment: salts[4],
-        });
+        // const nuggswapDeployment = await hre.deployments.deploy('NuggSwap', {
+        //     from: eoaDeployer,
+        //     log: true,
+        //     args: [xnuggDeployement.address],
+        //     // deterministicDeployment: salts[4],
+        // });
 
-        const nuggFTDeployement = await hre.deployments.deploy('NuggFT', {
-            from: eoaDeployer,
-            log: true,
-            args: [
-                xnuggDeployement.address,
-                nuggswapDeployment.address,
-                '0xeBdE9e7F12449e043502227b9D7EBDe55A809925',
-                '0x2D9b450E87253EA02072531A1422dec3cEBB0f6c',
-            ],
-            // deterministicDeployment: salts[3],
-        });
+        // const nuggftDeployement = await hre.deployments.deploy('NuggFT', {
+        //     from: eoaDeployer,
+        //     log: true,
+        //     args: [xnuggDeployement.address],
+        // });
 
-        hre.deployments.log('NuggFT Deployment Complete at address: ', nuggFTDeployement.address);
+        hre.deployments.log('NuggFT Deployment Complete at address: ', nuggftDeployement.address);
         hre.deployments.log('xNUGG Deployment Complete at address: ', xnuggDeployement.address);
-        hre.deployments.log('NuggSwap Deployment Complete at address: ', nuggswapDeployment.address);
+        // hre.deployments.log('NuggSwap Deployment Complete at address: ', nuggswapDeployment.address);
         // hre.deployments.log('DotNugg Deployment Complete at address: ', dotnuggDeployment.address);
         // hre.deployments.log('NuggIn Deployment Complete at address: ', nugginDeployment.address);
         // hre.deployments.log('NuggIn Deployment Complete at address: ', svgnugginDeployment.address);
 
         // const father = await hre.ethers.getContractAt<NuggFather>('NuggFather', fatherDeployment.address);
         //
-        const nuggft = await hre.ethers.getContractAt<NuggFT>('NuggFT', nuggFTDeployement.address);
+        const nuggft = await hre.ethers.getContractAt<NuggFT>('NuggFT', nuggftDeployement.address);
         //
 
         const xnugg = await hre.ethers.getContractAt<xNUGG>('xNUGG', xnuggDeployement.address);
@@ -111,7 +112,7 @@ const deployment = async (hre: HardhatRuntimeEnvironment) => {
 
         //
 
-        const nuggswap = await hre.ethers.getContractAt<NuggSwap>('NuggSwap', nuggswapDeployment.address);
+        // const nuggswap = await hre.ethers.getContractAt<NuggSwap>('NuggSwap', nuggswapDeployment.address);
         //
 
         // const seller = await hre.ethers.getContractAt<Nugg>('Nugg', sellerDeployment.address);
@@ -120,36 +121,25 @@ const deployment = async (hre: HardhatRuntimeEnvironment) => {
         hre.deployments.log('Dev depositing value into xNUGG... ');
         hre.deployments.log('Total supply before: ', fromEth(await xnugg.totalSupply()));
 
-        const tx0 = await xnugg.connect(await hre.ethers.getNamedSigner('dev')).deposit({ value: toEth('.001') });
-        hre.deployments.log('tx sent... waiting to be mined... ', tx0.hash);
-        await tx0.wait();
-        hre.deployments.log('Total supply after: ', fromEth(await xnugg.totalSupply()));
-        hre.deployments.log('Dev balance after:', fromEth(await xnugg.balanceOf(accounts.dev)));
+        // const tx0 = await xnugg.connect(await hre.ethers.getNamedSigner('dev')).mint({ value: toEth('.001') });
+        // hre.deployments.log('tx sent... waiting to be mined... ', tx0.hash);
+        // await tx0.wait();
+        // hre.deployments.log('Total supply after: ', fromEth(await xnugg.totalSupply()));
+        // hre.deployments.log('Dev balance after:', fromEth(await xnugg.balanceOf(accounts.dev)));
 
-        hre.deployments.log('Dee placing a bid... ');
+        // // hre.deployments.log('Dee placing a bid... ');
 
-        const tx = await nuggswap.connect(await hre.ethers.getNamedSigner('dee')).submitOffer(nuggft.address, 0, { value: toEth('.002') });
+        // const tx = await nuggft.connect(await hre.ethers.getNamedSigner('dee')).delegate(0, { value: toEth('.002') });
+        // hre.deployments.log('tx sent... waiting to be mined... ', tx.hash);
+        // await tx.wait();
+        // hre.deployments.log('Total supply after: ', fromEth(await xnugg.totalSupply()));
+        // hre.deployments.log('Dev balance after:  ', fromEth(await xnugg.balanceOf(accounts.dev)));
+
+        // }
+
+        const tx = await nuggft.connect(await hre.ethers.getNamedSigner('dee')).claim(0, 0);
         hre.deployments.log('tx sent... waiting to be mined... ', tx.hash);
         await tx.wait();
-        hre.deployments.log('Total supply after: ', fromEth(await xnugg.totalSupply()));
-        hre.deployments.log('Dev balance after:  ', fromEth(await xnugg.balanceOf(accounts.dev)));
-
-        // // if (res) {
-        // var start = new Date();
-        // var hrstart = process.hrtime();
-
-        // hre.deployments.log('Getting pending token uri...');
-
-        // const uri = await nuggft['tokenURI(uint256)'](0);
-        // if (uri) {
-        //     var end = new Date().getTime() - start.getTime(),
-        //         hrend = process.hrtime(hrstart);
-
-        //     console.info('Execution time: %dms', end);
-        //     console.info('Execution time (hr): %ds %dms', hrend[0], hrend[1] / 1000000);
-        //     hre.deployments.log(uri);
-        //     // hre.deployments.log(DecodeDotNuggBase64ToPngBase64(DecodeBase64ToJSON(uri).image, 10));
-        // }
     }
 };
 

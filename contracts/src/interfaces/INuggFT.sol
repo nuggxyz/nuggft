@@ -25,6 +25,8 @@ interface INuggFT {
 
     event SwapItem(uint256 sellingTokenId, uint256 itemId, uint256 eth);
 
+    event OpenSlot(uint256 tokenId);
+
     event Genesis();
 
     function swapItem(
