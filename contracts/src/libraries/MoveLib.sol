@@ -166,6 +166,8 @@ library MoveLib {
 
         s.offers[_epoch][swapData.account()] = swapData;
 
+        console.log('_epoch', _epoch);
+
         s.data = newSwapData;
 
         xnugg.sendValue(newSwapData.eth() - swapData.eth() + dust);
@@ -276,26 +278,28 @@ library MoveLib {
         uint256 sellingTokenId,
         uint256 itemid,
         uint256 endingEpoch,
-        uint160 sendingTokenId
+        uint160 buyingTokenId
     ) internal {
-        require(e.ownerOf(sendingTokenId) == msg.sender, 'AUC:TT:3');
+        require(e.ownerOf(buyingTokenId) == msg.sender, 'AUC:TT:3');
         require(itemid < 256, 'ML:CI:0');
 
         uint256 activeEpoch = genesis.activeEpoch();
 
-        (uint256 swapData, uint256 offerData) = s.loadStorage(sendingTokenId, endingEpoch);
+        (uint256 swapData, uint256 offerData) = s.loadStorage(buyingTokenId, endingEpoch);
 
-        delete s.offers[endingEpoch][sendingTokenId];
+        delete s.offers[endingEpoch][buyingTokenId];
 
-        if (SwapLib.checkClaimer(sendingTokenId, swapData, offerData, activeEpoch)) {
+        console.logBytes32(bytes32(swapData));
+
+        if (SwapLib.checkClaimer(buyingTokenId, swapData, offerData, activeEpoch)) {
             delete s.data;
 
-            i.push(sendingTokenId, itemid);
+            i.push(buyingTokenId, itemid);
         } else {
             payable(msg.sender).sendValue(offerData.eth());
         }
 
-        emit ClaimItem(sellingTokenId, itemid, endingEpoch, sendingTokenId);
+        emit ClaimItem(sellingTokenId, itemid, endingEpoch, buyingTokenId);
     }
 
     function swap(

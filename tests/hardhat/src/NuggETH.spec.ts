@@ -142,6 +142,7 @@ describe('uint tests', async function () {
 
             await Mining.advanceBlockTo(350);
             await fix.nuggft.connect(accounts.frank).claim(9, 9);
+            // const epoch = await fix.nuggft.connect(accounts.charile).epoch();
 
             // await fix.nuggft.connect(accounts.frank).claim( 9, 9);
             await fix.nuggft.connect(accounts.charile).claim(0, 3);
@@ -149,7 +150,15 @@ describe('uint tests', async function () {
             const info = await fix.nuggft.infoOf(9);
             console.log(info.items[0].toString(), accounts.dee.address);
             await fix.nuggft.connect(accounts.frank).swapItem(9, info.items[0], toEth('14'));
+            const epoch = await fix.nuggft.connect(accounts.charile).epoch();
+
             await fix.nuggft.connect(accounts.charile).delegateItem(9, info.items[0], 0, { value: toEth('43') });
+
+            await Mining.advanceBlockTo(450);
+
+            console.log('epoch', epoch.toString());
+
+            await fix.nuggft.connect(accounts.charile).claimItem(9, info.items[0], 0, epoch.add(2));
 
             // await fix.xnugg.connect(accounts.dee).burn(toEth('41'));
 

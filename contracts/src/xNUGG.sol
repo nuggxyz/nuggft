@@ -23,13 +23,13 @@ contract xNUGG is IxNUGG, ERC20 {
     uint256 public immutable override genesis;
 
     constructor() ERC20('Staked NUGG', 'xNUGG') {
+        emit Genesis();
+
         uint256 shares = sl_state.start(msg.sender);
 
         emit Transfer(address(0), msg.sender, shares);
 
         genesis = block.number;
-
-        emit Genesis();
     }
 
     receive() external payable {

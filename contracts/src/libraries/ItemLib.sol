@@ -7,6 +7,24 @@ library ItemLib {
     event PreMint(uint256 tokenId, uint256[] items);
     event PopItem(uint256 tokenId, uint256 itemId);
     event PushItem(uint256 tokenId, uint256 itemId);
+    event OpenSlot(uint256 tokenId);
+
+    // /**
+    //  * @dev Emitted when `value` tokens of token type `id` are transferred from `from` to `to` by `operator`.
+    //  */
+    // event TransferSingle(address indexed operator, address indexed from, address indexed to, uint256 id, uint256 value);
+
+    // /**
+    //  * @dev Equivalent to multiple {TransferSingle} events, where `operator`, `from` and `to` are the same for all
+    //  * transfers.
+    //  */
+    // event TransferBatch(
+    //     address indexed operator,
+    //     address indexed from,
+    //     address indexed to,
+    //     uint256[] ids,
+    //     uint256[] values
+    // );
 
     using ShiftLib for uint256;
 
@@ -45,6 +63,13 @@ library ItemLib {
         uint256[] memory items = mint(s, tokenId, itemData);
 
         emit PreMint(tokenId, items);
+
+        uint256[] memory amounts = new uint256[](items.length);
+        for (uint256 i = 0; i < amounts.length; i++) {
+            amounts[i] = 1;
+        }
+
+        // emit TransferBatch(address(this), address(0), msg.sender, items, amounts);
     }
 
     function mint(
@@ -75,6 +100,9 @@ library ItemLib {
         s.tokenData[tokenId] = data;
 
         s.protocolItems[itemId]++;
+
+        emit PushItem(tokenId, itemId);
+        // emit TransferSingle(address(this), msg.sender, address(this), itemId, 1);
     }
 
     function push(
@@ -92,5 +120,19 @@ library ItemLib {
         (data, ) = data.pushFirstEmpty(uint8(itemId));
 
         s.tokenData[tokenId] = data;
+
+        emit PushItem(tokenId, itemId);
+        // emit TransferSingle(address(this), address(this), msg.sender, itemId, 1);
+    }
+
+    function open(Storage storage s, uint256 tokenId) internal {
+        uint256 data = s.tokenData[tokenId];
+        require(data != 0, '1155:STF:0');
+
+        data = data.size(data.size() + 1);
+
+        s.tokenData[tokenId] = data;
+
+        emit OpenSlot(tokenId);
     }
 }
