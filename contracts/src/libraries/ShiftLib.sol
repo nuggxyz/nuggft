@@ -91,8 +91,6 @@ library ShiftLib {
         }
     }
 
-
-
     function pushFirstEmpty(uint256 input, uint16 itemId) internal view returns (uint256 res, uint8 index) {
         uint256[] memory _items = items(input);
         for (uint8 i = 0; i < _items.length; i++) {
@@ -148,9 +146,8 @@ library ShiftLib {
         res = new uint256[](s);
         input >>= 16;
         for (uint256 i = 0; i < s; i++) {
-             res[i] = input & 0xffff;
-                      input >>= 16;
-
+            res[i] = input & 0xffff;
+            input >>= 16;
         }
     }
 
@@ -208,6 +205,30 @@ library ShiftLib {
         assembly {
             input := and(input, 0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff00ff)
             res := or(shl(0x8, update), input)
+        }
+    }
+
+    function item1(uint256 input) internal pure returns (uint16 res) {
+        assembly {
+            res := shr(mul(0x16, 1), input)
+        }
+    }
+
+    function item2(uint256 input) internal pure returns (uint16 res) {
+        assembly {
+            res := shr(mul(0x16, 2), input)
+        }
+    }
+
+    function item3(uint256 input) internal pure returns (uint16 res) {
+        assembly {
+            res := shr(mul(0x16, 3), input)
+        }
+    }
+
+    function item4(uint256 input) internal pure returns (uint16 res) {
+        assembly {
+            res := shr(mul(0x16, 4), input)
         }
     }
 }
