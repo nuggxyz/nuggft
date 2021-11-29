@@ -37,6 +37,10 @@ interface INuggFT {
 
     function xnugg() external view returns (address payable);
 
+    function dotnugg() external view returns (address);
+
+    function defaultResolver() external view returns (address);
+
     function genesis() external view returns (uint256 res);
 
     function epoch() external view returns (uint256 res);

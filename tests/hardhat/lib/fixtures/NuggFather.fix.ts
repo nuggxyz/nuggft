@@ -50,7 +50,7 @@ export const NuggFatherFix: Fixture<NuggFatherFixture> = async function (
     const nuggft = await deployContractWithSalt<NuggFT__factory>({
         factory: 'NuggFT',
         from: eoaDeployer,
-        args: [xnugg.address],
+        args: [xnugg.address, xnugg.address, xnugg.address],
     });
 
     hre.tracer.nameTags[nuggft.address] = `NuggFT`;

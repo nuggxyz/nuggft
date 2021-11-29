@@ -273,7 +273,7 @@ describe('uint tests', async function () {
             );
             console.log('(real) owners:', fromEth(ETH_TRILLION));
 
-            console.log('tokenURI', await fix.nuggft['tokenURI(uint256)'](0));
+            // console.log('tokenURI', await fix.nuggft['tokenURI(uint256)'](0));
 
             // await fix.xnugg.connect(accounts.dee).approve(fix.minter.address, toEth('40'));
 

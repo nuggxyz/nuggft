@@ -10,17 +10,25 @@ import './libraries/SwapLib.sol';
 import './libraries/ERC721Lib.sol';
 import './libraries/ItemLib.sol';
 import './libraries/MoveLib.sol';
+import './libraries/DotNuggLib.sol';
+
 import './base/NuggERC721.sol';
 
 contract NuggFT is NuggERC721, INuggFT {
     using EpochLib for uint256;
     using ItemLib for ItemLib.Storage;
     using SwapLib for SwapLib.Storage;
+    using DotNuggLib for DotNuggLib.Storage;
+
     using ShiftLib for uint256;
 
     address payable public immutable override xnugg;
 
     uint256 public immutable override genesis;
+
+    address public immutable override defaultResolver;
+
+    address public immutable override dotnugg;
 
     // protocol store for all items
     // all tokens (el_state)
@@ -39,11 +47,20 @@ contract NuggFT is NuggERC721, INuggFT {
 
     ItemLib.Storage private il_state;
 
+    DotNuggLib.Storage private dn_state;
+
     mapping(uint256 => SwapLib.Storage) internal sl_state;
     mapping(uint256 => mapping(uint256 => SwapLib.Storage)) internal sl_state_items;
 
-    constructor(address _xnugg) NuggERC721('NUGGFT', 'Nugg Fungible Token') {
+    constructor(
+        address _xnugg,
+        address _dotnugg,
+        address _defaultResolver
+    ) NuggERC721('NUGGFT', 'Nugg Fungible Token') {
         xnugg = payable(_xnugg);
+        dotnugg = _dotnugg;
+        defaultResolver = _defaultResolver;
+
         genesis = block.number;
 
         emit Genesis();
@@ -199,5 +216,13 @@ contract NuggFT is NuggERC721, INuggFT {
         return il_state.infoOf(tokenId);
     }
 
-    function tokenURI(uint256 tokenId) public view override returns (string memory res) {}
+    function tokenURI(uint256 tokenId) public view override returns (string memory res) {
+        require(_exists(tokenId) || tokenId == genesis.activeEpoch(), 'NFT:NSM:0');
+        res = dn_state.generateTokenURIDefaultResolver(il_state, dotnugg, tokenId, defaultResolver);
+    }
+
+    function tokenURI(uint256 tokenId, address resolver) public view returns (string memory res) {
+        require(_exists(tokenId) || tokenId == genesis.activeEpoch(), 'NFT:NSM:0');
+        res = dn_state.generateTokenURI(il_state, dotnugg, tokenId, resolver);
+    }
 }
