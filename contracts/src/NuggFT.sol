@@ -216,6 +216,18 @@ contract NuggFT is NuggERC721, INuggFT {
         return il_state.infoOf(tokenId);
     }
 
+    function addItemsWithShifting(uint8 itemType, bytes32[][] calldata data) public {
+        dn_state.addItems(itemType, data);
+    }
+
+    function addItemsNormal(uint8 itemType, bytes[] calldata data) public {
+        dn_state.addItemsOld(itemType, data);
+    }
+
+    function loadItem(uint8 itemType, uint16 id) public view returns (bytes32[] memory res) {
+        res = dn_state.loadItem(itemType, id);
+    }
+
     function tokenURI(uint256 tokenId) public view override returns (string memory res) {
         require(_exists(tokenId) || tokenId == genesis.activeEpoch(), 'NFT:NSM:0');
         res = dn_state.generateTokenURIDefaultResolver(il_state, dotnugg, tokenId, defaultResolver);

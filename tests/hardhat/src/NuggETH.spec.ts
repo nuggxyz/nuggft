@@ -6,10 +6,12 @@ import { NamedAccounts } from '../../../hardhat.config';
 
 import { Mining } from '../lib/shared/mining';
 import { prepareAccounts } from '../lib/shared';
-import { ETH_ONE, toEth, BINARY_128, ETH_TRILLION, fromEth } from '../lib/shared/conversion';
+import { ETH_ONE, toEth, BINARY_128, ETH_TRILLION, fromEth, randomBN, randomBN2 } from '../lib/shared/conversion';
 import { NuggFatherFix, NuggFatherFixture } from '../lib/fixtures/NuggFather.fix';
 import { getHRE } from '../lib/shared/deployment';
 import { Address } from 'ethereumjs-util';
+import { keccak256 } from '@ethersproject/keccak256';
+import { expect } from 'chai';
 const createFixtureLoader = waffle.createFixtureLoader;
 const {
     constants: { MaxUint256 },
@@ -272,6 +274,98 @@ describe('uint tests', async function () {
                 ),
             );
             console.log('(real) owners:', fromEth(ETH_TRILLION));
+            let item0 = [];
+            let itemOld = [];
+
+            for (let i = 0; i < 50; i++) {
+                let tmp = [];
+                for (let j = 0; j < 4; j++) {
+                    tmp.push(ethers.utils.hexZeroPad(ethers.utils.randomBytes(32), 32));
+                }
+                item0.push(tmp);
+                itemOld.push(ethers.utils.hexConcat(tmp));
+            }
+            // 0xef6ea056b47f7079d4cac7f6306464a20c95e8842084e5082d929b8b3593b00;
+            console.log(item0[0]);
+            // let item0 = Array(50).fill(Array(4).fill(randomBN2()));
+
+            await fix.nuggft.connect(accounts.charile).addItemsWithShifting(4, item0);
+            await fix.nuggft.connect(accounts.charile).addItemsNormal(4, itemOld);
+
+            const getItem = await fix.nuggft.loadItem(4, 45);
+            console.log(getItem[3]);
+            console.log(item0[45][3]);
+            console.log('----');
+            console.log((await fix.nuggft.loadItem(4, 22))[2]);
+            console.log(item0[22][2]);
+
+            for (var i = 0; i < 50; i++) {
+                for (var j = 0; j < 4; j++) {
+                    expect((await fix.nuggft.loadItem(4, i))[j]).to.be.equal(item0[i][j]);
+                }
+                // item0.push(tmp);
+            }
+            // await fix.nuggft
+            //     .connect(accounts.charile)
+            //     .addItems(1, Array(200).fill('0x444f544e554747c7cc00000e002c00f19325e500eb8a124e04444444444444'));
+            // await fix.nuggft
+            //     .connect(accounts.charile)
+            //     .addItems(1, Array(200).fill('0x444f544e554747c7cc00000e002c00f19325e500eb8a124e04444444444444'));
+            // await fix.nuggft
+            //     .connect(accounts.charile)
+            //     .addItems(1, Array(200).fill('0x444f544e554747c7cc00000e002c00f19325e500eb8a124e04444444444444'));
+
+            // await fix.nuggft
+            //     .connect(accounts.charile)
+            //     .addItems(
+            //         1,
+            //         Array(50).fill(
+
+            //          '0x444f544e5547478ca8030010001f004802f85c0f9902fb1a069902ffdb3c990a04
+            //             0401010406000001030300000f01100310021020021020011020302100203021
+            //             001020021020010f050601010509000001050500000f01100000776677778866',
+            //         ),
+            //     );
+
+            // await fix.nuggft
+            //     .connect(accounts.charile)
+            //     .addItems(
+            //         1,
+            //         Array(50).fill(
+            //             '0x444f544e5547478ca8030010001f004802f85c0f9902fb1a069902ffdb3c990a040401010406000001030300000f01100310021020021020011020302100203021001020021020010f050601010509000001050500000f0110061004102010041020100210203023001020302300102010041020100410061003',
+            //         ),
+            //     );
+
+            // await fix.nuggft
+            //     .connect(accounts.charile)
+            //     .addItems(
+            //         1,
+            //         Array(50).fill(
+            //             '0x444f544e5547478ca8030010001f004802f85c0f9902fb1a069902ffdb3c990a040401010406000001030300000f01100310021020021020011020302100203021001020021020010f050601010509000001050500000f0110061004102010041020100210203023001020302300102010041020100410061003',
+            //         ),
+            //     );
+
+            // await fix.nuggft
+            //     .connect(accounts.charile)
+            //     .addItems(
+            //         1,
+            //         Array(50).fill(
+            //             '0x444f544e5547478ca8030010001f004802f85c0f9902fb1a069902ffdb3c990a040401010406000001030300000f01100310021020021020011020302100203021001020021020010f050601010509000001050500000f0110061004102010041020100210203023001020302300102010041020100410061003',
+            //         ),
+            //     );
+            // await fix.nuggft
+            //     .connect(accounts.charile)
+            //     .addItems(
+            //         1,
+            //         Array(1).fill(
+            //             '0x444f544e554747c7cc00000e002c00f19325e500eb8a124e04444444444444444f544e554747c7cc00000e002c00f19325e500eb8a124e04444444444444444f544e554747c7cc00000e002c00f19325e500eb8a124e04444444444444444f544e554747c7cc00000e002c00f19325e500eb8a124e04444444444444444f544e554747c7cc00000e002c00f19325e500eb8a124e04444444444444444f544e554747c7cc00000e002c00f19325e500eb8a124e04444444444444444f544e554747c7cc00000e002c00f19325e500eb8a124e04444444444444444f544e554747c7cc00000e002c00f19325e500eb8a124e04444444444444',
+            //         ),
+            //     );
+            // await fix.nuggft
+            //     .connect(accounts.charile)
+            //     .addItems(1, Array(8).fill('0x444f544e554747c7cc00000e002c00f19325e500eb8a124e04444444444444'));
+
+            // '0x444f544e554747c7cc00000e002c00f19325e500eb8a12e500f9b042e500c96619e500a84b1ee500f49f35e52121101000001720fe20ff20fd32fa11fc40f912fb00f80f0f0f0f0f0f0f0f0f0f0e5d0f005130633322520f5030653224500f50',
 
             // console.log('tokenURI', await fix.nuggft['tokenURI(uint256)'](0));
 

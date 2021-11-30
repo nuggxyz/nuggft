@@ -1,7 +1,7 @@
 interface IDotNugg {
     function nuggify(
         bytes memory _collection,
-        bytes[] memory _items,
+        bytes32[][] memory _items,
         address _resolver,
         string memory name,
         string memory description,
