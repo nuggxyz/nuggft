@@ -208,27 +208,81 @@ library ShiftLib {
         }
     }
 
+    function item0(uint256 input, uint16 update) internal pure returns (uint256 res) {
+        assembly {
+            input := and(input, 0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff0000)
+            res := or(shl(mul(16, 0), update), input)
+        }
+    }
+
+    function item0(uint256 input) internal pure returns (uint16 res) {
+        assembly {
+            res := shr(mul(16, 0), input)
+        }
+    }
+
+    function item1(uint256 input, uint16 update) internal pure returns (uint256 res) {
+        assembly {
+            input := and(input, 0xffffffffffffffffffffffffffffffffffffffffffffffffffffffff0000ffff)
+            res := or(shl(mul(16, 1), update), input)
+        }
+    }
+
     function item1(uint256 input) internal pure returns (uint16 res) {
         assembly {
-            res := shr(mul(0x16, 1), input)
+            res := shr(mul(16, 1), input)
+        }
+    }
+
+    function item2(uint256 input, uint16 update) internal pure returns (uint256 res) {
+        assembly {
+            input := and(input, 0xffffffffffffffffffffffffffffffffffffffffffffffffffff0000ffffffff)
+            res := or(shl(mul(16, 2), update), input)
         }
     }
 
     function item2(uint256 input) internal pure returns (uint16 res) {
         assembly {
-            res := shr(mul(0x16, 2), input)
+            res := shr(mul(16, 2), input)
+        }
+    }
+
+    function item3(uint256 input, uint16 update) internal pure returns (uint256 res) {
+        assembly {
+            input := and(input, 0xffffffffffffffffffffffffffffffffffffffffffffffff0000ffffffffffff)
+            res := or(shl(mul(16, 3), update), input)
         }
     }
 
     function item3(uint256 input) internal pure returns (uint16 res) {
         assembly {
-            res := shr(mul(0x16, 3), input)
+            res := shr(mul(16, 3), input)
+        }
+    }
+
+    function item4(uint256 input, uint16 update) internal pure returns (uint256 res) {
+        assembly {
+            input := and(input, 0xffffffffffffffffffffffffffffffffffffffffffff0000ffffffffffffffff)
+            res := or(shl(mul(16, 4), update), input)
         }
     }
 
     function item4(uint256 input) internal pure returns (uint16 res) {
         assembly {
-            res := shr(mul(0x16, 4), input)
+            res := shr(mul(16, 4), input)
+        }
+    }
+
+    function item(uint256 input, uint8 id) internal pure returns (uint16 res) {
+        assembly {
+            res := shr(mul(16, id), input)
+        }
+    }
+
+    function item(uint256 input, uint16 update, uint8 id) internal pure returns (uint256 res) {
+        assembly {
+            input := and(input,not(shl(mul(16, id), 0xffff)))
+            res := or(shl(mul(16, id), update), input)
         }
     }
 }
