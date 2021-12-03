@@ -50,6 +50,8 @@ const deployment = async (hre: HardhatRuntimeEnvironment) => {
             // deterministicDeployment: salts[0],
         });
 
+        const inputData = hre.dotnugg.map((x) => x.hex);
+
         // const relayDeployment = await hre.deployments.deploy('XNUGGRelay', {
         //     from: eoaDeployer,
         //     log: true,

@@ -32,7 +32,7 @@ describe('uint tests', async function () {
         await refresh();
         const hre = getHRE();
 
-        console.log(hre.middleware);
+        console.log(hre.dotnugg);
     });
 
     describe('internal', async () => {
@@ -289,8 +289,8 @@ describe('uint tests', async function () {
             console.log(item0[0]);
             // let item0 = Array(50).fill(Array(4).fill(randomBN2()));
 
-            await fix.nuggft.connect(accounts.charile).addItemsWithShifting(4, item0);
-            await fix.nuggft.connect(accounts.charile).addItemsNormal(4, itemOld);
+            // await fix.nuggft.connect(accounts.charile).addItemsWithShifting(4, item0);
+            // await fix.nuggft.connect(accounts.charile).addItemsNormal(4, itemOld);
 
             const getItem = await fix.nuggft.loadItem(4, 45);
             console.log(getItem[3]);
@@ -300,9 +300,9 @@ describe('uint tests', async function () {
             console.log(item0[22][2]);
 
             for (var i = 0; i < 50; i++) {
-                for (var j = 0; j < 4; j++) {
-                    expect((await fix.nuggft.loadItem(4, i))[j]).to.be.equal(item0[i][j]);
-                }
+                // for (var j = 0; j < 4; j++) {
+                expect(await fix.nuggft.loadItem(4, i)).to.be.equal(ethers.utils.hexConcat(item0[i]));
+                // }
                 // item0.push(tmp);
             }
             // await fix.nuggft

@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity 0.8.4;
+pragma solidity 0.8.10;
 
 import './interfaces/INuggFT.sol';
 
@@ -100,11 +100,11 @@ contract NuggFT is NuggERC721, INuggFT {
     }
 
     function delegate(uint256 tokenid) external payable override {
-        MoveLib.delegate(sl_state[tokenid], il_state, genesis, tokenid, xnugg);
+        MoveLib.delegate(sl_state[tokenid], il_state, dn_state, genesis, tokenid, xnugg);
     }
 
     function mint(uint256 tokenid) external payable override {
-        MoveLib.mint(sl_state[tokenid], il_state, genesis, tokenid, xnugg);
+        MoveLib.mint(sl_state[tokenid], il_state, dn_state, genesis, tokenid, xnugg);
     }
 
     function delegateItem(
@@ -216,20 +216,20 @@ contract NuggFT is NuggERC721, INuggFT {
         return il_state.infoOf(tokenId);
     }
 
-    function addItemsWithShifting(uint8 itemType, bytes32[][] calldata data) public {
-        dn_state.addItems(itemType, data);
-    }
+    // function addItemsWithShifting(uint8 itemType, bytes32[][] calldata data) public {
+    //     dn_state.addItems(itemType, data);
+    // }
 
-    function addItemsNormal(uint8 itemType, bytes[] calldata data) public {
-        dn_state.addItemsOld(itemType, data);
-    }
+    // function addItemsNormal(uint8 itemType, bytes[] calldata data) public {
+    //     dn_state.addItemsOld(itemType, data);
+    // }
 
-    function loadItem(uint8 itemType, uint16 id) public view returns (bytes32[] memory res) {
+    function loadItem(uint8 itemType, uint16 id) public view returns (uint256[] memory res) {
         res = dn_state.loadItem(itemType, id);
     }
 
     function tokenURI(uint256 tokenId) public view override returns (string memory res) {
-        require(_exists(tokenId) || tokenId == genesis.activeEpoch(), 'NFT:NSM:0');
+        require(_exists(tokenId) || tokenId == genesis.activeEpoch(), 'NFT:NTM:0');
         res = dn_state.generateTokenURIDefaultResolver(il_state, dotnugg, tokenId, defaultResolver);
     }
 

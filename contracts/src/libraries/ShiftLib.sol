@@ -1,6 +1,5 @@
-pragma solidity 0.8.4;
+pragma solidity 0.8.10;
 
-import 'hardhat/console.sol';
 
 library ShiftLib {
     function unmask(uint256 input) internal pure returns (uint256 res) {
@@ -91,7 +90,7 @@ library ShiftLib {
         }
     }
 
-    function pushFirstEmpty(uint256 input, uint16 itemId) internal view returns (uint256 res, uint8 index) {
+    function pushFirstEmpty(uint256 input, uint16 itemId) internal pure returns (uint256 res, uint8 index) {
         uint256[] memory _items = items(input);
         for (uint8 i = 0; i < _items.length; i++) {
             if (_items[i] == 0) {
@@ -99,8 +98,6 @@ library ShiftLib {
                 break;
             }
         }
-        console.logBytes32(bytes32(input));
-        console.logBytes2(bytes2(itemId));
 
         require(index > 0, 'SL:PFM:A');
 
@@ -108,12 +105,11 @@ library ShiftLib {
 
         res = pushItem(input, itemId, index);
 
-        console.logBytes32(bytes32(res));
     }
 
     function popFirstMatch(uint256 input, uint16 itemId)
         internal
-        view
+        pure
         returns (
             uint256 res,
             uint16 popped,
@@ -127,8 +123,6 @@ library ShiftLib {
                 break;
             }
         }
-        console.logBytes32(bytes32(input));
-        console.logBytes2(bytes2(itemId));
 
         require(index > 0, 'SL:PFM:0');
 
@@ -136,7 +130,6 @@ library ShiftLib {
 
         (res, popped) = popItem(input, index);
 
-        console.logBytes32(bytes32(res));
 
         require(popped == itemId, 'SL:PFM:1');
     }
@@ -164,21 +157,21 @@ library ShiftLib {
 
     function pushItem(
         uint256 input,
-        uint16 item,
+        uint16 itm,
         uint8 at
     ) internal pure returns (uint256 res) {
         assembly {
             let offset := add(16, mul(16, at))
             res := and(input, not(shl(offset, 0xffff)))
-            res := or(input, shl(offset, item))
+            res := or(input, shl(offset, itm))
         }
     }
 
-    function popItem(uint256 input, uint8 at) internal pure returns (uint256 res, uint16 item) {
+    function popItem(uint256 input, uint8 at) internal pure returns (uint256 res, uint16 itm) {
         assembly {
             let offset := add(16, mul(16, at))
             res := and(input, not(shl(offset, 0xffff)))
-            item := shr(offset, input)
+            itm := shr(offset, input)
         }
     }
 

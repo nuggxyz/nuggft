@@ -1,4 +1,4 @@
-pragma solidity 0.8.4;
+pragma solidity 0.8.10;
 import '@openzeppelin/contracts/token/ERC1155/IERC1155.sol';
 
 import '@openzeppelin/contracts/token/ERC721/IERC721.sol';
@@ -43,6 +43,7 @@ library MoveLib {
         SwapLib.Storage storage s,
         // ERC721Lib.Storage storage e,
         ItemLib.Storage storage i,
+        DotNuggLib.Storage storage dns,
         uint256 genesis,
         uint256 tokenid,
         address payable xnugg
@@ -52,7 +53,7 @@ library MoveLib {
         (uint256 swapData, uint256 offerData) = s.loadStorage(msg.sender);
 
         if (activeEpoch == tokenid && swapData == 0) {
-            mint(s, i, genesis, tokenid, xnugg);
+            mint(s, i, dns, genesis, tokenid, xnugg);
         } else if (offerData == 0 && swapData.isOwner()) {
             commit(s, tokenid, xnugg, genesis);
         } else {
@@ -84,6 +85,7 @@ library MoveLib {
     function mint(
         SwapLib.Storage storage s,
         ItemLib.Storage storage i,
+        DotNuggLib.Storage storage dns,
         uint256 genesis,
         uint256 tokenid,
         address payable xnugg
@@ -104,7 +106,7 @@ library MoveLib {
 
         if (msg.value > 0) xnugg.sendValue(msg.value);
 
-        i.premint(tokenid, genesis);
+        i.premint(dns, tokenid, genesis);
 
         emit Mint(activeEpoch, msg.sender, newSwapData.eth());
     }

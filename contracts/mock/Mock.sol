@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: UNLICENSED
 
-pragma solidity 0.8.4;
+pragma solidity 0.8.10;
 
 // https://github.com/gnosis/mock-contract/blob/master/contracts/MockContract.sol
 // adapted for solidity v8
