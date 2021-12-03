@@ -1,4 +1,4 @@
-pragma solidity 0.8.4;
+pragma solidity 0.8.10;
 
 interface INuggFT {
     event PreMint(uint256 tokenId, uint256[] items);

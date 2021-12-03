@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
-pragma solidity ^0.8.4;
+pragma solidity ^0.8.10;
 
 import '../../lib/DSTestExtended.sol';
 
@@ -25,11 +25,11 @@ contract pointerVsUint256 is DSTestExtended {
         assertEq(p, 53);
     }
 
-    function add10(uint256 val) public returns (uint256 res) {
+    function add10(uint256 val) internal pure returns (uint256 res) {
         res = val + 10;
     }
 
-    function add10(Pointer memory ref) public {
+    function add10(Pointer memory ref) internal pure {
         ref.value += 10;
     }
 }

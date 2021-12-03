@@ -20,6 +20,7 @@ export interface NuggFatherFixture {
     ownerStartBal: BigNumber;
     hre: HardhatRuntimeEnvironment;
     blockOffset: BigNumber;
+
     // toNuggSwapTokenId(b: BigNumberish): BigNumber;
 }
 
@@ -72,6 +73,7 @@ export const NuggFatherFix: Fixture<NuggFatherFixture> = async function (
     return {
         // toNuggSwapTokenId,
         // mockERC1155,
+        // dotnugg: hre.dotnugg,
         nuggft,
         xnugg,
         blockOffset,

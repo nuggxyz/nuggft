@@ -6,6 +6,8 @@ import {
     TASK_COMPILE_SOLIDITY_GET_ARTIFACT_FROM_COMPILATION_OUTPUT,
     TASK_COMPILE_SOLIDITY_GET_DEPENDENCY_GRAPH,
     TASK_COMPILE_SOLIDITY_GET_SOURCE_PATHS,
+    TASK_TEST,
+    TASK_TEST_SETUP_TEST_ENVIRONMENT,
 } from 'hardhat/builtin-tasks/task-names';
 import {
     ArgumentType,
@@ -18,10 +20,10 @@ import {
     TaskArguments,
 } from 'hardhat/types';
 
-import { DotNugg } from '../../../dotnugg-core/types';
 import { TASK_DEPLOY } from 'hardhat-deploy';
+import { DotNuggCompiler } from '../../../dotnugg-compiler-2/src/main';
 
-subtask(TASK_COMPILE_SOLIDITY_GET_ARTIFACT_FROM_COMPILATION_OUTPUT).setAction(
+subtask(TASK_TEST_SETUP_TEST_ENVIRONMENT).setAction(
     async (
         args: { sourceName: string; contractName: string; contractOutput: CompilerOutputContract; test: string },
         hre: HardhatRuntimeEnvironment,
@@ -29,6 +31,8 @@ subtask(TASK_COMPILE_SOLIDITY_GET_ARTIFACT_FROM_COMPILATION_OUTPUT).setAction(
     ): Promise<void> => {
         // console.log(args.contractOutput.evm.bytecode.object);
         hre.middleware = { test: 'this should not work' };
+        hre.dotnugg = (await DotNuggCompiler.build('../nuggft-art')) as unknown as any;
+
         return await runSuper(args);
     },
 );

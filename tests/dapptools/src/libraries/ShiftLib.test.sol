@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
-pragma solidity ^0.8.4;
+pragma solidity ^0.8.10;
 
 import '../../lib/DSTestExtended.sol';
 
@@ -197,15 +197,15 @@ contract ShiftLibTest is DSTestExtended {
     //     assertTrue(!offer_sample5.isActive(69), 'offer_sample5');
     // }
 
-    function test_setAccount() public {
-        uint256 one = swap_sample3.account(address(0));
-        uint256 two = swap_sample4.account(msg.sender);
-        uint256 thr = swap_sample5.account(address(type(uint160).max));
+    // function test_setAccount() public {
+    //     uint256 one = swap_sample3.account(address(0));
+    //     uint256 two = swap_sample4.account(msg.sender);
+    //     uint256 thr = swap_sample5.account(address(type(uint160).max));
 
-        assertEq(one, 0xa000010001050D80EA58E3000000000000000000000000000000000000000000, 'swap_sample3');
-        assertEq(two, 0x00000000000000000000000000a329c0648769a73afac7f9381e08fb43dbea72, 'swap_sample4');
-        assertEq(thr, 0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff, 'swap_sample5');
-    }
+    //     assertEq(one, 0xa000010001050D80EA58E3000000000000000000000000000000000000000000, 'swap_sample3');
+    //     assertEq(two, 0x00000000000000000000000000a329c0648769a73afac7f9381e08fb43dbea72, 'swap_sample4');
+    //     assertEq(thr, 0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff, 'swap_sample5');
+    // }
 
     function test_setEth() public {
         (uint256 one, uint256 rem1) = swap_sample3.eth(1000000000000);

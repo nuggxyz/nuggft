@@ -2,6 +2,7 @@ import 'hardhat/console.sol';
 
 import './ShiftLib.sol';
 import './EpochLib.sol';
+import './DotNuggLib.sol';
 
 library ItemLib {
     event PreMint(uint256 tokenId, uint256[] items);
@@ -33,6 +34,7 @@ library ItemLib {
 
     function premint(
         Storage storage s,
+        DotNuggLib.Storage storage dns,
         uint256 tokenId,
         uint256 genesis
     ) internal {
@@ -43,7 +45,7 @@ library ItemLib {
 
         itemData = itemData;
 
-        uint256[] memory items = mint(s, tokenId, itemData);
+        uint256[] memory items = mint(s, dns, tokenId, itemData);
 
         emit PreMint(tokenId, items);
 
@@ -55,17 +57,55 @@ library ItemLib {
 
     function mint(
         Storage storage s,
+        DotNuggLib.Storage storage dns,
         uint256 tokenId,
         uint256 data
     ) internal returns (uint256[] memory items) {
         require(s.tokenData[tokenId] == 0, 'IL:M:0');
 
-        data = data.base(data.base() % 20).size(0x4);
+        uint256 lendata = dns.lengths;
+
+        data = data
+            .size(0x0)
+            .base(data.base() % 20)
+            .item1(data.item1() % lendata.item1())
+            .item2(data.item2() % lendata.item2())
+            .item3(data.item3() % lendata.item3())
+            .item4(data.item4() % lendata.item4());
 
         s.tokenData[tokenId] = data;
 
         return data.items();
     }
+
+    // 1/2 byte - size ---- 0-15
+    // 1/2 bytes - base -----  0-15
+    // 1/2 byte - traits 0-3
+    // 1/2 byte - traits 4-7 --- 2
+
+    // 1.5 bytes - head
+    // 1.5 bytes - eyes
+    // 1.5 bytes - mouth
+    // 1.5 bytes - other
+    // 1.5 bytes - other2 ---- 7.5  9.5
+
+    // 1.5 bytes - head
+    // 1.5 bytes - eyes
+    // 1.5 bytes - mouth
+    // 1.5 bytes - other
+    // 1.5 bytes - other2 ---- 7.5  17
+
+    // 1.5 bytes - head
+    // 1.5 bytes - eyes
+    // 1.5 bytes - mouth
+    // 1.5 bytes - other
+    // 1.5 bytes - other2 ---- 7.5  24.5
+
+    // 1.5 bytes - head
+    // 1.5 bytes - eyes
+    // 1.5 bytes - mouth
+    // 1.5 bytes - other
+    // 1.5 bytes - other2 ---- 7.5  32
 
     function pop(
         Storage storage s,
