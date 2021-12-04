@@ -7,7 +7,8 @@ import 'hardhat-deploy';
 import 'hardhat-gas-reporter';
 import 'solidity-coverage';
 import '@typechain/hardhat';
-import 'hardhat-erc1820';
+import 'hardhat-spdx-license-identifier';
+import '@typechain/hardhat';
 import 'hardhat-abi-exporter';
 import 'hardhat-contract-sizer';
 import '@atixlabs/hardhat-time-n-mine';
@@ -307,6 +308,10 @@ const HardhatConfig: HardhatUserConfig = {
     //     clear: true,
     //     runOnCompile: true,
     // },
+    spdxLicenseIdentifier: {
+        overwrite: true,
+        runOnCompile: true,
+    },
 };
 
 export default HardhatConfig;

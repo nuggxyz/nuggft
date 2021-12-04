@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: MIT
+
 import './ItemLib.sol';
 import './ShiftLib.sol';
 import '../types/ItemType.sol';

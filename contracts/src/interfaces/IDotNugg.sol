@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: MIT
+
 interface IDotNugg {
     function nuggify(
         uint256[] memory _collection,
