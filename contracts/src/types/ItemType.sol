@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: MIT
+
 // 1/2 byte - size ---- 0-15
 // 1/2 bytes - base -----  0-15
 // 1/2 byte - traits 0-3

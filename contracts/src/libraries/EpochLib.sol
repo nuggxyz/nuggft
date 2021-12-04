@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: MIT
+
 import './ShiftLib.sol';
 
 library EpochLib {

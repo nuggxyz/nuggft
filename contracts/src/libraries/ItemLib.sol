@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: MIT
+
 import 'hardhat/console.sol';
 
 import './ShiftLib.sol';
