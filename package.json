@@ -1,8 +1,9 @@
 {
-    "name": "nuggswap-core",
+    "name": "nuggft-core",
     "version": "1.0.0",
     "main": "index.js",
     "license": "MIT",
+    "author": "dub6ix <dub6ix@nugg.xyz>",
     "devDependencies": {
         "@assemblyscript/loader": "^0.19.17",
         "@atixlabs/hardhat-time-n-mine": "^0.0.5",
