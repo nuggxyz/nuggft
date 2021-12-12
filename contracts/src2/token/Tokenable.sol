@@ -3,30 +3,32 @@
 pragma solidity ^0.8.0;
 
 import '@openzeppelin/contracts/utils/introspection/ERC165.sol';
-import '@openzeppelin/contracts/token/ERC721/IERC721.sol';
-import '@openzeppelin/contracts/token/ERC721/extensions/IERC721Metadata.sol';
+
 import '@openzeppelin/contracts/utils/Address.sol';
 import '@openzeppelin/contracts/token/ERC721/IERC721Receiver.sol';
 
-import '../../src/libraries/ERC721Lib.sol';
+import '../interfaces/INuggFT.sol';
+import './Token.sol';
+import '../proof/ProofLib.sol';
 
 /**
  * @dev Implementation of https://eips.ethereum.org/EIPS/eip-721[ERC721] Non-Fungible Token Standard, including
  * the Metadata extension, but not including the Enumerable extension, which is available separately as
  * {ERC721Enumerable}.
  */
-abstract contract NuggERC721 is ERC165, IERC721, IERC721Metadata {
+abstract contract Tokenable is ITokenable, ERC165 {
     using Address for address;
-    using ERC721Lib for ERC721Lib.Storage;
+    using Token for Token.Storage;
 
-    ERC721Lib.Storage internal erc721_state;
+    // Token.Storage internal nuggft();
+    function nuggft() internal view virtual returns (Token.Storage storage);
 
     /**
      * @dev Initializes the contract by setting a `name` and a `symbol` to the token collection.
      */
     constructor(string memory name_, string memory symbol_) {
-        erc721_state._name = name_;
-        erc721_state._symbol = symbol_;
+        nuggft()._name = name_;
+        nuggft()._symbol = symbol_;
     }
 
     /**
@@ -37,31 +39,63 @@ abstract contract NuggERC721 is ERC165, IERC721, IERC721Metadata {
     }
 
     /**
-     * @dev See {IERC721-balanceOf}.
+     * @dev See {IERC721-_}.
      */
     function balanceOf(address owner) public view virtual override returns (uint256) {
-        return erc721_state.balanceOf(owner);
+        return nuggft()._balanceOf(owner);
     }
 
     /**
      * @dev See {IERC721-ownerOf}.
      */
     function ownerOf(uint256 tokenId) public view virtual override returns (address) {
-        return erc721_state.ownerOf(tokenId);
+        return nuggft()._ownerOf(tokenId);
+    }
+
+    /**
+     * @dev See {IERC721-_}.
+     */
+    function proofOf(uint256 tokenId) public view virtual override returns (uint256) {
+        return nuggft()._proofOf(tokenId);
+    }
+
+    /**
+     * @dev See {IERC721-_}.
+     */
+    function parsedProofOf(uint256 tokenId)
+        public
+        view
+        virtual
+        override
+        returns (
+            uint256 proof,
+            uint256[] memory defaultIds,
+            uint256[] memory extraIds,
+            uint256[] memory overrides
+        )
+    {
+        return ProofLib.parseProof(nuggft(), nuggft()._proofOf(tokenId));
+    }
+
+    /**
+     * @dev See {IERC721-_}.
+     */
+    function resolverOf(uint256 tokenId) public view virtual override returns (address) {
+        return nuggft()._resolverOf(tokenId);
     }
 
     /**
      * @dev See {IERC721Metadata-name}.
      */
     function name() public view virtual override returns (string memory) {
-        return erc721_state._name;
+        return nuggft()._name;
     }
 
     /**
      * @dev See {IERC721Metadata-symbol}.
      */
     function symbol() public view virtual override returns (string memory) {
-        return erc721_state._symbol;
+        return nuggft()._symbol;
     }
 
     /**
@@ -73,7 +107,7 @@ abstract contract NuggERC721 is ERC165, IERC721, IERC721Metadata {
      * @dev See {IERC721-approve}.
      */
     function approve(address to, uint256 tokenId) public virtual override {
-        address owner = erc721_state.ownerOf(tokenId);
+        address owner = nuggft()._ownerOf(tokenId);
         require(to != owner, 'ERC721: approval to current owner');
 
         require(msg.sender == owner || isApprovedForAll(owner, msg.sender), 'ERC721: approve caller is not owner nor approved for all');
@@ -85,7 +119,7 @@ abstract contract NuggERC721 is ERC165, IERC721, IERC721Metadata {
      * @dev See {IERC721-getApproved}.
      */
     function getApproved(uint256 tokenId) public view virtual override returns (address) {
-        return erc721_state.getApproved(tokenId);
+        return nuggft()._getApproved(tokenId);
     }
 
     /**
@@ -94,7 +128,7 @@ abstract contract NuggERC721 is ERC165, IERC721, IERC721Metadata {
     function setApprovalForAll(address operator, bool approved) public virtual override {
         require(operator != msg.sender, 'ERC721: approve to caller');
 
-        erc721_state._operatorApprovals[msg.sender][operator] = approved;
+        nuggft()._operatorApprovals[msg.sender][operator] = approved;
         emit ApprovalForAll(msg.sender, operator, approved);
     }
 
@@ -102,7 +136,7 @@ abstract contract NuggERC721 is ERC165, IERC721, IERC721Metadata {
      * @dev See {IERC721-isApprovedForAll}.
      */
     function isApprovedForAll(address owner, address operator) public view virtual override returns (bool) {
-        return erc721_state.isApprovedForAll(owner, operator);
+        return nuggft()._isApprovedForAll(owner, operator);
     }
 
     /**
@@ -168,7 +202,7 @@ abstract contract NuggERC721 is ERC165, IERC721, IERC721Metadata {
         bytes memory _data
     ) internal virtual {
         _transfer(from, to, tokenId);
-        require(ERC721Lib._checkOnERC721Received(from, to, tokenId, _data), 'ERC721: transfer to non ERC721Receiver implementer');
+        require(Token._checkOnERC721Received(from, to, tokenId, _data), 'ERC721: transfer to non ERC721Receiver implementer');
     }
 
     /**
@@ -180,7 +214,7 @@ abstract contract NuggERC721 is ERC165, IERC721, IERC721Metadata {
      * and stop existing when they are burned (`_burn`).
      */
     function _exists(uint256 tokenId) internal view virtual returns (bool) {
-        return erc721_state._exists(tokenId);
+        return nuggft()._exists(tokenId);
     }
 
     /**
@@ -192,7 +226,7 @@ abstract contract NuggERC721 is ERC165, IERC721, IERC721Metadata {
      */
     function _isApprovedOrOwner(address spender, uint256 tokenId) internal view virtual returns (bool) {
         require(_exists(tokenId), 'ERC721: operator query for nonexistent token');
-        address owner = erc721_state.ownerOf(tokenId);
+        address owner = nuggft()._ownerOf(tokenId);
         return (spender == owner || getApproved(tokenId) == spender || isApprovedForAll(owner, spender));
     }
 
@@ -220,7 +254,7 @@ abstract contract NuggERC721 is ERC165, IERC721, IERC721Metadata {
         bytes memory _data
     ) internal virtual {
         _mint(to, tokenId);
-        require(ERC721Lib._checkOnERC721Received(address(0), to, tokenId, _data), 'ERC721: transfer to non ERC721Receiver implementer');
+        require(Token._checkOnERC721Received(address(0), to, tokenId, _data), 'ERC721: transfer to non ERC721Receiver implementer');
     }
 
     /**
@@ -241,8 +275,8 @@ abstract contract NuggERC721 is ERC165, IERC721, IERC721Metadata {
 
         _beforeTokenTransfer(address(0), to, tokenId);
 
-        erc721_state._balances[to] += 1;
-        erc721_state._owners[tokenId] = to;
+        nuggft()._balances[to] += 1;
+        nuggft()._owners[tokenId] = to;
 
         emit Transfer(address(0), to, tokenId);
     }
@@ -258,15 +292,15 @@ abstract contract NuggERC721 is ERC165, IERC721, IERC721Metadata {
      * Emits a {Transfer} event.
      */
     function _burn(uint256 tokenId) internal virtual {
-        address owner = erc721_state.ownerOf(tokenId);
+        address owner = nuggft()._ownerOf(tokenId);
 
         _beforeTokenTransfer(owner, address(0), tokenId);
 
         // Clear approvals
         _approve(address(0), tokenId);
 
-        erc721_state._balances[owner] -= 1;
-        delete erc721_state._owners[tokenId];
+        nuggft()._balances[owner] -= 1;
+        delete nuggft()._owners[tokenId];
 
         emit Transfer(owner, address(0), tokenId);
     }
@@ -287,7 +321,7 @@ abstract contract NuggERC721 is ERC165, IERC721, IERC721Metadata {
         address to,
         uint256 tokenId
     ) internal virtual {
-        require(erc721_state.ownerOf(tokenId) == from, 'ERC721: transfer of token that is not own');
+        require(nuggft()._ownerOf(tokenId) == from, 'ERC721: transfer of token that is not own');
         require(to != address(0), 'ERC721: transfer to the zero address');
 
         _beforeTokenTransfer(from, to, tokenId);
@@ -295,9 +329,9 @@ abstract contract NuggERC721 is ERC165, IERC721, IERC721Metadata {
         // Clear approvals from the previous owner
         _approve(address(0), tokenId);
 
-        erc721_state._balances[from] -= 1;
-        erc721_state._balances[to] += 1;
-        erc721_state._owners[tokenId] = to;
+        nuggft()._balances[from] -= 1;
+        nuggft()._balances[to] += 1;
+        nuggft()._owners[tokenId] = to;
 
         emit Transfer(from, to, tokenId);
     }
@@ -308,8 +342,8 @@ abstract contract NuggERC721 is ERC165, IERC721, IERC721Metadata {
      * Emits a {Approval} event.
      */
     function _approve(address to, uint256 tokenId) internal virtual {
-        erc721_state._tokenApprovals[tokenId] = to;
-        emit Approval(erc721_state.ownerOf(tokenId), to, tokenId);
+        nuggft()._tokenApprovals[tokenId] = to;
+        emit Approval(nuggft()._ownerOf(tokenId), to, tokenId);
     }
 
     /**

@@ -47,10 +47,12 @@ export const NuggFatherFix: Fixture<NuggFatherFixture> = async function (
     const nuggft = await deployContractWithSalt<NuggFT__factory>({
         factory: 'NuggFT',
         from: eoaDeployer,
-        args: [eoaDeployer.address, eoaDeployer.address],
+        args: [eoaDeployer.address],
     });
 
     hre.tracer.nameTags[nuggft.address] = `NuggFT`;
+
+    await nuggft.addToVault(hre.dotnugg.items.map((x) => x.hex));
 
     const blockOffset = BigNumber.from(await hre.ethers.provider.getBlockNumber());
 
