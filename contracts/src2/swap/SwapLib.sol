@@ -15,6 +15,8 @@ import './SwapType.sol';
 
 import '../libraries/EpochLib.sol';
 
+import '../../tests/Event.sol';
+
 library SwapLib {
     using EpochLib for uint256;
     using ShiftLib for uint256;
@@ -88,14 +90,16 @@ library SwapLib {
 
     function commit(
         Token.Storage storage nuggft,
-        uint256 tokenid,
-        uint256 genesis
+        uint256 genesis,
+        uint256 tokenId
     ) internal {
-        Swap.Storage storage _swap = nuggft._swaps[tokenid].self;
+        Swap.Storage storage _swap = nuggft._swaps[tokenId].self;
+
+        Event.log(tokenId, 'tokenId');
 
         _commitCore(_swap, genesis, uint160(msg.sender));
 
-        emit Commit(tokenid, msg.sender, msg.value);
+        emit Commit(tokenId, msg.sender, msg.value);
     }
 
     function _commitCore(
@@ -109,7 +113,9 @@ library SwapLib {
 
         require(msg.value > 0, 'SL:COM:2');
 
-        require(offerData == 0, 'SL:HSO:0');
+        require(offerData == 0 && swapData != 0, 'SL:HSO:0');
+
+        Event.log(swapData, 'swapData');
 
         require(swapData.isOwner(), 'SL:HSO:1');
 

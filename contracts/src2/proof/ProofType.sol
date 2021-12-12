@@ -2,6 +2,8 @@
 
 import '../vault/LengthType.sol';
 
+import '../../tests/Event.sol';
+
 library ProofType {
     using LengthType for uint256;
 
@@ -32,20 +34,17 @@ library ProofType {
         pick1 |= 1 << ID_NUMBER_SIZE;
         pick2 |= 2 << ID_NUMBER_SIZE;
 
-        res = (pick3 << (3 * ID_SIZE + 4)) | (pick2 << (2 * ID_SIZE + 4)) | (pick1 << (1 * ID_SIZE + 4)) | (pick0 << 4) | 3;
+        res = (pick3 << (3 * ID_SIZE + 4)) | (pick2 << (2 * ID_SIZE + 4)) | (pick1 << (1 * ID_SIZE + 4)) | (pick0 << 4) | 4;
     }
 
-    function size(uint256 input, uint8 update) internal pure returns (uint256 res) {
-        assembly {
-            input := and(input, 0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff00)
-            res := or(update, input)
-        }
+    function size(uint256 input, uint256 update) internal pure returns (uint256 res) {
+        require(update < ShiftLib.mask(4), 'PT:DS:0');
+        res = input & ShiftLib.fullsubmask(4, 0);
+        res |= update;
     }
 
-    function size(uint256 input) internal pure returns (uint8 res) {
-        assembly {
-            res := and(input, 0xff)
-        }
+    function size(uint256 input) internal pure returns (uint256 res) {
+        res = input & ShiftLib.mask(4);
     }
 
     function items(uint256 input) internal pure returns (uint256[] memory res) {
@@ -53,8 +52,8 @@ library ProofType {
         res = new uint256[](s);
         input >>= 4;
         for (uint256 i = 0; i < s; i++) {
-            res[i] = input & 0xff;
-            input >>= 8;
+            res[i] = input & 0xffff;
+            input >>= 16;
         }
     }
 
@@ -64,7 +63,7 @@ library ProofType {
         uint8 at
     ) internal pure returns (uint256 res) {
         assembly {
-            let offset := add(16, mul(16, at))
+            let offset := add(4, mul(16, at))
             res := and(input, not(shl(offset, 0xffff)))
             res := or(input, shl(offset, itm))
         }
@@ -72,7 +71,7 @@ library ProofType {
 
     function popItem(uint256 input, uint8 at) internal pure returns (uint256 res, uint16 itm) {
         assembly {
-            let offset := add(16, mul(16, at))
+            let offset := add(4, mul(16, at))
             res := and(input, not(shl(offset, 0xffff)))
             itm := shr(offset, input)
         }
@@ -96,7 +95,7 @@ library ProofType {
 
     function popFirstMatch(uint256 input, uint16 itemId)
         internal
-        pure
+        view
         returns (
             uint256 res,
             uint16 popped,
@@ -104,13 +103,15 @@ library ProofType {
         )
     {
         uint256[] memory _items = items(input);
+
+        Event.log(items(input), 'items(input)');
         for (uint8 i = 0; i < _items.length; i++) {
             if (_items[i] == itemId) {
                 index = i + 1;
                 break;
             }
         }
-
+        Event.log(input, 'input', itemId, 'itemId', index, 'index');
         require(index > 0, 'SL:PFM:0');
 
         index--;

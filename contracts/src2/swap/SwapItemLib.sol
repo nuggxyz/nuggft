@@ -56,6 +56,9 @@ library SwapItemLib {
         Swap.Storage storage _swap = nuggft._swaps[sellingTokenId].items[itemId];
 
         (uint256 swapData, uint256 offerData) = _swap.loadStorage(sendingTokenId);
+        Event.log(sellingTokenId, 'sellingTokenId', itemId, 'itemId', sendingTokenId, 'sendingTokenId');
+
+        Event.log(swapData, 'swapData', offerData, 'offerData', genesis, 'genesis');
 
         if (offerData == 0 && swapData.isOwner()) {
             commitItem(nuggft, genesis, sellingTokenId, itemId, sendingTokenId);
@@ -128,7 +131,7 @@ library SwapItemLib {
             payable(msg.sender).sendValue(offerData.eth());
         }
 
-        emit ClaimItem(sellingTokenId, itemId, endingEpoch, buyingTokenId);
+        emit ClaimItem(sellingTokenId, itemId, buyingTokenId, endingEpoch);
     }
 
     function swapItem(

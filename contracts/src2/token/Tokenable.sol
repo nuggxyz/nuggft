@@ -74,7 +74,7 @@ abstract contract Tokenable is ITokenable, ERC165 {
             uint256[] memory overrides
         )
     {
-        return ProofLib.parseProof(nuggft(), nuggft()._proofOf(tokenId));
+        return ProofLib.parseProof(nuggft(), tokenId);
     }
 
     /**

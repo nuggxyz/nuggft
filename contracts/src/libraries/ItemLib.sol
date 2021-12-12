@@ -67,13 +67,13 @@ library ItemLib {
 
         uint256 lendata = dns.lengths;
 
-        data = data
-            .size(0x0)
-            .base(data.base() % 20)
-            .item1(data.item1() % lendata.item1())
-            .item2(data.item2() % lendata.item2())
-            .item3(data.item3() % lendata.item3());
-        // .item4(data.item4() % lendata.item4());
+        // data = data
+        //     .size(0x0)
+        //     .base(data.base() % 20)
+        //     .item1(data.item1() % lendata.item1())
+        //     .item2(data.item2() % lendata.item2())
+        //     .item3(data.item3() % lendata.item3());
+        // // .item4(data.item4() % lendata.item4());
 
         s.tokenData[tokenId] = data;
 
@@ -150,7 +150,7 @@ library ItemLib {
         uint256 data = s.tokenData[tokenId];
         require(data != 0, '1155:STF:0');
 
-        data = data.size(data.size() + 1);
+        // data = data.size(data.size() + 1);
 
         s.tokenData[tokenId] = data;
 
