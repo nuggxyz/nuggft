@@ -72,8 +72,8 @@ library ItemLib {
             .base(data.base() % 20)
             .item1(data.item1() % lendata.item1())
             .item2(data.item2() % lendata.item2())
-            .item3(data.item3() % lendata.item3())
-            .item4(data.item4() % lendata.item4());
+            .item3(data.item3() % lendata.item3());
+        // .item4(data.item4() % lendata.item4());
 
         s.tokenData[tokenId] = data;
 

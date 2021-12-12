@@ -13,7 +13,6 @@ archive
 /images/generated
 coverage.json
 /coverage
-/docs
 /deployments/hardhat/
 /data/abi
 /graph_copy
@@ -21,7 +20,9 @@ coverage.json
 /graph/generated
 /graph/graph-node
 /deployments/localhost/
-out/
-abis
+*/out
+/tests/dapptools/out
 typechain
-/out
+out
+tests/dapptools/cache
+abis

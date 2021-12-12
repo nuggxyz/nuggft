@@ -53,11 +53,11 @@ contract NuggFT is NuggERC721, INuggFT {
     mapping(uint256 => mapping(uint256 => SwapLib.Storage)) internal sl_state_items;
 
     constructor(
-        address _xnugg,
+        //   address _xnugg,
         address _dotnugg,
         address _defaultResolver
     ) NuggERC721('NUGGFT', 'Nugg Fungible Token') {
-        xnugg = payable(_xnugg);
+        xnugg = payable(address(this));
         dotnugg = _dotnugg;
         defaultResolver = _defaultResolver;
 
@@ -215,14 +215,6 @@ contract NuggFT is NuggERC721, INuggFT {
     {
         return il_state.infoOf(tokenId);
     }
-
-    // function addItemsWithShifting(uint8 itemType, bytes32[][] calldata data) public {
-    //     dn_state.addItems(itemType, data);
-    // }
-
-    // function addItemsNormal(uint8 itemType, bytes[] calldata data) public {
-    //     dn_state.addItemsOld(itemType, data);
-    // }
 
     function loadItem(uint8 itemType, uint16 id) public view returns (uint256[] memory res) {
         res = dn_state.loadItem(itemType, id);
