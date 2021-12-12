@@ -139,7 +139,7 @@ library ShiftLib {
     function items(uint256 input) internal pure returns (uint256[] memory res) {
         uint256 s = size(input);
         res = new uint256[](s);
-        input >>= 16;
+        input >>= 4;
         for (uint256 i = 0; i < s; i++) {
             res[i] = input & 0xffff;
             input >>= 16;
@@ -163,7 +163,7 @@ library ShiftLib {
         uint8 at
     ) internal pure returns (uint256 res) {
         assembly {
-            let offset := add(16, mul(16, at))
+            let offset := add(4, mul(16, at))
             res := and(input, not(shl(offset, 0xffff)))
             res := or(input, shl(offset, itm))
         }
@@ -171,22 +171,22 @@ library ShiftLib {
 
     function popItem(uint256 input, uint8 at) internal pure returns (uint256 res, uint16 itm) {
         assembly {
-            let offset := add(16, mul(16, at))
+            let offset := add(4, mul(16, at))
             res := and(input, not(shl(offset, 0xffff)))
             itm := shr(offset, input)
         }
     }
 
-    function size(uint256 input, uint8 update) internal pure returns (uint256 res) {
-        assembly {
-            input := and(input, 0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff00)
-            res := or(update, input)
-        }
-    }
+    // function size(uint256 input, uint8 update) internal pure returns (uint256 res) {
+    //     assembly {
+    //         input := and(input, 0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff00)
+    //         res := or(update, input)
+    //     }
+    // }
 
     function size(uint256 input) internal pure returns (uint8 res) {
         assembly {
-            res := and(input, 0xff)
+            res := and(input, 0x03)
         }
     }
 

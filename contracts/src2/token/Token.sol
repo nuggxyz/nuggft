@@ -11,6 +11,8 @@ import '../swap/Swap.sol';
 
 import '../vault/Vault.sol';
 
+import '../../tests/Event.sol';
+
 library Token {
     using Address for address;
 
@@ -86,7 +88,8 @@ library Token {
      */
     function _proofOf(Storage storage s, uint256 tokenId) internal view returns (uint256 data) {
         data = s._proofs[tokenId];
-        require(data != 0, 'ERC721: owner query for nonexistent token');
+        Event.log(data, 'data');
+        require(data != 0, 'TOKEN:PO:0');
     }
 
     /**

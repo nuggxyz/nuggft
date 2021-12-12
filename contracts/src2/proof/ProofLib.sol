@@ -124,7 +124,7 @@ library ProofLib {
 
         nuggft._ownedItems[itemId]++;
 
-        emit PushItem(tokenId, itemId);
+        emit PopItem(tokenId, itemId);
     }
 
     function open(Token.Storage storage nuggft, uint256 tokenId) internal {

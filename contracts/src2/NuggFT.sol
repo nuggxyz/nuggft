@@ -16,10 +16,6 @@ contract NuggFT is INuggFT, Tokenable, Swapable {
     using Token for Token.Storage;
     using TokenLib for Token.Storage;
 
-    // using SwapLib for Swa[].Storage;
-
-    // using ShiftLib for uint256;
-
     address public immutable override defaultResolver;
 
     uint256 internal immutable _genesis;
