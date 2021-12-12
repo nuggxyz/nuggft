@@ -31,7 +31,7 @@ describe('uint tests', async function () {
         it('should revert if shares = 0', async () => {
             await fix.nuggft.connect(accounts.mac).delegate(0);
 
-            await fix.nuggft.connect(accounts.dee).offer(0, { value: toEth('3.000') });
+            await fix.nuggft.connect(accounts.dee).delegate(0, { value: toEth('3.000') });
 
             await Mining.advanceBlockTo(50);
 
@@ -41,27 +41,27 @@ describe('uint tests', async function () {
             await fix.nuggft.connect(accounts.dee).approve(fix.nuggft.address, 0);
             await fix.nuggft.connect(accounts.dee).swap(0, toEth('.02000'));
 
-            await fix.nuggft.connect(accounts.frank).mint(2, { value: toEth('20.000') });
-            await fix.nuggft.connect(accounts.frank).commit(0, { value: toEth('20.000') });
-            await fix.nuggft.connect(accounts.dennis).offer(0, { value: toEth('22.000') });
-            await fix.nuggft.connect(accounts.frank).offer(0, { value: toEth('3.000') });
-            await fix.nuggft.connect(accounts.dennis).offer(0, { value: toEth('2.000') });
-            await fix.nuggft.connect(accounts.dennis).offer(0, { value: toEth('2.000') });
-            await fix.nuggft.connect(accounts.charile).offer(0, { value: toEth('55.000') });
+            await fix.nuggft.connect(accounts.frank).delegate(2, { value: toEth('20.000') });
+            await fix.nuggft.connect(accounts.frank).delegate(0, { value: toEth('20.000') });
+            await fix.nuggft.connect(accounts.dennis).delegate(0, { value: toEth('22.000') });
+            await fix.nuggft.connect(accounts.frank).delegate(0, { value: toEth('3.000') });
+            await fix.nuggft.connect(accounts.dennis).delegate(0, { value: toEth('2.000') });
+            await fix.nuggft.connect(accounts.dennis).delegate(0, { value: toEth('2.000') });
+            await fix.nuggft.connect(accounts.charile).delegate(0, { value: toEth('55.000') });
 
             await Mining.advanceBlockTo(250);
             await Mining.advanceBlock();
 
-            await fix.nuggft.connect(accounts.frank).mint(9, { value: toEth('88') });
+            await fix.nuggft.connect(accounts.frank).delegate(9, { value: toEth('88') });
 
             await Mining.advanceBlockTo(350);
             await fix.nuggft.connect(accounts.frank).claim(9, 9);
 
             await fix.nuggft.connect(accounts.charile).claim(0, 3);
-            console.log(1);
             const info = await fix.nuggft.parsedProofOf(9);
-            console.log(2);
+
             console.log(info.defaultIds[1].toString(), accounts.dee.address);
+
             await fix.nuggft.connect(accounts.frank).swapItem(9, info.defaultIds[1], toEth('14'));
             const epoch = await fix.nuggft.connect(accounts.charile).epoch();
 
