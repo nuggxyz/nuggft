@@ -106,7 +106,7 @@ library MoveLib {
 
         s.data = newSwapData;
 
-        if (msg.value > 0) xnugg.sendValue(msg.value);
+        // if (msg.value > 0) xnugg.sendValue(msg.value);
 
         i.premint(dns, tokenid, genesis);
 
@@ -174,9 +174,7 @@ library MoveLib {
 
         s.data = newSwapData;
 
-        xnugg.sendValue(newSwapData.eth() - swapData.eth() + dust);
-
-        // emit Commit(tokenid, sender, newSwapData.eth());
+        // xnugg.sendValue(newSwapData.eth() - swapData.eth() + dust);
     }
 
     function offer(
@@ -244,7 +242,7 @@ library MoveLib {
 
         s.data = newSwapData;
 
-        xnugg.sendValue(newSwapData.eth() - swapData.eth() + dust);
+        // xnugg.sendValue(newSwapData.eth() - swapData.eth() + dust);
     }
 
     function claim(

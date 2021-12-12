@@ -3,7 +3,7 @@ module.exports = {
     extends: ['universe/node', 'prettier'],
     plugins: ['prettier', 'unused-imports', 'import'],
     rules: {
-        'prettier/prettier': 'error',
+        // 'prettier/prettier': 'error',
         '@typescript-eslint/no-unused-vars': 'off',
         // 'no-unused-vars': 'off',
         'unused-imports/no-unused-imports': 'error',

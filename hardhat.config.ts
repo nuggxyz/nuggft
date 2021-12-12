@@ -7,16 +7,15 @@ import 'hardhat-deploy';
 import 'hardhat-gas-reporter';
 import 'solidity-coverage';
 import '@typechain/hardhat';
-import 'hardhat-spdx-license-identifier';
-import '@typechain/hardhat';
+import 'hardhat-erc1820';
 import 'hardhat-abi-exporter';
 import 'hardhat-contract-sizer';
 import '@atixlabs/hardhat-time-n-mine';
 import 'hardhat-storage-layout';
 // NORMAL IMPORTS
 import 'hardhat-tracer';
-
-import './tasks/middleware';
+import 'hardhat-spdx-license-identifier';
+import '../dotnugg-hardhat/src';
 
 import { resolve } from 'path';
 
@@ -25,9 +24,9 @@ import { utils } from 'ethers';
 import { removeConsoleLog } from 'hardhat-preprocessor';
 import { HardhatUserConfig, NetworksUserConfig, NetworkUserConfig } from 'hardhat/types';
 
-dotenvConfig({ path: resolve(__dirname, './.env') });
+dotenvConfig({ path: resolve(__dirname, '.env') });
 
-export const GAS_PRICE = utils.parseUnits('100', 'gwei');
+export const GAS_PRICE = utils.parseUnits('5', 'gwei');
 
 export const NamedAccounts = {
     main: { default: 0 },
@@ -59,7 +58,7 @@ const DefaultLocalNetworkConfig = {
     saveDeployments: true,
     accounts: {
         mnemonic: 'many dark suns glow like gods fury when they eats that nugg',
-        accountsBalance: '690001000080000000000000000',
+        accountsBalance: '990000000000000000000',
     },
 };
 
@@ -73,7 +72,6 @@ const DefaultProductionNetworkConfig = {
     ...DefaultNetworkConfig,
     tags: [NetworkTags.PRODUCTION],
 };
-
 const LocalNetworks: NetworksUserConfig = {
     localhost: {
         ...DefaultLocalNetworkConfig,
@@ -81,7 +79,6 @@ const LocalNetworks: NetworksUserConfig = {
     hardhat: {
         ...DefaultLocalNetworkConfig,
         allowUnlimitedContractSize: true,
-        saveDeployments: false,
         forking: {
             enabled: false,
             url: `https://ropsten.infura.io/v3/${process.env.INFURA_API_KEY}` || '',
@@ -90,6 +87,7 @@ const LocalNetworks: NetworksUserConfig = {
         gas: 10000000000,
         blockGasLimit: 10000000000,
         gasPrice: parseInt(GAS_PRICE.toString(), 10),
+        saveDeployments: false,
     },
 };
 
@@ -162,7 +160,7 @@ const StagingNetworks: NetworksUserConfig = {
     },
 };
 
-const _ProductionNetworks: NetworksUserConfig = {
+const ProductionNetworks: NetworksUserConfig = {
     mainnet: {
         ...DefaultProductionNetworkConfig,
         url: `https://mainnet.infura.io/v3/${process.env.INFURA_API_KEY}`,
@@ -228,7 +226,7 @@ const HardhatConfig: HardhatUserConfig = {
         target: 'ethers-v5',
     },
     mocha: {
-        timeout: 20000,
+        timeout: 20000 * 6,
     },
     paths: {
         artifacts: 'artifacts',
@@ -280,17 +278,16 @@ const HardhatConfig: HardhatUserConfig = {
         coinmarketcap: process.env.COINMARKETCAP_API_KEY,
         currency: 'USD',
         enabled: true,
-
-        excludeContracts: ['*/libraries/'],
+        // excludeContracts: ['contracts/libraries/'],
     },
     networks: {
         // ...ProductionNetworks,
         ...StagingNetworks,
         ...LocalNetworks,
     },
-    // preprocess: {
-    //     eachLine: removeConsoleLog((hre): boolean => !(hre.hardhatArguments.showStackTraces && hre.network.name === 'localhost')),
-    // },
+    preprocess: {
+        eachLine: removeConsoleLog((bre) => bre.network.name !== 'hardhat' && bre.network.name !== 'localhost'),
+    },
     abiExporter: {
         path: './abis',
         clear: true,
@@ -311,6 +308,9 @@ const HardhatConfig: HardhatUserConfig = {
     spdxLicenseIdentifier: {
         overwrite: true,
         runOnCompile: true,
+    },
+    dotnugg: {
+        art: '../nuggft-art',
     },
 };
 
