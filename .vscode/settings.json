@@ -52,5 +52,5 @@
     "[dotenv]": {
         "editor.defaultFormatter": "foxundermoon.shell-format"
     },
-    "solidity.compileUsingRemoteVersion": "v0.8.4+commit.c7e474f2"
+    "solidity.compileUsingRemoteVersion": "v0.8.9+commit.c7e474f2"
 }
