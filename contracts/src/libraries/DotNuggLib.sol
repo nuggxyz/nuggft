@@ -67,20 +67,20 @@ library DotNuggLib {
         ItemType.Index itemType,
         uint256[][] calldata data
     ) internal {
-        uint256 lengths = s.lengths;
-        uint16 len = s.lengths.length(itemType);
-        uint256 itemtypebytes = uint256(itemType) << 96;
-        for (uint256 i = 0; i < data.length; i++) {
-            uint256 check = uint256(data[i][0]);
-            assembly {
-                check := and(check, not(0xff))
-            }
-            s.items[itemtypebytes | len++] = data[i][0];
-            for (uint256 j = 1; j < data[i].length; j++) {
-                s.items[check | j] = data[i][j];
-            }
-        }
-        s.lengths = lengths.length(itemType, len);
+        // uint256 lengths = s.lengths;
+        // uint16 len = s.lengths.length(itemType);
+        // uint256 itemtypebytes = uint256(itemType) << 96;
+        // for (uint256 i = 0; i < data.length; i++) {
+        //     uint256 check = uint256(data[i][0]);
+        //     assembly {
+        //         check := and(check, not(0xff))
+        //     }
+        //     s.items[itemtypebytes | len++] = data[i][0];
+        //     for (uint256 j = 1; j < data[i].length; j++) {
+        //         s.items[check | j] = data[i][j];
+        //     }
+        // }
+        // s.lengths = lengths.length(itemType, len);
     }
 
     function loadItem(

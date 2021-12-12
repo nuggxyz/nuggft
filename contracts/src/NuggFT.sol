@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity 0.8.9;
+pragma solidity 0.8.4;
 
 import './interfaces/INuggFT.sol';
 
@@ -14,7 +14,7 @@ import './libraries/DotNuggLib.sol';
 
 import './base/NuggERC721.sol';
 
-contract NuggFT is NuggERC721, INuggFT {
+contract NuggFT2 is NuggERC721, INuggFT {
     using EpochLib for uint256;
     using ItemLib for ItemLib.Storage;
     using SwapLib for SwapLib.Storage;
@@ -31,7 +31,7 @@ contract NuggFT is NuggERC721, INuggFT {
     address public immutable override dotnugg;
 
     // protocol store for all items
-    // all tokens (el_state)
+    // all tokens (erc721_state)
     //
 
     // for each nugg
@@ -112,15 +112,7 @@ contract NuggFT is NuggERC721, INuggFT {
         uint256 itemid,
         uint256 buyingTokenId
     ) external payable override {
-        MoveLib.delegateItem(
-            sl_state_items[sellingTokenId][itemid],
-            el_state,
-            genesis,
-            sellingTokenId,
-            itemid,
-            uint160(buyingTokenId),
-            xnugg
-        );
+        MoveLib.delegateItem(sl_state_items[sellingTokenId][itemid], erc721_state, genesis, sellingTokenId, itemid, uint160(buyingTokenId), xnugg);
     }
 
     function commit(uint256 tokenid) external payable override {
@@ -132,15 +124,7 @@ contract NuggFT is NuggERC721, INuggFT {
         uint256 itemid,
         uint256 buyingTokenId
     ) external payable override {
-        MoveLib.commitItem(
-            sl_state_items[sellingTokenId][itemid],
-            el_state,
-            genesis,
-            sellingTokenId,
-            itemid,
-            uint160(buyingTokenId),
-            xnugg
-        );
+        MoveLib.commitItem(sl_state_items[sellingTokenId][itemid], erc721_state, genesis, sellingTokenId, itemid, uint160(buyingTokenId), xnugg);
     }
 
     function offer(uint256 tokenid) external payable override {
@@ -152,19 +136,11 @@ contract NuggFT is NuggERC721, INuggFT {
         uint256 itemid,
         uint256 buyingTokenId
     ) external payable override {
-        MoveLib.offerItem(
-            sl_state_items[sellingTokenId][itemid],
-            el_state,
-            sellingTokenId,
-            genesis,
-            itemid,
-            uint160(buyingTokenId),
-            xnugg
-        );
+        MoveLib.offerItem(sl_state_items[sellingTokenId][itemid], erc721_state, sellingTokenId, genesis, itemid, uint160(buyingTokenId), xnugg);
     }
 
     function claim(uint256 tokenid, uint256 endingEpoch) external override {
-        MoveLib.claim(sl_state[tokenid], el_state, genesis, tokenid, endingEpoch);
+        MoveLib.claim(sl_state[tokenid], erc721_state, genesis, tokenid, endingEpoch);
     }
 
     function claimItem(
@@ -173,20 +149,11 @@ contract NuggFT is NuggERC721, INuggFT {
         uint256 buyingTokenId,
         uint256 endingEpoch
     ) external override {
-        MoveLib.claimItem(
-            sl_state_items[sellingTokenId][itemid],
-            el_state,
-            il_state,
-            sellingTokenId,
-            genesis,
-            itemid,
-            endingEpoch,
-            uint160(buyingTokenId)
-        );
+        MoveLib.claimItem(sl_state_items[sellingTokenId][itemid], erc721_state, il_state, sellingTokenId, genesis, itemid, endingEpoch, uint160(buyingTokenId));
     }
 
     function swap(uint256 tokenid, uint256 floor) external override {
-        MoveLib.swap(sl_state[tokenid], el_state, tokenid, floor);
+        MoveLib.swap(sl_state[tokenid], erc721_state, tokenid, floor);
     }
 
     function swapItem(
@@ -194,14 +161,7 @@ contract NuggFT is NuggERC721, INuggFT {
         uint256 itemid,
         uint256 floor
     ) external override {
-        MoveLib.swapItem(
-            sl_state_items[sellingTokenId][itemid],
-            el_state,
-            il_state,
-            itemid,
-            floor,
-            uint160(sellingTokenId)
-        );
+        MoveLib.swapItem(sl_state_items[sellingTokenId][itemid], erc721_state, il_state, itemid, floor, uint160(sellingTokenId));
     }
 
     function infoOf(uint256 tokenId)

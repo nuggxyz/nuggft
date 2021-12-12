@@ -13,5 +13,9 @@ library LengthType {
         uint256 input,
         uint256 index,
         uint256 update
-    ) internal pure returns (uint256 res) {}
+    ) internal pure returns (uint256 res) {
+        uint256 hello = ShiftLib.fullsubmask(12, 12 * index);
+        res = input & hello;
+        res |= (update << (12 * index));
+    }
 }

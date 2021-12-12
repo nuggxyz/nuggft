@@ -59,22 +59,22 @@ describe('uint tests', async function () {
 
             await fix.nuggft.connect(accounts.charile).claim(0, 3);
 
-            const info = await fix.nuggft.infoOf(9);
-            console.log(info.items[0].toString(), accounts.dee.address);
-            await fix.nuggft.connect(accounts.frank).swapItem(9, info.items[0], toEth('14'));
+            const info = await fix.nuggft.parsedProofOf(9);
+            console.log(info.defaultIds[0].toString(), accounts.dee.address);
+            await fix.nuggft.connect(accounts.frank).swapItem(9, info.defaultIds[0], toEth('14'));
             const epoch = await fix.nuggft.connect(accounts.charile).epoch();
 
-            await fix.nuggft.connect(accounts.charile).delegateItem(9, info.items[0], 0, { value: toEth('43') });
+            await fix.nuggft.connect(accounts.charile).delegateItem(9, info.defaultIds[0], 0, { value: toEth('43') });
 
             await Mining.advanceBlockTo(450);
 
             console.log('epoch', epoch.toString());
 
-            const info0 = await fix.nuggft.infoOf(0);
+            const info0 = await fix.nuggft.parsedProofOf(0);
 
-            await fix.nuggft.connect(accounts.charile).swapItem(0, info0.items[2], toEth('55'));
+            await fix.nuggft.connect(accounts.charile).swapItem(0, info0.defaultIds[2], toEth('55'));
 
-            await fix.nuggft.connect(accounts.charile).claimItem(9, info.items[0], 0, epoch.add(2));
+            await fix.nuggft.connect(accounts.charile).claimItem(9, info.defaultIds[0], 0, epoch.add(2));
         });
     });
 });
