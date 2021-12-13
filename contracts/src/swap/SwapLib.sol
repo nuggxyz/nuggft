@@ -14,6 +14,7 @@ import './SwapLib.sol';
 import './SwapType.sol';
 
 import '../libraries/EpochLib.sol';
+import '../stake/StakeLib.sol';
 
 import '../../tests/Event.sol';
 
@@ -22,24 +23,18 @@ library SwapLib {
     using ShiftLib for uint256;
     using Address for address payable;
     using QuadMath for uint256;
-
     using SwapType for uint256;
-    using Swap for Swap.Storage;
-
     using ProofLib for uint256;
 
+    using Swap for Swap.Storage;
+    using StakeLib for Token.Storage;
     using ProofLib for Token.Storage;
-
     using TokenLib for Token.Storage;
 
     event Mint(uint256 epoch, address account, uint256 eth);
-
     event Commit(uint256 tokenid, address account, uint256 eth);
-
     event Offer(uint256 tokenid, address account, uint256 eth);
-
     event Claim(uint256 tokenid, uint256 endingEpoch, address account);
-
     event StartSwap(uint256 tokenid, address account, uint256 eth);
 
     function delegate(
@@ -81,9 +76,9 @@ library SwapLib {
 
         _swap.data = newSwapData;
 
-        // if (msg.value > 0) xnugg.sendValue(msg.value);
-
         nuggft.setProof(tokenid, genesis);
+
+        nuggft.addStakedSharesAndEth(1, msg.value);
 
         emit Mint(activeEpoch, msg.sender, newSwapData.eth());
     }
@@ -95,14 +90,15 @@ library SwapLib {
     ) internal {
         Swap.Storage storage _swap = nuggft._swaps[tokenId].self;
 
-        Event.log(tokenId, 'tokenId');
+        // Event.log(tokenId, 'tokenId');
 
-        _commitCore(_swap, genesis, uint160(msg.sender));
+        _commitCore(nuggft, _swap, genesis, uint160(msg.sender));
 
         emit Commit(tokenId, msg.sender, msg.value);
     }
 
     function _commitCore(
+        Token.Storage storage nuggft,
         Swap.Storage storage _swap,
         uint256 genesis,
         uint160 sender
@@ -115,7 +111,7 @@ library SwapLib {
 
         require(offerData == 0 && swapData != 0, 'SL:HSO:0');
 
-        Event.log(swapData, 'swapData');
+        // Event.log(swapData, 'swapData');
 
         require(swapData.isOwner(), 'SL:HSO:1');
 
@@ -130,7 +126,7 @@ library SwapLib {
 
         _swap.data = newSwapData;
 
-        // xnugg.sendValue(newSwapData.eth() - swapData.eth() + dust);
+        nuggft.addStakedEth(newSwapData.eth() - swapData.eth() + dust);
     }
 
     function offer(
@@ -140,12 +136,13 @@ library SwapLib {
     ) internal {
         Swap.Storage storage _swap = nuggft._swaps[tokenid].self;
 
-        _offerCore(_swap, genesis, uint160(msg.sender));
+        _offerCore(nuggft, _swap, genesis, uint160(msg.sender));
 
         emit Offer(tokenid, msg.sender, msg.value);
     }
 
     function _offerCore(
+        Token.Storage storage nuggft,
         Swap.Storage storage _swap,
         uint256 genesis,
         uint160 sender
@@ -177,7 +174,7 @@ library SwapLib {
 
         _swap.data = newSwapData;
 
-        // xnugg.sendValue(newSwapData.eth() - swapData.eth() + dust);
+        nuggft.addStakedEth(newSwapData.eth() - swapData.eth() + dust);
     }
 
     function claim(

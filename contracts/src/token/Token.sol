@@ -22,7 +22,7 @@ library Token {
         // Token symbol
         string _symbol;
         // Token symbol
-        uint256 _pool;
+        uint256 _stake;
         // Token symbol
         Vault.Storage _vault;
         // Token symbol

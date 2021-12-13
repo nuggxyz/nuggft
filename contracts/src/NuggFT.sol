@@ -8,9 +8,10 @@ import './interfaces/IResolver.sol';
 import './token/Token.sol';
 import './token/Tokenable.sol';
 import './swap/Swapable.sol';
+import './stake/Stakeable.sol';
 import './swap/Swap.sol';
 
-contract NuggFT is INuggFT, Tokenable, Swapable {
+contract NuggFT is INuggFT, Tokenable, Swapable, Stakeable {
     using EpochLib for uint256;
     using Vault for Vault.Storage;
     using Token for Token.Storage;
@@ -30,7 +31,7 @@ contract NuggFT is INuggFT, Tokenable, Swapable {
         emit Genesis();
     }
 
-    function nuggft() internal view override(Swapable, Tokenable) returns (Token.Storage storage) {
+    function nuggft() internal view override(Swapable, Tokenable, Stakeable) returns (Token.Storage storage) {
         return _nuggft;
     }
 
@@ -47,7 +48,7 @@ contract NuggFT is INuggFT, Tokenable, Swapable {
     }
 
     function tokenURI(uint256 tokenId, address resolver) public view returns (string memory res) {
-        require(_exists(tokenId) || tokenId == _genesis.activeEpoch(), 'NFT:NTM:0');
+        require(_nuggft._exists(tokenId) || tokenId == _genesis.activeEpoch(), 'NFT:NTM:0');
 
         (, uint256[] memory ids, , uint256[] memory overrides) = parsedProofOf(tokenId);
 
@@ -61,8 +62,4 @@ contract NuggFT is INuggFT, Tokenable, Swapable {
 
         return string(IPostProcessResolver(resolver).postProcess(processedFile, data, customData));
     }
-
-    // array of item ids - with array of feature ids
-
-    // the resolver
 }

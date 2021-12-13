@@ -5,6 +5,16 @@ pragma solidity 0.8.4;
 import '@openzeppelin/contracts/token/ERC721/IERC721.sol';
 import '@openzeppelin/contracts/token/ERC721/extensions/IERC721Metadata.sol';
 
+interface IStakeable {
+    function totalSupply() external view returns (uint256);
+
+    function totalStakedShares() external view returns (uint256);
+
+    function totalStakedEth() external view returns (uint256);
+
+    function activeEthPerShare() external view returns (uint256);
+}
+
 interface ITokenable is IERC721, IERC721Metadata {
     function proofOf(uint256 tokenId) external view returns (uint256);
 
