@@ -6,6 +6,9 @@ import '@openzeppelin/contracts/token/ERC721/IERC721.sol';
 import '@openzeppelin/contracts/token/ERC721/extensions/IERC721Metadata.sol';
 
 interface IStakeable {
+    event StakeEth(uint256 amount);
+    event UnStakeEth(uint256 amount);
+
     function totalSupply() external view returns (uint256);
 
     function totalStakedShares() external view returns (uint256);

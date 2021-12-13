@@ -14,7 +14,8 @@ library StakeLib {
     using QuadMath for uint256;
     using StakeType for uint256;
 
-    event Stake()
+    event StakeEth(uint256 amount);
+    event UnStakeEth(uint256 amount);
 
     function addStakedSharesAndEth(
         Token.Storage storage nuggft,
@@ -26,6 +27,7 @@ library StakeLib {
         (uint256 activeShare, uint256 activeEth) = nuggft._stake.getStakedSharesAndEth();
 
         nuggft._stake = nuggft._stake.setStakedShares(activeShare + shares).setStakedEth(activeEth + eth);
+        emit StakeEth(eth);
     }
 
     function addStakedShares(Token.Storage storage nuggft, uint256 amount) internal {
@@ -50,6 +52,7 @@ library StakeLib {
         uint256 activeEth = nuggft._stake.getStakedEth();
 
         nuggft._stake = nuggft._stake.setStakedEth(activeEth + amount);
+        emit StakeEth(amount);
     }
 
     function subStakedEth(Token.Storage storage nuggft, uint256 amount) internal {
@@ -58,6 +61,7 @@ library StakeLib {
         require(activeEth >= amount, 'SL:SS:0');
 
         nuggft._stake = nuggft._stake.setStakedEth(activeEth - amount);
+        emit UnStakeEth(amount);
     }
 
     function getActiveEthPerShare(Token.Storage storage nuggft) internal view returns (uint256 res) {
