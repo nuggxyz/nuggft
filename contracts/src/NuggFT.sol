@@ -35,7 +35,7 @@ contract NuggFT is INuggFT, Tokenable, Swapable, Stakeable {
         return _nuggft;
     }
 
-    function genesis() public view override(Swapable, ISwapable) returns (uint256) {
+    function genesis() public view override(Swapable, ISwapable, Tokenable) returns (uint256) {
         return _genesis;
     }
 
@@ -46,7 +46,7 @@ contract NuggFT is INuggFT, Tokenable, Swapable, Stakeable {
     function rawProcessURI(uint256 tokenId) public view returns (uint256[] memory res) {
         require(_nuggft._exists(tokenId) || tokenId == _genesis.activeEpoch(), 'NFT:NTM:0');
 
-        (, uint256[] memory ids, , uint256[] memory overrides) = parsedProofOf(tokenId);
+        (, uint256[] memory ids, , uint256[] memory overrides) = _nuggft._exists(tokenId) ? parsedProofOf(tokenId) : ProofLib.pendingProof(_nuggft, _genesis);
 
         bytes memory data = abi.encode(tokenId, ids, overrides, address(this));
 
@@ -62,7 +62,7 @@ contract NuggFT is INuggFT, Tokenable, Swapable, Stakeable {
     function tokenURI(uint256 tokenId, address resolver) public view returns (bytes memory res) {
         require(_nuggft._exists(tokenId) || tokenId == _genesis.activeEpoch(), 'NFT:NTM:0');
 
-        (, uint256[] memory ids, , uint256[] memory overrides) = parsedProofOf(tokenId);
+        (, uint256[] memory ids, , uint256[] memory overrides) = _nuggft._exists(tokenId) ? parsedProofOf(tokenId) : ProofLib.pendingProof(_nuggft, _genesis);
 
         uint256[][] memory files = _nuggft._vault.getBatch(ids);
 

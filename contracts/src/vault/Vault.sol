@@ -3,7 +3,7 @@
 pragma solidity 0.8.4;
 
 import '../libraries/ShiftLib.sol';
-
+import '../../tests/Event.sol';
 library Vault {
     struct Storage {
         mapping(uint256 => mapping(uint256 => mapping(uint256 => uint256))) items;
@@ -38,10 +38,11 @@ library Vault {
         uint256 zero = s.items[feature][id][0];
 
         uint256 length = getDataLength(zero);
+        Event.log(zero, "zero", length, "length", id, "id");
 
         data = new uint256[](length);
 
-        for (uint256 i = 1; i < length; i++) {
+        for (uint256 i = 0; i < length; i++) {
             data[i] = s.items[feature][id][i];
         }
     }
@@ -55,7 +56,7 @@ library Vault {
     }
 
     function getDataLength(uint256 data) internal pure returns (uint256 res) {
-        res = (data >> 248);
+        res = (data >> 250);
     }
 
     function setDataLength(uint256 lengthData, uint256 feature) internal pure returns (uint256 res) {

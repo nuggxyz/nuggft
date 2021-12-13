@@ -87,7 +87,19 @@ describe('uint tests', async function () {
 
             await fix.nuggft.connect(accounts.charile).approve(fix.nuggft.address, 0);
 
-            await fix.nuggft.connect(accounts.charile).rawProcessURI(0);
+            await Mining.advanceBlockTo(9000);
+
+            const epoch1 = await fix.nuggft.connect(accounts.charile).epoch();
+
+            const check1 = await fix.nuggft.connect(accounts.charile).proofOf(epoch1);
+
+            // await fix.nuggft.connect(accounts.charile).delegate(epoch1, { value: toEth('55.000') });
+
+            // await Mining.advanceBlockTo(10000);
+
+            // const check2 = await fix.nuggft.connect(accounts.charile).proofOf(epoch1);
+
+            // console.log(check1, check2, check1.eq(check2));
 
             await fix.nuggft.connect(accounts.charile).burn(0);
         });

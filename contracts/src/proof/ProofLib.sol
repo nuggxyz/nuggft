@@ -68,6 +68,25 @@ library ProofLib {
         overrides = new uint256[](8);
     }
 
+    function pendingProof(Token.Storage storage nuggft, uint256 genesis)
+        internal
+        view
+        returns (
+            uint256 proof,
+            uint256[] memory defaultIds,
+            uint256[] memory extraIds,
+            uint256[] memory overrides
+        )
+    {
+        (uint256 seed, ) = EpochLib.calculateSeed(genesis);
+
+        uint256 lendata = nuggft._vault.lengthData;
+
+        seed = ProofType.initFromSeed(lendata, seed);
+
+        return parseProofLogic(seed);
+    }
+
     function setProof(
         Token.Storage storage nuggft,
         uint256 tokenId,
