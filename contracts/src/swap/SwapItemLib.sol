@@ -80,7 +80,7 @@ library SwapItemLib {
 
         Swap.Storage storage _swap = nuggft._swaps[sellingTokenId].items[itemId];
 
-        SwapLib._commitCore(_swap, genesis, sendingTokenId);
+        SwapLib._commitCore(nuggft, _swap, genesis, sendingTokenId);
 
         emit CommitItem(sellingTokenId, itemId, sendingTokenId, msg.value);
     }
@@ -98,7 +98,7 @@ library SwapItemLib {
 
         Swap.Storage storage _swap = nuggft._swaps[sellingTokenId].items[itemId];
 
-        SwapLib._offerCore(_swap, genesis, sendingTokenId);
+        SwapLib._offerCore(nuggft, _swap, genesis, sendingTokenId);
 
         emit OfferItem(sellingTokenId, itemId, sendingTokenId, msg.value);
     }

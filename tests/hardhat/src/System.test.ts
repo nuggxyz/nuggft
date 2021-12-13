@@ -4,7 +4,7 @@ import { ethers, waffle } from 'hardhat';
 import { NamedAccounts } from '../../../hardhat.config';
 import { Mining } from '../lib/shared/mining';
 import { prepareAccounts } from '../lib/shared';
-import { toEth } from '../lib/shared/conversion';
+import { fromEth, toEth } from '../lib/shared/conversion';
 import { NuggFatherFix, NuggFatherFixture } from '../lib/fixtures/NuggFather.fix';
 
 const createFixtureLoader = waffle.createFixtureLoader;
@@ -71,11 +71,23 @@ describe('uint tests', async function () {
 
             console.log('epoch', epoch.toString());
 
+            console.log('activeEthPerShare()', fromEth(await fix.nuggft.activeEthPerShare()));
+            console.log('totalSupply()', fromEth(await fix.nuggft.totalSupply()));
+            console.log('totalStakedEth()', fromEth(await fix.nuggft.totalStakedEth()));
+
             const info0 = await fix.nuggft.parsedProofOf(0);
 
             await fix.nuggft.connect(accounts.charile).swapItem(0, info0.defaultIds[2], toEth('55'));
 
             await fix.nuggft.connect(accounts.charile).claimItem(9, info.defaultIds[1], 0, epoch.add(1));
+
+            await fix.nuggft.connect(accounts.frank).approve(fix.nuggft.address, 9);
+
+            await fix.nuggft.connect(accounts.frank).burn(9);
+
+            await fix.nuggft.connect(accounts.charile).approve(fix.nuggft.address, 0);
+
+            await fix.nuggft.connect(accounts.charile).burn(0);
         });
     });
 });
