@@ -43,11 +43,23 @@ contract NuggFT is INuggFT, Tokenable, Swapable, Stakeable {
         _nuggft._vault.set(data);
     }
 
-    function tokenURI(uint256 tokenId) public view override(IERC721Metadata, Tokenable) returns (string memory res) {
-        res = tokenURI(tokenId, _nuggft._hasResolver(tokenId) ? _nuggft._resolverOf(tokenId) : defaultResolver);
+    function rawProcessURI(uint256 tokenId) public view returns (uint256[] memory res) {
+        require(_nuggft._exists(tokenId) || tokenId == _genesis.activeEpoch(), 'NFT:NTM:0');
+
+        (, uint256[] memory ids, , uint256[] memory overrides) = parsedProofOf(tokenId);
+
+        bytes memory data = abi.encode(tokenId, ids, overrides, address(this));
+
+        uint256[][] memory files = _nuggft._vault.getBatch(ids);
+
+        res = IProcessResolver(defaultResolver).process(files, data, '');
     }
 
-    function tokenURI(uint256 tokenId, address resolver) public view returns (string memory res) {
+    function tokenURI(uint256 tokenId) public view override(IERC721Metadata, Tokenable) returns (string memory res) {
+        res = string(tokenURI(tokenId, _nuggft._hasResolver(tokenId) ? _nuggft._resolverOf(tokenId) : defaultResolver));
+    }
+
+    function tokenURI(uint256 tokenId, address resolver) public view returns (bytes memory res) {
         require(_nuggft._exists(tokenId) || tokenId == _genesis.activeEpoch(), 'NFT:NTM:0');
 
         (, uint256[] memory ids, , uint256[] memory overrides) = parsedProofOf(tokenId);
@@ -60,6 +72,6 @@ contract NuggFT is INuggFT, Tokenable, Swapable, Stakeable {
 
         uint256[] memory processedFile = IProcessResolver(resolver).process(files, data, customData);
 
-        return string(IPostProcessResolver(resolver).postProcess(processedFile, data, customData));
+        return IPostProcessResolver(resolver).postProcess(processedFile, data, customData);
     }
 }

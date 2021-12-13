@@ -6,6 +6,7 @@ import { getHRE } from '../shared/deployment';
 import { deployContractWithSalt } from '../shared';
 import { NuggFT } from '../../../../typechain/NuggFT';
 import { NuggFT__factory } from '../../../../typechain/factories/NuggFT__factory';
+import { MockProcessResolver__factory } from '../../../../typechain';
 
 export interface NuggFatherFixture {
     // nuggswap: NuggSwap;
@@ -44,15 +45,25 @@ export const NuggFatherFix: Fixture<NuggFatherFixture> = async function (
     //0x435ccc2eaa41633658be26d804be5A01fEcC9337
     //0x770f070388b13A597b84B557d6B8D1CD94Fc9925
 
+    const processResolver = await deployContractWithSalt<MockProcessResolver__factory>({
+        factory: 'MockProcessResolver',
+        from: eoaDeployer,
+        args: [],
+    });
+
     const nuggft = await deployContractWithSalt<NuggFT__factory>({
         factory: 'NuggFT',
         from: eoaDeployer,
-        args: [eoaDeployer.address],
+        args: [processResolver.address],
     });
 
     hre.tracer.nameTags[nuggft.address] = `NuggFT`;
 
-    await nuggft.addToVault(hre.dotnugg.items.map((x) => x.hex));
+    await nuggft.addToVault(hre.dotnugg.items.slice(0, 25).map((x) => x.hex));
+    await nuggft.addToVault(hre.dotnugg.items.slice(25, 50).map((x) => x.hex));
+
+    await nuggft.addToVault(hre.dotnugg.items.slice(50, 75).map((x) => x.hex));
+    await nuggft.addToVault(hre.dotnugg.items.slice(75, 100).map((x) => x.hex));
 
     const blockOffset = BigNumber.from(await hre.ethers.provider.getBlockNumber());
 

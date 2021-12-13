@@ -79,13 +79,15 @@ describe('uint tests', async function () {
 
             await fix.nuggft.connect(accounts.charile).swapItem(0, info0.defaultIds[2], toEth('55'));
 
-            await fix.nuggft.connect(accounts.charile).claimItem(9, info.defaultIds[1], 0, epoch.add(1));
+            // await fix.nuggft.connect(accounts.charile).claimItem(9, info.defaultIds[1], 0, epoch.add(1));
 
             await fix.nuggft.connect(accounts.frank).approve(fix.nuggft.address, 9);
 
             await fix.nuggft.connect(accounts.frank).burn(9);
 
             await fix.nuggft.connect(accounts.charile).approve(fix.nuggft.address, 0);
+
+            await fix.nuggft.connect(accounts.charile).rawProcessURI(0);
 
             await fix.nuggft.connect(accounts.charile).burn(0);
         });
