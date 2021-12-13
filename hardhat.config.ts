@@ -16,6 +16,9 @@ import 'hardhat-storage-layout';
 import 'hardhat-tracer';
 import 'hardhat-spdx-license-identifier';
 import '../dotnugg-hardhat/src';
+import './tasks/nuggft/delegate';
+import './tasks/nuggft/claim';
+import './tasks/nuggft/rawProcessUri';
 
 import { resolve } from 'path';
 
