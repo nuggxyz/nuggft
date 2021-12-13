@@ -19,6 +19,8 @@ interface IStakeable {
 }
 
 interface ITokenable is IERC721, IERC721Metadata {
+    event SetProof(uint256 tokenId, uint256[] items);
+
     function proofOf(uint256 tokenId) external view returns (uint256);
 
     function parsedProofOf(uint256 tokenId)

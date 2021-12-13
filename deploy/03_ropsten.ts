@@ -1,6 +1,7 @@
 import { HardhatRuntimeEnvironment } from 'hardhat/types';
 
 import { NamedAccounts } from '../hardhat.config';
+import { toEth } from '../tests/hardhat/lib/shared/conversion';
 import { NuggFT } from '../typechain';
 // import { XNUGG as xNUGG } from '../typechain/XNUGG';
 // import { NuggFT } from '../typechain/NuggFT.d';
@@ -70,11 +71,45 @@ const deployment = async (hre: HardhatRuntimeEnvironment) => {
         //     .connect(await hre.ethers.getNamedSigner('dee'))
         //     .addToVault(hre.dotnugg.items.slice(0, 50).map((x) => x.hex));
 
-        // const result = await nuggft
-        //     .connect(await hre.ethers.getNamedSigner('dee'))
-        //     .addToVault(hre.dotnugg.items.slice(0, 25).map((x) => x.hex));
-        // await result.wait();
-        // console.log(result);
+        const tx0 = await nuggft
+            .connect(await hre.ethers.getNamedSigner('dev'))
+            .addToVault(hre.dotnugg.items.slice(0, 25).map((x) => x.hex));
+        hre.deployments.log('tx0 sent... waiting to be mined... ', tx0.hash);
+        await tx0.wait();
+
+        const tx1 = await nuggft
+            .connect(await hre.ethers.getNamedSigner('dev'))
+            .addToVault(hre.dotnugg.items.slice(25, 50).map((x) => x.hex));
+        hre.deployments.log('tx1 sent... waiting to be mined... ', tx1.hash);
+        await tx1.wait();
+
+        const tx2 = await nuggft
+            .connect(await hre.ethers.getNamedSigner('dev'))
+            .addToVault(hre.dotnugg.items.slice(50, 75).map((x) => x.hex));
+        hre.deployments.log('tx2 sent... waiting to be mined... ', tx2.hash);
+        await tx2.wait();
+
+        const tx3 = await nuggft
+            .connect(await hre.ethers.getNamedSigner('dev'))
+            .addToVault(hre.dotnugg.items.slice(75, 200).map((x) => x.hex));
+        hre.deployments.log('tx3 sent... waiting to be mined... ', tx3.hash);
+        await tx3.wait();
+
+        const activeEpoch = await nuggft.epoch();
+        hre.deployments.log('active epoch is..', activeEpoch.toString());
+
+        const tokenUriBefore = await nuggft['tokenURI(uint256)'](activeEpoch);
+
+        hre.deployments.log('tokenUri before is..', tokenUriBefore);
+
+        const tx4 = await nuggft.connect(await hre.ethers.getNamedSigner('dee')).delegate(activeEpoch, { value: toEth('.01') });
+
+        hre.deployments.log('tx4 sent... waiting to be mined... ', tx4.hash);
+        await tx4.wait();
+
+        const tokenUriAfter = await nuggft['tokenURI(uint256)'](activeEpoch);
+
+        hre.deployments.log('tokenUri after is..', tokenUriAfter);
 
         // // await nuggft.connect(await hre.ethers.getNamedSigner('dee')).addToVault(hre.dotnugg.items.slice(25, 50).map((x) => x.hex));
 
@@ -86,9 +121,9 @@ const deployment = async (hre: HardhatRuntimeEnvironment) => {
 
         // await nuggft.connect(await hre.ethers.getNamedSigner('dee')).delegate(0, { value: toEth('0.01') });
 
-        const res = await nuggft.rawProcessURI(0);
+        // const res = await nuggft.rawProcessURI(0);
 
-        console.log(res);
+        // console.log(res);
 
         // const fileDotnuggDeployment = await hre.deployments.deploy('SvgFileResolver', {
         //     from: eoaDeployer,

@@ -22,11 +22,13 @@ import '../proof/ProofLib.sol';
 abstract contract Tokenable is ITokenable, ERC165 {
     using Address for address;
     using Token for Token.Storage;
-
+    using EpochLib for uint256;
     using TokenLib for Token.Storage;
 
     // Token.Storage internal nuggft();
     function nuggft() internal view virtual returns (Token.Storage storage);
+
+    function genesis() public view virtual returns (uint256);
 
     /**
      * @dev Initializes the contract by setting a `name` and a `symbol` to the token collection.
@@ -61,6 +63,11 @@ abstract contract Tokenable is ITokenable, ERC165 {
      * @dev See {IERC721-_}.
      */
     function proofOf(uint256 tokenId) public view virtual override returns (uint256) {
+        if (tokenId == genesis().activeEpoch()) {
+            (uint256 p, , , ) = ProofLib.pendingProof(nuggft(), genesis());
+            return p;
+        }
+
         return nuggft()._proofOf(tokenId);
     }
 
