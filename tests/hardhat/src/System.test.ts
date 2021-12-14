@@ -39,7 +39,7 @@ describe('uint tests', async function () {
             await fix.nuggft.connect(accounts.mac).claim(0, 0);
 
             await fix.nuggft.connect(accounts.dee).approve(fix.nuggft.address, 0);
-            await fix.nuggft.connect(accounts.dee).swap(0, toEth('.02000'));
+            await fix.nuggft.connect(accounts.dee).swap(0, toEth('5.000'));
 
             await fix.nuggft.connect(accounts.frank).delegate(2, { value: toEth('20.000') });
             await fix.nuggft.connect(accounts.frank).delegate(0, { value: toEth('20.000') });

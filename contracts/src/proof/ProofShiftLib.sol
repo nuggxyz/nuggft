@@ -1,12 +1,12 @@
 // SPDX-License-Identifier: MIT
 
-import '../vault/LengthType.sol';
+pragma solidity 0.8.4;
 
-import '../../tests/Event.sol';
+import '../libraries/ShiftLib.sol';
 
-library ProofType {
-    using LengthType for uint256;
+import '../vault/VaultShiftLib.sol';
 
+library ProofShiftLib {
     uint256 constant ID_SIZE = 16;
     uint256 constant ID_FEATURE_SIZE = 4;
     uint256 constant ID_NUMBER_SIZE = 12;
@@ -14,22 +14,22 @@ library ProofType {
     function initFromSeed(uint256 lengthData, uint256 seed) internal pure returns (uint256 res) {
         require(seed != 0, 'seed');
 
-        uint256 pick0 = ((seed >> (4 + ID_SIZE * 0)) & ShiftLib.mask(ID_NUMBER_SIZE)) % lengthData.length(0);
-        uint256 pick1 = ((seed >> (4 + ID_SIZE * 1)) & ShiftLib.mask(ID_NUMBER_SIZE)) % lengthData.length(1);
-        uint256 pick2 = ((seed >> (4 + ID_SIZE * 2)) & ShiftLib.mask(ID_NUMBER_SIZE)) % lengthData.length(2);
+        uint256 pick0 = ((seed >> (4 + ID_SIZE * 0)) & ShiftLib.mask(ID_NUMBER_SIZE)) % VaultShiftLib.length(lengthData, 0);
+        uint256 pick1 = ((seed >> (4 + ID_SIZE * 1)) & ShiftLib.mask(ID_NUMBER_SIZE)) % VaultShiftLib.length(lengthData, 1);
+        uint256 pick2 = ((seed >> (4 + ID_SIZE * 2)) & ShiftLib.mask(ID_NUMBER_SIZE)) % VaultShiftLib.length(lengthData, 2);
 
         uint256 pick3 = (seed >> 69) % 256;
 
         uint256 num = (seed >> (4 + ID_SIZE * 3)) & ShiftLib.mask(ID_NUMBER_SIZE);
 
         if (pick3 < 96) {
-            pick3 = (3 << ID_NUMBER_SIZE) | (num % (lengthData.length(3)));
+            pick3 = (3 << ID_NUMBER_SIZE) | (num % (VaultShiftLib.length(lengthData, 3)));
         } else if (pick3 < 192) {
-            pick3 = (4 << ID_NUMBER_SIZE) | (num % (lengthData.length(4)));
+            pick3 = (4 << ID_NUMBER_SIZE) | (num % (VaultShiftLib.length(lengthData, 4)));
         } else if (pick3 < 250) {
-            pick3 = (5 << ID_NUMBER_SIZE) | (num % (lengthData.length(5)));
+            pick3 = (5 << ID_NUMBER_SIZE) | (num % (VaultShiftLib.length(lengthData, 5)));
         } else {
-            pick3 = (6 << ID_NUMBER_SIZE) | (num % (lengthData.length(6)));
+            pick3 = (6 << ID_NUMBER_SIZE) | (num % (VaultShiftLib.length(lengthData, 6)));
         }
         pick1 |= 1 << ID_NUMBER_SIZE;
         pick2 |= 2 << ID_NUMBER_SIZE;
@@ -37,9 +37,31 @@ library ProofType {
         res = (pick3 << (3 * ID_SIZE + 4)) | (pick2 << (2 * ID_SIZE + 4)) | (pick1 << (1 * ID_SIZE + 4)) | (pick0 << 4) | 4;
     }
 
+    function parseProofLogic(uint256 _proof)
+        internal
+        pure
+        returns (
+            uint256 proof,
+            uint256[] memory defaultIds,
+            uint256[] memory extraIds,
+            uint256[] memory overrides
+        )
+    {
+        proof = _proof;
+        defaultIds = new uint256[](_proof & ShiftLib.mask(4));
+
+        for (uint256 i = 0; i < defaultIds.length; i++) {
+            defaultIds[i] = (_proof >> (4 + i * 16)) & ShiftLib.mask(16);
+        }
+        extraIds = new uint256[](8);
+        overrides = new uint256[](8);
+    }
+
     function size(uint256 input, uint256 update) internal pure returns (uint256 res) {
         require(update < ShiftLib.mask(4), 'PT:DS:0');
+
         res = input & ShiftLib.fullsubmask(4, 0);
+
         res |= update;
     }
 
@@ -95,7 +117,7 @@ library ProofType {
 
     function popFirstMatch(uint256 input, uint16 itemId)
         internal
-        view
+        pure
         returns (
             uint256 res,
             uint16 popped,
@@ -104,14 +126,13 @@ library ProofType {
     {
         uint256[] memory _items = items(input);
 
-        Event.log(items(input), 'items(input)');
         for (uint8 i = 0; i < _items.length; i++) {
             if (_items[i] == itemId) {
                 index = i + 1;
                 break;
             }
         }
-        Event.log(input, 'input', itemId, 'itemId', index, 'index');
+
         require(index > 0, 'SL:PFM:0');
 
         index--;

@@ -1,8 +1,10 @@
 // SPDX-License-Identifier: MIT
 
+pragma solidity 0.8.4;
+
 import '../libraries/ShiftLib.sol';
 
-library StakeType {
+library StakeShiftLib {
     function getStakedEth(uint256 state) internal pure returns (uint256 res) {
         res = state & ShiftLib.mask(192);
     }

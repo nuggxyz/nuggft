@@ -3,12 +3,6 @@
 pragma solidity 0.8.4;
 
 library ShiftLib {
-    function submask(uint256 bits, uint256 offset) internal pure returns (uint256 res) {
-        assembly {
-            res := shl(not(sub(exp(2, bits), 1)), offset)
-        }
-    }
-
     function fullsubmask(uint256 bits, uint256 offset) internal pure returns (uint256 res) {
         res = ~(mask(bits) << offset);
     }

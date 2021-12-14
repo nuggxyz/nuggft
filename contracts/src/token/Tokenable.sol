@@ -25,6 +25,10 @@ abstract contract Tokenable is ITokenable, ERC165 {
     using EpochLib for uint256;
     using TokenLib for Token.Storage;
 
+    bytes32 immutable _name;
+
+    bytes32 immutable _symbol;
+
     // Token.Storage internal nuggft();
     function nuggft() internal view virtual returns (Token.Storage storage);
 
@@ -33,9 +37,9 @@ abstract contract Tokenable is ITokenable, ERC165 {
     /**
      * @dev Initializes the contract by setting a `name` and a `symbol` to the token collection.
      */
-    constructor(string memory name_, string memory symbol_) {
-        nuggft()._name = name_;
-        nuggft()._symbol = symbol_;
+    constructor(bytes32 name_, bytes32 symbol_) {
+        _name = name_;
+        _symbol = symbol_;
     }
 
     /**
@@ -100,14 +104,14 @@ abstract contract Tokenable is ITokenable, ERC165 {
      * @dev See {IERC721Metadata-name}.
      */
     function name() public view virtual override returns (string memory) {
-        return nuggft()._name;
+        return string(abi.encodePacked(_name));
     }
 
     /**
      * @dev See {IERC721Metadata-symbol}.
      */
     function symbol() public view virtual override returns (string memory) {
-        return nuggft()._symbol;
+        return string(abi.encodePacked(_symbol));
     }
 
     /**
@@ -173,9 +177,7 @@ abstract contract Tokenable is ITokenable, ERC165 {
         address to,
         uint256 tokenId
     ) public virtual override {
-        // //solhint-disable-next-line max-line-length
-        // require(_isApprovedOrOwner(msg.sender, tokenId), 'ERC721: transfer caller is not owner nor approved');
-        // _transfer(from, to, tokenId);
+        require(false, 'TOKEN:TF:0');
     }
 
     /**
@@ -186,7 +188,7 @@ abstract contract Tokenable is ITokenable, ERC165 {
         address to,
         uint256 tokenId
     ) public virtual override {
-        safeTransferFrom(from, to, tokenId, '');
+        require(false, 'TOKEN:STF:0');
     }
 
     /**
@@ -198,49 +200,8 @@ abstract contract Tokenable is ITokenable, ERC165 {
         uint256 tokenId,
         bytes memory _data
     ) public virtual override {
-        // require(_isApprovedOrOwner(msg.sender, tokenId), 'ERC721: transfer caller is not owner nor approved');
-        // _safeTransfer(from, to, tokenId, _data);
+        require(false, 'TOKEN:STF:1');
     }
-
-    // /**
-    //  * @dev Safely transfers `tokenId` token from `from` to `to`, checking first that contract recipients
-    //  * are aware of the ERC721 protocol to prevent tokens from being forever locked.
-    //  *
-    //  * `_data` is additional data, it has no specified format and it is sent in call to `to`.
-    //  *
-    //  * This internal function is equivalent to {safeTransferFrom}, and can be used to e.g.
-    //  * implement alternative mechanisms to perform token transfer, such as signature-based.
-    //  *
-    //  * Requirements:
-    //  *
-    //  * - `from` cannot be the zero address.
-    //  * - `to` cannot be the zero address.
-    //  * - `tokenId` token must exist and be owned by `from`.
-    //  * - If `to` refers to a smart contract, it must implement {IERC721Receiver-onERC721Received}, which is called upon a safe transfer.
-    //  *
-    //  * Emits a {Transfer} event.
-    //  */
-    // function _safeTransfer(
-    //     address from,
-    //     address to,
-    //     uint256 tokenId,
-    //     bytes memory _data
-    // ) internal virtual {
-    //     _transfer(from, to, tokenId);
-    //     require(Token._checkOnERC721Received(from, to, tokenId, _data), 'ERC721: transfer to non ERC721Receiver implementer');
-    // }
-
-    // /**
-    //  * @dev Returns whether `tokenId` exists.
-    //  *
-    //  * Tokens can be managed by their owner or approved accounts via {approve} or {setApprovalForAll}.
-    //  *
-    //  * Tokens start existing when they are minted (`_mint`),
-    //  * and stop existing when they are burned (`_burn`).
-    //  */
-    // function _exists(uint256 tokenId) internal view virtual returns (bool) {
-    //     return nuggft()._exists(tokenId);
-    // }
 
     /**
      * @dev Returns whether `spender` is allowed to manage `tokenId`.
@@ -254,106 +215,4 @@ abstract contract Tokenable is ITokenable, ERC165 {
         address owner = nuggft()._ownerOf(tokenId);
         return (spender == owner || getApproved(tokenId) == spender || isApprovedForAll(owner, spender));
     }
-
-    // /**
-    //  * @dev Safely mints `tokenId` and transfers it to `to`.
-    //  *
-    //  * Requirements:
-    //  *
-    //  * - `tokenId` must not exist.
-    //  * - If `to` refers to a smart contract, it must implement {IERC721Receiver-onERC721Received}, which is called upon a safe transfer.
-    //  *
-    //  * Emits a {Transfer} event.
-    //  */
-    // function _safeMint(address to, uint256 tokenId) internal virtual {
-    //     _safeMint(to, tokenId, '');
-    // }
-
-    // /**
-    //  * @dev Same as {xref-ERC721-_safeMint-address-uint256-}[`_safeMint`], with an additional `data` parameter which is
-    //  * forwarded in {IERC721Receiver-onERC721Received} to contract recipients.
-    //  */
-    // function _safeMint(
-    //     address to,
-    //     uint256 tokenId,
-    //     bytes memory _data
-    // ) internal virtual {
-    //     _mint(to, tokenId);
-    //     require(Token._checkOnERC721Received(address(0), to, tokenId, _data), 'ERC721: transfer to non ERC721Receiver implementer');
-    // }
-
-    // /**
-    //  * @dev Mints `tokenId` and transfers it to `to`.
-    //  *
-    //  * WARNING: Usage of this method is discouraged, use {_safeMint} whenever possible
-    //  *
-    //  * Requirements:
-    //  *
-    //  * - `tokenId` must not exist.
-    //  * - `to` cannot be the zero address.
-    //  *
-    //  * Emits a {Transfer} event.
-    //  */
-    // function _mint(address to, uint256 tokenId) internal virtual {
-    //     require(to != address(0), 'ERC721: mint to the zero address');
-    //     require(!_exists(tokenId), 'ERC721: token already minted');
-
-    //     _beforeTokenTransfer(address(0), to, tokenId);
-
-    //     nuggft()._balances[to] += 1;
-    //     nuggft()._owners[tokenId] = to;
-
-    //     emit Transfer(address(0), to, tokenId);
-    // }
-
-    // /**
-    //  * @dev Transfers `tokenId` from `from` to `to`.
-    //  *  As opposed to {transferFrom}, this imposes no restrictions on msg.sender.
-    //  *
-    //  * Requirements:
-    //  *
-    //  * - `to` cannot be the zero address.
-    //  * - `tokenId` token must be owned by `from`.
-    //  *
-    //  * Emits a {Transfer} event.
-    //  */
-    // function _transfer(
-    //     address from,
-    //     address to,
-    //     uint256 tokenId
-    // ) internal virtual {
-    //     require(nuggft()._ownerOf(tokenId) == from, 'ERC721: transfer of token that is not own');
-    //     require(to != address(0), 'ERC721: transfer to the zero address');
-
-    //     _beforeTokenTransfer(from, to, tokenId);
-
-    //     // Clear approvals from the previous owner
-    //     _approve(address(0), tokenId);
-
-    //     nuggft()._balances[from] -= 1;
-    //     nuggft()._balances[to] += 1;
-    //     nuggft()._owners[tokenId] = to;
-
-    //     emit Transfer(from, to, tokenId);
-    // }
-
-    // /**
-    //  * @dev Hook that is called before any token transfer. This includes minting
-    //  * and burning.
-    //  *
-    //  * Calling conditions:
-    //  *
-    //  * - When `from` and `to` are both non-zero, ``from``'s `tokenId` will be
-    //  * transferred to `to`.
-    //  * - When `from` is zero, `tokenId` will be minted for `to`.
-    //  * - When `to` is zero, ``from``'s `tokenId` will be burned.
-    //  * - `from` and `to` are never both zero.
-    //  *
-    //  * To learn more about hooks, head to xref:ROOT:extending-contracts.adoc#using-hooks[Using Hooks].
-    //  */
-    // function _beforeTokenTransfer(
-    //     address from,
-    //     address to,
-    //     uint256 tokenId
-    // ) internal virtual {}
 }

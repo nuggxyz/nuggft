@@ -1,14 +1,12 @@
 // SPDX-License-Identifier: MIT
 
+pragma solidity 0.8.4;
+
 import './ShiftLib.sol';
 
 library EpochLib {
     using ShiftLib for uint256;
 
-    /**
-     * @dev #TODO
-     * @return res
-     */
     function activeEpoch(uint256 genesis) internal view returns (uint256 res) {
         res = toEpoch(genesis, block.number);
     }
@@ -31,18 +29,10 @@ library EpochLib {
         res = 25;
     }
 
-    /**
-     * @dev #TODO
-     * @return res
-     */
     function toStartBlock(uint256 genesis, uint256 epoch) internal pure returns (uint256 res) {
         res = (epoch * interval()) + genesis;
     }
 
-    /**
-     * @dev #TODO
-     * @return res
-     */
     function toEndBlock(uint256 genesis, uint256 epoch) internal pure returns (uint256 res) {
         res = toStartBlock(genesis, epoch + 1) - 1;
     }

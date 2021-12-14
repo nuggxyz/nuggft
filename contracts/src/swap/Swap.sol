@@ -1,12 +1,13 @@
 // SPDX-License-Identifier: MIT
 
-import '../libraries/ShiftLib.sol';
-import '../libraries/QuadMath.sol';
+pragma solidity 0.8.4;
 
-import './SwapType.sol';
+import '../libraries/ShiftLib.sol';
+
+import './SwapShiftLib.sol';
 
 library Swap {
-    using SwapType for uint256;
+    using SwapShiftLib for uint256;
 
     struct History {
         Storage self;
@@ -60,28 +61,4 @@ library Swap {
 
         return swapData.isOwner() || (account == swapData.account() && over);
     }
-
-    // function points(uint256 total, uint256 bps) internal pure returns (uint256 res) {
-    //     res = QuadMath.mulDiv(total, bps, 10000);
-    // }
-
-    // function pointsWith(uint256 total, uint256 bps) internal pure returns (uint256 res) {
-    //     res = points(total, bps) + total;
-    // }
-
-    // function itemTokenId(uint256 itemid, uint256 tokenid) internal pure returns (uint256 res) {
-    //     res = (tokenid << 16) | itemid;
-    // }
-
-    // function tokenIdToAddress(uint256 tokenid) internal pure returns (address res) {
-    //     res = address(uint160((0x42069 << 140) | tokenid));
-    // }
-
-    // function addressToTokenId(address addr) internal pure returns (uint256 res) {
-    //     res = uint136(uint160(addr));
-    // }
-
-    // function isTokenIdAddress(address addr) internal view returns (bool res) {
-    //     if (uint160(addr) >> 80 == 0x42069 << 60) return true;
-    // }
 }
