@@ -18,6 +18,20 @@ interface IStakeable {
     function activeEthPerShare() external view returns (uint256);
 }
 
+interface ILoanable {
+    event TakeLoan(uint256 tokenId, address account, uint256 eth);
+    event Payoff(uint256 tokenId, address account, uint256 eth);
+    event Liquidate(uint256 tokenId, address account, uint256 eth);
+
+    function payoffAmount() external view returns (uint256);
+
+    function loan(uint256 tokenId) external;
+
+    function payoff(uint256 tokenId) external payable;
+
+    function liqidate(uint256 tokenId) external payable;
+}
+
 interface ITokenable is IERC721, IERC721Metadata {
     event SetProof(uint256 tokenId, uint256[] items);
 
@@ -101,7 +115,7 @@ interface ISwapable {
     function epoch() external view returns (uint256 res);
 }
 
-interface INuggFT is ISwapable, ITokenable, IStakeable {
+interface INuggFT is ISwapable, ITokenable, IStakeable, ILoanable {
     event PreMint(uint256 tokenId, uint256[] items);
 
     event PopItem(uint256 tokenId, uint256 itemId);

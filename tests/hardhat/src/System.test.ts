@@ -83,11 +83,9 @@ describe('uint tests', async function () {
 
             await fix.nuggft.connect(accounts.frank).approve(fix.nuggft.address, 9);
 
-            await fix.nuggft.connect(accounts.frank).burn(9);
-
             await fix.nuggft.connect(accounts.charile).approve(fix.nuggft.address, 0);
 
-            await Mining.advanceBlockTo(9000);
+            await Mining.advanceBlockTo(500);
 
             const epoch1 = await fix.nuggft.connect(accounts.charile).epoch();
 
@@ -102,6 +100,10 @@ describe('uint tests', async function () {
             // console.log(check1, check2, check1.eq(check2));
 
             await fix.nuggft.connect(accounts.charile).burn(0);
+
+            await fix.nuggft.connect(accounts.frank).loan(9);
+
+            await fix.nuggft.connect(accounts.frank).payoff(9, { value: await fix.nuggft.payoffAmount() });
         });
     });
 });
