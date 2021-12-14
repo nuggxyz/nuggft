@@ -59,11 +59,13 @@ export const NuggFatherFix: Fixture<NuggFatherFixture> = async function (
 
     hre.tracer.nameTags[nuggft.address] = `NuggFT`;
 
-    await nuggft.addToVault(hre.dotnugg.items.slice(0, 25).map((x) => x.hex));
-    await nuggft.addToVault(hre.dotnugg.items.slice(25, 50).map((x) => x.hex));
+    await nuggft.addToVault(hre.dotnugg.itemsByFeatureByIdHex);
 
-    await nuggft.addToVault(hre.dotnugg.items.slice(50, 75).map((x) => x.hex));
-    await nuggft.addToVault(hre.dotnugg.items.slice(75, 100).map((x) => x.hex));
+    // await nuggft.addToVault(hre.dotnugg.items.slice(0, 25).map((x) => x.hex));
+    // await nuggft.addToVault(hre.dotnugg.items.slice(25, 50).map((x) => x.hex));
+
+    // await nuggft.addToVault(hre.dotnugg.items.slice(50, 75).map((x) => x.hex));
+    // await nuggft.addToVault(hre.dotnugg.items.slice(75, 100).map((x) => x.hex));
 
     const blockOffset = BigNumber.from(await hre.ethers.provider.getBlockNumber());
 
