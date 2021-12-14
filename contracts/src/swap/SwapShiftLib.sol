@@ -1,8 +1,14 @@
 // SPDX-License-Identifier: MIT
 
-library SwapType {
+pragma solidity 0.8.4;
 
+import '../libraries/ShiftLib.sol';
 
+/// @title A title that should describe the contract/interface
+/// @author The name of the author
+/// @notice Explain to an end user what this does
+/// @dev Explain to a developer any extra details
+library SwapShiftLib {
     function eth(uint256 input) internal pure returns (uint256 res) {
         assembly {
             res := and(shr(160, input), 0xFFFFFFFFFFFFFF)
@@ -19,7 +25,6 @@ library SwapType {
             update := div(update, 0xE8D4A51000)
             for {
             } gt(update, 0xFFFFFFFFFFFF) {
-                // 13
             } {
                 res := add(res, 0x01)
                 update := shr(4, update)
@@ -35,6 +40,7 @@ library SwapType {
     // 9 f's
     function epoch(uint256 input, uint256 update) internal pure returns (uint256 res) {
         assert(update <= 0xFFFFFFFFF);
+
         assembly {
             res := and(input, 0xf000000000ffffffffffffffffffffffffffffffffffffffffffffffffffffff)
             res := or(res, shl(216, update))
@@ -54,13 +60,15 @@ library SwapType {
     }
 
     function account(uint256 input, uint160 update) internal pure returns (uint256 res) {
+        uint256 mask = ShiftLib.fullsubmask(160, 0);
+
         assembly {
-            input := and(input, 0xffffffffffffffffffffffff0000000000000000000000000000000000000000)
+            input := and(input, mask)
             res := or(input, update)
         }
     }
 
-        function isOwner(uint256 input, bool) internal pure returns (uint256 res) {
+    function isOwner(uint256 input, bool) internal pure returns (uint256 res) {
         assembly {
             res := or(input, shl(255, 0x1))
         }
@@ -71,5 +79,4 @@ library SwapType {
             res := and(shr(255, input), 0x1)
         }
     }
-
 }

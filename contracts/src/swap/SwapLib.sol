@@ -11,7 +11,7 @@ import '../proof/ProofLib.sol';
 import './Swap.sol';
 
 import './SwapLib.sol';
-import './SwapType.sol';
+import './SwapShiftLib.sol';
 
 import '../libraries/EpochLib.sol';
 import '../stake/StakeLib.sol';
@@ -23,7 +23,7 @@ library SwapLib {
     using ShiftLib for uint256;
     using Address for address payable;
     using QuadMath for uint256;
-    using SwapType for uint256;
+    using SwapShiftLib for uint256;
     using ProofLib for uint256;
 
     using Swap for Swap.Storage;
@@ -60,6 +60,8 @@ library SwapLib {
         uint256 genesis,
         uint256 tokenid
     ) internal returns (uint256 newSwapData) {
+        require(msg.value >= nuggft.getActiveEthPerShare(), 'SL:M:0');
+
         Swap.Storage storage _swap = nuggft._swaps[tokenid].self;
 
         uint256 activeEpoch = genesis.activeEpoch();
@@ -70,7 +72,7 @@ library SwapLib {
         // the ability to accidently place an offer for nugg A and end up minting nugg B.
         require(activeEpoch == tokenid, 'NS:M:0');
 
-        require(swapData == 0, 'NS:M:D');
+        require(swapData == 0 && offerData == 0, 'NS:M:D');
 
         (newSwapData, ) = uint256(0).epoch(activeEpoch).account(uint160(msg.sender)).eth(msg.value);
 
@@ -90,8 +92,6 @@ library SwapLib {
     ) internal {
         Swap.Storage storage _swap = nuggft._swaps[tokenId].self;
 
-        // Event.log(tokenId, 'tokenId');
-
         _commitCore(nuggft, _swap, genesis, uint160(msg.sender));
 
         emit Commit(tokenId, msg.sender, msg.value);
@@ -110,8 +110,6 @@ library SwapLib {
         require(msg.value > 0, 'SL:COM:2');
 
         require(offerData == 0 && swapData != 0, 'SL:HSO:0');
-
-        // Event.log(swapData, 'swapData');
 
         require(swapData.isOwner(), 'SL:HSO:1');
 
@@ -193,6 +191,7 @@ library SwapLib {
 
         if (Swap.checkClaimer(uint160(msg.sender), swapData, offerData, activeEpoch)) {
             delete _swap.data;
+
             if (endingEpoch == swapData.epoch()) {
                 nuggft.checkedMintTo(msg.sender, tokenid);
             } else {
@@ -210,6 +209,8 @@ library SwapLib {
         uint256 tokenid,
         uint256 floor
     ) internal {
+        require(floor >= nuggft.getActiveEthPerShare(), 'SL:S:0');
+
         Swap.Storage storage _swap = nuggft._swaps[tokenid].self;
 
         (uint256 swapData, ) = _swap.loadStorage(msg.sender);

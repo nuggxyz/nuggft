@@ -11,36 +11,33 @@ import '../proof/ProofLib.sol';
 import './Swap.sol';
 
 import './SwapLib.sol';
-import './SwapType.sol';
+import './SwapShiftLib.sol';
 
 import '../libraries/EpochLib.sol';
 
 library SwapItemLib {
-    using EpochLib for uint256;
-    using ShiftLib for uint256;
     using Address for address payable;
+
+    using EpochLib for uint256;
+    using SwapShiftLib for uint256;
+    using ShiftLib for uint256;
     using QuadMath for uint256;
-
-    using SwapType for uint256;
-    using Swap for Swap.Storage;
-
     using ProofLib for uint256;
+
+    using Swap for Swap.Storage;
 
     using Token for Token.Storage;
 
     event CommitItem(uint256 sellingTokenId, uint256 itemId, uint256 buyingTokenId, uint256 eth);
-
     event OfferItem(uint256 sellingTokenId, uint256 itemId, uint256 buyingTokenId, uint256 eth);
-
     event ClaimItem(uint256 sellingTokenId, uint256 itemId, uint256 buyingTokenId, uint256 endingEpoch);
-
     event SwapItem(uint256 sellingTokenId, uint256 itemId, uint256 eth);
 
     function getSwap(
         Token.Storage storage nuggft,
         uint256 sellingTokenId,
         uint256 itemId
-    ) internal returns (Swap.Storage storage) {
+    ) internal view returns (Swap.Storage storage) {
         return nuggft._swaps[sellingTokenId].items[itemId];
     }
 
@@ -56,9 +53,6 @@ library SwapItemLib {
         Swap.Storage storage _swap = nuggft._swaps[sellingTokenId].items[itemId];
 
         (uint256 swapData, uint256 offerData) = _swap.loadStorage(sendingTokenId);
-        Event.log(sellingTokenId, 'sellingTokenId', itemId, 'itemId', sendingTokenId, 'sendingTokenId');
-
-        Event.log(swapData, 'swapData', offerData, 'offerData', genesis, 'genesis');
 
         if (offerData == 0 && swapData.isOwner()) {
             commitItem(nuggft, genesis, sellingTokenId, itemId, sendingTokenId);

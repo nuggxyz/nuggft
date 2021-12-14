@@ -13,38 +13,20 @@ library TokenLib {
     using Token for Token.Storage;
     using StakeLib for Token.Storage;
 
-    /**
-     * @dev Emitted when `tokenId` token is transferred from `from` to `to`.
-     */
     event Transfer(address indexed from, address indexed to, uint256 indexed tokenId);
 
-    /**
-     * @dev Emitted when `owner` enables `approved` to manage the `tokenId` token.
-     */
     event Approval(address indexed owner, address indexed approved, uint256 indexed tokenId);
 
-    /**
-     * @dev Approve `to` to operate on `tokenId`
-     *
-     * Emits a {Approval} event.
-     */
     function _approve(
         Token.Storage storage nuggft,
         address to,
         uint256 tokenId
     ) internal {
         nuggft._tokenApprovals[tokenId] = to;
+
         emit Approval(nuggft._ownerOf(tokenId), to, tokenId);
     }
 
-    /**
-     * @dev Returns whether `tokenId` exists.
-     *
-     * Tokens can be managed by their owner or approved accounts via {approve} or {setApprovalForAll}.
-     *
-     * Tokens start existing when they are minted (`_mint`),
-     * and stop existing when they are burned (`_burn`).
-     */
     function checkedTransferFromSelf(
         Token.Storage storage nuggft,
         address to,
@@ -104,7 +86,11 @@ library TokenLib {
         emit Approval(owner, address(0), tokenId);
 
         nuggft._balances[owner] -= 1;
+
         delete nuggft._owners[tokenId];
+        delete nuggft._resolvers[tokenId];
+        delete nuggft._proofs[tokenId];
+        delete nuggft._swaps[tokenId];
 
         emit Transfer(owner, address(0), tokenId);
 

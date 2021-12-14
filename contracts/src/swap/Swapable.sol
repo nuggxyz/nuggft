@@ -14,7 +14,7 @@ abstract contract Swapable is ISwapable {
 
     function nuggft() internal view virtual returns (Token.Storage storage);
 
-    using SwapType for uint256;
+    using SwapShiftLib for uint256;
     using EpochLib for uint256;
 
     using Swap for Swap.Storage;

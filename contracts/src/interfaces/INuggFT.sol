@@ -101,7 +101,7 @@ interface ISwapable {
     function epoch() external view returns (uint256 res);
 }
 
-interface INuggFT is ISwapable, ITokenable {
+interface INuggFT is ISwapable, ITokenable, IStakeable {
     event PreMint(uint256 tokenId, uint256[] items);
 
     event PopItem(uint256 tokenId, uint256 itemId);
@@ -116,7 +116,7 @@ interface INuggFT is ISwapable, ITokenable {
 
     event Claim(uint256 tokenid, uint256 endingEpoch, address account);
 
-    event Swap(uint256 tokenid, address account, uint256 eth);
+    event StartSwap(uint256 tokenid, address account, uint256 eth);
 
     event CommitItem(uint256 sellingTokenId, uint256 itemId, uint256 buyingTokenId, uint256 eth);
 

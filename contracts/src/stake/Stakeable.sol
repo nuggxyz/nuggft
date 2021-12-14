@@ -9,9 +9,6 @@ import '../interfaces/INuggFT.sol';
 abstract contract Stakeable is IStakeable {
     using StakeLib for Token.Storage;
 
-    // Token.Storage internal nuggft();
-    function nuggft() internal view virtual returns (Token.Storage storage);
-
     function totalSupply() public view override returns (uint256 res) {
         res = totalStakedShares();
     }
@@ -27,4 +24,6 @@ abstract contract Stakeable is IStakeable {
     function activeEthPerShare() public view override returns (uint256 res) {
         res = nuggft().getActiveEthPerShare();
     }
+
+    function nuggft() internal view virtual returns (Token.Storage storage);
 }
