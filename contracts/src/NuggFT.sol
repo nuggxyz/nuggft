@@ -9,9 +9,11 @@ import './token/Token.sol';
 import './token/Tokenable.sol';
 import './swap/Swapable.sol';
 import './stake/Stakeable.sol';
+import './loan/Loanable.sol';
+
 import './swap/Swap.sol';
 
-contract NuggFT is INuggFT, Tokenable, Swapable, Stakeable {
+contract NuggFT is INuggFT, Tokenable, Swapable, Stakeable, Loanable {
     using EpochLib for uint256;
 
     using Vault for Vault.Storage;
@@ -71,11 +73,11 @@ contract NuggFT is INuggFT, Tokenable, Swapable, Stakeable {
         return IPostProcessResolver(resolver).postProcess(processedFile, data, customData);
     }
 
-    function genesis() public view override(Swapable, ISwapable, Tokenable) returns (uint256) {
+    function genesis() public view override(Swapable, ISwapable, Tokenable, Loanable) returns (uint256) {
         return _genesis;
     }
 
-    function nuggft() internal view override(Swapable, Tokenable, Stakeable) returns (Token.Storage storage s) {
+    function nuggft() internal view override(Swapable, Tokenable, Stakeable, Loanable) returns (Token.Storage storage s) {
         s = _nuggft;
     }
 }

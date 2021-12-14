@@ -30,6 +30,8 @@ library Token {
         // Mapping from token ID to owner address
         mapping(uint256 => address) _owners;
         // Mapping from token ID to owner address
+        mapping(uint256 => uint256) _loans;
+        // Mapping from token ID to owner address
         mapping(uint256 => uint256) _proofs;
         // Mapping from token ID to owner address
         mapping(uint256 => address) _resolvers;
