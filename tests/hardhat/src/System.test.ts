@@ -99,6 +99,8 @@ describe('uint tests', async function () {
 
             // console.log(check1, check2, check1.eq(check2));
 
+            console.log(await fix.nuggft.rawProcessURI(0));
+
             await fix.nuggft.connect(accounts.charile).burn(0);
 
             await fix.nuggft.connect(accounts.frank).loan(9);
