@@ -2,14 +2,14 @@
 
 pragma solidity ^0.8.0;
 
-import '@openzeppelin/contracts/utils/Address.sol';
+import '../libraries/SafeTransferLib.sol';
 
 import './Token.sol';
 
 import '../stake/StakeLib.sol';
 
 library TokenLib {
-    using Address for address payable;
+    using SafeTransferLib for address;
     using Token for Token.Storage;
     using StakeLib for Token.Storage;
 
@@ -99,6 +99,6 @@ library TokenLib {
         nuggft.subStakedEth(amount);
         nuggft.subStakedShares(1);
 
-        payable(owner).sendValue(nuggft.getActiveEthPerShare());
+        msg.sender.safeTransferETH(nuggft.getActiveEthPerShare());
     }
 }

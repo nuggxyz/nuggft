@@ -3,7 +3,7 @@
 pragma solidity 0.8.4;
 import '@openzeppelin/contracts/token/ERC1155/IERC1155.sol';
 
-import '@openzeppelin/contracts/utils/Address.sol';
+import '../libraries/SafeTransferLib.sol';
 
 import '../token/TokenLib.sol';
 import '../proof/ProofLib.sol';
@@ -16,7 +16,7 @@ import './SwapShiftLib.sol';
 import '../libraries/EpochLib.sol';
 
 library SwapItemLib {
-    using Address for address payable;
+    using SafeTransferLib for address;
 
     using EpochLib for uint256;
     using SwapShiftLib for uint256;
@@ -122,7 +122,7 @@ library SwapItemLib {
 
             ProofLib.push(nuggft, buyingTokenId, itemId);
         } else {
-            payable(msg.sender).sendValue(offerData.eth());
+            msg.sender.safeTransferETH(offerData.eth());
         }
 
         emit ClaimItem(sellingTokenId, itemId, buyingTokenId, endingEpoch);

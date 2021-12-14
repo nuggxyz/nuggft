@@ -20,6 +20,22 @@ contract smallvar is DSTestExtended {
         assertEq(res, 16000);
     }
 
+    function test_uint16_unchecked() public {
+        uint16 res = 16;
+        unchecked {
+            res *= 1000;
+        }
+        assertEq(res, 16000);
+    }
+
+    function test_uint16_unchecked_as256withid() public {
+        uint256 res = 16;
+        unchecked {
+            res *= 1000;
+        }
+        assertEq(res, 16000);
+    }
+
     function test_uint256() public {
         uint256 res = 16;
         res *= 1000;
@@ -40,5 +56,10 @@ contract smallvar is DSTestExtended {
             res := mul(res, 1000)
         }
         assertEq(res, 16000);
+    }
+
+    function setUint16(uint256 a, uint256 offset) internal returns (uint256) {
+        require(a < type(uint16).max);
+        return a << offset;
     }
 }

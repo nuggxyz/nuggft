@@ -18,11 +18,11 @@ contract pointerVsUint256 is DSTestExtended {
     }
 
     function test_uint256() public {
-        uint256 p = 43;
+        Pointer memory p = Pointer(43);
+        uint256 a = p.value;
+        p.value = add10(a);
 
-        p = add10(p);
-
-        assertEq(p, 53);
+        assertEq(p.value, 53);
     }
 
     function add10(uint256 val) internal pure returns (uint256 res) {

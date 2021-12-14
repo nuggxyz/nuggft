@@ -3,19 +3,16 @@
 pragma solidity 0.8.4;
 
 import '@openzeppelin/contracts/token/ERC721/IERC721Receiver.sol';
-import '@openzeppelin/contracts/token/ERC721/IERC721.sol';
-
-import '@openzeppelin/contracts/utils/Address.sol';
 
 import '../swap/Swap.sol';
 
 import '../vault/Vault.sol';
 
+import '../libraries/SafeTransferLib.sol';
+
 import '../../tests/Event.sol';
 
 library Token {
-    using Address for address;
-
     struct Storage {
         // Token name
         string _name;
@@ -90,7 +87,6 @@ library Token {
      */
     function _proofOf(Storage storage s, uint256 tokenId) internal view returns (uint256 data) {
         data = s._proofs[tokenId];
-        Event.log(data, 'data');
         require(data != 0, 'TOKEN:PO:0');
     }
 
@@ -126,7 +122,7 @@ library Token {
         uint256 tokenId,
         bytes memory _data
     ) internal returns (bool) {
-        if (to.isContract()) {
+        if (SafeTransferLib.isDeployedContract(to)) {
             try IERC721Receiver(to).onERC721Received(msg.sender, from, tokenId, _data) returns (bytes4 retval) {
                 return retval == IERC721Receiver.onERC721Received.selector;
             } catch (bytes memory reason) {

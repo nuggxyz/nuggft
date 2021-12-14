@@ -50,7 +50,7 @@ library ProofLib {
 
         nuggft._ownedItems[itemId]--;
 
-        (working, ) = ProofShiftLib.pushFirstEmpty(working, uint16(itemId));
+        working = ProofShiftLib.push(working, itemId);
 
         nuggft._proofs[tokenId] = working;
 
@@ -66,7 +66,7 @@ library ProofLib {
 
         require(working != 0, '1155:STF:0');
 
-        (working, , ) = ProofShiftLib.popFirstMatch(working, uint16(itemId));
+        working = ProofShiftLib.pop(working, itemId);
 
         nuggft._proofs[tokenId] = working;
 
@@ -75,15 +75,15 @@ library ProofLib {
         emit PopItem(tokenId, itemId);
     }
 
-    function open(Token.Storage storage nuggft, uint256 tokenId) internal {
-        uint256 working = proofOf(nuggft, tokenId);
+    // function open(Token.Storage storage nuggft, uint256 tokenId) internal {
+    //     uint256 working = proofOf(nuggft, tokenId);
 
-        working = ProofShiftLib.size(ProofShiftLib.size(working) + 1);
+    //     working = ProofShiftLib.size(ProofShiftLib.size(working) + 1);
 
-        nuggft._proofs[tokenId] = working;
+    //     nuggft._proofs[tokenId] = working;
 
-        emit OpenSlot(tokenId);
-    }
+    //     emit OpenSlot(tokenId);
+    // }
 
     function proofOf(Token.Storage storage nuggft, uint256 tokenId) internal view returns (uint256 res) {
         res = nuggft._proofs[tokenId];

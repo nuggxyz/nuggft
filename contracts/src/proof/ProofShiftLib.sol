@@ -7,12 +7,22 @@ import '../libraries/ShiftLib.sol';
 import '../vault/VaultShiftLib.sol';
 
 library ProofShiftLib {
+    using ShiftLib for uint256;
+
     uint256 constant ID_SIZE = 16;
     uint256 constant ID_FEATURE_SIZE = 4;
     uint256 constant ID_NUMBER_SIZE = 12;
 
+    uint256 constant FEATURE_ARR_SIZE = 8;
+
+    uint256 constant DISPLAY_ARRAY_POSITION = 0;
+    uint256 constant DISPLAY_ARRAY_MAX_LEN = 8;
+    uint256 constant DIAPLAY_ARRAY_ITEM_BIT_LEN = 16;
+
     function initFromSeed(uint256 lengthData, uint256 seed) internal pure returns (uint256 res) {
         require(seed != 0, 'seed');
+
+        uint256[] memory upd = new uint256[](4);
 
         uint256 pick0 = ((seed >> (4 + ID_SIZE * 0)) & ShiftLib.mask(ID_NUMBER_SIZE)) % VaultShiftLib.length(lengthData, 0);
         uint256 pick1 = ((seed >> (4 + ID_SIZE * 1)) & ShiftLib.mask(ID_NUMBER_SIZE)) % VaultShiftLib.length(lengthData, 1);
@@ -31,10 +41,17 @@ library ProofShiftLib {
         } else {
             pick3 = (6 << ID_NUMBER_SIZE) | (num % (VaultShiftLib.length(lengthData, 6)));
         }
-        pick1 |= 1 << ID_NUMBER_SIZE;
-        pick2 |= 2 << ID_NUMBER_SIZE;
+        // pick1 |= 1 << ID_NUMBER_SIZE;
+        // pick2 |= 2 << ID_NUMBER_SIZE;
 
-        res = (pick3 << (3 * ID_SIZE + 4)) | (pick2 << (2 * ID_SIZE + 4)) | (pick1 << (1 * ID_SIZE + 4)) | (pick0 << 4) | 4;
+        upd[0] = pick0;
+        upd[1] = pick1 | (1 << ID_NUMBER_SIZE);
+        upd[2] = pick2 | (2 << ID_NUMBER_SIZE);
+        upd[3] = pick3;
+
+        res = ShiftLib.setDynamicArray(res, upd, 16, 0, 4, 8);
+
+        // res = (pick3 << (3 * ID_SIZE + 4)) | (pick2 << (2 * ID_SIZE + 4)) | (pick1 << (1 * ID_SIZE + 4)) | (pick0 << 4) | 4;
     }
 
     function parseProofLogic(uint256 _proof)
@@ -48,98 +65,91 @@ library ProofShiftLib {
         )
     {
         proof = _proof;
-        defaultIds = new uint256[](_proof & ShiftLib.mask(4));
 
-        for (uint256 i = 0; i < defaultIds.length; i++) {
-            defaultIds[i] = (_proof >> (4 + i * 16)) & ShiftLib.mask(16);
-        }
-        extraIds = new uint256[](8);
-        overrides = new uint256[](8);
+        (defaultIds, , ) = ShiftLib.getDynamicArray(proof, 16, 0);
+
+        // for (uint256 i = 0; i < defaultIds.length; i++) {
+        //     defaultIds[i] = _proof.get(16, 4 + i * 16);
+        // }
+        // extraIds = new uint256[](8);
+        // overrides = new uint256[](8);
     }
 
     function size(uint256 input, uint256 update) internal pure returns (uint256 res) {
-        require(update < ShiftLib.mask(4), 'PT:DS:0');
-
-        res = input & ShiftLib.fullsubmask(4, 0);
-
-        res |= update;
+        res = ShiftLib.set(input, 4, 0, update);
     }
 
     function size(uint256 input) internal pure returns (uint256 res) {
-        res = input & ShiftLib.mask(4);
+        res = ShiftLib.get(input, 4, 0);
     }
 
     function items(uint256 input) internal pure returns (uint256[] memory res) {
-        uint256 s = size(input);
-        res = new uint256[](s);
-        input >>= 4;
-        for (uint256 i = 0; i < s; i++) {
-            res[i] = input & 0xffff;
-            input >>= 16;
-        }
+        (res, , ) = ShiftLib.getDynamicArray(input, 16, 0);
     }
 
-    function pushItem(
-        uint256 input,
-        uint16 itm,
-        uint8 at
-    ) internal pure returns (uint256 res) {
-        assembly {
-            let offset := add(4, mul(16, at))
-            res := and(input, not(shl(offset, 0xffff)))
-            res := or(input, shl(offset, itm))
-        }
+    // function pushItem(
+    //     uint256 input,
+    //     uint16 itm,
+    //     uint8 at
+    // ) internal pure returns (uint256 res) {
+    //     // Shift
+    //     // assembly {
+    //     //     let offset := add(4, mul(16, at))
+    //     //     res := and(input, not(shl(offset, 0xffff)))
+    //     //     res := or(input, shl(offset, itm))
+    //     // }
+    // }
+
+    // function popItem(uint256 input, uint8 at) internal pure returns (uint256 res, uint16 itm) {
+    //     // assembly {
+    //     //     let offset := add(4, mul(16, at))
+    //     //     res := and(input, not(shl(offset, 0xffff)))
+    //     //     itm := shr(offset, input)
+    //     // }
+    // }
+
+    function push(uint256 input, uint256 itemId) internal pure returns (uint256 res) {
+        res = ShiftLib.pushDynamicArray(input, 16, 0, itemId);
+        // uint256[] memory _items = items(input);
+        // for (uint8 i = 0; i < _items.length; i++) {
+        //     if (_items[i] == 0) {
+        //         index = i + 1;
+        //         break;
+        //     }
+        // }
+
+        // require(index > 0, 'SL:PFM:A');
+
+        // index--;
+
+        // res = pushItem(input, itemId, index);
     }
 
-    function popItem(uint256 input, uint8 at) internal pure returns (uint256 res, uint16 itm) {
-        assembly {
-            let offset := add(4, mul(16, at))
-            res := and(input, not(shl(offset, 0xffff)))
-            itm := shr(offset, input)
-        }
-    }
-
-    function pushFirstEmpty(uint256 input, uint16 itemId) internal pure returns (uint256 res, uint8 index) {
-        uint256[] memory _items = items(input);
-        for (uint8 i = 0; i < _items.length; i++) {
-            if (_items[i] == 0) {
-                index = i + 1;
-                break;
-            }
-        }
-
-        require(index > 0, 'SL:PFM:A');
-
-        index--;
-
-        res = pushItem(input, itemId, index);
-    }
-
-    function popFirstMatch(uint256 input, uint16 itemId)
+    function pop(uint256 input, uint256 itemId)
         internal
         pure
         returns (
-            uint256 res,
-            uint16 popped,
-            uint8 index
+            uint256 res // uint16 popped,
         )
+    // uint8 index
     {
-        uint256[] memory _items = items(input);
+        res = ShiftLib.popDynamicArray(input, 16, 0, itemId);
+        // uint256[] memory _items = items(input);
 
-        for (uint8 i = 0; i < _items.length; i++) {
-            if (_items[i] == itemId) {
-                index = i + 1;
-                break;
-            }
-        }
+        // for (uint8 i = 0; i < _items.length; i++) {
+        //     if (_items[i] == itemId) {
+        //         index = i + 1;
+        //         break;
+        //     }
+        // }
 
-        require(index > 0, 'SL:PFM:0');
+        // require(index > 0, 'SL:PFM:0');
 
-        index--;
+        // index--;
 
-        (res, popped) = popItem(input, index);
+        // (res, popped) = popItem(input, index);
 
-        require(popped == itemId, 'SL:PFM:1');
+        // require(popped == itemId, 'SL:PFM:1');
     }
 }
 
