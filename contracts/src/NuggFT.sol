@@ -37,10 +37,6 @@ contract NuggFT is INuggFT, Tokenable, Swapable, Stakeable, Loanable {
         emit Genesis();
     }
 
-    // function addToVault(uint256[][] calldata data) external {
-    //     nuggft()._vault.set(data);
-    // }
-
     function addToVault(uint256[][][] calldata data) external {
         nuggft()._vault.set(data);
     }

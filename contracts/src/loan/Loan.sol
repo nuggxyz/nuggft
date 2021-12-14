@@ -2,7 +2,7 @@
 
 pragma solidity 0.8.4;
 
-import '@openzeppelin/contracts/utils/Address.sol';
+import '../libraries/SafeTransferLib.sol';
 
 import '../token/Token.sol';
 import '../token/TokenLib.sol';
@@ -13,7 +13,7 @@ import '../libraries/EpochLib.sol';
 import '../libraries/QuadMath.sol';
 
 library Loan {
-    using Address for address payable;
+    using SafeTransferLib for address;
     using SwapShiftLib for uint256;
     using EpochLib for uint256;
     using QuadMath for uint256;
@@ -48,7 +48,7 @@ library Loan {
 
         nuggft._loans[tokenId] = loanData; // starting swap data
 
-        payable(msg.sender).sendValue(floor);
+        msg.sender.safeTransferETH(floor);
 
         nuggft.subStakedEth(floor);
 
