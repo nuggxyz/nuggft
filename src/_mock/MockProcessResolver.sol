@@ -2,8 +2,8 @@
 
 pragma solidity 0.8.4;
 
-import '../src/interfaces/IResolver.sol';
-import '../tests/Event.sol';
+import '../interfaces/IResolver.sol';
+import '../_test/utils/Print.sol';
 
 /**
  * @title DotNugg V1 - onchain encoder/decoder for dotnugg files
@@ -34,7 +34,7 @@ contract MockProcessResolver is INuggFtProcessor {
         bytes memory preProcessorData
     ) public view override returns (uint256[] memory resp) {
         for (uint256 i = 0; i < files.length; i++) {
-            Event.log(files[i], 'files[i]');
+            Print.log(files[i], 'files[i]');
         }
         return files[0];
     }

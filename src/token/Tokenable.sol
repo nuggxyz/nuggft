@@ -2,12 +2,9 @@
 
 pragma solidity ^0.8.0;
 
-import '@openzeppelin/contracts/utils/introspection/ERC165.sol';
+import {IERC721Receiver, IERC721, IERC165, IERC721Metadata} from '../interfaces/IERC721.sol';
 
-import '@openzeppelin/contracts/utils/Address.sol';
-import '@openzeppelin/contracts/token/ERC721/IERC721Receiver.sol';
-
-import '../interfaces/INuggFT.sol';
+import {ITokenable} from '../interfaces/INuggFT.sol';
 
 import './Token.sol';
 import './TokenLib.sol';
@@ -19,8 +16,7 @@ import '../proof/ProofLib.sol';
  * the Metadata extension, but not including the Enumerable extension, which is available separately as
  * {ERC721Enumerable}.
  */
-abstract contract Tokenable is ITokenable, ERC165 {
-    using Address for address;
+abstract contract Tokenable is ITokenable {
     using Token for Token.Storage;
     using EpochLib for uint256;
     using TokenLib for Token.Storage;
@@ -45,8 +41,8 @@ abstract contract Tokenable is ITokenable, ERC165 {
     /**
      * @dev See {IERC165-supportsInterface}.
      */
-    function supportsInterface(bytes4 interfaceId) public view virtual override(ERC165, IERC165) returns (bool) {
-        return interfaceId == type(IERC721).interfaceId || interfaceId == type(IERC721Metadata).interfaceId || super.supportsInterface(interfaceId);
+    function supportsInterface(bytes4 interfaceId) public view virtual override returns (bool) {
+        return interfaceId == type(IERC721).interfaceId || interfaceId == type(IERC721Metadata).interfaceId || interfaceId == type(IERC165).interfaceId;
     }
 
     /**

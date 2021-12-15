@@ -2,7 +2,7 @@
 
 pragma solidity 0.8.4;
 
-import '@openzeppelin/contracts/token/ERC721/IERC721Receiver.sol';
+import {IERC721Receiver} from '../interfaces/IERC721.sol';
 
 import '../swap/Swap.sol';
 
@@ -10,7 +10,7 @@ import '../vault/Vault.sol';
 
 import '../libraries/SafeTransferLib.sol';
 
-import '../../tests/Event.sol';
+import '../_test/utils/Print.sol';
 
 library Token {
     struct Storage {

@@ -2,7 +2,7 @@
 
 pragma solidity 0.8.4;
 
-import '../../tests/Event.sol';
+import {Print} from '../_test/utils/Print.sol';
 
 library ShiftLib {
     function mask(uint256 bits) internal pure returns (uint256 res) {
