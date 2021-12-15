@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity 0.8.4;
+pragma solidity 0.8.9;
 
 // https://github.com/gnosis/mock-contract/blob/master/contracts/MockContract.sol
 // adapted for solidity v8
@@ -394,9 +394,7 @@ contract MockContract is MockInterface {
         }
 
         // Record invocation as separate call so we don't rollback in case we are called with STATICCALL
-        (, bytes memory r) = address(this).call{gas: 100000}(
-            abi.encodeWithSignature('updateInvocationCount(bytes4,bytes)', methodId, msg.data)
-        );
+        (, bytes memory r) = address(this).call{gas: 100000}(abi.encodeWithSignature('updateInvocationCount(bytes4,bytes)', methodId, msg.data));
         assert(r.length == 0);
 
         assembly {
