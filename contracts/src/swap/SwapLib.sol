@@ -2,8 +2,6 @@
 
 pragma solidity 0.8.4;
 
-import '@openzeppelin/contracts/token/ERC1155/IERC1155.sol';
-
 import '../token/TokenLib.sol';
 import '../proof/ProofLib.sol';
 
@@ -92,6 +90,8 @@ library SwapLib {
         uint256 tokenId
     ) internal {
         Swap.Storage storage _swap = nuggft._swaps[tokenId].self;
+
+        require(msg.value >= nuggft.getActiveEthPerShare(), 'SL:S:0');
 
         _commitCore(nuggft, _swap, genesis, uint160(msg.sender));
 

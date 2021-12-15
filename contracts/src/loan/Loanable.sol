@@ -18,7 +18,7 @@ abstract contract Loanable is ILoanable {
     }
 
     function payoff(uint256 tokenId) external payable override {
-        Loan.payoff(nuggft(), tokenId);
+        Loan.payoff(nuggft(), genesis(), tokenId);
     }
 
     function liqidate(uint256 tokenId) external payable override {

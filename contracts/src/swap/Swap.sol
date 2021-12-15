@@ -54,7 +54,7 @@ library Swap {
         uint256 swapData,
         uint256 offerData,
         uint256 activeEpoch
-    ) internal pure returns (bool winner) {
+    ) internal view returns (bool winner) {
         require(offerData != 0, 'SL:CC:1');
 
         bool over = activeEpoch > swapData.epoch();

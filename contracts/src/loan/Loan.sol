@@ -55,12 +55,20 @@ library Loan {
         nuggft.subStakedShares(1);
     }
 
-    function payoff(Token.Storage storage nuggft, uint256 tokenId) internal {
+    function payoff(
+        Token.Storage storage nuggft,
+        uint256 genesis,
+        uint256 tokenId
+    ) internal {
         require(address(this) == nuggft._ownerOf(tokenId), 'LOAN:P:0');
 
         uint256 loanData = nuggft._loans[tokenId];
 
         require(loanData.account() == uint160(msg.sender), 'LOAN:P:1');
+
+        uint256 epoch = genesis.activeEpoch();
+
+        // require(loanData.epoch() < epoch, 'LOAN:L:2');
 
         require(msg.value >= payoffAmount(nuggft), 'LOAN:P:2');
 
