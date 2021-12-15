@@ -4,7 +4,7 @@ pragma solidity 0.8.4;
 
 // import 'hardhat/console.sol';
 
-library Event {
+library Print {
     function log(uint256 val, string memory name) internal view {
         // console.log('-----------------------');
         // console.log('variable: ', name);

@@ -6,7 +6,7 @@ import '../libraries/ShiftLib.sol';
 
 import '../libraries/SSTORE2.sol';
 
-import '../../tests/Event.sol';
+import '../_test/utils/Print.sol';
 
 import './VaultShiftLib.sol';
 

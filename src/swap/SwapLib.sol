@@ -15,7 +15,7 @@ import '../libraries/SafeTransferLib.sol';
 import '../libraries/EpochLib.sol';
 import '../stake/StakeLib.sol';
 
-import '../../tests/Event.sol';
+import '../_test/utils/Print.sol';
 
 library SwapLib {
     using EpochLib for uint256;

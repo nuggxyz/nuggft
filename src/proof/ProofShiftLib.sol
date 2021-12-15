@@ -6,7 +6,7 @@ import '../libraries/ShiftLib.sol';
 
 import '../vault/VaultShiftLib.sol';
 
-import '../../tests/Event.sol';
+import '../_test/utils/Print.sol';
 
 library ProofShiftLib {
     using ShiftLib for uint256;
@@ -53,7 +53,7 @@ library ProofShiftLib {
 
         res = ShiftLib.setDynamicArray(res, upd, 16, 0, 4, 8);
 
-        // Event.log(res, 'res');
+        // Print.log(res, 'res');
 
         // res = (pick3 << (3 * ID_SIZE + 4)) | (pick2 << (2 * ID_SIZE + 4)) | (pick1 << (1 * ID_SIZE + 4)) | (pick0 << 4) | 4;
     }
@@ -70,11 +70,11 @@ library ProofShiftLib {
     {
         proof = _proof;
 
-        // Event.log(proof, 'proof');
+        // Print.log(proof, 'proof');
 
         (defaultIds, , ) = ShiftLib.getDynamicArray(proof, 16, 0);
 
-        Event.log(defaultIds, "defaultIds");
+        Print.log(defaultIds, 'defaultIds');
 
         // for (uint256 i = 0; i < defaultIds.length; i++) {
         //     defaultIds[i] = _proof.get(16, 4 + i * 16);

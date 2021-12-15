@@ -1,11 +1,11 @@
 // SPDX-License-Identifier: UNLICENCED
 pragma solidity ^0.8.4;
 
-import '../../lib/DSTestExtended.sol';
+import '../utils/DSTestPlus.sol';
 
-import '../../../../contracts/src/libraries/ShiftLib.sol';
+import '../../libraries/ShiftLib.sol';
 
-contract ShiftLib_getArray is DSTestExtended {
+contract ShiftLib_getArray is DSTestPlus {
     function setUp() public {}
 
     function test_a() public {
