@@ -2,14 +2,14 @@
 
 pragma solidity 0.8.4;
 
+import '../../tests/Event.sol';
+
 library ShiftLib {
     function mask(uint256 bits) internal pure returns (uint256 res) {
         validateBits(bits);
 
-        unchecked {
-            assembly {
-                res := sub(exp(2, bits), 1)
-            }
+        assembly {
+            res := sub(exp(2, bits), 1)
         }
     }
 
@@ -17,10 +17,9 @@ library ShiftLib {
         validatePos(pos);
         res = mask(bits);
 
-        unchecked {
-            assembly {
-                res := not(shl(res, pos))
-            }
+        assembly {
+            res := not(shl(res, pos))
+
             // res = ~(mask(bits) << offset);
         }
     }
@@ -30,13 +29,11 @@ library ShiftLib {
         uint256 bits,
         uint256 pos,
         uint256 value
-    ) internal pure returns (uint256 postStore) {
+    ) internal view returns (uint256 postStore) {
         validateNum(value, bits);
 
-        unchecked {
-            postStore = preStore & fullsubmask(bits, pos);
-            postStore |= (value << pos);
-        }
+        postStore = preStore & fullsubmask(bits, pos);
+        postStore |= (value << pos);
     }
 
     function get(
@@ -46,9 +43,7 @@ library ShiftLib {
     ) internal pure returns (uint256 value) {
         validatePos(pos);
 
-        unchecked {
-            value = (store >> pos) & mask(bits);
-        }
+        value = (store >> pos) & mask(bits);
     }
 
     /*///////////////////////////////////////////////////////////////
@@ -64,12 +59,11 @@ library ShiftLib {
 
         res = get(store, bits, pos);
 
-        unchecked {
-            uint256 i = res & 0xff;
-            res >>= 8;
-            res <<= (i * 4);
-            res *= 0xE8D4A51000;
-        }
+        uint256 i = res & 0xff;
+        res >>= 8;
+        res <<= (i * 4);
+        res *= 0xE8D4A51000;
+
         // assembly {
         //     // res := and(shr(pos, store), 0xFFFFFFFFFFFFFF)
         //     let i := and(res, 0xff)
@@ -84,7 +78,7 @@ library ShiftLib {
         uint256 bits,
         uint256 pos,
         uint256 value
-    ) internal pure returns (uint256 res, uint256 dust) {
+    ) internal view returns (uint256 res, uint256 dust) {
         require(bits > 8, 'SHIFT:SCE');
 
         validatePosWithLength(pos, bits);
@@ -119,17 +113,15 @@ library ShiftLib {
         uint256 pos,
         uint256 numItems
     ) internal pure returns (uint256[] memory arr) {
-        validatePosWithLength(pos, numItems * bitsPerItem);
+        validatePosWithLength(pos, numItems * bitsPerItem - 1);
 
         store = get(store, numItems * bitsPerItem, pos);
 
-        unchecked {
-            arr = new uint256[](numItems);
-            uint256 msk = mask(bitsPerItem);
-            for (uint256 i = 0; i < numItems; i++) {
-                arr[i] = store & msk;
-                store >>= bitsPerItem;
-            }
+        arr = new uint256[](numItems);
+        uint256 msk = mask(bitsPerItem);
+        for (uint256 i = 0; i < numItems; i++) {
+            arr[i] = store & msk;
+            store >>= bitsPerItem;
         }
     }
 
@@ -138,14 +130,12 @@ library ShiftLib {
         uint256[] memory arr,
         uint256 bitsPerItem,
         uint256 pos
-    ) internal pure returns (uint256 res) {
+    ) internal view returns (uint256 res) {
         validatePosWithLength(pos, arr.length * bitsPerItem);
 
-        unchecked {
-            for (uint256 i = arr.length; i > 0; i--) {
-                validateNum(arr[i - 1], bitsPerItem);
-                res <<= arr[i - 1];
-            }
+        for (uint256 i = arr.length; i > 0; i--) {
+            validateNum(arr[i - 1], bitsPerItem);
+            res |= arr[i - 1] << ((bitsPerItem * (i - 1)));
         }
 
         res = set(store, arr.length * bitsPerItem, pos, res);
@@ -162,7 +152,7 @@ library ShiftLib {
         uint256 pos,
         uint256 truelen,
         uint256 maxLen
-    ) internal pure returns (uint256 res) {
+    ) internal view returns (uint256 res) {
         validatePosWithLength(pos, maxLen * bitsPerItem + 16);
 
         // must be different than popDynamicArray
@@ -201,7 +191,7 @@ library ShiftLib {
         uint256 bitsPerItem,
         uint256 pos,
         uint256 id
-    ) internal pure returns (uint256 res) {
+    ) internal view returns (uint256 res) {
         (uint256[] memory arr, uint256 truelen, uint256 maxlen) = getDynamicArray(store, bitsPerItem, pos);
 
         require(truelen > 0, 'SL:PDA:0');
@@ -223,7 +213,7 @@ library ShiftLib {
         uint256 bitsPerItem,
         uint256 pos,
         uint256 id
-    ) internal pure returns (uint256 res) {
+    ) internal view returns (uint256 res) {
         (uint256[] memory arr, uint256 truelen, uint256 maxlen) = getDynamicArray(store, bitsPerItem, pos);
 
         require(truelen < maxlen, 'SL:PDA:0');
@@ -237,7 +227,8 @@ library ShiftLib {
                             COMMON BASE UNITS
     //////////////////////////////////////////////////////////////*/
 
-    function validateNum(uint256 num, uint256 bits) internal pure {
+    function validateNum(uint256 num, uint256 bits) internal view {
+        // Event.log(num, "num", bits, "bits", mask(bits), "mask(bits)");
         require(num <= mask(bits), 'SHIFT:V:0');
     }
 

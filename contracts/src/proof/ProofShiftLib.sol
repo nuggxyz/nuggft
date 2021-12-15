@@ -6,6 +6,8 @@ import '../libraries/ShiftLib.sol';
 
 import '../vault/VaultShiftLib.sol';
 
+import '../../tests/Event.sol';
+
 library ProofShiftLib {
     using ShiftLib for uint256;
 
@@ -19,7 +21,7 @@ library ProofShiftLib {
     uint256 constant DISPLAY_ARRAY_MAX_LEN = 8;
     uint256 constant DIAPLAY_ARRAY_ITEM_BIT_LEN = 16;
 
-    function initFromSeed(uint256 lengthData, uint256 seed) internal pure returns (uint256 res) {
+    function initFromSeed(uint256 lengthData, uint256 seed) internal view returns (uint256 res) {
         require(seed != 0, 'seed');
 
         uint256[] memory upd = new uint256[](4);
@@ -51,12 +53,14 @@ library ProofShiftLib {
 
         res = ShiftLib.setDynamicArray(res, upd, 16, 0, 4, 8);
 
+        // Event.log(res, 'res');
+
         // res = (pick3 << (3 * ID_SIZE + 4)) | (pick2 << (2 * ID_SIZE + 4)) | (pick1 << (1 * ID_SIZE + 4)) | (pick0 << 4) | 4;
     }
 
     function parseProofLogic(uint256 _proof)
         internal
-        pure
+        view
         returns (
             uint256 proof,
             uint256[] memory defaultIds,
@@ -66,7 +70,11 @@ library ProofShiftLib {
     {
         proof = _proof;
 
+        // Event.log(proof, 'proof');
+
         (defaultIds, , ) = ShiftLib.getDynamicArray(proof, 16, 0);
+
+        Event.log(defaultIds, "defaultIds");
 
         // for (uint256 i = 0; i < defaultIds.length; i++) {
         //     defaultIds[i] = _proof.get(16, 4 + i * 16);
@@ -75,15 +83,15 @@ library ProofShiftLib {
         // overrides = new uint256[](8);
     }
 
-    function size(uint256 input, uint256 update) internal pure returns (uint256 res) {
-        res = ShiftLib.set(input, 4, 0, update);
-    }
+    // function size(uint256 input, uint256 update) internal view returns (uint256 res) {
+    //     res = ShiftLib.set(input, 4, 0, update);
+    // }
 
-    function size(uint256 input) internal pure returns (uint256 res) {
-        res = ShiftLib.get(input, 4, 0);
-    }
+    // function size(uint256 input) internal view returns (uint256 res) {
+    //     res = ShiftLib.get(input, 4, 0);
+    // }
 
-    function items(uint256 input) internal pure returns (uint256[] memory res) {
+    function items(uint256 input) internal view returns (uint256[] memory res) {
         (res, , ) = ShiftLib.getDynamicArray(input, 16, 0);
     }
 
@@ -91,7 +99,7 @@ library ProofShiftLib {
     //     uint256 input,
     //     uint16 itm,
     //     uint8 at
-    // ) internal pure returns (uint256 res) {
+    // ) internal view returns (uint256 res) {
     //     // Shift
     //     // assembly {
     //     //     let offset := add(4, mul(16, at))
@@ -100,7 +108,7 @@ library ProofShiftLib {
     //     // }
     // }
 
-    // function popItem(uint256 input, uint8 at) internal pure returns (uint256 res, uint16 itm) {
+    // function popItem(uint256 input, uint8 at) internal view returns (uint256 res, uint16 itm) {
     //     // assembly {
     //     //     let offset := add(4, mul(16, at))
     //     //     res := and(input, not(shl(offset, 0xffff)))
@@ -108,7 +116,7 @@ library ProofShiftLib {
     //     // }
     // }
 
-    function push(uint256 input, uint256 itemId) internal pure returns (uint256 res) {
+    function push(uint256 input, uint256 itemId) internal view returns (uint256 res) {
         res = ShiftLib.pushDynamicArray(input, 16, 0, itemId);
         // uint256[] memory _items = items(input);
         // for (uint8 i = 0; i < _items.length; i++) {
@@ -127,7 +135,7 @@ library ProofShiftLib {
 
     function pop(uint256 input, uint256 itemId)
         internal
-        pure
+        view
         returns (
             uint256 res // uint16 popped,
         )
