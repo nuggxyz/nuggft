@@ -5,20 +5,23 @@ pragma solidity 0.8.9;
 import {Print} from '../_test/utils/Print.sol';
 
 library ShiftLib {
+    /// @notice creates a bit mask
+    /// @dev res = (2 ^ bits) - 1
+    /// @param bits d
+    /// @return res d
+    /// @custom:alt res := sub(exp(2, bits), 1)
+    /// @dev no need to check if "bits" is < 256 as anything greater than 255 will be treated the same
     function mask(uint256 bits) internal pure returns (uint256 res) {
-        validateBits(bits);
-
         assembly {
-            res := sub(exp(2, bits), 1)
+            res := sub(shl(bits, 1), 1)
         }
     }
 
     function fullsubmask(uint256 bits, uint256 pos) internal pure returns (uint256 res) {
-        validatePos(pos);
-        res = mask(bits);
+        // validatePos(pos);
 
         assembly {
-            res := not(shl(res, pos))
+            res := not(shl(sub(shl(bits, 1), 1), pos))
 
             // res = ~(mask(bits) << offset);
         }
@@ -29,11 +32,16 @@ library ShiftLib {
         uint256 bits,
         uint256 pos,
         uint256 value
-    ) internal view returns (uint256 postStore) {
+    ) internal pure returns (uint256 postStore) {
         validateNum(value, bits);
 
         postStore = preStore & fullsubmask(bits, pos);
-        postStore |= (value << pos);
+
+        assembly {
+            value := shl(pos, value)
+        }
+        postStore |= value;
+        // postStore |= (value << pos);
     }
 
     function get(
@@ -43,7 +51,10 @@ library ShiftLib {
     ) internal pure returns (uint256 value) {
         validatePos(pos);
 
-        value = (store >> pos) & mask(bits);
+        assembly {
+            value := shr(pos, store)
+        }
+        value &= mask(bits);
     }
 
     /*///////////////////////////////////////////////////////////////
@@ -78,7 +89,7 @@ library ShiftLib {
         uint256 bits,
         uint256 pos,
         uint256 value
-    ) internal view returns (uint256 res, uint256 dust) {
+    ) internal pure returns (uint256 res, uint256 dust) {
         require(bits > 8, 'SHIFT:SCE');
 
         validatePosWithLength(pos, bits);
@@ -130,7 +141,7 @@ library ShiftLib {
         uint256[] memory arr,
         uint256 bitsPerItem,
         uint256 pos
-    ) internal view returns (uint256 res) {
+    ) internal pure returns (uint256 res) {
         validatePosWithLength(pos, arr.length * bitsPerItem);
 
         for (uint256 i = arr.length; i > 0; i--) {
@@ -152,7 +163,7 @@ library ShiftLib {
         uint256 pos,
         uint256 truelen,
         uint256 maxLen
-    ) internal view returns (uint256 res) {
+    ) internal pure returns (uint256 res) {
         validatePosWithLength(pos, maxLen * bitsPerItem + 16);
 
         // must be different than popDynamicArray
@@ -191,7 +202,7 @@ library ShiftLib {
         uint256 bitsPerItem,
         uint256 pos,
         uint256 id
-    ) internal view returns (uint256 res) {
+    ) internal pure returns (uint256 res) {
         (uint256[] memory arr, uint256 truelen, uint256 maxlen) = getDynamicArray(store, bitsPerItem, pos);
 
         require(truelen > 0, 'SL:PDA:0');
@@ -213,7 +224,7 @@ library ShiftLib {
         uint256 bitsPerItem,
         uint256 pos,
         uint256 id
-    ) internal view returns (uint256 res) {
+    ) internal pure returns (uint256 res) {
         (uint256[] memory arr, uint256 truelen, uint256 maxlen) = getDynamicArray(store, bitsPerItem, pos);
 
         require(truelen < maxlen, 'SL:PDA:0');
@@ -227,21 +238,23 @@ library ShiftLib {
                             COMMON BASE UNITS
     //////////////////////////////////////////////////////////////*/
 
-    function validateNum(uint256 num, uint256 bits) internal view {
-        // Event.log(num, "num", bits, "bits", mask(bits), "mask(bits)");
-        require(num <= mask(bits), 'SHIFT:V:0');
+    function validateNum(uint256 num, uint256 bits) internal pure {
+        assert(num <= mask(bits));
     }
 
     function validateBits(uint256 bits) internal pure {
-        require(bits <= 256 && bits > 0, 'SHIFT:BITS:0');
+        assert(bits <= 256);
+        assert(bits > 0);
     }
 
     function validatePosWithLength(uint256 pos, uint256 length) internal pure {
         validateBits(length);
-        require(pos < 256 - length && pos >= 0, 'SHIFT:POSWL:0');
+        assert(pos < 256 - length);
+        assert(pos >= 0);
     }
 
     function validatePos(uint256 pos) internal pure {
-        require(pos < 256 && pos >= 0, 'SHIFT:POS:0');
+        assert(pos < 256);
+        assert(pos >= 0);
     }
 }

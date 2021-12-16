@@ -36,11 +36,20 @@ library SwapLib {
     event Claim(uint256 tokenid, uint256 endingEpoch, address account);
     event StartSwap(uint256 tokenid, address account, uint256 eth);
 
-    function delegate(
-        Token.Storage storage nuggft,
-        uint256 genesis,
-        uint256 tokenid
-    ) internal {
+    function checkClaimer(
+        uint160 account,
+        uint256 swapData,
+        uint256 offerData,
+        uint256 activeEpoch
+    ) internal view returns (bool winner) {
+        require(offerData != 0, 'SL:CC:1');
+
+        bool over = activeEpoch > swapData.epoch();
+
+        return swapData.isOwner() || (account == swapData.account() && over);
+    }
+
+    function delegate(uint256 genesis, uint256 tokenid) internal {
         uint256 activeEpoch = genesis.activeEpoch();
 
         (uint256 swapData, uint256 offerData) = nuggft._swaps[tokenid].self.loadStorage(msg.sender);
@@ -54,11 +63,7 @@ library SwapLib {
         }
     }
 
-    function mint(
-        Token.Storage storage nuggft,
-        uint256 genesis,
-        uint256 tokenid
-    ) internal returns (uint256 newSwapData) {
+    function mint(uint256 genesis, uint256 tokenid) internal returns (uint256 newSwapData) {
         require(msg.value >= nuggft.getActiveEthPerShare(), 'SL:M:0');
 
         Swap.Storage storage _swap = nuggft._swaps[tokenid].self;
@@ -84,11 +89,7 @@ library SwapLib {
         emit Mint(activeEpoch, msg.sender, newSwapData.eth());
     }
 
-    function commit(
-        Token.Storage storage nuggft,
-        uint256 genesis,
-        uint256 tokenId
-    ) internal {
+    function commit(uint256 genesis, uint256 tokenId) internal {
         Swap.Storage storage _swap = nuggft._swaps[tokenId].self;
 
         require(msg.value >= nuggft.getActiveEthPerShare(), 'SL:S:0');
@@ -99,7 +100,6 @@ library SwapLib {
     }
 
     function _commitCore(
-        Token.Storage storage nuggft,
         Swap.Storage storage _swap,
         uint256 genesis,
         uint160 sender
@@ -128,11 +128,7 @@ library SwapLib {
         nuggft.addStakedEth(newSwapData.eth() - swapData.eth() + dust);
     }
 
-    function offer(
-        Token.Storage storage nuggft,
-        uint256 genesis,
-        uint256 tokenid
-    ) internal {
+    function offer(uint256 genesis, uint256 tokenid) internal {
         Swap.Storage storage _swap = nuggft._swaps[tokenid].self;
 
         _offerCore(nuggft, _swap, genesis, uint160(msg.sender));
@@ -141,7 +137,6 @@ library SwapLib {
     }
 
     function _offerCore(
-        Token.Storage storage nuggft,
         Swap.Storage storage _swap,
         uint256 genesis,
         uint160 sender
@@ -177,7 +172,6 @@ library SwapLib {
     }
 
     function claim(
-        Token.Storage storage nuggft,
         uint256 genesis,
         uint256 tokenid,
         uint256 endingEpoch
@@ -205,11 +199,7 @@ library SwapLib {
         emit Claim(tokenid, endingEpoch, msg.sender);
     }
 
-    function swap(
-        Token.Storage storage nuggft,
-        uint256 tokenid,
-        uint256 floor
-    ) internal {
+    function swap(uint256 tokenid, uint256 floor) internal {
         require(floor >= nuggft.getActiveEthPerShare(), 'SL:S:0');
 
         Swap.Storage storage _swap = nuggft._swaps[tokenid].self;
@@ -227,5 +217,123 @@ library SwapLib {
         nuggft.approvedTransferToSelf(msg.sender, tokenid);
 
         emit StartSwap(tokenid, msg.sender, floor);
+    }
+
+    event CommitItem(uint256 sellingTokenId, uint256 itemId, uint256 buyingTokenId, uint256 eth);
+    event OfferItem(uint256 sellingTokenId, uint256 itemId, uint256 buyingTokenId, uint256 eth);
+    event ClaimItem(uint256 sellingTokenId, uint256 itemId, uint256 buyingTokenId, uint256 endingEpoch);
+    event SwapItem(uint256 sellingTokenId, uint256 itemId, uint256 eth);
+
+    function getItemSwap(uint256 sellingTokenId, uint256 itemId) internal view returns (Swap.Storage storage) {
+        return nuggft._swaps[sellingTokenId].items[itemId];
+    }
+
+    function delegateItem(
+        uint256 genesis,
+        uint256 sellingTokenId,
+        uint256 itemId,
+        uint160 sendingTokenId
+    ) internal {
+        require(nuggft._ownerOf(sendingTokenId) == msg.sender, 'AUC:TT:3');
+
+        Swap.Storage storage _swap = nuggft._swaps[sellingTokenId].items[itemId];
+
+        (uint256 swapData, uint256 offerData) = _swap.loadStorage(sendingTokenId);
+
+        if (offerData == 0 && swapData.isOwner()) {
+            commitItem(nuggft, genesis, sellingTokenId, itemId, sendingTokenId);
+        } else {
+            offerItem(nuggft, genesis, sellingTokenId, itemId, sendingTokenId);
+        }
+    }
+
+    function commitItem(
+        uint256 genesis,
+        uint256 sellingTokenId,
+        uint256 itemId,
+        uint160 sendingTokenId
+    ) internal {
+        require(itemId < 0xffff, 'ML:CI:0');
+
+        require(nuggft._ownerOf(sendingTokenId) == msg.sender, 'AUC:TT:3');
+
+        Swap.Storage storage _swap = nuggft._swaps[sellingTokenId].items[itemId];
+
+        SwapLib._commitCore(nuggft, _swap, genesis, sendingTokenId);
+
+        emit CommitItem(sellingTokenId, itemId, sendingTokenId, msg.value);
+    }
+
+    function offerItem(
+        uint256 genesis,
+        uint256 sellingTokenId,
+        uint256 itemId,
+        uint160 sendingTokenId
+    ) internal {
+        require(itemId < 256, 'ML:OI:0');
+
+        require(nuggft._ownerOf(sendingTokenId) == msg.sender, 'AUC:TT:3');
+
+        Swap.Storage storage _swap = nuggft._swaps[sellingTokenId].items[itemId];
+
+        SwapLib._offerCore(nuggft, _swap, genesis, sendingTokenId);
+
+        emit OfferItem(sellingTokenId, itemId, sendingTokenId, msg.value);
+    }
+
+    function claimItem(
+        uint256 genesis,
+        uint256 sellingTokenId,
+        uint256 itemId,
+        uint256 endingEpoch,
+        uint160 buyingTokenId
+    ) internal {
+        require(nuggft._ownerOf(buyingTokenId) == msg.sender, 'AUC:TT:3');
+
+        require(itemId <= 0xffff, 'ML:CI:0');
+
+        Swap.Storage storage _swap = nuggft._swaps[sellingTokenId].items[itemId];
+
+        uint256 activeEpoch = genesis.activeEpoch();
+
+        (uint256 swapData, uint256 offerData) = _swap.loadStorage(buyingTokenId, endingEpoch);
+
+        delete _swap.offers[endingEpoch][buyingTokenId];
+
+        if (Swap.checkClaimer(buyingTokenId, swapData, offerData, activeEpoch)) {
+            delete _swap.data;
+
+            ProofLib.push(nuggft, buyingTokenId, itemId);
+        } else {
+            msg.sender.safeTransferETH(offerData.eth());
+        }
+
+        emit ClaimItem(sellingTokenId, itemId, buyingTokenId, endingEpoch);
+    }
+
+    function swapItem(
+        uint256 itemId,
+        uint256 floor,
+        uint160 sellingTokenId
+    ) internal {
+        require(nuggft._ownerOf(sellingTokenId) == msg.sender, 'AUC:TT:3');
+
+        require(itemId < 0xffff, 'ML:SI:0');
+
+        Swap.Storage storage _swap = nuggft._swaps[sellingTokenId].items[itemId];
+
+        (uint256 swapData, ) = _swap.loadStorage(sellingTokenId);
+
+        // make sure swap does not exist
+        require(swapData == 0, 'NS:SS:0');
+
+        // build starting swap data
+        (swapData, ) = swapData.account(sellingTokenId).isOwner(true).eth(floor);
+
+        _swap.data = swapData;
+
+        ProofLib.pop(nuggft, sellingTokenId, itemId);
+
+        emit SwapItem(sellingTokenId, itemId, floor);
     }
 }

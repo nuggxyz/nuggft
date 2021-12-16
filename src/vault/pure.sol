@@ -4,7 +4,12 @@ pragma solidity 0.8.9;
 
 import '../libraries/ShiftLib.sol';
 
-library VaultShiftLib {
+library VaultPure {
+    function decoder(bytes memory data, uint256 feature) internal pure returns (uint256[][] memory res) {
+        // bytes[] memory tmp = abi.decode((data), (bytes[]));
+        res = abi.decode(abi.decode((data), (bytes[]))[feature], (uint256[][]));
+    }
+
     function length(uint256 input, uint256 index) internal pure returns (uint256 res) {
         res = (input >> (12 * index)) & ShiftLib.mask(12);
     }
@@ -29,10 +34,6 @@ library VaultShiftLib {
     function getDataLength(uint256 data) internal pure returns (uint256 res) {
         res = (data >> 250);
     }
-
-    // function setDataLength(uint256 lengthData, uint256 feature) internal pure returns (uint256 res) {
-    //     res = (lengthData >> (12 * feature)) & ShiftLib.mask(12);
-    // }
 
     function getFeature(uint256[] memory data) internal pure returns (uint256 res) {
         res = (data[data.length - 1] >> 32) & 0x7;
