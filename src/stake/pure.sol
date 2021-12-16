@@ -2,9 +2,9 @@
 
 pragma solidity 0.8.9;
 
-import '../libraries/ShiftLib.sol';
+import {ShiftLib} from '../libraries/ShiftLib.sol';
 
-library StakeShiftLib {
+library StakePure {
     function getStakedEth(uint256 state) internal pure returns (uint256 res) {
         res = state & ShiftLib.mask(192);
     }

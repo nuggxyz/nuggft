@@ -4,7 +4,7 @@ pragma solidity 0.8.9;
 
 import {IERC721, IERC721Metadata, IERC165} from './IERC721.sol';
 
-interface IStakeable {
+interface IStakeExternal {
     event StakeEth(uint256 amount);
     event UnStakeEth(uint256 amount);
 
@@ -17,7 +17,7 @@ interface IStakeable {
     function activeEthPerShare() external view returns (uint256);
 }
 
-interface ILoanable {
+interface ILoanExternal {
     event TakeLoan(uint256 tokenId, address account, uint256 eth);
     event Payoff(uint256 tokenId, address account, uint256 eth);
     event Liquidate(uint256 tokenId, address account, uint256 eth);
@@ -31,7 +31,7 @@ interface ILoanable {
     function liqidate(uint256 tokenId) external payable;
 }
 
-interface ITokenable is IERC721, IERC721Metadata {
+interface ITokenExternal is IERC721, IERC721Metadata {
     event SetProof(uint256 tokenId, uint256[] items);
 
     function proofOf(uint256 tokenId) external view returns (uint256);
@@ -49,7 +49,7 @@ interface ITokenable is IERC721, IERC721Metadata {
     function resolverOf(uint256 tokenId) external view returns (address);
 }
 
-interface ISwapable {
+interface ISwapExternal {
     function delegate(uint256 tokenid) external payable;
 
     function delegateItem(
@@ -114,7 +114,7 @@ interface ISwapable {
     function epoch() external view returns (uint256 res);
 }
 
-interface INuggFT is ISwapable, ITokenable, IStakeable, ILoanable {
+interface INuggFT is ISwapExternal, ITokenExternal, IStakeExternal, ILoanExternal {
     event PreMint(uint256 tokenId, uint256[] items);
 
     event PopItem(uint256 tokenId, uint256 itemId);
