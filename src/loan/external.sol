@@ -4,22 +4,22 @@ pragma solidity 0.8.9;
 
 import {ILoanExternal} from '../interfaces/INuggFT.sol';
 
-import {LoanLogic} from './logic.sol';
+import {LoanCore} from './core.sol';
 
 abstract contract LoanExternal is ILoanExternal {
     function loan(uint256 tokenId) external override {
-        LoanLogic.loan(tokenId);
+        LoanCore.loan(tokenId);
     }
 
     function payoff(uint256 tokenId) external payable override {
-        LoanLogic.payoff(tokenId);
+        LoanCore.payoff(tokenId);
     }
 
     function liqidate(uint256 tokenId) external payable override {
-        LoanLogic.liquidate(tokenId);
+        LoanCore.liquidate(tokenId);
     }
 
     function payoffAmount() external view override returns (uint256 res) {
-        res = LoanLogic.payoffAmount();
+        res = LoanCore.payoffAmount();
     }
 }

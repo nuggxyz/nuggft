@@ -12,7 +12,7 @@ library Vault {
         mapping(uint256 => address) resolvers;
     }
 
-    function ptr() internal pure returns (Storage storage s) {
+    function ptr() internal view returns (Storage storage s) {
         return Global.ptr().vault;
     }
 }

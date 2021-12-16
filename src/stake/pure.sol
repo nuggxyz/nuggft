@@ -25,6 +25,6 @@ library StakePure {
 
     function getStakedSharesAndEth(uint256 state) internal pure returns (uint256 shares, uint256 eth) {
         shares = getStakedShares(state);
-        eth = getStakedEth(eth);
+        eth = getStakedEth(state);
     }
 }

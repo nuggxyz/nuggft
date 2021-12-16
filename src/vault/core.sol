@@ -10,7 +10,7 @@ import {VaultPure} from './pure.sol';
 
 import {Vault} from './storage.sol';
 
-library VaultLogic {
+library VaultCore {
     using VaultPure for uint256;
 
     function set(uint256[][][] calldata data) internal {
@@ -53,7 +53,6 @@ library VaultLogic {
         data = new uint256[][](ids.length);
 
         for (uint256 i = 0; i < ids.length; i++) {
-            Print.log(ids[i], 'ids[i]');
             data[i] = get(ids[i] >> 12, ids[i] & ShiftLib.mask(12));
         }
     }

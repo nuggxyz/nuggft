@@ -1,7 +1,13 @@
+// SPDX-License-Identifier: MIT
+
+pragma solidity 0.8.9;
+
 import {Vault} from '../vault/storage.sol';
 import {Stake} from '../stake/storage.sol';
 import {Swap} from '../swap/storage.sol';
 import {Proof} from '../proof/storage.sol';
+import {Token} from '../token/storage.sol';
+import {Loan} from '../loan/storage.sol';
 
 library Global {
     struct Storage {
@@ -14,15 +20,14 @@ library Global {
         // Token symbol
         Proof.Storage proof;
         //
-        Loan.Storage loan;
+        Loan.Mapping loan;
         //
-        Swap.Storage swap;
-        mapping(uint256 => uint256) _ownedItems;
+        Swap.Full swap;
     }
 
-    function ptr() internal returns (Storage storage s) {
+    function ptr() internal pure returns (Storage storage s) {
         assembly {
-            s.slot := 1
+            s.slot := 0x42069
         }
     }
 }

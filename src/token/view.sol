@@ -1,4 +1,6 @@
-import {Stake} from './storage.sol';
+// SPDX-License-Identifier: MIT
+
+import {Token} from './storage.sol';
 
 library TokenView {
     /**
@@ -21,8 +23,8 @@ library TokenView {
      * @dev See {IERC721-getApproved}.
      */
     function getApproved(uint256 tokenId) internal view returns (address) {
-        require(exists(s, tokenId), 'ERC721: approved query for nonexistent token');
-        return Token.ptr().tokenApprovals[tokenId];
+        require(exists(tokenId), 'ERC721: approved query for nonexistent token');
+        return Token.ptr().approvals[tokenId];
     }
 
     /**
@@ -33,13 +35,13 @@ library TokenView {
         require(owner != address(0), 'ERC721: owner query for nonexistent token');
     }
 
-    /**
-     * @dev See {IERC721-ownerOf}.
-     */
-    function resolverOf(uint256 tokenId) internal view returns (address resolver) {
-        resolver = Token.ptr().resolvers[tokenId];
-        require(resolver != address(0), 'ERC721: resolver query for nonexistent token');
-    }
+    // /**
+    //  * @dev See {IERC721-ownerOf}.
+    //  */
+    // function resolverOf(uint256 tokenId) internal view returns (address resolver) {
+    //     resolver = VaultView.resolvers[tokenId];
+    //     require(resolver != address(0), 'ERC721: resolver query for nonexistent token');
+    // }
 
     /**
      * @dev See {IERC721-balanceOf}.
@@ -49,7 +51,7 @@ library TokenView {
         return Token.ptr().balances[owner];
     }
 
-    function isApprovedOrOwner(address spender, uint256 tokenId) internal view virtual returns (bool) {
+    function isApprovedOrOwner(address spender, uint256 tokenId) internal view returns (bool) {
         address owner = TokenView.ownerOf(tokenId);
         return (spender == owner || getApproved(tokenId) == spender || isApprovedForAll(owner, spender));
     }

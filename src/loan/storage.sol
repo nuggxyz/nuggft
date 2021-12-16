@@ -9,11 +9,19 @@ library Loan {
         mapping(uint256 => uint256) map;
     }
 
-    function get(uint256 tokenId) internal pure returns (uint256) {
-        return Global.ptr().loan.map[tokenId];
+    function ptr() internal view returns (Mapping storage m) {
+        return Global.ptr().loan;
     }
 
-    function set(uint256 tokenId, uint256 data) internal pure {
-        Global.ptr().loan.map[tokenId] = data;
+    function handleBurn(uint256 tokenId) internal {
+        delete ptr().map[tokenId];
+    }
+
+    function get(uint256 tokenId) internal view returns (uint256) {
+        return ptr().map[tokenId];
+    }
+
+    function set(uint256 tokenId, uint256 data) internal {
+        ptr().map[tokenId] = data;
     }
 }

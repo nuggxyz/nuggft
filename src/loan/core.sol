@@ -4,12 +4,19 @@ pragma solidity 0.8.9;
 
 import {SafeTransferLib} from '../libraries/SafeTransferLib.sol';
 
-import {TokenView} from '../token/view.sol';
-import {TokenLogic} from '../token/logic.sol';
+import {Global} from '../global/storage.sol';
+import {Loan} from '../loan/storage.sol';
+
+import {TokenCore} from '../token/core.sol';
+import {StakeCore} from '../stake/core.sol';
 
 import {SwapPure} from '../swap/pure.sol';
 
-library LoanLogic {
+import {TokenView} from '../token/view.sol';
+import {StakeView} from '../stake/view.sol';
+import {EpochView} from '../epoch/view.sol';
+
+library LoanCore {
     using SwapPure for uint256;
 
     uint256 constant LIQUIDATION_PERIOD = 1000;
@@ -20,19 +27,19 @@ library LoanLogic {
 
     function loan(uint256 tokenId) internal {
         // we know the loan data is blank because it is owned by the user
-        require(TokenLogic.ownerOf(tokenId) == msg.sender, 'LOAN:L:0');
+        require(TokenView.ownerOf(tokenId) == msg.sender, 'LOAN:L:0');
 
         uint256 floor = StakeView.getActiveEthPerShare();
 
-        TokenLogic.approvedTransferToSelf(msg.sender, tokenId);
+        TokenCore.approvedTransferToSelf(tokenId);
 
         uint256 epoch = EpochView.activeEpoch();
 
         (uint256 loanData, ) = uint256(0).account(uint160(msg.sender)).epoch(epoch).eth(floor);
 
-        Global.ptr().loans[tokenId] = loanData; // starting swap data
+        Global.ptr().loan.map[tokenId] = loanData; // starting swap data
 
-        StakeLogic.subStakedSharePayingSender();
+        StakeCore.subStakedSharePayingSender();
 
         emit TakeLoan(tokenId, msg.sender, floor);
     }
@@ -40,27 +47,27 @@ library LoanLogic {
     function payoff(uint256 tokenId) internal {
         require(address(this) == TokenView.ownerOf(tokenId), 'LOAN:P:0');
 
-        uint256 loanData = nuggft._loans[tokenId];
+        uint256 loanData = Loan.get(tokenId);
 
         require(loanData.account() == uint160(msg.sender), 'LOAN:P:1');
 
         uint256 epoch = EpochView.activeEpoch();
 
-        require(msg.value >= payoffAmount(nuggft), 'LOAN:P:2');
+        require(msg.value >= payoffAmount(), 'LOAN:P:2');
 
-        delete Global.ptr().loans[tokenId];
+        delete Global.ptr().loan.map[tokenId];
 
         emit Payoff(tokenId, msg.sender, msg.value);
 
-        nuggft.checkedTransferFromSelf(msg.sender, tokenId);
+        TokenCore.checkedTransferFromSelf(msg.sender, tokenId);
 
-        nuggft.addStakedSharesAndEth(1, msg.value);
+        StakeCore.addStakedSharesAndEth(1, msg.value);
     }
 
     function liquidate(uint256 tokenId) internal {
         require(address(this) == TokenView.ownerOf(tokenId), 'LOAN:L:0');
 
-        uint256 loanData = LoanView.data(tokenId);
+        uint256 loanData = Global.ptr().loan.map[tokenId];
 
         require(loanData != 0, 'LOAN:L:1');
 
@@ -72,13 +79,13 @@ library LoanLogic {
 
         require(msg.value >= minOffer, 'LOAN:L:3');
 
-        delete Global.ptr().loans[tokenId];
+        delete Global.ptr().loan.map[tokenId];
 
         emit Liquidate(tokenId, msg.sender, msg.value);
 
-        TokenLogic.checkedTransferFromSelf(msg.sender, tokenId);
+        TokenCore.checkedTransferFromSelf(msg.sender, tokenId);
 
-        StakeLogic.addStakedSharesAndEth(1, msg.value);
+        StakeCore.addStakedSharesAndEth(1, msg.value);
     }
 
     function payoffAmount() internal view returns (uint256 res) {
