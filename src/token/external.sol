@@ -4,20 +4,21 @@ pragma solidity ^0.8.0;
 
 import {IERC721Receiver, IERC721, IERC165, IERC721Metadata} from '../interfaces/IERC721.sol';
 
-import {IToken} from '../interfaces/INuggFT.sol';
+import {ITokenExternal} from '../interfaces/INuggFT.sol';
 
 import {Token} from './storage.sol';
 
 import {TokenView} from './view.sol';
 
-import './logic.sol';
+import {TokenCore} from './core.sol';
+import {GlobalCore} from '../global/core.sol';
 
 /**
  * @dev Implementation of https://eips.ethereum.org/EIPS/eip-721[ERC721] Non-Fungible Token Standard, including
  * the Metadata extension, but not including the Enumerable extension, which is available separately as
  * {ERC721Enumerable}.
  */
-abstract contract TokenExternal is TokenExternal {
+abstract contract TokenExternal is ITokenExternal {
     bytes32 immutable _name;
 
     bytes32 immutable _symbol;
@@ -38,21 +39,21 @@ abstract contract TokenExternal is TokenExternal {
      * Emits a {Transfer} event.
      */
     function burn(uint256 tokenId) external {
-        Global.ptr().burnForStake(tokenId);
+        GlobalCore.burn(tokenId);
     }
 
     /**
      * @dev See {IERC721-approve}.
      */
     function approve(address to, uint256 tokenId) public override {
-        TokenLogic.checkedApprove(to, tokenId);
+        TokenCore.checkedApprove(to, tokenId);
     }
 
     /**
      * @dev See {IERC721-setApprovalForAll}.
      */
     function setApprovalForAll(address operator, bool approved) public override {
-        TokenLogic.checkedSetApprovalForAll(operator, approved);
+        TokenCore.checkedSetApprovalForAll(operator, approved);
     }
 
     /**

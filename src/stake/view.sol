@@ -1,6 +1,8 @@
-import {Global} from '../global/storage.sol';
+// SPDX-License-Identifier: MIT
 
-import {QuadMath} from '../libraries/QuadMath.sol';
+pragma solidity 0.8.9;
+
+import {Global} from '../global/storage.sol';
 
 import {StakePure} from './pure.sol';
 
@@ -11,7 +13,7 @@ library StakeView {
 
     function getActiveEthPerShare() internal view returns (uint256 res) {
         res = Stake.ptr().data;
-        res = res.getStakedEth() / res.getStakedShares();
+        res = res.getStakedShares() == 0 ? 0 : res.getStakedEth() / res.getStakedShares();
     }
 
     function getActiveStakedShares() internal view returns (uint256 res) {

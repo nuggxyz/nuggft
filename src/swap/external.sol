@@ -4,7 +4,10 @@ pragma solidity 0.8.9;
 
 import {ISwapExternal} from '../interfaces/INuggFT.sol';
 
+import {SwapCore} from './core.sol';
 import {SwapView} from './view.sol';
+import {Swap} from './storage.sol';
+import {EpochView} from '../epoch/view.sol';
 
 abstract contract SwapExternal is ISwapExternal {
     function getActiveSwap(uint256 tokenId)
@@ -21,20 +24,12 @@ abstract contract SwapExternal is ISwapExternal {
         return SwapView.getActiveSwap(tokenId);
     }
 
-    function getOfferByAccount(
-        uint256 tokenId,
-        uint256 index,
-        address account
-    ) external view override returns (uint256 amount) {
-        return SwapView.getOfferByAccount(tokenId, index, account);
-    }
-
-    function epoch() external view override returns (uint256 res) {
-        res = EpochView.activeEpoch();
+    function getOfferByAccount(uint256 tokenId, address account) external view override returns (uint256 amount) {
+        return SwapView.getOfferByAccount(tokenId, account);
     }
 
     function delegate(uint256 tokenId) external payable override {
-        SwapLogic.delegate(tokenId);
+        SwapCore.delegate(tokenId);
     }
 
     function delegateItem(
@@ -42,24 +37,23 @@ abstract contract SwapExternal is ISwapExternal {
         uint256 itemid,
         uint256 buyingTokenId
     ) external payable override {
-        SwapLogic.delegateItem(sellingTokenId, itemid, uint160(buyingTokenId));
+        SwapCore.delegateItem(sellingTokenId, itemid, uint160(buyingTokenId));
     }
 
-    function claim(uint256 tokenId, uint256 endingEpoch) external override {
-        SwapLogic.claim(tokenId, endingEpoch);
+    function claim(uint256 tokenId) external override {
+        SwapCore.claim(tokenId);
     }
 
     function claimItem(
         uint256 sellingTokenId,
         uint256 itemid,
-        uint256 buyingTokenId,
-        uint256 endingEpoch
+        uint256 buyingTokenId
     ) external override {
-        SwapLogic.claimItem(sellingTokenId, itemid, endingEpoch, uint160(buyingTokenId));
+        SwapCore.claimItem(sellingTokenId, itemid, uint160(buyingTokenId));
     }
 
     function swap(uint256 tokenId, uint256 floor) external override {
-        SwapLogic.swap(tokenId, floor);
+        SwapCore.swap(tokenId, floor);
     }
 
     function swapItem(
@@ -67,6 +61,6 @@ abstract contract SwapExternal is ISwapExternal {
         uint256 itemid,
         uint256 floor
     ) external override {
-        SwapLogic.swapItem(itemid, floor, uint160(sellingTokenId));
+        SwapCore.swapItem(itemid, floor, uint160(sellingTokenId));
     }
 }

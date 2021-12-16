@@ -9,7 +9,7 @@ library Stake {
         uint256 data;
     }
 
-    function ptr() internal pure returns (Storage storage s) {
+    function ptr() internal view returns (Storage storage s) {
         return Global.ptr().stake;
     }
 }

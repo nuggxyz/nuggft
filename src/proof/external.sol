@@ -8,7 +8,8 @@ import {Proof} from './storage.sol';
 
 import {EpochView} from '../epoch/view.sol';
 
-import {ProofLogic} from './logic.sol';
+import {ProofCore} from './core.sol';
+import {ProofView} from './core.sol';
 
 /**
  * @dev Implementation of https://eips.ethereum.org/EIPS/eip-721[ERC721] Non-Fungible Token Standard, including
@@ -18,11 +19,11 @@ import {ProofLogic} from './logic.sol';
 abstract contract ProofExternal is IProofExternal {
     function proofOf(uint256 tokenId) public view virtual override returns (uint256) {
         if (tokenId == EpochView.activeEpoch()) {
-            (uint256 p, , , ) = ProofLib.pendingProof();
+            (uint256 p, , , ) = ProofView.pendingProof();
             return p;
         }
 
-        return ProofView.proofOf(tokenId);
+        return ProofView.checkedProofOfIncludingPending(tokenId);
     }
 
     function parsedProofOf(uint256 tokenId)
@@ -37,6 +38,6 @@ abstract contract ProofExternal is IProofExternal {
             uint256[] memory overrides
         )
     {
-        return ProofLib.parseProof(Global.ptr(), tokenId);
+        return ProofView.parseProof(tokenId);
     }
 }

@@ -2,9 +2,12 @@
 
 pragma solidity 0.8.9;
 
+import {SafeTransferLib} from '../libraries/SafeTransferLib.sol';
+
 import {ShiftLib} from '../libraries/ShiftLib.sol';
 
 import {StakePure} from './pure.sol';
+import {StakeView} from './view.sol';
 
 import {Stake} from './storage.sol';
 
@@ -12,7 +15,7 @@ import {Stake} from './storage.sol';
 /// @author The name of the author
 /// @notice Explain to an end user what this does
 /// @dev Explain to a developer any extra details
-library StakeLogic {
+library StakeCore {
     using StakePure for uint256;
 
     /// @param amount a parameter just like in doxygen (must be followed by parameter name)
@@ -23,6 +26,8 @@ library StakeLogic {
 
     function addStakedSharesAndEth(uint256 shares, uint256 eth) internal {
         require(shares < ShiftLib.mask(64) && eth < ShiftLib.mask(192), 'SL:SS:0');
+
+        require(eth >= StakeView.getActiveEthPerShare(), 'SL:M:0');
 
         uint256 read = Stake.ptr().data;
 
@@ -48,6 +53,8 @@ library StakeLogic {
 
         Stake.ptr().data = read.setStakedEth(read.getStakedEth() + amount);
 
+        assert(Stake.ptr().data.getStakedEth() > 0);
+
         emit StakeEth(amount);
     }
 
@@ -62,16 +69,18 @@ library StakeLogic {
     function subStakedSharePayingSender() internal {
         uint256 read = Stake.ptr().data;
 
-        (uint256 activeShare, uint256 activeEth) = read.getStakedSharesAndEth();
+        (uint256 activeShares, uint256 activeEth) = read.getStakedSharesAndEth();
 
         uint256 eth = StakeView.getActiveEthPerShare();
 
         require(activeShares >= 1, 'SL:SS:0');
-        require(activeEth >= eth, 'SL:SS:0');
+        // require(activeEth >= eth, 'SL:SS:1');
 
-        Stake.ptr().data = read.setStakedShares(activeShare - amount).setStakedEth(activeEth - eth);
+        // Print.log(activeEth, 'activeEth', eth, 'eth');
 
-        msg.sender.safeTransferETH(eth);
+        Stake.ptr().data = read.setStakedShares(activeShares - 1).setStakedEth(activeEth - eth);
+
+        SafeTransferLib.safeTransferETH(msg.sender, eth);
     }
 
     // function subStakedEth(uint256 amount) internal {

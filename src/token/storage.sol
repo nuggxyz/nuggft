@@ -16,7 +16,7 @@ library Token {
         mapping(address => mapping(address => bool)) operatorApprovals;
     }
 
-    function ptr() internal pure returns (Storage storage s) {
+    function ptr() internal view returns (Storage storage s) {
         return Global.ptr().token;
     }
 }

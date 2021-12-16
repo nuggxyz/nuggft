@@ -8,7 +8,7 @@ import {VaultPure} from '../vault/pure.sol';
 
 import '../_test/utils/Print.sol';
 
-library ProofShiftLib {
+library ProofPure {
     using ShiftLib for uint256;
 
     uint256 constant ID_SIZE = 16;
@@ -20,37 +20,6 @@ library ProofShiftLib {
     uint256 constant DISPLAY_ARRAY_POSITION = 0;
     uint256 constant DISPLAY_ARRAY_MAX_LEN = 8;
     uint256 constant DIAPLAY_ARRAY_ITEM_BIT_LEN = 16;
-
-    function initFromSeed(uint256 lengthData, uint256 seed) internal view returns (uint256 res) {
-        require(seed != 0, 'seed');
-
-        uint256[] memory upd = new uint256[](4);
-
-        uint256 pick0 = ((seed >> (4 + ID_SIZE * 0)) & ShiftLib.mask(ID_NUMBER_SIZE)) % VaultPure.length(lengthData, 0);
-        uint256 pick1 = ((seed >> (4 + ID_SIZE * 1)) & ShiftLib.mask(ID_NUMBER_SIZE)) % VaultPure.length(lengthData, 1);
-        uint256 pick2 = ((seed >> (4 + ID_SIZE * 2)) & ShiftLib.mask(ID_NUMBER_SIZE)) % VaultPure.length(lengthData, 2);
-
-        uint256 pick3 = (seed >> 69) % 256;
-
-        uint256 num = (seed >> (4 + ID_SIZE * 3)) & ShiftLib.mask(ID_NUMBER_SIZE);
-
-        if (pick3 < 96) {
-            pick3 = (3 << ID_NUMBER_SIZE) | (num % (VaultPure.length(lengthData, 3)));
-        } else if (pick3 < 192) {
-            pick3 = (4 << ID_NUMBER_SIZE) | (num % (VaultPure.length(lengthData, 4)));
-        } else if (pick3 < 250) {
-            pick3 = (5 << ID_NUMBER_SIZE) | (num % (VaultPure.length(lengthData, 5)));
-        } else {
-            pick3 = (6 << ID_NUMBER_SIZE) | (num % (VaultPure.length(lengthData, 6)));
-        }
-
-        upd[0] = pick0;
-        upd[1] = pick1 | (1 << ID_NUMBER_SIZE);
-        upd[2] = pick2 | (2 << ID_NUMBER_SIZE);
-        upd[3] = pick3;
-
-        res = ShiftLib.setDynamicArray(res, upd, 16, 0, 4, 8);
-    }
 
     function parseProofLogic(uint256 _proof)
         internal
@@ -64,11 +33,11 @@ library ProofShiftLib {
     {
         proof = _proof;
 
-        Print.log(proof, 'proof');
+        // Print.log(proof, 'proof');
 
         (defaultIds, , ) = ShiftLib.getDynamicArray(proof, 16, 0);
 
-        Print.log(defaultIds, 'defaultIds');
+        // Print.log(defaultIds, 'defaultIds');
     }
 
     function items(uint256 input) internal view returns (uint256[] memory res) {
