@@ -4,6 +4,10 @@ pragma solidity 0.8.9;
 
 import {Epoch} from './EpochStorage.sol';
 
+/// @title EpochPure
+/// @author dub6ix.eth
+/// @notice logical functions to calcualte the current epoch
+/// @dev Explain to a developer any extra details
 library EpochPure {
     function toStartBlock(uint256 epoch) internal pure returns (uint256 res) {
         res = ((epoch - 1) * Epoch.INTERVAL) + Epoch.GENESIS;
