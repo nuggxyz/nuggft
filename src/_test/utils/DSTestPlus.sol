@@ -11,10 +11,10 @@ contract DSTestPlus is DSTest {
 
     address internal constant DEAD_ADDRESS = 0xDeaDbeefdEAdbeefdEadbEEFdeadbeEFdEaDbeeF;
 
-    string private checkpointLabel;
+    bytes32 checkpointLabel;
     uint256 private checkpointGasLeft;
 
-    function startMeasuringGas(string memory label) internal virtual {
+    function startMeasuringGas(bytes32 label) internal virtual {
         checkpointLabel = label;
         checkpointGasLeft = gasleft();
     }
@@ -22,13 +22,13 @@ contract DSTestPlus is DSTest {
     function stopMeasuringGas() internal virtual {
         uint256 checkpointGasLeft2 = gasleft();
 
-        string memory label = checkpointLabel;
+        bytes32 label = checkpointLabel;
 
-        emit log_named_uint(string(abi.encodePacked(label, ' Gas')), checkpointGasLeft - checkpointGasLeft2);
+        emit log_named_uint(string(abi.encodePacked(label, ' Gas')), checkpointGasLeft - checkpointGasLeft2 - 22134);
     }
 
-    function fail(string memory err) internal virtual {
-        emit log_named_string('Error', err);
+    function fail(bytes32 err) internal virtual {
+        emit log_named_string('Error', string(abi.encodePacked(err)));
         fail();
     }
 
