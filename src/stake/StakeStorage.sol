@@ -9,7 +9,15 @@ library Stake {
         uint256 data;
     }
 
-    function ptr() internal view returns (Storage storage s) {
+    function sstore(uint256 input) internal {
+        Global.ptr().stake.data = input;
+    }
+
+    function spointer() internal view returns (Storage storage s) {
         return Global.ptr().stake;
+    }
+
+    function sload() internal view returns (uint256 res) {
+        return Global.ptr().stake.data;
     }
 }

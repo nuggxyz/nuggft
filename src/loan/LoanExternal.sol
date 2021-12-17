@@ -15,10 +15,6 @@ abstract contract LoanExternal is ILoanExternal {
         LoanCore.payoff(tokenId);
     }
 
-    function liqidate(uint256 tokenId) external payable override {
-        LoanCore.liquidate(tokenId);
-    }
-
     function payoffAmount() external view override returns (uint256 res) {
         res = LoanCore.payoffAmount();
     }

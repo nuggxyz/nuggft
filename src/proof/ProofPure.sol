@@ -6,7 +6,6 @@ import {ShiftLib} from '../libraries/ShiftLib.sol';
 
 import {VaultPure} from '../vault/VaultPure.sol';
 
-
 library ProofPure {
     using ShiftLib for uint256;
 
@@ -25,29 +24,25 @@ library ProofPure {
         view
         returns (
             uint256 proof,
-            uint256[] memory defaultIds,
-            uint256[] memory extraIds,
-            uint256[] memory overrides
+            uint16[] memory defaultIds,
+            uint16[] memory extraIds,
+            uint16[] memory overrides
         )
     {
         proof = _proof;
 
-        // Print.log(proof, 'proof');
-
         (defaultIds, , ) = ShiftLib.getDynamicArray(proof, 16, 0);
-
-        // Print.log(defaultIds, 'defaultIds');
     }
 
-    function items(uint256 input) internal view returns (uint256[] memory res) {
+    function items(uint256 input) internal view returns (uint16[] memory res) {
         (res, , ) = ShiftLib.getDynamicArray(input, 16, 0);
     }
 
-    function push(uint256 input, uint256 itemId) internal view returns (uint256 res) {
+    function push(uint256 input, uint16 itemId) internal view returns (uint256 res) {
         res = ShiftLib.pushDynamicArray(input, 16, 0, itemId);
     }
 
-    function pop(uint256 input, uint256 itemId) internal view returns (uint256 res) {
+    function pop(uint256 input, uint16 itemId) internal view returns (uint256 res) {
         res = ShiftLib.popDynamicArray(input, 16, 0, itemId);
     }
 }

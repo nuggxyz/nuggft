@@ -33,9 +33,9 @@ abstract contract ProofExternal is IProofExternal {
         override
         returns (
             uint256 proof,
-            uint256[] memory defaultIds,
-            uint256[] memory extraIds,
-            uint256[] memory overrides
+            uint16[] memory defaultIds,
+            uint16[] memory extraIds,
+            uint16[] memory overrides
         )
     {
         return ProofView.parseProof(tokenId);

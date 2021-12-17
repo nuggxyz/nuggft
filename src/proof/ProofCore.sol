@@ -3,6 +3,7 @@
 pragma solidity 0.8.9;
 
 import {ShiftLib} from '../libraries/ShiftLib.sol';
+import {SafeCastLib} from '../libraries/SafeCastLib.sol';
 
 import {EpochView} from '../epoch/EpochView.sol';
 
@@ -14,21 +15,22 @@ import {VaultPure} from '../vault/VaultPure.sol';
 import {Vault} from '../vault/VaultStorage.sol';
 
 library ProofCore {
+    using SafeCastLib for uint256;
     using ProofPure for uint256;
 
     /*━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
                                 EVENTS
     ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━*/
 
-    event SetProof(uint256 tokenId, uint256[] items);
-    event PopItem(uint256 tokenId, uint256 itemId);
-    event PushItem(uint256 tokenId, uint256 itemId);
+    event SetProof(uint256 tokenId, uint16[] items);
+    event PopItem(uint256 tokenId, uint16 itemId);
+    event PushItem(uint256 tokenId, uint16 itemId);
 
     /*━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
                             ITEM MANAGEMENT
     ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━*/
 
-    function push(uint256 tokenId, uint256 itemId) internal {
+    function push(uint256 tokenId, uint16 itemId) internal {
         uint256 working = ProofView.checkedProofOf(tokenId);
 
         require(Proof.ptr().protcolItems[itemId] > 0, '1155:SBTF:1');
@@ -42,7 +44,7 @@ library ProofCore {
         emit PushItem(tokenId, itemId);
     }
 
-    function pop(uint256 tokenId, uint256 itemId) internal {
+    function pop(uint256 tokenId, uint16 itemId) internal {
         uint256 working = ProofView.checkedProofOf(tokenId);
 
         require(working != 0, '1155:STF:0');
@@ -72,7 +74,14 @@ library ProofCore {
 
         Proof.set(tokenId, seed);
 
-        (, uint256[] memory items, , ) = ProofPure.parseProofLogic(seed);
+        (, uint16[] memory items, , ) = ProofPure.parseProofLogic(seed);
+
+        // just for fun
+        assembly {
+            let ptr := mload(items)
+            ptr := sub(ptr, 1)
+            mstore(items, ptr)
+        }
 
         emit SetProof(tokenId, items);
     }
@@ -82,11 +91,11 @@ library ProofCore {
 
         uint256 lendata = Vault.ptr().lengthData;
 
-        uint256[] memory upd = new uint256[](4);
+        uint16[] memory upd = new uint16[](4);
 
-        uint256 ID_SIZE = 16;
-        uint256 ID_FEATURE_SIZE = 4;
-        uint256 ID_NUMBER_SIZE = 12;
+        uint8 ID_SIZE = 16;
+        uint8 ID_FEATURE_SIZE = 4;
+        uint8 ID_NUMBER_SIZE = 12;
 
         uint256 pick0 = ((seed >> (4 + ID_SIZE * 0)) & ShiftLib.mask(ID_NUMBER_SIZE)) % VaultPure.length(lendata, 0);
         uint256 pick1 = ((seed >> (4 + ID_SIZE * 1)) & ShiftLib.mask(ID_NUMBER_SIZE)) % VaultPure.length(lendata, 1);
@@ -106,10 +115,10 @@ library ProofCore {
             pick3 = (6 << ID_NUMBER_SIZE) | (num % (VaultPure.length(lendata, 6)));
         }
 
-        upd[0] = pick0;
-        upd[1] = pick1 | (1 << ID_NUMBER_SIZE);
-        upd[2] = pick2 | (2 << ID_NUMBER_SIZE);
-        upd[3] = pick3;
+        upd[0] = pick0.safe16();
+        upd[1] = (pick1 | (1 << ID_NUMBER_SIZE)).safe16();
+        upd[2] = (pick2 | (2 << ID_NUMBER_SIZE)).safe16();
+        upd[3] = pick3.safe16();
 
         res = ShiftLib.setDynamicArray(res, upd, 16, 0, 4, 8);
     }

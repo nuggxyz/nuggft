@@ -2,6 +2,7 @@
 
 pragma solidity 0.8.9;
 
+import {SafeCastLib} from '../libraries/SafeCastLib.sol';
 import {ShiftLib} from '../libraries/ShiftLib.sol';
 import {SSTORE2} from '../libraries/SSTORE2.sol';
 
@@ -10,6 +11,7 @@ import {VaultPure} from './VaultPure.sol';
 
 library VaultCore {
     using VaultPure for uint256;
+    using SafeCastLib for uint16;
 
     function set(uint256[][][] calldata data) internal {
         require(data.length <= 8 && data.length > 0, 'VAULT:FEAT:0');
@@ -18,7 +20,7 @@ library VaultCore {
 
         uint256 ptr;
 
-        for (uint256 i = 0; i < data.length; i++) {
+        for (uint8 i = 0; i < data.length; i++) {
             ptr = ptr.length(i, data[i].length);
             a[i] = abi.encode(data[i]);
         }
@@ -30,7 +32,7 @@ library VaultCore {
         Vault.ptr().lengthData = Vault.ptr().lengthData.addLengths(ptr);
     }
 
-    function get(uint256 feature, uint256 id) internal view returns (uint256[] memory data) {
+    function get(uint8 feature, uint256 id) internal view returns (uint256[] memory data) {
         uint256 ptrlen = Vault.ptr().ptrs.length;
 
         uint256 pointer;
@@ -47,11 +49,11 @@ library VaultCore {
         data = abi.decode(abi.decode(SSTORE2.read(pointer.addr()), (bytes[]))[feature], (uint256[][]))[id];
     }
 
-    function getBatch(uint256[] memory ids) internal view returns (uint256[][] memory data) {
+    function getBatch(uint16[] memory ids) internal view returns (uint256[][] memory data) {
         data = new uint256[][](ids.length);
 
         for (uint256 i = 0; i < ids.length; i++) {
-            data[i] = get(ids[i] >> 12, ids[i] & ShiftLib.mask(12));
+            data[i] = get((ids[i] >> 12).safe8(), ids[i] & ShiftLib.mask(12));
         }
     }
 }

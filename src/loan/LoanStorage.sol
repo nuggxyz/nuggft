@@ -17,11 +17,15 @@ library Loan {
         delete ptr().map[tokenId];
     }
 
-    function get(uint256 tokenId) internal view returns (uint256) {
+    function sload(uint256 tokenId) internal view returns (uint256) {
         return ptr().map[tokenId];
     }
 
-    function set(uint256 tokenId, uint256 data) internal {
+    function sstore(uint256 tokenId, uint256 data) internal {
         ptr().map[tokenId] = data;
+    }
+
+    function spurge(uint256 tokenId) internal {
+        delete ptr().map[tokenId];
     }
 }

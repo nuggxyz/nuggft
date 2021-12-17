@@ -9,13 +9,13 @@ library VaultPure {
         res = abi.decode(abi.decode((data), (bytes[]))[feature], (uint256[][]));
     }
 
-    function length(uint256 input, uint256 index) internal pure returns (uint256 res) {
+    function length(uint256 input, uint8 index) internal pure returns (uint256 res) {
         res = (input >> (12 * index)) & ShiftLib.mask(12);
     }
 
     function length(
         uint256 input,
-        uint256 index,
+        uint8 index,
         uint256 update
     ) internal pure returns (uint256 res) {
         res = input & ShiftLib.fullsubmask(12, 12 * index);
@@ -23,7 +23,7 @@ library VaultPure {
     }
 
     function addLengths(uint256 baseData, uint256 dataToAdd) internal pure returns (uint256 res) {
-        for (uint256 i = 0; i < 8; i++) {
+        for (uint8 i = 0; i < 8; i++) {
             res = length(res, i, length(baseData, i) + length(dataToAdd, i));
         }
 
@@ -42,7 +42,7 @@ library VaultPure {
         res = (lengthData >> (12 * feature)) & ShiftLib.mask(12);
     }
 
-    function incrementLengthOf(uint256 lengthData, uint256 feature) internal pure returns (uint256 res, uint256 update) {
+    function incrementLengthOf(uint256 lengthData, uint8 feature) internal pure returns (uint256 res, uint256 update) {
         update = getLengthOf(lengthData, feature) + 1;
 
         res = lengthData & ShiftLib.fullsubmask(12, 12 * feature);

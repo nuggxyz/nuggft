@@ -33,7 +33,7 @@ abstract contract VaultExternal is IVaultExternal {
     function rawProcessURI(uint256 tokenId) public view returns (uint256[] memory res) {
         require(TokenView.exists(tokenId) || tokenId == EpochView.activeEpoch(), 'NFT:NTM:0');
 
-        (, uint256[] memory ids, , uint256[] memory overrides) = ProofView.parsedProofOfIncludingPending(tokenId);
+        (, uint16[] memory ids, , uint16[] memory overrides) = ProofView.parsedProofOfIncludingPending(tokenId);
 
         bytes memory data = abi.encode(tokenId, ids, overrides, address(this));
 
@@ -49,7 +49,7 @@ abstract contract VaultExternal is IVaultExternal {
     function tokenURI(uint256 tokenId, address resolver) public view returns (bytes memory res) {
         require(ProofView.hasProof(tokenId) || tokenId == EpochView.activeEpoch(), 'NFT:NTM:0');
 
-        (, uint256[] memory ids, , uint256[] memory overrides) = ProofView.parsedProofOfIncludingPending(tokenId);
+        (, uint16[] memory ids, , uint16[] memory overrides) = ProofView.parsedProofOfIncludingPending(tokenId);
 
         uint256[][] memory files = VaultCore.getBatch(ids);
 

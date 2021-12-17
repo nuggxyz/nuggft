@@ -12,7 +12,7 @@ import {StakeView} from './StakeView.sol';
 import {Stake} from './StakeStorage.sol';
 
 /// @title A title that should describe the contract/interface
-/// @author The name of the author
+/// @author dub6ix
 /// @notice Explain to an end user what this does
 /// @dev Explain to a developer any extra details
 library StakeCore {
@@ -29,36 +29,30 @@ library StakeCore {
                                  ADD
     ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━*/
 
-    function addStakedSharesAndEth(uint256 shares, uint256 eth) internal {
-        require(shares < ShiftLib.mask(64) && eth < ShiftLib.mask(192), 'SL:SS:0');
+    function addStakedShareAndEth(uint192 eth) internal {
+        uint256 cache = Stake.sload();
 
-        require(eth >= StakeView.getActiveEthPerShare(), 'SL:M:0');
+        (uint64 activeShares, uint192 activeEth) = cache.getStakedSharesAndEth();
 
-        uint256 read = Stake.ptr().data;
+        require(eth >= cache.getEthPerShare(), 'SL:M:0');
 
-        (uint256 activeShare, uint256 activeEth) = read.getStakedSharesAndEth();
-
-        Stake.ptr().data = read.setStakedShares(activeShare + shares).setStakedEth(activeEth + eth);
+        Stake.sstore(cache.setStakedShares(activeShares + 1).setStakedEth(activeEth + eth));
 
         emit StakeEth(eth);
     }
 
-    function addStakedShares(uint256 amount) internal {
-        require(amount < ShiftLib.mask(64), 'SL:SS:0');
+    function addStakedShares(uint64 amount) internal {
+        uint256 cache = Stake.sload();
 
-        uint256 read = Stake.ptr().data;
+        require(cache.getStakedEth() == 0, 'SC:0');
 
-        Stake.ptr().data = read.setStakedShares(read.getStakedShares() + amount);
+        Stake.sstore(cache.setStakedShares(cache.getStakedShares() + amount));
     }
 
-    function addStakedEth(uint256 amount) internal {
-        require(amount < ShiftLib.mask(192), 'SL:SS:0');
+    function addStakedEth(uint192 amount) internal {
+        uint256 cache = Stake.sload();
 
-        uint256 read = Stake.ptr().data;
-
-        Stake.ptr().data = read.setStakedEth(read.getStakedEth() + amount);
-
-        assert(Stake.ptr().data.getStakedEth() > 0);
+        Stake.sstore(cache.setStakedEth(cache.getStakedEth() + amount));
 
         emit StakeEth(amount);
     }
@@ -68,19 +62,19 @@ library StakeCore {
     ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━*/
 
     function subStakedSharePayingSender() internal {
-        uint256 read = Stake.ptr().data;
+        uint256 cache = Stake.sload();
 
-        (uint256 activeShares, uint256 activeEth) = read.getStakedSharesAndEth();
+        (uint64 activeShares, uint192 activeEth) = cache.getStakedSharesAndEth();
 
-        uint256 eth = StakeView.getActiveEthPerShare();
+        uint192 eps = cache.getEthPerShare();
 
         require(activeShares >= 1, 'SL:SS:0');
-        require(activeEth >= eth, 'SL:SS:1');
+        require(activeEth >= eps, 'SL:SS:1');
 
-        Stake.ptr().data = read.setStakedShares(activeShares - 1).setStakedEth(activeEth - eth);
+        Stake.sstore(cache.setStakedShares(activeShares - 1).setStakedEth(activeEth - eps));
 
-        SafeTransferLib.safeTransferETH(msg.sender, eth);
+        SafeTransferLib.safeTransferETH(msg.sender, eps);
 
-        emit UnStakeEth(eth);
+        emit UnStakeEth(eps);
     }
 }

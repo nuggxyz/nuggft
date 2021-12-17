@@ -28,7 +28,7 @@ library Swap {
     struct Memory {
         uint256 swapData;
         uint256 offerData;
-        uint256 activeEpoch;
+        uint32 activeEpoch;
         uint160 sender;
     }
 
@@ -36,20 +36,20 @@ library Swap {
                                 TOKEN SWAP
     ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━*/
 
-    function _tokenSwapPtr(uint256 tokenId) private view returns (Storage storage si) {
+    function _tokenSwapPtr(uint160 tokenId) private view returns (Storage storage si) {
         return Global.ptr().swap.map[tokenId].self;
     }
 
-    function loadTokenSwap(uint256 tokenId, address account) internal view returns (Storage storage s, Memory memory m) {
+    function loadTokenSwap(uint160 tokenId, address account) internal view returns (Storage storage s, Memory memory m) {
         s = _tokenSwapPtr(tokenId);
         m = _load(s, uint160(account));
     }
 
-    function deleteTokenOffer(uint256 tokenId, uint160 account) internal {
+    function deleteTokenOffer(uint160 tokenId, uint160 account) internal {
         delete _tokenSwapPtr(tokenId).offers[account];
     }
 
-    function deleteTokenSwap(uint256 tokenId) internal {
+    function deleteTokenSwap(uint160 tokenId) internal {
         delete _tokenSwapPtr(tokenId).data;
     }
 
@@ -57,30 +57,28 @@ library Swap {
                                 ITEM SWAP
     ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━*/
 
-    function _itemSwapPtr(uint256 tokenId, uint256 itemId) private view returns (Storage storage si) {
+    function _itemSwapPtr(uint160 tokenId, uint16 itemId) private view returns (Storage storage si) {
         return Global.ptr().swap.map[tokenId].items[itemId];
     }
 
     function loadItemSwap(
-        uint256 tokenId,
-        uint256 itemId,
+        uint160 tokenId,
+        uint16 itemId,
         uint160 account
     ) internal view returns (Storage storage s, Memory memory m) {
-        require(itemId <= 0xffff, 'ML:CI:0');
-
         s = _itemSwapPtr(tokenId, itemId);
         m = _load(s, account);
     }
 
     function deleteItemOffer(
-        uint256 tokenId,
-        uint256 itemId,
+        uint160 tokenId,
+        uint16 itemId,
         uint160 account
     ) internal {
         delete _itemSwapPtr(tokenId, itemId).offers[account];
     }
 
-    function deleteItemSwap(uint256 tokenId, uint256 itemId) internal {
+    function deleteItemSwap(uint160 tokenId, uint16 itemId) internal {
         delete _itemSwapPtr(tokenId, itemId).data;
     }
 
@@ -89,12 +87,13 @@ library Swap {
     ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━*/
 
     function _load(Storage storage ptr, uint160 account) private view returns (Memory memory m) {
-        m.swapData = ptr.data;
+        uint256 cache = ptr.data;
+        m.swapData = cache;
         m.activeEpoch = EpochView.activeEpoch();
         m.sender = account;
 
-        if (account == m.swapData.account()) {
-            m.offerData = m.swapData;
+        if (account == cache.account()) {
+            m.offerData = cache;
         } else {
             m.offerData = ptr.offers[account];
         }
