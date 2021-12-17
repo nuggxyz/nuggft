@@ -16,36 +16,17 @@ import {Vault} from '../vault/storage.sol';
 library ProofCore {
     using ProofPure for uint256;
 
+    /*━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+                                EVENTS
+    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━*/
+
     event SetProof(uint256 tokenId, uint256[] items);
     event PopItem(uint256 tokenId, uint256 itemId);
     event PushItem(uint256 tokenId, uint256 itemId);
 
-    // event OpenSlot(uint256 tokenId);
-
-    function setProof(uint256 tokenId) internal {
-        // Print.log(tokenId, 'tokenId');
-
-        if (ProofView.hasProof(tokenId)) {
-            // Print.log(ProofView.checkedProofOf(tokenId), 'ProofView.checkedProofOf(tokenId)');
-        }
-
-        require(!ProofView.hasProof(tokenId), 'IL:M:0');
-
-        (uint256 seed, uint256 epoch) = EpochView.calculateSeed();
-
-        require(seed != 0, '721:MINT:0');
-        require(epoch == tokenId, '721:MINT:1');
-
-        seed = initFromSeed(seed);
-
-        Proof.set(tokenId, seed);
-
-        // Print.log(tokenId, 'tokenId');
-
-        (, uint256[] memory items, , ) = ProofPure.parseProofLogic(seed);
-
-        emit SetProof(tokenId, items);
-    }
+    /*━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+                            ITEM MANAGEMENT
+    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━*/
 
     function push(uint256 tokenId, uint256 itemId) internal {
         uint256 working = ProofView.checkedProofOf(tokenId);
@@ -73,6 +54,27 @@ library ProofCore {
         Proof.ptr().protcolItems[itemId]++;
 
         emit PopItem(tokenId, itemId);
+    }
+
+    /*━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+                            INITIALIZATION
+    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━*/
+
+    function setProof(uint256 tokenId) internal {
+        require(!ProofView.hasProof(tokenId), 'IL:M:0');
+
+        (uint256 seed, uint256 epoch) = EpochView.calculateSeed();
+
+        require(seed != 0, '721:MINT:0');
+        require(epoch == tokenId, '721:MINT:1');
+
+        seed = initFromSeed(seed);
+
+        Proof.set(tokenId, seed);
+
+        (, uint256[] memory items, , ) = ProofPure.parseProofLogic(seed);
+
+        emit SetProof(tokenId, items);
     }
 
     function initFromSeed(uint256 seed) internal view returns (uint256 res) {
@@ -108,8 +110,6 @@ library ProofCore {
         upd[1] = pick1 | (1 << ID_NUMBER_SIZE);
         upd[2] = pick2 | (2 << ID_NUMBER_SIZE);
         upd[3] = pick3;
-
-        // Print.log(upd, 'upd');
 
         res = ShiftLib.setDynamicArray(res, upd, 16, 0, 4, 8);
     }

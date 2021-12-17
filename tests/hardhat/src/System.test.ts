@@ -29,7 +29,8 @@ describe('uint tests', async function () {
 
     describe('internal', async () => {
         it('should revert if shares = 0', async () => {
-            await fix.nuggft.connect(accounts.mac).delegate(1);
+            console.log(await fix.nuggft.name());
+            await fix.nuggft.connect(accounts.mac).delegate2(1);
 
             await fix.nuggft.connect(accounts.dee).delegate(1, { value: toEth('3.000') });
 
@@ -82,6 +83,8 @@ describe('uint tests', async function () {
             // await fix.nuggft.connect(accounts.charile).claimItem(11, info.defaultIds[1], 0, epoch.add(1));
 
             await fix.nuggft.connect(accounts.frank).approve(fix.nuggft.address, 11);
+
+            await fix.nuggft.connect(accounts.charile).claimItem(11, info.defaultIds[1], 1);
 
             await fix.nuggft.connect(accounts.charile).approve(fix.nuggft.address, 1);
 

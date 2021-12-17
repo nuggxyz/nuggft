@@ -32,9 +32,9 @@ library Swap {
         uint160 sender;
     }
 
-    /*///////////////////////////////////////////////////////////////
-                            TOKEN SWAP LOADERS
-    //////////////////////////////////////////////////////////////*/
+    /*━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+                                TOKEN SWAP
+    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━*/
 
     function _tokenSwapPtr(uint256 tokenId) private view returns (Storage storage si) {
         return Global.ptr().swap.map[tokenId].self;
@@ -53,18 +53,9 @@ library Swap {
         delete _tokenSwapPtr(tokenId).data;
     }
 
-    // function loadTokenSwapWithEpoch(
-    //     uint256 tokenId,
-    //     address account,
-    //     uint256 epoch
-    // ) internal  returns (Storage storage s, Memory memory m) {
-    //     s = _tokenSwapPtr(tokenId);
-    //     m = _loadWithEpoch(s, uint160(account), epoch);
-    // }
-
-    /*///////////////////////////////////////////////////////////////
-                            ITEM SWAP LOADERS
-    //////////////////////////////////////////////////////////////*/
+    /*━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+                                ITEM SWAP
+    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━*/
 
     function _itemSwapPtr(uint256 tokenId, uint256 itemId) private view returns (Storage storage si) {
         return Global.ptr().swap.map[tokenId].items[itemId];
@@ -93,25 +84,14 @@ library Swap {
         delete _itemSwapPtr(tokenId, itemId).data;
     }
 
-    // function loadItemSwapWithEpoch(
-    //     uint256 tokenId,
-    //     uint256 itemId,
-    //     uint160 account,
-    //     uint256 epoch
-    // ) internal  returns (Storage storage s, Memory memory m) {
-    //     s = _itemSwapPtr(tokenId, itemId);
-    //     m = _loadWithEpoch(s, account, epoch);
-    // }
-
-    /*///////////////////////////////////////////////////////////////
+    /*━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
                                 COMMON
-    //////////////////////////////////////////////////////////////*/
+    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━*/
 
     function _load(Storage storage ptr, uint160 account) private view returns (Memory memory m) {
         m.swapData = ptr.data;
         m.activeEpoch = EpochView.activeEpoch();
         m.sender = account;
-        // if (m.swapData == 0) return m;
 
         if (account == m.swapData.account()) {
             m.offerData = m.swapData;
@@ -119,22 +99,4 @@ library Swap {
             m.offerData = ptr.offers[account];
         }
     }
-
-    // function _loadWithEpoch(
-    //     Storage storage ptr,
-    //     uint160 account,
-    //     uint256 epoch
-    // ) private  returns (Memory memory m) {
-    //     m.swapData = ptr.self.data;
-
-    //     m.activeEpoch = EpochView.activeEpoch();
-
-    //     if (m.swapData.epoch() != epoch) m.swapData = 0;
-
-    //     if (m.swapData != 0 && account == m.swapData.account()) {
-    //         m.offerData = m.swapData;
-    //     } else {
-    //         m.offerData = ptr.offers[account];
-    //     }
-    // }
 }

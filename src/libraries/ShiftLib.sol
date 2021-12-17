@@ -33,17 +33,13 @@ library ShiftLib {
     ) internal view returns (uint256 postStore) {
         validateNum(value, bits);
 
-        // Print.log(value, 'value', fullsubmask(bits, pos), 'fullsubmask(bits, pos)');
-
         postStore = preStore & fullsubmask(bits, pos);
 
         assembly {
-            // if not(iszero(pos)) {
             value := shl(pos, value)
-            // }
         }
+
         postStore |= value;
-        // postStore |= (value << pos);
     }
 
     function get(
@@ -72,20 +68,19 @@ library ShiftLib {
 
         res = get(store, bits, pos);
 
-        uint256 i = res & 0xff;
-        res >>= 8;
-        res <<= (i * 4);
-        res *= 0xE8D4A51000;
+        // uint256 i = res & 0xff;
+        // res >>= 8;
+        // res <<= (i * 4);
+        // res *= 0xE8D4A51000;
 
-        // assembly {
-        //     // res := and(shr(pos, store), 0xFFFFFFFFFFFFFF)
-        //     let i := and(res, 0xff)
-        //     res := shl(mul(4, i), shr(8, res))
-        //     res := mul(res, 0xE8D4A51000)
-        // }
+        assembly {
+            // res := and(shr(pos, store), 0xFFFFFFFFFFFFFF)
+            let i := and(res, 0xff)
+            res := shl(mul(4, i), shr(8, res))
+            res := mul(res, 0xE8D4A51000)
+        }
     }
 
-    // 14 f's
     function setCompressed(
         uint256 store,
         uint256 bits,
@@ -116,9 +111,9 @@ library ShiftLib {
         res = set(store, bits, pos, value);
     }
 
-    /*///////////////////////////////////////////////////////////////
+    /*━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
                                 ARRAYS
-    //////////////////////////////////////////////////////////////*/
+    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━*/
 
     function getArray(
         uint256 store,
@@ -154,9 +149,9 @@ library ShiftLib {
         res = set(store, arr.length * bitsPerItem, pos, res);
     }
 
-    /*///////////////////////////////////////////////////////////////
-                            DYNAMIC ARRAY
-    //////////////////////////////////////////////////////////////*/
+    /*━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+                            DYNAMIC ARRAYS
+    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━*/
 
     function setDynamicArray(
         uint256 store,
@@ -196,7 +191,7 @@ library ShiftLib {
 
         validatePosWithLength(pos, len * bitsPerItem + 16);
 
-        arr = getArray(store, bitsPerItem, pos + 16, len);
+        arr = getArray(store, bitsPerItem, pos + 16, len + 1);
     }
 
     function popDynamicArray(
@@ -236,9 +231,9 @@ library ShiftLib {
         res = setDynamicArray(store, arr, bitsPerItem, pos, truelen + 1, maxlen);
     }
 
-    /*///////////////////////////////////////////////////////////////
-                            COMMON BASE UNITS
-    //////////////////////////////////////////////////////////////*/
+    /*━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+                             ASSERTIONS
+    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━*/
 
     function validateNum(uint256 num, uint256 bits) internal view {
         assert(num <= mask(bits));

@@ -8,9 +8,9 @@ import {IERC721Receiver} from '../interfaces/IERC721.sol';
 /// @author Modified from Gnosis (https://github.com/gnosis/gp-v2-contracts/blob/main/src/contracts/libraries/GPv2SafeERC20.sol)
 /// @dev Use with caution! Some functions in this library knowingly create dirty bits at the destination of the free memory pointer.
 library SafeTransferLib {
-    /*///////////////////////////////////////////////////////////////
+    /*━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
                             ETH OPERATIONS
-    //////////////////////////////////////////////////////////////*/
+    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━*/
 
     function safeTransferETH(address to, uint256 amount) internal {
         bool callStatus;
@@ -22,6 +22,10 @@ library SafeTransferLib {
 
         require(callStatus, 'ETH_TRANSFER_FAILED');
     }
+
+    /*━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+                            NFT OPERATIONS
+    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━*/
 
     function isDeployedContract(address account) internal view returns (bool res) {
         res = account.code.length != 0;

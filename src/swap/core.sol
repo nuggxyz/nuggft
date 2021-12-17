@@ -17,9 +17,9 @@ import {TokenView} from '../token/view.sol';
 library SwapCore {
     using SwapPure for uint256;
 
-    /*///////////////////////////////////////////////////////////////
+    /*━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
                                 EVENTS
-    //////////////////////////////////////////////////////////////*/
+    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━*/
 
     event Mint(uint256 epoch, address account, uint256 eth);
     event Commit(uint256 tokenId, address account, uint256 eth);
@@ -32,9 +32,9 @@ library SwapCore {
     event ClaimItem(uint256 sellingTokenId, uint256 itemId, uint256 buyingTokenId, uint256 endingEpoch);
     event SwapItem(uint256 sellingTokenId, uint256 itemId, uint256 eth);
 
-    /*///////////////////////////////////////////////////////////////
-                            TOKEN HANDLERS
-    //////////////////////////////////////////////////////////////*/
+    /*━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+                            TOKEN SWAP FUNCTIONS
+    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━*/
 
     function delegate(uint256 tokenId) internal {
         (Swap.Storage storage s, Swap.Memory memory m) = Swap.loadTokenSwap(tokenId, msg.sender);
@@ -42,11 +42,6 @@ library SwapCore {
         // make sure user is not the owner of swap
         // we do not know how much to give them when they call "claim" otherwise
         require(!m.offerData.isOwner(), 'SL:HSO:0');
-
-        // // make sure swap is still active
-        // require(m.activeEpoch <= m.swapData.epoch(), 'SL:OBP:3');
-
-        // Print.log(m.activeEpoch, 'm.activeEpoch');
 
         if (m.activeEpoch == tokenId && m.swapData == 0) {
             // we do not need this, could take tokenId out as an argument - but do not want to give users
@@ -69,10 +64,7 @@ library SwapCore {
     function mint(Swap.Storage storage s, Swap.Memory memory m) internal {
         require(m.swapData == 0 && m.offerData == 0, 'NS:M:D');
 
-        (uint256 newSwapData, ) = uint256(0).epoch(m.activeEpoch).account(uint160(msg.sender)).eth(msg.value);
-
-        // indirectly guards against rentrancy
-        s.data = newSwapData;
+        (s.data, ) = uint256(0).epoch(m.activeEpoch).account(uint160(msg.sender)).eth(msg.value);
 
         StakeCore.addStakedSharesAndEth(1, msg.value);
 
@@ -81,8 +73,6 @@ library SwapCore {
 
     function claim(uint256 tokenId) internal {
         (, Swap.Memory memory m) = Swap.loadTokenSwap(tokenId, msg.sender);
-
-        // require(m.offerData.epoch() == tokenId, 'C:0');
 
         Swap.deleteTokenOffer(tokenId, uint160(msg.sender));
 
@@ -110,20 +100,15 @@ library SwapCore {
 
         // make sure swap does not exist - this logically should never happen
         assert(m.swapData == 0);
-        //  not anymore - as no external calls   protects against reentracy from token transfer
-        // require(swapData == 0, 'NS:SS:0');
 
-        // build starting swap data
-        (m.swapData, ) = m.swapData.account(uint160(msg.sender)).isOwner(true).eth(floor);
-
-        s.data = m.swapData;
+        (s.data, ) = uint256(0).account(uint160(msg.sender)).isOwner(true).eth(floor);
 
         emit StartSwap(tokenId, msg.sender, floor);
     }
 
-    /*///////////////////////////////////////////////////////////////
-                            ITEM HANDLERS
-    //////////////////////////////////////////////////////////////*/
+    /*━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+                            ITEM SWAP FUNCTIONS
+    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━*/
 
     function delegateItem(
         uint256 sellingTokenId,
@@ -134,16 +119,9 @@ library SwapCore {
 
         (Swap.Storage storage s, Swap.Memory memory m) = Swap.loadItemSwap(sellingTokenId, itemId, sendingTokenId);
 
-        // Print.log(sellingTokenId, 'sellingTokenId', itemId, 'itemId', sendingTokenId, 'sendingTokenId');
-
-        // Print.log(m.offerData, 'm.offerData', m.swapData, 'm.swapData');
-
         // make sure user is not the owner of swap
         // we do not know how much to give them when they call "claim" otherwise
         require(!m.offerData.isOwner(), 'SL:HSO:0');
-
-        // // make sure swap is still active
-        // require(m.activeEpoch <= m.swapData.epoch(), 'SL:OBP:3');
 
         if (m.offerData == 0 && m.swapData.isOwner()) {
             commit(s, m);
@@ -163,7 +141,7 @@ library SwapCore {
     ) internal {
         require(TokenView.ownerOf(buyingTokenId) == msg.sender, 'AUC:TT:3');
 
-        (Swap.Storage storage s, Swap.Memory memory m) = Swap.loadItemSwap(sellingTokenId, itemId, buyingTokenId);
+        (, Swap.Memory memory m) = Swap.loadItemSwap(sellingTokenId, itemId, buyingTokenId);
 
         Swap.deleteItemOffer(sellingTokenId, itemId, buyingTokenId);
 
@@ -191,23 +169,17 @@ library SwapCore {
 
         assert(m.swapData == 0);
 
-        // Print.log(m.offerData, 'm.offerData', m.swapData, 'm.swapData');
-
         // build starting swap data
         (uint256 dat, ) = uint256(0).account(sellingTokenId).isOwner(true).eth(floor);
 
         s.data = dat;
 
-        // Print.log(m.offerData, 'm.offerData', m.swapData, 'm.swapData', dat, 'dat');
-
-        // Print.log(sellingTokenId, 'sellingTokenId', itemId, 'itemId', m.sender, 'm.sender');
-
-        emit SwapItem(sellingTokenId, itemId, floor);
+        emit SwapItem(sellingTokenId, itemId, dat.eth());
     }
 
-    /*///////////////////////////////////////////////////////////////
-                            COMMON HANDLERS
-    //////////////////////////////////////////////////////////////*/
+    /*━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+                            COMMON FUNCTIONS
+    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━*/
 
     function checkClaimerIsWinnerOrLoser(Swap.Memory memory m) internal view returns (bool winner) {
         require(m.offerData != 0, 'SL:CC:1');

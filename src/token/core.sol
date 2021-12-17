@@ -6,12 +6,18 @@ import {Token} from './storage.sol';
 
 import {TokenView} from './view.sol';
 
+import {StakeCore} from '../stake/core.sol';
+
 import {SafeTransferLib} from '../libraries/SafeTransferLib.sol';
 
 library TokenCore {
     event Transfer(address indexed from, address indexed to, uint256 indexed tokenId);
     event Approval(address indexed owner, address indexed approved, uint256 indexed tokenId);
     event ApprovalForAll(address indexed owner, address indexed operator, bool approved);
+
+    /*━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+                                APPROVAL
+    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━*/
 
     function checkedSetApprovalForAll(address operator, bool approved) internal {
         require(msg.sender != operator && operator == address(this), 'TL:0');
@@ -34,6 +40,10 @@ library TokenCore {
 
         emit Approval(owner, account, tokenId);
     }
+
+    /*━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+                                TRANSFER
+    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━*/
 
     function checkedTransferFromSelf(address to, uint256 tokenId) internal {
         // TODO: we should check this before we allow someeone to offer
@@ -78,28 +88,13 @@ library TokenCore {
 
         require(TokenView.ownerOf(tokenId) == msg.sender, 'TL:BFS:1');
 
-        // delete Token.ptr().approvals[tokenId];
-
         // @todo do I need this??
         // emit Approval(owner, address(0), tokenId);
 
         Token.ptr().balances[msg.sender] -= 1;
 
-        // delete s._msg.senders[tokenId];
-
-        // delete s._resolvers[tokenId];
-        // delete s._proofs[tokenId];
-        // delete s._swaps[tokenId];
-
         emit Transfer(msg.sender, address(0), tokenId);
 
-        // StakeLogic.subStakedSharePayingSender();
+        StakeCore.subStakedSharePayingSender();
     }
-
-    //     Swap.burn(tokenId);
-    // Proof.onBurn(tokenId);
-    // Vault.onBurn(tokenId);
-    // Token.onBurn(tokenId);
-
-    // Stake.onBurn(tokenId);
 }

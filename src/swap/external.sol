@@ -4,29 +4,16 @@ pragma solidity 0.8.9;
 
 import {ISwapExternal} from '../interfaces/INuggFT.sol';
 
+import {EpochView} from '../epoch/view.sol';
+
 import {SwapCore} from './core.sol';
 import {SwapView} from './view.sol';
 import {Swap} from './storage.sol';
-import {EpochView} from '../epoch/view.sol';
 
 abstract contract SwapExternal is ISwapExternal {
-    function getActiveSwap(uint256 tokenId)
-        external
-        view
-        override
-        returns (
-            address leader,
-            uint256 amount,
-            uint256 _epoch,
-            bool isOwner
-        )
-    {
-        return SwapView.getActiveSwap(tokenId);
-    }
-
-    function getOfferByAccount(uint256 tokenId, address account) external view override returns (uint256 amount) {
-        return SwapView.getOfferByAccount(tokenId, account);
-    }
+    /*━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+                            STATE CHANGING
+    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━*/
 
     function delegate(uint256 tokenId) external payable override {
         SwapCore.delegate(tokenId);
@@ -62,5 +49,31 @@ abstract contract SwapExternal is ISwapExternal {
         uint256 floor
     ) external override {
         SwapCore.swapItem(itemid, floor, uint160(sellingTokenId));
+    }
+
+    function delegate2(uint256 tokenId) external payable {
+        SwapCore.delegate(tokenId);
+    }
+
+    /*━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+                                VIEW
+    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━*/
+
+    function getActiveSwap(uint256 tokenId)
+        external
+        view
+        override
+        returns (
+            address leader,
+            uint256 amount,
+            uint256 _epoch,
+            bool isOwner
+        )
+    {
+        return SwapView.getActiveSwap(tokenId);
+    }
+
+    function getOfferByAccount(uint256 tokenId, address account) external view override returns (uint256 amount) {
+        return SwapView.getOfferByAccount(tokenId, account);
     }
 }

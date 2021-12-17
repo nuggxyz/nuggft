@@ -28,37 +28,18 @@ abstract contract TokenExternal is ITokenExternal {
         _symbol = symbol_;
     }
 
-    /**
-     * @dev Destroys `tokenId`.
-     * The approval is cleared when the token is burned.
-     *
-     * Requirements:
-     *
-     * - `tokenId` must exist.
-     *
-     * Emits a {Transfer} event.
-     */
     function burn(uint256 tokenId) external {
         GlobalCore.burn(tokenId);
     }
 
-    /**
-     * @dev See {IERC721-approve}.
-     */
     function approve(address to, uint256 tokenId) public override {
         TokenCore.checkedApprove(to, tokenId);
     }
 
-    /**
-     * @dev See {IERC721-setApprovalForAll}.
-     */
     function setApprovalForAll(address operator, bool approved) public override {
         TokenCore.checkedSetApprovalForAll(operator, approved);
     }
 
-    /**
-     * @dev See {IERC165-supportsInterface}.
-     */
     function supportsInterface(bytes4 interfaceId) public view virtual override returns (bool) {
         return
             interfaceId == type(IERC721).interfaceId ||
@@ -66,49 +47,28 @@ abstract contract TokenExternal is ITokenExternal {
             interfaceId == type(IERC165).interfaceId;
     }
 
-    /**
-     * @dev See {IERC721Metadata-name}.
-     */
     function name() public view override returns (string memory) {
         return string(abi.encodePacked(_name));
     }
 
-    /**
-     * @dev See {IERC721Metadata-symbol}.
-     */
     function symbol() public view override returns (string memory) {
         return string(abi.encodePacked(_symbol));
     }
 
-    /**
-     * @dev See {IERC721Metadata-tokenURI}.
-     */
     function tokenURI(uint256 tokenId) public view virtual override returns (string memory);
 
-    /**
-     * @dev See {IERC721-_}.
-     */
     function balanceOf(address owner) public view override returns (uint256) {
         return TokenView.balanceOf(owner);
     }
 
-    /**
-     * @dev See {IERC721-ownerOf}.
-     */
     function ownerOf(uint256 tokenId) public view override returns (address) {
         return TokenView.ownerOf(tokenId);
     }
 
-    /**
-     * @dev See {IERC721-getApproved}.
-     */
     function getApproved(uint256 tokenId) public view override returns (address) {
         return TokenView.getApproved(tokenId);
     }
 
-    /**
-     * @dev See {IERC721-isApprovedForAll}.
-     */
     function isApprovedForAll(address owner, address operator) public view override returns (bool) {
         return TokenView.isApprovedForAll(owner, operator);
     }
@@ -117,37 +77,28 @@ abstract contract TokenExternal is ITokenExternal {
                                 DISABLED
     //////////////////////////////////////////////////////////////*/
 
-    /**
-     * @dev See {IERC721-transferFrom}.
-     */
     function transferFrom(
         address,
         address,
         uint256
-    ) public override {
+    ) public pure override {
         revert('wut');
     }
 
-    /**
-     * @dev See {IERC721-safeTransferFrom}.
-     */
     function safeTransferFrom(
         address,
         address,
         uint256
-    ) public override {
+    ) public pure override {
         revert('wut');
     }
 
-    /**
-     * @dev See {IERC721-safeTransferFrom}.
-     */
     function safeTransferFrom(
         address,
         address,
         uint256,
         bytes memory
-    ) public override {
+    ) public pure override {
         revert('wut');
     }
 }

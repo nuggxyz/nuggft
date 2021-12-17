@@ -18,11 +18,16 @@ import {Stake} from './storage.sol';
 library StakeCore {
     using StakePure for uint256;
 
-    /// @param amount a parameter just like in doxygen (must be followed by parameter name)
-    event StakeEth(uint256 amount);
+    /*━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+                                EVENTS
+    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━*/
 
-    /// @param amount a parameter just like in doxygen (must be followed by parameter name)
+    event StakeEth(uint256 amount);
     event UnStakeEth(uint256 amount);
+
+    /*━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+                                 ADD
+    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━*/
 
     function addStakedSharesAndEth(uint256 shares, uint256 eth) internal {
         require(shares < ShiftLib.mask(64) && eth < ShiftLib.mask(192), 'SL:SS:0');
@@ -58,13 +63,9 @@ library StakeCore {
         emit StakeEth(amount);
     }
 
-    // function removeStake(uint256 amount) internal {
-    //     SafeTransferLib.safeTransferETH(msg.sender, floor);
-
-    //     StakeLogic.subStakedEth(floor);
-
-    //     StakeLogic.subStakedShares(1);
-    // }
+    /*━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+                                 SUB
+    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━*/
 
     function subStakedSharePayingSender() internal {
         uint256 read = Stake.ptr().data;
@@ -74,24 +75,12 @@ library StakeCore {
         uint256 eth = StakeView.getActiveEthPerShare();
 
         require(activeShares >= 1, 'SL:SS:0');
-        // require(activeEth >= eth, 'SL:SS:1');
-
-        // Print.log(activeEth, 'activeEth', eth, 'eth');
+        require(activeEth >= eth, 'SL:SS:1');
 
         Stake.ptr().data = read.setStakedShares(activeShares - 1).setStakedEth(activeEth - eth);
 
         SafeTransferLib.safeTransferETH(msg.sender, eth);
+
+        emit UnStakeEth(eth);
     }
-
-    // function subStakedEth(uint256 amount) internal {
-    //     uint256 read = Stake.ptr().data;
-
-    //     uint256 activeEth = read.getStakedEth();
-
-    //     require(activeEth >= amount, 'SL:SS:0');
-
-    //     Stake.ptr().data = read.setStakedEth(activeEth - amount);
-
-    //     emit UnStakeEth(amount);
-    // }
 }
