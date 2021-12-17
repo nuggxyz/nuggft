@@ -11,17 +11,11 @@ import {Loan} from '../loan/storage.sol';
 
 library Global {
     struct Storage {
-        // Token symbol
         Token.Storage token;
-        // Token symbol
         Stake.Storage stake;
-        // Token symbol
         Vault.Storage vault;
-        // Token symbol
         Proof.Storage proof;
-        //
         Loan.Mapping loan;
-        //
         Swap.Full swap;
     }
 

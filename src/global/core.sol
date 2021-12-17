@@ -18,12 +18,5 @@ library GlobalCore {
 
         delete Global.ptr().token.owners[tokenId];
         delete Global.ptr().token.approvals[tokenId];
-
-        // SwapStorage.handleBurn(tokenId);
-        // ProofStorage.handleBurn(tokenId);
-        // VaultStorage.handleBurn(tokenId);
-        // TokenStorage.handleBurn(tokenId);
-        // StakeStorage.handleBurn(tokenId);
-        // LoanStorage.handleBurn(tokenId);
     }
 }
