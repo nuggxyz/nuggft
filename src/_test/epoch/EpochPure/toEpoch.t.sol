@@ -6,8 +6,8 @@ import {DSTestPlus as t} from '../../utils/DSTestPlus.sol';
 
 import {EpochPure} from '../../../epoch/EpochPure.sol';
 
-contract EpochPureTest__toEndBlock is t {
+contract EpochPureTest__toEpoch is t {
     function test_a() public {
-        assertEq(EpochPure.toEndBlock(100), 2500);
+        assertEq(EpochPure.toEpoch(1250000), 50000);
     }
 }

@@ -3,15 +3,16 @@
 pragma solidity 0.8.9;
 
 import {IVaultExternal} from '../interfaces/INuggFT.sol';
-
 import {IERC721Metadata} from '../interfaces/IERC721.sol';
 import {IPostProcessResolver, IProcessResolver, IPreProcessResolver} from '../interfaces/IResolver.sol';
 
 import {VaultCore} from './VaultCore.sol';
-
 import {VaultView} from './VaultView.sol';
+
 import {TokenView} from '../token/TokenView.sol';
+
 import {EpochView} from '../epoch/EpochView.sol';
+
 import {ProofView} from '../proof/ProofView.sol';
 
 abstract contract VaultExternal is IVaultExternal {
