@@ -36,9 +36,9 @@ library ProofView {
         view
         returns (
             uint256 proof,
-            uint256[] memory defaultIds,
-            uint256[] memory extraIds,
-            uint256[] memory overrides
+            uint16[] memory defaultIds,
+            uint16[] memory extraIds,
+            uint16[] memory overrides
         )
     {
         proof = checkedProofOf(tokenId);
@@ -46,7 +46,7 @@ library ProofView {
         return ProofPure.parseProofLogic(proof);
 
         // TODO HAVE TO IMPLEMENT OVERRIDES AND EXTRA IDS
-        // defaultIds = new uint256[](8);
+        // defaultIds = new uint16[](8);
 
         // for (uint256 i = 1; i < 6; i++) {
         //     defaultIds[i] = (proof >> (4 + (ITEMID_SIZE * 6) + ITEMID_SIZE * (i - 1)));
@@ -58,9 +58,9 @@ library ProofView {
         view
         returns (
             uint256 proof,
-            uint256[] memory defaultIds,
-            uint256[] memory extraIds,
-            uint256[] memory overrides
+            uint16[] memory defaultIds,
+            uint16[] memory extraIds,
+            uint16[] memory overrides
         )
     {
         proof = checkedProofOfIncludingPending(tokenId);
@@ -68,7 +68,7 @@ library ProofView {
         return ProofPure.parseProofLogic(proof);
 
         // TODO HAVE TO IMPLEMENT OVERRIDES AND EXTRA IDS
-        // defaultIds = new uint256[](8);
+        // defaultIds = new uint16[](8);
 
         // for (uint256 i = 1; i < 6; i++) {
         //     defaultIds[i] = (proof >> (4 + (ITEMID_SIZE * 6) + ITEMID_SIZE * (i - 1)));
@@ -80,9 +80,9 @@ library ProofView {
         view
         returns (
             uint256 proof,
-            uint256[] memory defaultIds,
-            uint256[] memory extraIds,
-            uint256[] memory overrides
+            uint16[] memory defaultIds,
+            uint16[] memory extraIds,
+            uint16[] memory overrides
         )
     {
         (uint256 seed, ) = EpochView.calculateSeed();

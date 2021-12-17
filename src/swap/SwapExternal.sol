@@ -15,43 +15,43 @@ abstract contract SwapExternal is ISwapExternal {
                             STATE CHANGING
     ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━*/
 
-    function delegate(uint256 tokenId) external payable override {
+    function delegate(uint160 tokenId) external payable override {
         SwapCore.delegate(tokenId);
     }
 
     function delegateItem(
-        uint256 sellingTokenId,
-        uint256 itemid,
-        uint256 buyingTokenId
+        uint160 sellingTokenId,
+        uint16 itemid,
+        uint160 buyingTokenId
     ) external payable override {
-        SwapCore.delegateItem(sellingTokenId, itemid, uint160(buyingTokenId));
+        SwapCore.delegateItem(sellingTokenId, itemid, buyingTokenId);
     }
 
-    function claim(uint256 tokenId) external override {
+    function claim(uint160 tokenId) external override {
         SwapCore.claim(tokenId);
     }
 
     function claimItem(
-        uint256 sellingTokenId,
-        uint256 itemid,
-        uint256 buyingTokenId
+        uint160 sellingTokenId,
+        uint16 itemid,
+        uint160 buyingTokenId
     ) external override {
-        SwapCore.claimItem(sellingTokenId, itemid, uint160(buyingTokenId));
+        SwapCore.claimItem(sellingTokenId, itemid, buyingTokenId);
     }
 
-    function swap(uint256 tokenId, uint256 floor) external override {
+    function swap(uint160 tokenId, uint256 floor) external override {
         SwapCore.swap(tokenId, floor);
     }
 
     function swapItem(
-        uint256 sellingTokenId,
-        uint256 itemid,
+        uint160 sellingTokenId,
+        uint16 itemid,
         uint256 floor
     ) external override {
-        SwapCore.swapItem(itemid, floor, uint160(sellingTokenId));
+        SwapCore.swapItem(itemid, floor, sellingTokenId);
     }
 
-    function delegate2(uint256 tokenId) external payable {
+    function delegate2(uint160 tokenId) external payable {
         SwapCore.delegate(tokenId);
     }
 
@@ -59,21 +59,21 @@ abstract contract SwapExternal is ISwapExternal {
                                 VIEW
     ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━*/
 
-    function getActiveSwap(uint256 tokenId)
+    function getActiveSwap(uint160 tokenId)
         external
         view
         override
         returns (
             address leader,
             uint256 amount,
-            uint256 _epoch,
+            uint32 _epoch,
             bool isOwner
         )
     {
         return SwapView.getActiveSwap(tokenId);
     }
 
-    function getOfferByAccount(uint256 tokenId, address account) external view override returns (uint256 amount) {
+    function getOfferByAccount(uint160 tokenId, address account) external view override returns (uint256 amount) {
         return SwapView.getOfferByAccount(tokenId, account);
     }
 }

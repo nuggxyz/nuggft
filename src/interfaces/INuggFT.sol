@@ -33,9 +33,9 @@ interface IProofExternal {
         view
         returns (
             uint256 proof,
-            uint256[] memory defaultIds,
-            uint256[] memory extraIds,
-            uint256[] memory overrides
+            uint16[] memory defaultIds,
+            uint16[] memory extraIds,
+            uint16[] memory overrides
         );
 }
 
@@ -48,15 +48,12 @@ interface IVaultExternal {
 interface ILoanExternal {
     event TakeLoan(uint256 tokenId, address account, uint256 eth);
     event Payoff(uint256 tokenId, address account, uint256 eth);
-    event Liquidate(uint256 tokenId, address account, uint256 eth);
 
     function payoffAmount() external view returns (uint256);
 
     function loan(uint256 tokenId) external;
 
     function payoff(uint256 tokenId) external payable;
-
-    function liqidate(uint256 tokenId) external payable;
 }
 
 interface ITokenExternal is IERC721, IERC721Metadata {}
@@ -80,39 +77,39 @@ interface ISwapExternal {
 
     event SwapItem(uint256 sellingTokenId, uint256 itemId, uint256 eth);
 
-    function delegate(uint256 tokenid) external payable;
+    function delegate(uint160 tokenid) external payable;
 
     function delegateItem(
-        uint256 sellerTokenId,
-        uint256 itemid,
-        uint256 buyerTokenId
+        uint160 sellerTokenId,
+        uint16 itemid,
+        uint160 buyerTokenId
     ) external payable;
 
-    function claim(uint256 tokenid) external;
+    function claim(uint160 tokenid) external;
 
     function claimItem(
-        uint256 sellerTokenId,
-        uint256 itemid,
-        uint256 buyerTokenId
+        uint160 sellerTokenId,
+        uint16 itemid,
+        uint160 buyerTokenId
     ) external;
 
-    function swap(uint256 tokenid, uint256 floor) external;
+    function swap(uint160 tokenid, uint256 floor) external;
 
     function swapItem(
-        uint256 tokenid,
-        uint256 floor,
-        uint256 itemid
+        uint160 tokenid,
+        uint16 itemid,
+        uint256 floor
     ) external;
 
-    function getOfferByAccount(uint256 tokenid, address account) external view returns (uint256 eth);
+    function getOfferByAccount(uint160 tokenid, address account) external view returns (uint256 eth);
 
-    function getActiveSwap(uint256 tokenid)
+    function getActiveSwap(uint160 tokenid)
         external
         view
         returns (
             address leader,
             uint256 eth,
-            uint256 _epoch,
+            uint32 _epoch,
             bool isOwner
         );
 }

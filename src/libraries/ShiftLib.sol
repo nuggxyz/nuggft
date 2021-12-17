@@ -2,20 +2,23 @@
 
 pragma solidity 0.8.9;
 
+import {SafeCastLib} from './SafeCastLib.sol';
+
 library ShiftLib {
+    using SafeCastLib for uint256;
+
     /// @notice creates a bit mask
     /// @dev res = (2 ^ bits) - 1
     /// @param bits d
     /// @return res d
-    /// @custom:alt res := sub(exp(2, bits), 1)
     /// @dev no need to check if "bits" is < 256 as anything greater than 255 will be treated the same
-    function mask(uint256 bits) internal pure returns (uint256 res) {
+    function mask(uint8 bits) internal pure returns (uint256 res) {
         assembly {
             res := sub(shl(bits, 1), 1)
         }
     }
 
-    function fullsubmask(uint256 bits, uint256 pos) internal pure returns (uint256 res) {
+    function fullsubmask(uint8 bits, uint8 pos) internal pure returns (uint256 res) {
         // validatePos(pos);
 
         // assembly {
@@ -27,11 +30,11 @@ library ShiftLib {
 
     function set(
         uint256 preStore,
-        uint256 bits,
-        uint256 pos,
+        uint8 bits,
+        uint8 pos,
         uint256 value
     ) internal view returns (uint256 postStore) {
-        validateNum(value, bits);
+        // validateNum(value, bits);
 
         postStore = preStore & fullsubmask(bits, pos);
 
@@ -44,10 +47,10 @@ library ShiftLib {
 
     function get(
         uint256 store,
-        uint256 bits,
-        uint256 pos
+        uint8 bits,
+        uint8 pos
     ) internal view returns (uint256 value) {
-        validatePos(pos);
+        // validatePos(pos);
 
         assembly {
             value := shr(pos, store)
@@ -61,10 +64,10 @@ library ShiftLib {
 
     function getCompressed(
         uint256 store,
-        uint256 bits,
-        uint256 pos
+        uint8 bits,
+        uint8 pos
     ) internal view returns (uint256 res) {
-        validatePosWithLength(pos, bits - 8);
+        // validatePosWithLength(pos, bits - 8);
 
         res = get(store, bits, pos);
 
@@ -83,13 +86,13 @@ library ShiftLib {
 
     function setCompressed(
         uint256 store,
-        uint256 bits,
-        uint256 pos,
+        uint8 bits,
+        uint8 pos,
         uint256 value
     ) internal view returns (uint256 res, uint256 dust) {
         require(bits > 8, 'SHIFT:SCE');
 
-        validatePosWithLength(pos, bits);
+        // validatePosWithLength(pos, bits);
 
         assembly {
             let ins := value
@@ -106,7 +109,7 @@ library ShiftLib {
             let out := shl(mul(4, res), shr(8, value))
             dust := sub(ins, mul(out, 0xE8D4A51000))
         }
-        validateNum(value >> 8, bits - 8);
+        // validateNum(value >> 8, bits - 8);
 
         res = set(store, bits, pos, value);
     }
@@ -117,36 +120,36 @@ library ShiftLib {
 
     function getArray(
         uint256 store,
-        uint256 bitsPerItem,
-        uint256 pos,
-        uint256 numItems
-    ) internal view returns (uint256[] memory arr) {
-        validatePosWithLength(pos, numItems * bitsPerItem - 1);
+        uint8 bitsPerItem,
+        uint8 pos,
+        uint8 numItems
+    ) internal view returns (uint16[] memory arr) {
+        // validatePosWithLength(pos, numItems * bitsPerItem - 1);
 
         store = get(store, numItems * bitsPerItem, pos);
 
-        arr = new uint256[](numItems);
+        arr = new uint16[](numItems);
         uint256 msk = mask(bitsPerItem);
         for (uint256 i = 0; i < numItems; i++) {
-            arr[i] = store & msk;
+            arr[i] = (store & msk).safe16();
             store >>= bitsPerItem;
         }
     }
 
     function setArray(
         uint256 store,
-        uint256[] memory arr,
-        uint256 bitsPerItem,
-        uint256 pos
+        uint16[] memory arr,
+        uint8 bitsPerItem,
+        uint8 pos
     ) internal view returns (uint256 res) {
-        validatePosWithLength(pos, arr.length * bitsPerItem);
+        // validatePosWithLength(pos, arr.length * bitsPerItem);
 
         for (uint256 i = arr.length; i > 0; i--) {
-            validateNum(arr[i - 1], bitsPerItem);
-            res |= arr[i - 1] << ((bitsPerItem * (i - 1)));
+            // validateNum(arr[i - 1], bitsPerItem);
+            res |= uint256(arr[i - 1]) << ((bitsPerItem * (i - 1)));
         }
 
-        res = set(store, arr.length * bitsPerItem, pos, res);
+        res = set(store, arr.length.safe8() * bitsPerItem, pos, res);
     }
 
     /*━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -155,13 +158,13 @@ library ShiftLib {
 
     function setDynamicArray(
         uint256 store,
-        uint256[] memory arr,
-        uint256 bitsPerItem,
-        uint256 pos,
+        uint16[] memory arr,
+        uint8 bitsPerItem,
+        uint8 pos,
         uint256 truelen,
         uint256 maxLen
     ) internal view returns (uint256 res) {
-        validatePosWithLength(pos, maxLen * bitsPerItem + 16);
+        // validatePosWithLength(pos, maxLen * bitsPerItem + 16);
 
         // must be different than popDynamicArray
         require(truelen <= maxLen, 'SL:SDA:0');
@@ -173,13 +176,13 @@ library ShiftLib {
 
     function getDynamicArray(
         uint256 store,
-        uint256 bitsPerItem,
-        uint256 pos
+        uint8 bitsPerItem,
+        uint8 pos
     )
         internal
         view
         returns (
-            uint256[] memory arr,
+            uint16[] memory arr,
             uint256 len,
             uint256 maxlen
         )
@@ -189,18 +192,18 @@ library ShiftLib {
         maxlen = len >> 8;
         len &= 0xff;
 
-        validatePosWithLength(pos, len * bitsPerItem + 16);
+        // validatePosWithLength(pos, len * bitsPerItem + 16);
 
-        arr = getArray(store, bitsPerItem, pos + 16, len + 1);
+        arr = getArray(store, bitsPerItem, pos + 16, len.safe8() + 1);
     }
 
     function popDynamicArray(
         uint256 store,
-        uint256 bitsPerItem,
-        uint256 pos,
+        uint8 bitsPerItem,
+        uint8 pos,
         uint256 id
     ) internal view returns (uint256 res) {
-        (uint256[] memory arr, uint256 truelen, uint256 maxlen) = getDynamicArray(store, bitsPerItem, pos);
+        (uint16[] memory arr, uint256 truelen, uint256 maxlen) = getDynamicArray(store, bitsPerItem, pos);
 
         require(truelen > 0, 'SL:PDA:0');
 
@@ -218,11 +221,11 @@ library ShiftLib {
 
     function pushDynamicArray(
         uint256 store,
-        uint256 bitsPerItem,
-        uint256 pos,
-        uint256 id
+        uint8 bitsPerItem,
+        uint8 pos,
+        uint16 id
     ) internal view returns (uint256 res) {
-        (uint256[] memory arr, uint256 truelen, uint256 maxlen) = getDynamicArray(store, bitsPerItem, pos);
+        (uint16[] memory arr, uint256 truelen, uint256 maxlen) = getDynamicArray(store, bitsPerItem, pos);
 
         require(truelen < maxlen, 'SL:PDA:0');
 
@@ -235,23 +238,23 @@ library ShiftLib {
                              ASSERTIONS
     ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━*/
 
-    function validateNum(uint256 num, uint256 bits) internal view {
-        assert(num <= mask(bits));
-    }
+    // function validateNum(uint256 num, uint8 bits) internal view {
+    //     assert(num <= mask(bits));
+    // }
 
-    function validateBits(uint256 bits) internal view {
-        assert(bits <= 256);
-        assert(bits > 0);
-    }
+    // function validateBits(uint8 bits) internal view {
+    //     assert(bits <= 256);
+    //     assert(bits > 0);
+    // }
 
-    function validatePosWithLength(uint256 pos, uint256 length) internal view {
-        validateBits(length);
-        assert(pos < 256 - length);
-        assert(pos >= 0);
-    }
+    // function validatePosWithLength(uint8 pos, uint256 length) internal view {
+    //     // validateBits(length);
+    //     assert(pos < 256 - length);
+    //     assert(pos >= 0);
+    // }
 
-    function validatePos(uint256 pos) internal view {
-        assert(pos < 256);
-        assert(pos >= 0);
-    }
+    // function validatePos(uint8 pos) internal view {
+    //     assert(pos < 256);
+    //     assert(pos >= 0);
+    // }
 }

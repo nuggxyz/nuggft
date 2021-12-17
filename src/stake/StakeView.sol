@@ -8,19 +8,21 @@ import {StakePure} from './StakePure.sol';
 
 import {Stake} from './StakeStorage.sol';
 
+/// @title StakeView
+/// @author dub6ix
+/// @notice functions that combine access to Stake storage and logic for access by outside modules
 library StakeView {
     using StakePure for uint256;
 
     function getActiveEthPerShare() internal view returns (uint256 res) {
-        res = Stake.ptr().data;
-        res = res.getStakedShares() == 0 ? 0 : res.getStakedEth() / res.getStakedShares();
+        res = Stake.sload().getEthPerShare();
     }
 
     function getActiveStakedShares() internal view returns (uint256 res) {
-        res = Stake.ptr().data.getStakedShares();
+        res = Stake.sload().getStakedShares();
     }
 
     function getActiveStakedEth() internal view returns (uint256 res) {
-        res = Stake.ptr().data.getStakedEth();
+        res = Stake.sload().getStakedEth();
     }
 }

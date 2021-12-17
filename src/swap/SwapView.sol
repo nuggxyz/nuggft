@@ -8,13 +8,13 @@ import {SwapPure} from './SwapPure.sol';
 library SwapView {
     using SwapPure for uint256;
 
-    function getActiveSwap(uint256 tokenId)
+    function getActiveSwap(uint160 tokenId)
         internal
         view
         returns (
             address leader,
             uint256 amount,
-            uint256 _epoch,
+            uint32 _epoch,
             bool isOwner
         )
     {
@@ -26,7 +26,7 @@ library SwapView {
         isOwner = m.swapData.isOwner();
     }
 
-    function getOfferByAccount(uint256 tokenId, address account) internal view returns (uint256 amount) {
+    function getOfferByAccount(uint160 tokenId, address account) internal view returns (uint256 amount) {
         (, Swap.Memory memory m) = Swap.loadTokenSwap(tokenId, account);
         require(m.offerData != 0, 'NS:GS:0');
         amount = m.offerData.eth();
