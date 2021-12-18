@@ -5,30 +5,32 @@ pragma solidity 0.8.9;
 import {IERC721, IERC721Metadata, IERC165} from './IERC721.sol';
 
 interface IStakeExternal {
-    event StakeEth(uint256 amount);
-    event UnStakeEth(uint256 amount);
+    event StakeEth(uint96 amount);
+    event UnStakeEth(uint96 amount);
+
+    function totalProtocolEth() external view returns (uint96);
 
     function totalSupply() external view returns (uint256);
 
-    function totalStakedShares() external view returns (uint256);
+    function totalStakedShares() external view returns (uint64);
 
-    function totalStakedEth() external view returns (uint256);
+    function totalStakedEth() external view returns (uint96);
 
-    function activeEthPerShare() external view returns (uint256);
+    function activeEthPerShare() external view returns (uint96);
 }
 
 interface IProofExternal {
-    event PreMint(uint256 tokenId, uint256[] items);
+    event PreMint(uint160 tokenId, uint256[] items);
 
-    event PopItem(uint256 tokenId, uint256 itemId);
+    event PopItem(uint160 tokenId, uint16 itemId);
 
-    event PushItem(uint256 tokenId, uint256 itemId);
+    event PushItem(uint160 tokenId, uint16 itemId);
 
-    event SetProof(uint256 tokenId, uint256[] items);
+    event SetProof(uint160 tokenId, uint256[] items);
 
-    function proofOf(uint256 tokenId) external view returns (uint256);
+    function proofOf(uint160 tokenId) external view returns (uint256);
 
-    function parsedProofOf(uint256 tokenId)
+    function parsedProofOf(uint160 tokenId)
         external
         view
         returns (
@@ -42,42 +44,44 @@ interface IProofExternal {
 interface IVaultExternal {
     function defaultResolver() external view returns (address);
 
-    function resolverOf(uint256 tokenId) external view returns (address);
+    function resolverOf(uint160 tokenId) external view returns (address);
 }
 
 interface ILoanExternal {
-    event TakeLoan(uint256 tokenId, address account, uint256 eth);
-    event Payoff(uint256 tokenId, address account, uint256 eth);
+    event TakeLoan(uint160 tokenId, address account, uint96);
+    event Payoff(uint160 tokenId, address account, uint96);
 
     function payoffAmount() external view returns (uint256);
 
-    function loan(uint256 tokenId) external;
+    function rebalance(uint160 tokenId) external payable;
 
-    function payoff(uint256 tokenId) external payable;
+    function loan(uint160 tokenId) external;
+
+    function payoff(uint160 tokenId) external payable;
 }
 
 interface ITokenExternal is IERC721, IERC721Metadata {}
 
 interface ISwapExternal {
-    event Mint(uint256 epoch, address account, uint256 eth);
+    event Mint(uint160 tokenId, address account, uint96);
 
-    event Commit(uint256 tokenid, address account, uint256 eth);
+    event Commit(uint160 tokenId, address account, uint96);
 
-    event Offer(uint256 tokenid, address account, uint256 eth);
+    event Offer(uint160 tokenId, address account, uint96);
 
-    event Claim(uint256 tokenid, uint256 endingEpoch, address account);
+    event Claim(uint160 tokenId, address account);
 
-    event StartSwap(uint256 tokenid, address account, uint256 eth);
+    event StartSwap(uint160 tokenId, address account, uint96 floor);
 
-    event CommitItem(uint256 sellingTokenId, uint256 itemId, uint256 buyingTokenId, uint256 eth);
+    event CommitItem(uint160 sellingTokenId, uint16 itemId, uint160 buyingTokenId, uint96 eth);
 
-    event OfferItem(uint256 sellingTokenId, uint256 itemId, uint256 buyingTokenId, uint256 eth);
+    event OfferItem(uint160 sellingTokenId, uint16 itemId, uint160 buyingTokenId, uint96 eth);
 
-    event ClaimItem(uint256 sellingTokenId, uint256 itemId, uint256 buyingTokenId, uint256 endingEpoch);
+    event ClaimItem(uint160 sellingTokenId, uint16 itemId, uint160 buyingTokenId);
 
-    event SwapItem(uint256 sellingTokenId, uint256 itemId, uint256 eth);
+    event SwapItem(uint160 sellingTokenId, uint16 itemId, uint96 floor);
 
-    function delegate(uint160 tokenid) external payable;
+    function delegate(uint160 tokenId) external payable;
 
     function delegateItem(
         uint160 sellerTokenId,
@@ -85,7 +89,7 @@ interface ISwapExternal {
         uint160 buyerTokenId
     ) external payable;
 
-    function claim(uint160 tokenid) external;
+    function claim(uint160 tokenId) external;
 
     function claimItem(
         uint160 sellerTokenId,
@@ -93,29 +97,29 @@ interface ISwapExternal {
         uint160 buyerTokenId
     ) external;
 
-    function swap(uint160 tokenid, uint256 floor) external;
+    function swap(uint160 tokenId, uint96 floor) external;
 
     function swapItem(
-        uint160 tokenid,
+        uint160 tokenId,
         uint16 itemid,
-        uint256 floor
+        uint96 floor
     ) external;
 
-    function getOfferByAccount(uint160 tokenid, address account) external view returns (uint256 eth);
+    function getOfferByAccount(uint160 tokenId, address account) external view returns (uint96 eth);
 
-    function getActiveSwap(uint160 tokenid)
+    function getActiveSwap(uint160 tokenId)
         external
         view
         returns (
             address leader,
-            uint256 eth,
+            uint96 eth,
             uint32 _epoch,
             bool isOwner
         );
 }
 
 interface IEpochExternal {
-    function epoch() external view returns (uint256 res);
+    function epoch() external view returns (uint32 res);
 }
 
 interface INuggFT is ISwapExternal, ITokenExternal, IStakeExternal, ILoanExternal, IProofExternal, IVaultExternal, IEpochExternal {

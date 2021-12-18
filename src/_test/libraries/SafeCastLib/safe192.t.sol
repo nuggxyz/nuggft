@@ -6,8 +6,8 @@ import {DSTestPlus as t} from '../../utils/DSTestPlus.sol';
 
 import {SafeCastLib} from '../../../libraries/SafeCastLib.sol';
 
-contract SafeCastLibTest__safe192 is t {
-    function test__SafeCastLib__safe192__g1() public {
-        assertEq(SafeCastLib.safe192(type(uint192).max), type(uint192).max);
+contract SafeCastLibTest__safe96 is t {
+    function test__SafeCastLib__safe96__g1() public {
+        assertEq(SafeCastLib.safe96(type(uint96).max), type(uint96).max);
     }
 }

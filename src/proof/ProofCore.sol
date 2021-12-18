@@ -22,15 +22,15 @@ library ProofCore {
                                 EVENTS
     ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━*/
 
-    event SetProof(uint256 tokenId, uint16[] items);
-    event PopItem(uint256 tokenId, uint16 itemId);
-    event PushItem(uint256 tokenId, uint16 itemId);
+    event SetProof(uint160 tokenId, uint16[] items);
+    event PopItem(uint160 tokenId, uint16 itemId);
+    event PushItem(uint160 tokenId, uint16 itemId);
 
     /*━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
                             ITEM MANAGEMENT
     ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━*/
 
-    function push(uint256 tokenId, uint16 itemId) internal {
+    function push(uint160 tokenId, uint16 itemId) internal {
         uint256 working = ProofView.checkedProofOf(tokenId);
 
         require(Proof.ptr().protcolItems[itemId] > 0, '1155:SBTF:1');
@@ -44,7 +44,7 @@ library ProofCore {
         emit PushItem(tokenId, itemId);
     }
 
-    function pop(uint256 tokenId, uint16 itemId) internal {
+    function pop(uint160 tokenId, uint16 itemId) internal {
         uint256 working = ProofView.checkedProofOf(tokenId);
 
         require(working != 0, '1155:STF:0');
@@ -62,7 +62,7 @@ library ProofCore {
                             INITIALIZATION
     ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━*/
 
-    function setProof(uint256 tokenId) internal {
+    function setProof(uint160 tokenId) internal {
         require(!ProofView.hasProof(tokenId), 'IL:M:0');
 
         (uint256 seed, uint256 epoch) = EpochView.calculateSeed();

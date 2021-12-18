@@ -24,12 +24,15 @@ library SwapPure {
                             SHIFT HELPERS
     ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━*/
 
-    function eth(uint256 input) internal view returns (uint256 res) {
-        return ShiftLib.getCompressed(input, 56, 160);
+    // type(uint96).max / 10**13 = 0x01C25C268497681 =  7922816251426433
+    // type(uint56).max          = 0x100000000000000 = 72057594037927936
+    function eth(uint256 input) internal view returns (uint96 res) {
+        return (ShiftLib.get(input, 56, 160) * 0x9184E72A000).safe96();
     }
 
-    function eth(uint256 input, uint256 update) internal view returns (uint256 res, uint256 rem) {
-        return ShiftLib.setCompressed(input, 56, 160, update);
+    function eth(uint256 input, uint96 update) internal view returns (uint256 cache, uint96 rem) {
+        rem = update % uint96(0x9184E72A000);
+        cache = ShiftLib.set(input, 56, 160, update / uint96(0x9184E72A000));
     }
 
     function epoch(uint256 input, uint32 update) internal view returns (uint256 res) {
@@ -63,9 +66,9 @@ library SwapPure {
     function buildSwapData(
         uint32 _epoch,
         uint160 _account,
-        uint256 _eth,
+        uint96 _eth,
         bool _isOwner
-    ) internal view returns (uint256 res, uint256 dust) {
+    ) internal view returns (uint256 res, uint96 dust) {
         res = epoch(res, _epoch);
         res = account(res, _account);
         if (_isOwner) res = isOwner(res, true);
@@ -76,7 +79,7 @@ library SwapPure {
     function updateSwapData(
         uint256 data,
         uint160 _account,
-        uint256 _eth
+        uint96 _eth
     )
         internal
         view
@@ -93,17 +96,17 @@ library SwapPure {
         uint256 data,
         uint32 _epoch,
         uint160 _account,
-        uint256 _eth
+        uint96 _eth
     )
         internal
         view
         returns (
             uint256 res,
-            uint256 increment,
-            uint256 dust
+            uint96 increment,
+            uint96 dust
         )
     {
-        uint256 baseEth = eth(data);
+        uint96 baseEth = eth(data);
 
         require(addIncrement(baseEth) < _eth);
 

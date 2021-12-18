@@ -39,14 +39,14 @@ abstract contract SwapExternal is ISwapExternal {
         SwapCore.claimItem(sellingTokenId, itemid, buyingTokenId);
     }
 
-    function swap(uint160 tokenId, uint256 floor) external override {
+    function swap(uint160 tokenId, uint96 floor) external override {
         SwapCore.swap(tokenId, floor);
     }
 
     function swapItem(
         uint160 sellingTokenId,
         uint16 itemid,
-        uint256 floor
+        uint96 floor
     ) external override {
         SwapCore.swapItem(itemid, floor, sellingTokenId);
     }
@@ -65,7 +65,7 @@ abstract contract SwapExternal is ISwapExternal {
         override
         returns (
             address leader,
-            uint256 amount,
+            uint96 amount,
             uint32 _epoch,
             bool isOwner
         )
@@ -73,7 +73,7 @@ abstract contract SwapExternal is ISwapExternal {
         return SwapView.getActiveSwap(tokenId);
     }
 
-    function getOfferByAccount(uint160 tokenId, address account) external view override returns (uint256 amount) {
+    function getOfferByAccount(uint160 tokenId, address account) external view override returns (uint96 amount) {
         return SwapView.getOfferByAccount(tokenId, account);
     }
 }

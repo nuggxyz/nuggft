@@ -14,15 +14,19 @@ import {Stake} from './StakeStorage.sol';
 library StakeView {
     using StakePure for uint256;
 
-    function getActiveEthPerShare() internal view returns (uint256 res) {
+    function getActiveEthPerShare() internal view returns (uint96 res) {
         res = Stake.sload().getEthPerShare();
     }
 
-    function getActiveStakedShares() internal view returns (uint256 res) {
+    function getActiveStakedShares() internal view returns (uint64 res) {
         res = Stake.sload().getStakedShares();
     }
 
-    function getActiveStakedEth() internal view returns (uint256 res) {
+    function getActiveStakedEth() internal view returns (uint96 res) {
         res = Stake.sload().getStakedEth();
+    }
+
+    function getActiveProtocolEth() internal view returns (uint96 res) {
+        res = Stake.sload().getProtocolEth();
     }
 }

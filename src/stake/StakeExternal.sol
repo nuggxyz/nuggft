@@ -7,16 +7,20 @@ import {StakeView} from './StakeView.sol';
 import {IStakeExternal} from '../interfaces/INuggFT.sol';
 
 abstract contract StakeExternal is IStakeExternal {
-    function totalStakedShares() public view override returns (uint256 res) {
+    function totalStakedShares() public view override returns (uint64 res) {
         res = StakeView.getActiveStakedShares();
     }
 
-    function totalStakedEth() public view override returns (uint256 res) {
+    function totalStakedEth() public view override returns (uint96 res) {
         res = StakeView.getActiveStakedEth();
     }
 
-    function activeEthPerShare() public view override returns (uint256 res) {
+    function activeEthPerShare() public view override returns (uint96 res) {
         res = StakeView.getActiveEthPerShare();
+    }
+
+    function totalProtocolEth() public view override returns (uint96 res) {
+        res = StakeView.getActiveProtocolEth();
     }
 
     function totalSupply() public view override returns (uint256 res) {

@@ -15,7 +15,7 @@ library SwapView {
         view
         returns (
             address leader,
-            uint256 amount,
+            uint96 amount,
             uint32 _epoch,
             bool isOwner
         )
@@ -28,7 +28,7 @@ library SwapView {
         isOwner = m.swapData.isOwner();
     }
 
-    function getOfferByAccount(uint160 tokenId, address account) internal view returns (uint256 amount) {
+    function getOfferByAccount(uint160 tokenId, address account) internal view returns (uint96 amount) {
         (, Swap.Memory memory m) = Swap.loadTokenSwap(tokenId, account);
         require(m.offerData != 0, 'NS:GS:0');
         amount = m.offerData.eth();

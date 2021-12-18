@@ -17,7 +17,7 @@ import {ProofView} from './ProofView.sol';
  * {ERC721Enumerable}.
  */
 abstract contract ProofExternal is IProofExternal {
-    function proofOf(uint256 tokenId) public view virtual override returns (uint256) {
+    function proofOf(uint160 tokenId) public view virtual override returns (uint256) {
         if (tokenId == EpochView.activeEpoch()) {
             (uint256 p, , , ) = ProofView.pendingProof();
             return p;
@@ -26,7 +26,7 @@ abstract contract ProofExternal is IProofExternal {
         return ProofView.checkedProofOfIncludingPending(tokenId);
     }
 
-    function parsedProofOf(uint256 tokenId)
+    function parsedProofOf(uint160 tokenId)
         public
         view
         virtual

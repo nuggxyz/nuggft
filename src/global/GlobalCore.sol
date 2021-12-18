@@ -7,7 +7,7 @@ import {Global} from './GlobalStorage.sol';
 import {TokenCore} from '../token/TokenCore.sol';
 
 library GlobalCore {
-    function burn(uint256 tokenId) internal {
+    function burn(uint160 tokenId) internal {
         TokenCore.onBurn(tokenId);
 
         delete Global.ptr().swap.map[tokenId];

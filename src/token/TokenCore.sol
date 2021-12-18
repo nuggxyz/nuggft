@@ -27,7 +27,7 @@ library TokenCore {
         emit ApprovalForAll(msg.sender, operator, approved);
     }
 
-    function checkedApprove(address account, uint256 tokenId) internal {
+    function checkedApprove(address account, uint160 tokenId) internal {
         address owner = TokenView.ownerOf(tokenId);
 
         // ERC721: approval to current owner
@@ -45,7 +45,7 @@ library TokenCore {
                                 TRANSFER
     ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━*/
 
-    function checkedTransferFromSelf(address to, uint256 tokenId) internal {
+    function checkedTransferFromSelf(address to, uint160 tokenId) internal {
         // TODO: we should check this before we allow someeone to offer
         require(SafeTransferLib.isERC721Receiver(to, tokenId), 'TL:0');
 
@@ -56,7 +56,7 @@ library TokenCore {
         emit Transfer(address(this), to, tokenId);
     }
 
-    function approvedTransferToSelf(uint256 tokenId) internal {
+    function approvedTransferToSelf(uint160 tokenId) internal {
         // ERC721: transfer caller is not owner nor approved
         require(msg.sender == TokenView.ownerOf(tokenId) && TokenView.getApproved(tokenId) == address(this), 'TL:4');
 
@@ -73,7 +73,7 @@ library TokenCore {
         emit Transfer(msg.sender, address(this), tokenId);
     }
 
-    function checkedMintTo(address to, uint256 tokenId) internal {
+    function checkedMintTo(address to, uint160 tokenId) internal {
         // ERC721: transfer caller is not owner nor approved
         require(SafeTransferLib.isERC721Receiver(to, tokenId), 'TL:4');
 
@@ -83,7 +83,7 @@ library TokenCore {
         emit Transfer(address(0), to, tokenId);
     }
 
-    function onBurn(uint256 tokenId) internal {
+    function onBurn(uint160 tokenId) internal {
         require(TokenView.getApproved(tokenId) == address(this), 'TL:BFS:0');
 
         require(TokenView.ownerOf(tokenId) == msg.sender, 'TL:BFS:1');
