@@ -4,10 +4,14 @@ pragma solidity 0.8.9;
 
 import {DSTest} from '../../../lib/ds-test/src/test.sol';
 
-import {Hevm} from './Hevm.sol';
+import {Hevm, ForgeVm} from './Vm.sol';
 
 contract DSTestPlus is DSTest {
     Hevm internal constant hevm = Hevm(HEVM_ADDRESS);
+
+    //    Vm vm = Vm(0x7109709ECfa91a80626fF3989D68f67F5b1DD12D);
+
+    ForgeVm internal constant fvm = ForgeVm(0x7109709ECfa91a80626fF3989D68f67F5b1DD12D);
 
     address internal constant DEAD_ADDRESS = 0xDeaDbeefdEAdbeefdEadbEEFdeadbeEFdEaDbeeF;
 
@@ -59,5 +63,19 @@ contract DSTestPlus is DSTest {
             emit log_named_bytes('    Actual', a);
             fail();
         }
+    }
+}
+
+contract DSInvariantTest {
+    address[] private targets;
+
+    function targetContracts() public view virtual returns (address[] memory) {
+        require(targets.length > 0, 'NO_TARGET_CONTRACTS');
+
+        return targets;
+    }
+
+    function addTargetContract(address newTargetContract) internal virtual {
+        targets.push(newTargetContract);
     }
 }
