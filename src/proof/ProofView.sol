@@ -13,12 +13,12 @@ import {ProofPure} from './ProofPure.sol';
 import {Proof} from './ProofStorage.sol';
 
 library ProofView {
-    function checkedProofOf(uint256 tokenId) internal view returns (uint256 res) {
+    function checkedProofOf(uint160 tokenId) internal view returns (uint256 res) {
         res = Proof.get(tokenId);
         require(res != 0, 'PROOF:PO:0');
     }
 
-    function checkedProofOfIncludingPending(uint256 tokenId) internal view returns (uint256 res) {
+    function checkedProofOfIncludingPending(uint160 tokenId) internal view returns (uint256 res) {
         if (tokenId == EpochView.activeEpoch()) {
             (uint256 p, , , ) = pendingProof();
             return p;
@@ -27,11 +27,11 @@ library ProofView {
         require(res != 0, 'PROOF:PO:0');
     }
 
-    function hasProof(uint256 tokenId) internal view returns (bool res) {
+    function hasProof(uint160 tokenId) internal view returns (bool res) {
         res = Proof.get(tokenId) != 0;
     }
 
-    function parseProof(uint256 tokenId)
+    function parseProof(uint160 tokenId)
         internal
         view
         returns (
@@ -53,7 +53,7 @@ library ProofView {
         // }
     }
 
-    function parsedProofOfIncludingPending(uint256 tokenId)
+    function parsedProofOfIncludingPending(uint160 tokenId)
         internal
         view
         returns (

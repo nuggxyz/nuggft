@@ -5,7 +5,7 @@ pragma solidity 0.8.9;
 import {Token} from './TokenStorage.sol';
 
 library TokenView {
-    function exists(uint256 tokenId) internal view returns (bool) {
+    function exists(uint160 tokenId) internal view returns (bool) {
         return Token.ptr().owners[tokenId] != address(0);
     }
 
@@ -13,12 +13,12 @@ library TokenView {
         return Token.ptr().operatorApprovals[owner][operator];
     }
 
-    function getApproved(uint256 tokenId) internal view returns (address) {
+    function getApproved(uint160 tokenId) internal view returns (address) {
         require(exists(tokenId), 'ERC721: approved query for nonexistent token');
         return Token.ptr().approvals[tokenId];
     }
 
-    function ownerOf(uint256 tokenId) internal view returns (address owner) {
+    function ownerOf(uint160 tokenId) internal view returns (address owner) {
         owner = Token.ptr().owners[tokenId];
         require(owner != address(0), 'ERC721: owner query for nonexistent token');
     }
@@ -28,7 +28,7 @@ library TokenView {
         return Token.ptr().balances[owner];
     }
 
-    function isApprovedOrOwner(address spender, uint256 tokenId) internal view returns (bool) {
+    function isApprovedOrOwner(address spender, uint160 tokenId) internal view returns (bool) {
         address owner = TokenView.ownerOf(tokenId);
         return (spender == owner || getApproved(tokenId) == spender || isApprovedForAll(owner, spender));
     }

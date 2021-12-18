@@ -16,8 +16,6 @@ import {ProofCore} from '../proof/ProofCore.sol';
 import {TokenCore} from '../token/TokenCore.sol';
 import {TokenView} from '../token/TokenView.sol';
 
-import {Print} from '../_test/utils/Print.sol';
-
 library SwapCore {
     using SafeCastLib for uint256;
     using SwapPure for uint256;
@@ -79,11 +77,11 @@ library SwapCore {
     function mint(Swap.Storage storage s, Swap.Memory memory m) internal {
         require(m.swapData == 0 && m.offerData == 0, 'NS:M:D');
 
-        (uint256 dat, ) = SwapPure.buildSwapData(m.activeEpoch, uint160(msg.sender), msg.value, false);
+        (uint256 dat, ) = SwapPure.buildSwapData(m.activeEpoch, uint160(msg.sender), msg.value.safe96(), false);
 
         s.data = dat;
 
-        StakeCore.addStakedShareAndEth(msg.value.safe192());
+        StakeCore.addStakedShareAndEth(msg.value.safe96());
 
         ProofCore.setProof(m.activeEpoch);
     }
@@ -118,7 +116,7 @@ library SwapCore {
         // make sure swap does not exist - this logically should never happen
         assert(m.swapData == 0);
 
-        (uint256 dat, ) = SwapPure.buildSwapData(0, uint160(msg.sender), msg.value, true);
+        (uint256 dat, ) = SwapPure.buildSwapData(0, uint160(msg.sender), msg.value.safe96(), true);
 
         s.data = dat;
 
@@ -177,7 +175,7 @@ library SwapCore {
 
     function swapItem(
         uint16 itemId,
-        uint256 floor,
+        uint96 floor,
         uint160 sellingTokenId
     ) internal {
         require(TokenView.ownerOf(sellingTokenId) == msg.sender, 'AUC:TT:3');
@@ -220,14 +218,14 @@ library SwapCore {
             m.swapData,
             m.activeEpoch + 1,
             m.sender,
-            msg.value
+            msg.value.safe96()
         );
 
         s.data = newSwapData;
 
         s.offers[m.swapData.account()] = m.swapData;
 
-        StakeCore.addStakedEth((increment + dust).safe192());
+        StakeCore.addStakedEth((increment + dust).safe96());
     }
 
     function offer(Swap.Storage storage s, Swap.Memory memory m) internal {
@@ -240,11 +238,11 @@ library SwapCore {
         (uint256 newSwapData, uint256 increment, uint256 dust) = SwapPure.updateSwapData(
             m.swapData,
             m.sender,
-            m.offerData.eth() + msg.value
+            m.offerData.eth() + msg.value.safe96()
         );
 
         s.data = newSwapData;
 
-        StakeCore.addStakedEth((increment + dust).safe192());
+        StakeCore.addStakedEth((increment + dust).safe96());
     }
 }

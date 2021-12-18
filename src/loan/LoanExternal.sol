@@ -7,12 +7,16 @@ import {ILoanExternal} from '../interfaces/INuggFT.sol';
 import {LoanCore} from './LoanCore.sol';
 
 abstract contract LoanExternal is ILoanExternal {
-    function loan(uint256 tokenId) external override {
+    function loan(uint160 tokenId) external override {
         LoanCore.loan(tokenId);
     }
 
-    function payoff(uint256 tokenId) external payable override {
+    function payoff(uint160 tokenId) external payable override {
         LoanCore.payoff(tokenId);
+    }
+
+    function rebalance(uint160 tokenId) external payable override {
+        LoanCore.rebalance(tokenId);
     }
 
     function payoffAmount() external view override returns (uint256 res) {

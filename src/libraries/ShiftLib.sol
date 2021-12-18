@@ -58,62 +58,6 @@ library ShiftLib {
         value &= mask(bits);
     }
 
-    /*///////////////////////////////////////////////////////////////
-                                COMPRESSED
-    //////////////////////////////////////////////////////////////*/
-
-    function getCompressed(
-        uint256 store,
-        uint8 bits,
-        uint8 pos
-    ) internal view returns (uint256 res) {
-        // validatePosWithLength(pos, bits - 8);
-
-        res = get(store, bits, pos);
-
-        // uint256 i = res & 0xff;
-        // res >>= 8;
-        // res <<= (i * 4);
-        // res *= 0xE8D4A51000;
-
-        assembly {
-            // res := and(shr(pos, store), 0xFFFFFFFFFFFFFF)
-            let i := and(res, 0xff)
-            res := shl(mul(4, i), shr(8, res))
-            res := mul(res, 0xE8D4A51000)
-        }
-    }
-
-    function setCompressed(
-        uint256 store,
-        uint8 bits,
-        uint8 pos,
-        uint256 value
-    ) internal view returns (uint256 res, uint256 dust) {
-        require(bits > 8, 'SHIFT:SCE');
-
-        // validatePosWithLength(pos, bits);
-
-        assembly {
-            let ins := value
-            value := div(value, 0xE8D4A51000)
-            for {
-
-            } gt(value, 0xFFFFFFFFFFFF) {
-
-            } {
-                res := add(res, 0x01)
-                value := shr(4, value)
-            }
-            value := or(shl(8, value), res)
-            let out := shl(mul(4, res), shr(8, value))
-            dust := sub(ins, mul(out, 0xE8D4A51000))
-        }
-        // validateNum(value >> 8, bits - 8);
-
-        res = set(store, bits, pos, value);
-    }
-
     /*━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
                                 ARRAYS
     ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━*/

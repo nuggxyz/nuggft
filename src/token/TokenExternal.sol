@@ -2,6 +2,8 @@
 
 pragma solidity 0.8.9;
 
+import {SafeCastLib} from '../libraries/SafeCastLib.sol';
+
 import {IERC721Receiver, IERC721, IERC165, IERC721Metadata} from '../interfaces/IERC721.sol';
 import {ITokenExternal} from '../interfaces/INuggFT.sol';
 
@@ -19,6 +21,8 @@ import {TokenCore} from './TokenCore.sol';
  * {ERC721Enumerable}.
  */
 abstract contract TokenExternal is ITokenExternal {
+    using SafeCastLib for uint256;
+
     bytes32 immutable _name;
 
     bytes32 immutable _symbol;
@@ -29,11 +33,11 @@ abstract contract TokenExternal is ITokenExternal {
     }
 
     function burn(uint256 tokenId) external {
-        GlobalCore.burn(tokenId);
+        GlobalCore.burn(tokenId.safe160());
     }
 
     function approve(address to, uint256 tokenId) public override {
-        TokenCore.checkedApprove(to, tokenId);
+        TokenCore.checkedApprove(to, tokenId.safe160());
     }
 
     function setApprovalForAll(address operator, bool approved) public override {
@@ -62,11 +66,11 @@ abstract contract TokenExternal is ITokenExternal {
     }
 
     function ownerOf(uint256 tokenId) public view override returns (address) {
-        return TokenView.ownerOf(tokenId);
+        return TokenView.ownerOf(tokenId.safe160());
     }
 
     function getApproved(uint256 tokenId) public view override returns (address) {
-        return TokenView.getApproved(tokenId);
+        return TokenView.getApproved(tokenId.safe160());
     }
 
     function isApprovedForAll(address owner, address operator) public view override returns (bool) {

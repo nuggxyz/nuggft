@@ -104,11 +104,45 @@ describe('uint tests', async function () {
 
             console.log(await fix.nuggft.rawProcessURI(1));
 
-            await fix.nuggft.connect(accounts.charile).burn(1);
+            await fix.nuggft.connect(accounts.charile).loan(1);
 
-            await fix.nuggft.connect(accounts.frank).loan(11);
+            console.log('bal ', fromEth(await accounts.charile.getBalance()));
+            console.log('activeEthPerShare()', fromEth(await fix.nuggft.activeEthPerShare()));
+            console.log('totalSupply()', fromEth(await fix.nuggft.totalSupply()));
+            console.log('totalProtocolEth()', fromEth(await fix.nuggft.totalProtocolEth()));
 
-            await fix.nuggft.connect(accounts.frank).payoff(11, { value: await fix.nuggft.payoffAmount() });
+            console.log('totalStakedEth()', fromEth(await fix.nuggft.totalStakedEth()));
+            await fix.nuggft.connect(accounts.charile).rebalance(1, { value: toEth('40') });
+
+            console.log('bal ', fromEth(await accounts.charile.getBalance()));
+            console.log('activeEthPerShare()', fromEth(await fix.nuggft.activeEthPerShare()));
+            console.log('totalSupply()', fromEth(await fix.nuggft.totalSupply()));
+            console.log('totalProtocolEth()', fromEth(await fix.nuggft.totalProtocolEth()));
+
+            console.log('totalStakedEth()', fromEth(await fix.nuggft.totalStakedEth()));
+            await fix.nuggft.connect(accounts.charile).rebalance(1, { value: toEth('40') });
+            console.log('bal ', fromEth(await accounts.charile.getBalance()));
+            console.log('activeEthPerShare()', fromEth(await fix.nuggft.activeEthPerShare()));
+            console.log('totalSupply()', fromEth(await fix.nuggft.totalSupply()));
+            console.log('totalStakedEth()', fromEth(await fix.nuggft.totalStakedEth()));
+
+            console.log('totalProtocolEth()', fromEth(await fix.nuggft.totalProtocolEth()));
+            await fix.nuggft.connect(accounts.charile).rebalance(1, { value: toEth('40') });
+            console.log('bal ', (await accounts.charile.getBalance()).toString());
+
+            console.log('activeEthPerShare()', (await fix.nuggft.activeEthPerShare()).toString());
+            console.log('totalSupply()', fromEth(await fix.nuggft.totalSupply()));
+            console.log('totalProtocolEth()', fromEth(await fix.nuggft.totalProtocolEth()));
+
+            console.log('totalStakedEth()', fromEth(await fix.nuggft.totalStakedEth()));
+
+            await fix.nuggft.connect(accounts.frank).burn(11);
+
+            console.log('activeEthPerShare()', fromEth(await fix.nuggft.activeEthPerShare()));
+            console.log('totalSupply()', fromEth(await fix.nuggft.totalSupply()));
+            console.log('totalStakedEth()', fromEth(await fix.nuggft.totalStakedEth()));
+
+            // await fix.nuggft.connect(accounts.frank).payoff(11, { value: await fix.nuggft.payoffAmount() });
         });
     });
 });

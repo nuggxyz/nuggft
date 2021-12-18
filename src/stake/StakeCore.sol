@@ -29,14 +29,18 @@ library StakeCore {
                                  ADD
     ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━*/
 
-    function addStakedShareAndEth(uint192 eth) internal {
+    function addStakedShareAndEth(uint96 eth) internal {
         uint256 cache = Stake.sload();
 
-        (uint64 activeShares, uint192 activeEth) = cache.getStakedSharesAndEth();
+        (uint64 activeShares, uint96 activeEth, uint96 activeProtocolEth) = cache.getStakedSharesAndEth();
+
+        uint96 protocol = (eth * 100) / 10000;
+
+        eth -= protocol;
 
         require(eth >= cache.getEthPerShare(), 'SL:M:0');
 
-        Stake.sstore(cache.setStakedShares(activeShares + 1).setStakedEth(activeEth + eth));
+        Stake.sstore(cache.setStakedShares(activeShares + 1).setStakedEth(activeEth + eth).setProtocolEth(activeProtocolEth + protocol));
 
         emit StakeEth(eth);
     }
@@ -49,10 +53,14 @@ library StakeCore {
         Stake.sstore(cache.setStakedShares(cache.getStakedShares() + amount));
     }
 
-    function addStakedEth(uint192 amount) internal {
+    function addStakedEth(uint96 amount) internal {
         uint256 cache = Stake.sload();
 
-        Stake.sstore(cache.setStakedEth(cache.getStakedEth() + amount));
+        uint96 protocol = (amount * 100) / 10000;
+
+        amount -= protocol;
+
+        Stake.sstore(cache.setStakedEth(cache.getStakedEth() + amount).setProtocolEth(cache.getProtocolEth() + protocol));
 
         emit StakeEth(amount);
     }
@@ -64,9 +72,9 @@ library StakeCore {
     function subStakedSharePayingSender() internal {
         uint256 cache = Stake.sload();
 
-        (uint64 activeShares, uint192 activeEth) = cache.getStakedSharesAndEth();
+        (uint64 activeShares, uint96 activeEth, ) = cache.getStakedSharesAndEth();
 
-        uint192 eps = cache.getEthPerShare();
+        uint96 eps = cache.getEthPerShare();
 
         require(activeShares >= 1, 'SL:SS:0');
         require(activeEth >= eps, 'SL:SS:1');

@@ -14,11 +14,11 @@ library Proof {
         s = Global.ptr().proof;
     }
 
-    function get(uint256 tokenId) internal view returns (uint256) {
+    function get(uint160 tokenId) internal view returns (uint256) {
         return ptr().map[tokenId];
     }
 
-    function set(uint256 tokenId, uint256 data) internal {
+    function set(uint160 tokenId, uint256 data) internal {
         ptr().map[tokenId] = data;
     }
 }
