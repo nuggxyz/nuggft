@@ -13,6 +13,7 @@ import {VaultExternal as Vault} from './vault/VaultExternal.sol';
 import {StakeExternal as Staked} from './stake/StakeExternal.sol';
 import {LoanExternal as Loanable} from './loan/LoanExternal.sol';
 import {EpochExternal as Epoched} from './epoch/EpochExternal.sol';
+import {EpochExternal as Epoched} from './epoch/EpochExternal.sol';
 
 contract NuggFT is a, Swapable, Provable, Loanable, Staked, Epoched, Vault, Token {
     constructor(address _defaultResolver) Token('nuggft', 'Nugg Fungible Token') Vault(_defaultResolver) {

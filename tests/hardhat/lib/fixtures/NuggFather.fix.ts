@@ -12,7 +12,7 @@ export interface NuggFatherFixture {
     // nuggswap: NuggSwap;
     // xnugg: xNUGG;
     nuggft: NuggFT;
-
+    deployer: Wallet;
     owner: string;
     ownerStartBal: BigNumber;
     hre: HardhatRuntimeEnvironment;
@@ -27,18 +27,18 @@ export const NuggFatherFix: Fixture<NuggFatherFixture> = async function (
 ): Promise<NuggFatherFixture> {
     const hre = getHRE();
 
-    const eoaDeployer = provider.getWallets()[16];
+    const deployer = provider.getWallets()[16];
     const eoaOwner = provider.getWallets()[17];
 
     // const xnugg = await deployContractWithSalt<xNUGG__factory>({
     //     factory: 'xNUGG',
-    //     from: eoaDeployer,
+    //     from: deployer,
     //     args: [],
     // });
 
     // const nuggswap = await deployContractWithSalt<NuggSwap__factory>({
     //     factory: 'NuggSwap',
-    //     from: eoaDeployer,
+    //     from: deployer,
     //     args: [xnugg.address],
     // });
 
@@ -47,13 +47,13 @@ export const NuggFatherFix: Fixture<NuggFatherFixture> = async function (
 
     const processResolver = await deployContractWithSalt<MockProcessResolver__factory>({
         factory: 'MockProcessResolver',
-        from: eoaDeployer,
+        from: deployer,
         args: [],
     });
 
     const nuggft = await deployContractWithSalt<NuggFT__factory>({
         factory: 'NuggFT',
-        from: eoaDeployer,
+        from: deployer,
         args: [processResolver.address],
     });
 
@@ -69,7 +69,7 @@ export const NuggFatherFix: Fixture<NuggFatherFixture> = async function (
 
     const blockOffset = BigNumber.from(await hre.ethers.provider.getBlockNumber());
 
-    const owner = eoaDeployer.address;
+    const owner = deployer.address;
 
     // hre.tracer.nameTags[xnugg.address] = 'xNUGG';
     // hre.tracer.nameTags[nuggswap.address] = 'NuggSwap';
@@ -87,6 +87,7 @@ export const NuggFatherFix: Fixture<NuggFatherFixture> = async function (
         // dotnugg: hre.dotnugg,
         nuggft,
         // xnugg,
+        deployer,
         blockOffset,
         owner,
         // nuggswap,

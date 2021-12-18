@@ -21,11 +21,13 @@ library LoanCore {
     using SafeCastLib for uint256;
     using SwapPure for uint256;
 
-    uint256 constant LIQUIDATION_PERIOD = 1000;
+    uint32 constant LIQUIDATION_PERIOD = 1000;
+    uint96 constant REBALANCE_FEE_BPS = 100;
+    uint32 constant REBALANCE_PERIOD_INCREASE = 100;
 
     event TakeLoan(uint160 tokenId, address account, uint256 eth);
     event Payoff(uint160 tokenId, address account, uint256 eth);
-    event Liquidate(uint160 tokenId, address account, uint256 eth);
+    event Rebalance(uint160 tokenId);
 
     function loan(uint160 tokenId) internal {
         // we know the loan data is blank because it is owned by the user
@@ -41,8 +43,6 @@ library LoanCore {
 
         Loan.sstore(tokenId, loanData); // starting swap data
 
-        // StakeCore.subStakedSharePayingSender();
-
         SafeTransferLib.safeTransferETH(msg.sender, principal);
 
         emit TakeLoan(tokenId, msg.sender, principal);
@@ -57,9 +57,56 @@ library LoanCore {
 
         uint96 curr = cache.eth(); // in their pocket atm
 
-        uint96 fee = (curr * 100) / 10000; // fee to be paid
+        uint96 fee = ((curr * REBALANCE_FEE_BPS) / 10000); // fee to be paid 69
 
-        require(fee <= msg.value, 'LOAN:RE:0');
+        require(fee <= msg.value, 'LOAN:RE:0'); // 70
+
+        uint96 preEps = StakeView.getActiveEthPerShare();
+
+        StakeCore.addStakedEth(fee);
+
+        (uint256 loanData, uint96 dust) = SwapPure.buildSwapData(
+            cache.epoch() + REBALANCE_PERIOD_INCREASE,
+            uint160(msg.sender),
+            StakeView.getActiveEthPerShare(),
+            false
+        );
+
+        Loan.sstore(tokenId, loanData); // starting swap data
+
+        uint96 overpayment = msg.value.safe96() - fee; // 1 wei
+        emit Rebalance(overpayment);
+
+        uint96 update = curr + fee;
+
+        // value earned while lone was taken out
+        uint96 earnings = update >= preEps ? 0 : preEps - update;
+
+        SafeTransferLib.safeTransferETH(msg.sender, earnings + overpayment + dust);
+
+        emit Rebalance(tokenId);
+    }
+
+    function payoff(uint160 tokenId) internal {
+        require(address(this) == TokenView.ownerOf(tokenId), 'LOAN:P:0');
+
+        uint256 cache = Loan.sload(tokenId);
+
+        Loan.spurge(tokenId); // starting swap data
+
+        uint32 epoch = EpochView.activeEpoch();
+
+        if (cache.epoch() + LIQUIDATION_PERIOD >= epoch) {
+            require(cache.account() == uint160(msg.sender), 'LOAN:P:1');
+        }
+
+        require(cache != 0, 'LOAN:P:2');
+
+        uint96 curr = cache.eth(); // in their pocket atm
+
+        uint96 fee = (curr * REBALANCE_FEE_BPS) / 10000; // fee to be paid
+
+        require(fee + curr <= msg.value, 'LOAN:RE:0');
 
         uint96 overpayment = msg.value.safe96() - fee;
 
@@ -67,57 +114,16 @@ library LoanCore {
 
         uint96 activeEps = StakeView.getActiveEthPerShare();
 
-        uint96 reward = update >= activeEps ? 0 : activeEps - update;
+        // value earned while lone was taken out
+        uint96 earnings = update >= activeEps ? 0 : activeEps - update;
 
         StakeCore.addStakedEth(fee);
 
-        (uint256 loanData, ) = SwapPure.buildSwapData(cache.epoch() + 100, uint160(msg.sender), StakeView.getActiveEthPerShare(), false);
+        SafeTransferLib.safeTransferETH(msg.sender, earnings + overpayment);
 
-        Loan.sstore(tokenId, loanData); // starting swap data
-
-        SafeTransferLib.safeTransferETH(msg.sender, reward + overpayment);
-
-        emit Liquidate(tokenId, msg.sender, fee);
-        emit Payoff(tokenId, msg.sender, overpayment);
-        emit Payoff(tokenId, msg.sender, activeEps);
-    }
-
-    /// loan    -----
-    /// extend
-    /// extend
-    /// extend
-    /// payoff
-
-    function payoff(uint160 tokenId) internal {
-        require(address(this) == TokenView.ownerOf(tokenId), 'LOAN:P:0');
-
-        uint256 cache = Loan.sload(tokenId);
-
-        require(cache != 0, 'LOAN:P:2');
-
-        uint32 epoch = EpochView.activeEpoch();
-
-        uint96 min;
-
-        if (cache.epoch() + LIQUIDATION_PERIOD >= epoch) {
-            require(cache.account() == uint160(msg.sender), 'LOAN:P:1');
-        }
-
-        if (cache.account() == uint160(msg.sender)) {
-            // PAYOFF
-            min = (cache.eth() * 10100) / 10000; // ususally will be less!
-        } else {
-            // LIQUIDATION
-            min = StakeView.getActiveEthPerShare();
-        }
-
-        require(msg.value >= min, 'LOAN:P:2');
+        TokenCore.checkedTransferFromSelf(msg.sender, tokenId);
 
         emit Payoff(tokenId, msg.sender, msg.value);
-
-        Loan.spurge(tokenId);
-
-        TokenCore.checkedTransferFromSelf(msg.sender, tokenId); // StakeCore.addStakedShareAndEth(msg.value.safe96());
     }
 
     function payoffAmount() internal view returns (uint256 res) {
