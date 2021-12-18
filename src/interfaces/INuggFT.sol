@@ -55,8 +55,6 @@ interface ILoanExternal {
     event TakeLoan(uint160 tokenId, address account, uint96);
     event Payoff(uint160 tokenId, address account, uint96);
 
-    function payoffAmount() external view returns (uint256);
-
     function rebalance(uint160 tokenId) external payable;
 
     function loan(uint160 tokenId) external;

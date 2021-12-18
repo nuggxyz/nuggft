@@ -8,6 +8,6 @@ import {StakeCore} from '../../../stake/StakeCore.sol';
 
 contract StakeCoreTest__subStakedSharePayingSender is t {
     function test__StakeCore__subStakedSharePayingSender__a() public {
-        StakeCore.subStakedSharePayingSender();
+        StakeCore.subStakedSharePayingSender(0);
     }
 }

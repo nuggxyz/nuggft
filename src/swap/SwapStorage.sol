@@ -12,12 +12,12 @@ library Swap {
     using SwapPure for uint256;
 
     struct Full {
-        mapping(uint256 => Mapping) map;
+        mapping(uint160 => Mapping) map;
     }
 
     struct Mapping {
         Storage self;
-        mapping(uint256 => Storage) items;
+        mapping(uint16 => Storage) items;
     }
 
     struct Storage {

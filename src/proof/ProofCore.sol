@@ -14,6 +14,9 @@ import {Proof} from './ProofStorage.sol';
 import {VaultPure} from '../vault/VaultPure.sol';
 import {Vault} from '../vault/VaultStorage.sol';
 
+
+import {Print} from '../_test/utils/Print.sol';
+
 library ProofCore {
     using SafeCastLib for uint256;
     using ProofPure for uint256;
@@ -93,31 +96,35 @@ library ProofCore {
 
         uint16[] memory upd = new uint16[](4);
 
-        uint8 ID_SIZE = 16;
-        uint8 ID_FEATURE_SIZE = 4;
-        uint8 ID_NUMBER_SIZE = 12;
+        uint8 FULL_SIZE = 16;
+        uint8 FEAT_SIZE = 4;
+        uint8 POSITION_SIZE = 12;
 
-        uint256 pick0 = ((seed >> (4 + ID_SIZE * 0)) & ShiftLib.mask(ID_NUMBER_SIZE)) % VaultPure.length(lendata, 0);
-        uint256 pick1 = ((seed >> (4 + ID_SIZE * 1)) & ShiftLib.mask(ID_NUMBER_SIZE)) % VaultPure.length(lendata, 1);
-        uint256 pick2 = ((seed >> (4 + ID_SIZE * 2)) & ShiftLib.mask(ID_NUMBER_SIZE)) % VaultPure.length(lendata, 2);
+        uint256 maxPosSize = ShiftLib.mask(POSITION_SIZE);
+
+        uint256 pick0 = ((seed >> (4 + FULL_SIZE * 0)) & maxPosSize) % VaultPure.length(lendata, 0);
+        uint256 pick1 = ((seed >> (4 + FULL_SIZE * 1)) & maxPosSize) % VaultPure.length(lendata, 1);
+
+        Print.log(VaultPure.length(lendata, 2), "VaultPure.length(lendata, 2)", lendata, "lendata");
+        uint256 pick2 = ((seed >> (4 + FULL_SIZE * 2)) & maxPosSize) % VaultPure.length(lendata, 2);
 
         uint256 pick3 = (seed >> 69) % 256;
 
-        uint256 num = (seed >> (4 + ID_SIZE * 3)) & ShiftLib.mask(ID_NUMBER_SIZE);
+        uint256 num = (seed >> (4 + FULL_SIZE * 3)) & maxPosSize;
 
         if (pick3 < 96) {
-            pick3 = (3 << ID_NUMBER_SIZE) | (num % (VaultPure.length(lendata, 3)));
+            pick3 = (3 << POSITION_SIZE) | (num % (VaultPure.length(lendata, 3)));
         } else if (pick3 < 192) {
-            pick3 = (4 << ID_NUMBER_SIZE) | (num % (VaultPure.length(lendata, 4)));
+            pick3 = (4 << POSITION_SIZE) | (num % (VaultPure.length(lendata, 4)));
         } else if (pick3 < 250) {
-            pick3 = (5 << ID_NUMBER_SIZE) | (num % (VaultPure.length(lendata, 5)));
+            pick3 = (5 << POSITION_SIZE) | (num % (VaultPure.length(lendata, 5)));
         } else {
-            pick3 = (6 << ID_NUMBER_SIZE) | (num % (VaultPure.length(lendata, 6)));
+            pick3 = (6 << POSITION_SIZE) | (num % (VaultPure.length(lendata, 6)));
         }
 
         upd[0] = pick0.safe16();
-        upd[1] = (pick1 | (1 << ID_NUMBER_SIZE)).safe16();
-        upd[2] = (pick2 | (2 << ID_NUMBER_SIZE)).safe16();
+        upd[1] = (pick1 | (1 << POSITION_SIZE)).safe16();
+        upd[2] = (pick2 | (2 << POSITION_SIZE)).safe16();
         upd[3] = pick3.safe16();
 
         res = ShiftLib.setDynamicArray(res, upd, 16, 0, 4, 8);
