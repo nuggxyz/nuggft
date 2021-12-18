@@ -2,7 +2,7 @@
 
 // OpenZeppelin Contracts v4.4.0 (token/ERC721/IERC721.sol)
 
-pragma solidity ^0.8.0;
+pragma solidity 0.8.9;
 
 // OpenZeppelin Contracts v4.4.0 (token/ERC721/extensions/IERC721Metadata.sol)
 

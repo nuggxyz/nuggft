@@ -1,5 +1,7 @@
 // SPDX-License-Identifier: MIT
 
+pragma solidity 0.8.9;
+
 import {Global} from '../global/GlobalStorage.sol';
 
 import {Swap} from './SwapStorage.sol';
