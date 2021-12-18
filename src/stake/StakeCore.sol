@@ -22,8 +22,25 @@ library StakeCore {
                                 EVENTS
     ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━*/
 
-    event StakeEth(uint256 amount);
-    event UnStakeEth(uint256 amount);
+    event StakeEth(uint96 amount);
+    event UnStakeEth(uint96 amount);
+    event ProtocolEthExtracted(uint96 amount);
+
+    /*━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+                                 TRUSTED
+    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━*/
+
+    function trustedExtractProtocolEth() internal {
+        uint256 cache = Stake.sload();
+
+        uint96 eth = cache.getProtocolEth();
+
+        SafeTransferLib.safeTransferETH(msg.sender, eth);
+
+        Stake.sstore(cache.setProtocolEth(0));
+
+        emit ProtocolEthExtracted(eth);
+    }
 
     /*━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
                                  ADD

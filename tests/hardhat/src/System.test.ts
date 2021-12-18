@@ -136,11 +136,14 @@ describe('uint tests', async function () {
 
             console.log('totalStakedEth()', fromEth(await fix.nuggft.totalStakedEth()));
 
-            await fix.nuggft.connect(accounts.frank).burn(11);
+            await fix.nuggft.connect(accounts.charile).payoff(1, { value: toEth('90') });
 
             console.log('activeEthPerShare()', fromEth(await fix.nuggft.activeEthPerShare()));
             console.log('totalSupply()', fromEth(await fix.nuggft.totalSupply()));
             console.log('totalStakedEth()', fromEth(await fix.nuggft.totalStakedEth()));
+            console.log('bal ', (await accounts.charile.getBalance()).toString());
+
+            await fix.nuggft.connect(fix.deployer).extractProtocolEth();
 
             // await fix.nuggft.connect(accounts.frank).payoff(11, { value: await fix.nuggft.payoffAmount() });
         });

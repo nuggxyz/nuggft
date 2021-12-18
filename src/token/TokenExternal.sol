@@ -16,9 +16,7 @@ import {TokenView} from './TokenView.sol';
 import {TokenCore} from './TokenCore.sol';
 
 /**
- * @dev Implementation of https://eips.ethereum.org/EIPS/eip-721[ERC721] Non-Fungible Token Standard, including
- * the Metadata extension, but not including the Enumerable extension, which is available separately as
- * {ERC721Enumerable}.
+ * @dev Implementation of https://eips.ethereum.org/EIPS/eip-721[ERC721] Non-Fungible Token Standard
  */
 abstract contract TokenExternal is ITokenExternal {
     using SafeCastLib for uint256;

@@ -2,11 +2,17 @@
 
 pragma solidity 0.8.9;
 
-import {StakeView} from './StakeView.sol';
-
 import {IStakeExternal} from '../interfaces/INuggFT.sol';
 
-abstract contract StakeExternal is IStakeExternal {
+import {StakeView} from './StakeView.sol';
+import {StakeTrust} from './StakeTrust.sol';
+import {StakeCore} from './StakeCore.sol';
+
+abstract contract StakeExternal is IStakeExternal, StakeTrust {
+    function extractProtocolEth() public override requiresTrust {
+        StakeCore.trustedExtractProtocolEth();
+    }
+
     function totalStakedShares() public view override returns (uint64 res) {
         res = StakeView.getActiveStakedShares();
     }
