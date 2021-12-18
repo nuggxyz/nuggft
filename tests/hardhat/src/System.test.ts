@@ -34,7 +34,7 @@ describe('uint tests', async function () {
 
             await fix.nuggft.connect(accounts.dee).delegate(1, { value: toEth('3.000') });
 
-            await Mining.advanceBlockTo(51);
+            await Mining.advanceBlockTo(510);
 
             await fix.nuggft.connect(accounts.dee).claim(1);
             await fix.nuggft.connect(accounts.mac).claim(1);
@@ -50,25 +50,27 @@ describe('uint tests', async function () {
             await fix.nuggft.connect(accounts.dennis).delegate(1, { value: toEth('2.000') });
             await fix.nuggft.connect(accounts.charile).delegate(1, { value: toEth('55.000') });
 
-            await Mining.advanceBlockTo(250);
+            await Mining.advanceBlockTo(2500);
             await Mining.advanceBlock();
 
-            await fix.nuggft.connect(accounts.frank).delegate(11, { value: toEth('88') });
+            const token11 = await fix.nuggft.epoch();
 
-            await Mining.advanceBlockTo(350);
-            await fix.nuggft.connect(accounts.frank).claim(11);
+            await fix.nuggft.connect(accounts.frank).delegate(token11, { value: toEth('88') });
+
+            await Mining.advanceBlockTo(3500);
+            await fix.nuggft.connect(accounts.frank).claim(token11);
 
             await fix.nuggft.connect(accounts.charile).claim(1);
-            const info = await fix.nuggft.parsedProofOf(11);
+            const info = await fix.nuggft.parsedProofOf(token11);
 
             console.log(info.defaultIds[1].toString(), accounts.dee.address);
 
-            await fix.nuggft.connect(accounts.frank).swapItem(11, info.defaultIds[1], toEth('14'));
+            await fix.nuggft.connect(accounts.frank).swapItem(token11, info.defaultIds[1], toEth('14'));
             const epoch = await fix.nuggft.connect(accounts.charile).epoch();
 
-            await fix.nuggft.connect(accounts.charile).delegateItem(11, info.defaultIds[1], 1, { value: toEth('43') });
+            await fix.nuggft.connect(accounts.charile).delegateItem(token11, info.defaultIds[1], 1, { value: toEth('43') });
 
-            await Mining.advanceBlockTo(450);
+            await Mining.advanceBlockTo(4500);
 
             console.log('epoch', epoch.toString());
 
@@ -80,11 +82,11 @@ describe('uint tests', async function () {
 
             await fix.nuggft.connect(accounts.charile).swapItem(1, info0.defaultIds[2], toEth('55'));
 
-            // await fix.nuggft.connect(accounts.charile).claimItem(11, info.defaultIds[1], 0, epoch.add(1));
+            // await fix.nuggft.connect(accounts.charile).claimItem(token11, info.defaultIds[1], 0, epoch.add(1));
 
-            await fix.nuggft.connect(accounts.frank).approve(fix.nuggft.address, 11);
+            await fix.nuggft.connect(accounts.frank).approve(fix.nuggft.address, token11);
 
-            await fix.nuggft.connect(accounts.charile).claimItem(11, info.defaultIds[1], 1);
+            await fix.nuggft.connect(accounts.charile).claimItem(token11, info.defaultIds[1], 1);
 
             await fix.nuggft.connect(accounts.charile).approve(fix.nuggft.address, 1);
 
@@ -145,7 +147,7 @@ describe('uint tests', async function () {
 
             await fix.nuggft.connect(fix.deployer).extractProtocolEth();
 
-            // await fix.nuggft.connect(accounts.frank).payoff(11, { value: await fix.nuggft.payoffAmount() });
+            // await fix.nuggft.connect(accounts.frank).payoff(token11, { value: await fix.nuggft.payoffAmount() });
         });
     });
 });
