@@ -14,17 +14,17 @@ library TokenView {
     }
 
     function getApproved(uint160 tokenId) internal view returns (address) {
-        require(exists(tokenId), 'ERC721: approved query for nonexistent token');
+        require(exists(tokenId), 'T:9');
         return Token.ptr().approvals[tokenId];
     }
 
     function ownerOf(uint160 tokenId) internal view returns (address owner) {
         owner = Token.ptr().owners[tokenId];
-        require(owner != address(0), 'ERC721: owner query for nonexistent token');
+        require(owner != address(0), 'T:A');
     }
 
     function balanceOf(address owner) internal view returns (uint256) {
-        require(owner != address(0), 'ERC721: balance query for the zero address');
+        require(owner != address(0), 'T:B');
         return Token.ptr().balances[owner];
     }
 

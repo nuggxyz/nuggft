@@ -2,6 +2,8 @@
 
 pragma solidity 0.8.9;
 
+import {SafeCastLib} from '../libraries/SafeCastLib.sol';
+
 import {IStakeExternal} from '../interfaces/INuggFT.sol';
 
 import {StakeView} from './StakeView.sol';
@@ -9,27 +11,33 @@ import {StakeTrust} from './StakeTrust.sol';
 import {StakeCore} from './StakeCore.sol';
 
 abstract contract StakeExternal is IStakeExternal, StakeTrust {
-    function extractProtocolEth() public override requiresTrust {
+    using SafeCastLib for uint256;
+
+    function extractProtocolEth() external override requiresTrust {
         StakeCore.trustedExtractProtocolEth();
     }
 
-    function totalStakedShares() public view override returns (uint64 res) {
+    function withdrawStake(uint160 tokenId) external override {
+        StakeCore.subStakedSharePayingSender(tokenId);
+    }
+
+    function totalStakedShares() external view override returns (uint64 res) {
         res = StakeView.getActiveStakedShares();
     }
 
-    function totalStakedEth() public view override returns (uint96 res) {
+    function totalStakedEth() external view override returns (uint96 res) {
         res = StakeView.getActiveStakedEth();
     }
 
-    function activeEthPerShare() public view override returns (uint96 res) {
+    function activeEthPerShare() external view override returns (uint96 res) {
         res = StakeView.getActiveEthPerShare();
     }
 
-    function totalProtocolEth() public view override returns (uint96 res) {
+    function totalProtocolEth() external view override returns (uint96 res) {
         res = StakeView.getActiveProtocolEth();
     }
 
-    function totalSupply() public view override returns (uint256 res) {
-        res = totalStakedShares();
+    function totalSupply() external view override returns (uint256 res) {
+        res = StakeView.getActiveStakedShares();
     }
 }

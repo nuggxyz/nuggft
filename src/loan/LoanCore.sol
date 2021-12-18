@@ -125,9 +125,4 @@ library LoanCore {
 
         emit Payoff(tokenId, msg.sender, msg.value);
     }
-
-    function payoffAmount() internal view returns (uint256 res) {
-        // 1% interest on top of the floor increase
-        res = (StakeView.getActiveEthPerShare() * 10100) / 10000;
-    }
 }

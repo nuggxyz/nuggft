@@ -8,6 +8,8 @@ interface IStakeExternal {
     event StakeEth(uint96 amount);
     event UnStakeEth(uint96 amount);
 
+    function withdrawStake(uint160 tokenId) external;
+
     function extractProtocolEth() external;
 
     function totalProtocolEth() external view returns (uint96);

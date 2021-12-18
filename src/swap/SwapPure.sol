@@ -26,40 +26,40 @@ library SwapPure {
 
     // type(uint96).max / 10**13 = 0x01C25C268497681 =  7922816251426433
     // type(uint56).max          = 0x100000000000000 = 72057594037927936
-    function eth(uint256 input) internal view returns (uint96 res) {
+    function eth(uint256 input) internal pure returns (uint96 res) {
         return (ShiftLib.get(input, 56, 160) * 0x9184E72A000).safe96();
     }
 
-    function eth(uint256 input, uint96 update) internal view returns (uint256 cache, uint96 rem) {
+    function eth(uint256 input, uint96 update) internal pure returns (uint256 cache, uint96 rem) {
         rem = update % uint96(0x9184E72A000);
         cache = ShiftLib.set(input, 56, 160, update / uint96(0x9184E72A000));
     }
 
-    function epoch(uint256 input, uint32 update) internal view returns (uint256 res) {
+    function epoch(uint256 input, uint32 update) internal pure returns (uint256 res) {
         return ShiftLib.set(input, 32, 216, update);
     }
 
-    function epoch(uint256 input) internal view returns (uint32 res) {
+    function epoch(uint256 input) internal pure returns (uint32 res) {
         return ShiftLib.get(input, 32, 216).safe32();
     }
 
-    function account(uint256 input) internal view returns (uint160 res) {
+    function account(uint256 input) internal pure returns (uint160 res) {
         res = ShiftLib.get(input, 160, 0).safe160();
     }
 
-    function account(uint256 input, uint160 update) internal view returns (uint256 res) {
+    function account(uint256 input, uint160 update) internal pure returns (uint256 res) {
         res = ShiftLib.set(input, 160, 0, update);
     }
 
-    function isOwner(uint256 input, bool update) internal view returns (uint256 res) {
+    function isOwner(uint256 input, bool update) internal pure returns (uint256 res) {
         return ShiftLib.set(input, 1, 255, update ? 0x1 : 0x0);
     }
 
-    function isOwner(uint256 input) internal view returns (bool res) {
+    function isOwner(uint256 input) internal pure returns (bool res) {
         return ShiftLib.get(input, 1, 255) == 0x1;
     }
 
-    function flag(uint256 input) internal view returns (uint256 res) {
+    function flag(uint256 input) internal pure returns (uint256 res) {
         res = ShiftLib.set(input, 1, 254, 0x01);
     }
 
@@ -68,7 +68,7 @@ library SwapPure {
         uint160 _account,
         uint96 _eth,
         bool _isOwner
-    ) internal view returns (uint256 res, uint96 dust) {
+    ) internal pure returns (uint256 res, uint96 dust) {
         res = epoch(res, _epoch);
         res = account(res, _account);
         if (_isOwner) res = isOwner(res, true);
@@ -82,7 +82,7 @@ library SwapPure {
         uint96 _eth
     )
         internal
-        view
+        pure
         returns (
             uint256 res,
             uint256 increment,
@@ -99,7 +99,7 @@ library SwapPure {
         uint96 _eth
     )
         internal
-        view
+        pure
         returns (
             uint256 res,
             uint96 increment,
