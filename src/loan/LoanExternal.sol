@@ -18,8 +18,4 @@ abstract contract LoanExternal is ILoanExternal {
     function rebalance(uint160 tokenId) external payable override {
         LoanCore.rebalance(tokenId);
     }
-
-    function payoffAmount() external view override returns (uint256 res) {
-        res = LoanCore.payoffAmount();
-    }
 }

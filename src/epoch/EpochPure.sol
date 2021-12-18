@@ -5,8 +5,6 @@ pragma solidity 0.8.9;
 import {SafeCastLib} from '../libraries/SafeCastLib.sol';
 import {Epoch} from './EpochStorage.sol';
 
-import {Print} from '../_test/utils/Print.sol';
-
 /// @title EpochPure
 /// @author dub6ix.eth
 /// @notice logical functions to calcualte the current epoch

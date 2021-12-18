@@ -6,9 +6,10 @@ import {SafeTransferLib} from '../libraries/SafeTransferLib.sol';
 
 import {ShiftLib} from '../libraries/ShiftLib.sol';
 
+import {TokenCore} from '../token/TokenCore.sol';
+
 import {StakePure} from './StakePure.sol';
 import {StakeView} from './StakeView.sol';
-
 import {Stake} from './StakeStorage.sol';
 
 /// @title A title that should describe the contract/interface
@@ -17,6 +18,8 @@ import {Stake} from './StakeStorage.sol';
 /// @dev Explain to a developer any extra details
 library StakeCore {
     using StakePure for uint256;
+
+    uint96 constant PROTOCOL_FEE_BPS = 100;
 
     /*━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
                                 EVENTS
@@ -51,7 +54,7 @@ library StakeCore {
 
         (uint64 activeShares, uint96 activeEth, uint96 activeProtocolEth) = cache.getStakedSharesAndEth();
 
-        uint96 protocol = (eth * 100) / 10000;
+        uint96 protocol = (eth * PROTOCOL_FEE_BPS) / 10000;
 
         eth -= protocol;
 
@@ -73,7 +76,7 @@ library StakeCore {
     function addStakedEth(uint96 amount) internal {
         uint256 cache = Stake.sload();
 
-        uint96 protocol = (amount * 100) / 10000;
+        uint96 protocol = (amount * PROTOCOL_FEE_BPS) / 10000;
 
         amount -= protocol;
 
@@ -86,20 +89,22 @@ library StakeCore {
                                  SUB
     ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━*/
 
-    function subStakedSharePayingSender() internal {
+    function subStakedSharePayingSender(uint160 tokenId) internal {
         uint256 cache = Stake.sload();
+
+        TokenCore.onBurn(tokenId);
 
         (uint64 activeShares, uint96 activeEth, ) = cache.getStakedSharesAndEth();
 
-        uint96 eps = cache.getEthPerShare();
+        uint96 preEps = cache.getEthPerShare();
 
         require(activeShares >= 1, 'SL:SS:0');
-        require(activeEth >= eps, 'SL:SS:1');
+        require(activeEth >= preEps, 'SL:SS:1');
 
-        Stake.sstore(cache.setStakedShares(activeShares - 1).setStakedEth(activeEth - eps));
+        Stake.sstore(cache.setStakedShares(activeShares - 1).setStakedEth(activeEth - preEps));
 
-        SafeTransferLib.safeTransferETH(msg.sender, eps);
+        SafeTransferLib.safeTransferETH(msg.sender, preEps);
 
-        emit UnStakeEth(eps);
+        emit UnStakeEth(preEps);
     }
 }

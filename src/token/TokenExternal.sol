@@ -7,8 +7,6 @@ import {SafeCastLib} from '../libraries/SafeCastLib.sol';
 import {IERC721Receiver, IERC721, IERC165, IERC721Metadata} from '../interfaces/IERC721.sol';
 import {ITokenExternal} from '../interfaces/INuggFT.sol';
 
-import {GlobalCore} from '../global/GlobalCore.sol';
-
 import {Token} from './TokenStorage.sol';
 
 import {TokenView} from './TokenView.sol';
@@ -28,10 +26,6 @@ abstract contract TokenExternal is ITokenExternal {
     constructor(bytes32 name_, bytes32 symbol_) {
         _name = name_;
         _symbol = symbol_;
-    }
-
-    function burn(uint256 tokenId) external {
-        GlobalCore.burn(tokenId.safe160());
     }
 
     function approve(address to, uint256 tokenId) public override {
@@ -75,9 +69,9 @@ abstract contract TokenExternal is ITokenExternal {
         return TokenView.isApprovedForAll(owner, operator);
     }
 
-    /*///////////////////////////////////////////////////////////////
+    /*━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
                                 DISABLED
-    //////////////////////////////////////////////////////////////*/
+    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━*/
 
     function transferFrom(
         address,

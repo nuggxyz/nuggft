@@ -19,8 +19,6 @@ library ShiftLib {
     }
 
     function fullsubmask(uint8 bits, uint8 pos) internal pure returns (uint256 res) {
-        // validatePos(pos);
-
         // assembly {
         //     res := not(shl(sub(shl(bits, 1), 1), pos))
         // }
@@ -33,9 +31,7 @@ library ShiftLib {
         uint8 bits,
         uint8 pos,
         uint256 value
-    ) internal view returns (uint256 postStore) {
-        // validateNum(value, bits);
-
+    ) internal pure returns (uint256 postStore) {
         postStore = preStore & fullsubmask(bits, pos);
 
         assembly {
@@ -49,9 +45,7 @@ library ShiftLib {
         uint256 store,
         uint8 bits,
         uint8 pos
-    ) internal view returns (uint256 value) {
-        // validatePos(pos);
-
+    ) internal pure returns (uint256 value) {
         assembly {
             value := shr(pos, store)
         }
@@ -68,8 +62,6 @@ library ShiftLib {
         uint8 pos,
         uint8 numItems
     ) internal view returns (uint16[] memory arr) {
-        // validatePosWithLength(pos, numItems * bitsPerItem - 1);
-
         store = get(store, numItems * bitsPerItem, pos);
 
         arr = new uint16[](numItems);
@@ -86,10 +78,7 @@ library ShiftLib {
         uint8 bitsPerItem,
         uint8 pos
     ) internal view returns (uint256 res) {
-        // validatePosWithLength(pos, arr.length * bitsPerItem);
-
         for (uint256 i = arr.length; i > 0; i--) {
-            // validateNum(arr[i - 1], bitsPerItem);
             res |= uint256(arr[i - 1]) << ((bitsPerItem * (i - 1)));
         }
 
@@ -108,8 +97,6 @@ library ShiftLib {
         uint256 truelen,
         uint256 maxLen
     ) internal view returns (uint256 res) {
-        // validatePosWithLength(pos, maxLen * bitsPerItem + 16);
-
         // must be different than popDynamicArray
         require(truelen <= maxLen, 'SL:SDA:0');
 
@@ -135,8 +122,6 @@ library ShiftLib {
 
         maxlen = len >> 8;
         len &= 0xff;
-
-        // validatePosWithLength(pos, len * bitsPerItem + 16);
 
         arr = getArray(store, bitsPerItem, pos + 16, len.safe8() + 1);
     }

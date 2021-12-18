@@ -59,8 +59,6 @@ library SwapCore {
 
         require(m.swapData != 0, 'NS:0:0');
 
-        // Print.log(m.swapData, 'sd', m.offerData, 'od', m.swapData.isOwner() ? 1 : 0, 'ayo');
-
         if (m.offerData == 0 && m.swapData.isOwner()) {
             require(msg.value >= StakeView.getActiveEthPerShare(), 'SL:S:0');
 
@@ -94,6 +92,7 @@ library SwapCore {
         if (checkClaimerIsWinnerOrLoser(m)) {
             Swap.deleteTokenSwap(tokenId);
 
+            // if this is a minting nugg
             if (tokenId == m.swapData.epoch()) {
                 TokenCore.checkedMintTo(msg.sender, tokenId);
             } else {
@@ -105,6 +104,8 @@ library SwapCore {
 
         emit Claim(tokenId, 0, msg.sender);
     }
+
+    function unsafeClaimERC721To(uint160 tokenId, address to) internal {}
 
     function swap(uint160 tokenId, uint256 floor) internal {
         require(floor >= StakeView.getActiveEthPerShare(), 'SL:S:0');
@@ -199,7 +200,7 @@ library SwapCore {
                             COMMON FUNCTIONS
     ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━*/
 
-    function checkClaimerIsWinnerOrLoser(Swap.Memory memory m) internal view returns (bool winner) {
+    function checkClaimerIsWinnerOrLoser(Swap.Memory memory m) internal pure returns (bool winner) {
         require(m.offerData != 0, 'SL:CC:1');
 
         bool isOver = m.activeEpoch > m.swapData.epoch();
@@ -229,7 +230,6 @@ library SwapCore {
     }
 
     function offer(Swap.Storage storage s, Swap.Memory memory m) internal {
-        // Print.log(m.activeEpoch, 'm.activeEpoch', m.swapData.epoch(), 'm.swapData.epoch()');
         // make sure swap is still active
         require(m.activeEpoch <= m.swapData.epoch(), 'SL:OBP:3');
 
