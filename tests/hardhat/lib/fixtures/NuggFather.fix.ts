@@ -60,6 +60,13 @@ export const NuggFatherFix: Fixture<NuggFatherFixture> = async function (
     hre.tracer.nameTags[nuggft.address] = `NuggFT`;
 
     await nuggft.addToVault(hre.dotnugg.itemsByFeatureByIdHex);
+    await nuggft.addToVault(hre.dotnugg.itemsByFeatureByIdHex);
+    await nuggft.addToVault(hre.dotnugg.itemsByFeatureByIdHex);
+    await nuggft.addToVault(hre.dotnugg.itemsByFeatureByIdHex);
+    await nuggft.addToVault(hre.dotnugg.itemsByFeatureByIdHex);
+    await nuggft.addToVault(hre.dotnugg.itemsByFeatureByIdHex);
+
+    console.log(hre.dotnugg.itemsByFeatureByIdHex[2].length);
 
     // await nuggft.addToVault(hre.dotnugg.items.slice(0, 25).map((x) => x.hex));
     // await nuggft.addToVault(hre.dotnugg.items.slice(25, 50).map((x) => x.hex));
