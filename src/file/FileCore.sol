@@ -6,23 +6,32 @@ import {SafeCastLib} from '../libraries/SafeCastLib.sol';
 import {ShiftLib} from '../libraries/ShiftLib.sol';
 import {SSTORE2} from '../libraries/SSTORE2.sol';
 
-import {Vault} from './VaultStorage.sol';
-import {VaultPure} from './VaultPure.sol';
-import {VaultView} from './VaultView.sol';
+import {File} from './FileStorage.sol';
+import {FilePure} from './FilePure.sol';
+import {FileView} from './FileView.sol';
 import {ProofPure} from '../proof/ProofPure.sol';
+import {ProofView} from '../proof/ProofView.sol';
+
 import {TokenView} from '../token/TokenView.sol';
 
-import {Print} from '../_test/utils/Print.sol';
-
-library VaultCore {
-    using VaultPure for uint256;
+library FileCore {
+    using FilePure for uint256;
     using SafeCastLib for uint256;
     using SafeCastLib for uint16;
+
+    function prepareForProcess(uint160 tokenId) internal view returns (uint256[][] memory files, bytes memory data) {
+        (uint256 proof, uint8[] memory ids, uint8[] memory extras, uint8[] memory xovers, uint8[] memory yovers) = ProofView
+            .parsedProofOfIncludingPending(tokenId);
+
+        files = FileCore.getBatch(ids);
+
+        data = abi.encode(0, address(this), tokenId, proof, ids, extras, xovers, yovers);
+    }
 
     function setResolver(uint160 tokenId, address to) internal {
         require(TokenView.isApprovedOrOwner(msg.sender, tokenId), 'T:0');
 
-        Vault.spointer().resolvers[tokenId] = to;
+        File.spointer().resolvers[tokenId] = to;
     }
 
     function trustedSet(uint8 feature, uint256[][] calldata data) internal {
@@ -34,23 +43,27 @@ library VaultCore {
 
         address ptr = SSTORE2.write(abi.encode(data));
 
-        Vault.spointer().ptrs[feature].push(uint160(ptr) | working);
+        File.spointer().ptrs[feature].push(uint168(uint160(ptr)) | working);
 
-        uint256 cache = Vault.spointer().lengthData;
+        uint256 cache = File.spointer().lengthData;
 
-        uint8[] memory lengths = VaultPure.getLengths(cache);
+        uint8[] memory lengths = FilePure.getLengths(cache);
 
         lengths[feature] += len;
 
-        Vault.spointer().lengthData = VaultPure.setLengths(cache, lengths);
+        File.spointer().lengthData = FilePure.setLengths(cache, lengths);
     }
 
     function get(uint8 feature, uint8 pos) internal view returns (uint256[] memory data) {
-        uint8 totalLength = VaultPure.getLengths(Vault.spointer().lengthData)[feature];
+        require(pos != 0, "VC:2");
+
+        pos--;
+
+        uint8 totalLength = FilePure.getLengths(File.spointer().lengthData)[feature];
 
         require(pos < totalLength, 'VC:1');
 
-        uint168[] memory ptrs = Vault.spointer().ptrs[feature];
+        uint168[] memory ptrs = File.spointer().ptrs[feature];
 
         address store;
         uint8 storePos;
@@ -77,7 +90,8 @@ library VaultCore {
         data = new uint256[][](ids.length);
 
         for (uint8 i = 0; i < ids.length; i++) {
-            data[i] = get(i, ids[i]);
+            if (ids[i] == 0) data[i] = new uint256[](0);
+            else data[i] = get(i, ids[i]);
         }
     }
 }

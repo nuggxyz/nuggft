@@ -18,6 +18,10 @@ import {ProofView} from './ProofView.sol';
  * {ERC721Enumerable}.
  */
 abstract contract ProofExternal is IProofExternal {
+    function rotateFeature(uint160 tokenId, uint8 feature) external {
+        ProofCore.rotateFeature(tokenId, feature);
+    }
+
     function proofOf(uint160 tokenId) public view virtual override returns (uint256) {
         return ProofView.checkedProofOfIncludingPending(tokenId);
     }

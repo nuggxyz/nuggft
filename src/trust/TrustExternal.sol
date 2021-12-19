@@ -5,7 +5,7 @@ pragma solidity 0.8.9;
 import {ITrustExternal} from '../interfaces/INuggFT.sol';
 
 import {StakeCore} from '../stake/StakeCore.sol';
-import {VaultCore} from '../vault/VaultCore.sol';
+import {FileCore} from '../file/FileCore.sol';
 
 /// @notice ULTRA minimal authorization logic for smart contracts.
 /// @author Inspired by Trust.sol from Rari-Capital (https://github.com/Rari-Capital/solmate/blob/fab107565a51674f3a3b5bfdaacc67f6179b1a9b/src/auth/Trust.sol)
@@ -31,8 +31,8 @@ abstract contract TrustExternal is ITrustExternal {
         StakeCore.trustedExtractProtocolEth();
     }
 
-    function addToVault(uint256[][] calldata data, uint8 feature) external override requiresTrust {
-        VaultCore.trustedSet(feature, data);
+    function storeFiles(uint256[][] calldata data, uint8 feature) external override requiresTrust {
+        FileCore.trustedSet(feature, data);
     }
 
     function setIsTrusted(address user) external virtual override requiresTrust {

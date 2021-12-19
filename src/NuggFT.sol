@@ -6,21 +6,33 @@ import {IERC721Metadata} from './interfaces/IERC721.sol';
 
 import {INuggFT as a} from './interfaces/INuggFT.sol';
 
-import {TokenExternal as Token} from './token/TokenExternal.sol';
+import {TokenExternal as ERC721} from './token/TokenExternal.sol';
 import {SwapExternal as Swapable} from './swap/SwapExternal.sol';
 import {ProofExternal as Provable} from './proof/ProofExternal.sol';
-import {VaultExternal as Vault} from './vault/VaultExternal.sol';
+import {FileExternal as DotNugg} from './file/FileExternal.sol';
 import {StakeExternal as Staked} from './stake/StakeExternal.sol';
 import {LoanExternal as Loanable} from './loan/LoanExternal.sol';
 import {EpochExternal as Epoched} from './epoch/EpochExternal.sol';
 import {TrustExternal as Trusted} from './trust/TrustExternal.sol';
 
-contract NuggFT is a, Swapable, Provable, Loanable, Trusted, Staked, Epoched, Vault, Token {
-    constructor(address _defaultResolver) Token('nuggft', 'Nugg Fungible Token') Vault(_defaultResolver) {
+contract NuggFT is a, Swapable, Provable, Loanable, Trusted, Staked, Epoched, DotNugg, ERC721 {
+    // bytes32 constant _name = 'Nugg Fungible Token';
+
+    // bytes32 constant _symbol = 'NUGGFT';
+
+    constructor(address _defaultResolver) DotNugg(_defaultResolver) {
         emit Genesis();
     }
 
-    function tokenURI(uint256 tokenId) public view override(IERC721Metadata, Vault, Token) returns (string memory) {
-        return Vault.tokenURI(tokenId);
+    function tokenURI(uint256 tokenId) public view override(DotNugg, IERC721Metadata) returns (string memory) {
+        return DotNugg.tokenURI(tokenId);
+    }
+
+    function name() public pure override returns (string memory) {
+        return 'Nugg Fungible Token';
+    }
+
+    function symbol() public pure override returns (string memory) {
+        return 'NUGGFT';
     }
 }

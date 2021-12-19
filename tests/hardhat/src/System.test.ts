@@ -61,14 +61,25 @@ describe('uint tests', async function () {
             await fix.nuggft.connect(accounts.frank).claim(token11);
 
             await fix.nuggft.connect(accounts.charile).claim(1);
+
             const info = await fix.nuggft.parsedProofOf(token11);
 
-            console.log(info.defaultIds[1].toString(), accounts.dee.address);
+            // eslint-disable-next-line prefer-const
+            let dids: number[] = [];
 
-            await fix.nuggft.connect(accounts.frank).swapItem(token11, info.defaultIds[1], toEth('14'));
+            for (let i = 0; i < 8; i++) {
+                dids[i] = (i << 8) | info.defaultIds[i];
+                console.log(i, info.defaultIds[i], dids[i]);
+            }
+
+            console.log(dids[1].toString(), accounts.dee.address);
+
+            await fix.nuggft.connect(accounts.frank).rotateFeature(token11, 1);
+
+            await fix.nuggft.connect(accounts.frank).swapItem(token11, dids[1], toEth('14'));
             const epoch = await fix.nuggft.connect(accounts.charile).epoch();
 
-            await fix.nuggft.connect(accounts.charile).delegateItem(token11, info.defaultIds[1], 1, { value: toEth('43') });
+            await fix.nuggft.connect(accounts.charile).delegateItem(token11, dids[1], 1, { value: toEth('43') });
 
             await Mining.advanceBlockTo(4500);
 
@@ -80,13 +91,23 @@ describe('uint tests', async function () {
 
             const info0 = await fix.nuggft.parsedProofOf(1);
 
-            await fix.nuggft.connect(accounts.charile).swapItem(1, info0.defaultIds[2], toEth('55'));
+            // eslint-disable-next-line prefer-const
+            let dids2: number[] = [];
 
-            // await fix.nuggft.connect(accounts.charile).claimItem(token11, info.defaultIds[1], 0, epoch.add(1));
+            for (let i = 0; i < 8; i++) {
+                dids2[i] = (i << 8) | info0.defaultIds[i];
+                console.log(i, info0.defaultIds[i], dids2[i]);
+            }
+
+            await fix.nuggft.connect(accounts.charile).rotateFeature(1, 2);
+
+            await fix.nuggft.connect(accounts.charile).swapItem(1, dids2[2], toEth('55'));
+
+            // await fix.nuggft.connect(accounts.charile).claimItem(token11, dids[1], 0, epoch.add(1));
 
             await fix.nuggft.connect(accounts.frank).approve(fix.nuggft.address, token11);
 
-            await fix.nuggft.connect(accounts.charile).claimItem(token11, info.defaultIds[1], 1);
+            await fix.nuggft.connect(accounts.charile).claimItem(token11, dids[1], 1);
 
             await fix.nuggft.connect(accounts.charile).approve(fix.nuggft.address, 1);
 
@@ -104,7 +125,7 @@ describe('uint tests', async function () {
 
             // console.log(check1, check2, check1.eq(check2));
 
-            console.log(await fix.nuggft.rawProcessURI(1));
+            console.log(await fix.nuggft['resolveRaw(uint160)'](1));
 
             await fix.nuggft.connect(accounts.charile).loan(1);
 

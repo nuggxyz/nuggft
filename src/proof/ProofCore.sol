@@ -7,12 +7,15 @@ import {SafeCastLib} from '../libraries/SafeCastLib.sol';
 
 import {EpochView} from '../epoch/EpochView.sol';
 
-import {ProofPure} from './ProofPure.sol';
-import {ProofView} from './ProofView.sol';
 import {Proof} from './ProofStorage.sol';
 
-import {VaultView} from '../vault/VaultView.sol';
-import {Vault} from '../vault/VaultStorage.sol';
+import {ProofPure} from './ProofPure.sol';
+import {ProofView} from './ProofView.sol';
+
+import {TokenView} from '../token/TokenView.sol';
+
+import {FileView} from '../file/FileView.sol';
+import {File} from '../file/FileStorage.sol';
 
 // OK
 library ProofCore {
@@ -38,9 +41,11 @@ library ProofCore {
     ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━*/
 
     function addItem(uint160 tokenId, uint16 itemId) internal {
+        require(TokenView.ownerOf(tokenId) == msg.sender, 'PC:0');
+
         uint256 working = ProofView.checkedProofOf(tokenId);
 
-        require(Proof.ptr().protcolItems[itemId] > 0, '1155:SBTF:1');
+        require(Proof.ptr().protcolItems[itemId] > 0, 'RC:3');
 
         Proof.ptr().protcolItems[itemId]--;
 
@@ -52,6 +57,8 @@ library ProofCore {
     }
 
     function removeItem(uint160 tokenId, uint16 itemId) internal {
+        require(TokenView.ownerOf(tokenId) == msg.sender, 'PC:1');
+
         uint256 working = ProofView.checkedProofOf(tokenId);
 
         working = ProofPure.pullFromExtra(working, itemId);
@@ -63,10 +70,12 @@ library ProofCore {
         emit PopItem(tokenId, itemId);
     }
 
-    function rotateItem(uint160 tokenId, uint8 feature) internal {
+    function rotateFeature(uint160 tokenId, uint8 feature) internal {
+        require(TokenView.ownerOf(tokenId) == msg.sender, 'PC:2');
+
         uint256 working = ProofView.checkedProofOf(tokenId);
 
-        working = ProofPure.swapDefaultandExtra(working, feature);
+        working = ProofPure.rotateDefaultandExtra(working, feature);
 
         Proof.set(tokenId, working);
 
@@ -108,20 +117,20 @@ library ProofCore {
     function initFromSeed(uint256 seed) internal view returns (uint256 res, uint8[] memory upd) {
         require(seed != 0, 'seed');
 
-        uint8[] memory lengths = VaultView.totalLengths();
+        uint8[] memory lengths = FileView.totalLengths();
 
         upd = new uint8[](8);
 
         uint8[] memory picks = ShiftLib.getArray(seed, 0);
 
-        upd[0] = picks[0] % lengths[0];
-        upd[1] = picks[1] % lengths[1];
-        upd[2] = picks[2] % lengths[2];
+        upd[0] = (picks[0] % lengths[0]) + 1;
+        upd[1] = (picks[1] % lengths[1]) + 1;
+        upd[2] = (picks[2] % lengths[2]) + 1;
 
-        if (picks[3] < 96) upd[3] = picks[4] % lengths[3];
-        else if (picks[3] < 192) upd[4] = picks[4] % lengths[4];
-        else if (picks[3] < 250) upd[5] = picks[4] % lengths[5];
-        else upd[6] = picks[4] % lengths[6];
+        if (picks[3] < 96) upd[3] = (picks[4] % lengths[3]) + 1;
+        else if (picks[3] < 192) upd[4] = (picks[4] % lengths[4]) + 1;
+        else if (picks[3] < 250) upd[5] = (picks[4] % lengths[5]) + 1;
+        else upd[6] = (picks[4] % lengths[6]) + 1;
 
         res = ShiftLib.setArray(res, 0, upd);
     }

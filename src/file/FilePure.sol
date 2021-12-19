@@ -6,7 +6,7 @@ import {ShiftLib} from '../libraries/ShiftLib.sol';
 import {SafeCastLib} from '../libraries/SafeCastLib.sol';
 import '../_test/utils/Print.sol';
 
-library VaultPure {
+library FilePure {
     using SafeCastLib for uint256;
 
     // OK
