@@ -16,10 +16,6 @@ import {EpochExternal as Epoched} from './epoch/EpochExternal.sol';
 import {TrustExternal as Trusted} from './trust/TrustExternal.sol';
 
 contract NuggFT is a, Swapable, Provable, Loanable, Trusted, Staked, Epoched, DotNugg, ERC721 {
-    // bytes32 constant _name = 'Nugg Fungible Token';
-
-    // bytes32 constant _symbol = 'NUGGFT';
-
     constructor(address _defaultResolver) DotNugg(_defaultResolver) {
         emit Genesis();
     }

@@ -14,19 +14,29 @@ import {ProofView} from '../proof/ProofView.sol';
 
 import {TokenView} from '../token/TokenView.sol';
 
+import {Trust} from '../trust/TrustStorage.sol';
+
 library FileCore {
     using FilePure for uint256;
     using SafeCastLib for uint256;
     using SafeCastLib for uint16;
 
+    /*━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+                                PROCESS FILES
+    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━*/
+
     function prepareForProcess(uint160 tokenId) internal view returns (uint256[][] memory files, bytes memory data) {
         (uint256 proof, uint8[] memory ids, uint8[] memory extras, uint8[] memory xovers, uint8[] memory yovers) = ProofView
             .parsedProofOfIncludingPending(tokenId);
 
-        files = FileCore.getBatch(ids);
+        files = FileCore.getBatchFiles(ids);
 
         data = abi.encode(0, address(this), tokenId, proof, ids, extras, xovers, yovers);
     }
+
+    /*━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+                                RESOLVER SET
+    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━*/
 
     function setResolver(uint160 tokenId, address to) internal {
         require(TokenView.isApprovedOrOwner(msg.sender, tokenId), 'T:0');
@@ -34,7 +44,17 @@ library FileCore {
         File.spointer().resolvers[tokenId] = to;
     }
 
-    function trustedSet(uint8 feature, uint256[][] calldata data) internal {
+    /*━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+                                TRUSTED
+    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━*/
+
+    function trustedStoreFiles(
+        Trust.Storage storage trust,
+        uint8 feature,
+        uint256[][] calldata data
+    ) internal {
+        require(trust._isTrusted, 'T:0');
+
         uint8 len = data.length.safe8();
 
         require(len > 0, 'VC:0');
@@ -54,8 +74,21 @@ library FileCore {
         File.spointer().lengthData = FilePure.setLengths(cache, lengths);
     }
 
+    /*━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+                                 GET FILES
+    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━*/
+
+    function getBatchFiles(uint8[] memory ids) internal view returns (uint256[][] memory data) {
+        data = new uint256[][](ids.length);
+
+        for (uint8 i = 0; i < ids.length; i++) {
+            if (ids[i] == 0) data[i] = new uint256[](0);
+            else data[i] = get(i, ids[i]);
+        }
+    }
+
     function get(uint8 feature, uint8 pos) internal view returns (uint256[] memory data) {
-        require(pos != 0, "VC:2");
+        require(pos != 0, 'VC:2');
 
         pos--;
 
@@ -84,14 +117,5 @@ library FileCore {
         require(store != address(0), 'VC:2');
 
         data = abi.decode(SSTORE2.read(address(uint160(store))), (uint256[][]))[storePos];
-    }
-
-    function getBatch(uint8[] memory ids) internal view returns (uint256[][] memory data) {
-        data = new uint256[][](ids.length);
-
-        for (uint8 i = 0; i < ids.length; i++) {
-            if (ids[i] == 0) data[i] = new uint256[](0);
-            else data[i] = get(i, ids[i]);
-        }
     }
 }
