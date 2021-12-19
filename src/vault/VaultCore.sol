@@ -31,19 +31,19 @@ library VaultCore {
 
         ptr = ptr.addr(SSTORE2.write(abi.encode(a)));
 
-        Vault.ptr().ptrs.push(ptr);
+        Vault.spointer().ptrs.push(ptr);
 
-        Vault.ptr().lengthData = Vault.ptr().lengthData.addLengths(ptr);
+        Vault.spointer().lengthData = Vault.spointer().lengthData.addLengths(ptr);
     }
    // (uint256[][])
     function get(uint8 feature, uint16 id) internal view returns (uint256[] memory data) {
-        uint256 ptrlen = Vault.ptr().ptrs.length;
+        uint256 ptrlen = Vault.spointer().ptrs.length;
 
         uint256 pointer;
         uint256 cumItems;
         uint256 orgid = id;
         for (uint256 i = 0; i < ptrlen; i++) {
-            pointer = Vault.ptr().ptrs[i];
+            pointer = Vault.spointer().ptrs[i];
             cumItems += pointer.length(feature);
             Print.log(cumItems, "cumItems" , id, "id",feature,"feature",pointer.length(feature), "pointer.length(feature)");
 

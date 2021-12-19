@@ -10,6 +10,7 @@ import {Swap} from './SwapStorage.sol';
 import {SwapCore} from './SwapCore.sol';
 import {SwapView} from './SwapView.sol';
 
+// OK
 abstract contract SwapExternal is ISwapExternal {
     /*━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
                             STATE CHANGING

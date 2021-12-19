@@ -4,6 +4,7 @@ pragma solidity 0.8.9;
 
 import {Global} from '../global/GlobalStorage.sol';
 
+// TESTED
 library Vault {
     struct Storage {
         uint256 lengthData;
@@ -12,7 +13,7 @@ library Vault {
         mapping(uint256 => address) resolvers;
     }
 
-    function ptr() internal view returns (Storage storage s) {
+    function spointer() internal view returns (Storage storage s) {
         return Global.ptr().vault;
     }
 }

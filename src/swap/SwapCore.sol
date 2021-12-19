@@ -39,6 +39,12 @@ library SwapCore {
                             TOKEN SWAP FUNCTIONS
     ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━*/
 
+
+    /// @notice Explain to an end user what this does
+    /// @dev E
+    /// @param tokenId a
+    /// @custom:test hardhat
+    ///
     function delegate(uint160 tokenId) internal {
         (Swap.Storage storage s, Swap.Memory memory m) = Swap.loadTokenSwap(tokenId, msg.sender);
 

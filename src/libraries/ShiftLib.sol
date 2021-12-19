@@ -140,7 +140,7 @@ library ShiftLib {
         for (uint8 i = 0; i < arr.length; i++) {
             if (arr[i] == id) found = true;
 
-            if (found && i != arr.length) arr[i] = arr[i] + 1;
+            if (found && i != arr.length - 1) arr[i] = arr[i + 1];
         }
 
         require(found, 'SL:PDA:0');

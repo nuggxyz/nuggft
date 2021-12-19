@@ -12,6 +12,7 @@ import {ProofPure} from './ProofPure.sol';
 
 import {Proof} from './ProofStorage.sol';
 
+// OK
 library ProofView {
     function checkedProofOf(uint160 tokenId) internal view returns (uint256 res) {
         res = Proof.get(tokenId);

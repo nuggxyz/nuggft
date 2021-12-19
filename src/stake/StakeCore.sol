@@ -12,6 +12,7 @@ import {StakePure} from './StakePure.sol';
 import {StakeView} from './StakeView.sol';
 import {Stake} from './StakeStorage.sol';
 
+// SYSTEM
 /// @title A title that should describe the contract/interface
 /// @author dub6ix
 /// @notice Explain to an end user what this does
