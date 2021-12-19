@@ -6,6 +6,7 @@ import {Global} from '../global/GlobalStorage.sol';
 
 library Stake {
     struct Storage {
+        address trustedMigrator;
         uint256 data;
     }
 

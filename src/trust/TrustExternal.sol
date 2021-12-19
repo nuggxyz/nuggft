@@ -5,17 +5,21 @@ pragma solidity 0.8.9;
 import {ITrustExternal} from '../interfaces/INuggFT.sol';
 
 import {StakeCore} from '../stake/StakeCore.sol';
+
+import {Trust} from './TrustStorage.sol';
+
 import {FileCore} from '../file/FileCore.sol';
 
-/// @notice ULTRA minimal authorization logic for smart contracts.
-/// @author Inspired by Trust.sol from Rari-Capital (https://github.com/Rari-Capital/solmate/blob/fab107565a51674f3a3b5bfdaacc67f6179b1a9b/src/auth/Trust.sol)
 abstract contract TrustExternal is ITrustExternal {
     address private _trusted;
 
+    Trust.Storage private _trust;
+
     modifier requiresTrust() {
         require(_trusted == msg.sender, 'UNTRUSTED');
-
+        _trust._isTrusted = true;
         _;
+        _trust._isTrusted = false;
     }
 
     constructor() {
@@ -28,11 +32,15 @@ abstract contract TrustExternal is ITrustExternal {
                                 TRUSTED
     ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━*/
     function extractProtocolEth() external override requiresTrust {
-        StakeCore.trustedExtractProtocolEth();
+        StakeCore.trustedExtractProtocolEth(_trust);
+    }
+
+    function setMigrator(address addr) external requiresTrust {
+        StakeCore.trustedSetMigrator(_trust, addr);
     }
 
     function storeFiles(uint256[][] calldata data, uint8 feature) external override requiresTrust {
-        FileCore.trustedSet(feature, data);
+        FileCore.trustedStoreFiles(_trust, feature, data);
     }
 
     function setIsTrusted(address user) external virtual override requiresTrust {

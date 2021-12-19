@@ -7,15 +7,13 @@ import {SafeCastLib} from '../libraries/SafeCastLib.sol';
 import {IStakeExternal} from '../interfaces/INuggFT.sol';
 
 import {StakeView} from './StakeView.sol';
-import {StakeTrust} from './StakeTrust.sol';
 import {StakeCore} from './StakeCore.sol';
 
 abstract contract StakeExternal is IStakeExternal {
     using SafeCastLib for uint256;
 
-
     function withdrawStake(uint160 tokenId) external override {
-        StakeCore.subStakedSharePayingSender(tokenId);
+        StakeCore.burnStakedShare(tokenId);
     }
 
     function totalStakedShares() external view override returns (uint64 res) {
