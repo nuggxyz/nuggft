@@ -19,11 +19,6 @@ import {ProofView} from './ProofView.sol';
  */
 abstract contract ProofExternal is IProofExternal {
     function proofOf(uint160 tokenId) public view virtual override returns (uint256) {
-        if (tokenId == EpochView.activeEpoch()) {
-            (uint256 p, , , ) = ProofView.pendingProof();
-            return p;
-        }
-
         return ProofView.checkedProofOfIncludingPending(tokenId);
     }
 
@@ -34,9 +29,10 @@ abstract contract ProofExternal is IProofExternal {
         override
         returns (
             uint256 proof,
-            uint16[] memory defaultIds,
-            uint16[] memory extraIds,
-            uint16[] memory overrides
+            uint8[] memory defaultIds,
+            uint8[] memory extraIds,
+            uint8[] memory overxs,
+            uint8[] memory overys
         )
     {
         return ProofView.parseProof(tokenId);

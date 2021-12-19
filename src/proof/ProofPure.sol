@@ -19,31 +19,71 @@ library ProofPure {
     uint256 constant DISPLAY_ARRAY_MAX_LEN = 8;
     uint256 constant DIAPLAY_ARRAY_ITEM_BIT_LEN = 16;
 
-    function parseProofLogic(uint256 _proof)
+    function fullProof(uint256 input)
         internal
-        view
+        pure
         returns (
             uint256 proof,
-            uint16[] memory defaultIds,
-            uint16[] memory extraIds,
-            uint16[] memory overrides
+            uint8[] memory defaultIds,
+            uint8[] memory extraIds,
+            uint8[] memory overxs,
+            uint8[] memory overys
         )
     {
-        proof = _proof;
-
-        (defaultIds, , ) = ShiftLib.getDynamicArray(proof, 16, 0);
+        proof = input;
+        defaultIds = ShiftLib.getArray(proof, 0);
+        extraIds = ShiftLib.getArray(proof, 64);
+        overxs = ShiftLib.getArray(proof, 128);
+        overys = ShiftLib.getArray(proof, 192);
     }
 
-    function items(uint256 input) internal view returns (uint16[] memory res) {
-        (res, , ) = ShiftLib.getDynamicArray(input, 16, 0);
+    function pushToExtra(uint256 input, uint16 itemId) internal pure returns (uint256 res) {
+        uint8[] memory arr = ShiftLib.getArray(input, 64);
+
+        (uint8 feat, uint8 pos) = parseItemId(itemId);
+
+        require(arr[feat] == 0, 'PP:0');
+
+        arr[feat] = pos;
+
+        return ShiftLib.setArray(input, 64, arr);
     }
 
-    function push(uint256 input, uint16 itemId) internal view returns (uint256 res) {
-        res = ShiftLib.pushDynamicArray(input, 16, 0, itemId);
+    function pullFromExtra(uint256 input, uint16 itemId) internal pure returns (uint256 res) {
+        uint8[] memory arr = ShiftLib.getArray(input, 64);
+
+        (uint8 feat, uint8 pos) = parseItemId(itemId);
+
+        require(arr[feat] == pos, 'PP:0');
+
+        arr[feat] = 0;
+
+        res = ShiftLib.setArray(input, 64, arr);
     }
 
-    function pop(uint256 input, uint16 itemId) internal view returns (uint256 res) {
-        res = ShiftLib.popDynamicArray(input, 16, 0, itemId);
+    function swapDefaultandExtra(uint256 input, uint8 feature) internal pure returns (uint256 res) {
+        uint8[] memory def = ShiftLib.getArray(input, 0);
+        uint8[] memory ext = ShiftLib.getArray(input, 64);
+
+        def[feature] = ext[feature];
+        ext[feature] = def[feature];
+
+        res = ShiftLib.setArray(input, 0, def);
+        res = ShiftLib.setArray(res, 64, ext);
+    }
+
+    function setOverride(
+        uint256 input,
+        uint8[] memory xs,
+        uint8[] memory ys
+    ) internal pure returns (uint256 res) {
+        res = ShiftLib.setArray(input, 128, xs);
+        res = ShiftLib.setArray(res, 192, ys);
+    }
+
+    function parseItemId(uint16 itemId) internal pure returns (uint8 feat, uint8 pos) {
+        feat = uint8(itemId >> 12);
+        pos = uint8(itemId & 0xff);
     }
 }
 

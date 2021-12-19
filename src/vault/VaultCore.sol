@@ -8,7 +8,9 @@ import {SSTORE2} from '../libraries/SSTORE2.sol';
 
 import {Vault} from './VaultStorage.sol';
 import {VaultPure} from './VaultPure.sol';
-
+import {VaultView} from './VaultView.sol';
+import {ProofPure} from '../proof/ProofPure.sol';
+import {TokenView} from '../token/TokenView.sol';
 
 import {Print} from '../_test/utils/Print.sol';
 
@@ -17,49 +19,65 @@ library VaultCore {
     using SafeCastLib for uint256;
     using SafeCastLib for uint16;
 
-    function set(uint256[][][] calldata data) internal {
-        require(data.length <= 8 && data.length > 0, 'VAULT:FEAT:0');
+    function setResolver(uint160 tokenId, address to) internal {
+        require(TokenView.isApprovedOrOwner(msg.sender, tokenId), 'T:0');
 
-        bytes[] memory a = new bytes[](8);
-
-        uint256 ptr;
-
-        for (uint8 i = 0; i < data.length; i++) {
-            ptr = ptr.length(i, data[i].length.safe16());
-            a[i] = abi.encode(data[i]);
-        }
-
-        ptr = ptr.addr(SSTORE2.write(abi.encode(a)));
-
-        Vault.spointer().ptrs.push(ptr);
-
-        Vault.spointer().lengthData = Vault.spointer().lengthData.addLengths(ptr);
-    }
-   // (uint256[][])
-    function get(uint8 feature, uint16 id) internal view returns (uint256[] memory data) {
-        uint256 ptrlen = Vault.spointer().ptrs.length;
-
-        uint256 pointer;
-        uint256 cumItems;
-        uint256 orgid = id;
-        for (uint256 i = 0; i < ptrlen; i++) {
-            pointer = Vault.spointer().ptrs[i];
-            cumItems += pointer.length(feature);
-            Print.log(cumItems, "cumItems" , id, "id",feature,"feature",pointer.length(feature), "pointer.length(feature)");
-
-            if (cumItems > orgid) break;
-            else if (ptrlen == i + 1) require(false, 'VAULT:GET:1 - ID DOES NOT EXIST');
-            id -= pointer.length(feature);
-        }
-
-        data = abi.decode(abi.decode(SSTORE2.read(pointer.addr()), (bytes[]))[feature], (uint256[][]))[id];
+        Vault.spointer().resolvers[tokenId] = to;
     }
 
-    function getBatch(uint16[] memory ids) internal view returns (uint256[][] memory data) {
+    function trustedSet(uint8 feature, uint256[][] calldata data) internal {
+        uint8 len = data.length.safe8();
+
+        require(len > 0, 'VC:0');
+
+        uint168 working = uint168(len) << 160;
+
+        address ptr = SSTORE2.write(abi.encode(data));
+
+        Vault.spointer().ptrs[feature].push(uint160(ptr) | working);
+
+        uint256 cache = Vault.spointer().lengthData;
+
+        uint8[] memory lengths = VaultPure.getLengths(cache);
+
+        lengths[feature] += len;
+
+        Vault.spointer().lengthData = VaultPure.setLengths(cache, lengths);
+    }
+
+    function get(uint8 feature, uint8 pos) internal view returns (uint256[] memory data) {
+        uint8 totalLength = VaultPure.getLengths(Vault.spointer().lengthData)[feature];
+
+        require(pos < totalLength, 'VC:1');
+
+        uint168[] memory ptrs = Vault.spointer().ptrs[feature];
+
+        address store;
+        uint8 storePos;
+
+        uint8 workingPos;
+
+        for (uint256 i = 0; i < ptrs.length; i++) {
+            uint8 here = uint8(ptrs[i] >> 160);
+            if (workingPos + here > pos) {
+                store = address(uint160(ptrs[i]));
+                storePos = pos - workingPos;
+                break;
+            } else {
+                workingPos += here;
+            }
+        }
+
+        require(store != address(0), 'VC:2');
+
+        data = abi.decode(SSTORE2.read(address(uint160(store))), (uint256[][]))[storePos];
+    }
+
+    function getBatch(uint8[] memory ids) internal view returns (uint256[][] memory data) {
         data = new uint256[][](ids.length);
 
-        for (uint256 i = 0; i < ids.length; i++) {
-            data[i] = get((ids[i] >> 12).safe8(), (ids[i] & ShiftLib.mask(12)).safe16());
+        for (uint8 i = 0; i < ids.length; i++) {
+            data[i] = get(i, ids[i]);
         }
     }
 }

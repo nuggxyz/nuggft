@@ -39,7 +39,6 @@ library SwapCore {
                             TOKEN SWAP FUNCTIONS
     ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━*/
 
-
     /// @notice Explain to an end user what this does
     /// @dev E
     /// @param tokenId a
@@ -172,7 +171,7 @@ library SwapCore {
         if (checkClaimerIsWinnerOrLoser(m)) {
             Swap.deleteItemSwap(sellingTokenId, itemId);
 
-            ProofCore.push(buyingTokenId, itemId);
+            ProofCore.addItem(buyingTokenId, itemId);
         } else {
             SafeTransferLib.safeTransferETH(msg.sender, m.offerData.eth());
         }
@@ -188,7 +187,7 @@ library SwapCore {
         require(TokenView.ownerOf(sellingTokenId) == msg.sender, 'AUC:TT:3');
 
         // will revert if they do not have the item
-        ProofCore.pop(sellingTokenId, itemId);
+        ProofCore.removeItem(sellingTokenId, itemId);
 
         (Swap.Storage storage s, Swap.Memory memory m) = Swap.loadItemSwap(sellingTokenId, itemId, sellingTokenId);
 

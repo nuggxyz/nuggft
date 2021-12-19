@@ -10,12 +10,9 @@ import {StakeView} from './StakeView.sol';
 import {StakeTrust} from './StakeTrust.sol';
 import {StakeCore} from './StakeCore.sol';
 
-abstract contract StakeExternal is IStakeExternal, StakeTrust {
+abstract contract StakeExternal is IStakeExternal {
     using SafeCastLib for uint256;
 
-    function extractProtocolEth() external override requiresTrust {
-        StakeCore.trustedExtractProtocolEth();
-    }
 
     function withdrawStake(uint160 tokenId) external override {
         StakeCore.subStakedSharePayingSender(tokenId);
