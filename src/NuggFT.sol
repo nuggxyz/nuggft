@@ -13,9 +13,9 @@ import {FileExternal as DotNugg} from './file/FileExternal.sol';
 import {StakeExternal as Staked} from './stake/StakeExternal.sol';
 import {LoanExternal as Loanable} from './loan/LoanExternal.sol';
 import {EpochExternal as Epoched} from './epoch/EpochExternal.sol';
-import {TrustExternal as Trusted} from './trust/TrustExternal.sol';
+import {TrustExternal as Migratable} from './trust/TrustExternal.sol';
 
-contract NuggFT is a, Swapable, Provable, Loanable, Trusted, Staked, Epoched, DotNugg, ERC721 {
+contract NuggFT is a, Swapable, Provable, Loanable, Migratable, Staked, Epoched, DotNugg, ERC721 {
     constructor(address _defaultResolver) DotNugg(_defaultResolver) {
         emit Genesis();
     }

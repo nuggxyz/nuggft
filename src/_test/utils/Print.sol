@@ -56,6 +56,32 @@ library Print {
         console.log(name3, val3, '|', Uint256.toHexString(val3, 32));
     }
 
+    function log(
+        uint256 val0,
+        string memory name0,
+        uint256 val1,
+        string memory name1,
+        uint256 val2,
+        string memory name2,
+        uint256 val3,
+        string memory name3,
+        uint256 val4,
+        string memory name4
+    ) internal view {
+        console.log('-----------------------');
+        console.log('-----------------------');
+        console.log('variable: ', name0);
+        console.log('|', Uint256.toHexString(val0, 32), '=', val0);
+        console.log('variable: ', name1);
+        console.log('|', Uint256.toHexString(val1, 32), '=', val1);
+        console.log('variable: ', name2);
+        console.log('|', Uint256.toHexString(val2, 32), '=', val2);
+        console.log('variable: ', name3);
+        console.log('|', Uint256.toHexString(val3, 32), '=', val3);
+        console.log('variable: ', name4);
+        console.log('|', Uint256.toHexString(val4, 32), '=', val4);
+    }
+
     function log(uint256[] memory arr, string memory name) internal view {
         console.log('--------------------');
         console.log('array: ', name);

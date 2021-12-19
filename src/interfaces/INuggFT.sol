@@ -19,6 +19,11 @@ interface ITrustExternal {
 interface IStakeExternal {
     event StakeEth(uint96 amount);
     event UnStakeEth(uint96 amount);
+    event ProtocolEthExtracted(uint96 amount);
+    event MigratorV1Updated(address migrator);
+    event MigrateV1Sent(address v2, uint160 tokenId, uint256 proof, address owner, uint96 eth);
+
+    function migrateStake(uint160 tokenId) external;
 
     function withdrawStake(uint160 tokenId) external;
 

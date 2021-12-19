@@ -6,11 +6,11 @@ import { getHRE } from '../shared/deployment';
 import { deployContractWithSalt } from '../shared';
 import { NuggFT } from '../../../../typechain/NuggFT';
 import { NuggFT__factory } from '../../../../typechain/factories/NuggFT__factory';
-import { MockDotNuggV1Processer__factory } from '../../../../typechain';
+import { MockDotNuggV1Processer__factory, MockNuggFTV1Migrator, MockNuggFTV1Migrator__factory } from '../../../../typechain';
 
 export interface NuggFatherFixture {
     // nuggswap: NuggSwap;
-    // xnugg: xNUGG;
+    migrator: MockNuggFTV1Migrator;
     nuggft: NuggFT;
     deployer: Wallet;
     owner: string;
@@ -30,18 +30,6 @@ export const NuggFatherFix: Fixture<NuggFatherFixture> = async function (
     const deployer = provider.getWallets()[16];
     const eoaOwner = provider.getWallets()[17];
 
-    // const xnugg = await deployContractWithSalt<xNUGG__factory>({
-    //     factory: 'xNUGG',
-    //     from: deployer,
-    //     args: [],
-    // });
-
-    // const nuggswap = await deployContractWithSalt<NuggSwap__factory>({
-    //     factory: 'NuggSwap',
-    //     from: deployer,
-    //     args: [xnugg.address],
-    // });
-
     //0x435ccc2eaa41633658be26d804be5A01fEcC9337
     //0x770f070388b13A597b84B557d6B8D1CD94Fc9925
 
@@ -57,7 +45,14 @@ export const NuggFatherFix: Fixture<NuggFatherFixture> = async function (
         args: [processResolver.address],
     });
 
+    const migrator = await deployContractWithSalt<MockNuggFTV1Migrator__factory>({
+        factory: 'MockNuggFTV1Migrator',
+        from: deployer,
+        args: [],
+    });
+
     hre.tracer.nameTags[nuggft.address] = `NuggFT`;
+    hre.tracer.nameTags[migrator.address] = `MockNuggFTV1Migrator`;
 
     await nuggft.connect(deployer).storeFiles(hre.dotnugg.itemsByFeatureByIdArray[0], 0);
     await nuggft.connect(deployer).storeFiles(hre.dotnugg.itemsByFeatureByIdArray[1], 1);
@@ -93,6 +88,7 @@ export const NuggFatherFix: Fixture<NuggFatherFixture> = async function (
         // mockERC1155,
         // dotnugg: hre.dotnugg,
         nuggft,
+        migrator,
         // xnugg,
         deployer,
         blockOffset,

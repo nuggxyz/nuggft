@@ -2,10 +2,6 @@
 
 pragma solidity 0.8.9;
 
-// import './interfaces/IWETH9.sol';
-
-// adapted from WBNB on BSC  https://bscscan.com/address/0xbb4CdB9CBd36B01bD1cBaEBF2De08d9173bc095c#code
-
 contract WETH9 {
     string public name = 'Wrapped ETH';
     string public symbol = 'WETH';
