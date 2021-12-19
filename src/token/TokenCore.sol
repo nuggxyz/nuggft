@@ -11,6 +11,7 @@ import {TokenView} from './TokenView.sol';
 
 import {StakeCore} from '../stake/StakeCore.sol';
 
+// system test
 library TokenCore {
     event Transfer(address indexed from, address indexed to, uint256 indexed tokenId);
     event Approval(address indexed owner, address indexed approved, uint256 indexed tokenId);

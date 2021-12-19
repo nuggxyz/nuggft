@@ -29,6 +29,7 @@ library LoanCore {
     event Payoff(uint160 tokenId, address account, uint256 eth);
     event Rebalance(uint160 tokenId);
 
+    // @hh system tests
     function loan(uint160 tokenId) internal {
         // we know the loan data is blank because it is owned by the user
         require(TokenView.ownerOf(tokenId) == msg.sender, 'LOAN:L:0');
@@ -48,6 +49,7 @@ library LoanCore {
         emit TakeLoan(tokenId, msg.sender, principal);
     }
 
+    // @hh system tests
     function rebalance(uint160 tokenId) internal {
         require(address(this) == TokenView.ownerOf(tokenId), 'LOAN:P:0');
 
@@ -75,7 +77,6 @@ library LoanCore {
         Loan.sstore(tokenId, loanData); // starting swap data
 
         uint96 overpayment = msg.value.safe96() - fee; // 1 wei
-        emit Rebalance(overpayment);
 
         uint96 update = curr + fee;
 
@@ -87,6 +88,7 @@ library LoanCore {
         emit Rebalance(tokenId);
     }
 
+    // @hh system tests
     function payoff(uint160 tokenId) internal {
         require(address(this) == TokenView.ownerOf(tokenId), 'LOAN:P:0');
 

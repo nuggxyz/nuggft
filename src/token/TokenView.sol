@@ -4,6 +4,7 @@ pragma solidity 0.8.9;
 
 import {Token} from './TokenStorage.sol';
 
+// OK
 library TokenView {
     function exists(uint160 tokenId) internal view returns (bool) {
         return Token.ptr().owners[tokenId] != address(0);

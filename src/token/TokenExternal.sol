@@ -13,6 +13,7 @@ import {TokenView} from './TokenView.sol';
 
 import {TokenCore} from './TokenCore.sol';
 
+//OK
 /**
  * @dev Implementation of https://eips.ethereum.org/EIPS/eip-721[ERC721] Non-Fungible Token Standard
  */

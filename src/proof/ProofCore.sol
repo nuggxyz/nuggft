@@ -14,9 +14,9 @@ import {Proof} from './ProofStorage.sol';
 import {VaultPure} from '../vault/VaultPure.sol';
 import {Vault} from '../vault/VaultStorage.sol';
 
-
 import {Print} from '../_test/utils/Print.sol';
 
+// OK
 library ProofCore {
     using SafeCastLib for uint256;
     using ProofPure for uint256;
@@ -92,7 +92,7 @@ library ProofCore {
     function initFromSeed(uint256 seed) internal view returns (uint256 res) {
         require(seed != 0, 'seed');
 
-        uint256 lendata = Vault.ptr().lengthData;
+        uint256 lendata = Vault.spointer().lengthData;
 
         uint16[] memory upd = new uint16[](4);
 
@@ -105,7 +105,7 @@ library ProofCore {
         uint256 pick0 = ((seed >> (4 + FULL_SIZE * 0)) & maxPosSize) % VaultPure.length(lendata, 0);
         uint256 pick1 = ((seed >> (4 + FULL_SIZE * 1)) & maxPosSize) % VaultPure.length(lendata, 1);
 
-        Print.log(VaultPure.length(lendata, 2), "VaultPure.length(lendata, 2)", lendata, "lendata");
+        Print.log(VaultPure.length(lendata, 2), 'VaultPure.length(lendata, 2)', lendata, 'lendata');
         uint256 pick2 = ((seed >> (4 + FULL_SIZE * 2)) & maxPosSize) % VaultPure.length(lendata, 2);
 
         uint256 pick3 = (seed >> 69) % 256;

@@ -4,6 +4,7 @@ import {Global} from '../global/GlobalStorage.sol';
 
 pragma solidity 0.8.9;
 
+// OK
 library Proof {
     struct Storage {
         mapping(uint256 => uint256) map;

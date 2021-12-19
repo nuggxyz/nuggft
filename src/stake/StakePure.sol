@@ -9,6 +9,7 @@ library StakePure {
     /// 96 stakedEth
     /// 64 stakedShares
 
+    // @test input output unit test
     function getProtocolEth(uint256 cache) internal pure returns (uint96 res) {
         // using casting to select only 96
         res = uint96(cache);
@@ -19,6 +20,7 @@ library StakePure {
         res |= update;
     }
 
+    // @test input output unit test
     function getStakedEth(uint256 cache) internal pure returns (uint96 res) {
         // using casting to select only 96
         res = uint96(cache >> 96);
@@ -30,6 +32,7 @@ library StakePure {
         res |= uint256(update) << 96;
     }
 
+    // @test input output unit test
     function getStakedShares(uint256 cache) internal pure returns (uint64 res) {
         res = uint64(cache >> 192);
     }
@@ -39,6 +42,7 @@ library StakePure {
         res |= (uint256(update) << 192);
     }
 
+    // @test manual ish - combined input output
     function getStakedSharesAndEth(uint256 cache)
         internal
         pure
@@ -53,6 +57,7 @@ library StakePure {
         proto = getProtocolEth(cache);
     }
 
+    // @test manual
     function getEthPerShare(uint256 cache) internal pure returns (uint96 res) {
         res = getStakedShares(cache) == 0 ? 0 : getStakedEth(cache) / getStakedShares(cache);
     }

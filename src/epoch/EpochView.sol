@@ -6,6 +6,7 @@ import {Epoch} from './EpochStorage.sol';
 
 import {EpochPure} from './EpochPure.sol';
 
+// MANUAL
 library EpochView {
     function activeEpoch() internal view returns (uint32 res) {
         res = EpochPure.toEpoch(block.number);
