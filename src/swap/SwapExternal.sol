@@ -52,9 +52,9 @@ abstract contract SwapExternal is ISwapExternal {
         SwapCore.swapItem(itemid, floor, sellingTokenId);
     }
 
-    function delegate2(uint160 tokenId) external payable {
-        SwapCore.delegate(tokenId);
-    }
+    // function delegate2(uint160 tokenId) external payable {
+    //     SwapCore.delegate(tokenId);
+    // }
 
     /*━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
                                 VIEW

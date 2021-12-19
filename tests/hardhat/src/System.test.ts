@@ -30,7 +30,7 @@ describe('uint tests', async function () {
     describe('internal', async () => {
         it('should revert if shares = 0', async () => {
             console.log(await fix.nuggft.name());
-            await fix.nuggft.connect(accounts.mac).delegate2(1);
+            await fix.nuggft.connect(accounts.mac).delegate(1);
 
             await fix.nuggft.connect(accounts.dee).delegate(1, { value: toEth('3.000') });
 
@@ -167,6 +167,12 @@ describe('uint tests', async function () {
             console.log('bal ', (await accounts.charile.getBalance()).toString());
 
             await fix.nuggft.connect(fix.deployer).extractProtocolEth();
+
+            await fix.nuggft.connect(accounts.deployer).setMigrator(fix.migrator.address);
+
+            await fix.nuggft.connect(accounts.charile).approve(fix.nuggft.address, 1);
+
+            await fix.nuggft.connect(accounts.charile).migrateStake(1);
 
             // await fix.nuggft.connect(accounts.frank).payoff(token11, { value: await fix.nuggft.payoffAmount() });
         });
