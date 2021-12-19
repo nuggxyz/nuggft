@@ -6,7 +6,7 @@ import { getHRE } from '../shared/deployment';
 import { deployContractWithSalt } from '../shared';
 import { NuggFT } from '../../../../typechain/NuggFT';
 import { NuggFT__factory } from '../../../../typechain/factories/NuggFT__factory';
-import { MockProcessResolver__factory } from '../../../../typechain';
+import { MockDotNuggV1Processer__factory } from '../../../../typechain';
 
 export interface NuggFatherFixture {
     // nuggswap: NuggSwap;
@@ -45,8 +45,8 @@ export const NuggFatherFix: Fixture<NuggFatherFixture> = async function (
     //0x435ccc2eaa41633658be26d804be5A01fEcC9337
     //0x770f070388b13A597b84B557d6B8D1CD94Fc9925
 
-    const processResolver = await deployContractWithSalt<MockProcessResolver__factory>({
-        factory: 'MockProcessResolver',
+    const processResolver = await deployContractWithSalt<MockDotNuggV1Processer__factory>({
+        factory: 'MockDotNuggV1Processer',
         from: deployer,
         args: [],
     });
@@ -59,20 +59,20 @@ export const NuggFatherFix: Fixture<NuggFatherFixture> = async function (
 
     hre.tracer.nameTags[nuggft.address] = `NuggFT`;
 
-    await nuggft.addToVault(hre.dotnugg.itemsByFeatureByIdHex);
-    await nuggft.addToVault(hre.dotnugg.itemsByFeatureByIdHex);
-    await nuggft.addToVault(hre.dotnugg.itemsByFeatureByIdHex);
-    await nuggft.addToVault(hre.dotnugg.itemsByFeatureByIdHex);
-    await nuggft.addToVault(hre.dotnugg.itemsByFeatureByIdHex);
-    await nuggft.addToVault(hre.dotnugg.itemsByFeatureByIdHex);
+    await nuggft.connect(deployer).storeFiles(hre.dotnugg.itemsByFeatureByIdArray[0], 0);
+    await nuggft.connect(deployer).storeFiles(hre.dotnugg.itemsByFeatureByIdArray[1], 1);
+    await nuggft.connect(deployer).storeFiles(hre.dotnugg.itemsByFeatureByIdArray[2], 2);
+    await nuggft.connect(deployer).storeFiles(hre.dotnugg.itemsByFeatureByIdArray[3], 3);
+    await nuggft.connect(deployer).storeFiles(hre.dotnugg.itemsByFeatureByIdArray[4], 4);
+    await nuggft.connect(deployer).storeFiles(hre.dotnugg.itemsByFeatureByIdArray[5], 5);
 
     console.log(hre.dotnugg.itemsByFeatureByIdHex[2].length);
 
-    // await nuggft.addToVault(hre.dotnugg.items.slice(0, 25).map((x) => x.hex));
-    // await nuggft.addToVault(hre.dotnugg.items.slice(25, 50).map((x) => x.hex));
+    // await nuggft.addToFile(hre.dotnugg.items.slice(0, 25).map((x) => x.hex));
+    // await nuggft.addToFile(hre.dotnugg.items.slice(25, 50).map((x) => x.hex));
 
-    // await nuggft.addToVault(hre.dotnugg.items.slice(50, 75).map((x) => x.hex));
-    // await nuggft.addToVault(hre.dotnugg.items.slice(75, 100).map((x) => x.hex));
+    // await nuggft.addToFile(hre.dotnugg.items.slice(50, 75).map((x) => x.hex));
+    // await nuggft.addToFile(hre.dotnugg.items.slice(75, 100).map((x) => x.hex));
 
     const blockOffset = BigNumber.from(await hre.ethers.provider.getBlockNumber());
 

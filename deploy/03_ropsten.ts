@@ -69,29 +69,29 @@ const deployment = async (hre: HardhatRuntimeEnvironment) => {
 
         // const res = await nuggft
         //     .connect(await hre.ethers.getNamedSigner('dee'))
-        //     .addToVault(hre.dotnugg.items.slice(0, 50).map((x) => x.hex));
+        //     .addToFile(hre.dotnugg.items.slice(0, 50).map((x) => x.hex));
 
         const tx0 = await nuggft
             .connect(await hre.ethers.getNamedSigner('dev'))
-            .addToVault(hre.dotnugg.items.slice(0, 25).map((x) => x.hex));
+            .addToFile(hre.dotnugg.items.slice(0, 25).map((x) => x.hex));
         hre.deployments.log('tx0 sent... waiting to be mined... ', tx0.hash);
         await tx0.wait();
 
         const tx1 = await nuggft
             .connect(await hre.ethers.getNamedSigner('dev'))
-            .addToVault(hre.dotnugg.items.slice(25, 50).map((x) => x.hex));
+            .addToFile(hre.dotnugg.items.slice(25, 50).map((x) => x.hex));
         hre.deployments.log('tx1 sent... waiting to be mined... ', tx1.hash);
         await tx1.wait();
 
         const tx2 = await nuggft
             .connect(await hre.ethers.getNamedSigner('dev'))
-            .addToVault(hre.dotnugg.items.slice(50, 75).map((x) => x.hex));
+            .addToFile(hre.dotnugg.items.slice(50, 75).map((x) => x.hex));
         hre.deployments.log('tx2 sent... waiting to be mined... ', tx2.hash);
         await tx2.wait();
 
         const tx3 = await nuggft
             .connect(await hre.ethers.getNamedSigner('dev'))
-            .addToVault(hre.dotnugg.items.slice(75, 200).map((x) => x.hex));
+            .addToFile(hre.dotnugg.items.slice(75, 200).map((x) => x.hex));
         hre.deployments.log('tx3 sent... waiting to be mined... ', tx3.hash);
         await tx3.wait();
 
@@ -111,13 +111,13 @@ const deployment = async (hre: HardhatRuntimeEnvironment) => {
 
         hre.deployments.log('tokenUri after is..', tokenUriAfter);
 
-        // // await nuggft.connect(await hre.ethers.getNamedSigner('dee')).addToVault(hre.dotnugg.items.slice(25, 50).map((x) => x.hex));
+        // // await nuggft.connect(await hre.ethers.getNamedSigner('dee')).addToFile(hre.dotnugg.items.slice(25, 50).map((x) => x.hex));
 
-        // // await nuggft.connect(await hre.ethers.getNamedSigner('dee')).addToVault(hre.dotnugg.items.slice(50, 75).map((x) => x.hex));
-        // // await nuggft.connect(await hre.ethers.getNamedSigner('dee')).addToVault(hre.dotnugg.items.slice(75, 100).map((x) => x.hex));
+        // // await nuggft.connect(await hre.ethers.getNamedSigner('dee')).addToFile(hre.dotnugg.items.slice(50, 75).map((x) => x.hex));
+        // // await nuggft.connect(await hre.ethers.getNamedSigner('dee')).addToFile(hre.dotnugg.items.slice(75, 100).map((x) => x.hex));
 
         // // // console.log(res);
-        // // await nuggft.connect(await hre.ethers.getNamedSigner('dee')).addToVault(hre.dotnugg.items.slice(0, 50).map((x) => x.hex));
+        // // await nuggft.connect(await hre.ethers.getNamedSigner('dee')).addToFile(hre.dotnugg.items.slice(0, 50).map((x) => x.hex));
 
         // await nuggft.connect(await hre.ethers.getNamedSigner('dee')).delegate(0, { value: toEth('0.01') });
 

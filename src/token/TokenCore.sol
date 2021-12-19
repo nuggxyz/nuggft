@@ -94,7 +94,7 @@ library TokenCore {
         delete Global.ptr().swap.map[tokenId];
         delete Global.ptr().loan.map[tokenId];
         delete Global.ptr().proof.map[tokenId];
-        delete Global.ptr().vault.resolvers[tokenId];
+        delete Global.ptr().file.resolvers[tokenId];
 
         emit Approval(msg.sender, address(0), tokenId);
 

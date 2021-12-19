@@ -20,15 +20,6 @@ import {TokenCore} from './TokenCore.sol';
 abstract contract TokenExternal is ITokenExternal {
     using SafeCastLib for uint256;
 
-    bytes32 immutable _name;
-
-    bytes32 immutable _symbol;
-
-    constructor(bytes32 name_, bytes32 symbol_) {
-        _name = name_;
-        _symbol = symbol_;
-    }
-
     function approve(address to, uint256 tokenId) public override {
         TokenCore.checkedApprove(to, tokenId.safe160());
     }
@@ -44,15 +35,7 @@ abstract contract TokenExternal is ITokenExternal {
             interfaceId == type(IERC165).interfaceId;
     }
 
-    function name() public view override returns (string memory) {
-        return string(abi.encodePacked(_name));
-    }
-
-    function symbol() public view override returns (string memory) {
-        return string(abi.encodePacked(_symbol));
-    }
-
-    function tokenURI(uint256 tokenId) public view virtual override returns (string memory);
+    // function tokenURI(uint256 tokenId) public view virtual override returns (string memory);
 
     function balanceOf(address owner) public view override returns (uint256) {
         return TokenView.balanceOf(owner);

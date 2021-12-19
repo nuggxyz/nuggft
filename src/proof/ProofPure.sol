@@ -4,20 +4,11 @@ pragma solidity 0.8.9;
 
 import {ShiftLib} from '../libraries/ShiftLib.sol';
 
-import {VaultPure} from '../vault/VaultPure.sol';
+import {FilePure} from '../file/FilePure.sol';
+import {Print} from '../_test/utils/Print.sol';
 
 library ProofPure {
     using ShiftLib for uint256;
-
-    uint256 constant ID_SIZE = 16;
-    uint256 constant ID_FEATURE_SIZE = 4;
-    uint256 constant ID_NUMBER_SIZE = 12;
-
-    uint256 constant FEATURE_ARR_SIZE = 8;
-
-    uint256 constant DISPLAY_ARRAY_POSITION = 0;
-    uint256 constant DISPLAY_ARRAY_MAX_LEN = 8;
-    uint256 constant DIAPLAY_ARRAY_ITEM_BIT_LEN = 16;
 
     function fullProof(uint256 input)
         internal
@@ -42,6 +33,9 @@ library ProofPure {
 
         (uint8 feat, uint8 pos) = parseItemId(itemId);
 
+        // Print.log(feat, 'feat', pos, 'pos', arr[feat], 'arr[feat]');
+        // Print.log(arr, 'arr');
+
         require(arr[feat] == 0, 'PP:0');
 
         arr[feat] = pos;
@@ -54,19 +48,29 @@ library ProofPure {
 
         (uint8 feat, uint8 pos) = parseItemId(itemId);
 
-        require(arr[feat] == pos, 'PP:0');
+        // Print.log(feat, 'feat', pos, 'pos', arr[feat], 'arr[feat]');
+        // Print.log(arr, 'arr');
+
+        require(arr[feat] == pos, 'PP:1');
 
         arr[feat] = 0;
 
         res = ShiftLib.setArray(input, 64, arr);
     }
 
-    function swapDefaultandExtra(uint256 input, uint8 feature) internal pure returns (uint256 res) {
+    function rotateDefaultandExtra(uint256 input, uint8 feature) internal pure returns (uint256 res) {
         uint8[] memory def = ShiftLib.getArray(input, 0);
         uint8[] memory ext = ShiftLib.getArray(input, 64);
 
-        def[feature] = ext[feature];
+        // Print.log(def, 'def');
+        // Print.log(ext, 'ext');
+
+        uint8 tmp = ext[feature];
         ext[feature] = def[feature];
+        def[feature] = tmp;
+
+        // Print.log(def, 'def');
+        // Print.log(ext, 'ext');
 
         res = ShiftLib.setArray(input, 0, def);
         res = ShiftLib.setArray(res, 64, ext);
@@ -82,7 +86,7 @@ library ProofPure {
     }
 
     function parseItemId(uint16 itemId) internal pure returns (uint8 feat, uint8 pos) {
-        feat = uint8(itemId >> 12);
+        feat = uint8(itemId >> 8);
         pos = uint8(itemId & 0xff);
     }
 }

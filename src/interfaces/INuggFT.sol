@@ -9,7 +9,7 @@ interface ITrustExternal {
 
     function extractProtocolEth() external;
 
-    function addToVault(uint256[][] calldata data, uint8 feature) external;
+    function storeFiles(uint256[][] calldata data, uint8 feature) external;
 
     function setIsTrusted(address user) external;
 
@@ -44,6 +44,8 @@ interface IProofExternal {
 
     function proofOf(uint160 tokenId) external view returns (uint256);
 
+    function rotateFeature(uint160 tokenId, uint8 feature) external;
+
     function parsedProofOf(uint160 tokenId)
         external
         view
@@ -56,12 +58,14 @@ interface IProofExternal {
         );
 }
 
-interface IVaultExternal is IERC721Metadata {
-    function defaultResolver() external view returns (address);
+interface IFileExternal is IERC721Metadata {
+    function setResolver(uint160 tokenId, address to) external;
+
+    function dotnuggV1Processer() external view returns (address);
 
     function resolverOf(uint160 tokenId) external view returns (address);
 
-    function setResolver(uint160 tokenId, address to) external;
+    // function tokenURI(uint256 tokenId) external view override returns (string memory);
 }
 
 interface ILoanExternal {
@@ -137,6 +141,15 @@ interface IEpochExternal {
     function epoch() external view returns (uint32 res);
 }
 
-interface INuggFT is ISwapExternal, ITokenExternal, IStakeExternal, ILoanExternal, IProofExternal, IVaultExternal, IEpochExternal {
+interface INuggFT is
+    ISwapExternal,
+    ITokenExternal,
+    IStakeExternal,
+    ILoanExternal,
+    IProofExternal,
+    IFileExternal,
+    IEpochExternal,
+    ITrustExternal
+{
     event Genesis();
 }
