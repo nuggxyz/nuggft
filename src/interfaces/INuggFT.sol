@@ -4,13 +4,23 @@ pragma solidity 0.8.9;
 
 import {IERC721, IERC721Metadata, IERC165} from './IERC721.sol';
 
+interface ITrustExternal {
+    event TrustUpdated(address indexed user);
+
+    function extractProtocolEth() external;
+
+    function addToVault(uint256[][] calldata data, uint8 feature) external;
+
+    function setIsTrusted(address user) external;
+
+    function trusted() external view returns (address);
+}
+
 interface IStakeExternal {
     event StakeEth(uint96 amount);
     event UnStakeEth(uint96 amount);
 
     function withdrawStake(uint160 tokenId) external;
-
-    function extractProtocolEth() external;
 
     function totalProtocolEth() external view returns (uint96);
 
@@ -39,16 +49,19 @@ interface IProofExternal {
         view
         returns (
             uint256 proof,
-            uint16[] memory defaultIds,
-            uint16[] memory extraIds,
-            uint16[] memory overrides
+            uint8[] memory defaultIds,
+            uint8[] memory extraIds,
+            uint8[] memory overxs,
+            uint8[] memory overys
         );
 }
 
-interface IVaultExternal {
+interface IVaultExternal is IERC721Metadata {
     function defaultResolver() external view returns (address);
 
     function resolverOf(uint160 tokenId) external view returns (address);
+
+    function setResolver(uint160 tokenId, address to) external;
 }
 
 interface ILoanExternal {
@@ -62,7 +75,7 @@ interface ILoanExternal {
     function payoff(uint160 tokenId) external payable;
 }
 
-interface ITokenExternal is IERC721, IERC721Metadata {}
+interface ITokenExternal is IERC721 {}
 
 interface ISwapExternal {
     event Mint(uint160 tokenId, address account, uint96);

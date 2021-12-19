@@ -19,10 +19,6 @@ library ShiftLib {
     }
 
     function fullsubmask(uint8 bits, uint8 pos) internal pure returns (uint256 res) {
-        // assembly {
-        //     res := not(shl(sub(shl(bits, 1), 1), pos))
-        // }
-
         res = ~(mask(bits) << pos);
     }
 
@@ -56,112 +52,105 @@ library ShiftLib {
                                 ARRAYS
     ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━*/
 
-    function getArray(
-        uint256 store,
-        uint8 bitsPerItem,
-        uint8 pos,
-        uint8 numItems
-    ) internal view returns (uint16[] memory arr) {
-        store = get(store, numItems * bitsPerItem, pos);
+    function getArray(uint256 store, uint8 pos) internal pure returns (uint8[] memory arr) {
+        store = get(store, 64, pos);
 
-        arr = new uint16[](numItems);
-        uint256 msk = mask(bitsPerItem);
-        for (uint256 i = 0; i < numItems; i++) {
-            arr[i] = (store & msk).safe16();
-            store >>= bitsPerItem;
+        arr = new uint8[](8);
+        for (uint256 i = 0; i < 8; i++) {
+            arr[i] = uint8(store & 0xff);
+            store >>= 8;
         }
     }
 
     function setArray(
         uint256 store,
-        uint16[] memory arr,
-        uint8 bitsPerItem,
-        uint8 pos
-    ) internal view returns (uint256 res) {
-        for (uint256 i = arr.length; i > 0; i--) {
-            res |= uint256(arr[i - 1]) << ((bitsPerItem * (i - 1)));
+        uint8 pos,
+        uint8[] memory arr
+    ) internal pure returns (uint256 res) {
+        for (uint256 i = 8; i > 0; i--) {
+            res |= uint256(arr[i - 1]) << ((8 * (i - 1)));
         }
 
-        res = set(store, arr.length.safe8() * bitsPerItem, pos, res);
+        res = set(store, 64, pos, res);
     }
 
     /*━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
                             DYNAMIC ARRAYS
     ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━*/
 
-    function setDynamicArray(
-        uint256 store,
-        uint16[] memory arr,
-        uint8 bitsPerItem,
-        uint8 pos,
-        uint256 truelen,
-        uint256 maxLen
-    ) internal view returns (uint256 res) {
-        // must be different than popDynamicArray
-        require(truelen <= maxLen, 'SL:SDA:0');
+    // function setDynamicArray(
+    //     uint256 store,
+    //     uint16[] memory arr,
+    //     uint8 bitsPerItem,
+    //     uint8 pos,
+    //     uint256 truelen,
+    //     uint256 maxLen
+    // ) internal view returns (uint256 res) {
+    //     // must be different than popDynamicArray
+    //     require(truelen <= maxLen, 'SL:SDA:0');
 
-        res = set(store, 16, pos, (maxLen << 8) | truelen);
+    //     res = set(store, 16, pos, (maxLen << 8) | truelen);
 
-        res = setArray(res, arr, bitsPerItem, pos + 16);
-    }
+    //     res = setArray(res, arr, bitsPerItem, pos + 16);
+    // }
 
-    function getDynamicArray(
-        uint256 store,
-        uint8 bitsPerItem,
-        uint8 pos
-    )
-        internal
-        view
-        returns (
-            uint16[] memory arr,
-            uint256 len,
-            uint256 maxlen
-        )
-    {
-        len = get(store, 16, pos);
+    // function getDynamicArray(
+    //     uint256 store,
+    //     uint8 bitsPerItem,
+    //     uint8 pos
+    // )
+    //     internal
+    //     view
+    //     returns (
+    //         uint16[] memory arr,
+    //         uint256 len,
+    //         uint256 maxlen
+    //     )
+    // {
+    //     len = get(store, 16, pos);
 
-        maxlen = len >> 8;
-        len &= 0xff;
+    //     maxlen = len >> 8;
+    //     len &= 0xff;
 
-        arr = getArray(store, bitsPerItem, pos + 16, len.safe8() + 1);
-    }
+    //     arr = getArray(store, bitsPerItem, pos + 16, len.safe8() + 1);
+    // }
 
-    function popDynamicArray(
-        uint256 store,
-        uint8 bitsPerItem,
-        uint8 pos,
-        uint256 id
-    ) internal view returns (uint256 res) {
-        (uint16[] memory arr, uint256 truelen, uint256 maxlen) = getDynamicArray(store, bitsPerItem, pos);
+    // function popDynamicArray(
+    //     uint256 store,
+    //     uint8 bitsPerItem,
+    //     uint8 pos,
+    //     uint256 id
+    // ) internal view returns (uint256 res) {
+    //     (uint16[] memory arr, uint256 truelen, uint256 maxlen) = getDynamicArray(store, bitsPerItem, pos);
 
-        require(truelen > 0, 'SL:PDA:0');
+    //     require(truelen > 0, 'SL:PDA:0');
 
-        bool found;
-        for (uint8 i = 0; i < arr.length; i++) {
-            if (arr[i] == id) found = true;
+    //     bool found;
+    //     for (uint8 i = 0; i < arr.length; i++) {
+    //         if (arr[i] == id) found = true;
 
-            if (found && i != arr.length - 1) arr[i] = arr[i + 1];
-        }
+    //         if (found && i != arr.length - 1) arr[i] = arr[i + 1];
+    //     }
 
-        require(found, 'SL:PDA:0');
+    //     require(found, 'SL:PDA:0');
 
-        res = setDynamicArray(store, arr, bitsPerItem, pos, truelen - 1, maxlen);
-    }
+    //     res = setDynamicArray(store, arr, bitsPerItem, pos, truelen - 1, maxlen);
+    // }
 
-    function pushDynamicArray(
-        uint256 store,
-        uint8 bitsPerItem,
-        uint8 pos,
-        uint16 id
-    ) internal view returns (uint256 res) {
-        (uint16[] memory arr, uint256 truelen, uint256 maxlen) = getDynamicArray(store, bitsPerItem, pos);
+    // function pushDynamicArray(
+    //     uint256 store,
+    //     uint8 bitsPerItem,
+    //     uint8 pos,
+    //     uint16 id
+    // ) internal view returns (uint256 res) {
+    //     (uint16[] memory arr, uint256 truelen, uint256 maxlen) = getDynamicArray(store, bitsPerItem, pos);
 
-        require(truelen < maxlen, 'SL:PDA:0');
+    //     require(truelen < maxlen, 'SL:PDA:0');
 
-        arr[truelen] = id;
+    //     arr[truelen] = id;
 
-        res = setDynamicArray(store, arr, bitsPerItem, pos, truelen + 1, maxlen);
-    }
+    //     res = setDynamicArray(store, arr, bitsPerItem, pos, truelen + 1, maxlen);
+    // }
 
     /*━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
                              ASSERTIONS

@@ -11,10 +11,8 @@ import {ProofPure} from './ProofPure.sol';
 import {ProofView} from './ProofView.sol';
 import {Proof} from './ProofStorage.sol';
 
-import {VaultPure} from '../vault/VaultPure.sol';
+import {VaultView} from '../vault/VaultView.sol';
 import {Vault} from '../vault/VaultStorage.sol';
-
-import {Print} from '../_test/utils/Print.sol';
 
 // OK
 library ProofCore {
@@ -25,34 +23,38 @@ library ProofCore {
                                 EVENTS
     ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━*/
 
-    event SetProof(uint160 tokenId, uint16[] items);
+    event SetProof(uint160 tokenId, uint8[] items);
     event PopItem(uint160 tokenId, uint16 itemId);
     event PushItem(uint160 tokenId, uint16 itemId);
+    event RotateItem(uint160 tokenId, uint8 feature);
+
+    // function migrate() internal {
+    //     // send the tokenId, proof and value to new address
+    //     // burn the token here
+    // }
 
     /*━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
                             ITEM MANAGEMENT
     ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━*/
 
-    function push(uint160 tokenId, uint16 itemId) internal {
+    function addItem(uint160 tokenId, uint16 itemId) internal {
         uint256 working = ProofView.checkedProofOf(tokenId);
 
         require(Proof.ptr().protcolItems[itemId] > 0, '1155:SBTF:1');
 
         Proof.ptr().protcolItems[itemId]--;
 
-        working = ProofPure.push(working, itemId);
+        working = ProofPure.pushToExtra(working, itemId);
 
         Proof.set(tokenId, working);
 
         emit PushItem(tokenId, itemId);
     }
 
-    function pop(uint160 tokenId, uint16 itemId) internal {
+    function removeItem(uint160 tokenId, uint16 itemId) internal {
         uint256 working = ProofView.checkedProofOf(tokenId);
 
-        require(working != 0, '1155:STF:0');
-
-        working = ProofPure.pop(working, itemId);
+        working = ProofPure.pullFromExtra(working, itemId);
 
         Proof.set(tokenId, working);
 
@@ -61,72 +63,75 @@ library ProofCore {
         emit PopItem(tokenId, itemId);
     }
 
+    function rotateItem(uint160 tokenId, uint8 feature) internal {
+        uint256 working = ProofView.checkedProofOf(tokenId);
+
+        working = ProofPure.swapDefaultandExtra(working, feature);
+
+        Proof.set(tokenId, working);
+
+        emit RotateItem(tokenId, feature);
+    }
+
     /*━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
                             INITIALIZATION
     ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━*/
 
+    function pendingProof()
+        internal
+        view
+        returns (
+            uint256 seed,
+            uint256 epoch,
+            uint256 proof,
+            uint8[] memory defaultIds
+        )
+    {
+        (seed, epoch) = EpochView.calculateSeed();
+
+        (proof, defaultIds) = ProofCore.initFromSeed(seed);
+    }
+
     function setProof(uint160 tokenId) internal {
         require(!ProofView.hasProof(tokenId), 'IL:M:0');
 
-        (uint256 seed, uint256 epoch) = EpochView.calculateSeed();
+        (uint256 seed, uint256 epoch, uint256 res, uint8[] memory picks) = pendingProof();
 
         require(seed != 0, '721:MINT:0');
         require(epoch == tokenId, '721:MINT:1');
 
-        seed = initFromSeed(seed);
+        Proof.set(tokenId, res);
 
-        Proof.set(tokenId, seed);
-
-        (, uint16[] memory items, , ) = ProofPure.parseProofLogic(seed);
-
-        // just for fun
-        assembly {
-            let ptr := mload(items)
-            ptr := sub(ptr, 1)
-            mstore(items, ptr)
-        }
-
-        emit SetProof(tokenId, items);
+        emit SetProof(tokenId, picks);
     }
 
-    function initFromSeed(uint256 seed) internal view returns (uint256 res) {
+    function initFromSeed(uint256 seed) internal view returns (uint256 res, uint8[] memory upd) {
         require(seed != 0, 'seed');
 
-        uint256 lendata = Vault.spointer().lengthData;
+        uint8[] memory lengths = VaultView.totalLengths();
 
-        uint16[] memory upd = new uint16[](4);
+        upd = new uint8[](8);
 
-        uint8 FULL_SIZE = 16;
-        uint8 FEAT_SIZE = 4;
-        uint8 POSITION_SIZE = 12;
+        uint8[] memory picks = ShiftLib.getArray(seed, 0);
 
-        uint256 maxPosSize = ShiftLib.mask(POSITION_SIZE);
+        upd[0] = picks[0] % lengths[0];
+        upd[1] = picks[1] % lengths[1];
+        upd[2] = picks[2] % lengths[2];
 
-        uint256 pick0 = ((seed >> (4 + FULL_SIZE * 0)) & maxPosSize) % VaultPure.length(lendata, 0);
-        uint256 pick1 = ((seed >> (4 + FULL_SIZE * 1)) & maxPosSize) % VaultPure.length(lendata, 1);
+        if (picks[3] < 96) upd[3] = picks[4] % lengths[3];
+        else if (picks[3] < 192) upd[4] = picks[4] % lengths[4];
+        else if (picks[3] < 250) upd[5] = picks[4] % lengths[5];
+        else upd[6] = picks[4] % lengths[6];
 
-        Print.log(VaultPure.length(lendata, 2), 'VaultPure.length(lendata, 2)', lendata, 'lendata');
-        uint256 pick2 = ((seed >> (4 + FULL_SIZE * 2)) & maxPosSize) % VaultPure.length(lendata, 2);
-
-        uint256 pick3 = (seed >> 69) % 256;
-
-        uint256 num = (seed >> (4 + FULL_SIZE * 3)) & maxPosSize;
-
-        if (pick3 < 96) {
-            pick3 = (3 << POSITION_SIZE) | (num % (VaultPure.length(lendata, 3)));
-        } else if (pick3 < 192) {
-            pick3 = (4 << POSITION_SIZE) | (num % (VaultPure.length(lendata, 4)));
-        } else if (pick3 < 250) {
-            pick3 = (5 << POSITION_SIZE) | (num % (VaultPure.length(lendata, 5)));
-        } else {
-            pick3 = (6 << POSITION_SIZE) | (num % (VaultPure.length(lendata, 6)));
-        }
-
-        upd[0] = pick0.safe16();
-        upd[1] = (pick1 | (1 << POSITION_SIZE)).safe16();
-        upd[2] = (pick2 | (2 << POSITION_SIZE)).safe16();
-        upd[3] = pick3.safe16();
-
-        res = ShiftLib.setDynamicArray(res, upd, 16, 0, 4, 8);
+        res = ShiftLib.setArray(res, 0, upd);
     }
 }
+
+// uint256 pick3 = (seed >> 69) % mask;
+
+// uint256 num = (seed >> (4 + FULL_SIZE * 3)) & mask;
+// uint256 mask = type(uint8).max;
+
+// upd[0] = ((seed >> (4 + FULL_SIZE * 0)) & mask) % lengths[0];
+// upd[1] = ((seed >> (4 + FULL_SIZE * 1)) & mask) % lengths[2];
+// upd[2] pick2 = ((seed >> (4 + FULL_SIZE * 2)) & mask) % lengths[2];

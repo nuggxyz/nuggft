@@ -8,7 +8,7 @@ import {Global} from '../global/GlobalStorage.sol';
 library Vault {
     struct Storage {
         uint256 lengthData;
-        uint256[] ptrs;
+        uint168[][] ptrs;
         // Mapping from token ID to owner address
         mapping(uint256 => address) resolvers;
     }

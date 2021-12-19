@@ -26,45 +26,46 @@ abstract contract VaultExternal is IVaultExternal {
         defaultResolver = _dr;
     }
 
+    function setResolver(uint160 tokenId, address to) public view virtual override returns (address) {
+        return VaultCore.setResolver(tokenId, to);
+    }
+
+    function tokenURI(uint256 tokenId) public view virtual override returns (string memory res) {
+        res = resolvedTokenURIString(
+            tokenId,
+            VaultView.hasResolver(tokenId.safe160()) ? VaultView.resolverOf(tokenId.safe160()) : defaultResolver
+        );
+    }
+
     function resolverOf(uint160 tokenId) public view virtual override returns (address) {
         return VaultView.resolverOf(tokenId);
     }
 
-    function addToVault(uint256[][][] calldata data) external {
-        VaultCore.set(data);
-    }
+    function rawTokenURI(uint160 tokenId) public view returns (uint256[] memory res) {
+        (, uint8[] memory ids, , uint8[] memory xovers, uint8[] memory yovers) = ProofView.parsedProofOfIncludingPending(tokenId);
 
-    function rawProcessURI(uint160 tokenId) public view returns (uint256[] memory res) {
-        require(TokenView.exists(tokenId) || tokenId == EpochView.activeEpoch(), 'NFT:NTM:0');
-
-        (, uint16[] memory ids, , uint16[] memory overrides) = ProofView.parsedProofOfIncludingPending(tokenId);
-
-        bytes memory data = abi.encode(tokenId, ids, overrides, address(this));
+        bytes memory data = abi.encode(tokenId, ids, xovers, yovers, address(this));
 
         uint256[][] memory files = VaultCore.getBatch(ids);
 
-        res = IProcessResolver(defaultResolver).process(files, data, '');
+        res = IProcessResolver(defaultResolver).rawProcess(files, data);
     }
 
-    function tokenURI(uint256 tokenId) public view virtual returns (string memory res) {
-        res = string(
-            tokenURI(tokenId, VaultView.hasResolver(tokenId.safe160()) ? VaultView.resolverOf(tokenId.safe160()) : defaultResolver)
-        );
+    function resolvedTokenURIString(uint256 tokenId, address resolver) public view returns (string memory res) {
+        res = string(resolvedTokenURI(tokenId, resolver));
     }
 
-    function tokenURI(uint256 tokenId, address resolver) public view returns (bytes memory res) {
-        require(ProofView.hasProof(tokenId.safe160()) || tokenId == EpochView.activeEpoch(), 'NFT:NTM:0');
-
-        (, uint16[] memory ids, , uint16[] memory overrides) = ProofView.parsedProofOfIncludingPending(tokenId.safe160());
+    function resolvedTokenURI(uint256 tokenId, address resolver) public view returns (bytes memory res) {
+        (, uint8[] memory ids, , uint8[] memory xovers, uint8[] memory yovers) = ProofView.parsedProofOfIncludingPending(tokenId);
 
         uint256[][] memory files = VaultCore.getBatch(ids);
 
-        bytes memory data = abi.encode(tokenId, ids, overrides, address(this));
+        bytes memory data = abi.encode(tokenId, ids, xovers, yovers, address(this));
 
-        bytes memory customData = IPreProcessResolver(resolver).preProcess(data);
+        // bytes memory customData = IPreProcessResolver(resolver).preProcess(data);
 
-        uint256[] memory processedFile = IProcessResolver(resolver).process(files, data, customData);
+        res = IProcessResolver(resolver).resolvedProcess(files, resolver, data);
 
-        return IPostProcessResolver(resolver).postProcess(processedFile, data, customData);
+        // return IPostProcessResolver(resolver).postProcess(processedFile, data, customData);
     }
 }
