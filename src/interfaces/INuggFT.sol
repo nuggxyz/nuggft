@@ -71,7 +71,7 @@ interface IProofExternal {
         );
 }
 
-interface IFileExternal is IERC721Metadata, IdotnuggV1Implementer {}
+interface IFileExternal is IdotnuggV1Implementer {}
 
 interface ILoanExternal {
     event TakeLoan(uint160 tokenId, address account, uint96);
@@ -84,7 +84,7 @@ interface ILoanExternal {
     function payoff(uint160 tokenId) external payable;
 }
 
-interface ITokenExternal is IERC721 {}
+interface ITokenExternal is IERC721, IERC721Metadata {}
 
 interface ISwapExternal {
     event Mint(uint160 tokenId, address account, uint96);
@@ -146,15 +146,6 @@ interface IEpochExternal {
     function epoch() external view returns (uint32 res);
 }
 
-interface INuggFT is
-    ISwapExternal,
-    ITokenExternal,
-    IStakeExternal,
-    ILoanExternal,
-    IProofExternal,
-    IFileExternal,
-    IEpochExternal,
-    ITrustExternal
-{
+interface INuggFT is ISwapExternal, ITokenExternal, IStakeExternal, ILoanExternal, IProofExternal, IEpochExternal, ITrustExternal {
     event Genesis();
 }

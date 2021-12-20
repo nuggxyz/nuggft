@@ -15,13 +15,16 @@ import {LoanExternal as Loanable} from './loan/LoanExternal.sol';
 import {EpochExternal as Epoched} from './epoch/EpochExternal.sol';
 import {TrustExternal as Migratable} from './trust/TrustExternal.sol';
 
-contract NuggFT is a, Swapable, Provable, Loanable, Migratable, Staked, Epoched, DotNugg, ERC721 {
-    constructor(address _defaultResolver) DotNugg(_defaultResolver) {
+contract NuggFT is a, Swapable, Provable, Loanable, Migratable, Staked, Epoched, ERC721 {
+    address public immutable dotnuggImplementer;
+
+    constructor(address _dotnuggV1Processer) {
+        dotnuggImplementer = address(new DotNugg(_dotnuggV1Processer));
         emit Genesis();
     }
 
-    function tokenURI(uint256 tokenId) public view override(DotNugg, IERC721Metadata) returns (string memory) {
-        return DotNugg.tokenURI(tokenId);
+    function tokenURI(uint256 tokenId) public view override(IERC721Metadata) returns (string memory) {
+        return DotNugg(dotnuggImplementer).tokenURI(tokenId);
     }
 
     function name() public pure override returns (string memory) {
