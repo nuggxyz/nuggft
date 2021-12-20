@@ -27,11 +27,7 @@ library FileCore {
                                 PROCESS FILES
     ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━*/
 
-    function prepareForProcess(
-        uint160 tokenId,
-        uint8 zoom,
-        uint8 size
-    ) internal view returns (uint256[][] memory files, IdotnuggV1Data.Data memory data) {
+    function prepareForProcess(uint160 tokenId) internal view returns (uint256[][] memory files, IdotnuggV1Data.Data memory data) {
         (uint256 proof, uint8[] memory ids, uint8[] memory extras, uint8[] memory xovers, uint8[] memory yovers) = ProofView
             .parsedProofOfIncludingPending(tokenId);
 
@@ -39,8 +35,6 @@ library FileCore {
 
         data = IdotnuggV1Data.Data({
             version: 1,
-            zoom: zoom,
-            size: size,
             renderedAt: block.timestamp,
             name: 'NuggFT V1',
             desc: 'Nugg Fungible Token V1 by nugg.xyz',
