@@ -134,6 +134,7 @@ library ProofCore {
         emit SetProof(tokenId, res, picks);
     }
 
+    // TODO TO BE TESTED
     function initFromSeed(uint256 seed) internal view returns (uint256 res, uint8[] memory upd) {
         require(seed != 0, 'seed');
 

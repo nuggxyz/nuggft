@@ -36,10 +36,6 @@ abstract contract FileExternal is IFileExternal {
         FileCore.setResolver(tokenId.safe160(), to);
     }
 
-    function resolverOf(uint256 tokenId) public view virtual override returns (address) {
-        return FileView.resolverOf(tokenId.safe160());
-    }
-
     /*━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
                             MAIN FUNCTIONS
     ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━*/
@@ -58,5 +54,17 @@ abstract contract FileExternal is IFileExternal {
 
     function prepareFiles(uint256 tokenId) public view override returns (uint256[][] memory input, IdotnuggV1Data.Data memory data) {
         (input, data) = FileCore.prepareForProcess(tokenId.safe160());
+    }
+
+    /*━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+                                VIEW
+    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━*/
+
+    function resolverOf(uint256 tokenId) public view virtual override returns (address) {
+        return FileView.resolverOf(tokenId.safe160());
+    }
+
+    function totalLengths() public view override returns (uint8[] memory res) {
+        res = FileView.totalLengths();
     }
 }

@@ -24,16 +24,16 @@ library SwapCore {
                                 EVENTS
     ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━*/
 
-    event Mint(uint256 epoch, address account, uint256 eth);
-    event Commit(uint160 tokenId, address account, uint256 eth);
-    event Offer(uint160 tokenId, address account, uint256 eth);
-    event Claim(uint160 tokenId, uint256 endingEpoch, address account);
-    event StartSwap(uint160 tokenId, address account, uint256 eth);
+    event Mint(uint256 epoch, address account, uint96 eth);
+    event Commit(uint160 tokenId, address account, uint96 eth);
+    event Offer(uint160 tokenId, address account, uint96 eth);
+    event Claim(uint160 tokenId, address account);
+    event StartSwap(uint160 tokenId, address account, uint96 eth);
 
-    event CommitItem(uint160 sellingTokenId, uint16 itemId, uint256 buyingTokenId, uint256 eth);
-    event OfferItem(uint160 sellingTokenId, uint16 itemId, uint256 buyingTokenId, uint256 eth);
-    event ClaimItem(uint160 sellingTokenId, uint16 itemId, uint256 buyingTokenId, uint256 endingEpoch);
-    event SwapItem(uint160 sellingTokenId, uint16 itemId, uint256 eth);
+    event CommitItem(uint160 sellingTokenId, uint16 itemId, uint160 buyingTokenId, uint96 eth);
+    event OfferItem(uint160 sellingTokenId, uint16 itemId, uint160 buyingTokenId, uint96 eth);
+    event ClaimItem(uint160 sellingTokenId, uint16 itemId, uint160 buyingTokenId);
+    event SwapItem(uint160 sellingTokenId, uint16 itemId, uint96 eth);
 
     /*━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
                             TOKEN SWAP FUNCTIONS
@@ -55,7 +55,7 @@ library SwapCore {
             // the ability to accidently place an offer for nugg A and end up minting nugg B.
             mint(s, m);
 
-            emit Mint(tokenId, msg.sender, msg.value);
+            emit Mint(tokenId, msg.sender, msg.value.safe96());
 
             return;
         }
@@ -69,11 +69,11 @@ library SwapCore {
 
             commit(s, m);
 
-            emit Commit(tokenId, msg.sender, msg.value);
+            emit Commit(tokenId, msg.sender, msg.value.safe96());
         } else {
             offer(s, m);
 
-            emit Offer(tokenId, msg.sender, msg.value);
+            emit Offer(tokenId, msg.sender, msg.value.safe96());
         }
     }
 
@@ -107,12 +107,12 @@ library SwapCore {
             SafeTransferLib.safeTransferETH(msg.sender, m.offerData.eth());
         }
 
-        emit Claim(tokenId, 0, msg.sender);
+        emit Claim(tokenId, msg.sender);
     }
 
     function unsafeClaimERC721To(uint160 tokenId, address to) internal {}
 
-    function swap(uint160 tokenId, uint256 floor) internal {
+    function swap(uint160 tokenId, uint96 floor) internal {
         require(floor >= StakeView.getActiveEthPerShare(), 'SL:S:0');
 
         TokenCore.approvedTransferToSelf(tokenId);
@@ -149,11 +149,11 @@ library SwapCore {
         if (m.offerData == 0 && m.swapData.isOwner()) {
             commit(s, m);
 
-            emit CommitItem(sellingTokenId, itemId, sendingTokenId, msg.value);
+            emit CommitItem(sellingTokenId, itemId, sendingTokenId, msg.value.safe96());
         } else {
             offer(s, m);
 
-            emit OfferItem(sellingTokenId, itemId, sendingTokenId, msg.value);
+            emit OfferItem(sellingTokenId, itemId, sendingTokenId, msg.value.safe96());
         }
     }
 
@@ -176,7 +176,7 @@ library SwapCore {
             SafeTransferLib.safeTransferETH(msg.sender, m.offerData.eth());
         }
 
-        emit ClaimItem(sellingTokenId, itemId, buyingTokenId, 0);
+        emit ClaimItem(sellingTokenId, itemId, buyingTokenId);
     }
 
     function swapItem(
