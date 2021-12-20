@@ -25,15 +25,15 @@ import {Trust} from '../trust/TrustStorage.sol';
 library StakeCore {
     using StakePure for uint256;
 
-    uint96 constant PROTOCOL_FEE_BPS = 100;
+    uint96 constant PROTOCOL_FEE_BPS = 1000;
 
     /*━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
                                 EVENTS
     ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━*/
 
-    event StakeEth(uint96 amount);
-    event UnStakeEth(uint96 amount);
-    event ProtocolEthExtracted(uint96 amount);
+    event StakeEth(uint96 stake, uint96 protocol);
+    event UnStakeEth(uint96 stake, address to);
+    event ProtocolEthExtracted(uint96 eth);
     event MigratorV1Updated(address migrator);
     event MigrateV1Sent(address v2, uint160 tokenId, uint256 proof, address owner, uint96 eth);
 
@@ -80,7 +80,7 @@ library StakeCore {
 
         Stake.sstore(cache.setStakedShares(activeShares + 1).setStakedEth(activeEth + eth).setProtocolEth(activeProtocolEth + protocol));
 
-        emit StakeEth(eth);
+        emit StakeEth(eth, protocol);
     }
 
     function addStakedShares(uint64 amount) internal {
@@ -100,7 +100,7 @@ library StakeCore {
 
         Stake.sstore(cache.setStakedEth(cache.getStakedEth() + amount).setProtocolEth(cache.getProtocolEth() + protocol));
 
-        emit StakeEth(amount);
+        emit StakeEth(amount, protocol);
     }
 
     /*━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -143,6 +143,6 @@ library StakeCore {
 
         Stake.sstore(cache.setStakedShares(activeShares - 1).setStakedEth(activeEth - ethOwed));
 
-        emit UnStakeEth(ethOwed);
+        emit UnStakeEth(ethOwed, msg.sender);
     }
 }
