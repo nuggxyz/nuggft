@@ -5,6 +5,7 @@ pragma solidity 0.8.9;
 import {ITrustExternal} from '../interfaces/INuggFT.sol';
 
 import {StakeCore} from '../stake/StakeCore.sol';
+import {TokenCore} from '../token/TokenCore.sol';
 
 import {Trust} from './TrustStorage.sol';
 
@@ -31,6 +32,10 @@ abstract contract TrustExternal is ITrustExternal {
     /*━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
                                 TRUSTED
     ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━*/
+    function trustedMint(uint160 tokenId, address to) external override requiresTrust {
+        TokenCore.trustedMint(_trust, to, tokenId);
+    }
+
     function extractProtocolEth() external override requiresTrust {
         StakeCore.trustedExtractProtocolEth(_trust);
     }

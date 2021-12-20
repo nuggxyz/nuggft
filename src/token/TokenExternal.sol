@@ -20,6 +20,10 @@ import {TokenCore} from './TokenCore.sol';
 abstract contract TokenExternal is ITokenExternal {
     using SafeCastLib for uint256;
 
+    function mint(uint160 tokenId) public override {
+        TokenCore.untrustedMint(tokenId);
+    }
+
     function approve(address to, uint256 tokenId) public override {
         TokenCore.checkedApprove(to, tokenId.safe160());
     }
@@ -34,8 +38,6 @@ abstract contract TokenExternal is ITokenExternal {
             interfaceId == type(IERC721Metadata).interfaceId ||
             interfaceId == type(IERC165).interfaceId;
     }
-
-    // function tokenURI(uint256 tokenId) public view virtual override returns (string memory);
 
     function balanceOf(address owner) public view override returns (uint256) {
         return TokenView.balanceOf(owner);

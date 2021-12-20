@@ -15,7 +15,7 @@ import {SwapPure} from '../swap/SwapPure.sol';
 
 import {TokenView} from '../token/TokenView.sol';
 import {StakeView} from '../stake/StakeView.sol';
-import {EpochView} from '../epoch/EpochView.sol';
+import {EpochCore} from '../epoch/EpochCore.sol';
 
 library LoanCore {
     using SafeCastLib for uint256;
@@ -46,7 +46,7 @@ library LoanCore {
 
         uint96 principal = StakeView.getActiveEthPerShare();
 
-        uint32 epoch = EpochView.activeEpoch();
+        uint32 epoch = EpochCore.activeEpoch();
 
         (uint256 loanData, ) = SwapPure.buildSwapData(epoch, uint160(msg.sender), principal, false);
 
@@ -106,7 +106,7 @@ library LoanCore {
 
         Loan.spurge(tokenId); // starting swap data
 
-        uint32 epoch = EpochView.activeEpoch();
+        uint32 epoch = EpochCore.activeEpoch();
 
         if (cache.epoch() + LIQUIDATION_PERIOD >= epoch) {
             require(cache.account() == uint160(msg.sender), 'LOAN:P:1');

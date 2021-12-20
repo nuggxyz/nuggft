@@ -6,7 +6,7 @@ import {IProofExternal} from '../interfaces/INuggFT.sol';
 
 import {Proof} from './ProofStorage.sol';
 
-import {EpochView} from '../epoch/EpochView.sol';
+import {EpochCore} from '../epoch/EpochCore.sol';
 
 import {ProofCore} from './ProofCore.sol';
 import {ProofView} from './ProofView.sol';
