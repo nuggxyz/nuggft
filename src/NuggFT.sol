@@ -25,7 +25,7 @@ contract NuggFT is a, Swapable, Provable, Loanable, Migratable, Staked, Epoched,
     }
 
     function name() public pure override returns (string memory) {
-        return 'Nugg Fungible Token';
+        return 'Nugg Fungible Token V1';
     }
 
     function symbol() public pure override returns (string memory) {

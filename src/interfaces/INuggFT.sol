@@ -105,7 +105,13 @@ interface IProofExternal {
         );
 }
 
-interface IFileExternal is IERC721Metadata, IdotnuggV1Implementer {}
+interface IFileExternal is IERC721Metadata, IdotnuggV1Implementer {
+    /*━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+                            VIEW FUNCTIONS
+    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━*/
+
+    function totalLengths() external view returns (uint8[] memory res);
+}
 
 interface ILoanExternal {
     /*━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -134,15 +140,16 @@ interface ISwapExternal {
                                 EVENTS
     ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━*/
 
-    event Mint(uint160 tokenId, address account, uint96);
-    event Commit(uint160 tokenId, address account, uint96);
-    event Offer(uint160 tokenId, address account, uint96);
+    event Mint(uint256 epoch, address account, uint96 eth);
+    event Commit(uint160 tokenId, address account, uint96 eth);
+    event Offer(uint160 tokenId, address account, uint96 eth);
     event Claim(uint160 tokenId, address account);
-    event StartSwap(uint160 tokenId, address account, uint96 floor);
+    event StartSwap(uint160 tokenId, address account, uint96 eth);
+
     event CommitItem(uint160 sellingTokenId, uint16 itemId, uint160 buyingTokenId, uint96 eth);
     event OfferItem(uint160 sellingTokenId, uint16 itemId, uint160 buyingTokenId, uint96 eth);
     event ClaimItem(uint160 sellingTokenId, uint16 itemId, uint160 buyingTokenId);
-    event SwapItem(uint160 sellingTokenId, uint16 itemId, uint96 floor);
+    event SwapItem(uint160 sellingTokenId, uint16 itemId, uint96 eth);
 
     /*━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
                             STATE CHANGING
