@@ -1,8 +1,5 @@
 import { HardhatRuntimeEnvironment } from 'hardhat/types';
 
-import { toEth } from '../tests/hardhat/lib/shared/conversion';
-import { NuggFT } from '../typechain';
-
 // import { NamedAccounts } from '../hardhat.config';
 // import { fromEth, toEth } from '../tests/shared/conversion';
 // import { ensureERC1820, ensureWETH } from '../tests/shared/deployment';
@@ -31,17 +28,12 @@ const deployment = async (hre: HardhatRuntimeEnvironment) => {
     //             weth.address,
     //         ],
     //     );
-
-    const nuggft = await hre.ethers.getContractAt<NuggFT>('NuggFT', '0x726d53FD72Fc16DcF4C62CE098e4A94705f1EC5F');
-
-    const activeEpoch = await nuggft.epoch();
-    hre.deployments.log('active epoch is..', activeEpoch.toString());
-
-    const tx4 = await nuggft.connect(await hre.ethers.getNamedSigner('dee')).delegate(activeEpoch, { value: toEth('.69') });
-
-    hre.deployments.log('tx4 sent... waiting to be mined... ', tx4.hash);
-    await tx4.wait();
-
+    // const nuggft = await hre.ethers.getContractAt<NuggFT>('NuggFT', '0x726d53FD72Fc16DcF4C62CE098e4A94705f1EC5F');
+    // const activeEpoch = await nuggft.epoch();
+    // hre.deployments.log('active epoch is..', activeEpoch.toString());
+    // const tx4 = await nuggft.connect(await hre.ethers.getNamedSigner('dee')).delegate(activeEpoch, { value: toEth('.69') });
+    // hre.deployments.log('tx4 sent... waiting to be mined... ', tx4.hash);
+    // await tx4.wait();
     //     const fatherDeployment = await hre.deployments.deploy('NuggFather', {
     //         from: eoaDeployer,
     //         log: true,

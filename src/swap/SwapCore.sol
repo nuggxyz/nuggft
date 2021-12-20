@@ -24,15 +24,15 @@ library SwapCore {
                                 EVENTS
     ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━*/
 
-    event DelagateMint(uint256 epoch, address account, uint96 eth);
-    event DelagateCommit(uint160 tokenId, address account, uint96 eth);
-    event DelagateOffer(uint160 tokenId, address account, uint96 eth);
-    event SwapClaim(uint160 tokenId, address account);
+    event DelegateMint(uint256 epoch, address account, uint96 eth);
+    event DelegateCommit(uint160 tokenId, address account, uint96 eth);
+    event DelegateOffer(uint160 tokenId, address account, uint96 eth);
+    event SwapClaim(uint160 tokenId, address account, uint32 epoch);
     event SwapStart(uint160 tokenId, address account, uint96 eth);
 
     event DelegateCommitItem(uint160 sellingTokenId, uint16 itemId, uint160 buyingTokenId, uint96 eth);
     event DelegateOfferItem(uint160 sellingTokenId, uint16 itemId, uint160 buyingTokenId, uint96 eth);
-    event SwapClaimItem(uint160 sellingTokenId, uint16 itemId, uint160 buyingTokenId);
+    event SwapClaimItem(uint160 sellingTokenId, uint16 itemId, uint160 buyingTokenId, uint32 epoch);
     event SwapItemStart(uint160 sellingTokenId, uint16 itemId, uint96 eth);
 
     /*━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -55,7 +55,7 @@ library SwapCore {
             // the ability to accidently place an offer for nugg A and end up minting nugg B.
             mint(s, m);
 
-            emit DelagateMint(tokenId, msg.sender, msg.value.safe96());
+            emit DelegateMint(tokenId, msg.sender, msg.value.safe96());
 
             return;
         }
@@ -69,11 +69,11 @@ library SwapCore {
 
             commit(s, m);
 
-            emit DelagateCommit(tokenId, msg.sender, msg.value.safe96());
+            emit DelegateCommit(tokenId, msg.sender, msg.value.safe96());
         } else {
             offer(s, m);
 
-            emit DelagateOffer(tokenId, msg.sender, msg.value.safe96());
+            emit DelegateOffer(tokenId, msg.sender, msg.value.safe96());
         }
     }
 
@@ -107,7 +107,7 @@ library SwapCore {
             SafeTransferLib.safeTransferETH(msg.sender, m.offerData.eth());
         }
 
-        emit SwapClaim(tokenId, msg.sender);
+        emit SwapClaim(tokenId, msg.sender, m.swapData.epoch());
     }
 
     function unsafeClaimERC721To(uint160 tokenId, address to) internal {}
@@ -176,7 +176,7 @@ library SwapCore {
             SafeTransferLib.safeTransferETH(msg.sender, m.offerData.eth());
         }
 
-        emit SwapClaimItem(sellingTokenId, itemId, buyingTokenId);
+        emit SwapClaimItem(sellingTokenId, itemId, buyingTokenId, m.swapData.epoch());
     }
 
     function swapItem(

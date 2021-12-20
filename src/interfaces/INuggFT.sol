@@ -119,9 +119,9 @@ interface ILoanExternal {
                                 EVENTS
     ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━*/
 
-    event TakeLoan(uint160 tokenId, address account, uint96 eth);
-    event Payoff(uint160 tokenId, address account, uint96 eth);
-    event Rebalance(uint160 tokenId, uint96 eth);
+    event TakeLoan(uint160 tokenId, uint96 principal);
+    event Payoff(uint160 tokenId, address account, uint96 payoffAmount);
+    event Rebalance(uint160 tokenId, uint96 fee, uint96 earned);
 
     /*━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
                             STATE CHANGING
@@ -136,6 +136,9 @@ interface ILoanExternal {
 
 interface ITokenExternal is IERC721 {
     function mint(uint160 tokenId) external;
+
+    event TrustedMint(address indexed to, uint160 tokenId);
+    event UntrustedMint(address indexed by, uint160 tokenId);
 }
 
 interface ISwapExternal {
@@ -143,15 +146,15 @@ interface ISwapExternal {
                                 EVENTS
     ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━*/
 
-    event DelagateMint(uint256 epoch, address account, uint96 eth);
-    event DelagateCommit(uint160 tokenId, address account, uint96 eth);
-    event DelagateOffer(uint160 tokenId, address account, uint96 eth);
-    event SwapClaim(uint160 tokenId, address account);
+    event DelegateMint(uint256 epoch, address account, uint96 eth);
+    event DelegateCommit(uint160 tokenId, address account, uint96 eth);
+    event DelegateOffer(uint160 tokenId, address account, uint96 eth);
+    event SwapClaim(uint160 tokenId, address account, uint32 epoch);
     event SwapStart(uint160 tokenId, address account, uint96 eth);
 
     event DelegateCommitItem(uint160 sellingTokenId, uint16 itemId, uint160 buyingTokenId, uint96 eth);
     event DelegateOfferItem(uint160 sellingTokenId, uint16 itemId, uint160 buyingTokenId, uint96 eth);
-    event SwapClaimItem(uint160 sellingTokenId, uint16 itemId, uint160 buyingTokenId);
+    event SwapClaimItem(uint160 sellingTokenId, uint16 itemId, uint160 buyingTokenId, uint32 epoch);
     event SwapItemStart(uint160 sellingTokenId, uint16 itemId, uint96 eth);
 
     /*━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
