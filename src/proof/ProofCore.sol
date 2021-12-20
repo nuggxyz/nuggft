@@ -5,7 +5,7 @@ pragma solidity 0.8.9;
 import {ShiftLib} from '../libraries/ShiftLib.sol';
 import {SafeCastLib} from '../libraries/SafeCastLib.sol';
 
-import {EpochView} from '../epoch/EpochView.sol';
+import {EpochCore} from '../epoch/EpochCore.sol';
 
 import {Proof} from './ProofStorage.sol';
 
@@ -16,6 +16,7 @@ import {TokenView} from '../token/TokenView.sol';
 
 import {FileView} from '../file/FileView.sol';
 import {File} from '../file/FileStorage.sol';
+import {Trust} from '../trust/TrustStorage.sol';
 
 // OK
 library ProofCore {
@@ -106,28 +107,27 @@ library ProofCore {
                             INITIALIZATION
     ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━*/
 
-    function pendingProof()
-        internal
-        view
-        returns (
-            uint256 seed,
-            uint256 epoch,
-            uint256 proof,
-            uint8[] memory defaultIds
-        )
-    {
-        (seed, epoch) = EpochView.calculateSeed();
+    function setProof(uint160 tokenId) internal {
+        require(!ProofView.hasProof(tokenId), 'P:0');
 
-        (proof, defaultIds) = ProofCore.initFromSeed(seed);
+        uint256 randomEnoughSeed = uint256(keccak256(abi.encodePacked(hex'420690', tokenId, blockhash(block.number - 1))));
+
+        require(randomEnoughSeed != 0, 'P:1');
+
+        (uint256 res, uint8[] memory picks) = ProofCore.initFromSeed(randomEnoughSeed);
+
+        Proof.set(tokenId, res);
+
+        emit SetProof(tokenId, res, picks);
     }
 
-    function setProof(uint160 tokenId) internal {
-        require(!ProofView.hasProof(tokenId), 'IL:M:0');
+    function setProofFromEpoch(uint160 tokenId) internal {
+        require(!ProofView.hasProof(tokenId), 'P:2');
 
         (uint256 seed, uint256 epoch, uint256 res, uint8[] memory picks) = pendingProof();
 
-        require(seed != 0, '721:MINT:0');
-        require(epoch == tokenId, '721:MINT:1');
+        require(seed != 0, 'P:3');
+        require(epoch == tokenId, 'P:4');
 
         Proof.set(tokenId, res);
 
@@ -136,7 +136,7 @@ library ProofCore {
 
     // TODO TO BE TESTED
     function initFromSeed(uint256 seed) internal view returns (uint256 res, uint8[] memory upd) {
-        require(seed != 0, 'seed');
+        require(seed != 0, 'P:6');
 
         uint8[] memory lengths = FileView.totalLengths();
 
@@ -154,5 +154,20 @@ library ProofCore {
         else upd[6] = (picks[4] % lengths[6]) + 1;
 
         res = ShiftLib.setArray(res, 0, upd);
+    }
+
+    function pendingProof()
+        internal
+        view
+        returns (
+            uint256 seed,
+            uint256 epoch,
+            uint256 proof,
+            uint8[] memory defaultIds
+        )
+    {
+        (seed, epoch) = EpochCore.calculateSeed();
+
+        (proof, defaultIds) = ProofCore.initFromSeed(seed);
     }
 }

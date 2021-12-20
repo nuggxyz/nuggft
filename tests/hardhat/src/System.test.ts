@@ -31,25 +31,34 @@ describe('uint tests', async function () {
     describe('internal', async () => {
         it('should revert if shares = 0', async () => {
             console.log(await fix.nuggft.name());
-            await fix.nuggft.connect(accounts.mac).delegate(1);
 
-            await fix.nuggft.connect(accounts.dee).delegate(1, { value: toEth('3.000') });
+            const token1 = await fix.nuggft.epoch();
+
+            await fix.nuggft.connect(accounts.mac).delegate(token1);
+
+            await fix.nuggft.connect(accounts.dee).delegate(token1, { value: toEth('3.000') });
 
             await Mining.advanceBlockTo(510);
 
-            await fix.nuggft.connect(accounts.dee).claim(1);
-            await fix.nuggft.connect(accounts.mac).claim(1);
+            await fix.nuggft.connect(accounts.dee).claim(token1);
+            await fix.nuggft.connect(accounts.mac).claim(token1);
 
-            await fix.nuggft.connect(accounts.dee).approve(fix.nuggft.address, 1);
-            await fix.nuggft.connect(accounts.dee).swap(1, toEth('5.000'));
+            await fix.nuggft.connect(accounts.dee).approve(fix.nuggft.address, token1);
+            await fix.nuggft.connect(accounts.dee).swap(token1, toEth('5.000'));
 
-            await fix.nuggft.connect(accounts.frank).delegate(3, { value: toEth('20.000') });
-            await fix.nuggft.connect(accounts.frank).delegate(1, { value: toEth('20.000') });
-            await fix.nuggft.connect(accounts.dennis).delegate(1, { value: toEth('22.000') });
-            await fix.nuggft.connect(accounts.frank).delegate(1, { value: toEth('3.000') });
-            await fix.nuggft.connect(accounts.dennis).delegate(1, { value: toEth('2.000') });
-            await fix.nuggft.connect(accounts.dennis).delegate(1, { value: toEth('2.000') });
-            await fix.nuggft.connect(accounts.charile).delegate(1, { value: toEth('55.000') });
+            const token3 = await fix.nuggft.epoch();
+
+            await fix.nuggft.connect(accounts.frank).delegate(token3, { value: toEth('20.000') });
+            await fix.nuggft.connect(accounts.frank).delegate(token1, { value: toEth('20.000') });
+            await fix.nuggft.connect(accounts.dennis).delegate(token1, { value: toEth('22.000') });
+            await fix.nuggft.connect(accounts.frank).delegate(token1, { value: toEth('3.000') });
+            await fix.nuggft.connect(accounts.dennis).delegate(token1, { value: toEth('2.000') });
+            await fix.nuggft.connect(accounts.dennis).delegate(token1, { value: toEth('2.000') });
+            await fix.nuggft.connect(accounts.charile).delegate(token1, { value: toEth('55.000') });
+
+            for (let i = 2000; i < 2030; i++) {
+                await fix.nuggft.connect(accounts.dennis).mint(i);
+            }
 
             await Mining.advanceBlockTo(2500);
             await Mining.advanceBlock();
@@ -61,7 +70,7 @@ describe('uint tests', async function () {
             await Mining.advanceBlockTo(3500);
             await fix.nuggft.connect(accounts.frank).claim(token11);
 
-            await fix.nuggft.connect(accounts.charile).claim(1);
+            await fix.nuggft.connect(accounts.charile).claim(token1);
 
             const info = await fix.nuggft.parsedProofOf(token11);
 
@@ -80,7 +89,7 @@ describe('uint tests', async function () {
             await fix.nuggft.connect(accounts.frank).swapItem(token11, dids[1], toEth('14'));
             const epoch = await fix.nuggft.connect(accounts.charile).epoch();
 
-            await fix.nuggft.connect(accounts.charile).delegateItem(token11, dids[1], 1, { value: toEth('43') });
+            await fix.nuggft.connect(accounts.charile).delegateItem(token11, dids[1], token1, { value: toEth('43') });
 
             await Mining.advanceBlockTo(4500);
 
@@ -90,7 +99,7 @@ describe('uint tests', async function () {
             console.log('totalSupply()', fromEth(await fix.nuggft.totalSupply()));
             console.log('totalStakedEth()', fromEth(await fix.nuggft.totalStakedEth()));
 
-            const info0 = await fix.nuggft.parsedProofOf(1);
+            const info0 = await fix.nuggft.parsedProofOf(token1);
 
             // eslint-disable-next-line prefer-const
             let dids2: number[] = [];
@@ -100,17 +109,17 @@ describe('uint tests', async function () {
                 console.log(i, info0.defaultIds[i], dids2[i]);
             }
 
-            await fix.nuggft.connect(accounts.charile).rotateFeature(1, 2);
+            await fix.nuggft.connect(accounts.charile).rotateFeature(token1, 2);
 
-            await fix.nuggft.connect(accounts.charile).swapItem(1, dids2[2], toEth('55'));
+            await fix.nuggft.connect(accounts.charile).swapItem(token1, dids2[2], toEth('55'));
 
             // await fix.nuggft.connect(accounts.charile).claimItem(token11, dids[1], 0, epoch.add(1));
 
             await fix.nuggft.connect(accounts.frank).approve(fix.nuggft.address, token11);
 
-            await fix.nuggft.connect(accounts.charile).claimItem(token11, dids[1], 1);
+            await fix.nuggft.connect(accounts.charile).claimItem(token11, dids[1], token1);
 
-            await fix.nuggft.connect(accounts.charile).approve(fix.nuggft.address, 1);
+            await fix.nuggft.connect(accounts.charile).approve(fix.nuggft.address, token1);
 
             await Mining.advanceBlockTo(500);
 
@@ -126,17 +135,9 @@ describe('uint tests', async function () {
 
             // console.log(check1, check2, check1.eq(check2));
 
-            console.log(await fix.processor.dotnuggToRaw(fix.nuggft.address, 1, Address.zero().toString(), 45, 10));
+            console.log(await fix.processor.dotnuggToRaw(fix.nuggft.address, token1, Address.zero().toString(), 45, 10));
 
-            await fix.nuggft.connect(accounts.charile).loan(1);
-
-            console.log('bal ', fromEth(await accounts.charile.getBalance()));
-            console.log('activeEthPerShare()', fromEth(await fix.nuggft.activeEthPerShare()));
-            console.log('totalSupply()', fromEth(await fix.nuggft.totalSupply()));
-            console.log('totalProtocolEth()', fromEth(await fix.nuggft.totalProtocolEth()));
-
-            console.log('totalStakedEth()', fromEth(await fix.nuggft.totalStakedEth()));
-            await fix.nuggft.connect(accounts.charile).rebalance(1, { value: toEth('40') });
+            await fix.nuggft.connect(accounts.charile).loan(token1);
 
             console.log('bal ', fromEth(await accounts.charile.getBalance()));
             console.log('activeEthPerShare()', fromEth(await fix.nuggft.activeEthPerShare()));
@@ -144,14 +145,22 @@ describe('uint tests', async function () {
             console.log('totalProtocolEth()', fromEth(await fix.nuggft.totalProtocolEth()));
 
             console.log('totalStakedEth()', fromEth(await fix.nuggft.totalStakedEth()));
-            await fix.nuggft.connect(accounts.charile).rebalance(1, { value: toEth('40') });
+            await fix.nuggft.connect(accounts.charile).rebalance(token1, { value: toEth('40') });
+
+            console.log('bal ', fromEth(await accounts.charile.getBalance()));
+            console.log('activeEthPerShare()', fromEth(await fix.nuggft.activeEthPerShare()));
+            console.log('totalSupply()', fromEth(await fix.nuggft.totalSupply()));
+            console.log('totalProtocolEth()', fromEth(await fix.nuggft.totalProtocolEth()));
+
+            console.log('totalStakedEth()', fromEth(await fix.nuggft.totalStakedEth()));
+            await fix.nuggft.connect(accounts.charile).rebalance(token1, { value: toEth('40') });
             console.log('bal ', fromEth(await accounts.charile.getBalance()));
             console.log('activeEthPerShare()', fromEth(await fix.nuggft.activeEthPerShare()));
             console.log('totalSupply()', fromEth(await fix.nuggft.totalSupply()));
             console.log('totalStakedEth()', fromEth(await fix.nuggft.totalStakedEth()));
 
             console.log('totalProtocolEth()', fromEth(await fix.nuggft.totalProtocolEth()));
-            await fix.nuggft.connect(accounts.charile).rebalance(1, { value: toEth('40') });
+            await fix.nuggft.connect(accounts.charile).rebalance(token1, { value: toEth('40') });
             console.log('bal ', (await accounts.charile.getBalance()).toString());
 
             console.log('activeEthPerShare()', (await fix.nuggft.activeEthPerShare()).toString());
@@ -160,7 +169,7 @@ describe('uint tests', async function () {
 
             console.log('totalStakedEth()', fromEth(await fix.nuggft.totalStakedEth()));
 
-            await fix.nuggft.connect(accounts.charile).payoff(1, { value: toEth('90') });
+            await fix.nuggft.connect(accounts.charile).payoff(token1, { value: toEth('90') });
 
             console.log('activeEthPerShare()', fromEth(await fix.nuggft.activeEthPerShare()));
             console.log('totalSupply()', fromEth(await fix.nuggft.totalSupply()));
@@ -171,9 +180,13 @@ describe('uint tests', async function () {
 
             await fix.nuggft.connect(accounts.deployer).setMigrator(fix.migrator.address);
 
-            await fix.nuggft.connect(accounts.charile).approve(fix.nuggft.address, 1);
+            await fix.nuggft.connect(fix.deployer).setIsTrusted(accounts.frank.address);
 
-            await fix.nuggft.connect(accounts.charile).migrateStake(1);
+            await fix.nuggft.connect(accounts.frank).trustedMint(69, accounts.mac.address);
+
+            await fix.nuggft.connect(accounts.charile).approve(fix.nuggft.address, token1);
+
+            await fix.nuggft.connect(accounts.charile).migrateStake(token1);
 
             // await fix.nuggft.connect(accounts.frank).payoff(token11, { value: await fix.nuggft.payoffAmount() });
         });

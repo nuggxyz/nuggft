@@ -24,16 +24,16 @@ library SwapCore {
                                 EVENTS
     ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━*/
 
-    event Mint(uint256 epoch, address account, uint96 eth);
-    event Commit(uint160 tokenId, address account, uint96 eth);
-    event Offer(uint160 tokenId, address account, uint96 eth);
-    event Claim(uint160 tokenId, address account);
-    event StartSwap(uint160 tokenId, address account, uint96 eth);
+    event DelagateMint(uint256 epoch, address account, uint96 eth);
+    event DelagateCommit(uint160 tokenId, address account, uint96 eth);
+    event DelagateOffer(uint160 tokenId, address account, uint96 eth);
+    event SwapClaim(uint160 tokenId, address account);
+    event SwapStart(uint160 tokenId, address account, uint96 eth);
 
-    event CommitItem(uint160 sellingTokenId, uint16 itemId, uint160 buyingTokenId, uint96 eth);
-    event OfferItem(uint160 sellingTokenId, uint16 itemId, uint160 buyingTokenId, uint96 eth);
-    event ClaimItem(uint160 sellingTokenId, uint16 itemId, uint160 buyingTokenId);
-    event SwapItem(uint160 sellingTokenId, uint16 itemId, uint96 eth);
+    event DelegateCommitItem(uint160 sellingTokenId, uint16 itemId, uint160 buyingTokenId, uint96 eth);
+    event DelegateOfferItem(uint160 sellingTokenId, uint16 itemId, uint160 buyingTokenId, uint96 eth);
+    event SwapClaimItem(uint160 sellingTokenId, uint16 itemId, uint160 buyingTokenId);
+    event SwapItemStart(uint160 sellingTokenId, uint16 itemId, uint96 eth);
 
     /*━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
                             TOKEN SWAP FUNCTIONS
@@ -55,7 +55,7 @@ library SwapCore {
             // the ability to accidently place an offer for nugg A and end up minting nugg B.
             mint(s, m);
 
-            emit Mint(tokenId, msg.sender, msg.value.safe96());
+            emit DelagateMint(tokenId, msg.sender, msg.value.safe96());
 
             return;
         }
@@ -69,11 +69,11 @@ library SwapCore {
 
             commit(s, m);
 
-            emit Commit(tokenId, msg.sender, msg.value.safe96());
+            emit DelagateCommit(tokenId, msg.sender, msg.value.safe96());
         } else {
             offer(s, m);
 
-            emit Offer(tokenId, msg.sender, msg.value.safe96());
+            emit DelagateOffer(tokenId, msg.sender, msg.value.safe96());
         }
     }
 
@@ -107,7 +107,7 @@ library SwapCore {
             SafeTransferLib.safeTransferETH(msg.sender, m.offerData.eth());
         }
 
-        emit Claim(tokenId, msg.sender);
+        emit SwapClaim(tokenId, msg.sender);
     }
 
     function unsafeClaimERC721To(uint160 tokenId, address to) internal {}
@@ -126,7 +126,7 @@ library SwapCore {
 
         s.data = dat;
 
-        emit StartSwap(tokenId, msg.sender, floor);
+        emit SwapStart(tokenId, msg.sender, floor);
     }
 
     /*━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -149,11 +149,11 @@ library SwapCore {
         if (m.offerData == 0 && m.swapData.isOwner()) {
             commit(s, m);
 
-            emit CommitItem(sellingTokenId, itemId, sendingTokenId, msg.value.safe96());
+            emit DelegateCommitItem(sellingTokenId, itemId, sendingTokenId, msg.value.safe96());
         } else {
             offer(s, m);
 
-            emit OfferItem(sellingTokenId, itemId, sendingTokenId, msg.value.safe96());
+            emit DelegateOfferItem(sellingTokenId, itemId, sendingTokenId, msg.value.safe96());
         }
     }
 
@@ -176,7 +176,7 @@ library SwapCore {
             SafeTransferLib.safeTransferETH(msg.sender, m.offerData.eth());
         }
 
-        emit ClaimItem(sellingTokenId, itemId, buyingTokenId);
+        emit SwapClaimItem(sellingTokenId, itemId, buyingTokenId);
     }
 
     function swapItem(
@@ -198,7 +198,7 @@ library SwapCore {
 
         s.data = dat;
 
-        emit SwapItem(sellingTokenId, itemId, dat.eth());
+        emit SwapItemStart(sellingTokenId, itemId, dat.eth());
     }
 
     /*━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━

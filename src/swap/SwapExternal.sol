@@ -4,7 +4,7 @@ pragma solidity 0.8.9;
 
 import {ISwapExternal} from '../interfaces/INuggFT.sol';
 
-import {EpochView} from '../epoch/EpochView.sol';
+import {EpochCore} from '../epoch/EpochCore.sol';
 
 import {Swap} from './SwapStorage.sol';
 import {SwapCore} from './SwapCore.sol';

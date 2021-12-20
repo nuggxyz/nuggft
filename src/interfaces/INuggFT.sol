@@ -16,6 +16,7 @@ interface ITrustExternal {
     /*━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
                             STATE CHANGING
     ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━*/
+    function trustedMint(uint160 tokenId, address to) external;
 
     function extractProtocolEth() external;
 
@@ -133,23 +134,25 @@ interface ILoanExternal {
     function payoff(uint160 tokenId) external payable;
 }
 
-interface ITokenExternal is IERC721 {}
+interface ITokenExternal is IERC721 {
+    function mint(uint160 tokenId) external;
+}
 
 interface ISwapExternal {
     /*━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
                                 EVENTS
     ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━*/
 
-    event Mint(uint256 epoch, address account, uint96 eth);
-    event Commit(uint160 tokenId, address account, uint96 eth);
-    event Offer(uint160 tokenId, address account, uint96 eth);
-    event Claim(uint160 tokenId, address account);
-    event StartSwap(uint160 tokenId, address account, uint96 eth);
+    event DelagateMint(uint256 epoch, address account, uint96 eth);
+    event DelagateCommit(uint160 tokenId, address account, uint96 eth);
+    event DelagateOffer(uint160 tokenId, address account, uint96 eth);
+    event SwapClaim(uint160 tokenId, address account);
+    event SwapStart(uint160 tokenId, address account, uint96 eth);
 
-    event CommitItem(uint160 sellingTokenId, uint16 itemId, uint160 buyingTokenId, uint96 eth);
-    event OfferItem(uint160 sellingTokenId, uint16 itemId, uint160 buyingTokenId, uint96 eth);
-    event ClaimItem(uint160 sellingTokenId, uint16 itemId, uint160 buyingTokenId);
-    event SwapItem(uint160 sellingTokenId, uint16 itemId, uint96 eth);
+    event DelegateCommitItem(uint160 sellingTokenId, uint16 itemId, uint160 buyingTokenId, uint96 eth);
+    event DelegateOfferItem(uint160 sellingTokenId, uint16 itemId, uint160 buyingTokenId, uint96 eth);
+    event SwapClaimItem(uint160 sellingTokenId, uint16 itemId, uint160 buyingTokenId);
+    event SwapItemStart(uint160 sellingTokenId, uint16 itemId, uint96 eth);
 
     /*━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
                             STATE CHANGING

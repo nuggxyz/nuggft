@@ -10,12 +10,25 @@ import {Global} from '../global/GlobalStorage.sol';
 import {TokenView} from './TokenView.sol';
 
 import {StakeCore} from '../stake/StakeCore.sol';
+import {ProofCore} from '../proof/ProofCore.sol';
+
+import {Trust} from '../trust/TrustStorage.sol';
 
 // system test
 library TokenCore {
+    uint32 constant TRUSTED_MINT_TOKENS = 500;
+    uint32 constant UNTRUSTED_MINT_TOKENS = 2500;
+
+    /*━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+                                EVENTS
+    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━*/
+
     event Transfer(address indexed from, address indexed to, uint256 indexed tokenId);
     event Approval(address indexed owner, address indexed approved, uint256 indexed tokenId);
     event ApprovalForAll(address indexed owner, address indexed operator, bool approved);
+
+    event TrustedMint(address indexed to, uint160 tokenId);
+    event UntrustedMint(address indexed by, uint160 tokenId);
 
     /*━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
                                 APPROVAL
@@ -46,6 +59,38 @@ library TokenCore {
     /*━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
                                 TRANSFER
     ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━*/
+
+    function untrustedMint(uint160 tokenId) internal {
+        require(tokenId < UNTRUSTED_MINT_TOKENS + TRUSTED_MINT_TOKENS && tokenId > TRUSTED_MINT_TOKENS, 'T:1');
+
+        require(!TokenView.exists(tokenId), 'T:2');
+
+        ProofCore.setProof(tokenId);
+
+        checkedMintTo(msg.sender, tokenId);
+
+        emit UntrustedMint(msg.sender, tokenId);
+    }
+
+    function trustedMint(
+        Trust.Storage storage trust,
+        address to,
+        uint160 tokenId
+    ) internal {
+        require(trust._isTrusted, 'T:0');
+
+        require(tokenId < TRUSTED_MINT_TOKENS && tokenId != 0, 'T:1');
+
+        require(!TokenView.exists(tokenId), 'T:2');
+
+        ProofCore.setProof(tokenId);
+
+        checkedMintTo(to, tokenId);
+
+        emit TrustedMint(to, tokenId);
+    }
+
+    // token does not exist and is < 1000
 
     function checkedTransferFromSelf(address to, uint160 tokenId) internal {
         require(SafeTransferLib.isERC721Receiver(to, tokenId), 'T:2');

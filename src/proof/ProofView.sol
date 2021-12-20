@@ -6,7 +6,7 @@ import {ShiftLib} from '../libraries/ShiftLib.sol';
 
 import {Global} from '../global/GlobalStorage.sol';
 
-import {EpochView} from '../epoch/EpochView.sol';
+import {EpochCore} from '../epoch/EpochCore.sol';
 
 import {ProofCore} from './ProofCore.sol';
 

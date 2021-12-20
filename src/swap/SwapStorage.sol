@@ -6,7 +6,7 @@ import {Global} from '../global/GlobalStorage.sol';
 
 import {SwapPure} from './SwapPure.sol';
 
-import {EpochView} from '../epoch/EpochView.sol';
+import {EpochCore} from '../epoch/EpochCore.sol';
 
 // SYSTEM TEST
 library Swap {
@@ -90,7 +90,7 @@ library Swap {
     function _load(Storage storage ptr, uint160 account) private view returns (Memory memory m) {
         uint256 cache = ptr.data;
         m.swapData = cache;
-        m.activeEpoch = EpochView.activeEpoch();
+        m.activeEpoch = EpochCore.activeEpoch();
         m.sender = account;
 
         if (account == cache.account()) {
