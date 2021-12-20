@@ -26,18 +26,50 @@ library ProofCore {
                                 EVENTS
     ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━*/
 
-    event SetProof(uint160 tokenId, uint8[] items);
-    event PopItem(uint160 tokenId, uint16 itemId);
-    event PushItem(uint160 tokenId, uint16 itemId);
-    event RotateItem(uint160 tokenId, uint8 feature);
-
-    // function migrate() internal {
-    //     // send the tokenId, proof and value to new address
-    //     // burn the token here
-    // }
+    event SetProof(uint160 tokenId, uint256 proof, uint8[] items);
+    event PopItem(uint160 tokenId, uint256 proof, uint16 itemId);
+    event PushItem(uint160 tokenId, uint256 proof, uint16 itemId);
+    event RotateItem(uint160 tokenId, uint256 proof, uint8 feature);
+    event SetAnchorOverrides(uint160 tokenId, uint256 proof, uint8[] xs, uint8[] ys);
 
     /*━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-                            ITEM MANAGEMENT
+                            EXTERNAL MANAGEMENT
+    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━*/
+
+    function rotateFeature(uint160 tokenId, uint8 feature) internal {
+        require(TokenView.ownerOf(tokenId) == msg.sender, 'PC:2');
+
+        uint256 working = ProofView.checkedProofOf(tokenId);
+
+        working = ProofPure.rotateDefaultandExtra(working, feature);
+
+        working = ProofPure.clearAnchorOverridesForFeature(working, feature);
+
+        Proof.set(tokenId, working);
+
+        emit RotateItem(tokenId, working, feature);
+    }
+
+    function setAnchorOverrides(
+        uint160 tokenId,
+        uint8[] memory xs,
+        uint8[] memory ys
+    ) internal {
+        require(TokenView.ownerOf(tokenId) == msg.sender, 'PC:2');
+
+        require(xs.length == 8 && ys.length == 8, 'PC:3');
+
+        uint256 working = ProofView.checkedProofOf(tokenId);
+
+        working = ProofPure.setNewAnchorOverrides(working, xs, ys);
+
+        Proof.set(tokenId, working);
+
+        emit SetAnchorOverrides(tokenId, working, xs, ys);
+    }
+
+    /*━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+                            SWAP MANAGEMENT
     ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━*/
 
     function addItem(uint160 tokenId, uint16 itemId) internal {
@@ -53,7 +85,7 @@ library ProofCore {
 
         Proof.set(tokenId, working);
 
-        emit PushItem(tokenId, itemId);
+        emit PushItem(tokenId, working, itemId);
     }
 
     function removeItem(uint160 tokenId, uint16 itemId) internal {
@@ -67,19 +99,7 @@ library ProofCore {
 
         Proof.ptr().protcolItems[itemId]++;
 
-        emit PopItem(tokenId, itemId);
-    }
-
-    function rotateFeature(uint160 tokenId, uint8 feature) internal {
-        require(TokenView.ownerOf(tokenId) == msg.sender, 'PC:2');
-
-        uint256 working = ProofView.checkedProofOf(tokenId);
-
-        working = ProofPure.rotateDefaultandExtra(working, feature);
-
-        Proof.set(tokenId, working);
-
-        emit RotateItem(tokenId, feature);
+        emit PopItem(tokenId, working, itemId);
     }
 
     /*━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -111,7 +131,7 @@ library ProofCore {
 
         Proof.set(tokenId, res);
 
-        emit SetProof(tokenId, picks);
+        emit SetProof(tokenId, res, picks);
     }
 
     function initFromSeed(uint256 seed) internal view returns (uint256 res, uint8[] memory upd) {
@@ -135,12 +155,3 @@ library ProofCore {
         res = ShiftLib.setArray(res, 0, upd);
     }
 }
-
-// uint256 pick3 = (seed >> 69) % mask;
-
-// uint256 num = (seed >> (4 + FULL_SIZE * 3)) & mask;
-// uint256 mask = type(uint8).max;
-
-// upd[0] = ((seed >> (4 + FULL_SIZE * 0)) & mask) % lengths[0];
-// upd[1] = ((seed >> (4 + FULL_SIZE * 1)) & mask) % lengths[2];
-// upd[2] pick2 = ((seed >> (4 + FULL_SIZE * 2)) & mask) % lengths[2];

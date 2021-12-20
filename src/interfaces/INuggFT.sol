@@ -4,6 +4,8 @@ pragma solidity 0.8.9;
 
 import {IERC721, IERC721Metadata, IERC165} from './IERC721.sol';
 
+import {IdotnuggV1Implementer} from '../interfaces/IdotnuggV1.sol';
+
 interface ITrustExternal {
     event TrustUpdated(address indexed user);
 
@@ -47,9 +49,15 @@ interface IProofExternal {
 
     event SetProof(uint160 tokenId, uint256[] items);
 
-    function proofOf(uint160 tokenId) external view returns (uint256);
-
     function rotateFeature(uint160 tokenId, uint8 feature) external;
+
+    function setOverrides(
+        uint160 tokenId,
+        uint8[] memory xs,
+        uint8[] memory ys
+    ) external;
+
+    function proofOf(uint160 tokenId) external view returns (uint256);
 
     function parsedProofOf(uint160 tokenId)
         external
@@ -63,15 +71,7 @@ interface IProofExternal {
         );
 }
 
-interface IFileExternal is IERC721Metadata {
-    function setResolver(uint160 tokenId, address to) external;
-
-    function dotnuggV1Processer() external view returns (address);
-
-    function resolverOf(uint160 tokenId) external view returns (address);
-
-    // function tokenURI(uint256 tokenId) external view override returns (string memory);
-}
+interface IFileExternal is IERC721Metadata, IdotnuggV1Implementer {}
 
 interface ILoanExternal {
     event TakeLoan(uint160 tokenId, address account, uint96);

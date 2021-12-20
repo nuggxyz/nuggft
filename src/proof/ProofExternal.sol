@@ -18,8 +18,16 @@ import {ProofView} from './ProofView.sol';
  * {ERC721Enumerable}.
  */
 abstract contract ProofExternal is IProofExternal {
-    function rotateFeature(uint160 tokenId, uint8 feature) external {
+    function rotateFeature(uint160 tokenId, uint8 feature) external override {
         ProofCore.rotateFeature(tokenId, feature);
+    }
+
+    function setOverrides(
+        uint160 tokenId,
+        uint8[] memory xs,
+        uint8[] memory ys
+    ) external override {
+        ProofCore.setAnchorOverrides(tokenId, xs, ys);
     }
 
     function proofOf(uint160 tokenId) public view virtual override returns (uint256) {
@@ -39,6 +47,6 @@ abstract contract ProofExternal is IProofExternal {
             uint8[] memory overys
         )
     {
-        return ProofView.parseProof(tokenId);
+        return ProofView.parsedProofOfIncludingPending(tokenId);
     }
 }
