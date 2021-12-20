@@ -1,7 +1,6 @@
 import { HardhatRuntimeEnvironment } from 'hardhat/types';
 
 import { NamedAccounts } from '../hardhat.config';
-import { toEth } from '../tests/hardhat/lib/shared/conversion';
 import { NuggFT } from '../typechain';
 // import { XNUGG as xNUGG } from '../typechain/XNUGG';
 // import { NuggFT } from '../typechain/NuggFT.d';
@@ -13,7 +12,7 @@ const deployment = async (hre: HardhatRuntimeEnvironment) => {
     if (chainID === '3' || chainID === '31337') {
         const accounts = (await hre.getNamedAccounts()) as Record<keyof typeof NamedAccounts, string>;
 
-        const eoaDeployer = accounts.deployer;
+        const eoaDeployer = await hre.ethers.getNamedSigner('deployer');
         hre.deployments.log('EOA deployer: ', accounts.deployer);
         // const args = new ethers.utils.AbiCoder().encode(
         //     ['bytes32', 'bytes32', 'bytes32', 'bytes32', 'bytes32', 'address'],
@@ -52,64 +51,80 @@ const deployment = async (hre: HardhatRuntimeEnvironment) => {
         // });
 
         const nuggftDeployment = await hre.deployments.deploy('NuggFT', {
-            from: eoaDeployer,
+            from: eoaDeployer.address,
             log: true,
-            args: ['0x47cE00De0bd8Ed8FAbd335FE1EA8283284FfeC68'],
+            args: ['0x488b62261D2D5ba4d2dcB446aCc355979405953D'],
             // deterministicDeployment: salts[2],
         });
         hre.deployments.log('NuggFT Deployment Complete at address: ', nuggftDeployment.address);
 
         const nuggft = await hre.ethers.getContractAt<NuggFT>('NuggFT', nuggftDeployment.address);
-        // const compressedDeployment = await hre.deployments.deploy('CompressedResolver', {
-        //     from: eoaDeployer,
-        //     log: true,
-        //     args: [defaultDeployment.address, defaultDeployment.address],
-        //     // deterministicDeployment: salts[6],
-        // });
 
-        // const res = await nuggft
-        //     .connect(await hre.ethers.getNamedSigner('dee'))
         //     .addToFile(hre.dotnugg.items.slice(0, 50).map((x) => x.hex));
 
-        const tx0 = await nuggft
-            .connect(await hre.ethers.getNamedSigner('dev'))
-            .addToFile(hre.dotnugg.items.slice(0, 25).map((x) => x.hex));
-        hre.deployments.log('tx0 sent... waiting to be mined... ', tx0.hash);
-        await tx0.wait();
+        // const sendFiles = async (feature: number) => {
+        //     return (
+        //         await nuggft
+        //             .connect(eoaDeployer)
+        //             .storeFiles(hre.dotnugg.itemsByFeatureByIdArray[feature], feature)
+        //             .then((data) => {
+        //                 hre.deployments.log(`tx for feature ${feature} sent... waiting to be mined... `, data.hash);
+        //                 return data;
+        //             })
+        //     )
+        //         .wait()
+        //         .then((data) => {
+        //             hre.deployments.log(`tx for feature ${feature} mined.`);
+        //         });
+        // };
 
-        const tx1 = await nuggft
-            .connect(await hre.ethers.getNamedSigner('dev'))
-            .addToFile(hre.dotnugg.items.slice(25, 50).map((x) => x.hex));
-        hre.deployments.log('tx1 sent... waiting to be mined... ', tx1.hash);
-        await tx1.wait();
-
-        const tx2 = await nuggft
-            .connect(await hre.ethers.getNamedSigner('dev'))
-            .addToFile(hre.dotnugg.items.slice(50, 75).map((x) => x.hex));
-        hre.deployments.log('tx2 sent... waiting to be mined... ', tx2.hash);
-        await tx2.wait();
-
-        const tx3 = await nuggft
-            .connect(await hre.ethers.getNamedSigner('dev'))
-            .addToFile(hre.dotnugg.items.slice(75, 200).map((x) => x.hex));
-        hre.deployments.log('tx3 sent... waiting to be mined... ', tx3.hash);
-        await tx3.wait();
+        // await sendFiles(0);
+        // await sendFiles(1);
+        // await sendFiles(2);
+        // await sendFiles(3);
+        // await sendFiles(4);
+        // await sendFiles(5);
+        // await sendFiles(6);
 
         const activeEpoch = await nuggft.epoch();
         hre.deployments.log('active epoch is..', activeEpoch.toString());
 
-        const tokenUriBefore = await nuggft['tokenURI(uint256)'](activeEpoch);
+        // const tokenUriBefore = await nuggft['tokenURI(uint256)'](activeEpoch);
 
-        hre.deployments.log('tokenUri before is..', tokenUriBefore);
+        // hre.deployments.log('tokenUri before is..', tokenUriBefore);
 
-        const tx4 = await nuggft.connect(await hre.ethers.getNamedSigner('dee')).delegate(activeEpoch, { value: toEth('.01') });
+        // const tx4 = await nuggft.connect(await hre.ethers.getNamedSigner('dee')).delegate(activeEpoch, { value: toEth('.03') });
 
-        hre.deployments.log('tx4 sent... waiting to be mined... ', tx4.hash);
-        await tx4.wait();
+        // hre.deployments.log('tx4 sent... waiting to be mined... ', tx4.hash);
+        // await tx4.wait();
 
-        const tokenUriAfter = await nuggft['tokenURI(uint256)'](activeEpoch);
+        // const tx5 = await nuggft.connect(await hre.ethers.getNamedSigner('d')).delegate(activeEpoch, { value: toEth('.02') });
 
-        hre.deployments.log('tokenUri after is..', tokenUriAfter);
+        // hre.deployments.log('tx5 sent... waiting to be mined... ', tx5.hash);
+        // await tx5.wait();
+
+        // const tokenUriAfter = await nuggft['tokenURI(uint256)'](activeEpoch);
+
+        // hre.deployments.log('tokenUri after is..', tokenUriAfter);
+
+        // const tx4 = await nuggft
+        //     .connect(await hre.ethers.getNamedSigner('dee'))
+        //     .trustedMint(69, '0x4e503501c5dedcf0607d1e1272bb4b3c1204cc71');
+
+        // hre.deployments.log('tx4 sent... waiting to be mined... ', tx4.hash);
+        // await tx4.wait();
+
+        const tx5 = await nuggft.connect(await hre.ethers.getNamedSigner('dee')).mint(2069, { gasLimit: 200000 });
+
+        hre.deployments.log('tx5 sent... waiting to be mined... ', tx5.hash);
+        await tx5.wait();
+
+        // const isTrustedtx = await nuggft.connect(eoaDeployer).setIsTrusted(accounts.dee);
+        // hre.deployments.log('isTrusted being updated', isTrustedtx.hash);
+
+        // await isTrustedtx.wait();
+
+        // hre.deployments.log('isTrusted updated to ', accounts.dee);
 
         // // await nuggft.connect(await hre.ethers.getNamedSigner('dee')).addToFile(hre.dotnugg.items.slice(25, 50).map((x) => x.hex));
 

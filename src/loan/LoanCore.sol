@@ -29,9 +29,9 @@ library LoanCore {
     uint96 constant REBALANCE_FEE_BPS = 100;
     uint32 constant REBALANCE_PERIOD_INCREASE = 1000;
 
-    event TakeLoan(uint160 tokenId, address account, uint96 eth);
-    event Payoff(uint160 tokenId, address account, uint96 eth);
-    event Rebalance(uint160 tokenId, uint96 eth);
+    event TakeLoan(uint160 tokenId, uint96 principal);
+    event Payoff(uint160 tokenId, address account, uint96 payoffAmount);
+    event Rebalance(uint160 tokenId, uint96 fee, uint96 earned);
 
     /*━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
                             LOAN MANAGEMENT
@@ -54,7 +54,7 @@ library LoanCore {
 
         SafeTransferLib.safeTransferETH(msg.sender, principal);
 
-        emit TakeLoan(tokenId, msg.sender, principal);
+        emit TakeLoan(tokenId, principal);
     }
 
     // @hh system tests
@@ -75,10 +75,12 @@ library LoanCore {
 
         StakeCore.addStakedEth(fee);
 
+        uint96 newPrincipal = StakeView.getActiveEthPerShare();
+
         (uint256 loanData, uint96 dust) = SwapPure.buildSwapData(
             cache.epoch() + REBALANCE_PERIOD_INCREASE,
             uint160(msg.sender),
-            StakeView.getActiveEthPerShare(),
+            newPrincipal,
             false
         );
 
@@ -93,9 +95,9 @@ library LoanCore {
 
         uint96 owed = earnings + overpayment + dust;
 
-        SafeTransferLib.safeTransferETH(msg.sender, earnings + overpayment + dust);
+        SafeTransferLib.safeTransferETH(msg.sender, owed);
 
-        emit Rebalance(tokenId, owed);
+        emit Rebalance(tokenId, fee, earnings);
     }
 
     // @hh system tests
@@ -118,7 +120,9 @@ library LoanCore {
 
         uint96 fee = (curr * REBALANCE_FEE_BPS) / 10000; // fee to be paid
 
-        require(fee + curr <= msg.value, 'LOAN:RE:0');
+        uint96 payoffAmount = fee + curr;
+
+        require(payoffAmount <= msg.value, 'LOAN:RE:0');
 
         uint96 value = msg.value.safe96();
 
@@ -131,12 +135,16 @@ library LoanCore {
         // value earned while lone was taken out
         uint96 earnings = update >= activeEps ? 0 : activeEps - update;
 
+        uint96 owed = earnings + overpayment;
+
         StakeCore.addStakedEth(fee);
 
-        SafeTransferLib.safeTransferETH(msg.sender, earnings + overpayment);
+        SafeTransferLib.safeTransferETH(msg.sender, owed);
 
         TokenCore.checkedTransferFromSelf(msg.sender, tokenId);
 
-        emit Payoff(tokenId, msg.sender, value);
+        emit Rebalance(tokenId, fee, earnings);
+
+        emit Payoff(tokenId, msg.sender, payoffAmount);
     }
 }
