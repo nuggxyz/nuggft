@@ -11,7 +11,7 @@ import '../_test/utils/Print.sol';
  * @notice yoU CAN'T HaVe ImAgES oN THe BlOCkcHAIn
  * @dev hold my margarita
  */
-contract MockdotnuggV1Processer is IdotnuggV1Processer {
+contract MockdotnuggV1Processor is IdotnuggV1Processor {
     function process(
         address implementer,
         uint256 tokenId,
@@ -19,12 +19,21 @@ contract MockdotnuggV1Processer is IdotnuggV1Processer {
     ) public view override returns (uint256[] memory resp, IdotnuggV1Data.Data memory dat) {
         (uint256[][] memory files, IdotnuggV1Data.Data memory data) = IdotnuggV1Implementer(implementer).prepareFiles(tokenId);
 
+        resp = processCore(files, data, width);
+        dat = data;
+    }
+
+    function processCore(
+        uint256[][] memory files,
+        IdotnuggV1Data.Data memory,
+        uint8 width
+    ) public view returns (uint256[] memory file) {
         Print.log(width, 'width');
 
         for (uint256 i = 0; i < files.length; i++) {
             Print.log(files[i], 'files[i]');
         }
-        return (files[0], data);
+        return files[0];
     }
 
     function resolveBytes(
@@ -69,7 +78,7 @@ contract MockdotnuggV1Processer is IdotnuggV1Processer {
         (uint256[] memory file, IdotnuggV1Data.Data memory data) = process(implementer, tokenId, width);
 
         if (resolver != address(0)) {
-            res = IdotnuggV1Processer(resolver).resolveRaw(res, data, zoom);
+            res = IdotnuggV1Processor(resolver).resolveRaw(res, data, zoom);
         } else {
             res = file;
         }
@@ -84,7 +93,7 @@ contract MockdotnuggV1Processer is IdotnuggV1Processer {
     ) public view override returns (bytes memory res) {
         (uint256[] memory file, IdotnuggV1Data.Data memory data) = process(implementer, tokenId, width);
 
-        res = IdotnuggV1Processer(resolver).resolveBytes(file, data, zoom);
+        res = IdotnuggV1Processor(resolver).resolveBytes(file, data, zoom);
     }
 
     function dotnuggToString(
@@ -96,7 +105,7 @@ contract MockdotnuggV1Processer is IdotnuggV1Processer {
     ) public view override returns (string memory res) {
         (uint256[] memory file, IdotnuggV1Data.Data memory data) = process(implementer, tokenId, width);
 
-        res = IdotnuggV1Processer(resolver).resolveString(file, data, zoom);
+        res = IdotnuggV1Processor(resolver).resolveString(file, data, zoom);
     }
 
     function dotnuggToData(
@@ -108,6 +117,6 @@ contract MockdotnuggV1Processer is IdotnuggV1Processer {
     ) public view override returns (IdotnuggV1Data.Data memory res) {
         (uint256[] memory file, IdotnuggV1Data.Data memory data) = process(implementer, tokenId, width);
 
-        res = IdotnuggV1Processer(resolver).resolveData(file, data, zoom);
+        res = IdotnuggV1Processor(resolver).resolveData(file, data, zoom);
     }
 }

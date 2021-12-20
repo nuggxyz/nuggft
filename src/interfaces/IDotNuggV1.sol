@@ -44,7 +44,7 @@ interface IdotnuggV1Resolver {
     ) external view returns (string memory res);
 }
 
-interface IdotnuggV1Processer is IdotnuggV1Resolver {
+interface IdotnuggV1Processor is IdotnuggV1Resolver {
     function dotnuggToBytes(
         address implementer,
         uint256 tokenId,
@@ -82,12 +82,18 @@ interface IdotnuggV1Processer is IdotnuggV1Resolver {
         uint256 tokenId,
         uint8 width
     ) external view returns (uint256[] memory file, IdotnuggV1Data.Data memory dat);
+
+    function processCore(
+        uint256[][] memory files,
+        IdotnuggV1Data.Data memory data,
+        uint8 width
+    ) external view returns (uint256[] memory file);
 }
 
 interface IdotnuggV1Implementer {
     function setResolver(uint256 tokenId, address to) external;
 
-    function resolverOf(uint256 tokenId) external view returns (address);
+    function resolverOf(uint256 tokenId) external view returns (address resolver);
 
     function prepareFiles(uint256 tokenId) external view returns (uint256[][] memory file, IdotnuggV1Data.Data memory data);
 }

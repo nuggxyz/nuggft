@@ -7,8 +7,8 @@ import { deployContractWithSalt } from '../shared';
 import { NuggFT } from '../../../../typechain/NuggFT';
 import { NuggFT__factory } from '../../../../typechain/factories/NuggFT__factory';
 import {
-    MockdotnuggV1Processer,
-    MockdotnuggV1Processer__factory,
+    MockdotnuggV1Processor,
+    MockdotnuggV1Processor__factory,
     MockNuggFTV1Migrator,
     MockNuggFTV1Migrator__factory,
 } from '../../../../typechain';
@@ -22,7 +22,7 @@ export interface NuggFatherFixture {
     ownerStartBal: BigNumber;
     hre: HardhatRuntimeEnvironment;
     blockOffset: BigNumber;
-    processer: MockdotnuggV1Processer;
+    processor: MockdotnuggV1Processor;
     // toNuggSwapTokenId(b: BigNumberish): BigNumber;
 }
 
@@ -38,8 +38,8 @@ export const NuggFatherFix: Fixture<NuggFatherFixture> = async function (
     //0x435ccc2eaa41633658be26d804be5A01fEcC9337
     //0x770f070388b13A597b84B557d6B8D1CD94Fc9925
 
-    const processer = await deployContractWithSalt<MockdotnuggV1Processer__factory>({
-        factory: 'MockdotnuggV1Processer',
+    const processor = await deployContractWithSalt<MockdotnuggV1Processor__factory>({
+        factory: 'MockdotnuggV1Processor',
         from: deployer,
         args: [],
     });
@@ -47,7 +47,7 @@ export const NuggFatherFix: Fixture<NuggFatherFixture> = async function (
     const nuggft = await deployContractWithSalt<NuggFT__factory>({
         factory: 'NuggFT',
         from: deployer,
-        args: [processer.address],
+        args: [processor.address],
     });
 
     const migrator = await deployContractWithSalt<MockNuggFTV1Migrator__factory>({
@@ -94,7 +94,7 @@ export const NuggFatherFix: Fixture<NuggFatherFixture> = async function (
         // dotnugg: hre.dotnugg,
         nuggft,
         migrator,
-        processer,
+        processor,
         deployer,
         blockOffset,
         owner,

@@ -35,22 +35,6 @@ library ProofView {
         res = Proof.get(tokenId) != 0;
     }
 
-    // function parseProof(uint160 tokenId)
-    //     internal
-    //     view
-    //     returns (
-    //         uint256 proof,
-    //         uint8[] memory defaultIds,
-    //         uint8[] memory extraIds,
-    //         uint8[] memory overxs,
-    //         uint8[] memory overys
-    //     )
-    // {
-    //     proof = checkedProofOf(tokenId);
-
-    //     return ProofPure.fullProof(proof);
-    // }
-
     function parsedProofOfIncludingPending(uint160 tokenId)
         internal
         view

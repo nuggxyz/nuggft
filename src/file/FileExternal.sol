@@ -4,7 +4,7 @@ pragma solidity 0.8.9;
 
 import {IFileExternal} from '../interfaces/INuggFT.sol';
 
-import {IdotnuggV1Processer} from '../interfaces/IdotnuggV1.sol';
+import {IdotnuggV1Processor} from '../interfaces/IdotnuggV1.sol';
 import {IdotnuggV1Resolver} from '../interfaces/IdotnuggV1.sol';
 import {IdotnuggV1Data} from '../interfaces/IdotnuggV1.sol';
 
@@ -17,15 +17,15 @@ import {File} from './FileStorage.sol';
 abstract contract FileExternal is IFileExternal {
     using SafeCastLib for uint256;
 
-    address public dotnuggV1Processer;
+    address public dotnuggV1Processor;
 
     uint8 public defaultWidth = 45;
 
     uint8 public defaultZoom = 10;
 
-    constructor(address _dotnuggV1Processer) {
-        require(_dotnuggV1Processer != address(0));
-        dotnuggV1Processer = _dotnuggV1Processer;
+    constructor(address _dotnuggV1Processor) {
+        require(_dotnuggV1Processor != address(0));
+        dotnuggV1Processor = _dotnuggV1Processor;
     }
 
     /*━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -47,9 +47,9 @@ abstract contract FileExternal is IFileExternal {
     function tokenURI(uint256 tokenId) public view virtual override returns (string memory res) {
         uint160 safeTokenId = tokenId.safe160();
 
-        address resolver = FileView.hasResolver(safeTokenId) ? FileView.resolverOf(safeTokenId) : dotnuggV1Processer;
+        address resolver = FileView.hasResolver(safeTokenId) ? FileView.resolverOf(safeTokenId) : dotnuggV1Processor;
 
-        res = IdotnuggV1Processer(dotnuggV1Processer).dotnuggToString(address(this), tokenId, resolver, defaultWidth, defaultZoom);
+        res = IdotnuggV1Processor(dotnuggV1Processor).dotnuggToString(address(this), tokenId, resolver, defaultWidth, defaultZoom);
     }
 
     /*━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
