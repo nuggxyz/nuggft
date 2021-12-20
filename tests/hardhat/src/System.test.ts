@@ -1,5 +1,6 @@
 import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/dist/src/signers';
 import { ethers, waffle } from 'hardhat';
+import { Address } from 'ethereumjs-util';
 
 import { NamedAccounts } from '../../../hardhat.config';
 import { Mining } from '../lib/shared/mining';
@@ -125,7 +126,7 @@ describe('uint tests', async function () {
 
             // console.log(check1, check2, check1.eq(check2));
 
-            console.log(await fix.nuggft['resolveRaw(uint160)'](1));
+            console.log(await fix.processer.dotnuggToRaw(fix.nuggft.address, 1, Address.zero().toString(), 45, 10));
 
             await fix.nuggft.connect(accounts.charile).loan(1);
 
