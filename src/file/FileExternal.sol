@@ -4,10 +4,9 @@ pragma solidity 0.8.9;
 
 import {IFileExternal} from '../interfaces/INuggFT.sol';
 
-import {IDotNuggV1Processer} from '../interfaces/IDotNuggV1.sol';
-import {IDotNuggV1BytesResolver} from '../interfaces/IDotNuggV1.sol';
-import {IDotNuggV1RawResolver} from '../interfaces/IDotNuggV1.sol';
-import {IDotNuggV1StringResolver} from '../interfaces/IDotNuggV1.sol';
+import {IdotnuggV1Processer} from '../interfaces/IdotnuggV1.sol';
+import {IdotnuggV1Resolver} from '../interfaces/IdotnuggV1.sol';
+import {IdotnuggV1Data} from '../interfaces/IdotnuggV1.sol';
 
 import {SafeCastLib} from '../libraries/SafeCastLib.sol';
 
@@ -18,7 +17,11 @@ import {File} from './FileStorage.sol';
 abstract contract FileExternal is IFileExternal {
     using SafeCastLib for uint256;
 
-    address public immutable dotnuggV1Processer;
+    address public immutable override dotnuggV1Processer;
+
+    uint8 public immutable override defaultWidth = 45;
+
+    uint8 public immutable override defaultZoom = 10;
 
     constructor(address _dotnuggV1Processer) {
         require(_dotnuggV1Processer != address(0));
@@ -29,38 +32,84 @@ abstract contract FileExternal is IFileExternal {
                             RESOLVER MANAGEMENT
     ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━*/
 
-    function setResolver(uint160 tokenId, address to) public virtual override {
-        FileCore.setResolver(tokenId, to);
+    function setResolver(uint256 tokenId, address to) public virtual override {
+        FileCore.setResolver(tokenId.safe160(), to);
     }
 
-    function resolverOf(uint160 tokenId) public view virtual override returns (address) {
-        return FileView.resolverOf(tokenId);
+    function resolverOf(uint256 tokenId) public view virtual override returns (address) {
+        return FileView.resolverOf(tokenId.safe160());
     }
 
     /*━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
                             MAIN FUNCTIONS
     ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━*/
 
-    function resolveRaw(uint160 tokenId, address resolver) public view returns (uint256[] memory res) {
-        (uint256[] memory file, , bytes memory data) = processTokenId(tokenId);
+    function resolveRaw(uint256 tokenId, address resolver) public view override returns (uint256[] memory res) {
+        res = resolveRawResizeable(tokenId, resolver, defaultWidth, defaultZoom);
+    }
+
+    function resolveBytes(uint256 tokenId, address resolver) public view override returns (bytes memory res) {
+        res = resolveBytesResizeable(tokenId, resolver, defaultWidth, defaultZoom);
+    }
+
+    function resolveString(uint256 tokenId, address resolver) public view override returns (string memory res) {
+        res = resolveStringResizeable(tokenId, resolver, defaultWidth, defaultZoom);
+    }
+
+    function resolveData(uint256 tokenId, address resolver) public view override returns (IdotnuggV1Data.Data memory res) {
+        res = resolveDataResizeable(tokenId, resolver, defaultWidth, defaultZoom);
+    }
+
+    /*━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+                        MAIN FUNCTIONS - RESIZABLE
+    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━*/
+
+    function resolveRawResizeable(
+        uint256 tokenId,
+        address resolver,
+        uint8 width,
+        uint8 zoom
+    ) public view override returns (uint256[] memory res) {
+        (uint256[] memory file, , IdotnuggV1Data.Data memory data) = processTokenId(tokenId, width, zoom);
 
         if (resolver != address(0)) {
-            res = IDotNuggV1RawResolver(resolver).resolveRaw(res, data);
+            res = IdotnuggV1Processer(resolver).resolveRaw(res, data);
         } else {
             res = file;
         }
     }
 
-    function resolveBytes(uint160 tokenId, address resolver) public view returns (bytes memory res) {
-        (uint256[] memory file, , bytes memory data) = processTokenId(tokenId);
+    function resolveBytesResizeable(
+        uint256 tokenId,
+        address resolver,
+        uint8 width,
+        uint8 zoom
+    ) public view override returns (bytes memory res) {
+        (uint256[] memory file, , IdotnuggV1Data.Data memory data) = processTokenId(tokenId, width, zoom);
 
-        res = IDotNuggV1BytesResolver(resolver).resolveBytes(file, data);
+        res = IdotnuggV1Processer(resolver).resolveBytes(file, data);
     }
 
-    function resolveString(uint160 tokenId, address resolver) public view returns (string memory res) {
-        (uint256[] memory file, , bytes memory data) = processTokenId(tokenId);
+    function resolveStringResizeable(
+        uint256 tokenId,
+        address resolver,
+        uint8 width,
+        uint8 zoom
+    ) public view override returns (string memory res) {
+        (uint256[] memory file, , IdotnuggV1Data.Data memory data) = processTokenId(tokenId, width, zoom);
 
-        res = IDotNuggV1StringResolver(resolver).resolveString(file, data);
+        res = IdotnuggV1Processer(resolver).resolveString(file, data);
+    }
+
+    function resolveDataResizeable(
+        uint256 tokenId,
+        address resolver,
+        uint8 width,
+        uint8 zoom
+    ) public view override returns (IdotnuggV1Data.Data memory res) {
+        (uint256[] memory file, , IdotnuggV1Data.Data memory data) = processTokenId(tokenId, width, zoom);
+
+        res = IdotnuggV1Processer(resolver).resolveData(file, data);
     }
 
     /*━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -89,17 +138,21 @@ abstract contract FileExternal is IFileExternal {
                                 HELPERS
     ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━*/
 
-    function processTokenId(uint160 tokenId)
+    function processTokenId(
+        uint256 tokenId,
+        uint8 width,
+        uint8 zoom
+    )
         internal
         view
         returns (
             uint256[] memory res,
             uint256[][] memory input,
-            bytes memory data
+            IdotnuggV1Data.Data memory data
         )
     {
-        (input, data) = FileCore.prepareForProcess(tokenId);
+        (input, data) = FileCore.prepareForProcess(tokenId.safe160(), width, zoom);
 
-        res = IDotNuggV1Processer(dotnuggV1Processer).process(input, data);
+        res = IdotnuggV1Processer(dotnuggV1Processer).process(input, data);
     }
 }

@@ -6,7 +6,7 @@ import { getHRE } from '../shared/deployment';
 import { deployContractWithSalt } from '../shared';
 import { NuggFT } from '../../../../typechain/NuggFT';
 import { NuggFT__factory } from '../../../../typechain/factories/NuggFT__factory';
-import { MockDotNuggV1Processer__factory, MockNuggFTV1Migrator, MockNuggFTV1Migrator__factory } from '../../../../typechain';
+import { MockdotnuggV1Processer__factory, MockNuggFTV1Migrator, MockNuggFTV1Migrator__factory } from '../../../../typechain';
 
 export interface NuggFatherFixture {
     // nuggswap: NuggSwap;
@@ -33,8 +33,8 @@ export const NuggFatherFix: Fixture<NuggFatherFixture> = async function (
     //0x435ccc2eaa41633658be26d804be5A01fEcC9337
     //0x770f070388b13A597b84B557d6B8D1CD94Fc9925
 
-    const processResolver = await deployContractWithSalt<MockDotNuggV1Processer__factory>({
-        factory: 'MockDotNuggV1Processer',
+    const processResolver = await deployContractWithSalt<MockdotnuggV1Processer__factory>({
+        factory: 'MockdotnuggV1Processer',
         from: deployer,
         args: [],
     });
