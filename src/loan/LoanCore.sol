@@ -21,13 +21,21 @@ library LoanCore {
     using SafeCastLib for uint256;
     using SwapPure for uint256;
 
+    /*━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+                                EVENTS
+    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━*/
+
     uint32 constant LIQUIDATION_PERIOD = 1000;
     uint96 constant REBALANCE_FEE_BPS = 100;
-    uint32 constant REBALANCE_PERIOD_INCREASE = 100;
+    uint32 constant REBALANCE_PERIOD_INCREASE = 1000;
 
-    event TakeLoan(uint160 tokenId, address account, uint256 eth);
-    event Payoff(uint160 tokenId, address account, uint256 eth);
-    event Rebalance(uint160 tokenId);
+    event TakeLoan(uint160 tokenId, address account, uint96 eth);
+    event Payoff(uint160 tokenId, address account, uint96 eth);
+    event Rebalance(uint160 tokenId, uint96 eth);
+
+    /*━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+                            LOAN MANAGEMENT
+    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━*/
 
     // @hh system tests
     function loan(uint160 tokenId) internal {
@@ -83,9 +91,11 @@ library LoanCore {
         // value earned while lone was taken out
         uint96 earnings = update >= preEps ? 0 : preEps - update;
 
+        uint96 owed = earnings + overpayment + dust;
+
         SafeTransferLib.safeTransferETH(msg.sender, earnings + overpayment + dust);
 
-        emit Rebalance(tokenId);
+        emit Rebalance(tokenId, owed);
     }
 
     // @hh system tests
@@ -110,7 +120,9 @@ library LoanCore {
 
         require(fee + curr <= msg.value, 'LOAN:RE:0');
 
-        uint96 overpayment = msg.value.safe96() - fee;
+        uint96 value = msg.value.safe96();
+
+        uint96 overpayment = value - fee;
 
         uint96 update = curr + fee;
 
@@ -125,6 +137,6 @@ library LoanCore {
 
         TokenCore.checkedTransferFromSelf(msg.sender, tokenId);
 
-        emit Payoff(tokenId, msg.sender, msg.value);
+        emit Payoff(tokenId, msg.sender, value);
     }
 }

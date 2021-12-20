@@ -7,7 +7,15 @@ import {IERC721, IERC721Metadata, IERC165} from './IERC721.sol';
 import {IdotnuggV1Implementer} from '../interfaces/IdotnuggV1.sol';
 
 interface ITrustExternal {
+    /*━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+                                EVENTS
+    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━*/
+
     event TrustUpdated(address indexed user);
+
+    /*━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+                            STATE CHANGING
+    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━*/
 
     function extractProtocolEth() external;
 
@@ -15,19 +23,35 @@ interface ITrustExternal {
 
     function setIsTrusted(address user) external;
 
+    /*━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+                            VIEW FUNCTIONS
+    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━*/
+
     function trusted() external view returns (address);
 }
 
 interface IStakeExternal {
-    event StakeEth(uint96 amount);
-    event UnStakeEth(uint96 amount);
-    event ProtocolEthExtracted(uint96 amount);
+    /*━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+                                EVENTS
+    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━*/
+
+    event StakeEth(uint96 stake, uint96 protocol);
+    event UnStakeEth(uint96 stake, address to);
+    event ProtocolEthExtracted(uint96 eth);
     event MigratorV1Updated(address migrator);
     event MigrateV1Sent(address v2, uint160 tokenId, uint256 proof, address owner, uint96 eth);
+
+    /*━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+                            STATE CHANGING
+    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━*/
 
     function migrateStake(uint160 tokenId) external;
 
     function withdrawStake(uint160 tokenId) external;
+
+    /*━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+                            VIEW FUNCTIONS
+    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━*/
 
     function totalProtocolEth() external view returns (uint96);
 
@@ -41,13 +65,19 @@ interface IStakeExternal {
 }
 
 interface IProofExternal {
-    event PreMint(uint160 tokenId, uint256[] items);
+    /*━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+                                EVENTS
+    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━*/
 
-    event PopItem(uint160 tokenId, uint16 itemId);
+    event SetProof(uint160 tokenId, uint256 proof, uint8[] items);
+    event PopItem(uint160 tokenId, uint256 proof, uint16 itemId);
+    event PushItem(uint160 tokenId, uint256 proof, uint16 itemId);
+    event RotateItem(uint160 tokenId, uint256 proof, uint8 feature);
+    event SetAnchorOverrides(uint160 tokenId, uint256 proof, uint8[] xs, uint8[] ys);
 
-    event PushItem(uint160 tokenId, uint16 itemId);
-
-    event SetProof(uint160 tokenId, uint256[] items);
+    /*━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+                            STATE CHANGING
+    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━*/
 
     function rotateFeature(uint160 tokenId, uint8 feature) external;
 
@@ -56,6 +86,10 @@ interface IProofExternal {
         uint8[] memory xs,
         uint8[] memory ys
     ) external;
+
+    /*━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+                            VIEW FUNCTIONS
+    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━*/
 
     function proofOf(uint160 tokenId) external view returns (uint256);
 
@@ -74,8 +108,17 @@ interface IProofExternal {
 interface IFileExternal is IERC721Metadata, IdotnuggV1Implementer {}
 
 interface ILoanExternal {
-    event TakeLoan(uint160 tokenId, address account, uint96);
-    event Payoff(uint160 tokenId, address account, uint96);
+    /*━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+                                EVENTS
+    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━*/
+
+    event TakeLoan(uint160 tokenId, address account, uint96 eth);
+    event Payoff(uint160 tokenId, address account, uint96 eth);
+    event Rebalance(uint160 tokenId, uint96 eth);
+
+    /*━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+                            STATE CHANGING
+    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━*/
 
     function rebalance(uint160 tokenId) external payable;
 
@@ -87,23 +130,23 @@ interface ILoanExternal {
 interface ITokenExternal is IERC721 {}
 
 interface ISwapExternal {
+    /*━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+                                EVENTS
+    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━*/
+
     event Mint(uint160 tokenId, address account, uint96);
-
     event Commit(uint160 tokenId, address account, uint96);
-
     event Offer(uint160 tokenId, address account, uint96);
-
     event Claim(uint160 tokenId, address account);
-
     event StartSwap(uint160 tokenId, address account, uint96 floor);
-
     event CommitItem(uint160 sellingTokenId, uint16 itemId, uint160 buyingTokenId, uint96 eth);
-
     event OfferItem(uint160 sellingTokenId, uint16 itemId, uint160 buyingTokenId, uint96 eth);
-
     event ClaimItem(uint160 sellingTokenId, uint16 itemId, uint160 buyingTokenId);
-
     event SwapItem(uint160 sellingTokenId, uint16 itemId, uint96 floor);
+
+    /*━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+                            STATE CHANGING
+    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━*/
 
     function delegate(uint160 tokenId) external payable;
 
@@ -129,6 +172,10 @@ interface ISwapExternal {
         uint96 floor
     ) external;
 
+    /*━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+                            VIEW FUNCTIONS
+    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━*/
+
     function getOfferByAccount(uint160 tokenId, address account) external view returns (uint96 eth);
 
     function getActiveSwap(uint160 tokenId)
@@ -143,6 +190,10 @@ interface ISwapExternal {
 }
 
 interface IEpochExternal {
+    /*━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+                            VIEW FUNCTIONS
+    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━*/
+
     function epoch() external view returns (uint32 res);
 }
 
