@@ -3,6 +3,7 @@
 pragma solidity 0.8.9;
 
 import {SafeTransferLib} from '../libraries/SafeTransferLib.sol';
+import {SafeCastLib} from '../libraries/SafeCastLib.sol';
 
 import {Token} from './TokenStorage.sol';
 import {Global} from '../global/GlobalStorage.sol';
@@ -16,6 +17,8 @@ import {Trust} from '../trust/TrustStorage.sol';
 
 // system test
 library TokenCore {
+    using SafeCastLib for uint256;
+
     uint32 constant TRUSTED_MINT_TOKENS = 500;
     uint32 constant UNTRUSTED_MINT_TOKENS = 2500;
 
@@ -65,6 +68,8 @@ library TokenCore {
 
         require(!TokenView.exists(tokenId), 'T:2');
 
+        StakeCore.addStakedShareAndEth(msg.value.safe96());
+
         ProofCore.setProof(tokenId);
 
         checkedMintTo(msg.sender, tokenId);
@@ -82,6 +87,8 @@ library TokenCore {
         require(tokenId < TRUSTED_MINT_TOKENS && tokenId != 0, 'T:1');
 
         require(!TokenView.exists(tokenId), 'T:2');
+
+        StakeCore.addStakedShareAndEth(msg.value.safe96());
 
         ProofCore.setProof(tokenId);
 

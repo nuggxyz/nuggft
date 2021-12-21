@@ -18,6 +18,10 @@ library StakeView {
         res = Stake.sload().getEthPerShare();
     }
 
+    function getMinSharePrice() internal view returns (uint96 res) {
+        res = Stake.sload().getMinSharePrice();
+    }
+
     function getActiveStakedShares() internal view returns (uint64 res) {
         res = Stake.sload().getStakedShares();
     }
