@@ -20,6 +20,10 @@ abstract contract StakeExternal is IStakeExternal {
         StakeCore.burnStakedShare(tokenId);
     }
 
+    function minSharePrice() external view override returns (uint96 res) {
+        res = StakeView.getMinSharePrice();
+    }
+
     function totalStakedShares() external view override returns (uint64 res) {
         res = StakeView.getActiveStakedShares();
     }

@@ -32,7 +32,7 @@ abstract contract TrustExternal is ITrustExternal {
     /*━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
                                 TRUSTED
     ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━*/
-    function trustedMint(uint160 tokenId, address to) external override requiresTrust {
+    function trustedMint(uint160 tokenId, address to) external payable override requiresTrust {
         TokenCore.trustedMint(_trust, to, tokenId);
     }
 

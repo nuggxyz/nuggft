@@ -4,10 +4,14 @@ pragma solidity 0.8.9;
 
 import {ShiftLib} from '../libraries/ShiftLib.sol';
 
+import {ShiftLib} from '../libraries/ShiftLib.sol';
+
 library StakePure {
     /// 96 protocol
     /// 96 stakedEth
     /// 64 stakedShares
+
+    uint96 constant PROTOCOL_FEE_BPS = 1000;
 
     // @test input output unit test
     function getProtocolEth(uint256 cache) internal pure returns (uint96 res) {
@@ -55,6 +59,12 @@ library StakePure {
         shares = getStakedShares(cache);
         eth = getStakedEth(cache);
         proto = getProtocolEth(cache);
+    }
+
+    // @test manual
+    function getMinSharePrice(uint256 cache) internal pure returns (uint96 res) {
+        res = getEthPerShare(cache);
+        res += (res * (getStakedShares(cache) + PROTOCOL_FEE_BPS)) / 10000;
     }
 
     // @test manual

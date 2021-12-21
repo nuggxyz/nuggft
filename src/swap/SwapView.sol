@@ -21,17 +21,17 @@ library SwapView {
             bool isOwner
         )
     {
-        (, Swap.Memory memory m) = Swap.loadTokenSwap(tokenId, address(0));
-        require(m.swapData != 0, 'NS:GS:0');
-        leader = address(m.swapData.account());
-        amount = m.swapData.eth();
-        _epoch = m.swapData.epoch();
-        isOwner = m.swapData.isOwner();
+        // (, Swap.Memory memory m) = Swap.loadTokenSwap(tokenId, address(0));
+        // require(m.swapData != 0, 'NS:GS:0');
+        // leader = address(m.swapData.account());
+        // amount = m.swapData.eth();
+        // _epoch = m.swapData.epoch();
+        // isOwner = m.swapData.isOwner();
     }
 
     function getOfferByAccount(uint160 tokenId, address account) internal view returns (uint96 amount) {
-        (, Swap.Memory memory m) = Swap.loadTokenSwap(tokenId, account);
-        require(m.offerData != 0, 'NS:GS:0');
-        amount = m.offerData.eth();
+        // (, Swap.Memory memory m) = Swap.loadTokenSwap(tokenId, account);
+        // require(m.offerData != 0, 'NS:GS:0');
+        // amount = m.offerData.eth();
     }
 }

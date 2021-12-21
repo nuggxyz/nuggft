@@ -54,10 +54,12 @@ describe('uint tests', async function () {
             await fix.nuggft.connect(accounts.frank).delegate(token1, { value: toEth('3.000') });
             await fix.nuggft.connect(accounts.dennis).delegate(token1, { value: toEth('2.000') });
             await fix.nuggft.connect(accounts.dennis).delegate(token1, { value: toEth('2.000') });
-            await fix.nuggft.connect(accounts.charile).delegate(token1, { value: toEth('55.000') });
+            await fix.nuggft.connect(accounts.charile).delegate(token1, { value: toEth('30.000') });
 
-            for (let i = 2000; i < 2030; i++) {
-                await fix.nuggft.connect(accounts.dennis).mint(i);
+            for (let i = 2000; i < 2010; i++) {
+                await fix.nuggft.connect(accounts.dennis).mint(i, { value: toEth('35') });
+
+                console.log('minshareprice: ', fromEth(await fix.nuggft.connect(accounts.frank).minSharePrice()));
             }
 
             await Mining.advanceBlockTo(2500);
@@ -182,7 +184,7 @@ describe('uint tests', async function () {
 
             await fix.nuggft.connect(fix.deployer).setIsTrusted(accounts.frank.address);
 
-            await fix.nuggft.connect(accounts.frank).trustedMint(69, accounts.mac.address);
+            await fix.nuggft.connect(accounts.frank).trustedMint(69, accounts.mac.address, { value: toEth('250') });
 
             await fix.nuggft.connect(accounts.charile).approve(fix.nuggft.address, token1);
 

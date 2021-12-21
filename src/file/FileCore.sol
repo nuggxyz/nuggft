@@ -38,7 +38,7 @@ library FileCore {
             renderedAt: block.timestamp,
             name: 'NuggFT V1',
             desc: 'Nugg Fungible Token V1 by nugg.xyz',
-            owner: TokenView.ownerOf(tokenId),
+            owner: TokenView.exists(tokenId) ? TokenView.ownerOf(tokenId) : address(0),
             tokenId: tokenId,
             proof: proof,
             ids: ids,

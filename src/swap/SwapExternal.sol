@@ -52,29 +52,25 @@ abstract contract SwapExternal is ISwapExternal {
         SwapCore.swapItem(itemid, floor, sellingTokenId);
     }
 
-    // function delegate2(uint160 tokenId) external payable {
-    //     SwapCore.delegate(tokenId);
-    // }
-
     /*━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
                                 VIEW
     ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━*/
 
-    function getActiveSwap(uint160 tokenId)
-        external
-        view
-        override
-        returns (
-            address leader,
-            uint96 amount,
-            uint32 _epoch,
-            bool isOwner
-        )
-    {
-        return SwapView.getActiveSwap(tokenId);
-    }
+    // function getActiveSwap(uint160 tokenId)
+    //     external
+    //     view
+    //     override
+    //     returns (
+    //         address leader,
+    //         uint96 amount,
+    //         uint32 _epoch,
+    //         bool isOwner
+    //     )
+    // {
+    //     return SwapView.getActiveSwap(tokenId);
+    // }
 
-    function getOfferByAccount(uint160 tokenId, address account) external view override returns (uint96 amount) {
-        return SwapView.getOfferByAccount(tokenId, account);
-    }
+    // function getOfferByAccount(uint160 tokenId, address account) external view override returns (uint96 amount) {
+    //     return SwapView.getOfferByAccount(tokenId, account);
+    // }
 }

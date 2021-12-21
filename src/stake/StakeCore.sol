@@ -25,8 +25,6 @@ import {Trust} from '../trust/TrustStorage.sol';
 library StakeCore {
     using StakePure for uint256;
 
-    uint96 constant PROTOCOL_FEE_BPS = 1000;
-
     /*━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
                                 EVENTS
     ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━*/
@@ -72,29 +70,21 @@ library StakeCore {
 
         (uint64 activeShares, uint96 activeEth, uint96 activeProtocolEth) = cache.getStakedSharesAndEth();
 
-        uint96 protocol = (eth * PROTOCOL_FEE_BPS) / 10000;
+        require(eth >= cache.getMinSharePrice(), 'ST:0');
+
+        uint96 protocol = (eth * StakePure.PROTOCOL_FEE_BPS) / 10000;
 
         eth -= protocol;
-
-        require(eth >= cache.getEthPerShare(), 'SL:M:0');
 
         Stake.sstore(cache.setStakedShares(activeShares + 1).setStakedEth(activeEth + eth).setProtocolEth(activeProtocolEth + protocol));
 
         emit StakeEth(eth, protocol);
     }
 
-    function addStakedShares(uint64 amount) internal {
-        uint256 cache = Stake.sload();
-
-        require(cache.getStakedEth() == 0, 'SC:0');
-
-        Stake.sstore(cache.setStakedShares(cache.getStakedShares() + amount));
-    }
-
     function addStakedEth(uint96 amount) internal {
         uint256 cache = Stake.sload();
 
-        uint96 protocol = (amount * PROTOCOL_FEE_BPS) / 10000;
+        uint96 protocol = (amount * StakePure.PROTOCOL_FEE_BPS) / 10000;
 
         amount -= protocol;
 

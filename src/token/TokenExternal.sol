@@ -20,7 +20,7 @@ import {TokenCore} from './TokenCore.sol';
 abstract contract TokenExternal is ITokenExternal {
     using SafeCastLib for uint256;
 
-    function mint(uint160 tokenId) public override {
+    function mint(uint160 tokenId) public payable override {
         TokenCore.untrustedMint(tokenId);
     }
 

@@ -16,7 +16,7 @@ interface ITrustExternal {
     /*━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
                             STATE CHANGING
     ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━*/
-    function trustedMint(uint160 tokenId, address to) external;
+    function trustedMint(uint160 tokenId, address to) external payable;
 
     function extractProtocolEth() external;
 
@@ -53,6 +53,8 @@ interface IStakeExternal {
     /*━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
                             VIEW FUNCTIONS
     ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━*/
+
+    function minSharePrice() external view returns (uint96 res);
 
     function totalProtocolEth() external view returns (uint96);
 
@@ -135,7 +137,7 @@ interface ILoanExternal {
 }
 
 interface ITokenExternal is IERC721 {
-    function mint(uint160 tokenId) external;
+    function mint(uint160 tokenId) external payable;
 
     event TrustedMint(address indexed to, uint160 tokenId);
     event UntrustedMint(address indexed by, uint160 tokenId);
@@ -189,17 +191,17 @@ interface ISwapExternal {
                             VIEW FUNCTIONS
     ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━*/
 
-    function getOfferByAccount(uint160 tokenId, address account) external view returns (uint96 eth);
+    // function getOfferByAccount(uint160 tokenId, address account) external view returns (uint96 eth);
 
-    function getActiveSwap(uint160 tokenId)
-        external
-        view
-        returns (
-            address leader,
-            uint96 eth,
-            uint32 _epoch,
-            bool isOwner
-        );
+    // function getActiveSwap(uint160 tokenId)
+    //     external
+    //     view
+    //     returns (
+    //         address leader,
+    //         uint96 eth,
+    //         uint32 _epoch,
+    //         bool isOwner
+    //     );
 }
 
 interface IEpochExternal {

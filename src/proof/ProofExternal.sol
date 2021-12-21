@@ -18,6 +18,8 @@ import {ProofView} from './ProofView.sol';
  * {ERC721Enumerable}.
  */
 abstract contract ProofExternal is IProofExternal {
+    uint256 immutable GEN = 0x69696969696969;
+
     function rotateFeature(uint160 tokenId, uint8 feature) external override {
         ProofCore.rotateFeature(tokenId, feature);
     }

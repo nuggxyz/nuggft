@@ -6,8 +6,6 @@ import {ShiftLib} from '../libraries/ShiftLib.sol';
 
 import {FilePure} from '../file/FilePure.sol';
 
-// import {Print} from '../_test/utils/Print.sol';
-
 library ProofPure {
     using ShiftLib for uint256;
 
