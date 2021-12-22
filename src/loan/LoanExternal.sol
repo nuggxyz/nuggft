@@ -126,13 +126,13 @@ abstract contract LoanExternal is ILoanExternal {
             address loaner
         )
     {
-        uint256 cache = Loan.sload(tokenId);
+        uint256 state = Loan.sload(tokenId);
 
         // ensure loan exists
-        require(cache != 0, 'L:1');
+        require(state != 0, 'L:1');
 
         // the amount of eth currently loanded by user
-        uint96 curr = cache.eth();
+        uint96 curr = state.eth();
 
         uint96 activeEps = StakeCore.activeEthPerShare();
 
@@ -143,8 +143,8 @@ abstract contract LoanExternal is ILoanExternal {
         // value earned while lone was taken out
         earned = toPayoff >= activeEps ? 0 : activeEps - toPayoff;
 
-        epochDue = cache.epoch() + LIQUIDATION_PERIOD;
+        epochDue = state.epoch() + LIQUIDATION_PERIOD;
 
-        loaner = address(cache.account());
+        loaner = address(state.account());
     }
 }
