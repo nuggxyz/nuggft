@@ -11,9 +11,9 @@ import {Token} from './TokenStorage.sol';
 import {TokenView} from './TokenView.sol';
 import {TokenCore} from './TokenCore.sol';
 
-/**
- * @dev Implementation of https://eips.ethereum.org/EIPS/eip-721[ERC721] Non-Fungible Token Standard
- */
+///
+/// @dev Implementation of https://eips.ethereum.org/EIPS/eip-721[ERC721] Non-Fungible Token Standard
+///
 abstract contract TokenExternal is ITokenExternal {
     using SafeCastLib for uint256;
 
@@ -36,10 +36,6 @@ abstract contract TokenExternal is ITokenExternal {
             interfaceId == type(IERC165).interfaceId;
     }
 
-    function balanceOf(address owner) public view override returns (uint256) {
-        return TokenView.balanceOf(owner);
-    }
-
     function ownerOf(uint256 tokenId) public view override returns (address) {
         return TokenView.ownerOf(tokenId.safe160());
     }
@@ -55,6 +51,10 @@ abstract contract TokenExternal is ITokenExternal {
     /*━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
                                 DISABLED
     ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━*/
+
+    function balanceOf(address) public pure override returns (uint256) {
+        return 0;
+    }
 
     function transferFrom(
         address,
