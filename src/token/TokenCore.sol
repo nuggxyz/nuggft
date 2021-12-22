@@ -129,7 +129,7 @@ library TokenCore {
         // Clear approvals from the previous owner
         delete Token.ptr().approvals[tokenId];
 
-        emit Approval(address(this), address(0), tokenId);
+        // emit Approval(address(this), address(0), tokenId);
 
         emit Transfer(msg.sender, address(this), tokenId);
     }
@@ -155,7 +155,7 @@ library TokenCore {
         delete Global.ptr().proof.map[tokenId];
         delete Global.ptr().file.resolvers[tokenId];
 
-        emit Approval(msg.sender, address(0), tokenId);
+        // emit Approval(msg.sender, address(0), tokenId);
 
         // DEL Token.ptr().balances[msg.sender] -= 1;
 
