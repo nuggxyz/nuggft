@@ -12,6 +12,7 @@ abstract contract EpochExternal is IEpochExternal {
         emit Genesis();
     }
 
+    /// @inheritdoc IEpochExternal
     function epoch() external view override returns (uint32) {
         return EpochCore.activeEpoch();
     }

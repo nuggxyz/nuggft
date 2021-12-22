@@ -15,7 +15,6 @@ import {TokenView} from '../token/TokenView.sol';
 
 import {FileView} from '../file/FileView.sol';
 import {File} from '../file/FileStorage.sol';
-import {Trust} from '../trust/TrustStorage.sol';
 
 // OK
 library ProofCore {
@@ -29,8 +28,6 @@ library ProofCore {
     event SetProof(uint160 tokenId, uint256 proof, uint8[] items);
     event PopItem(uint160 tokenId, uint256 proof, uint16 itemId);
     event PushItem(uint160 tokenId, uint256 proof, uint16 itemId);
-    event RotateItem(uint160 tokenId, uint256 proof, uint8 feature);
-    event SetAnchorOverrides(uint160 tokenId, uint256 proof, uint8[] xs, uint8[] ys);
 
     /*━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
                                 VIEW
@@ -72,42 +69,6 @@ library ProofCore {
     }
 
     /*━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-                            EXTERNAL MANAGEMENT
-    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━*/
-
-    function rotateFeature(uint160 tokenId, uint8 feature) internal {
-        require(TokenView.ownerOf(tokenId) == msg.sender, 'PC:2');
-
-        uint256 working = checkedProofOf(tokenId);
-
-        working = ProofPure.rotateDefaultandExtra(working, feature);
-
-        working = ProofPure.clearAnchorOverridesForFeature(working, feature);
-
-        Proof.sstore(tokenId, working);
-
-        emit RotateItem(tokenId, working, feature);
-    }
-
-    function setAnchorOverrides(
-        uint160 tokenId,
-        uint8[] memory xs,
-        uint8[] memory ys
-    ) internal {
-        require(TokenView.ownerOf(tokenId) == msg.sender, 'PC:2');
-
-        require(xs.length == 8 && ys.length == 8, 'PC:3');
-
-        uint256 working = checkedProofOf(tokenId);
-
-        working = ProofPure.setNewAnchorOverrides(working, xs, ys);
-
-        Proof.sstore(tokenId, working);
-
-        emit SetAnchorOverrides(tokenId, working, xs, ys);
-    }
-
-    /*━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
                             SWAP MANAGEMENT
     ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━*/
 
@@ -116,9 +77,9 @@ library ProofCore {
 
         uint256 working = checkedProofOf(tokenId);
 
-        require(Proof.ptr().protcolItems[itemId] > 0, 'RC:3');
+        require(Proof.spointer().protcolItems[itemId] > 0, 'RC:3');
 
-        Proof.ptr().protcolItems[itemId]--;
+        Proof.spointer().protcolItems[itemId]--;
 
         working = ProofPure.pushToExtra(working, itemId);
 
@@ -136,7 +97,7 @@ library ProofCore {
 
         Proof.sstore(tokenId, working);
 
-        Proof.ptr().protcolItems[itemId]++;
+        Proof.spointer().protcolItems[itemId]++;
 
         emit PopItem(tokenId, working, itemId);
     }

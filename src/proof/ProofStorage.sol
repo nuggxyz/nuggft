@@ -11,15 +11,15 @@ library Proof {
         mapping(uint256 => uint256) protcolItems;
     }
 
-    function ptr() internal view returns (Storage storage s) {
+    function spointer() internal view returns (Storage storage s) {
         s = Global.ptr().proof;
     }
 
     function sload(uint160 tokenId) internal view returns (uint256) {
-        return ptr().map[tokenId];
+        return spointer().map[tokenId];
     }
 
     function sstore(uint160 tokenId, uint256 data) internal {
-        ptr().map[tokenId] = data;
+        spointer().map[tokenId] = data;
     }
 }

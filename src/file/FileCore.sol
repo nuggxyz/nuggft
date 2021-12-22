@@ -10,13 +10,7 @@ import {SSTORE2} from '../libraries/SSTORE2.sol';
 
 import {File} from './FileStorage.sol';
 import {FilePure} from './FilePure.sol';
-import {FileView} from './FileView.sol';
-import {ProofPure} from '../proof/ProofPure.sol';
-import {ProofCore} from '../proof/ProofCore.sol';
 
-import {TokenView} from '../token/TokenView.sol';
-
-import {Trust} from '../trust/TrustStorage.sol';
 
 library FileCore {
     using FilePure for uint256;
@@ -24,50 +18,13 @@ library FileCore {
     using SafeCastLib for uint16;
 
     /*━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-                                PROCESS FILES
-    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━*/
-
-    function prepareForProcess(uint160 tokenId) internal view returns (uint256[][] memory files, IdotnuggV1Data.Data memory data) {
-        (uint256 proof, uint8[] memory ids, uint8[] memory extras, uint8[] memory xovers, uint8[] memory yovers) = ProofCore
-            .parsedProofOfIncludingPending(tokenId);
-
-        files = FileCore.getBatchFiles(ids);
-
-        data = IdotnuggV1Data.Data({
-            version: 1,
-            renderedAt: block.timestamp,
-            name: 'NuggFT V1',
-            desc: 'Nugg Fungible Token V1 by nugg.xyz',
-            owner: TokenView.exists(tokenId) ? TokenView.ownerOf(tokenId) : address(0),
-            tokenId: tokenId,
-            proof: proof,
-            ids: ids,
-            extras: extras,
-            xovers: xovers,
-            yovers: yovers
-        });
-    }
-
-    /*━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-                                RESOLVER SET
-    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━*/
-
-    function setResolver(uint160 tokenId, address to) internal {
-        require(TokenView.isApprovedOrOwner(msg.sender, tokenId), 'T:0');
-
-        File.spointer().resolvers[tokenId] = to;
-    }
-
-    /*━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
                                 TRUSTED
     ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━*/
 
-    function trustedStoreFiles(
-        Trust.Storage storage trust,
+    function storeFiles(
         uint8 feature,
         uint256[][] calldata data
     ) internal {
-        require(trust._isTrusted, 'T:0');
 
         uint8 len = data.length.safe8();
 

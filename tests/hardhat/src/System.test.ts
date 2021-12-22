@@ -43,9 +43,9 @@ describe('uint tests', async function () {
             let last = BigNumber.from(0);
             let lastShare = BigNumber.from(0);
 
-            for (let i = 2000; i < 2500; i++) {
-                await fix.nuggft.connect(accounts.dennis).mint(i, { value: await fix.nuggft.verifiedMinSharePrice() });
-                let working = await fix.nuggft.connect(accounts.frank).verifiedMinSharePrice();
+            for (let i = 2000; i < 2010; i++) {
+                await fix.nuggft.connect(accounts.dennis).mint(i, { value: await fix.nuggft.minSharePrice() });
+                let working = await fix.nuggft.connect(accounts.frank).minSharePrice();
                 let workingShare = await fix.nuggft.connect(accounts.frank).activeEthPerShare();
 
                 console.log(
@@ -84,7 +84,7 @@ describe('uint tests', async function () {
             // for (let i = 2000; i < 2010; i++) {
             //     await fix.nuggft.connect(accounts.dennis).mint(i, { value: toEth('35') });
 
-            //     console.log('minshareprice: ', fromEth(await fix.nuggft.connect(accounts.frank).verifiedMinSharePrice()));
+            //     console.log('minshareprice: ', fromEth(await fix.nuggft.connect(accounts.frank).minSharePrice()));
             // }
 
             await Mining.advanceBlockTo(2500);
@@ -207,7 +207,7 @@ describe('uint tests', async function () {
 
             await fix.nuggft.connect(accounts.deployer).setMigrator(fix.migrator.address);
 
-            await fix.nuggft.connect(fix.deployer).setIsTrusted(accounts.frank.address);
+            await fix.nuggft.connect(fix.deployer).setIsTrusted(accounts.frank.address, true);
 
             await fix.nuggft.connect(accounts.frank).trustedMint(69, accounts.mac.address, { value: toEth('250') });
 

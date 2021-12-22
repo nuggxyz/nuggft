@@ -7,8 +7,6 @@ import {INuggFTV1Migrator} from '../interfaces/INuggFTV1Migrator.sol';
 import {ShiftLib} from '../libraries/ShiftLib.sol';
 import {SafeTransferLib} from '../libraries/SafeTransferLib.sol';
 
-import {Trust} from '../trust/TrustStorage.sol';
-
 import {TokenCore} from '../token/TokenCore.sol';
 import {TokenView} from '../token/TokenView.sol';
 
@@ -129,37 +127,13 @@ library StakeCore {
                                 BURN/MIGRATE
     ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━*/
 
-    /// @notice burns a nugg from existance, dealing the eth worth of that share to the user
-    /// @dev should only be called directly
-    /// @param tokenId the id of the nugg being burned
-    function burnStakedShare(uint160 tokenId) internal {
-        uint96 ethOwed = _subStakedShare(tokenId);
-
-        SafeTransferLib.safeTransferETH(msg.sender, ethOwed);
-    }
-
-    function migrateStakedShare(uint160 tokenId) internal {
-        address migrator = Stake.spointer().trustedMigrator;
-
-        require(migrator != address(0), 'T:3');
-
-        // stores the proof before deleting the nugg
-        uint256 proof = ProofCore.checkedProofOf(tokenId);
-
-        uint96 ethOwed = _subStakedShare(tokenId);
-
-        INuggFTV1Migrator(migrator).nuggftMigrateFromV1{value: ethOwed}(tokenId, proof, msg.sender);
-
-        emit MigrateV1Sent(migrator, tokenId, proof, msg.sender, ethOwed);
-    }
-
     /// @notice removes a staked share from the contract,
     /// @dev this is the only way to remove a share
     /// @dev caculcates but does not handle dealing the eth - which is handled by the two helpers above
     /// @dev ensurs the user is the owner of the nugg
     /// @param tokenId the id of the nugg being unstaked
     /// @return ethOwed -> the amount of eth owed to the unstaking user - equivilent to "ethPerShare"
-    function _subStakedShare(uint160 tokenId) private returns (uint96 ethOwed) {
+    function subStakedShare(uint160 tokenId) internal returns (uint96 ethOwed) {
         require(TokenView.ownerOf(tokenId) == msg.sender, 'T:4');
 
         uint256 cache = Stake.sload();
@@ -183,33 +157,4 @@ library StakeCore {
     /*━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
                                  TRUSTED
     ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━*/
-
-    /// @notice sends the current protocolEth to the user and resets the value to zero
-    /// @dev caller must be a trusted user
-    /// @param trust the trust storage pointer
-    function trustedExtractProtocolEth(Trust.Storage storage trust) internal {
-        require(trust._isTrusted, 'T:0'); // "user not trusted"
-
-        uint256 cache = Stake.sload();
-
-        uint96 eth = cache.getProtocolEth();
-
-        SafeTransferLib.safeTransferETH(msg.sender, eth);
-
-        Stake.sstore(cache.setProtocolEth(0));
-
-        emit ProtocolEthExtracted(eth);
-    }
-
-    /// @notice sets the migrator contract
-    /// @dev caller must be a trusted user
-    /// @param trust the trust storage pointer
-    /// @param migrator the address to set as the migrator contract
-    function trustedSetMigrator(Trust.Storage storage trust, address migrator) internal {
-        require(trust._isTrusted, 'T:1'); // "user not trusted"
-
-        Stake.spointer().trustedMigrator = migrator;
-
-        emit MigratorV1Updated(migrator);
-    }
 }

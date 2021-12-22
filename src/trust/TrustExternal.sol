@@ -4,60 +4,48 @@ pragma solidity 0.8.9;
 
 import {ITrustExternal} from '../interfaces/nuggft/ITrustExternal.sol';
 
-import {StakeCore} from '../stake/StakeCore.sol';
-import {TokenCore} from '../token/TokenCore.sol';
-import {Trust} from './TrustStorage.sol';
-
-import {FileCore} from '../file/FileCore.sol';
+import {Trust} from './Trust.sol';
 
 abstract contract TrustExternal is ITrustExternal {
-    address private _trusted;
-
-    Trust.Storage private _trust;
-
-    modifier requiresTrust() {
-        require(_trusted == msg.sender, 'UNTRUSTED');
-        _trust._isTrusted = true;
-        _;
-        _trust._isTrusted = false;
-    }
-
     constructor() {
-        _trusted = msg.sender;
+        Trust.Storage storage store;
 
-        emit TrustUpdated(msg.sender);
+        assembly {
+            store.slot := 0x20002467
+        }
+
+        store.trusted[msg.sender] = true;
+
+        emit TrustUpdated(msg.sender, true);
     }
 
-    /*━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-                                TRUSTED
-    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━*/
-    function trustedMint(uint160 tokenId, address to) external payable override requiresTrust {
-        TokenCore.trustedMint(_trust, to, tokenId);
-    }
+    /// @inheritdoc ITrustExternal
+    function setIsTrusted(address user, bool trust) external virtual override {
+        Trust.check();
 
-    function extractProtocolEth() external override requiresTrust {
-        StakeCore.trustedExtractProtocolEth(_trust);
-    }
+        Trust.Storage storage store;
 
-    function setMigrator(address addr) external requiresTrust {
-        StakeCore.trustedSetMigrator(_trust, addr);
-    }
+        assembly {
+            store.slot := 0x20002467
+        }
 
-    function storeFiles(uint256[][] calldata data, uint8 feature) external override requiresTrust {
-        FileCore.trustedStoreFiles(_trust, feature, data);
-    }
+        store.trusted[user] = trust;
 
-    function setIsTrusted(address user) external virtual override requiresTrust {
-        _trusted = user;
-
-        emit TrustUpdated(user);
+        emit TrustUpdated(user, trust);
     }
 
     /*━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
                                  VIEW
     ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━*/
 
-    function trusted() public view override returns (address) {
-        return _trusted;
+    /// @inheritdoc ITrustExternal
+    function trusted(address user) public view override returns (bool) {
+        Trust.Storage storage store;
+
+        assembly {
+            store.slot := 0x20002467
+        }
+
+        return store.trusted[user];
     }
 }

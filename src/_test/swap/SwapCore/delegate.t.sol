@@ -15,7 +15,7 @@ contract SwapCoreTest__delegate is t {
         fvm.roll(1);
         fvm.roll(2);
 
-        SwapCore.delegate(1);
+        // SwapCore.delegate(1);
 
         (, Swap.Memory memory m) = Swap.loadTokenSwap(4, msg.sender);
 

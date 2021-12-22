@@ -19,13 +19,16 @@ interface IStakeExternal {
 
     function migrateStake(uint160 tokenId) external;
 
+    /// @notice burns a nugg from existance, dealing the eth worth of that share to the user
+    /// @dev should only be called directly
+    /// @param tokenId the id of the nugg being burned
     function withdrawStake(uint160 tokenId) external;
 
     /*━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
                             VIEW FUNCTIONS
     ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━*/
 
-    function verifiedMinSharePrice() external view returns (uint96 res);
+    function minSharePrice() external view returns (uint96 res);
 
     function totalProtocolEth() external view returns (uint96);
 
@@ -36,4 +39,17 @@ interface IStakeExternal {
     function totalStakedEth() external view returns (uint96);
 
     function activeEthPerShare() external view returns (uint96);
+
+    /*━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+                                TRUSTED
+    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━*/
+
+    /// @notice sends the current protocolEth to the user and resets the value to zero
+    /// @dev caller must be a trusted user
+    function extractProtocolEth() external;
+
+    /// @notice sets the migrator contract
+    /// @dev caller must be a trusted user
+    /// @param migrator the address to set as the migrator contract
+    function setMigrator(address migrator) external;
 }

@@ -96,4 +96,10 @@ interface IdotnuggV1Implementer {
     function resolverOf(uint256 tokenId) external view returns (address resolver);
 
     function prepareFiles(uint256 tokenId) external view returns (uint256[][] memory file, IdotnuggV1Data.Data memory data);
+
+    function dotnuggV1Processor() external returns (address);
+
+    function defaultWidth() external returns (uint8);
+
+    function defaultZoom() external returns (uint8);
 }
