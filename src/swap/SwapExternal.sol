@@ -2,13 +2,12 @@
 
 pragma solidity 0.8.9;
 
-import {ISwapExternal} from '../interfaces/INuggFT.sol';
+import {ISwapExternal} from '../interfaces/nuggft/ISwapExternal.sol';
 
 import {EpochCore} from '../epoch/EpochCore.sol';
 
 import {Swap} from './SwapStorage.sol';
 import {SwapCore} from './SwapCore.sol';
-import {SwapView} from './SwapView.sol';
 
 // OK
 abstract contract SwapExternal is ISwapExternal {
@@ -56,21 +55,7 @@ abstract contract SwapExternal is ISwapExternal {
                                 VIEW
     ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━*/
 
-    // function getActiveSwap(uint160 tokenId)
-    //     external
-    //     view
-    //     override
-    //     returns (
-    //         address leader,
-    //         uint96 amount,
-    //         uint32 _epoch,
-    //         bool isOwner
-    //     )
-    // {
-    //     return SwapView.getActiveSwap(tokenId);
-    // }
-
-    // function getOfferByAccount(uint160 tokenId, address account) external view override returns (uint96 amount) {
-    //     return SwapView.getOfferByAccount(tokenId, account);
-    // }
+    function verifedDelegateMin(uint160 tokenId) external view override returns (uint96 amount) {
+        return SwapCore.verifedDelegateMin(tokenId);
+    }
 }

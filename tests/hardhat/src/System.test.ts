@@ -1,6 +1,8 @@
+/* eslint-disable prefer-const */
 import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/dist/src/signers';
 import { ethers, waffle } from 'hardhat';
 import { Address } from 'ethereumjs-util';
+import { BigNumber } from 'ethers';
 
 import { NamedAccounts } from '../../../hardhat.config';
 import { Mining } from '../lib/shared/mining';
@@ -36,7 +38,29 @@ describe('uint tests', async function () {
 
             await fix.nuggft.connect(accounts.mac).delegate(token1);
 
-            await fix.nuggft.connect(accounts.dee).delegate(token1, { value: toEth('3.000') });
+            await fix.nuggft.connect(accounts.dee).delegate(token1, { value: toEth('0.0690') });
+
+            let last = BigNumber.from(0);
+            let lastShare = BigNumber.from(0);
+
+            for (let i = 2000; i < 2500; i++) {
+                await fix.nuggft.connect(accounts.dennis).mint(i, { value: await fix.nuggft.verifiedMinSharePrice() });
+                let working = await fix.nuggft.connect(accounts.frank).verifiedMinSharePrice();
+                let workingShare = await fix.nuggft.connect(accounts.frank).activeEthPerShare();
+
+                console.log(
+                    'diff: ',
+                    fromEth(working.sub(last)),
+                    'diffShare: ',
+                    fromEth(workingShare.sub(lastShare)),
+                    'minshareprice: ',
+                    fromEth(working),
+                    'minsharepriceShare: ',
+                    fromEth(workingShare),
+                );
+                last = working;
+                lastShare = workingShare;
+            }
 
             await Mining.advanceBlockTo(510);
 
@@ -44,6 +68,7 @@ describe('uint tests', async function () {
             await fix.nuggft.connect(accounts.mac).claim(token1);
 
             await fix.nuggft.connect(accounts.dee).approve(fix.nuggft.address, token1);
+
             await fix.nuggft.connect(accounts.dee).swap(token1, toEth('5.000'));
 
             const token3 = await fix.nuggft.epoch();
@@ -56,11 +81,11 @@ describe('uint tests', async function () {
             await fix.nuggft.connect(accounts.dennis).delegate(token1, { value: toEth('2.000') });
             await fix.nuggft.connect(accounts.charile).delegate(token1, { value: toEth('30.000') });
 
-            for (let i = 2000; i < 2010; i++) {
-                await fix.nuggft.connect(accounts.dennis).mint(i, { value: toEth('35') });
+            // for (let i = 2000; i < 2010; i++) {
+            //     await fix.nuggft.connect(accounts.dennis).mint(i, { value: toEth('35') });
 
-                console.log('minshareprice: ', fromEth(await fix.nuggft.connect(accounts.frank).minSharePrice()));
-            }
+            //     console.log('minshareprice: ', fromEth(await fix.nuggft.connect(accounts.frank).verifiedMinSharePrice()));
+            // }
 
             await Mining.advanceBlockTo(2500);
             await Mining.advanceBlock();

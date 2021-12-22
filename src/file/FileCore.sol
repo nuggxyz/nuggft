@@ -12,7 +12,7 @@ import {File} from './FileStorage.sol';
 import {FilePure} from './FilePure.sol';
 import {FileView} from './FileView.sol';
 import {ProofPure} from '../proof/ProofPure.sol';
-import {ProofView} from '../proof/ProofView.sol';
+import {ProofCore} from '../proof/ProofCore.sol';
 
 import {TokenView} from '../token/TokenView.sol';
 
@@ -28,7 +28,7 @@ library FileCore {
     ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━*/
 
     function prepareForProcess(uint160 tokenId) internal view returns (uint256[][] memory files, IdotnuggV1Data.Data memory data) {
-        (uint256 proof, uint8[] memory ids, uint8[] memory extras, uint8[] memory xovers, uint8[] memory yovers) = ProofView
+        (uint256 proof, uint8[] memory ids, uint8[] memory extras, uint8[] memory xovers, uint8[] memory yovers) = ProofCore
             .parsedProofOfIncludingPending(tokenId);
 
         files = FileCore.getBatchFiles(ids);

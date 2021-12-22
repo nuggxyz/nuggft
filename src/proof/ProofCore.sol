@@ -10,7 +10,6 @@ import {EpochCore} from '../epoch/EpochCore.sol';
 import {Proof} from './ProofStorage.sol';
 
 import {ProofPure} from './ProofPure.sol';
-import {ProofView} from './ProofView.sol';
 
 import {TokenView} from '../token/TokenView.sol';
 
@@ -34,19 +33,58 @@ library ProofCore {
     event SetAnchorOverrides(uint160 tokenId, uint256 proof, uint8[] xs, uint8[] ys);
 
     /*━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+                                VIEW
+    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━*/
+
+    function checkedProofOf(uint160 tokenId) internal view returns (uint256 res) {
+        res = Proof.sload(tokenId);
+        require(res != 0, 'P:0');
+    }
+
+    function checkedProofOfIncludingPending(uint160 tokenId) internal view returns (uint256 res) {
+        (uint256 seed, uint256 epoch, uint256 proof, ) = ProofCore.pendingProof();
+
+        if (epoch == tokenId && seed != 0) return proof;
+
+        res = Proof.sload(tokenId);
+
+        require(res != 0, 'P:1');
+    }
+
+    function hasProof(uint160 tokenId) internal view returns (bool res) {
+        res = Proof.sload(tokenId) != 0;
+    }
+
+    function parsedProofOfIncludingPending(uint160 tokenId)
+        internal
+        view
+        returns (
+            uint256 proof,
+            uint8[] memory defaultIds,
+            uint8[] memory extraIds,
+            uint8[] memory overxs,
+            uint8[] memory overys
+        )
+    {
+        proof = checkedProofOfIncludingPending(tokenId);
+
+        return ProofPure.fullProof(proof);
+    }
+
+    /*━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
                             EXTERNAL MANAGEMENT
     ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━*/
 
     function rotateFeature(uint160 tokenId, uint8 feature) internal {
         require(TokenView.ownerOf(tokenId) == msg.sender, 'PC:2');
 
-        uint256 working = ProofView.checkedProofOf(tokenId);
+        uint256 working = checkedProofOf(tokenId);
 
         working = ProofPure.rotateDefaultandExtra(working, feature);
 
         working = ProofPure.clearAnchorOverridesForFeature(working, feature);
 
-        Proof.set(tokenId, working);
+        Proof.sstore(tokenId, working);
 
         emit RotateItem(tokenId, working, feature);
     }
@@ -60,11 +98,11 @@ library ProofCore {
 
         require(xs.length == 8 && ys.length == 8, 'PC:3');
 
-        uint256 working = ProofView.checkedProofOf(tokenId);
+        uint256 working = checkedProofOf(tokenId);
 
         working = ProofPure.setNewAnchorOverrides(working, xs, ys);
 
-        Proof.set(tokenId, working);
+        Proof.sstore(tokenId, working);
 
         emit SetAnchorOverrides(tokenId, working, xs, ys);
     }
@@ -76,7 +114,7 @@ library ProofCore {
     function addItem(uint160 tokenId, uint16 itemId) internal {
         require(TokenView.ownerOf(tokenId) == msg.sender, 'PC:0');
 
-        uint256 working = ProofView.checkedProofOf(tokenId);
+        uint256 working = checkedProofOf(tokenId);
 
         require(Proof.ptr().protcolItems[itemId] > 0, 'RC:3');
 
@@ -84,7 +122,7 @@ library ProofCore {
 
         working = ProofPure.pushToExtra(working, itemId);
 
-        Proof.set(tokenId, working);
+        Proof.sstore(tokenId, working);
 
         emit PushItem(tokenId, working, itemId);
     }
@@ -92,11 +130,11 @@ library ProofCore {
     function removeItem(uint160 tokenId, uint16 itemId) internal {
         require(TokenView.ownerOf(tokenId) == msg.sender, 'PC:1');
 
-        uint256 working = ProofView.checkedProofOf(tokenId);
+        uint256 working = checkedProofOf(tokenId);
 
         working = ProofPure.pullFromExtra(working, itemId);
 
-        Proof.set(tokenId, working);
+        Proof.sstore(tokenId, working);
 
         Proof.ptr().protcolItems[itemId]++;
 
@@ -108,7 +146,7 @@ library ProofCore {
     ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━*/
 
     function setProof(uint160 tokenId) internal {
-        require(!ProofView.hasProof(tokenId), 'P:0');
+        require(!hasProof(tokenId), 'P:0');
 
         uint256 randomEnoughSeed = uint256(keccak256(abi.encodePacked(hex'420690', tokenId, blockhash(block.number - 1))));
 
@@ -116,20 +154,19 @@ library ProofCore {
 
         (uint256 res, uint8[] memory picks) = ProofCore.initFromSeed(randomEnoughSeed);
 
-        Proof.set(tokenId, res);
+        Proof.sstore(tokenId, res);
 
         emit SetProof(tokenId, res, picks);
     }
 
     function setProofFromEpoch(uint160 tokenId) internal {
-        require(!ProofView.hasProof(tokenId), 'P:2');
+        require(!hasProof(tokenId), 'P:2');
 
-        (uint256 seed, uint256 epoch, uint256 res, uint8[] memory picks) = pendingProof();
+        (, uint256 epoch, uint256 res, uint8[] memory picks) = pendingProof();
 
-        require(seed != 0, 'P:3');
         require(epoch == tokenId, 'P:4');
 
-        Proof.set(tokenId, res);
+        Proof.sstore(tokenId, res);
 
         emit SetProof(tokenId, res, picks);
     }

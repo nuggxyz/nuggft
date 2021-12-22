@@ -2,24 +2,15 @@
 
 pragma solidity 0.8.9;
 
-import {IProofExternal} from '../interfaces/INuggFT.sol';
+import {IProofExternal} from '../interfaces/nuggft/IProofExternal.sol';
 
 import {Proof} from './ProofStorage.sol';
 
 import {EpochCore} from '../epoch/EpochCore.sol';
 
 import {ProofCore} from './ProofCore.sol';
-import {ProofView} from './ProofView.sol';
 
-// OK
-/**
- * @dev Implementation of https://eips.ethereum.org/EIPS/eip-721[ERC721] Non-Fungible Token Standard, including
- * the Metadata extension, but not including the Enumerable extension, which is available separately as
- * {ERC721Enumerable}.
- */
 abstract contract ProofExternal is IProofExternal {
-    uint256 immutable GEN = 0x69696969696969;
-
     function rotateFeature(uint160 tokenId, uint8 feature) external override {
         ProofCore.rotateFeature(tokenId, feature);
     }
@@ -33,7 +24,7 @@ abstract contract ProofExternal is IProofExternal {
     }
 
     function proofOf(uint160 tokenId) public view virtual override returns (uint256) {
-        return ProofView.checkedProofOfIncludingPending(tokenId);
+        return ProofCore.checkedProofOfIncludingPending(tokenId);
     }
 
     function parsedProofOf(uint160 tokenId)
@@ -49,6 +40,6 @@ abstract contract ProofExternal is IProofExternal {
             uint8[] memory overys
         )
     {
-        return ProofView.parsedProofOfIncludingPending(tokenId);
+        return ProofCore.parsedProofOfIncludingPending(tokenId);
     }
 }

@@ -6,7 +6,6 @@ import {SafeCastLib} from '../libraries/SafeCastLib.sol';
 
 import {IStakeExternal} from '../interfaces/INuggFT.sol';
 
-import {StakeView} from './StakeView.sol';
 import {StakeCore} from './StakeCore.sol';
 
 abstract contract StakeExternal is IStakeExternal {
@@ -20,27 +19,27 @@ abstract contract StakeExternal is IStakeExternal {
         StakeCore.burnStakedShare(tokenId);
     }
 
-    function minSharePrice() external view override returns (uint96 res) {
-        res = StakeView.getMinSharePrice();
+    function verifiedMinSharePrice() external view override returns (uint96 res) {
+        res = StakeCore.verifiedMinSharePrice();
     }
 
     function totalStakedShares() external view override returns (uint64 res) {
-        res = StakeView.getActiveStakedShares();
+        res = StakeCore.activeStakedShares();
     }
 
     function totalStakedEth() external view override returns (uint96 res) {
-        res = StakeView.getActiveStakedEth();
+        res = StakeCore.activeStakedEth();
     }
 
     function activeEthPerShare() external view override returns (uint96 res) {
-        res = StakeView.getActiveEthPerShare();
+        res = StakeCore.activeEthPerShare();
     }
 
     function totalProtocolEth() external view override returns (uint96 res) {
-        res = StakeView.getActiveProtocolEth();
+        res = StakeCore.activeProtocolEth();
     }
 
     function totalSupply() external view override returns (uint256 res) {
-        res = StakeView.getActiveStakedShares();
+        res = StakeCore.activeStakedShares();
     }
 }

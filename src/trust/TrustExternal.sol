@@ -2,11 +2,10 @@
 
 pragma solidity 0.8.9;
 
-import {ITrustExternal} from '../interfaces/INuggFT.sol';
+import {ITrustExternal} from '../interfaces/nuggft/ITrustExternal.sol';
 
 import {StakeCore} from '../stake/StakeCore.sol';
 import {TokenCore} from '../token/TokenCore.sol';
-
 import {Trust} from './TrustStorage.sol';
 
 import {FileCore} from '../file/FileCore.sol';
