@@ -99,6 +99,7 @@ const StagingNetworks: NetworksUserConfig = {
         ...DefaultStageNetworkConfig,
         url: `https://ropsten.infura.io/v3/${process.env.INFURA_API_KEY}`,
         chainId: 3,
+        gasPrice: parseInt(GAS_PRICE.toString(), 10),
     },
     rinkeby: {
         ...DefaultStageNetworkConfig,

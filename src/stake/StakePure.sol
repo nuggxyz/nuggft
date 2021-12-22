@@ -61,10 +61,28 @@ library StakePure {
         proto = getProtocolEth(cache);
     }
 
+    function calculateProtocolFeeOf(uint96 any) internal pure returns (uint96 res) {
+        res = (any * StakePure.PROTOCOL_FEE_BPS) / 10000;
+    }
+
     // @test manual
-    function getMinSharePrice(uint256 cache) internal pure returns (uint96 res) {
-        res = getEthPerShare(cache);
-        res += (res * (getStakedShares(cache) + PROTOCOL_FEE_BPS)) / 10000;
+    function minSharePriceBreakdown(uint256 cache)
+        internal
+        pure
+        returns (
+            uint96 total,
+            uint96 ethPerShare,
+            uint96 protocolFee,
+            uint96 premium
+        )
+    {
+        ethPerShare = getEthPerShare(cache);
+
+        protocolFee = calculateProtocolFeeOf(ethPerShare);
+
+        premium = (ethPerShare * getStakedShares(cache)) / 10000;
+
+        total = ethPerShare + protocolFee + premium;
     }
 
     // @test manual

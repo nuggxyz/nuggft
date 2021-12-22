@@ -2,11 +2,11 @@
 
 pragma solidity 0.8.9;
 
-import {IFileExternal} from '../interfaces/INuggFT.sol';
-
 import {IdotnuggV1Processor} from '../interfaces/IdotnuggV1.sol';
 import {IdotnuggV1Resolver} from '../interfaces/IdotnuggV1.sol';
 import {IdotnuggV1Data} from '../interfaces/IdotnuggV1.sol';
+
+import {IFileExternal} from '../interfaces/nuggft/IFileExternal.sol';
 
 import {SafeCastLib} from '../libraries/SafeCastLib.sol';
 

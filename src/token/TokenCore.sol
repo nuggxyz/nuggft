@@ -97,13 +97,22 @@ library TokenCore {
         emit TrustedMint(to, tokenId);
     }
 
+    function checkedMintTo(address to, uint160 tokenId) internal {
+        // DEL require(SafeTransferLib.isERC721Receiver(to, tokenId), 'T:5');
+
+        // DEL Token.ptr().balances[to] += 1;
+        Token.ptr().owners[tokenId] = to;
+
+        emit Transfer(address(0), to, tokenId);
+    }
+
     // token does not exist and is < 1000
 
     function checkedTransferFromSelf(address to, uint160 tokenId) internal {
-        require(SafeTransferLib.isERC721Receiver(to, tokenId), 'T:2');
+        // DEL require(SafeTransferLib.isERC721Receiver(to, tokenId), 'T:2');
 
-        Token.ptr().balances[address(this)] -= 1;
-        Token.ptr().balances[to] += 1;
+        // DEL Token.ptr().balances[address(this)] -= 1;
+        // DEL Token.ptr().balances[to] += 1;
         Token.ptr().owners[tokenId] = to;
 
         emit Transfer(address(this), to, tokenId);
@@ -113,8 +122,8 @@ library TokenCore {
         // ERC721: transfer caller is not owner nor approved
         require(msg.sender == TokenView.ownerOf(tokenId) && TokenView.getApproved(tokenId) == address(this), 'T:4');
 
-        Token.ptr().balances[msg.sender] -= 1;
-        Token.ptr().balances[address(this)] += 1;
+        // DEL Token.ptr().balances[msg.sender] -= 1;
+        // DEL Token.ptr().balances[address(this)] += 1;
         Token.ptr().owners[tokenId] = address(this);
 
         // Clear approvals from the previous owner
@@ -125,14 +134,12 @@ library TokenCore {
         emit Transfer(msg.sender, address(this), tokenId);
     }
 
-    function checkedMintTo(address to, uint160 tokenId) internal {
-        // ERC721: transfer caller is not owner nor approved
-        require(SafeTransferLib.isERC721Receiver(to, tokenId), 'T:5');
+    function checkedPreMintFromSwap(uint160 tokenId) internal {
+        StakeCore.addStakedShareAndEth(msg.value.safe96());
 
-        Token.ptr().balances[to] += 1;
-        Token.ptr().owners[tokenId] = to;
+        ProofCore.setProofFromEpoch(tokenId);
 
-        emit Transfer(address(0), to, tokenId);
+        emit Transfer(address(0), address(this), tokenId);
     }
 
     function onBurn(uint160 tokenId) internal {
@@ -150,7 +157,7 @@ library TokenCore {
 
         emit Approval(msg.sender, address(0), tokenId);
 
-        Token.ptr().balances[msg.sender] -= 1;
+        // DEL Token.ptr().balances[msg.sender] -= 1;
 
         emit Transfer(msg.sender, address(0), tokenId);
     }

@@ -2,13 +2,14 @@
 
 pragma solidity 0.8.9;
 
+import {INuggFT} from '../interfaces/INuggFT.sol';
+
 import {SafeCastLib} from '../libraries/SafeCastLib.sol';
 import {SafeTransferLib} from '../libraries/SafeTransferLib.sol';
 
 import {Swap} from './SwapStorage.sol';
 import {SwapPure} from '../swap/SwapPure.sol';
 
-import {StakeView} from '../stake/StakeView.sol';
 import {StakeCore} from '../stake/StakeCore.sol';
 
 import {ProofCore} from '../proof/ProofCore.sol';
@@ -36,6 +37,30 @@ library SwapCore {
     event SwapItemStart(uint160 sellingTokenId, uint16 itemId, uint96 eth);
 
     /*━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+                                VIEW
+    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━*/
+
+    /// @notice calculates the minimum eth that must be sent with a delegate call
+    /// @dev returns 0 if no delegate can be made for this oken
+    /// @param tokenId the token to be delegated to
+    /// @return eth the minimum value that must be sent with a delegate call
+    function verifedDelegateMin(uint160 tokenId) internal view returns (uint96 eth) {
+        (, Swap.Memory memory m) = Swap.loadTokenSwap(tokenId, address(0));
+
+        if (m.activeEpoch == tokenId && m.swapData == 0) {
+            return StakeCore.verifiedMinSharePrice();
+        }
+
+        if (m.swapData == 0) return 0;
+
+        uint96 nextOfferMin = uint256(m.swapData.eth()).addIncrement().safe96();
+
+        if (m.offerData == 0 && m.swapData.isOwner() && nextOfferMin >= StakeCore.verifiedMinSharePrice()) return 0;
+
+        return nextOfferMin;
+    }
+
+    /*━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
                             TOKEN SWAP FUNCTIONS
     ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━*/
 
@@ -60,12 +85,13 @@ library SwapCore {
             return;
         }
 
-        require(!m.offerData.isOwner(), 'SL:HSO:0');
+        require(!m.offerData.isOwner(), 'S:0');
 
-        require(m.swapData != 0, 'NS:0:0');
+        require(m.swapData != 0, 'S:1');
 
         if (m.offerData == 0 && m.swapData.isOwner()) {
-            require(msg.value >= StakeView.getActiveEthPerShare(), 'SL:S:0');
+            //
+            require(msg.value >= StakeCore.activeEthPerShare(), 'S:2');
 
             commit(s, m);
 
@@ -78,15 +104,13 @@ library SwapCore {
     }
 
     function mint(Swap.Storage storage s, Swap.Memory memory m) internal {
-        require(m.swapData == 0 && m.offerData == 0, 'NS:M:D');
+        require(m.swapData == 0 && m.offerData == 0, 'S:3');
 
         (uint256 dat, ) = SwapPure.buildSwapData(m.activeEpoch, uint160(msg.sender), msg.value.safe96(), false);
 
         s.data = dat;
 
-        StakeCore.addStakedShareAndEth(msg.value.safe96());
-
-        ProofCore.setProof(m.activeEpoch);
+        TokenCore.checkedPreMintFromSwap(m.activeEpoch);
     }
 
     function claim(uint160 tokenId) internal {
@@ -98,11 +122,11 @@ library SwapCore {
             Swap.deleteTokenSwap(tokenId);
 
             // if this is a minting nugg
-            if (tokenId == m.swapData.epoch()) {
-                TokenCore.checkedMintTo(msg.sender, tokenId);
-            } else {
-                TokenCore.checkedTransferFromSelf(msg.sender, tokenId);
-            }
+            // if (tokenId == m.swapData.epoch()) {
+            //     TokenCore.checkedMintTo(msg.sender, tokenId);
+            // } else {
+            TokenCore.checkedTransferFromSelf(msg.sender, tokenId);
+            // }
         } else {
             SafeTransferLib.safeTransferETH(msg.sender, m.offerData.eth());
         }
@@ -110,10 +134,8 @@ library SwapCore {
         emit SwapClaim(tokenId, msg.sender, m.swapData.epoch());
     }
 
-    function unsafeClaimERC721To(uint160 tokenId, address to) internal {}
-
     function swap(uint160 tokenId, uint96 floor) internal {
-        require(floor >= StakeView.getActiveEthPerShare(), 'SL:S:0');
+        require(floor >= StakeCore.activeEthPerShare(), 'S:4');
 
         TokenCore.approvedTransferToSelf(tokenId);
 
@@ -138,7 +160,7 @@ library SwapCore {
         uint16 itemId,
         uint160 sendingTokenId
     ) internal {
-        require(TokenView.ownerOf(sendingTokenId) == msg.sender, 'AUC:TT:3');
+        require(TokenView.ownerOf(sendingTokenId) == msg.sender, 'S:5');
 
         (Swap.Storage storage s, Swap.Memory memory m) = Swap.loadItemSwap(sellingTokenId, itemId, sendingTokenId);
 
@@ -162,7 +184,7 @@ library SwapCore {
         uint16 itemId,
         uint160 buyingTokenId
     ) internal {
-        require(TokenView.ownerOf(buyingTokenId) == msg.sender, 'AUC:TT:3');
+        require(TokenView.ownerOf(buyingTokenId) == msg.sender, 'S:6');
 
         (, Swap.Memory memory m) = Swap.loadItemSwap(sellingTokenId, itemId, buyingTokenId);
 
@@ -184,7 +206,7 @@ library SwapCore {
         uint96 floor,
         uint160 sellingTokenId
     ) internal {
-        require(TokenView.ownerOf(sellingTokenId) == msg.sender, 'AUC:TT:3');
+        require(TokenView.ownerOf(sellingTokenId) == msg.sender, 'S:7');
 
         // will revert if they do not have the item
         ProofCore.removeItem(sellingTokenId, itemId);
@@ -206,7 +228,7 @@ library SwapCore {
     ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━*/
 
     function checkClaimerIsWinnerOrLoser(Swap.Memory memory m) internal pure returns (bool winner) {
-        require(m.offerData != 0, 'SL:CC:1');
+        require(m.offerData != 0, 'S:8');
 
         bool isOver = m.activeEpoch > m.swapData.epoch();
         bool isLeader = m.offerData.account() == m.swapData.account();

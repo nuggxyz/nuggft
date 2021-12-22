@@ -2,18 +2,15 @@
 
 pragma solidity 0.8.9;
 
+import {IERC721, IERC165, IERC721Metadata} from '../interfaces/IERC721.sol';
+import {ITokenExternal} from '../interfaces/nuggft/ITokenExternal.sol';
+
 import {SafeCastLib} from '../libraries/SafeCastLib.sol';
 
-import {IERC721Receiver, IERC721, IERC165, IERC721Metadata} from '../interfaces/IERC721.sol';
-import {ITokenExternal} from '../interfaces/INuggFT.sol';
-
 import {Token} from './TokenStorage.sol';
-
 import {TokenView} from './TokenView.sol';
-
 import {TokenCore} from './TokenCore.sol';
 
-//OK
 /**
  * @dev Implementation of https://eips.ethereum.org/EIPS/eip-721[ERC721] Non-Fungible Token Standard
  */
