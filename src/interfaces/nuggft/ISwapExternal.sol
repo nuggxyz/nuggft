@@ -50,5 +50,9 @@ interface ISwapExternal {
                             VIEW FUNCTIONS
     ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━*/
 
-    function verifedDelegateMin(uint160 tokenId) external view returns (uint96 amount);
+    /// @notice calculates the minimum eth that must be sent with a delegate call
+    /// @dev returns 0 if no delegate can be made for this oken
+    /// @param tokenId -> the token to be delegated to
+    /// @return value -> the minimum value that must be sent with a delegate call
+    function valueForDelegate(uint160 tokenId) external view returns (uint96 value);
 }

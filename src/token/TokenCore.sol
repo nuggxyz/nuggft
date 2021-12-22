@@ -13,8 +13,6 @@ import {TokenView} from './TokenView.sol';
 import {StakeCore} from '../stake/StakeCore.sol';
 import {ProofCore} from '../proof/ProofCore.sol';
 
-import {Trust} from '../trust/TrustStorage.sol';
-
 // system test
 library TokenCore {
     using SafeCastLib for uint256;
@@ -62,40 +60,6 @@ library TokenCore {
     /*━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
                                 TRANSFER
     ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━*/
-
-    function untrustedMint(uint160 tokenId) internal {
-        require(tokenId < UNTRUSTED_MINT_TOKENS + TRUSTED_MINT_TOKENS && tokenId > TRUSTED_MINT_TOKENS, 'T:1');
-
-        require(!TokenView.exists(tokenId), 'T:2');
-
-        StakeCore.addStakedShareAndEth(msg.value.safe96());
-
-        ProofCore.setProof(tokenId);
-
-        checkedMintTo(msg.sender, tokenId);
-
-        emit UntrustedMint(msg.sender, tokenId);
-    }
-
-    function trustedMint(
-        Trust.Storage storage trust,
-        address to,
-        uint160 tokenId
-    ) internal {
-        require(trust._isTrusted, 'T:0');
-
-        require(tokenId < TRUSTED_MINT_TOKENS && tokenId != 0, 'T:1');
-
-        require(!TokenView.exists(tokenId), 'T:2');
-
-        StakeCore.addStakedShareAndEth(msg.value.safe96());
-
-        ProofCore.setProof(tokenId);
-
-        checkedMintTo(to, tokenId);
-
-        emit TrustedMint(to, tokenId);
-    }
 
     function checkedMintTo(address to, uint160 tokenId) internal {
         // DEL require(SafeTransferLib.isERC721Receiver(to, tokenId), 'T:5');

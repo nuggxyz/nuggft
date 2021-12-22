@@ -11,24 +11,63 @@ import {Token} from './TokenStorage.sol';
 import {TokenView} from './TokenView.sol';
 import {TokenCore} from './TokenCore.sol';
 
+import {StakeCore} from '../stake/StakeCore.sol';
+import {ProofCore} from '../proof/ProofCore.sol';
+
+import {Trust} from '../trust/Trust.sol';
+
 ///
 /// @dev Implementation of https://eips.ethereum.org/EIPS/eip-721[ERC721] Non-Fungible Token Standard
 ///
 abstract contract TokenExternal is ITokenExternal {
     using SafeCastLib for uint256;
 
-    function mint(uint160 tokenId) public payable override {
-        TokenCore.untrustedMint(tokenId);
+    /// @inheritdoc ITokenExternal
+    function trustedMint(uint160 tokenId, address to) external payable override {
+        Trust.check();
+
+        require(tokenId < TokenCore.TRUSTED_MINT_TOKENS && tokenId != 0, 'T:1');
+
+        require(!TokenView.exists(tokenId), 'T:2');
+
+        StakeCore.addStakedShareAndEth(msg.value.safe96());
+
+        ProofCore.setProof(tokenId);
+
+        TokenCore.checkedMintTo(to, tokenId);
+
+        emit TrustedMint(to, tokenId);
     }
 
+    /// @inheritdoc ITokenExternal
+    function mint(uint160 tokenId) public payable override {
+        require(
+            tokenId < TokenCore.UNTRUSTED_MINT_TOKENS + TokenCore.TRUSTED_MINT_TOKENS && tokenId > TokenCore.TRUSTED_MINT_TOKENS,
+            'T:1'
+        );
+
+        require(!TokenView.exists(tokenId), 'T:2');
+
+        StakeCore.addStakedShareAndEth(msg.value.safe96());
+
+        ProofCore.setProof(tokenId);
+
+        TokenCore.checkedMintTo(msg.sender, tokenId);
+
+        emit UntrustedMint(msg.sender, tokenId);
+    }
+
+    /// @inheritdoc IERC721
     function approve(address to, uint256 tokenId) public override {
         TokenCore.checkedApprove(to, tokenId.safe160());
     }
 
+    /// @inheritdoc IERC721
     function setApprovalForAll(address operator, bool approved) public override {
         TokenCore.checkedSetApprovalForAll(operator, approved);
     }
 
+    /// @inheritdoc IERC165
     function supportsInterface(bytes4 interfaceId) public view virtual override returns (bool) {
         return
             interfaceId == type(IERC721).interfaceId ||
@@ -36,14 +75,17 @@ abstract contract TokenExternal is ITokenExternal {
             interfaceId == type(IERC165).interfaceId;
     }
 
+    /// @inheritdoc IERC721
     function ownerOf(uint256 tokenId) public view override returns (address) {
         return TokenView.ownerOf(tokenId.safe160());
     }
 
+    /// @inheritdoc IERC721
     function getApproved(uint256 tokenId) public view override returns (address) {
         return TokenView.getApproved(tokenId.safe160());
     }
 
+    /// @inheritdoc IERC721
     function isApprovedForAll(address owner, address operator) public view override returns (bool) {
         return TokenView.isApprovedForAll(owner, operator);
     }

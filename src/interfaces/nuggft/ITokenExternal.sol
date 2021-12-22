@@ -7,6 +7,8 @@ import {IERC721, IERC721Metadata, IERC165} from '../IERC721.sol';
 interface ITokenExternal is IERC721 {
     function mint(uint160 tokenId) external payable;
 
+    function trustedMint(uint160 tokenId, address to) external payable;
+
     event TrustedMint(address indexed to, uint160 tokenId);
     event UntrustedMint(address indexed by, uint160 tokenId);
 }

@@ -7,6 +7,8 @@ import {IERC721, IERC721Metadata, IERC165} from '../IERC721.sol';
 import {IdotnuggV1Implementer} from '../IdotnuggV1.sol';
 
 interface IFileExternal is IERC721Metadata, IdotnuggV1Implementer {
+    function storeFiles(uint256[][] calldata data, uint8 feature) external;
+
     /*━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
                             VIEW FUNCTIONS
     ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━*/

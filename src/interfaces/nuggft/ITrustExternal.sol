@@ -7,22 +7,17 @@ interface ITrustExternal {
                                 EVENTS
     ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━*/
 
-    event TrustUpdated(address indexed user);
+    event TrustUpdated(address indexed user, bool trust);
 
     /*━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
                             STATE CHANGING
     ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━*/
-    function trustedMint(uint160 tokenId, address to) external payable;
 
-    function extractProtocolEth() external;
-
-    function storeFiles(uint256[][] calldata data, uint8 feature) external;
-
-    function setIsTrusted(address user) external;
+    function setIsTrusted(address user, bool trust) external;
 
     /*━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
                             VIEW FUNCTIONS
     ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━*/
 
-    function trusted() external view returns (address);
+    function trusted(address user) external view returns (bool);
 }

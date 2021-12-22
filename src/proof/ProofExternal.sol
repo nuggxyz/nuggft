@@ -9,24 +9,51 @@ import {Proof} from './ProofStorage.sol';
 import {EpochCore} from '../epoch/EpochCore.sol';
 
 import {ProofCore} from './ProofCore.sol';
+import {ProofPure} from './ProofPure.sol';
+
+import {TokenView} from '../token/TokenView.sol';
 
 abstract contract ProofExternal is IProofExternal {
+    /// @inheritdoc IProofExternal
     function rotateFeature(uint160 tokenId, uint8 feature) external override {
-        ProofCore.rotateFeature(tokenId, feature);
+        require(TokenView.ownerOf(tokenId) == msg.sender, 'PC:2');
+
+        uint256 working = ProofCore.checkedProofOf(tokenId);
+
+        working = ProofPure.rotateDefaultandExtra(working, feature);
+
+        working = ProofPure.clearAnchorOverridesForFeature(working, feature);
+
+        Proof.sstore(tokenId, working);
+
+        emit RotateItem(tokenId, working, feature);
     }
 
+    /// @inheritdoc IProofExternal
     function setOverrides(
         uint160 tokenId,
         uint8[] memory xs,
         uint8[] memory ys
     ) external override {
-        ProofCore.setAnchorOverrides(tokenId, xs, ys);
+        require(TokenView.ownerOf(tokenId) == msg.sender, 'PC:2');
+
+        require(xs.length == 8 && ys.length == 8, 'PC:3');
+
+        uint256 working = ProofCore.checkedProofOf(tokenId);
+
+        working = ProofPure.setNewAnchorOverrides(working, xs, ys);
+
+        Proof.sstore(tokenId, working);
+
+        emit SetAnchorOverrides(tokenId, working, xs, ys);
     }
 
+    /// @inheritdoc IProofExternal
     function proofOf(uint160 tokenId) public view virtual override returns (uint256) {
         return ProofCore.checkedProofOfIncludingPending(tokenId);
     }
 
+    /// @inheritdoc IProofExternal
     function parsedProofOf(uint160 tokenId)
         public
         view
