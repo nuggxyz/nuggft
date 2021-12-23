@@ -17,7 +17,7 @@
     // }
 
     "nugg.xyz - DappTools Test Template": {
-        "prefix": "dappt",
+        "prefix": "dapp_test",
         "scope": "solidity",
         "body": [
             "// SPDX-License-Identifier: UNLICENSED",
@@ -27,6 +27,26 @@
             "import {DSTestPlus as t} from '../../utils/DSTestPlus.sol';",
             "",
             "import {${TM_DIRECTORY/.*\\/(.*)$/$1/}} from '../../../${TM_DIRECTORY/.*\\/(.*\\/.*)$/$1/}.sol';",
+            "",
+            "contract ${TM_DIRECTORY/.*\\/(.*)$/$1/}Test__${TM_FILENAME/(.*)\\.t\\..+$/$1/} is t {",
+            "",
+            "\tfunction test__${TM_DIRECTORY/.*\\/(.*)$/$1/}__${TM_FILENAME/(.*)\\.t\\..+$/$1/}__a() public {",
+            "\t\tassertEq(${TM_DIRECTORY/.*\\/(.*)$/$1/}.${TM_FILENAME/(.*)\\.t\\..+$/$1/}(${1:0}), ${2:0});",
+            "\t}",
+            "}"
+        ]
+    },
+    "nugg.xyz - DappTools External Test Template": {
+        "prefix": "dapp_ext",
+        "scope": "solidity",
+        "body": [
+            "// SPDX-License-Identifier: UNLICENSED",
+            "",
+            "pragma solidity 0.8.9;",
+            "",
+            "import {DSTestPlus as t} from '../utils/DSTestPlus.sol';",
+            "",
+            "import {NuggFatherFix} from '../fixtures/NuggFather.fix.sol'",
             "",
             "contract ${TM_DIRECTORY/.*\\/(.*)$/$1/}Test__${TM_FILENAME/(.*)\\.t\\..+$/$1/} is t {",
             "",

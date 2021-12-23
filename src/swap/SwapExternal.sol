@@ -26,9 +26,9 @@ abstract contract SwapExternal is ISwapExternal {
 
     event log_named_uint(string key, uint256 val);
 
-    /*━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+    /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
                                   delegate
-    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━*/
+       ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
 
     /// @inheritdoc ISwapExternal
     function delegate(uint160 tokenId) external payable override {
@@ -46,11 +46,11 @@ abstract contract SwapExternal is ISwapExternal {
 
             // we do not need this, could take tokenId out as an argument - but do not want to give users
             // the ability to accidently place an offer for nugg A and end up minting nugg B.
-            require(m.swapData == 0 && m.offerData == 0, 'S:3');
+            require(m.offerData == 0, 'S:3');
 
             (uint256 data, uint96 dust) = SwapPure.buildSwapData(m.activeEpoch, uint160(msg.sender), msg.value.safe96(), false);
 
-            require(dust != msg.value, 'S:13');
+            require(msg.value >= SwapPure.MIN_OFFER && dust != msg.value, 'S:13');
 
             s.data = data;
 
@@ -63,6 +63,9 @@ abstract contract SwapExternal is ISwapExternal {
             emit DelegateMint(tokenId, msg.sender, msg.value.safe96());
         } else {
             require(!m.offerData.isOwner(), 'S:0');
+
+            // forces user to claim previously
+            if (m.offerData != 0) require(m.offerData.epoch() == m.activeEpoch, 'S:EPO:12');
 
             require(m.swapData != 0, 'S:1');
 
@@ -215,22 +218,28 @@ abstract contract SwapExternal is ISwapExternal {
 
         if (m.swapData == 0) {
             if (m.activeEpoch == tokenId) {
-                return (true, StakeCore.minSharePrice().compressEthRoundUp(), 0);
+                nextSwapAmount = StakeCore.minSharePrice().compressEthRoundUp();
+            } else {
+                return (false, 0, 0);
             }
-            return (false, 0, 0);
+        } else {
+            if (m.offerData.isOwner()) canDelegate = false;
+
+            userCurrentOffer = m.offerData.eth();
+
+            nextSwapAmount = m.swapData.eth();
+
+            if (nextSwapAmount < StakeCore.activeEthPerShare()) {
+                nextSwapAmount = StakeCore.activeEthPerShare();
+            }
         }
 
-        if (m.offerData.isOwner()) canDelegate = false;
-
-        userCurrentOffer = m.offerData.eth();
-
-        nextSwapAmount = m.swapData.eth();
-
-        if (nextSwapAmount < StakeCore.activeEthPerShare()) {
-            nextSwapAmount = StakeCore.activeEthPerShare();
+        if (nextSwapAmount == 0) {
+            nextSwapAmount = SwapPure.MIN_OFFER;
+            // nextSwapAmount = nextSwapAmount.addIncrement();
+        } else {
+            nextSwapAmount = nextSwapAmount.addIncrement();
         }
-
-        nextSwapAmount = nextSwapAmount.addIncrement();
     }
 
     /*━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━

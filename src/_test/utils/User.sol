@@ -8,12 +8,11 @@ contract User {
     ForgeVm internal constant fvm = ForgeVm(0x7109709ECfa91a80626fF3989D68f67F5b1DD12D);
     event log_named_string(string key, string val);
 
-    constructor() payable {
-        // (bool ok, ) = tryCall(address(fvm), 0, abi.encodeWithSelector(fvm.deal.selector, startingEther * 10**18));
-        // if (!ok) {
-        // }
-        // fvm.deal(address(this), startingEther * 10**18);
-    }
+    fallback() external payable {}
+
+    receive() external payable {}
+
+    constructor() payable {}
 
     function tryCall(address target, bytes memory data) public payable virtual returns (bool success, bytes memory returnData) {
         (success, returnData) = target.call{value: msg.value}(data);

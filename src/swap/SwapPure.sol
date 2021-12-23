@@ -14,6 +14,7 @@ library SwapPure {
 
     // 10**13
     uint96 constant COMPRESSION_PERCISION = 0x9184E72A000;
+    uint96 constant MIN_OFFER = 0x9184E72A000 * 100;
 
     /*━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
                                CALCULATION
@@ -21,7 +22,11 @@ library SwapPure {
 
     // @test  manual
     function addIncrement(uint96 value) internal pure returns (uint96) {
-        return compressEthRoundDown(((value * 10200) / 10000));
+        // if (value < 10**16) {
+        //     return compressEthRoundUp(((value * 10200) / 10000));
+        // } else {
+        return compressEthRoundUp(((value * 10200) / 10000));
+        // }
     }
 
     // @test  manual
