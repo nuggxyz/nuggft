@@ -6,6 +6,8 @@ import {IERC721Metadata} from './interfaces/IERC721.sol';
 
 import {INuggFT as a} from './interfaces/INuggFT.sol';
 
+import {Global} from './global/GlobalStorage.sol';
+
 import {TokenExternal as Token} from './token/TokenExternal.sol';
 import {SwapExternal as Swapable} from './swap/SwapExternal.sol';
 import {ProofExternal as Provable} from './proof/ProofExternal.sol';
@@ -39,5 +41,9 @@ contract NuggFT is a, Swapable, Provable, Loanable, Migratable, Staked, Epoched,
 
     function symbol() public pure override returns (string memory) {
         return 'NUGGFT';
+    }
+
+    function globalPointerForTesting() internal view returns (Global.Storage storage ptr) {
+        return Global.ptr();
     }
 }

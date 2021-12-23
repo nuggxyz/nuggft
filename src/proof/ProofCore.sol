@@ -142,16 +142,21 @@ library ProofCore {
 
         uint8[] memory picks = ShiftLib.getArray(seed, 0);
 
-        upd[0] = (picks[0] % lengths[0]) + 1;
-        upd[1] = (picks[1] % lengths[1]) + 1;
-        upd[2] = (picks[2] % lengths[2]) + 1;
+        upd[0] = (safeMod(picks[0], lengths[0])) + 1;
+        upd[1] = (safeMod(picks[1], lengths[1])) + 1;
+        upd[2] = (safeMod(picks[2], lengths[2])) + 1;
 
-        if (picks[3] < 96) upd[3] = (picks[4] % lengths[3]) + 1;
-        else if (picks[3] < 192) upd[4] = (picks[4] % lengths[4]) + 1;
-        else if (picks[3] < 250) upd[5] = (picks[4] % lengths[5]) + 1;
-        else upd[6] = (picks[4] % lengths[6]) + 1;
+        if (picks[3] < 96) upd[3] = (safeMod(picks[4], lengths[3])) + 1;
+        else if (picks[3] < 192) upd[4] = (safeMod(picks[4], lengths[4])) + 1;
+        else if (picks[3] < 250) upd[5] = (safeMod(picks[4], lengths[5])) + 1;
+        else upd[6] = (safeMod(picks[4], lengths[6])) + 1;
 
         res = ShiftLib.setArray(res, 0, upd);
+    }
+
+    function safeMod(uint8 value, uint8 modder) internal pure returns (uint8) {
+        require(modder != 0, 'whoops');
+        return value % modder;
     }
 
     function pendingProof()
