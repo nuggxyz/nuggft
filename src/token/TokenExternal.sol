@@ -22,11 +22,14 @@ import {Trust} from '../trust/Trust.sol';
 abstract contract TokenExternal is ITokenExternal {
     using SafeCastLib for uint256;
 
+    uint32 constant TRUSTED_MINT_TOKENS = 500;
+    uint32 constant UNTRUSTED_MINT_TOKENS = 2500;
+
     /// @inheritdoc ITokenExternal
     function trustedMint(uint160 tokenId, address to) external payable override {
         Trust.check();
 
-        require(tokenId < TokenCore.TRUSTED_MINT_TOKENS && tokenId != 0, 'T:1');
+        require(tokenId < TRUSTED_MINT_TOKENS && tokenId != 0, 'T:1');
 
         require(!TokenView.exists(tokenId), 'T:2');
 
@@ -34,17 +37,12 @@ abstract contract TokenExternal is ITokenExternal {
 
         ProofCore.setProof(tokenId);
 
-        TokenCore.checkedMintTo(to, tokenId);
-
-        emit TrustedMint(to, tokenId);
+        _mintTo(to, tokenId);
     }
 
     /// @inheritdoc ITokenExternal
     function mint(uint160 tokenId) public payable override {
-        require(
-            tokenId < TokenCore.UNTRUSTED_MINT_TOKENS + TokenCore.TRUSTED_MINT_TOKENS && tokenId > TokenCore.TRUSTED_MINT_TOKENS,
-            'T:1'
-        );
+        require(tokenId < UNTRUSTED_MINT_TOKENS + TRUSTED_MINT_TOKENS && tokenId > TRUSTED_MINT_TOKENS, 'T:1');
 
         require(!TokenView.exists(tokenId), 'T:2');
 
@@ -52,19 +50,27 @@ abstract contract TokenExternal is ITokenExternal {
 
         ProofCore.setProof(tokenId);
 
-        TokenCore.checkedMintTo(msg.sender, tokenId);
-
-        emit UntrustedMint(msg.sender, tokenId);
+        _mintTo(msg.sender, tokenId);
     }
 
     /// @inheritdoc IERC721
     function approve(address to, uint256 tokenId) public override {
-        TokenCore.checkedApprove(to, tokenId.safe160());
+        address owner = TokenView.ownerOf(tokenId.safe160());
+
+        require(TokenView.isOperatorFor(msg.sender, owner), 'T:1');
+
+        Token.ptr().approvals[tokenId] = to;
+
+        emit Approval(owner, to, tokenId);
     }
 
     /// @inheritdoc IERC721
     function setApprovalForAll(address operator, bool approved) public override {
-        TokenCore.checkedSetApprovalForAll(operator, approved);
+        require(msg.sender != operator && operator == address(this), 'T:0');
+
+        Token.ptr().operatorApprovals[msg.sender][operator] = approved;
+
+        emit ApprovalForAll(msg.sender, operator, approved);
     }
 
     /// @inheritdoc IERC165
@@ -87,7 +93,7 @@ abstract contract TokenExternal is ITokenExternal {
 
     /// @inheritdoc IERC721
     function isApprovedForAll(address owner, address operator) public view override returns (bool) {
-        return TokenView.isApprovedForAll(owner, operator);
+        return TokenView.isOperatorFor(operator, owner);
     }
 
     /*━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -103,7 +109,7 @@ abstract contract TokenExternal is ITokenExternal {
         address,
         uint256
     ) public pure override {
-        revert('wut');
+        revert();
     }
 
     function safeTransferFrom(
@@ -111,7 +117,7 @@ abstract contract TokenExternal is ITokenExternal {
         address,
         uint256
     ) public pure override {
-        revert('wut');
+        revert();
     }
 
     function safeTransferFrom(
@@ -120,6 +126,16 @@ abstract contract TokenExternal is ITokenExternal {
         uint256,
         bytes memory
     ) public pure override {
-        revert('wut');
+        revert();
+    }
+
+    /*━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+                                internal
+    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━*/
+
+    function _mintTo(address to, uint160 tokenId) internal {
+        Token.ptr().owners[tokenId] = to;
+
+        emit Transfer(address(0), to, tokenId);
     }
 }

@@ -7,9 +7,9 @@ import {IERC721Receiver} from '../interfaces/IERC721.sol';
 /// @notice Safe ETH and ERC20 transfer library that gracefully handles missing return values.
 /// @author Modified from Gnosis (https://github.com/gnosis/gp-v2-contracts/blob/main/src/contracts/libraries/GPv2SafeERC20.sol)
 library SafeTransferLib {
-    /*━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-                            ETH OPERATIONS
-    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━*/
+    /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+                               ETH OPERATIONS
+       ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
 
     function safeTransferETH(address to, uint256 amount) internal {
         bool callStatus;
@@ -20,39 +20,5 @@ library SafeTransferLib {
         }
 
         require(callStatus, 'ETH_TRANSFER_FAILED');
-    }
-
-    /*━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-                            NFT OPERATIONS
-    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━*/
-
-    /**
-     * @dev Internal function to invoke {IERC721Receiver-onERC721Received} on a target address.
-     * The call is not executed if the target address is not a contract.
-     *
-     * @param to target address that will receive the tokens
-     * @param tokenId uint256 ID of the token to be transferred
-     * @return bool whether the call correctly returned the expected magic value
-     */
-    function isERC721Receiver(address to, uint256 tokenId) internal returns (bool) {
-        if (SafeTransferLib.isDeployedContract(to)) {
-            try IERC721Receiver(to).onERC721Received(msg.sender, address(this), tokenId, '') returns (bytes4 retval) {
-                return retval == IERC721Receiver.onERC721Received.selector;
-            } catch (bytes memory reason) {
-                if (reason.length == 0) {
-                    revert('ERC721: transfer to non ERC721Receiver implementer');
-                } else {
-                    assembly {
-                        revert(add(32, reason), mload(reason))
-                    }
-                }
-            }
-        } else {
-            return true;
-        }
-    }
-
-    function isDeployedContract(address account) internal view returns (bool res) {
-        res = account.code.length != 0;
     }
 }

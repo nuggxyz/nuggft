@@ -12,7 +12,7 @@ library EpochCore {
         uint32 genesis;
     }
 
-    uint256 constant INTERVAL = 0xff;
+    uint256 constant INTERVAL = 69;
     uint32 constant OFFSET = 3000;
 
     function setGenesis() internal {
@@ -24,6 +24,9 @@ library EpochCore {
         s.genesis = uint32(block.number);
     }
 
+    /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+                                whadduppp
+       ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
     function getGenesis() internal view returns (uint32) {
         Storage storage s;
 

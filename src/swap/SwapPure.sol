@@ -12,28 +12,45 @@ import {SafeCastLib} from '../libraries/SafeCastLib.sol';
 library SwapPure {
     using SafeCastLib for uint256;
 
+    // 10**13
+    uint96 constant COMPRESSION_PERCISION = 0x9184E72A000;
+
     /*━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-                            CALCULATION
+                               CALCULATION
     ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━*/
 
     // @test  manual
-    function addIncrement(uint256 value) internal pure returns (uint256) {
-        return (value * 10100) / 10000;
+    function addIncrement(uint96 value) internal pure returns (uint96) {
+        return compressEthRoundDown(((value * 10200) / 10000));
+    }
+
+    // @test  manual
+    function compressEthRoundDown(uint96 value) internal pure returns (uint96) {
+        return (value / COMPRESSION_PERCISION) * COMPRESSION_PERCISION;
+    }
+
+    // @test  manual
+    function compressEthRoundUp(uint96 value) internal pure returns (uint96) {
+        if (value % COMPRESSION_PERCISION > 0) {
+            return ((value / COMPRESSION_PERCISION) + 1) * COMPRESSION_PERCISION;
+        } else {
+            return compressEthRoundDown(value);
+        }
     }
 
     /*━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-                            SHIFT HELPERS
+                              SHIFT HELPERS
     ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━*/
     // @test input output unit test
     // type(uint96).max / 10**13 = 0x01C25C268497681 =  7922816251426433
     // type(uint56).max          = 0x100000000000000 = 72057594037927936
     function eth(uint256 input) internal pure returns (uint96 res) {
-        return (ShiftLib.get(input, 56, 160) * 0x9184E72A000).safe96();
+        return (ShiftLib.get(input, 56, 160) * COMPRESSION_PERCISION).safe96();
     }
 
     function eth(uint256 input, uint96 update) internal pure returns (uint256 cache, uint96 rem) {
-        rem = update % uint96(0x9184E72A000);
-        cache = ShiftLib.set(input, 56, 160, update / uint96(0x9184E72A000));
+        rem = update % COMPRESSION_PERCISION;
+        cache = ShiftLib.set(input, 56, 160, update / COMPRESSION_PERCISION);
     }
 
     // @test  input output unit test
@@ -80,46 +97,5 @@ library SwapPure {
         if (_isOwner) res = isOwner(res, true);
         (res, dust) = eth(res, _eth);
         res = flag(res);
-    }
-
-    // @test  manual
-    function updateSwapData(
-        uint256 data,
-        uint160 _account,
-        uint96 _eth
-    )
-        internal
-        pure
-        returns (
-            uint256 res,
-            uint256 increment,
-            uint256 dust
-        )
-    {
-        return updateSwapDataWithEpoch(data, epoch(data), _account, _eth);
-    }
-
-    // @test  unit
-    function updateSwapDataWithEpoch(
-        uint256 data,
-        uint32 _epoch,
-        uint160 _account,
-        uint96 _eth
-    )
-        internal
-        pure
-        returns (
-            uint256 res,
-            uint96 increment,
-            uint96 dust
-        )
-    {
-        uint96 baseEth = eth(data);
-
-        require(addIncrement(baseEth) < _eth);
-
-        (res, dust) = buildSwapData(_epoch, _account, _eth, false);
-
-        increment = _eth - baseEth;
     }
 }

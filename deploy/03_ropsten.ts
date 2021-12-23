@@ -2,7 +2,6 @@ import { ethers } from 'ethers';
 import { HardhatRuntimeEnvironment } from 'hardhat/types';
 
 import { NamedAccounts } from '../hardhat.config';
-import { toEth } from '../tests/hardhat/lib/shared/conversion';
 import { NuggFT } from '../typechain';
 // import { XNUGG as xNUGG } from '../typechain/XNUGG';
 // import { NuggFT } from '../typechain/NuggFT.d';
@@ -59,87 +58,111 @@ const deployment = async (hre: HardhatRuntimeEnvironment) => {
                 });
         };
 
-        // await sendFiles(0);
-        // await sendFiles(1);
-        // await sendFiles(2);
-        // await sendFiles(3);
-        // await sendFiles(4);
-        // await sendFiles(5);
-        // await sendFiles(6);
+        await sendFiles(0);
+        await sendFiles(1);
+        await sendFiles(2);
+        await sendFiles(3);
+        await sendFiles(4);
+        await sendFiles(5);
+        await sendFiles(6);
 
-        // const activeEpoch = await nuggft.epoch();
-        // hre.deployments.log('active epoch is..', activeEpoch.toString());
+        const activeEpoch = await nuggft.epoch();
+        hre.deployments.log('active epoch is..', activeEpoch.toString());
 
         // await sendTx(
-        //     nuggft.connect(await hre.ethers.getNamedSigner('dee')).delegate(activeEpoch, { value: toEth('.00001'), gasLimit: 200000 }),
+        //     nuggft
+        //         .connect(await hre.ethers.getNamedSigner('dee'))
+        //         .delegate(activeEpoch, { value: toEth('.00000005'), gasPrice: toEth('0.0000006') }),
         // );
 
         // await sendTx(
-        //     nuggft.connect(await hre.ethers.getNamedSigner('dee')).delegate(activeEpoch, { value: toEth('.00002'), gasLimit: 200000 }),
+        //     nuggft
+        //         .connect(await hre.ethers.getNamedSigner('dee'))
+        //         .delegate(activeEpoch, { value: toEth('.00005'), gasPrice: toEth('0.0000006') }),
         // );
 
         // await sendTx(
-        //     nuggft.connect(await hre.ethers.getNamedSigner('dee')).mint(1169, { gasLimit: 200000, value: await nuggft.minSharePrice() }),
+        //     nuggft
+        //         .connect(await hre.ethers.getNamedSigner('dee'))
+        //         .mint(1169, { value: await nuggft.minSharePrice(), gasPrice: toEth('0.00000006') }),
         // );
         // await sendTx(
-        //     nuggft.connect(await hre.ethers.getNamedSigner('dee')).mint(2169, { gasLimit: 200000, value: await nuggft.minSharePrice() }),
+        //     nuggft
+        //         .connect(await hre.ethers.getNamedSigner('dee'))
+        //         .mint(2169, { value: await nuggft.minSharePrice(), gasPrice: toEth('0.00000006') }),
         // );
         // await sendTx(
-        //     nuggft.connect(await hre.ethers.getNamedSigner('dee')).mint(2179, { gasLimit: 200000, value: await nuggft.minSharePrice() }),
+        //     nuggft
+        //         .connect(await hre.ethers.getNamedSigner('dee'))
+        //         .mint(2179, { value: await nuggft.minSharePrice(), gasPrice: toEth('0.00000006') }),
         // );
 
         // await sendTx(
-        //     nuggft.connect(await hre.ethers.getNamedSigner('dee')).mint(1170, { gasLimit: 200000, value: await nuggft.minSharePrice() }),
+        //     nuggft
+        //         .connect(await hre.ethers.getNamedSigner('dee'))
+        //         .mint(1170, { value: await nuggft.minSharePrice(), gasPrice: toEth('0.00000006') }),
         // );
         // await sendTx(
-        //     nuggft.connect(await hre.ethers.getNamedSigner('dee')).mint(2170, { gasLimit: 200000, value: await nuggft.minSharePrice() }),
+        //     nuggft
+        //         .connect(await hre.ethers.getNamedSigner('dee'))
+        //         .mint(2170, { value: await nuggft.minSharePrice(), gasPrice: toEth('0.00000006') }),
         // );
         // await sendTx(
-        //     nuggft.connect(await hre.ethers.getNamedSigner('dee')).mint(2180, { gasLimit: 200000, value: await nuggft.minSharePrice() }),
+        //     nuggft
+        //         .connect(await hre.ethers.getNamedSigner('dee'))
+        //         .mint(2180, { value: await nuggft.minSharePrice(), gasPrice: toEth('0.00000006') }),
         // );
 
-        // await sendTx(nuggft.connect(await hre.ethers.getNamedSigner('dee')).approve(nuggft.address, 2069, { gasLimit: 500000 }));
-        // await sendTx(nuggft.connect(await hre.ethers.getNamedSigner('dee')).approve(nuggft.address, 1070, { gasLimit: 500000 }));
-        await sendTx(nuggft.connect(await hre.ethers.getNamedSigner('dee')).approve(nuggft.address, 2070, { gasLimit: 500000 }));
-        await sendTx(nuggft.connect(await hre.ethers.getNamedSigner('dee')).approve(nuggft.address, 2080, { gasLimit: 500000 }));
+        // await sendTx(
+        //     nuggft.connect(await hre.ethers.getNamedSigner('dee')).approve(nuggft.address, 2179, { gasPrice: toEth('0.00000006') }),
+        // );
+        // await sendTx(
+        //     nuggft.connect(await hre.ethers.getNamedSigner('dee')).approve(nuggft.address, 1170, { gasPrice: toEth('0.00000006') }),
+        // );
+        // await sendTx(
+        //     nuggft.connect(await hre.ethers.getNamedSigner('dee')).approve(nuggft.address, 2170, { gasPrice: toEth('0.00000006') }),
+        // );
+        // // await sendTx(nuggft.connect(await hre.ethers.getNamedSigner('dee')).approve(nuggft.address, 2080));
 
-        await sendTx(nuggft.connect(await hre.ethers.getNamedSigner('dee')).swap(2069, toEth('.69'), { gasLimit: 500000 }));
-        await sendTx(nuggft.connect(await hre.ethers.getNamedSigner('dee')).swap(1070, toEth('1.69'), { gasLimit: 500000 }));
-        await sendTx(nuggft.connect(await hre.ethers.getNamedSigner('dee')).swap(2070, toEth('2.69'), { gasLimit: 500000 }));
-        await sendTx(nuggft.connect(await hre.ethers.getNamedSigner('dee')).swap(2080, toEth('3.69'), { gasLimit: 500000 }));
+        // await sendTx(nuggft.connect(await hre.ethers.getNamedSigner('dee')).swap(2179, toEth('.69'), { gasPrice: toEth('0.00000006') }));
+        // await sendTx(nuggft.connect(await hre.ethers.getNamedSigner('dee')).swap(1170, toEth('1.69'), { gasPrice: toEth('0.00000006') }));
+        // await sendTx(nuggft.connect(await hre.ethers.getNamedSigner('dee')).loan(2170, { gasPrice: toEth('0.00000006') }));
 
-        await sendTx(nuggft.connect(eoaDeployer).setIsTrusted(accounts.dee));
+        // await sendTx(nuggft.connect(await hre.ethers.getNamedSigner('dee')).swap(2070, toEth('2.69')));
+        // await sendTx(nuggft.connect(await hre.ethers.getNamedSigner('dee')).swap(2080, toEth('3.69')));
 
-        await sendTx(
-            nuggft
-                .connect(await hre.ethers.getNamedSigner('dee'))
-                .trustedMint(69, '0x4e503501c5dedcf0607d1e1272bb4b3c1204cc71', { gasLimit: 200000, value: await nuggft.minSharePrice() }),
-        );
-        await sendTx(
-            nuggft
-                .connect(await hre.ethers.getNamedSigner('dee'))
-                .trustedMint(169, '0x9B0E2b16F57648C7bAF28EDD7772a815Af266E77', { gasLimit: 200000, value: await nuggft.minSharePrice() }),
-        );
-        await sendTx(
-            nuggft
-                .connect(await hre.ethers.getNamedSigner('dee'))
-                .trustedMint(269, '0x4e503501c5dedcf0607d1e1272bb4b3c1204cc71', { gasLimit: 200000, value: await nuggft.minSharePrice() }),
-        );
-        await sendTx(
-            nuggft
-                .connect(await hre.ethers.getNamedSigner('dee'))
-                .trustedMint(369, '0x9B0E2b16F57648C7bAF28EDD7772a815Af266E77', { gasLimit: 200000, value: await nuggft.minSharePrice() }),
-        );
-        await sendTx(
-            nuggft
-                .connect(await hre.ethers.getNamedSigner('dee'))
-                .trustedMint(469, '0x4e503501c5dedcf0607d1e1272bb4b3c1204cc71', { gasLimit: 200000, value: await nuggft.minSharePrice() }),
-        );
-        await sendTx(
-            nuggft
-                .connect(await hre.ethers.getNamedSigner('dee'))
-                .trustedMint(420, '0x9B0E2b16F57648C7bAF28EDD7772a815Af266E77', { gasLimit: 200000, value: await nuggft.minSharePrice() }),
-        );
+        // await sendTx(nuggft.connect(eoaDeployer).setIsTrusted(accounts.dee, true));
+
+        // await sendTx(
+        //     nuggft
+        //         .connect(await hre.ethers.getNamedSigner('dee'))
+        //         .trustedMint(69, '0x4e503501c5dedcf0607d1e1272bb4b3c1204cc71', { value: await nuggft.minSharePrice() }),
+        // );
+        // await sendTx(
+        //     nuggft
+        //         .connect(await hre.ethers.getNamedSigner('dee'))
+        //         .trustedMint(169, '0x9B0E2b16F57648C7bAF28EDD7772a815Af266E77', { value: await nuggft.minSharePrice() }),
+        // );
+        // await sendTx(
+        //     nuggft
+        //         .connect(await hre.ethers.getNamedSigner('dee'))
+        //         .trustedMint(269, '0x4e503501c5dedcf0607d1e1272bb4b3c1204cc71', { value: await nuggft.minSharePrice() }),
+        // );
+        // await sendTx(
+        //     nuggft
+        //         .connect(await hre.ethers.getNamedSigner('dee'))
+        //         .trustedMint(369, '0x9B0E2b16F57648C7bAF28EDD7772a815Af266E77', { value: await nuggft.minSharePrice() }),
+        // );
+        // await sendTx(
+        //     nuggft
+        //         .connect(await hre.ethers.getNamedSigner('dee'))
+        //         .trustedMint(469, '0x4e503501c5dedcf0607d1e1272bb4b3c1204cc71', { value: await nuggft.minSharePrice() }),
+        // );
+        // await sendTx(
+        //     nuggft
+        //         .connect(await hre.ethers.getNamedSigner('dee'))
+        //         .trustedMint(420, '0x9B0E2b16F57648C7bAF28EDD7772a815Af266E77', { value: await nuggft.minSharePrice() }),
+        // );
     }
 };
 export default deployment;

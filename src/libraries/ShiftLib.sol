@@ -9,9 +9,8 @@ library ShiftLib {
 
     /// @notice creates a bit mask
     /// @dev res = (2 ^ bits) - 1
-    /// @param bits d
-    /// @return res d
-    /// @dev no need to check if "bits" is < 256 as anything greater than 255 will be treated the same
+    /// @param bits bit size of mask
+    /// @return res the mask
     function mask(uint8 bits) internal pure returns (uint256 res) {
         assembly {
             res := sub(shl(bits, 1), 1)

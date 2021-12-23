@@ -18,9 +18,9 @@ interface ISwapExternal {
     event SwapClaimItem(uint160 sellingTokenId, uint16 itemId, uint160 buyingTokenId, uint32 epoch);
     event SwapItemStart(uint160 sellingTokenId, uint16 itemId, uint96 eth);
 
-    /*━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+    /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
                             STATE CHANGING
-    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━*/
+       ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
 
     function delegate(uint160 tokenId) external payable;
 
@@ -53,6 +53,16 @@ interface ISwapExternal {
     /// @notice calculates the minimum eth that must be sent with a delegate call
     /// @dev returns 0 if no delegate can be made for this oken
     /// @param tokenId -> the token to be delegated to
-    /// @return value -> the minimum value that must be sent with a delegate call
-    function valueForDelegate(uint160 tokenId) external view returns (uint96 value);
+    /// @param user -> the address of the user who will be delegating
+    /// @return canDelegate -> instead of reverting this function will return false
+    /// @return nextSwapAmount -> the minimum value that must be sent with a delegate call
+    /// @return userCurrentOffer ->
+    function valueForDelegate(uint160 tokenId, address user)
+        external
+        view
+        returns (
+            bool canDelegate,
+            uint96 nextSwapAmount,
+            uint96 userCurrentOffer
+        );
 }
