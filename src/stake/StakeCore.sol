@@ -134,7 +134,7 @@ library StakeCore {
     /// @param tokenId the id of the nugg being unstaked
     /// @return ethOwed -> the amount of eth owed to the unstaking user - equivilent to "ethPerShare"
     function subStakedShare(uint160 tokenId) internal returns (uint96 ethOwed) {
-        require(TokenView.ownerOf(tokenId) == msg.sender, 'T:4');
+        require(TokenView.ownerOf(tokenId) == msg.sender, 'T:14');
 
         uint256 cache = Stake.sload();
 

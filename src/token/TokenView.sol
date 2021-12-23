@@ -19,12 +19,12 @@ library TokenView {
     }
 
     function getApproved(uint160 tokenId) internal view returns (address) {
-        require(exists(tokenId), 'T:9');
+        require(exists(tokenId), 'T:9:1');
         return Token.ptr().approvals[tokenId];
     }
 
     function ownerOf(uint160 tokenId) internal view returns (address owner) {
-        require(exists(tokenId), 'T:9');
+        require(exists(tokenId), 'T:9:2');
         owner = Token.ptr().owners[tokenId];
         if (owner == address(0)) return address(this);
     }
