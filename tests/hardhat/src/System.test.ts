@@ -73,19 +73,25 @@ describe('uint tests', async function () {
 
             const token3 = await fix.nuggft.epoch();
 
-            await fix.nuggft.connect(accounts.frank).delegate(token3, { value: toEth('20.000') });
-            await fix.nuggft.connect(accounts.frank).delegate(token1, { value: toEth('20.000') });
-            await fix.nuggft.connect(accounts.dennis).delegate(token1, { value: toEth('22.000') });
-            await fix.nuggft.connect(accounts.frank).delegate(token1, { value: toEth('3.000') });
-            await fix.nuggft.connect(accounts.dennis).delegate(token1, { value: toEth('2.000') });
-            await fix.nuggft.connect(accounts.dennis).delegate(token1, { value: toEth('2.000') });
-            await fix.nuggft.connect(accounts.charile).delegate(token1, { value: toEth('30.000') });
+            // await fix.nuggft.connect(accounts.frank).delegate(token3, { value: toEth('20.000') });
+            // await fix.nuggft.connect(accounts.frank).delegate(token1, { value: toEth('20.000') });
+            // await fix.nuggft.connect(accounts.dennis).delegate(token1, { value: toEth('22.000') });
+            // await fix.nuggft.connect(accounts.frank).delegate(token1, { value: toEth('3.000') });
+            // await fix.nuggft.connect(accounts.dennis).delegate(token1, { value: toEth('2.000') });
+            // await fix.nuggft.connect(accounts.dennis).delegate(token1, { value: toEth('2.000') });
+            // await fix.nuggft.connect(accounts.charile).delegate(token1, { value: toEth('30.000') });
 
-            // for (let i = 2000; i < 2010; i++) {
-            //     await fix.nuggft.connect(accounts.dennis).mint(i, { value: toEth('35') });
+            for (let i = 2000; i < 2010; i++) {
+                let [ok, next, useroffer] = await fix.nuggft.connect(accounts.dennis).valueForDelegate(token1, accounts.dennis.address);
+                console.log('dennis should: ', ok, fromEth(next.sub(useroffer)));
+                await fix.nuggft.connect(accounts.dennis).delegate(token1, { value: next.sub(useroffer) });
 
-            //     console.log('minshareprice: ', fromEth(await fix.nuggft.connect(accounts.frank).minSharePrice()));
-            // }
+                [ok, next, useroffer] = await fix.nuggft.connect(accounts.charile).valueForDelegate(token1, accounts.charile.address);
+                console.log('charile should: ', ok, fromEth(next.sub(useroffer)));
+
+                await fix.nuggft.connect(accounts.charile).delegate(token1, { value: next.sub(useroffer) });
+                // console.log('minshareprice: ', fromEth(await fix.nuggft.connect(accounts.frank).valueForDelegate()));
+            }
 
             await Mining.advanceBlockTo(2500);
             await Mining.advanceBlock();

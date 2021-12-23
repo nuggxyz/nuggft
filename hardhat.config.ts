@@ -99,7 +99,8 @@ const StagingNetworks: NetworksUserConfig = {
         ...DefaultStageNetworkConfig,
         url: `https://ropsten.infura.io/v3/${process.env.INFURA_API_KEY}`,
         chainId: 3,
-        gasPrice: parseInt(GAS_PRICE.toString(), 10),
+        gasPrice: 'auto',
+        // gasPrice: parseInt(GAS_PRICE.toString(), 10),
     },
     rinkeby: {
         ...DefaultStageNetworkConfig,
@@ -245,7 +246,7 @@ const HardhatConfig: HardhatUserConfig = {
                 settings: {
                     optimizer: {
                         enabled: true,
-                        runs: 500,
+                        runs: 700,
                     },
                 },
             },

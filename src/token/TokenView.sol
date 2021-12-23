@@ -3,15 +3,19 @@
 pragma solidity 0.8.9;
 
 import {Token} from './TokenStorage.sol';
+import {Proof} from '../proof/ProofStorage.sol';
 
-// OK
 library TokenView {
     function exists(uint160 tokenId) internal view returns (bool) {
-        return Token.ptr().owners[tokenId] != address(0);
+        return Proof.sload(tokenId) != 0;
     }
 
-    function isApprovedForAll(address owner, address operator) internal view returns (bool) {
-        return Token.ptr().operatorApprovals[owner][operator];
+    function isOperatorFor(address operator, address owner) internal view returns (bool) {
+        return owner == operator || Token.ptr().operatorApprovals[owner][operator];
+    }
+
+    function isOperatorForOwner(address operator, uint160 tokenId) internal view returns (bool) {
+        return isOperatorFor(operator, ownerOf(tokenId));
     }
 
     function getApproved(uint160 tokenId) internal view returns (address) {
@@ -20,17 +24,13 @@ library TokenView {
     }
 
     function ownerOf(uint160 tokenId) internal view returns (address owner) {
+        require(exists(tokenId), 'T:9');
         owner = Token.ptr().owners[tokenId];
-        require(owner != address(0), 'T:A');
-    }
-
-    function balanceOf(address owner) internal view returns (uint256) {
-        require(owner != address(0), 'T:B');
-        return Token.ptr().balances[owner];
+        if (owner == address(0)) return address(this);
     }
 
     function isApprovedOrOwner(address spender, uint160 tokenId) internal view returns (bool) {
         address owner = TokenView.ownerOf(tokenId);
-        return (spender == owner || getApproved(tokenId) == spender || isApprovedForAll(owner, spender));
+        return (spender == owner || getApproved(tokenId) == spender || isOperatorFor(owner, spender));
     }
 }

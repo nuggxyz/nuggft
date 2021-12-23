@@ -20,10 +20,12 @@ import {ProofCore} from '../proof/ProofCore.sol';
 
 abstract contract SwapExternal is ISwapExternal {
     using SwapPure for uint256;
+    using SwapPure for uint96;
+
     using SafeCastLib for uint256;
 
     /*━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-                                  DELEGATE
+                                  delegate
     ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━*/
 
     /// @inheritdoc ISwapExternal
@@ -38,32 +40,31 @@ abstract contract SwapExternal is ISwapExternal {
             // the ability to accidently place an offer for nugg A and end up minting nugg B.
             require(m.swapData == 0 && m.offerData == 0, 'S:3');
 
-            (uint256 dat, ) = SwapPure.buildSwapData(m.activeEpoch, uint160(msg.sender), msg.value.safe96(), false);
+            (s.data, ) = SwapPure.buildSwapData(m.activeEpoch, uint160(msg.sender), msg.value.safe96(), false);
 
-            s.data = dat;
+            StakeCore.addStakedShareAndEth(msg.value.safe96());
 
-            TokenCore.checkedPreMintFromSwap(m.activeEpoch);
+            ProofCore.setProofFromEpoch(tokenId);
+
+            TokenCore.emitTransferEvent(address(0), address(this), tokenId);
 
             emit DelegateMint(tokenId, msg.sender, msg.value.safe96());
-
-            return;
-        }
-
-        require(!m.offerData.isOwner(), 'S:0');
-
-        require(m.swapData != 0, 'S:1');
-
-        if (m.offerData == 0 && m.swapData.isOwner()) {
-            //
-            require(msg.value >= StakeCore.activeEthPerShare(), 'S:2');
-
-            SwapCore.commit(s, m);
-
-            emit DelegateCommit(tokenId, msg.sender, msg.value.safe96());
         } else {
-            SwapCore.offer(s, m);
+            require(!m.offerData.isOwner(), 'S:0');
 
-            emit DelegateOffer(tokenId, msg.sender, msg.value.safe96());
+            require(m.swapData != 0, 'S:1');
+
+            if (m.swapData.isOwner()) {
+                require(msg.value >= StakeCore.activeEthPerShare(), 'S:2');
+
+                commit(s, m);
+
+                emit DelegateCommit(tokenId, msg.sender, msg.value.safe96());
+            } else {
+                offer(s, m);
+
+                emit DelegateOffer(tokenId, msg.sender, msg.value.safe96());
+            }
         }
     }
 
@@ -82,18 +83,18 @@ abstract contract SwapExternal is ISwapExternal {
         require(!m.offerData.isOwner(), 'SL:HSO:0');
 
         if (m.offerData == 0 && m.swapData.isOwner()) {
-            SwapCore.commit(s, m);
+            commit(s, m);
 
             emit DelegateCommitItem(sellingTokenId, itemId, buyingTokenId, msg.value.safe96());
         } else {
-            SwapCore.offer(s, m);
+            offer(s, m);
 
             emit DelegateOfferItem(sellingTokenId, itemId, buyingTokenId, msg.value.safe96());
         }
     }
 
     /*━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-                                  CLAIM
+                                  claim
     ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━*/
 
     /// @inheritdoc ISwapExternal
@@ -110,7 +111,7 @@ abstract contract SwapExternal is ISwapExternal {
             SafeTransferLib.safeTransferETH(msg.sender, m.offerData.eth());
         }
 
-        emit SwapClaim(tokenId, msg.sender, m.swapData.epoch());
+        emit SwapClaim(tokenId, msg.sender, m.offerData.epoch());
     }
 
     /// @inheritdoc ISwapExternal
@@ -137,7 +138,7 @@ abstract contract SwapExternal is ISwapExternal {
     }
 
     /*━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-                                  SWAP
+                                  swap
     ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━*/
 
     /// @inheritdoc ISwapExternal
@@ -182,23 +183,132 @@ abstract contract SwapExternal is ISwapExternal {
     }
 
     /*━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-                                VIEW
+                                    view
     ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━*/
 
-    /// @inheritdoc ISwapExternal
-    function valueForDelegate(uint160 tokenId) external view override returns (uint96 amount) {
-        (, Swap.Memory memory m) = Swap.loadTokenSwap(tokenId, address(0));
+    // / @inheritdoc ISwapExternal
+    function valueForDelegate(uint160 tokenId, address user)
+        external
+        view
+        override
+        returns (
+            bool canDelegate,
+            uint96 nextSwapAmount,
+            uint96 userCurrentOffer
+        )
+    {
+        canDelegate = true;
 
-        if (m.activeEpoch == tokenId && m.swapData == 0) {
-            return StakeCore.minSharePrice();
+        (, Swap.Memory memory m) = Swap.loadTokenSwap(tokenId, user);
+
+        if (m.swapData == 0) {
+            if (m.activeEpoch == tokenId) {
+                return (true, StakeCore.minSharePrice().compressEthRoundUp(), 0);
+            }
+            return (false, 0, 0);
         }
 
-        if (m.swapData == 0) return 0;
+        if (m.offerData.isOwner()) canDelegate = false;
 
-        uint96 nextOfferMin = uint256(m.swapData.eth()).addIncrement().safe96();
+        userCurrentOffer = m.offerData.eth();
 
-        if (m.offerData == 0 && m.swapData.isOwner() && nextOfferMin >= StakeCore.minSharePrice()) return 0;
+        nextSwapAmount = m.swapData.eth();
 
-        return nextOfferMin;
+        if (nextSwapAmount < StakeCore.activeEthPerShare()) {
+            nextSwapAmount = StakeCore.activeEthPerShare();
+        }
+
+        nextSwapAmount = nextSwapAmount.addIncrement();
+    }
+
+    /*━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+                                internal
+    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━*/
+
+    function checkClaimerIsWinnerOrLoser(Swap.Memory memory m) internal pure returns (bool winner) {
+        require(m.offerData != 0, 'S:8');
+
+        bool isOver = m.activeEpoch > m.swapData.epoch();
+        bool isLeader = m.offerData.account() == m.swapData.account();
+        bool isOwner = m.swapData.isOwner();
+
+        return isOwner || (isLeader && isOver);
+    }
+
+    function commit(Swap.Storage storage s, Swap.Memory memory m) internal {
+        assert(m.offerData == 0 && m.swapData != 0);
+
+        assert(m.swapData.isOwner());
+
+        (uint256 newSwapData, uint256 increment, uint256 dust) = updateSwapDataWithEpoch(
+            m.swapData,
+            m.activeEpoch + 1,
+            m.sender,
+            msg.value.safe96()
+        );
+
+        s.data = newSwapData;
+
+        s.offers[m.swapData.account()] = m.swapData.epoch(m.activeEpoch + 1);
+
+        StakeCore.addStakedEth((increment + dust).safe96());
+    }
+
+    function offer(Swap.Storage storage s, Swap.Memory memory m) internal {
+        // make sure swap is still active
+        require(m.activeEpoch <= m.swapData.epoch(), 'SL:OBP:3');
+
+        if (m.swapData.account() != m.sender) s.offers[m.swapData.account()] = m.swapData;
+
+        (uint256 newSwapData, uint256 increment, uint256 dust) = updateSwapData(
+            m.swapData,
+            m.sender,
+            m.offerData.eth() + msg.value.safe96()
+        );
+
+        s.data = newSwapData;
+
+        StakeCore.addStakedEth((increment + dust).safe96());
+    }
+
+    // @test  manual
+    function updateSwapData(
+        uint256 prevSwapData,
+        uint160 account,
+        uint96 newUserOfferEth
+    )
+        internal
+        pure
+        returns (
+            uint256 res,
+            uint256 increment,
+            uint256 dust
+        )
+    {
+        return updateSwapDataWithEpoch(prevSwapData, prevSwapData.epoch(), account, newUserOfferEth);
+    }
+
+    // @test  unit
+    function updateSwapDataWithEpoch(
+        uint256 prevSwapData,
+        uint32 epoch,
+        uint160 account,
+        uint96 newUserOfferEth
+    )
+        internal
+        pure
+        returns (
+            uint256 res,
+            uint96 increment,
+            uint96 dust
+        )
+    {
+        uint96 baseEth = prevSwapData.eth();
+
+        require(baseEth.addIncrement() <= newUserOfferEth, 'E:1');
+
+        (res, dust) = SwapPure.buildSwapData(epoch, account, newUserOfferEth, false);
+
+        increment = newUserOfferEth - baseEth;
     }
 }

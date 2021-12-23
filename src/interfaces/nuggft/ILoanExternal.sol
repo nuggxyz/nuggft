@@ -25,10 +25,6 @@ interface ILoanExternal {
                             VIEW FUNCTIONS
     ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━*/
 
-    function valueForPayoff(uint160 tokenId) external view returns (uint96 res);
-
-    function valueForRebalance(uint160 tokenId) external view returns (uint96 res);
-
     /// @notice for a nugg's active loan: calculates the current min eth a user must send to payoff or rebalance
     /// @dev contract ->
     /// @dev frontend -> used to set the amount of eth for user
@@ -48,4 +44,12 @@ interface ILoanExternal {
             uint32 epochDue,
             address loaner
         );
+
+    /// @notice "toPayoff" value from "loanInfo"
+    /// @dev should be used to tell user how much eth to send for payoff
+    function valueForPayoff(uint160 tokenId) external view returns (uint96 res);
+
+    /// @notice "toRebalance" value from "loanInfo"
+    /// @dev should be used to tell user how much eth to send for rebalance
+    function valueForRebalance(uint160 tokenId) external view returns (uint96 res);
 }
