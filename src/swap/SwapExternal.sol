@@ -24,6 +24,8 @@ abstract contract SwapExternal is ISwapExternal {
 
     using SafeCastLib for uint256;
 
+    event log_named_uint(string key, uint256 val);
+
     /*━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
                                   delegate
     ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━*/
@@ -32,15 +34,25 @@ abstract contract SwapExternal is ISwapExternal {
     function delegate(uint160 tokenId) external payable override {
         (Swap.Storage storage s, Swap.Memory memory m) = Swap.loadTokenSwap(tokenId, msg.sender);
 
+        emit log_named_uint('m.activeEpoch', m.activeEpoch);
+
+        emit log_named_uint('tokenId', tokenId);
+
         // make sure user is not the owner of swap
         // we do not know how much to give them when they call "claim" otherwise
 
         if (m.activeEpoch == tokenId && m.swapData == 0) {
+            // require(msg.value > 0, 'S:9');
+
             // we do not need this, could take tokenId out as an argument - but do not want to give users
             // the ability to accidently place an offer for nugg A and end up minting nugg B.
             require(m.swapData == 0 && m.offerData == 0, 'S:3');
 
-            (s.data, ) = SwapPure.buildSwapData(m.activeEpoch, uint160(msg.sender), msg.value.safe96(), false);
+            (uint256 data, uint96 dust) = SwapPure.buildSwapData(m.activeEpoch, uint160(msg.sender), msg.value.safe96(), false);
+
+            require(dust != msg.value, 'S:13');
+
+            s.data = data;
 
             StakeCore.addStakedShareAndEth(msg.value.safe96());
 
@@ -103,7 +115,7 @@ abstract contract SwapExternal is ISwapExternal {
 
         Swap.deleteTokenOffer(tokenId, uint160(msg.sender));
 
-        if (SwapCore.checkClaimerIsWinnerOrLoser(m)) {
+        if (checkClaimerIsWinnerOrLoser(m)) {
             Swap.deleteTokenSwap(tokenId);
 
             TokenCore.checkedTransferFromSelf(msg.sender, tokenId);
@@ -126,7 +138,7 @@ abstract contract SwapExternal is ISwapExternal {
 
         Swap.deleteItemOffer(sellingTokenId, itemId, buyingTokenId);
 
-        if (SwapCore.checkClaimerIsWinnerOrLoser(m)) {
+        if (checkClaimerIsWinnerOrLoser(m)) {
             Swap.deleteItemSwap(sellingTokenId, itemId);
 
             ProofCore.addItem(buyingTokenId, itemId);
