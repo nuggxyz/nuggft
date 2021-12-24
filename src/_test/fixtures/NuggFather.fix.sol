@@ -18,7 +18,17 @@ contract RiggedNuggft is NuggFT {
     }
 }
 
+library SafeCast {
+    function safeInt(uint96 input) internal pure returns (int192) {
+        return (int192(int256(uint256(input))));
+    }
+}
+
 contract NuggFatherFix is t {
+    using SafeCast for uint96;
+    using SafeCast for uint256;
+    using SafeCast for uint64;
+
     MockdotnuggV1Processor public processor;
 
     MockNuggFTV1Migrator public migrator;
@@ -54,6 +64,102 @@ contract NuggFatherFix is t {
         nuggft.setIsTrusted(address(safe), true);
     }
 
+    /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+                                eth modifiers
+       ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+
+    struct ChangeCheck {
+        int192 before_staked;
+        int192 before_protocol;
+        int192 before_shares;
+        int192 before_minSharePrice;
+        int192 before_eps;
+        //
+        int192 after_staked;
+        int192 after_protocol;
+        int192 after_shares;
+        int192 after_minSharePrice;
+        int192 after_eps;
+    }
+
+    modifier changeInStaked(int192 change, int192 shareChange) {
+        ChangeCheck memory str;
+        str.before_staked = nuggft.totalStakedEth().safeInt();
+        str.before_protocol = nuggft.totalProtocolEth().safeInt();
+        str.before_shares = nuggft.totalStakedShares().safeInt();
+        str.before_minSharePrice = nuggft.minSharePrice().safeInt();
+
+        str.before_eps = nuggft.activeEthPerShare().safeInt();
+
+        assertEq(
+            str.before_eps,
+            str.before_shares > 0 ? str.before_staked / str.before_shares : int256(0),
+            'EPS is starting off with an incorrect value'
+        );
+
+        _;
+        str.after_staked = nuggft.totalStakedEth().safeInt();
+        str.after_protocol = nuggft.totalProtocolEth().safeInt();
+        str.after_shares = nuggft.totalStakedShares().safeInt();
+        str.after_minSharePrice = nuggft.minSharePrice().safeInt();
+
+        assertTrue(str.after_minSharePrice >= str.before_minSharePrice, 'minSharePrice is did not increase as expected');
+        assertEq(str.after_protocol - str.before_protocol, take(10, change), 'totalProtocol is not what is expected');
+        assertEq(str.after_staked - str.before_staked, change - take(10, change), 'staked change is not 90 percent of expected change');
+        assertEq(str.after_shares - str.before_shares, shareChange, 'shares difference is not what is expected');
+
+        str.after_eps = nuggft.activeEthPerShare().safeInt();
+        assertEq(
+            str.after_eps,
+            str.after_shares > 0 ? str.after_staked / str.after_shares : int256(0),
+            'EPS is not ending with correct value'
+        );
+    }
+
+    modifier changeInUserBalance(User user, int192 change) {
+        ChangeCheck memory str;
+
+        str.before_staked = int192(int256(uint256(address(user).balance)));
+        _;
+        str.after_staked = int192(int256(uint256(address(user).balance)));
+
+        assertEq(str.after_staked - str.before_staked, change, 'user balance did not change');
+    }
+
+    modifier changeInNuggftBalance(int192 change) {
+        ChangeCheck memory str;
+
+        str.before_staked = int192(int256(uint256(address(nuggft).balance)));
+        _;
+        str.after_staked = int192(int256(uint256(address(nuggft).balance)));
+
+        assertEq(str.after_staked - str.before_staked, change, 'nuggft balance did not change');
+    }
+
+    // modifier changeInMinSharePrice(int192 change) {
+    //     int192 bef = int192(int256(uint256(nuggft.minSharePrice())));
+    //     _;
+    //     int192 aft = int192(int256(uint256(nuggft.minSharePrice())));
+
+    //     assertEq(aft - bef, change);
+    // }
+
+    // modifier changeInStakedShares(int192 change) {
+    //     int192 bef = int192(int256(uint256(nuggft.totalStakedShares())));
+    //     _;
+    //     int192 aft = int192(int256(uint256(nuggft.totalStakedShares())));
+
+    //     assertEq(aft - bef, change);
+    // }
+
+    // modifier changeInStakedEth(int192 change) {
+    //     int192 bef = int192(int256(uint256(nuggft.totalStakedEth())));
+    //     _;
+    //     int192 aft = int192(int256(uint256(nuggft.totalStakedEth())));
+
+    //     assertEq(aft - bef, change);
+    // }
+
     function nuggft_call(User user, bytes memory args) public payable {
         nuggft_call(user, args, 0);
     }
@@ -63,7 +169,7 @@ contract NuggFatherFix is t {
         bytes memory args,
         uint96 eth
     ) public payable {
-        user.call{value: eth}(address(nuggft), args);
+        user.call(address(nuggft), args, eth);
     }
 
     function nuggft_revertCall(
@@ -171,6 +277,10 @@ contract NuggFatherFix is t {
         return abi.encodeWithSelector(nuggft.trustedMint.selector, tokenId, to);
     }
 
+    function take(int256 percent, int256 value) internal pure returns (int256) {
+        return (value * percent) / 100;
+    }
+
     /*━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
                                 scenarios
     ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━*/
@@ -190,7 +300,9 @@ contract NuggFatherFix is t {
 
         tokenId = scenario_frank_has_a_token_and_spent_50_eth();
 
-        nuggft_call(frank, approve(address(nuggft), tokenId));
+        {
+            nuggft_call(frank, approve(address(nuggft), tokenId));
+        }
 
         nuggft_call(frank, loan(tokenId));
     }
@@ -316,4 +428,177 @@ contract NuggFatherFix is t {
     /*━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
                                 scenarios
     ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━*/
+
+    // function environment() public returns (address[] memory users) {
+    //     users = new address[](2000);
+
+    //     User start = new User{value: 69 ether}();
+    //     uint160 count = 501;
+
+    //                 fvm.deal(address(start), 69 ether);
+
+    //     nuggft_call(start, mint(count++), .01 ether);
+    //     nuggft_call(start, mint(count++), nuggft.minSharePrice());
+    //     nuggft_call(start, mint(count++), nuggft.minSharePrice());
+
+    //     users[0] = address(start);
+
+    //     for (uint256 i = 1; i < users.length; i++) {
+    //         User tmp = new User{value: 69 ether}();
+
+    //         fvm.deal(address(tmp), 69 ether);
+
+    //         nuggft_call(tmp, mint(count++), nuggft.minSharePrice());
+    //         nuggft_call(tmp, mint(count++), nuggft.minSharePrice());
+    //         nuggft_call(tmp, mint(count++), nuggft.minSharePrice());
+
+    //         users[i] = address(tmp);
+    //     }
+
+    // }
+
+    function environmentForge() public returns (address[] memory users) {
+        users = new address[](9500);
+
+        User start = new User{value: 1000000000 ether}();
+        uint160 count = 501;
+
+      //   fvm.deal(address(start), 10000 *10**18);
+
+        nuggft_call(start, mint(count++), .08 ether);
+
+        users[0] = address(start);
+
+        int256 last = 0;
+        int256 lastDiff = 0;
+
+        for (uint256 i = 1; i < users.length; i++) {
+            // User tmp = new User{value: 100000000 ether}();
+
+            // fvm.deal(address(tmp), 10000 *10**18);
+
+            nuggft_call(start, mint(count++), nuggft.minSharePrice());
+
+            int256 curr = nuggft.minSharePrice().safeInt();
+
+            users[i] = address(start);
+
+            int256 diff =  curr-last;
+            emit log_named_int('diff', curr - last);
+            emit log_named_int('ldif', diff - lastDiff);
+
+            emit log_named_uint('nuggft.activeEthPerShare()', nuggft.activeEthPerShare());
+            // emit log_named_uint('nuggft.totalProtocolEth()', nuggft.totalProtocolEth());
+            // emit log_named_uint('nuggft.totalStakedEth()', nuggft.totalStakedEth());
+            emit log_named_uint('nuggft.totalStakedShares()', nuggft.totalStakedShares());
+            emit log_named_uint('nuggft.minSharePrice()', nuggft.minSharePrice());
+
+            emit log_string('--------');
+
+            last = curr;
+            lastDiff = diff;
+        }
+    }
+
+    function environmentForge2() public returns (address[] memory users) {
+        users = environmentForge();
+
+        uint256 bn = 5000;
+
+        // for (uint256 i = 0; i < 10000; i++) {
+        //     uint256 epoch = nuggft.epoch();
+
+        //     uint256 funner = uint256(keccak256(abi.encodePacked(epoch))) % 100;
+
+        //     nuggft_call(User(payable(users[funner])), delegate(users[funner], epoch), nuggft.minSharePrice());
+
+        //     fvm.roll(bn);
+
+        //     bn += 70;
+
+        //     nuggft_call(User(payable(users[funner])), claim(users[funner], epoch));
+        // }
+
+        assert(false);
+    }
 }
+
+// Success: test__system1()
+
+//   users length: 2000
+//   nuggft.activeEthPerShare(): 36422938319266817
+//   nuggft.totalProtocolEth(): 13721927850988207037
+//   nuggft.totalStakedEth(): 254960568234867720007
+//   nuggft.totalStakedShares(): 7000
+
+// Success: test__system1()
+
+//   users length: 2000
+//   nuggft.activeEthPerShare(): .220269870602728762
+//   nuggft.totalProtocolEth(): 105.652900187038601090
+//   nuggft.totalStakedEth(): 3524.317929643660202576
+//   nuggft.totalStakedShares(): 16000
+
+// Success: test__system1()
+// *10
+//   users length: 2000
+//   nuggft.activeEthPerShare():  .081046931383505748
+//   nuggft.totalProtocolEth(): 36.036371675422002761
+//   nuggft.totalStakedEth():  891.516245218563229016
+//   nuggft.totalStakedShares(): 11000
+
+//   users length: 2000
+//   nuggft.activeEthPerShare():   .009923420616251655
+//   nuggft.totalProtocolEth():  10.797105517187750828
+//   nuggft.totalStakedEth():   109.157626778768205405
+//   nuggft.totalStakedShares(): 11000
+
+// Success: test__system1()
+
+//   users length: 2000
+//   nuggft.activeEthPerShare(): .023820112972809680
+//   nuggft.totalProtocolEth(): 23.605706549631210195
+//   nuggft.totalStakedEth(): 262.021242700906482643
+//   nuggft.totalStakedShares(): 11000
+
+// Success: test__system1()
+
+//   users length: 2000
+//   nuggft.activeEthPerShare(): 22283800801842573
+//   nuggft.totalProtocolEth(): 12045486919914902312
+//   nuggft.totalStakedEth(): 133702804811055442627
+//   nuggft.totalStakedShares(): 6000
+
+//   users length: 2000
+//   nuggft.activeEthPerShare(): 1.124042581556443270
+//   nuggft.totalProtocolEth(): 658.232592803322633239
+//   nuggft.totalStakedEth(): 7306.276780116881258328
+//   nuggft.totalStakedShares(): 6500
+
+// Success: test__system1()
+
+//   users length: 2000
+//   nuggft.activeEthPerShare(): .179846813049030914
+//   nuggft.totalProtocolEth(): 105317214848531614175
+//   nuggft.totalStakedEth(): 1169004284818700946598
+//   nuggft.totalStakedShares(): 6500
+
+// .092595956292375926
+
+// .101719406217199627
+
+// Success: test__system1()
+
+//   users length: 2000
+//   nuggft.activeEthPerShare(): .178270406414740660
+//   nuggft.totalProtocolEth(): 96363895359319273644
+//   nuggft.totalStakedEth(): 1069622438488443964472
+//   nuggft.totalStakedShares(): 6000
+
+// Success: test__system1()
+
+//   users length: 1000
+//   nuggft.activeEthPerShare():   1.425741271002990526
+//   nuggft.totalProtocolEth():  305.518843786355111578
+//   nuggft.totalStakedEth():   4277.223813008971579744
+//   nuggft.totalStakedShares(): 3000

@@ -23,7 +23,7 @@ abstract contract TokenExternal is ITokenExternal {
     using SafeCastLib for uint256;
 
     uint32 constant TRUSTED_MINT_TOKENS = 500;
-    uint32 constant UNTRUSTED_MINT_TOKENS = 2500;
+    uint32 constant UNTRUSTED_MINT_TOKENS = 10000;
 
     /// @inheritdoc ITokenExternal
     function trustedMint(uint160 tokenId, address to) external payable override {
