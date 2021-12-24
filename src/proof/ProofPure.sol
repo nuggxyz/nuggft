@@ -81,6 +81,8 @@ library ProofPure {
 
         (uint8 feat, uint8 pos) = parseItemId(itemId);
 
+        require(feat != 0, 'P:F');
+
         require(arr[feat] == pos, 'P:E');
 
         arr[feat] = 0;
@@ -94,6 +96,8 @@ library ProofPure {
     /// @param feature -> the feature to switch items for
     /// @return res -> the modifed uint256 proof state
     function rotateDefaultandExtra(uint256 state, uint8 feature) internal pure returns (uint256 res) {
+        require(feature != 0, 'P:F');
+
         uint8[] memory def = ShiftLib.getArray(state, 0);
         uint8[] memory ext = ShiftLib.getArray(state, 64);
 

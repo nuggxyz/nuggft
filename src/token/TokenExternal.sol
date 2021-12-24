@@ -29,9 +29,9 @@ abstract contract TokenExternal is ITokenExternal {
     function trustedMint(uint160 tokenId, address to) external payable override {
         Trust.check();
 
-        require(tokenId < TRUSTED_MINT_TOKENS && tokenId != 0, 'T:1');
+        require(tokenId < TRUSTED_MINT_TOKENS && tokenId != 0, 'G:1');
 
-        require(!TokenView.exists(tokenId), 'T:2');
+        require(!TokenView.exists(tokenId), 'G:2');
 
         StakeCore.addStakedShareFromMsgValue();
 
@@ -42,9 +42,9 @@ abstract contract TokenExternal is ITokenExternal {
 
     /// @inheritdoc ITokenExternal
     function mint(uint160 tokenId) public payable override {
-        require(tokenId < UNTRUSTED_MINT_TOKENS + TRUSTED_MINT_TOKENS && tokenId > TRUSTED_MINT_TOKENS, 'T:1');
+        require(tokenId < UNTRUSTED_MINT_TOKENS + TRUSTED_MINT_TOKENS && tokenId > TRUSTED_MINT_TOKENS, 'G:1');
 
-        require(!TokenView.exists(tokenId), 'T:2');
+        require(!TokenView.exists(tokenId), 'G:2');
 
         StakeCore.addStakedShareFromMsgValue();
 
@@ -57,7 +57,7 @@ abstract contract TokenExternal is ITokenExternal {
     function approve(address to, uint256 tokenId) public override {
         address owner = TokenView.ownerOf(tokenId.safe160());
 
-        require(TokenView.isOperatorFor(msg.sender, owner), 'T:1');
+        require(TokenView.isOperatorFor(msg.sender, owner), 'G:1');
 
         Token.ptr().approvals[tokenId] = to;
 
@@ -66,7 +66,7 @@ abstract contract TokenExternal is ITokenExternal {
 
     /// @inheritdoc IERC721
     function setApprovalForAll(address operator, bool approved) public override {
-        require(msg.sender != operator && operator == address(this), 'T:0');
+        // require(msg.sender != operator && operator == address(this), 'G:0');
 
         Token.ptr().operatorApprovals[msg.sender][operator] = approved;
 

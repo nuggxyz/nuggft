@@ -87,21 +87,171 @@ contract NuggFatherFix is t {
                                 delegate
        ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
 
-    function delegate(address sender, uint256 tokenId) public payable returns (bytes memory res) {
+    function delegate(address sender, uint256 tokenId) public view returns (bytes memory res) {
         return abi.encodeWithSelector(nuggft.delegate.selector, sender, tokenId);
     }
 
-    function withdrawStake(uint256 tokenId) public payable returns (bytes memory res) {
+    function delegateItem(
+        uint256 buyerTokenId,
+        uint256 sellerTokenId,
+        uint256 itemId
+    ) public view returns (bytes memory res) {
+        return abi.encodeWithSelector(nuggft.delegateItem.selector, buyerTokenId, sellerTokenId, itemId);
+    }
+
+    function claim(address sender, uint256 tokenId) public view returns (bytes memory res) {
+        return abi.encodeWithSelector(nuggft.claim.selector, sender, tokenId);
+    }
+
+    function swap(uint256 tokenId, uint96 floor) public view returns (bytes memory res) {
+        return abi.encodeWithSelector(nuggft.swap.selector, tokenId, floor);
+    }
+
+    function swapItem(
+        uint256 tokenId,
+        uint256 itemId,
+        uint96 floor
+    ) public view returns (bytes memory res) {
+        return abi.encodeWithSelector(nuggft.swapItem.selector, tokenId, itemId, floor);
+    }
+
+    function claimItem(
+        uint256 buyerTokenId,
+        uint256 sellerTokenId,
+        uint256 itemId
+    ) public view returns (bytes memory res) {
+        return abi.encodeWithSelector(nuggft.claimItem.selector, buyerTokenId, sellerTokenId, itemId);
+    }
+
+    function rotateFeature(uint256 tokenId, uint256 feature) public view returns (bytes memory res) {
+        return abi.encodeWithSelector(nuggft.rotateFeature.selector, tokenId, feature);
+    }
+
+    function withdrawStake(uint256 tokenId) public view returns (bytes memory res) {
         return abi.encodeWithSelector(nuggft.withdrawStake.selector, tokenId);
     }
 
-    function migrateStake(uint256 tokenId) public payable returns (bytes memory res) {
-        return abi.encodeWithSelector(nuggft.withdrawStake.selector, tokenId);
+    function migrateStake(uint256 tokenId) public view returns (bytes memory res) {
+        return abi.encodeWithSelector(nuggft.migrateStake.selector, tokenId);
+    }
+
+    function setMigrator(address _migrator) public view returns (bytes memory res) {
+        return abi.encodeWithSelector(nuggft.setMigrator.selector, _migrator);
+    }
+
+    function approve(address addr, uint256 tokenId) public view returns (bytes memory res) {
+        return abi.encodeWithSelector(nuggft.approve.selector, addr, tokenId);
+    }
+
+    function setApprovalForAll(address addr, bool appr) public view returns (bytes memory res) {
+        return abi.encodeWithSelector(nuggft.setApprovalForAll.selector, addr, appr);
+    }
+
+    function mint(uint256 tokenId) public view returns (bytes memory res) {
+        return abi.encodeWithSelector(nuggft.mint.selector, tokenId);
+    }
+
+    function trustedMint(uint256 tokenId, address to) public view returns (bytes memory res) {
+        return abi.encodeWithSelector(nuggft.trustedMint.selector, tokenId, to);
     }
 
     /*━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
                                 scenarios
     ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━*/
+
+    function scenario_dee_has_a_token() public payable returns (uint32 tokenId) {
+        tokenId = 2069;
+        nuggft_call(dee, mint(tokenId));
+    }
+
+    function scenario_dee_has_a_token_2() public payable returns (uint32 tokenId) {
+        tokenId = 2400;
+        nuggft_call(dee, mint(tokenId));
+    }
+
+    function scenario_charlie_has_a_token() public payable returns (uint32 tokenId) {
+        tokenId = 2070;
+        nuggft_call(charlie, mint(tokenId));
+    }
+
+    function scenario_migrator_set() public payable {
+        nuggft_call(safe, setMigrator(address(migrator)));
+    }
+
+    function scenario_dee_has_swapped_a_token() public payable returns (uint32 tokenId, uint96 floor) {
+        tokenId = scenario_dee_has_a_token();
+        floor = 10**18;
+
+        nuggft_call(dee, approve(address(nuggft), tokenId));
+
+        nuggft_call(dee, swap(tokenId, floor));
+    }
+
+    function scenario_dee_has_swapped_a_token_and_mac_can_claim() public payable returns (uint32 tokenId) {
+        (tokenId, ) = scenario_dee_has_swapped_a_token();
+
+        nuggft_call(mac, delegate(address(mac), tokenId), 2 * 10**18);
+
+        fvm.roll(2000);
+    }
+
+    function scenario_mac_has_claimed_a_token_dee_swapped() public payable returns (uint32 tokenId) {
+        (tokenId) = scenario_dee_has_swapped_a_token_and_mac_can_claim();
+
+        nuggft_call(mac, claim(address(mac), tokenId));
+    }
+
+    function scenario_mac_has_swapped_a_token_dee_swapped() public payable returns (uint32 tokenId, uint96 floor) {
+        (tokenId) = scenario_mac_has_claimed_a_token_dee_swapped();
+        floor = 3 ether;
+
+        nuggft_call(mac, approve(address(nuggft), tokenId));
+
+        nuggft_call(mac, swap(tokenId, floor));
+    }
+
+    function scenario_dee_has_swapped_an_item()
+        public
+        payable
+        returns (
+            uint32 tokenId,
+            uint8 feature,
+            uint16 itemId,
+            uint96 floor
+        )
+    {
+        (tokenId) = scenario_dee_has_a_token();
+        floor = 3 ether;
+
+        (, uint8[] memory items, , , ) = nuggft.parsedProofOf(tokenId);
+
+        feature = 1;
+        itemId = items[feature] | (uint16(feature) << 8);
+
+        nuggft_call(dee, rotateFeature(tokenId, feature));
+
+        nuggft_call(dee, swapItem(tokenId, itemId, floor));
+    }
+
+    function scenario_dee_has_swapped_an_item_and_charlie_can_claim()
+        public
+        payable
+        returns (
+            uint32 charliesTokenId,
+            uint32 tokenId,
+            uint16 itemId
+        )
+    {
+        uint256 feature;
+        uint96 floor;
+        (tokenId, feature, itemId, floor) = scenario_dee_has_swapped_an_item();
+
+        charliesTokenId = scenario_charlie_has_a_token();
+
+        nuggft_call(charlie, delegateItem(charliesTokenId, tokenId, itemId), floor + 1 ether);
+
+        fvm.roll(2000);
+    }
 
     function scenario_one() public payable returns (uint32 firstEpoch, uint32 secondEpoch) {
         firstEpoch = nuggft.epoch();
@@ -132,6 +282,27 @@ contract NuggFatherFix is t {
         call_claim(dee, firstEpoch);
 
         call_approve(dee, firstEpoch, address(nuggft));
+    }
+
+    function scenario_one_2b() public payable returns (uint32 firstEpoch, uint32 secondEpoch) {
+        (firstEpoch, secondEpoch) = scenario_one();
+
+        call_claim(dee, firstEpoch);
+    }
+
+    /*━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+                                scenarios
+    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━*/
+
+    function scenario_deeClaimedFirstEpoch() public payable returns (uint32 tokenId) {
+        (tokenId, ) = scenario_one();
+
+        call_claim(dee, tokenId);
+    }
+
+    function scenario_deeMinted() public payable returns (uint32 tokenId) {
+        tokenId = 2069;
+        nuggft_call(dee, mint(tokenId));
     }
 
     function tryCall_delegate(

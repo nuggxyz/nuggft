@@ -15,16 +15,40 @@ contract revertTest__stake is t, NuggFatherFix {
     }
 
     /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-               [T:0] - addStakedShareToEth - "value of tx too low"
+            [T:1] - addStakedShareFromMsgValue - "value of tx too low"
        ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
 
-    function test__revert__stake__T_0() public {
-        nuggft_call(frank, delegate(address(frank), epoch), 30 * 10**16);
+    // mint
+    // ────
+
+    function test__revert__stake__T_1__success() public {
+        nuggft_call(frank, mint(2099), 30 * 10**16);
     }
 
-    /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-                         [T:1] - value of tx too low
-       ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+    function test__revert__stake__T_1__fail() public {
+        nuggft_call(frank, mint((2099)), 30 * 10**18);
+
+        nuggft_revertCall('T:1', dennis, mint(2909), 29 * 10**18);
+    }
+
+    function test__revert__stake__T_1__fail_fromZero() public {
+        nuggft_call(frank, mint((2099)), 30 * 10**18);
+
+        nuggft_revertCall('T:1', dennis, mint(2909));
+    }
+
+    // trustedMint
+    // ────
+
+    function test__revert__stake__T_1__successOnTrusted() public {
+        nuggft_call(safe, trustedMint(99, address(frank)), 30 * 10**16);
+    }
+
+    function test__revert__stake__T_1__failOnTrusted() public {
+        nuggft_call(safe, trustedMint(99, address(frank)), 30 * 10**18);
+
+        nuggft_revertCall('T:1', safe, trustedMint(9, address(dennis)), 29 * 10**18);
+    }
 
     /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
                          [T:2] - value of tx too low
@@ -34,32 +58,109 @@ contract revertTest__stake is t, NuggFatherFix {
              [T:3] - subStakedShare - "user not granded permission"
        ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
 
-    function test__revert__stake__T_3_reverts() public {
-        (epoch, ) = scenario_one_2a();
+    // withdrawStake
+    // ─────────────
 
-        nuggft_revertCall('T:3', mac, withdrawStake(epoch));
+    function test__revert__stake__T_3__withdrawStake__fail() public {
+        uint160 tokenId = scenario_dee_has_a_token();
+
+        nuggft_revertCall('T:3', mac, withdrawStake(tokenId));
     }
 
-    function test__revert__stake__T_3_succeeds() public {
-        (epoch, ) = scenario_one_2a();
+    function test__revert__stake__T_3__withdrawStake__failOnNoApproval() public {
+        uint160 tokenId = scenario_dee_has_a_token();
 
-        nuggft_call(dee, withdrawStake(epoch));
+        nuggft_revertCall('T:3', dee, withdrawStake(tokenId));
+    }
+
+    function test__revert__stake__T_3__withdrawStake__succeeds() public {
+        uint160 tokenId = scenario_dee_has_a_token();
+
+        nuggft_call(dee, approve(address(nuggft), tokenId));
+
+        nuggft_call(dee, withdrawStake(tokenId));
+    }
+
+    function test__revert__stake__T_3__withdrawStake__failOnIncorrectApproval() public {
+        uint160 tokenId = scenario_dee_has_a_token();
+
+        nuggft_call(dee, approve(address(mac), tokenId));
+
+        nuggft_revertCall('T:3', dee, withdrawStake(tokenId));
+    }
+
+    function test__revert__stake__T_3__withdrawStake__failOnIncorrectOperatorApproval() public {
+        uint160 tokenId = scenario_dee_has_a_token();
+
+        nuggft_call(dee, setApprovalForAll(address(mac), true));
+
+        nuggft_call(dee, approve(address(nuggft), tokenId));
+
+        nuggft_revertCall('T:3', dennis, withdrawStake(tokenId));
+    }
+
+    function test__revert__stake__T_3__withdrawStake__succeedsOnCorrectOperatorApproval() public {
+        uint160 tokenId = scenario_dee_has_a_token();
+
+        nuggft_call(dee, setApprovalForAll(address(mac), true));
+
+        nuggft_call(dee, approve(address(nuggft), tokenId));
+
+        nuggft_call(mac, withdrawStake(tokenId));
+    }
+
+    // migrateStake
+    // ─────────────
+
+    function test__revert__stake__T_3__migrateStake__fail() public {
+        uint160 tokenId = scenario_dee_has_a_token();
+
+        scenario_migrator_set();
+
+        nuggft_revertCall('T:3', dee, migrateStake(tokenId));
+    }
+
+    function test__revert__stake__T_3__migrateStake__succeeds() public {
+        uint160 tokenId = scenario_dee_has_a_token();
+
+        scenario_migrator_set();
+
+        nuggft_call(dee, approve(address(nuggft), tokenId));
+
+        nuggft_call(dee, migrateStake(tokenId));
     }
 
     /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-                         [T:4] - value of tx too low
+                [T:4] - migrateStake - "migrator must be set"
        ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
-    // finish
-    function test__revert__stake__T_4_reverts() public {
-        (epoch, ) = scenario_one_2a();
 
-        nuggft_revertCall('T:3', mac, withdrawStake(epoch));
+    // migrateStake
+    // ────────────
+
+    function test__revert__stake__T_4_fail() public {
+        uint160 tokenId = scenario_dee_has_a_token();
+
+        nuggft_revertCall('T:4', dee, migrateStake(tokenId));
     }
 
     function test__revert__stake__T_4_succeeds() public {
-        (epoch, ) = scenario_one_2a();
+        uint160 tokenId = scenario_dee_has_a_token();
 
-        nuggft_call(dee, withdrawStake(epoch));
+        nuggft_call(dee, approve(address(nuggft), tokenId));
+
+        nuggft_call(safe, setMigrator(address(migrator)));
+
+        nuggft_call(dee, migrateStake(tokenId));
+    }
+
+    function test__revert__stake__T_4_succeedsWithApproval() public {
+        uint160 tokenId = scenario_dee_has_a_token();
+
+        nuggft_call(dee, approve(address(nuggft), tokenId));
+
+        nuggft_call(safe, setMigrator(address(migrator)));
+
+        nuggft_call(dee, migrateStake(tokenId));
     }
 
     /// values add on top of each other

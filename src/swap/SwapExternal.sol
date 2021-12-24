@@ -30,7 +30,7 @@ abstract contract SwapExternal is ISwapExternal {
 
     /// @inheritdoc ISwapExternal
     function delegate(address sender, uint160 tokenId) public payable override {
-        require(TokenView.isOperatorFor(msg.sender, sender), 'S:6');
+        require(TokenView.isOperatorFor(msg.sender, sender), 'S:0');
 
         (Swap.Storage storage s, Swap.Memory memory m) = Swap.loadTokenSwap(tokenId, sender);
 
@@ -38,15 +38,14 @@ abstract contract SwapExternal is ISwapExternal {
         // we do not know how much to give them when they call "claim" otherwise
 
         if (m.activeEpoch == tokenId && m.swapData == 0) {
-            // require(msg.value > 0, 'S:9');
+            // to ensure we at least have enough to increment the offer amount by 2%
+            require(msg.value >= SwapPure.MIN_OFFER, 'S:1');
 
             // we do not need this, could take tokenId out as an argument - but do not want to give users
             // the ability to accidently place an offer for nugg A and end up minting nugg B.
-            require(m.offerData == 0, 'S:0');
+            assert(m.offerData == 0);
 
-            (uint256 data, uint96 dust) = SwapPure.buildSwapData(m.activeEpoch, m.sender, msg.value.safe96(), false);
-
-            require(msg.value >= SwapPure.MIN_OFFER && dust != msg.value, 'S:1');
+            (uint256 data, ) = SwapPure.buildSwapData(m.activeEpoch, m.sender, msg.value.safe96(), false);
 
             s.data = data;
 
@@ -58,22 +57,25 @@ abstract contract SwapExternal is ISwapExternal {
 
             emit DelegateMint(tokenId, m.sender, msg.value.safe96());
         } else {
-            require(!m.offerData.isOwner(), 'S:2');
+            require(m.swapData != 0, 'S:4');
+
+            if (m.offerData != 0) {
+                require(!m.offerData.isOwner() && m.offerData.epoch() == m.activeEpoch, 'S:3');
+            }
 
             // forces user to claim previously
-            if (m.offerData != 0) require(m.offerData.epoch() == m.activeEpoch, 'S:3');
-
-            require(m.swapData != 0, 'S:4');
 
             if (m.swapData.isOwner()) {
                 require(msg.value >= StakeCore.activeEthPerShare(), 'S:5');
 
                 commit(s, m);
 
+                // @todo - this msg.value is incorrect
                 emit DelegateCommit(tokenId, msg.sender, msg.value.safe96());
             } else {
                 offer(s, m);
 
+                // @todo - this msg.value is incorrect
                 emit DelegateOffer(tokenId, msg.sender, msg.value.safe96());
             }
         }
@@ -91,15 +93,17 @@ abstract contract SwapExternal is ISwapExternal {
 
         // make sure user is not the owner of swap
         // we do not know how much to give them when they call "claim" otherwise
-        require(!m.offerData.isOwner(), 'SL:HSO:0');
+        require(!m.offerData.isOwner(), 'S:7');
 
         if (m.offerData == 0 && m.swapData.isOwner()) {
             commit(s, m);
 
+            // @todo - this msg.value is incorrect
             emit DelegateCommitItem(sellerTokenId, itemId, buyerTokenId, msg.value.safe96());
         } else {
             offer(s, m);
 
+            // @todo - this msg.value is incorrect
             emit DelegateOfferItem(sellerTokenId, itemId, buyerTokenId, msg.value.safe96());
         }
     }
@@ -110,7 +114,7 @@ abstract contract SwapExternal is ISwapExternal {
 
     /// @inheritdoc ISwapExternal
     function claim(address sender, uint160 tokenId) external override {
-        require(TokenView.isOperatorFor(msg.sender, sender), 'S:6');
+        require(TokenView.isOperatorFor(msg.sender, sender), 'S:8');
 
         (, Swap.Memory memory m) = Swap.loadTokenSwap(tokenId, sender);
 
@@ -133,7 +137,7 @@ abstract contract SwapExternal is ISwapExternal {
         uint160 sellerTokenId,
         uint16 itemId
     ) external override {
-        require(TokenView.isOperatorForOwner(msg.sender, buyerTokenId), 'S:6');
+        require(TokenView.isOperatorForOwner(msg.sender, buyerTokenId), 'S:9');
 
         (, Swap.Memory memory m) = Swap.loadItemSwap(sellerTokenId, itemId, address(buyerTokenId));
 
@@ -158,9 +162,9 @@ abstract contract SwapExternal is ISwapExternal {
     function swap(uint160 tokenId, uint96 floor) external override {
         address sender = TokenView.ownerOf(tokenId);
 
-        require(TokenView.isOperatorFor(msg.sender, sender), 'S:6');
+        require(TokenView.isOperatorFor(msg.sender, sender), 'S:A');
 
-        require(floor >= StakeCore.activeEthPerShare(), 'S:4');
+        require(floor >= StakeCore.activeEthPerShare(), 'S:B');
 
         TokenCore.approvedTransferToSelf(tokenId);
 
@@ -182,7 +186,7 @@ abstract contract SwapExternal is ISwapExternal {
         uint16 itemId,
         uint96 floor
     ) external override {
-        require(TokenView.isOperatorForOwner(msg.sender, sellerTokenId), 'S:6');
+        require(TokenView.isOperatorForOwner(msg.sender, sellerTokenId), 'S:C');
 
         // will revert if they do not have the item
         ProofCore.removeItem(sellerTokenId, itemId);
@@ -190,7 +194,7 @@ abstract contract SwapExternal is ISwapExternal {
         (Swap.Storage storage s, Swap.Memory memory m) = Swap.loadItemSwap(sellerTokenId, itemId, address(sellerTokenId));
 
         // cannot sell two of the same item at same time
-        require(m.swapData == 0, 'SC:SI:0');
+        require(m.swapData == 0, 'S:D');
 
         (uint256 dat, ) = SwapPure.buildSwapData(0, address(sellerTokenId), floor, true);
 
@@ -248,13 +252,13 @@ abstract contract SwapExternal is ISwapExternal {
     ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━*/
 
     function checkClaimerIsWinnerOrLoser(Swap.Memory memory m) internal pure returns (bool winner) {
-        require(m.offerData != 0, 'S:8');
+        require(m.offerData != 0, 'S:E');
 
         bool isOver = m.activeEpoch > m.swapData.epoch();
         bool isLeader = m.offerData.account() == m.swapData.account();
-        bool isOwner = m.swapData.isOwner();
+        bool isOwner = m.swapData.isOwner() && m.offerData.isOwner();
 
-        return isOwner || (isLeader && isOver);
+        return isLeader && (isOwner || isOver);
     }
 
     function commit(Swap.Storage storage s, Swap.Memory memory m) internal {
@@ -271,14 +275,14 @@ abstract contract SwapExternal is ISwapExternal {
 
         s.data = newSwapData;
 
-        s.offers[m.swapData.account()] = m.swapData.epoch(m.activeEpoch + 1);
+        s.offers[m.swapData.account()] = m.swapData.epoch(m.activeEpoch + 1).isOwner(false);
 
         StakeCore.addStakedEth((increment + dust).safe96());
     }
 
     function offer(Swap.Storage storage s, Swap.Memory memory m) internal {
         // make sure swap is still active
-        require(m.activeEpoch <= m.swapData.epoch(), 'SL:OBP:3');
+        require(m.activeEpoch <= m.swapData.epoch(), 'S:F');
 
         if (m.swapData.account() != m.sender) s.offers[m.swapData.account()] = m.swapData;
 
@@ -327,7 +331,7 @@ abstract contract SwapExternal is ISwapExternal {
     {
         uint96 baseEth = prevSwapData.eth();
 
-        require(baseEth.addIncrement() <= newUserOfferEth, 'E:1');
+        require(baseEth.addIncrement() <= newUserOfferEth, 'S:G');
 
         (res, dust) = SwapPure.buildSwapData(epoch, account, newUserOfferEth, false);
 
