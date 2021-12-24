@@ -36,9 +36,9 @@ describe('uint tests', async function () {
 
             const token1 = await fix.nuggft.epoch();
 
-            await fix.nuggft.connect(accounts.mac).delegate(token1);
+            await fix.nuggft.connect(accounts.mac).delegate(accounts.mac.address, token1, { value: toEth('0.040') });
 
-            await fix.nuggft.connect(accounts.dee).delegate(token1, { value: toEth('0.0690') });
+            await fix.nuggft.connect(accounts.dee).delegate(accounts.dee.address, token1, { value: toEth('0.0690') });
 
             let last = BigNumber.from(0);
             let lastShare = BigNumber.from(0);
@@ -62,10 +62,10 @@ describe('uint tests', async function () {
                 lastShare = workingShare;
             }
 
-            await Mining.advanceBlockTo(510);
+            await Mining.advanceBlockTo(150);
 
-            await fix.nuggft.connect(accounts.dee).claim(token1);
-            await fix.nuggft.connect(accounts.mac).claim(token1);
+            await fix.nuggft.connect(accounts.dee).claim(accounts.dee.address, token1);
+            await fix.nuggft.connect(accounts.mac).claim(accounts.mac.address, token1);
 
             await fix.nuggft.connect(accounts.dee).approve(fix.nuggft.address, token1);
 
@@ -73,37 +73,37 @@ describe('uint tests', async function () {
 
             const token3 = await fix.nuggft.epoch();
 
-            // await fix.nuggft.connect(accounts.frank).delegate(token3, { value: toEth('20.000') });
-            // await fix.nuggft.connect(accounts.frank).delegate(token1, { value: toEth('20.000') });
-            // await fix.nuggft.connect(accounts.dennis).delegate(token1, { value: toEth('22.000') });
-            // await fix.nuggft.connect(accounts.frank).delegate(token1, { value: toEth('3.000') });
-            // await fix.nuggft.connect(accounts.dennis).delegate(token1, { value: toEth('2.000') });
-            // await fix.nuggft.connect(accounts.dennis).delegate(token1, { value: toEth('2.000') });
-            // await fix.nuggft.connect(accounts.charile).delegate(token1, { value: toEth('30.000') });
+            await fix.nuggft.connect(accounts.frank).delegate(accounts.frank.address, token3, { value: toEth('20.000') });
+            await fix.nuggft.connect(accounts.frank).delegate(accounts.frank.address, token1, { value: toEth('20.000') });
+            await fix.nuggft.connect(accounts.dennis).delegate(accounts.dennis.address, token1, { value: toEth('22.000') });
+            await fix.nuggft.connect(accounts.frank).delegate(accounts.frank.address, token1, { value: toEth('3.000') });
+            await fix.nuggft.connect(accounts.dennis).delegate(accounts.dennis.address, token1, { value: toEth('2.000') });
+            await fix.nuggft.connect(accounts.dennis).delegate(accounts.dennis.address, token1, { value: toEth('2.000') });
+            await fix.nuggft.connect(accounts.charile).delegate(accounts.charile.address, token1, { value: toEth('30.000') });
 
-            for (let i = 2000; i < 2010; i++) {
-                let [ok, next, useroffer] = await fix.nuggft.connect(accounts.dennis).valueForDelegate(token1, accounts.dennis.address);
-                console.log('dennis should: ', ok, fromEth(next.sub(useroffer)));
-                await fix.nuggft.connect(accounts.dennis).delegate(token1, { value: next.sub(useroffer) });
+            // for (let i = 2000; i < 2001; i++) {
+            //     let [ok, next, useroffer] = await fix.nuggft.connect(accounts.dennis).valueForDelegate(accounts.dennis.address, token1);
+            //     console.log('dennis should: ', ok, fromEth(next.sub(useroffer)));
+            //     await fix.nuggft.connect(accounts.dennis).delegate(accounts.dennis.address, token1, { value: next.sub(useroffer) });
 
-                [ok, next, useroffer] = await fix.nuggft.connect(accounts.charile).valueForDelegate(token1, accounts.charile.address);
-                console.log('charile should: ', ok, fromEth(next.sub(useroffer)));
+            //     [ok, next, useroffer] = await fix.nuggft.connect(accounts.charile).valueForDelegate(accounts.charile.address, token1);
+            //     console.log('charile should: ', ok, fromEth(next.sub(useroffer)));
 
-                await fix.nuggft.connect(accounts.charile).delegate(token1, { value: next.sub(useroffer) });
-                // console.log('minshareprice: ', fromEth(await fix.nuggft.connect(accounts.frank).valueForDelegate()));
-            }
+            //     await fix.nuggft.connect(accounts.charile).delegate(accounts.charile.address, token1, { value: next.sub(useroffer) });
+            //     // console.log('minshareprice: ', fromEth(await fix.nuggft.connect(accounts.frank).valueForDelegate()));
+            // }
 
-            await Mining.advanceBlockTo(2500);
+            await Mining.advanceBlockTo(2000);
             await Mining.advanceBlock();
 
             const token11 = await fix.nuggft.epoch();
 
-            await fix.nuggft.connect(accounts.frank).delegate(token11, { value: toEth('88') });
+            await fix.nuggft.connect(accounts.frank).delegate(accounts.frank.address, token11, { value: toEth('88') });
 
-            await Mining.advanceBlockTo(3500);
-            await fix.nuggft.connect(accounts.frank).claim(token11);
+            await Mining.advanceBlockTo(2500);
+            await fix.nuggft.connect(accounts.frank).claim(accounts.frank.address, token11);
 
-            await fix.nuggft.connect(accounts.charile).claim(token1);
+            await fix.nuggft.connect(accounts.charile).claim(accounts.charile.address, token1);
 
             const info = await fix.nuggft.parsedProofOf(token11);
 
@@ -122,7 +122,7 @@ describe('uint tests', async function () {
             await fix.nuggft.connect(accounts.frank).swapItem(token11, dids[1], toEth('14'));
             const epoch = await fix.nuggft.connect(accounts.charile).epoch();
 
-            await fix.nuggft.connect(accounts.charile).delegateItem(token11, dids[1], token1, { value: toEth('43') });
+            await fix.nuggft.connect(accounts.charile).delegateItem(token1, token11, dids[1], { value: toEth('43') });
 
             await Mining.advanceBlockTo(4500);
 
@@ -150,7 +150,7 @@ describe('uint tests', async function () {
 
             await fix.nuggft.connect(accounts.frank).approve(fix.nuggft.address, token11);
 
-            await fix.nuggft.connect(accounts.charile).claimItem(token11, dids[1], token1);
+            await fix.nuggft.connect(accounts.charile).claimItem(token1, token11, dids[1]);
 
             await fix.nuggft.connect(accounts.charile).approve(fix.nuggft.address, token1);
 
