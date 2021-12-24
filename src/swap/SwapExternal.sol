@@ -59,9 +59,15 @@ abstract contract SwapExternal is ISwapExternal {
         } else {
             require(m.swapData != 0, 'S:4');
 
+            // @todo needs to be better
             if (m.offerData != 0) {
-                require(!m.offerData.isOwner() && m.offerData.epoch() == m.activeEpoch, 'S:3');
+                require(
+                    !m.offerData.isOwner() && (m.offerData.epoch() == m.activeEpoch || m.offerData.epoch() == m.activeEpoch + 1),
+                    'S:3'
+                );
             }
+
+            // require((m.offerData.epoch() == m.activeEpoch)) || m.offerData.epoch() == m.activeEpoch - 1), "S:3");
 
             // forces user to claim previously
 
