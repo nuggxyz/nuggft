@@ -50,7 +50,7 @@ abstract contract SwapExternal is ISwapExternal {
 
             s.data = data;
 
-            StakeCore.addStakedShareAndEth(msg.value.safe96());
+            StakeCore.addStakedShareFromMsgValue();
 
             ProofCore.setProofFromEpoch(tokenId);
 

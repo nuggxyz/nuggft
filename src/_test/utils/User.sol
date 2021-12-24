@@ -14,6 +14,14 @@ contract User {
 
     constructor() payable {}
 
+    function call(
+        address target,
+        bytes4 selector,
+        bytes memory args
+    ) public payable virtual returns (bytes memory returnData) {
+        returnData = call(target, abi.encodeWithSelector(selector, args));
+    }
+
     function tryCall(address target, bytes memory data) public payable virtual returns (bool success, bytes memory returnData) {
         (success, returnData) = target.call{value: msg.value}(data);
     }

@@ -54,9 +54,85 @@ contract NuggFatherFix is t {
         nuggft.setIsTrusted(address(safe), true);
     }
 
-    /*━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+    function nuggft_call(User user, bytes memory args) public payable {
+        nuggft_call(user, args, 0);
+    }
+
+    function nuggft_call(
+        User user,
+        bytes memory args,
+        uint96 eth
+    ) public payable {
+        user.call{value: eth}(address(nuggft), args);
+    }
+
+    function nuggft_revertCall(
+        string memory message,
+        User user,
+        bytes memory args
+    ) public payable {
+        nuggft_revertCall(message, user, args, 0);
+    }
+
+    function nuggft_revertCall(
+        string memory message,
+        User user,
+        bytes memory args,
+        uint96 eth
+    ) public payable {
+        user.revertCall{value: eth}(address(nuggft), message, args);
+    }
+
+    /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
                                 delegate
+       ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+
+    function delegate(address sender, uint256 tokenId) public payable returns (bytes memory res) {
+        return abi.encodeWithSelector(nuggft.delegate.selector, sender, tokenId);
+    }
+
+    function withdrawStake(uint256 tokenId) public payable returns (bytes memory res) {
+        return abi.encodeWithSelector(nuggft.withdrawStake.selector, tokenId);
+    }
+
+    function migrateStake(uint256 tokenId) public payable returns (bytes memory res) {
+        return abi.encodeWithSelector(nuggft.withdrawStake.selector, tokenId);
+    }
+
+    /*━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+                                scenarios
     ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━*/
+
+    function scenario_one() public payable returns (uint32 firstEpoch, uint32 secondEpoch) {
+        firstEpoch = nuggft.epoch();
+
+        call_delegate(mac, 5 * 10**15, firstEpoch);
+        call_delegate(dee, 9 * 10**15, firstEpoch);
+
+        fvm.roll(2000);
+
+        secondEpoch = nuggft.epoch();
+
+        require(secondEpoch > firstEpoch, 'BLOCK NUMBER NOT HIGH ENOUGH');
+    }
+
+    function scenario_one_2() public payable returns (uint32 firstEpoch, uint32 secondEpoch) {
+        (firstEpoch, secondEpoch) = scenario_one();
+
+        call_claim(dee, firstEpoch);
+
+        call_approve(dee, firstEpoch, address(nuggft));
+
+        call_swap(dee, firstEpoch, 12 * 10**15);
+    }
+
+    function scenario_one_2a() public payable returns (uint32 firstEpoch, uint32 secondEpoch) {
+        (firstEpoch, secondEpoch) = scenario_one();
+
+        call_claim(dee, firstEpoch);
+
+        call_approve(dee, firstEpoch, address(nuggft));
+    }
 
     function tryCall_delegate(
         User user,
@@ -188,33 +264,6 @@ contract NuggFatherFix is t {
         address to
     ) public {
         user.revertCall(address(nuggft), message, abi.encodeWithSelector(nuggft.valueForDelegate.selector, tokenId, to));
-    }
-
-    /*━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-                                scenarios
-    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━*/
-
-    function scenario_one() public payable returns (uint32 firstEpoch, uint32 secondEpoch) {
-        firstEpoch = nuggft.epoch();
-
-        call_delegate(mac, 5 * 10**15, firstEpoch);
-        call_delegate(dee, 9 * 10**15, firstEpoch);
-
-        fvm.roll(2000);
-
-        secondEpoch = nuggft.epoch();
-
-        require(secondEpoch > firstEpoch, 'BLOCK NUMBER NOT HIGH ENOUGH');
-    }
-
-    function scenario_one_2() public payable returns (uint32 firstEpoch, uint32 secondEpoch) {
-        (firstEpoch, secondEpoch) = scenario_one();
-
-        call_claim(dee, firstEpoch);
-
-        call_approve(dee, firstEpoch, address(nuggft));
-
-        call_swap(dee, firstEpoch, 12 * 10**15);
     }
 
     /*━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━

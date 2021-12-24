@@ -17,9 +17,9 @@ library FileCore {
     using SafeCastLib for uint256;
     using SafeCastLib for uint16;
 
-    /*━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+    /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
                                 TRUSTED
-    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━*/
+       ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
 
     function storeFiles(
         uint8 feature,
@@ -30,11 +30,9 @@ library FileCore {
 
         require(len > 0, 'F:0');
 
-        uint168 working = uint168(len) << 160;
-
         address ptr = SSTORE2.write(abi.encode(data));
 
-        File.spointer().ptrs[feature].push(uint168(uint160(ptr)) | working);
+        File.spointer().ptrs[feature].push(uint168(uint160(ptr)) | (uint168(len) << 160));
 
         uint256 cache = File.spointer().lengthData;
 
@@ -45,9 +43,9 @@ library FileCore {
         File.spointer().lengthData = FilePure.setLengths(cache, lengths);
     }
 
-    /*━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+    /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
                                  GET FILES
-    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━*/
+       ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
 
     function getBatchFiles(uint8[] memory ids) internal view returns (uint256[][] memory data) {
         data = new uint256[][](ids.length);
