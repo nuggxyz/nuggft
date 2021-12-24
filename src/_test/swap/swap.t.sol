@@ -31,4 +31,6 @@ contract swapTest__claim is t, NuggFatherFix {
         revertCall_claim(mac, 'S:8', epoch);
         revertCall_claim(dee, 'S:8', epoch);
     }
+
+    // for item swaps they can only swap one given item at a time
 }

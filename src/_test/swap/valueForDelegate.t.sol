@@ -18,7 +18,7 @@ contract swapTest__valueForDelegate is t, NuggFatherFix {
     }
 
     function test__swap__valueForDelegate__returnsAValidAmount() public {
-        (bool should, uint96 top, uint96 curr) = nuggft.valueForDelegate(epoch, address(mac));
+        (bool should, uint96 top, uint96 curr) = nuggft.valueForDelegate(address(mac), epoch);
         emit log_named_uint('mac top', top);
         emit log_named_uint('mac curr', curr);
         assertTrue(should);
@@ -29,7 +29,7 @@ contract swapTest__valueForDelegate is t, NuggFatherFix {
         call_delegate(mac, 11 * 10**16, epoch);
 
         // call_delegate(mac, fastAmount(epoch, mac), epoch);
-        (bool should, uint96 top, uint96 curr) = nuggft.valueForDelegate(epoch, address(mac));
+        (bool should, uint96 top, uint96 curr) = nuggft.valueForDelegate(address(mac), epoch);
         assertTrue(should);
 
         revertCall_delegate(dee, top - curr - 1, 'E:1', epoch);
@@ -38,7 +38,7 @@ contract swapTest__valueForDelegate is t, NuggFatherFix {
     function test__swap__valueForDelegate__returnsLotsOfValidAmount() public {
         uint96 last;
         for (uint256 i = 0; i < 5; i++) {
-            (bool should, uint96 top, uint96 curr) = nuggft.valueForDelegate(epoch, address(mac));
+            (bool should, uint96 top, uint96 curr) = nuggft.valueForDelegate(address(mac), epoch);
             assertTrue(should);
             assertTrue(last < top);
             last = top;
@@ -46,11 +46,11 @@ contract swapTest__valueForDelegate is t, NuggFatherFix {
 
             call_delegate(mac, top - curr, epoch);
 
-            (should, top, curr) = nuggft.valueForDelegate(epoch, address(mac));
+            (should, top, curr) = nuggft.valueForDelegate(address(mac), epoch);
 
             emit log_named_uint('mac aft', curr);
 
-            (should, top, curr) = nuggft.valueForDelegate(epoch, address(frank));
+            (should, top, curr) = nuggft.valueForDelegate(address(frank), epoch);
 
             emit log_named_uint('fra bef', curr);
 
@@ -60,7 +60,7 @@ contract swapTest__valueForDelegate is t, NuggFatherFix {
 
             call_delegate(frank, top - curr, epoch);
 
-            (should, top, curr) = nuggft.valueForDelegate(epoch, address(frank));
+            (should, top, curr) = nuggft.valueForDelegate(address(frank), epoch);
 
             emit log_named_uint('fra aft', curr);
         }

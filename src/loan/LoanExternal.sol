@@ -27,14 +27,15 @@ abstract contract LoanExternal is ILoanExternal {
 
     /// @inheritdoc ILoanExternal
     function loan(uint160 tokenId) external override {
-        // we know the loan data is blank because it is owned by the user
-        require(TokenView.isOperatorForOwner(msg.sender, tokenId), 'L:2');
+        address sender = TokenView.ownerOf(tokenId);
+
+        require(TokenView.isOperatorFor(msg.sender, sender), 'L:0');
 
         uint96 principal = StakeCore.activeEthPerShare();
 
         uint32 epoch = EpochCore.activeEpoch();
 
-        (uint256 loanData, ) = SwapPure.buildSwapData(epoch, uint160(msg.sender), principal, false);
+        (uint256 loanData, ) = SwapPure.buildSwapData(epoch, sender, principal, false);
 
         Loan.sstore(tokenId, loanData); // starting swap data
 
@@ -42,23 +43,23 @@ abstract contract LoanExternal is ILoanExternal {
 
         TokenCore.approvedTransferToSelf(tokenId);
 
-        SafeTransferLib.safeTransferETH(msg.sender, principal);
+        SafeTransferLib.safeTransferETH(sender, principal);
     }
 
     /// @inheritdoc ILoanExternal
     function payoff(uint160 tokenId) external payable override {
-        require(address(this) == TokenView.ownerOf(tokenId), 'L:6');
-
         (uint96 toPayoff, uint96 toRebalance, uint96 earned, uint96 epochDue, address loaner) = loanInfo(tokenId);
+
+        assert(address(this) == TokenView.ownerOf(tokenId)); // should always be true - should revert in loanInfo
 
         Loan.spurge(tokenId); // starting swap data
 
         uint32 epoch = EpochCore.activeEpoch();
 
         // delay liquidation
-        if (epochDue >= epoch) require(TokenView.isOperatorFor(msg.sender, loaner), 'L:2');
+        if (epochDue >= epoch) require(TokenView.isOperatorFor(msg.sender, loaner), 'L:1');
 
-        require(toPayoff <= msg.value, 'L:8');
+        require(toPayoff <= msg.value, 'L:2');
 
         uint96 value = msg.value.safe96();
 
@@ -68,40 +69,42 @@ abstract contract LoanExternal is ILoanExternal {
 
         emit Rebalance(tokenId, toRebalance, earned);
 
-        emit Payoff(tokenId, msg.sender, toPayoff);
+        emit Payoff(tokenId, loaner, toPayoff);
 
         StakeCore.addStakedEth(toRebalance);
 
-        SafeTransferLib.safeTransferETH(msg.sender, owed);
+        SafeTransferLib.safeTransferETH(loaner, owed);
 
-        TokenCore.checkedTransferFromSelf(msg.sender, tokenId);
+        TokenCore.checkedTransferFromSelf(loaner, tokenId);
     }
 
     /// @inheritdoc ILoanExternal
     function rebalance(uint160 tokenId) external payable override {
-        require(address(this) == TokenView.ownerOf(tokenId), 'L:3');
+        // require(address(this) == TokenView.ownerOf(tokenId), 'L:3');
 
         (, uint96 toRebalance, uint96 earned, uint32 epochDue, address loaner) = loanInfo(tokenId);
 
-        require(TokenView.isOperatorFor(msg.sender, loaner), 'L:4');
+        assert(address(this) == TokenView.ownerOf(tokenId)); // should always be true - should revert in loanInfo
 
-        require(toRebalance <= msg.value, 'L:5'); // 70
+        require(TokenView.isOperatorFor(msg.sender, loaner), 'L:3');
+
+        require(toRebalance <= msg.value, 'L:4');
 
         StakeCore.addStakedEth(toRebalance);
 
         uint96 newPrincipal = StakeCore.activeEthPerShare();
 
-        (uint256 loanData, uint96 dust) = SwapPure.buildSwapData(epochDue, uint160(msg.sender), newPrincipal, false);
+        (uint256 loanData, uint96 dust) = SwapPure.buildSwapData(epochDue, loaner, newPrincipal, false);
 
-        Loan.sstore(tokenId, loanData); // starting swap data
+        Loan.sstore(tokenId, loanData);
 
-        uint96 overpayment = msg.value.safe96() - toRebalance; // 1 wei
+        uint96 overpayment = msg.value.safe96() - toRebalance;
 
         uint96 owed = earned + overpayment + dust;
 
         emit Rebalance(tokenId, toRebalance, earned);
 
-        SafeTransferLib.safeTransferETH(msg.sender, owed);
+        SafeTransferLib.safeTransferETH(loaner, owed);
     }
 
     /// @inheritdoc ILoanExternal
@@ -119,7 +122,7 @@ abstract contract LoanExternal is ILoanExternal {
         uint256 state = Loan.sload(tokenId);
 
         // ensure loan exists
-        require(state != 0, 'L:1');
+        require(state != 0, 'L:5');
 
         // the amount of eth currently loanded by user
         uint96 curr = state.eth();

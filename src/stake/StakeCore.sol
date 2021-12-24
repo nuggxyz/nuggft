@@ -7,6 +7,9 @@ import {INuggFTV1Migrator} from '../interfaces/INuggFTV1Migrator.sol';
 import {ShiftLib} from '../libraries/ShiftLib.sol';
 import {SafeTransferLib} from '../libraries/SafeTransferLib.sol';
 
+import {Global} from '../global/GlobalStorage.sol';
+
+import {Token} from '../token/TokenStorage.sol';
 import {TokenCore} from '../token/TokenCore.sol';
 import {TokenView} from '../token/TokenView.sol';
 
@@ -83,7 +86,7 @@ library StakeCore {
     /// @dev this is the only way to add shares - the logic here ensures that "ethPerShare" can never decrease
     /// @param eth the amount of eth being put up for a new share - must be some portion of msg.value
     function addStakedShareAndEth(uint96 eth) internal {
-        require(msg.value >= eth, 'T:5'); // "value of tx too low"
+        require(msg.value >= eth, 'T:0'); // "value of tx too low"
 
         uint256 cache = Stake.sload();
 
@@ -92,7 +95,7 @@ library StakeCore {
         (uint96 totalPrice, , uint96 protocolFee, ) = cache.minSharePriceBreakdown();
 
         // logically unnessesary - to help front end
-        require(eth >= totalPrice, 'T:2'); // "not enough eth to create share"
+        require(eth >= totalPrice, 'T:1'); // "not enough eth to create share"
 
         uint96 overpay = eth - totalPrice;
 
@@ -112,7 +115,7 @@ library StakeCore {
     /// @dev supply of eth goes up while supply of shares stays constant - increasing "minSharePrice"
     /// @param eth the amount of eth being staked - must be some portion of msg.value
     function addStakedEth(uint96 eth) internal {
-        require(msg.value >= eth, 'T:7'); // "value of tx too low"
+        require(msg.value >= eth, 'T:2'); // "value of tx too low"
 
         uint256 cache = Stake.sload();
 
@@ -130,31 +133,37 @@ library StakeCore {
     /// @notice removes a staked share from the contract,
     /// @dev this is the only way to remove a share
     /// @dev caculcates but does not handle dealing the eth - which is handled by the two helpers above
-    /// @dev ensurs the user is the owner of the nugg
+    /// @dev ensures the user is the owner of the nugg
     /// @param tokenId the id of the nugg being unstaked
     /// @return ethOwed -> the amount of eth owed to the unstaking user - equivilent to "ethPerShare"
     function subStakedShare(uint160 tokenId) internal returns (uint96 ethOwed) {
-        require(TokenView.ownerOf(tokenId) == msg.sender, 'T:14');
+        address owner = TokenView.ownerOf(tokenId);
+
+        require(TokenView.getApproved(tokenId) == address(this) && TokenView.isOperatorFor(msg.sender, owner), 'T:3');
 
         uint256 cache = Stake.sload();
 
         // hanles all logic not related to staking the nugg
-        TokenCore.onBurn(tokenId);
+        delete Token.ptr().owners[tokenId];
+        delete Token.ptr().approvals[tokenId];
+
+        delete Global.ptr().swap.map[tokenId];
+        delete Global.ptr().loan.map[tokenId];
+        delete Global.ptr().proof.map[tokenId];
+        delete Global.ptr().file.resolvers[tokenId];
+
+        TokenCore.emitTransferEvent(owner, address(0), tokenId);
 
         (uint64 activeShares, uint96 activeEth, ) = cache.getStakedSharesAndEth();
 
         ethOwed = cache.getEthPerShare();
 
-        /// TODO - what the hell are these
-        require(activeShares >= 1, 'T:5');
-        require(activeEth >= ethOwed, 'T:6');
+        /// TODO - test migration
+        assert(activeShares >= 1);
+        assert(activeEth >= ethOwed);
 
         Stake.sstore(cache.setStakedShares(activeShares - 1).setStakedEth(activeEth - ethOwed));
 
         emit UnStakeEth(ethOwed, msg.sender);
     }
-
-    /*━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-                                 TRUSTED
-    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━*/
 }

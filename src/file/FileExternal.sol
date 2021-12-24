@@ -34,7 +34,7 @@ abstract contract FileExternal is IFileExternal {
     uint8 public override defaultZoom = 10;
 
     constructor(address _dotnuggV1Processor) {
-        require(_dotnuggV1Processor != address(0));
+        require(_dotnuggV1Processor != address(0), 'F:4');
         dotnuggV1Processor = _dotnuggV1Processor;
     }
 
@@ -51,7 +51,7 @@ abstract contract FileExternal is IFileExternal {
 
     /// @inheritdoc IdotnuggV1Implementer
     function setResolver(uint256 tokenId, address to) public virtual override {
-        require(TokenView.isApprovedOrOwner(msg.sender, tokenId.safe160()), 'T:0');
+        require(TokenView.isOperatorForOwner(msg.sender, tokenId.safe160()), 'F:5');
 
         File.spointer().resolvers[tokenId] = to;
     }

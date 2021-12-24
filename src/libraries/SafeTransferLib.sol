@@ -19,6 +19,6 @@ library SafeTransferLib {
             callStatus := call(gas(), to, amount, 0, 0, 0, 0)
         }
 
-        require(callStatus, 'ETH_TRANSFER_FAILED');
+        require(callStatus, 'Z:0');
     }
 }

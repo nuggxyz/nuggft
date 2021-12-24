@@ -16,7 +16,7 @@ import {TokenView} from '../token/TokenView.sol';
 abstract contract ProofExternal is IProofExternal {
     /// @inheritdoc IProofExternal
     function rotateFeature(uint160 tokenId, uint8 feature) external override {
-        require(TokenView.ownerOf(tokenId) == msg.sender, 'PC:2');
+        require(TokenView.isOperatorForOwner(msg.sender, tokenId), 'P:A');
 
         uint256 working = ProofCore.checkedProofOf(tokenId);
 
@@ -35,9 +35,9 @@ abstract contract ProofExternal is IProofExternal {
         uint8[] memory xs,
         uint8[] memory ys
     ) external override {
-        require(TokenView.ownerOf(tokenId) == msg.sender, 'PC:2');
+        require(TokenView.isOperatorForOwner(msg.sender, tokenId), 'P:B');
 
-        require(xs.length == 8 && ys.length == 8, 'PC:3');
+        require(xs.length == 8 && ys.length == 8, 'P:C');
 
         uint256 working = ProofCore.checkedProofOf(tokenId);
 

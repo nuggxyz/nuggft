@@ -16,17 +16,13 @@ library SwapPure {
     uint96 constant COMPRESSION_PERCISION = 0x9184E72A000;
     uint96 constant MIN_OFFER = 0x9184E72A000 * 100;
 
-    /*━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+    /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
                                CALCULATION
-    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━*/
+       ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
 
     // @test  manual
     function addIncrement(uint96 value) internal pure returns (uint96) {
-        // if (value < 10**16) {
-        //     return compressEthRoundUp(((value * 10200) / 10000));
-        // } else {
         return compressEthRoundUp(((value * 10200) / 10000));
-        // }
     }
 
     // @test  manual
@@ -43,9 +39,9 @@ library SwapPure {
         }
     }
 
-    /*━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+    /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
                               SHIFT HELPERS
-    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━*/
+       ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
     // @test input output unit test
     // type(uint96).max / 10**13 = 0x01C25C268497681 =  7922816251426433
     // type(uint56).max          = 0x100000000000000 = 72057594037927936
@@ -68,12 +64,12 @@ library SwapPure {
     }
 
     // @test  input output unit test
-    function account(uint256 input) internal pure returns (uint160 res) {
-        res = ShiftLib.get(input, 160, 0).safe160();
+    function account(uint256 input) internal pure returns (address res) {
+        res = address(ShiftLib.get(input, 160, 0).safe160());
     }
 
-    function account(uint256 input, uint160 update) internal pure returns (uint256 output) {
-        output = ShiftLib.set(input, 160, 0, update);
+    function account(uint256 input, address update) internal pure returns (uint256 output) {
+        output = ShiftLib.set(input, 160, 0, uint160(update));
     }
 
     // @test  input output unit test
@@ -93,7 +89,7 @@ library SwapPure {
     // @test  manual
     function buildSwapData(
         uint32 _epoch,
-        uint160 _account,
+        address _account,
         uint96 _eth,
         bool _isOwner
     ) internal pure returns (uint256 res, uint96 dust) {

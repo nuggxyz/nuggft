@@ -73,11 +73,11 @@ library ProofCore {
     ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━*/
 
     function addItem(uint160 tokenId, uint16 itemId) internal {
-        require(TokenView.ownerOf(tokenId) == msg.sender, 'PC:0');
+        require(TokenView.isOperatorForOwner(msg.sender, tokenId), 'P:2');
 
         uint256 working = checkedProofOf(tokenId);
 
-        require(Proof.spointer().protcolItems[itemId] > 0, 'RC:3');
+        require(Proof.spointer().protcolItems[itemId] > 0, 'P:3');
 
         Proof.spointer().protcolItems[itemId]--;
 
@@ -89,7 +89,7 @@ library ProofCore {
     }
 
     function removeItem(uint160 tokenId, uint16 itemId) internal {
-        require(TokenView.ownerOf(tokenId) == msg.sender, 'PC:1');
+        require(TokenView.isOperatorForOwner(msg.sender, tokenId), 'P:4');
 
         uint256 working = checkedProofOf(tokenId);
 
@@ -107,11 +107,9 @@ library ProofCore {
     ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━*/
 
     function setProof(uint160 tokenId) internal {
-        require(!hasProof(tokenId), 'P:0');
+        require(!hasProof(tokenId), 'P:5');
 
         uint256 randomEnoughSeed = uint256(keccak256(abi.encodePacked(hex'420690', tokenId, blockhash(block.number - 1))));
-
-        require(randomEnoughSeed != 0, 'P:1');
 
         (uint256 res, uint8[] memory picks) = ProofCore.initFromSeed(randomEnoughSeed);
 
@@ -121,11 +119,11 @@ library ProofCore {
     }
 
     function setProofFromEpoch(uint160 tokenId) internal {
-        require(!hasProof(tokenId), 'P:2');
+        require(!hasProof(tokenId), 'P:6');
 
         (, uint256 epoch, uint256 res, uint8[] memory picks) = pendingProof();
 
-        require(epoch == tokenId, 'P:4');
+        require(epoch == tokenId, 'P:7');
 
         Proof.sstore(tokenId, res);
 
@@ -134,7 +132,7 @@ library ProofCore {
 
     // TODO TO BE TESTED
     function initFromSeed(uint256 seed) internal view returns (uint256 res, uint8[] memory upd) {
-        require(seed != 0, 'P:6');
+        require(seed != 0, 'P:8');
 
         uint8[] memory lengths = FileView.totalLengths();
 
@@ -155,7 +153,7 @@ library ProofCore {
     }
 
     function safeMod(uint8 value, uint8 modder) internal pure returns (uint8) {
-        require(modder != 0, 'whoops');
+        require(modder != 0, 'P:9');
         return value % modder;
     }
 

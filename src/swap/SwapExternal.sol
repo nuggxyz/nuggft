@@ -24,19 +24,15 @@ abstract contract SwapExternal is ISwapExternal {
 
     using SafeCastLib for uint256;
 
-    event log_named_uint(string key, uint256 val);
-
     /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
                                   delegate
        ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
 
     /// @inheritdoc ISwapExternal
-    function delegate(uint160 tokenId) external payable override {
-        (Swap.Storage storage s, Swap.Memory memory m) = Swap.loadTokenSwap(tokenId, msg.sender);
+    function delegate(address sender, uint160 tokenId) public payable override {
+        require(TokenView.isOperatorFor(msg.sender, sender), 'S:6');
 
-        emit log_named_uint('m.activeEpoch', m.activeEpoch);
-
-        emit log_named_uint('tokenId', tokenId);
+        (Swap.Storage storage s, Swap.Memory memory m) = Swap.loadTokenSwap(tokenId, sender);
 
         // make sure user is not the owner of swap
         // we do not know how much to give them when they call "claim" otherwise
@@ -46,11 +42,11 @@ abstract contract SwapExternal is ISwapExternal {
 
             // we do not need this, could take tokenId out as an argument - but do not want to give users
             // the ability to accidently place an offer for nugg A and end up minting nugg B.
-            require(m.offerData == 0, 'S:3');
+            require(m.offerData == 0, 'S:0');
 
-            (uint256 data, uint96 dust) = SwapPure.buildSwapData(m.activeEpoch, uint160(msg.sender), msg.value.safe96(), false);
+            (uint256 data, uint96 dust) = SwapPure.buildSwapData(m.activeEpoch, m.sender, msg.value.safe96(), false);
 
-            require(msg.value >= SwapPure.MIN_OFFER && dust != msg.value, 'S:13');
+            require(msg.value >= SwapPure.MIN_OFFER && dust != msg.value, 'S:1');
 
             s.data = data;
 
@@ -60,17 +56,17 @@ abstract contract SwapExternal is ISwapExternal {
 
             TokenCore.emitTransferEvent(address(0), address(this), tokenId);
 
-            emit DelegateMint(tokenId, msg.sender, msg.value.safe96());
+            emit DelegateMint(tokenId, m.sender, msg.value.safe96());
         } else {
-            require(!m.offerData.isOwner(), 'S:0');
+            require(!m.offerData.isOwner(), 'S:2');
 
             // forces user to claim previously
-            if (m.offerData != 0) require(m.offerData.epoch() == m.activeEpoch, 'S:EPO:12');
+            if (m.offerData != 0) require(m.offerData.epoch() == m.activeEpoch, 'S:3');
 
-            require(m.swapData != 0, 'S:1');
+            require(m.swapData != 0, 'S:4');
 
             if (m.swapData.isOwner()) {
-                require(msg.value >= StakeCore.activeEthPerShare(), 'S:2');
+                require(msg.value >= StakeCore.activeEthPerShare(), 'S:5');
 
                 commit(s, m);
 
@@ -85,13 +81,13 @@ abstract contract SwapExternal is ISwapExternal {
 
     /// @inheritdoc ISwapExternal
     function delegateItem(
-        uint160 sellingTokenId,
-        uint16 itemId,
-        uint160 buyingTokenId
+        uint160 buyerTokenId,
+        uint160 sellerTokenId,
+        uint16 itemId
     ) external payable override {
-        require(TokenView.ownerOf(buyingTokenId) == msg.sender, 'S:5');
+        require(TokenView.isOperatorForOwner(msg.sender, buyerTokenId), 'S:6');
 
-        (Swap.Storage storage s, Swap.Memory memory m) = Swap.loadItemSwap(sellingTokenId, itemId, buyingTokenId);
+        (Swap.Storage storage s, Swap.Memory memory m) = Swap.loadItemSwap(sellerTokenId, itemId, address(buyerTokenId));
 
         // make sure user is not the owner of swap
         // we do not know how much to give them when they call "claim" otherwise
@@ -100,11 +96,11 @@ abstract contract SwapExternal is ISwapExternal {
         if (m.offerData == 0 && m.swapData.isOwner()) {
             commit(s, m);
 
-            emit DelegateCommitItem(sellingTokenId, itemId, buyingTokenId, msg.value.safe96());
+            emit DelegateCommitItem(sellerTokenId, itemId, buyerTokenId, msg.value.safe96());
         } else {
             offer(s, m);
 
-            emit DelegateOfferItem(sellingTokenId, itemId, buyingTokenId, msg.value.safe96());
+            emit DelegateOfferItem(sellerTokenId, itemId, buyerTokenId, msg.value.safe96());
         }
     }
 
@@ -113,43 +109,45 @@ abstract contract SwapExternal is ISwapExternal {
     ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━*/
 
     /// @inheritdoc ISwapExternal
-    function claim(uint160 tokenId) external override {
-        (, Swap.Memory memory m) = Swap.loadTokenSwap(tokenId, msg.sender);
+    function claim(address sender, uint160 tokenId) external override {
+        require(TokenView.isOperatorFor(msg.sender, sender), 'S:6');
 
-        Swap.deleteTokenOffer(tokenId, uint160(msg.sender));
+        (, Swap.Memory memory m) = Swap.loadTokenSwap(tokenId, sender);
+
+        Swap.deleteTokenOffer(tokenId, sender);
 
         if (checkClaimerIsWinnerOrLoser(m)) {
             Swap.deleteTokenSwap(tokenId);
 
-            TokenCore.checkedTransferFromSelf(msg.sender, tokenId);
+            TokenCore.checkedTransferFromSelf(sender, tokenId);
         } else {
-            SafeTransferLib.safeTransferETH(msg.sender, m.offerData.eth());
+            SafeTransferLib.safeTransferETH(sender, m.offerData.eth());
         }
 
-        emit SwapClaim(tokenId, msg.sender, m.offerData.epoch());
+        emit SwapClaim(tokenId, sender, m.offerData.epoch());
     }
 
     /// @inheritdoc ISwapExternal
     function claimItem(
-        uint160 sellingTokenId,
-        uint16 itemId,
-        uint160 buyingTokenId
+        uint160 buyerTokenId,
+        uint160 sellerTokenId,
+        uint16 itemId
     ) external override {
-        require(TokenView.ownerOf(buyingTokenId) == msg.sender, 'S:6');
+        require(TokenView.isOperatorForOwner(msg.sender, buyerTokenId), 'S:6');
 
-        (, Swap.Memory memory m) = Swap.loadItemSwap(sellingTokenId, itemId, buyingTokenId);
+        (, Swap.Memory memory m) = Swap.loadItemSwap(sellerTokenId, itemId, address(buyerTokenId));
 
-        Swap.deleteItemOffer(sellingTokenId, itemId, buyingTokenId);
+        Swap.deleteItemOffer(sellerTokenId, itemId, address(buyerTokenId));
 
         if (checkClaimerIsWinnerOrLoser(m)) {
-            Swap.deleteItemSwap(sellingTokenId, itemId);
+            Swap.deleteItemSwap(sellerTokenId, itemId);
 
-            ProofCore.addItem(buyingTokenId, itemId);
+            ProofCore.addItem(buyerTokenId, itemId);
         } else {
-            SafeTransferLib.safeTransferETH(msg.sender, m.offerData.eth());
+            SafeTransferLib.safeTransferETH(TokenView.ownerOf(buyerTokenId), m.offerData.eth());
         }
 
-        emit SwapClaimItem(sellingTokenId, itemId, buyingTokenId, m.swapData.epoch());
+        emit SwapClaimItem(sellerTokenId, itemId, buyerTokenId, m.swapData.epoch());
     }
 
     /*━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -158,43 +156,47 @@ abstract contract SwapExternal is ISwapExternal {
 
     /// @inheritdoc ISwapExternal
     function swap(uint160 tokenId, uint96 floor) external override {
+        address sender = TokenView.ownerOf(tokenId);
+
+        require(TokenView.isOperatorFor(msg.sender, sender), 'S:6');
+
         require(floor >= StakeCore.activeEthPerShare(), 'S:4');
 
         TokenCore.approvedTransferToSelf(tokenId);
 
-        (Swap.Storage storage s, Swap.Memory memory m) = Swap.loadTokenSwap(tokenId, msg.sender);
+        (Swap.Storage storage s, Swap.Memory memory m) = Swap.loadTokenSwap(tokenId, sender);
 
         // make sure swap does not exist - this logically should never happen
         assert(m.swapData == 0);
 
-        (uint256 dat, ) = SwapPure.buildSwapData(0, uint160(msg.sender), floor, true);
+        (uint256 dat, ) = SwapPure.buildSwapData(0, sender, floor, true);
 
         s.data = dat;
 
-        emit SwapStart(tokenId, msg.sender, floor);
+        emit SwapStart(tokenId, sender, floor);
     }
 
     /// @inheritdoc ISwapExternal
     function swapItem(
-        uint160 sellingTokenId,
+        uint160 sellerTokenId,
         uint16 itemId,
         uint96 floor
     ) external override {
-        require(TokenView.ownerOf(sellingTokenId) == msg.sender, 'S:7');
+        require(TokenView.isOperatorForOwner(msg.sender, sellerTokenId), 'S:6');
 
         // will revert if they do not have the item
-        ProofCore.removeItem(sellingTokenId, itemId);
+        ProofCore.removeItem(sellerTokenId, itemId);
 
-        (Swap.Storage storage s, Swap.Memory memory m) = Swap.loadItemSwap(sellingTokenId, itemId, sellingTokenId);
+        (Swap.Storage storage s, Swap.Memory memory m) = Swap.loadItemSwap(sellerTokenId, itemId, address(sellerTokenId));
 
         // cannot sell two of the same item at same time
         require(m.swapData == 0, 'SC:SI:0');
 
-        (uint256 dat, ) = SwapPure.buildSwapData(0, sellingTokenId, floor, true);
+        (uint256 dat, ) = SwapPure.buildSwapData(0, address(sellerTokenId), floor, true);
 
         s.data = dat;
 
-        emit SwapItemStart(sellingTokenId, itemId, dat.eth());
+        emit SwapItemStart(sellerTokenId, itemId, dat.eth());
     }
 
     /*━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -202,19 +204,19 @@ abstract contract SwapExternal is ISwapExternal {
     ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━*/
 
     // / @inheritdoc ISwapExternal
-    function valueForDelegate(uint160 tokenId, address user)
+    function valueForDelegate(address sender, uint160 tokenId)
         external
         view
         override
         returns (
             bool canDelegate,
             uint96 nextSwapAmount,
-            uint96 userCurrentOffer
+            uint96 senderCurrentOffer
         )
     {
         canDelegate = true;
 
-        (, Swap.Memory memory m) = Swap.loadTokenSwap(tokenId, user);
+        (, Swap.Memory memory m) = Swap.loadTokenSwap(tokenId, sender);
 
         if (m.swapData == 0) {
             if (m.activeEpoch == tokenId) {
@@ -225,7 +227,7 @@ abstract contract SwapExternal is ISwapExternal {
         } else {
             if (m.offerData.isOwner()) canDelegate = false;
 
-            userCurrentOffer = m.offerData.eth();
+            senderCurrentOffer = m.offerData.eth();
 
             nextSwapAmount = m.swapData.eth();
 
@@ -236,7 +238,6 @@ abstract contract SwapExternal is ISwapExternal {
 
         if (nextSwapAmount == 0) {
             nextSwapAmount = SwapPure.MIN_OFFER;
-            // nextSwapAmount = nextSwapAmount.addIncrement();
         } else {
             nextSwapAmount = nextSwapAmount.addIncrement();
         }
@@ -295,7 +296,7 @@ abstract contract SwapExternal is ISwapExternal {
     // @test  manual
     function updateSwapData(
         uint256 prevSwapData,
-        uint160 account,
+        address account,
         uint96 newUserOfferEth
     )
         internal
@@ -313,7 +314,7 @@ abstract contract SwapExternal is ISwapExternal {
     function updateSwapDataWithEpoch(
         uint256 prevSwapData,
         uint32 epoch,
-        uint160 account,
+        address account,
         uint96 newUserOfferEth
     )
         internal
