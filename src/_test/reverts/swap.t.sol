@@ -240,13 +240,111 @@ contract revertTest__swap is NuggFatherFix {
         [S:A] - swap - "msg.sender is operator for sender"
        ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
 
+    function test__revert__swap__S_A__successAsSelf() public {
+        uint256 tokenId = scenario_dee_has_a_token_and_can_swap();
+
+        nuggft_call(dee, swap(tokenId, 2 ether));
+    }
+
+    function test__revert__swap__S_A__successAsOperator() public {
+        uint256 tokenId = scenario_dee_has_a_token_and_can_swap();
+
+        nuggft_call(dee, setApprovalForAll(address(dennis), true));
+
+        nuggft_call(dennis, swap(tokenId, 2 ether));
+    }
+
+    function test__revert__swap__S_A__failAsNotOperator() public {
+        uint256 tokenId = scenario_dee_has_a_token_and_can_swap();
+
+        nuggft_revertCall('S:A', dennis, swap(tokenId, 2 ether));
+    }
+
     /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
         [S:B] - swap - "floor >= activeEthPerShare"
        ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
 
+    function test__revert__swap__S_B__successWithEqualEPS() public {
+        uint256 tokenId = scenario_dee_has_a_token_and_can_swap();
+
+        scenario_frank_has_a_token_and_spent_50_eth();
+
+        uint96 floor = nuggft.activeEthPerShare();
+
+        nuggft_call(dee, swap(tokenId, floor));
+    }
+
+    function test__revert__swap__S_B__successWithOneWeiTooHigh() public {
+        uint256 tokenId = scenario_dee_has_a_token_and_can_swap();
+
+        scenario_frank_has_a_token_and_spent_50_eth();
+
+        uint96 floor = nuggft.activeEthPerShare();
+
+        nuggft_call(dee, swap(tokenId, floor + 1));
+    }
+
+    function test__revert__swap__S_B__revertWithOneWeiTooLow() public {
+        uint256 tokenId = scenario_dee_has_a_token_and_can_swap();
+
+        scenario_frank_has_a_token_and_spent_50_eth();
+
+        uint96 floor = nuggft.activeEthPerShare();
+
+        nuggft_revertCall('S:B', dee, swap(tokenId, floor - 1));
+    }
+
+    function test__revert__swap__S_B__revertWithZero() public {
+        uint256 tokenId = scenario_dee_has_a_token_and_can_swap();
+
+        scenario_frank_has_a_token_and_spent_50_eth();
+
+        nuggft_revertCall('S:B', dee, swap(tokenId, 0));
+    }
+
+    function test__revert__swap__S_B__revertWithHalfFloor() public {
+        uint256 tokenId = scenario_dee_has_a_token_and_can_swap();
+
+        scenario_frank_has_a_token_and_spent_50_eth();
+
+        uint96 floor = nuggft.activeEthPerShare();
+
+        nuggft_revertCall('S:B', dee, swap(tokenId, floor / 2));
+    }
+
+    function test__revert__swap__S_B__successWithWayTooHigh() public {
+        uint256 tokenId = scenario_dee_has_a_token_and_can_swap();
+
+        scenario_frank_has_a_token_and_spent_50_eth();
+
+        uint96 floor = nuggft.activeEthPerShare();
+
+        nuggft_call(dee, swap(tokenId, floor + 30 ether));
+    }
+
     /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
         [S:C] - swapItem - "msg.sender is operator for buyerTokenId"
        ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+
+    function test__revert__swap__S_C__successAsOwnerOfBuyerTokenId() public {
+        (uint160 tokenId, uint16 itemId, ) = scenario_dee_has_a_token_and_can_swap_an_item();
+
+        nuggft_call(dee, swapItem(tokenId, itemId, 1 ether));
+    }
+
+    function test__revert__swap__S_C__successAsOperator() public {
+        (uint160 tokenId, uint16 itemId, ) = scenario_dee_has_a_token_and_can_swap_an_item();
+
+        nuggft_call(dee, setApprovalForAll(address(dennis), true));
+
+        nuggft_call(dennis, swapItem(tokenId, itemId, 1 ether));
+    }
+
+    function test__revert__swap__S_C__failAsNotOperator() public {
+        (uint160 tokenId, uint16 itemId, ) = scenario_dee_has_a_token_and_can_swap_an_item();
+
+        nuggft_revertCall('S:C', dennis, swapItem(tokenId, itemId, 1 ether));
+    }
 
     /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
         [S:D] - swapItem - "cannot sell two of same item at same time"
@@ -256,7 +354,58 @@ contract revertTest__swap is NuggFatherFix {
         [S:E] - checkClaimerIsWinnerOrLoser - "invalid offer"
        ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
 
+    function test__revert__swap__S_E__successPrevSwapperCanClaimAfterNewSwapHasStarted() public {
+        (uint160 tokenId, uint96 floor) = scenario_mac_has_swapped_a_token_dee_swapped();
+
+        // dee got the token here
+        nuggft_call(dee, claim(address(dee), tokenId));
+    }
+
+    function test__revert__swap__S_E__failNoOffer() public {
+        uint160 tokenId = scenario_dee_has_swapped_a_token_and_mac_can_claim();
+
+        // dee got the token here
+        nuggft_revertCall('S:E', charlie, claim(address(charlie), tokenId));
+    }
+
+    function test__revert__swap__S_E__successAsLeader() public {
+        uint160 tokenId = scenario_dee_has_swapped_a_token_and_mac_can_claim();
+
+        // dee got the token here
+        nuggft_call(mac, claim(address(mac), tokenId));
+    }
+
+    function test__revert__swap__S_E__successAsOwner() public {
+        uint160 tokenId = scenario_dee_has_swapped_a_token_and_mac_can_claim();
+
+        // dee got the token here
+        nuggft_call(dee, claim(address(dee), tokenId));
+    }
+
     /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
         [S:F] - offer - "swap must be active"
        ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+
+    function test__revert__swap__S_F__successOfferInActiveSwap() public {
+        (uint160 tokenId, uint96 eth) = scenario_dee_has_swapped_a_token_and_mac_has_delegated();
+
+        // dee got the token here
+        nuggft_call(charlie, delegate(address(charlie), tokenId), eth + 1 ether);
+    }
+
+    function test__revert__swap__S_F__failOfferInOldSwap() public {
+        (uint160 tokenId, uint96 eth) = scenario_dee_has_swapped_a_token_and_mac_has_delegated();
+
+        fvm.roll(2000);
+
+        // dee got the token here
+        nuggft_revertCall('S:F', charlie, delegate(address(charlie), tokenId), eth + 1 ether);
+    }
+
+    function test__revert__swap__S_F__failOfferInFutureSwap() public {
+        // dee got the token here
+        nuggft_revertCall('S:4', charlie, delegate(address(charlie), 50000), 1 ether);
+    }
 }
+
+// @todo - make sure eth ends up where we want it
