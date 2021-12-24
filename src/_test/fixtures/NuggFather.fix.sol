@@ -42,12 +42,12 @@ contract NuggFatherFix is t {
         migrator = new MockNuggFTV1Migrator();
         nuggft = new RiggedNuggft(address(processor));
 
-        safe = new User{value: 100 * 10**18}();
-        frank = new User{value: 100 * 10**18}();
-        charlie = new User{value: 100 * 10**18}();
-        dennis = new User{value: 100 * 10**18}();
-        mac = new User{value: 100 * 10**18}();
-        dee = new User{value: 100 * 10**18}();
+        safe = new User{value: 1000 ether}();
+        frank = new User{value: 1000 ether}();
+        charlie = new User{value: 1000 ether}();
+        dennis = new User{value: 1000 ether}();
+        mac = new User{value: 1000 ether}();
+        dee = new User{value: 1000 ether}();
 
         any = new User();
 
@@ -105,6 +105,22 @@ contract NuggFatherFix is t {
 
     function swap(uint256 tokenId, uint96 floor) public view returns (bytes memory res) {
         return abi.encodeWithSelector(nuggft.swap.selector, tokenId, floor);
+    }
+
+    function loan(uint256 tokenId) public view returns (bytes memory res) {
+        return abi.encodeWithSelector(nuggft.loan.selector, tokenId);
+    }
+
+    function payoff(uint256 tokenId) public view returns (bytes memory res) {
+        return abi.encodeWithSelector(nuggft.payoff.selector, tokenId);
+    }
+
+    function rebalance(uint256 tokenId) public view returns (bytes memory res) {
+        return abi.encodeWithSelector(nuggft.rebalance.selector, tokenId);
+    }
+
+    function loanInfo(uint256 tokenId) public view returns (bytes memory res) {
+        return abi.encodeWithSelector(nuggft.loanInfo.selector, tokenId);
     }
 
     function swapItem(
@@ -167,6 +183,22 @@ contract NuggFatherFix is t {
     function scenario_frank_has_a_token_and_spent_50_eth() public payable returns (uint160 tokenId) {
         tokenId = 2012;
         nuggft_call(frank, mint(tokenId), 50 ether);
+    }
+
+    function scenario_frank_has_a_loaned_token() public payable returns (uint160 tokenId) {
+        scenario_charlie_has_a_token();
+
+        tokenId = scenario_frank_has_a_token_and_spent_50_eth();
+
+        nuggft_call(frank, approve(address(nuggft), tokenId));
+
+        nuggft_call(frank, loan(tokenId));
+    }
+
+    function scenario_frank_has_a_loaned_token_that_has_expired() public payable returns (uint160 tokenId) {
+        tokenId = scenario_frank_has_a_loaned_token();
+
+        fvm.roll(200000);
     }
 
     function scenario_dee_has_a_token_2() public payable returns (uint160 tokenId) {
