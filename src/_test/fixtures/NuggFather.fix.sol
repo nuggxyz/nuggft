@@ -159,17 +159,22 @@ contract NuggFatherFix is t {
                                 scenarios
     ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━*/
 
-    function scenario_dee_has_a_token() public payable returns (uint32 tokenId) {
+    function scenario_dee_has_a_token() public payable returns (uint160 tokenId) {
         tokenId = 2069;
         nuggft_call(dee, mint(tokenId));
     }
 
-    function scenario_dee_has_a_token_2() public payable returns (uint32 tokenId) {
+    function scenario_frank_has_a_token_and_spent_50_eth() public payable returns (uint160 tokenId) {
+        tokenId = 2012;
+        nuggft_call(frank, mint(tokenId), 50 ether);
+    }
+
+    function scenario_dee_has_a_token_2() public payable returns (uint160 tokenId) {
         tokenId = 2400;
         nuggft_call(dee, mint(tokenId));
     }
 
-    function scenario_charlie_has_a_token() public payable returns (uint32 tokenId) {
+    function scenario_charlie_has_a_token() public payable returns (uint160 tokenId) {
         tokenId = 2070;
         nuggft_call(charlie, mint(tokenId));
     }
@@ -178,30 +183,41 @@ contract NuggFatherFix is t {
         nuggft_call(safe, setMigrator(address(migrator)));
     }
 
-    function scenario_dee_has_swapped_a_token() public payable returns (uint32 tokenId, uint96 floor) {
+    function scenario_dee_has_a_token_and_can_swap() public payable returns (uint160 tokenId) {
         tokenId = scenario_dee_has_a_token();
-        floor = 10**18;
 
         nuggft_call(dee, approve(address(nuggft), tokenId));
+    }
+
+    function scenario_dee_has_swapped_a_token() public payable returns (uint160 tokenId, uint96 floor) {
+        tokenId = scenario_dee_has_a_token_and_can_swap();
+
+        floor = 1 ether;
 
         nuggft_call(dee, swap(tokenId, floor));
     }
 
-    function scenario_dee_has_swapped_a_token_and_mac_can_claim() public payable returns (uint32 tokenId) {
+    function scenario_dee_has_swapped_a_token_and_mac_has_delegated() public payable returns (uint160 tokenId, uint96 eth) {
         (tokenId, ) = scenario_dee_has_swapped_a_token();
 
-        nuggft_call(mac, delegate(address(mac), tokenId), 2 * 10**18);
+        eth = 2 ether;
+
+        nuggft_call(mac, delegate(address(mac), tokenId), eth);
+    }
+
+    function scenario_dee_has_swapped_a_token_and_mac_can_claim() public payable returns (uint160 tokenId) {
+        (tokenId, ) = scenario_dee_has_swapped_a_token_and_mac_has_delegated();
 
         fvm.roll(2000);
     }
 
-    function scenario_mac_has_claimed_a_token_dee_swapped() public payable returns (uint32 tokenId) {
+    function scenario_mac_has_claimed_a_token_dee_swapped() public payable returns (uint160 tokenId) {
         (tokenId) = scenario_dee_has_swapped_a_token_and_mac_can_claim();
 
         nuggft_call(mac, claim(address(mac), tokenId));
     }
 
-    function scenario_mac_has_swapped_a_token_dee_swapped() public payable returns (uint32 tokenId, uint96 floor) {
+    function scenario_mac_has_swapped_a_token_dee_swapped() public payable returns (uint160 tokenId, uint96 floor) {
         (tokenId) = scenario_mac_has_claimed_a_token_dee_swapped();
         floor = 3 ether;
 
@@ -210,18 +226,16 @@ contract NuggFatherFix is t {
         nuggft_call(mac, swap(tokenId, floor));
     }
 
-    function scenario_dee_has_swapped_an_item()
+    function scenario_dee_has_a_token_and_can_swap_an_item()
         public
         payable
         returns (
-            uint32 tokenId,
-            uint8 feature,
+            uint160 tokenId,
             uint16 itemId,
-            uint96 floor
+            uint8 feature
         )
     {
         (tokenId) = scenario_dee_has_a_token();
-        floor = 3 ether;
 
         (, uint8[] memory items, , , ) = nuggft.parsedProofOf(tokenId);
 
@@ -229,6 +243,20 @@ contract NuggFatherFix is t {
         itemId = items[feature] | (uint16(feature) << 8);
 
         nuggft_call(dee, rotateFeature(tokenId, feature));
+    }
+
+    function scenario_dee_has_swapped_an_item()
+        public
+        payable
+        returns (
+            uint160 tokenId,
+            uint8 feature,
+            uint16 itemId,
+            uint96 floor
+        )
+    {
+        (tokenId, itemId, feature) = scenario_dee_has_a_token_and_can_swap_an_item();
+        floor = 3 ether;
 
         nuggft_call(dee, swapItem(tokenId, itemId, floor));
     }
@@ -237,8 +265,8 @@ contract NuggFatherFix is t {
         public
         payable
         returns (
-            uint32 charliesTokenId,
-            uint32 tokenId,
+            uint160 charliesTokenId,
+            uint160 tokenId,
             uint16 itemId
         )
     {
@@ -294,13 +322,13 @@ contract NuggFatherFix is t {
                                 scenarios
     ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━*/
 
-    function scenario_deeClaimedFirstEpoch() public payable returns (uint32 tokenId) {
+    function scenario_deeClaimedFirstEpoch() public payable returns (uint160 tokenId) {
         (tokenId, ) = scenario_one();
 
         call_claim(dee, tokenId);
     }
 
-    function scenario_deeMinted() public payable returns (uint32 tokenId) {
+    function scenario_deeMinted() public payable returns (uint160 tokenId) {
         tokenId = 2069;
         nuggft_call(dee, mint(tokenId));
     }
