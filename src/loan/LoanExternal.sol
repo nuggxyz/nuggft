@@ -56,12 +56,17 @@ abstract contract LoanExternal is ILoanExternal {
 
         uint32 epoch = EpochCore.activeEpoch();
 
-        // delay liquidation
-        if (epochDue >= epoch) require(TokenView.isOperatorFor(msg.sender, loaner), 'L:1');
+        address benif = msg.sender;
 
-        require(toPayoff <= msg.value, 'L:2');
+        // delay liquidation
+        if (epochDue >= epoch) {
+            require(TokenView.isOperatorFor(msg.sender, loaner), 'L:1');
+            benif = loaner;
+        }
 
         uint96 value = msg.value.safe96();
+
+        require(toPayoff <= value, 'L:2');
 
         uint96 overpayment = value - toRebalance;
 
@@ -69,27 +74,24 @@ abstract contract LoanExternal is ILoanExternal {
 
         emit Rebalance(tokenId, toRebalance, earned);
 
-        emit Payoff(tokenId, loaner, toPayoff);
+        emit Payoff(tokenId, benif, toPayoff);
 
         StakeCore.addStakedEth(toRebalance);
 
-        SafeTransferLib.safeTransferETH(loaner, owed);
+        SafeTransferLib.safeTransferETH(benif, owed);
 
-        TokenCore.checkedTransferFromSelf(loaner, tokenId);
+        TokenCore.checkedTransferFromSelf(benif, tokenId);
     }
 
     /// @inheritdoc ILoanExternal
     function rebalance(uint160 tokenId) external payable override {
-        // require(address(this) == TokenView.ownerOf(tokenId), 'L:3');
-
         (, uint96 toRebalance, uint96 earned, uint32 epochDue, address loaner) = loanInfo(tokenId);
 
         assert(address(this) == TokenView.ownerOf(tokenId)); // should always be true - should revert in loanInfo
 
-        require(TokenView.isOperatorFor(msg.sender, loaner), 'L:3');
+        require(toRebalance <= msg.value, 'L:3');
 
-        require(toRebalance <= msg.value, 'L:4');
-
+        // has to be done before newPrincipal is calculated
         StakeCore.addStakedEth(toRebalance);
 
         uint96 newPrincipal = StakeCore.activeEthPerShare();
@@ -108,6 +110,16 @@ abstract contract LoanExternal is ILoanExternal {
     }
 
     /// @inheritdoc ILoanExternal
+    function valueForPayoff(uint160 tokenId) external view returns (uint96 res) {
+        (res, , , , ) = loanInfo(tokenId);
+    }
+
+    /// @inheritdoc ILoanExternal
+    function valueForRebalance(uint160 tokenId) external view returns (uint96 res) {
+        (, res, , , ) = loanInfo(tokenId);
+    }
+
+    /// @inheritdoc ILoanExternal
     function loanInfo(uint160 tokenId)
         public
         view
@@ -122,7 +134,7 @@ abstract contract LoanExternal is ILoanExternal {
         uint256 state = Loan.sload(tokenId);
 
         // ensure loan exists
-        require(state != 0, 'L:5');
+        require(state != 0, 'L:4');
 
         // the amount of eth currently loanded by user
         uint96 curr = state.eth();
@@ -139,15 +151,5 @@ abstract contract LoanExternal is ILoanExternal {
         epochDue = state.epoch() + LIQUIDATION_PERIOD;
 
         loaner = address(state.account());
-    }
-
-    /// @inheritdoc ILoanExternal
-    function valueForPayoff(uint160 tokenId) external view returns (uint96 res) {
-        (res, , , , ) = loanInfo(tokenId);
-    }
-
-    /// @inheritdoc ILoanExternal
-    function valueForRebalance(uint160 tokenId) external view returns (uint96 res) {
-        (, res, , , ) = loanInfo(tokenId);
     }
 }

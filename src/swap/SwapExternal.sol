@@ -29,7 +29,7 @@ abstract contract SwapExternal is ISwapExternal {
        ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
 
     /// @inheritdoc ISwapExternal
-    function delegate(address sender, uint160 tokenId) public payable override {
+    function delegate(address sender, uint160 tokenId) external payable override {
         require(TokenView.isOperatorFor(msg.sender, sender), 'S:0');
 
         (Swap.Storage storage s, Swap.Memory memory m) = Swap.loadTokenSwap(tokenId, sender);
@@ -108,9 +108,9 @@ abstract contract SwapExternal is ISwapExternal {
         }
     }
 
-    /*━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+    /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
                                   claim
-    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━*/
+       ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
 
     /// @inheritdoc ISwapExternal
     function claim(address sender, uint160 tokenId) external override {
@@ -154,9 +154,9 @@ abstract contract SwapExternal is ISwapExternal {
         emit SwapClaimItem(sellerTokenId, itemId, buyerTokenId, m.swapData.epoch());
     }
 
-    /*━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+    /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
                                   swap
-    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━*/
+       ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
 
     /// @inheritdoc ISwapExternal
     function swap(uint160 tokenId, uint96 floor) external override {
@@ -203,9 +203,9 @@ abstract contract SwapExternal is ISwapExternal {
         emit SwapItemStart(sellerTokenId, itemId, dat.eth());
     }
 
-    /*━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+    /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
                                     view
-    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━*/
+       ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
 
     // / @inheritdoc ISwapExternal
     function valueForDelegate(address sender, uint160 tokenId)
@@ -226,6 +226,7 @@ abstract contract SwapExternal is ISwapExternal {
             if (m.activeEpoch == tokenId) {
                 nextSwapAmount = StakeCore.minSharePrice().compressEthRoundUp();
             } else {
+                // swap does not exist
                 return (false, 0, 0);
             }
         } else {
@@ -247,9 +248,9 @@ abstract contract SwapExternal is ISwapExternal {
         }
     }
 
-    /*━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+    /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
                                 internal
-    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━*/
+       ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
 
     function checkClaimerIsWinnerOrLoser(Swap.Memory memory m) internal pure returns (bool winner) {
         require(m.offerData != 0, 'S:E');
@@ -266,7 +267,7 @@ abstract contract SwapExternal is ISwapExternal {
 
         assert(m.swapData.isOwner());
 
-        (uint256 newSwapData, uint256 increment, uint256 dust) = updateSwapDataWithEpoch(
+        (uint256 newSwapData, uint96 increment, uint96 dust) = updateSwapDataWithEpoch(
             m.swapData,
             m.activeEpoch + 1,
             m.sender,
@@ -277,7 +278,7 @@ abstract contract SwapExternal is ISwapExternal {
 
         s.offers[m.swapData.account()] = m.swapData.epoch(m.activeEpoch + 1).isOwner(false);
 
-        StakeCore.addStakedEth((increment + dust).safe96());
+        StakeCore.addStakedEth(increment + dust);
     }
 
     function offer(Swap.Storage storage s, Swap.Memory memory m) internal {
@@ -286,15 +287,11 @@ abstract contract SwapExternal is ISwapExternal {
 
         if (m.swapData.account() != m.sender) s.offers[m.swapData.account()] = m.swapData;
 
-        (uint256 newSwapData, uint256 increment, uint256 dust) = updateSwapData(
-            m.swapData,
-            m.sender,
-            m.offerData.eth() + msg.value.safe96()
-        );
+        (uint256 newSwapData, uint96 increment, uint96 dust) = updateSwapData(m.swapData, m.sender, m.offerData.eth() + msg.value.safe96());
 
         s.data = newSwapData;
 
-        StakeCore.addStakedEth((increment + dust).safe96());
+        StakeCore.addStakedEth(increment + dust);
     }
 
     // @test  manual
@@ -307,8 +304,8 @@ abstract contract SwapExternal is ISwapExternal {
         pure
         returns (
             uint256 res,
-            uint256 increment,
-            uint256 dust
+            uint96 increment,
+            uint96 dust
         )
     {
         return updateSwapDataWithEpoch(prevSwapData, prevSwapData.epoch(), account, newUserOfferEth);
