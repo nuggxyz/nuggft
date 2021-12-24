@@ -63,7 +63,7 @@ contract NuggFatherFix is t {
         uint256 eth,
         uint256 tokenId
     ) public payable returns (bool ok) {
-        (ok, ) = user.tryCall{value: eth}(address(nuggft), abi.encodeWithSelector(nuggft.delegate.selector, tokenId));
+        (ok, ) = user.tryCall{value: eth}(address(nuggft), abi.encodeWithSelector(nuggft.delegate.selector, address(user), tokenId));
     }
 
     function call_delegate(
@@ -71,7 +71,7 @@ contract NuggFatherFix is t {
         uint256 eth,
         uint256 tokenId
     ) public payable {
-        user.call{value: eth}(address(nuggft), abi.encodeWithSelector(nuggft.delegate.selector, tokenId));
+        user.call{value: eth}(address(nuggft), abi.encodeWithSelector(nuggft.delegate.selector, address(user), tokenId));
     }
 
     function revertCall_delegate(
@@ -80,7 +80,7 @@ contract NuggFatherFix is t {
         string memory message,
         uint256 tokenId
     ) public payable {
-        user.revertCall{value: eth}(address(nuggft), message, abi.encodeWithSelector(nuggft.delegate.selector, tokenId));
+        user.revertCall{value: eth}(address(nuggft), message, abi.encodeWithSelector(nuggft.delegate.selector, address(user), tokenId));
     }
 
     /*━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -88,11 +88,11 @@ contract NuggFatherFix is t {
     ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━*/
 
     function tryCall_claim(User user, uint256 tokenId) public returns (bool ok) {
-        (ok, ) = user.tryCall(address(nuggft), abi.encodeWithSelector(nuggft.claim.selector, tokenId));
+        (ok, ) = user.tryCall(address(nuggft), abi.encodeWithSelector(nuggft.claim.selector, address(user), tokenId));
     }
 
     function call_claim(User user, uint256 tokenId) public {
-        user.call(address(nuggft), abi.encodeWithSelector(nuggft.claim.selector, tokenId));
+        user.call(address(nuggft), abi.encodeWithSelector(nuggft.claim.selector, address(user), tokenId));
     }
 
     function revertCall_claim(
@@ -100,7 +100,7 @@ contract NuggFatherFix is t {
         string memory message,
         uint256 tokenId
     ) public {
-        user.revertCall(address(nuggft), message, abi.encodeWithSelector(nuggft.claim.selector, tokenId));
+        user.revertCall(address(nuggft), message, abi.encodeWithSelector(nuggft.claim.selector, address(user), tokenId));
     }
 
     /*━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━

@@ -28,20 +28,22 @@ library TokenCore {
     ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━*/
 
     function checkedTransferFromSelf(address to, uint160 tokenId) internal {
+        require(TokenView.ownerOf(tokenId) == address(this), 'N:0');
+
         Token.ptr().owners[tokenId] = to;
 
-        emit Transfer(address(this), to, tokenId);
+        emitTransferEvent(address(this), to, tokenId);
     }
 
     function approvedTransferToSelf(uint160 tokenId) internal {
-        require(TokenView.isOperatorForOwner(msg.sender, tokenId) && TokenView.getApproved(tokenId) == address(this), 'T:4');
+        require(TokenView.isOperatorForOwner(msg.sender, tokenId) && TokenView.getApproved(tokenId) == address(this), 'N:1');
 
         delete Token.ptr().owners[tokenId];
 
         // Clear approvals from the previous owner
         delete Token.ptr().approvals[tokenId];
 
-        emit Transfer(msg.sender, address(this), tokenId);
+        emitTransferEvent(msg.sender, address(this), tokenId);
     }
 
     function emitTransferEvent(
@@ -50,21 +52,5 @@ library TokenCore {
         uint160 tokenId
     ) internal {
         emit Transfer(from, to, tokenId);
-    }
-
-    function onBurn(uint160 tokenId) internal {
-        require(TokenView.getApproved(tokenId) == address(this), 'T:6');
-
-        require(TokenView.ownerOf(tokenId) == msg.sender, 'T:7');
-
-        delete Token.ptr().owners[tokenId];
-        delete Token.ptr().approvals[tokenId];
-
-        delete Global.ptr().swap.map[tokenId];
-        delete Global.ptr().loan.map[tokenId];
-        delete Global.ptr().proof.map[tokenId];
-        delete Global.ptr().file.resolvers[tokenId];
-
-        emit Transfer(msg.sender, address(0), tokenId);
     }
 }

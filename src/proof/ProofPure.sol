@@ -4,8 +4,6 @@ pragma solidity 0.8.9;
 
 import {ShiftLib} from '../libraries/ShiftLib.sol';
 
-/// @title ProofPure
-/// @author dub6ix - nugg.xyz
 /// @notice abstracts all the logic for converting the proof between a the uint256 which is stored in
 /// in state and the the 4 uint8 arrays that it consists off.
 /// @dev Explain to a developer any extra details
@@ -65,7 +63,7 @@ library ProofPure {
 
         (uint8 feat, uint8 pos) = parseItemId(itemId);
 
-        require(arr[feat] == 0, 'PP:0');
+        require(arr[feat] == 0, 'P:D');
 
         arr[feat] = pos;
 
@@ -83,7 +81,7 @@ library ProofPure {
 
         (uint8 feat, uint8 pos) = parseItemId(itemId);
 
-        require(arr[feat] == pos, 'PP:1');
+        require(arr[feat] == pos, 'P:E');
 
         arr[feat] = 0;
 

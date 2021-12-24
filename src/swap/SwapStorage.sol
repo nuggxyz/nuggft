@@ -23,14 +23,14 @@ library Swap {
 
     struct Storage {
         uint256 data;
-        mapping(uint160 => uint256) offers;
+        mapping(address => uint256) offers;
     }
 
     struct Memory {
         uint256 swapData;
         uint256 offerData;
         uint32 activeEpoch;
-        uint160 sender;
+        address sender;
     }
 
     /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -43,10 +43,10 @@ library Swap {
 
     function loadTokenSwap(uint160 tokenId, address account) internal view returns (Storage storage s, Memory memory m) {
         s = _tokenSwapPtr(tokenId);
-        m = _load(s, uint160(account));
+        m = _load(s, account);
     }
 
-    function deleteTokenOffer(uint160 tokenId, uint160 account) internal {
+    function deleteTokenOffer(uint160 tokenId, address account) internal {
         delete _tokenSwapPtr(tokenId).offers[account];
     }
 
@@ -65,7 +65,7 @@ library Swap {
     function loadItemSwap(
         uint160 tokenId,
         uint16 itemId,
-        uint160 account
+        address account
     ) internal view returns (Storage storage s, Memory memory m) {
         s = _itemSwapPtr(tokenId, itemId);
         m = _load(s, account);
@@ -74,7 +74,7 @@ library Swap {
     function deleteItemOffer(
         uint160 tokenId,
         uint16 itemId,
-        uint160 account
+        address account
     ) internal {
         delete _itemSwapPtr(tokenId, itemId).offers[account];
     }
@@ -87,7 +87,7 @@ library Swap {
                                 COMMON
        ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
 
-    function _load(Storage storage ptr, uint160 account) private view returns (Memory memory m) {
+    function _load(Storage storage ptr, address account) private view returns (Memory memory m) {
         uint256 cache = ptr.data;
         m.swapData = cache;
         m.activeEpoch = EpochCore.activeEpoch();

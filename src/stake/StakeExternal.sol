@@ -37,7 +37,7 @@ abstract contract StakeExternal is IStakeExternal {
     function migrateStake(uint160 tokenId) external {
         address migrator = Stake.spointer().trustedMigrator;
 
-        require(migrator != address(0), 'T:3');
+        require(migrator != address(0), 'T:4');
 
         // stores the proof before deleting the nugg
         uint256 proof = ProofCore.checkedProofOf(tokenId);

@@ -23,9 +23,9 @@ contract swapTest__delegate is t, NuggFatherFix {
     }
 
     function test__swap__delegate__mintForOneThenZero() public payable {
-        assertTrue(tryCall_delegate(mac, 10**18, epoch));
+        call_delegate(mac, 10**18, epoch);
 
-        assertTrue(!tryCall_delegate(dennis, 0, epoch));
+        revertCall_delegate(dennis, 0, 'E:1', epoch);
     }
 
     function test__swap__delegate__valueMustIncrease() public payable {
@@ -47,6 +47,8 @@ contract swapTest__delegate is t, NuggFatherFix {
     function test__swap__delegate__shouldFailForPreviousUnclaimed() public {
         scenario_one_2();
 
-        revertCall_delegate(mac, 12 * 10**15, 'S:EPO:12', epoch);
+        revertCall_delegate(mac, 12 * 10**15, 'S:3', epoch);
     }
+
+    /// values add on top of each other
 }

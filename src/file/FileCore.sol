@@ -28,7 +28,7 @@ library FileCore {
 
         uint8 len = data.length.safe8();
 
-        require(len > 0, 'VC:0');
+        require(len > 0, 'F:0');
 
         uint168 working = uint168(len) << 160;
 
@@ -59,13 +59,13 @@ library FileCore {
     }
 
     function get(uint8 feature, uint8 pos) internal view returns (uint256[] memory data) {
-        require(pos != 0, 'VC:2');
+        require(pos != 0, 'F:1');
 
         pos--;
 
         uint8 totalLength = FilePure.getLengths(File.spointer().lengthData)[feature];
 
-        require(pos < totalLength, 'VC:1');
+        require(pos < totalLength, 'F:2');
 
         uint168[] memory ptrs = File.spointer().ptrs[feature];
 
@@ -85,7 +85,7 @@ library FileCore {
             }
         }
 
-        require(store != address(0), 'VC:2');
+        require(store != address(0), 'F:3');
 
         data = abi.decode(SSTORE2.read(address(uint160(store))), (uint256[][]))[storePos];
     }

@@ -61,7 +61,7 @@ library EpochCore {
         epoch = activeEpoch();
         uint256 startblock = toStartBlock(epoch);
         bytes32 bhash = blockhash(startblock - 1);
-        require(bhash != 0, 'EPC:SBL');
+        require(bhash != 0, 'E:0');
         res = uint256(keccak256(abi.encodePacked(bhash, epoch, address(this))));
     }
 }
