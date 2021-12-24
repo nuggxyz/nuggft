@@ -6,6 +6,7 @@ import {INuggFTV1Migrator} from '../interfaces/INuggFTV1Migrator.sol';
 
 import {ShiftLib} from '../libraries/ShiftLib.sol';
 import {SafeTransferLib} from '../libraries/SafeTransferLib.sol';
+import {SafeCastLib} from '../libraries/SafeCastLib.sol';
 
 import {Global} from '../global/GlobalStorage.sol';
 
@@ -18,17 +19,16 @@ import {ProofCore} from '../proof/ProofCore.sol';
 import {Stake} from './StakeStorage.sol';
 import {StakePure} from './StakePure.sol';
 
-// SYSTEM
-/// @title A title that should describe the contract/interface
-/// @author dub6ix
 /// @notice Explain to an end user what this does
 /// @dev Explain to a developer any extra details
 library StakeCore {
+    using SafeCastLib for uint256;
+
     using StakePure for uint256;
 
-    /*━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+    /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
                                     EVENTS
-    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━*/
+       ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
 
     event StakeEth(uint96 stake, uint96 protocol);
     event UnStakeEth(uint96 stake, address to);
@@ -78,15 +78,14 @@ library StakeCore {
         res = Stake.sload().getProtocolEth();
     }
 
-    /*━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+    /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
                             ADD STAKE & SHARES
-    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━*/
+       ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
 
     /// @notice handles the adding of shares - ensures enough eth is being added
     /// @dev this is the only way to add shares - the logic here ensures that "ethPerShare" can never decrease
-    /// @param eth the amount of eth being put up for a new share - must be some portion of msg.value
-    function addStakedShareAndEth(uint96 eth) internal {
-        require(msg.value >= eth, 'T:0'); // "value of tx too low"
+    function addStakedShareFromMsgValue() internal {
+        uint96 value = msg.value.safe96();
 
         uint256 cache = Stake.sload();
 
@@ -95,20 +94,20 @@ library StakeCore {
         (uint96 totalPrice, , uint96 protocolFee, ) = cache.minSharePriceBreakdown();
 
         // logically unnessesary - to help front end
-        require(eth >= totalPrice, 'T:1'); // "not enough eth to create share"
+        require(value >= totalPrice, 'T:1'); // "not enough eth to create share"
 
-        uint96 overpay = eth - totalPrice;
+        uint96 overpay = value - totalPrice;
 
         // the rest of the value gets added to stakedEth
         protocolFee += StakePure.calculateProtocolFeeOf(overpay);
 
         Stake.sstore(
-            cache.setStakedShares(activeShares + 1).setStakedEth(activeEth + (eth - protocolFee)).setProtocolEth(
+            cache.setStakedShares(activeShares + 1).setStakedEth(activeEth + (value - protocolFee)).setProtocolEth(
                 activeProtoEth + protocolFee
             )
         );
 
-        emit StakeEth(eth - protocolFee, protocolFee);
+        emit StakeEth(value - protocolFee, protocolFee);
     }
 
     /// @notice handles isolated staking of eth
@@ -126,9 +125,9 @@ library StakeCore {
         emit StakeEth(eth - protocolFee, protocolFee);
     }
 
-    /*━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+    /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
                                 BURN/MIGRATE
-    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━*/
+       ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
 
     /// @notice removes a staked share from the contract,
     /// @dev this is the only way to remove a share

@@ -33,7 +33,7 @@ abstract contract TokenExternal is ITokenExternal {
 
         require(!TokenView.exists(tokenId), 'T:2');
 
-        StakeCore.addStakedShareAndEth(msg.value.safe96());
+        StakeCore.addStakedShareFromMsgValue();
 
         ProofCore.setProof(tokenId);
 
@@ -46,7 +46,7 @@ abstract contract TokenExternal is ITokenExternal {
 
         require(!TokenView.exists(tokenId), 'T:2');
 
-        StakeCore.addStakedShareAndEth(msg.value.safe96());
+        StakeCore.addStakedShareFromMsgValue();
 
         ProofCore.setProof(tokenId);
 

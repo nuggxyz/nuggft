@@ -8,6 +8,6 @@ import {StakeCore} from '../../../stake/StakeCore.sol';
 
 contract StakeCoreTest__addStakedSharesAndEth is t {
     function test__StakeCore__addStakedShareAndEth__a() public {
-        StakeCore.addStakedShareAndEth(0);
+        // StakeCore.addStakedShareAndEth(0);
     }
 }
