@@ -51,7 +51,7 @@ abstract contract SwapExternal is ISwapExternal {
 
             StakeCore.addStakedShareFromMsgValue();
 
-            ProofCore.setProofFromEpoch(tokenId);
+            ProofCore.setProof(tokenId);
 
             TokenCore.emitTransferEvent(address(0), address(this), tokenId);
 
@@ -59,17 +59,13 @@ abstract contract SwapExternal is ISwapExternal {
         } else {
             require(m.swapData != 0, 'S:4');
 
-            // @todo needs to be better
             if (m.offerData != 0) {
-                require(
-                    !m.offerData.isOwner() && (m.offerData.epoch() == m.activeEpoch || m.offerData.epoch() == m.activeEpoch + 1),
-                    'S:3'
-                );
+                // forces user to claim previous swap before acting on this one
+                // prevents owner from COMMITTING on their own swap - not offering
+                require(m.offerData.epoch() >= m.activeEpoch, 'S:R');
+
+                assert(!m.offerData.isOwner()); // always be caught by the require above
             }
-
-            // require((m.offerData.epoch() == m.activeEpoch)) || m.offerData.epoch() == m.activeEpoch - 1), "S:3");
-
-            // forces user to claim previously
 
             if (m.swapData.isOwner()) {
                 require(msg.value >= StakeCore.activeEthPerShare(), 'S:5');
@@ -272,6 +268,11 @@ abstract contract SwapExternal is ISwapExternal {
         assert(m.offerData == 0 && m.swapData != 0);
 
         assert(m.swapData.isOwner());
+
+        // forces a user not to commit on their own swap
+        // ensures that owner of swap cannot use thier floor value to place an offer unless someone else has offered
+        // if you
+        // require(!m.offerData.isOwner(), 'S:3');
 
         (uint256 newSwapData, uint96 increment, uint96 dust) = updateSwapDataWithEpoch(
             m.swapData,
