@@ -10,6 +10,8 @@ import {NuggftV1File} from './NuggftV1File.sol';
 
 import {NuggftV1ProofType} from '../types/NuggftV1ProofType.sol';
 
+import {Print} from '../_test/utils/Print.sol';
+
 abstract contract NuggftV1Proof is INuggftV1Proof, NuggftV1File {
     /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
                                 state
@@ -190,11 +192,17 @@ abstract contract NuggftV1Proof is INuggftV1Proof, NuggftV1File {
         upd[1] = (safeMod(picks[1], lengths[1])) + 1;
         upd[2] = (safeMod(picks[2], lengths[2])) + 1;
 
+        // Print.log(picks[3], 'picks[3]');
+
         if (picks[3] < 60) upd[3] = (safeMod(picks[4], lengths[3])) + 1;
         else if (picks[3] < 120) upd[4] = (safeMod(picks[4], lengths[4])) + 1;
         else if (picks[3] < 180) upd[5] = (safeMod(picks[4], lengths[5])) + 1;
-        else if (picks[3] < 240) upd[6] = (safeMod(picks[4], lengths[6])) + 1;
-        else upd[7] = (safeMod(picks[4], lengths[7])) + 1;
+        else if (picks[3] < 240)
+            upd[6] = (safeMod(picks[4], lengths[6])) + 1;
+            // FIXME
+        else upd[6] = (safeMod(picks[4], lengths[6])) + 1;
+
+        // Print.log(lengths, 'lengths');
 
         res = ShiftLib.setArray(res, 0, upd);
     }
