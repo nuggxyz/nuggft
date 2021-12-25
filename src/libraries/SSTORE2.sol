@@ -2,6 +2,8 @@
 
 pragma solidity 0.8.9;
 
+/// Adapted from Rari-Capital/solmate
+
 /// @notice Read and write to persistent storage at a fraction of the cost.
 /// @author Modified from 0xSequence (https://github.com/0xsequence/sstore2/blob/master/contracts/SSTORE2.sol)
 library SSTORE2 {

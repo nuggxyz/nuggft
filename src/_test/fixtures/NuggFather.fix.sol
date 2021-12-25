@@ -8,13 +8,13 @@ import {User} from '../utils/User.sol';
 
 import {MockdotnuggV1Processor} from '../../_mock/MockdotnuggV1Processer.sol';
 
-import {MockNuggFTV1Migrator} from '../../_mock/MockNuggFTV1Migrator.sol';
+import {MockNuggftV1Migrator} from '../../_mock/MockNuggftV1Migrator.sol';
 
-import {NuggFT} from '../../NuggFT.sol';
+import {NuggftV1} from '../../NuggftV1.sol';
 
-contract RiggedNuggft is NuggFT {
-    constructor(address processor) NuggFT(processor) {
-        globalPointerForTesting().file.lengthData = 0x0303030303030303;
+contract RiggedNuggft is NuggftV1 {
+    constructor(address processor) NuggftV1(processor) {
+        featureLengths = 0x0303030303030303;
     }
 }
 
@@ -31,7 +31,7 @@ contract NuggFatherFix is t {
 
     MockdotnuggV1Processor public processor;
 
-    MockNuggFTV1Migrator public migrator;
+    MockNuggftV1Migrator public migrator;
 
     RiggedNuggft public nuggft;
 
@@ -49,7 +49,7 @@ contract NuggFatherFix is t {
         fvm.roll(1);
         fvm.roll(2);
         processor = new MockdotnuggV1Processor();
-        migrator = new MockNuggFTV1Migrator();
+        migrator = new MockNuggftV1Migrator();
         nuggft = new RiggedNuggft(address(processor));
 
         safe = new User{value: 1000 ether}();
@@ -89,7 +89,7 @@ contract NuggFatherFix is t {
         str.before_shares = nuggft.totalStakedShares().safeInt();
         str.before_minSharePrice = nuggft.minSharePrice().safeInt();
 
-        str.before_eps = nuggft.activeEthPerShare().safeInt();
+        str.before_eps = nuggft.totalEthPerShare().safeInt();
 
         assertEq(
             str.before_eps,
@@ -108,7 +108,7 @@ contract NuggFatherFix is t {
         assertEq(str.after_staked - str.before_staked, change - take(10, change), 'staked change is not 90 percent of expected change');
         assertEq(str.after_shares - str.before_shares, shareChange, 'shares difference is not what is expected');
 
-        str.after_eps = nuggft.activeEthPerShare().safeInt();
+        str.after_eps = nuggft.totalEthPerShare().safeInt();
         assertEq(
             str.after_eps,
             str.after_shares > 0 ? str.after_staked / str.after_shares : int256(0),
@@ -463,7 +463,7 @@ contract NuggFatherFix is t {
         User start = new User{value: 1000000000 ether}();
         uint160 count = 501;
 
-      //   fvm.deal(address(start), 10000 *10**18);
+        //   fvm.deal(address(start), 10000 *10**18);
 
         nuggft_call(start, mint(count++), .08 ether);
 
@@ -483,11 +483,11 @@ contract NuggFatherFix is t {
 
             users[i] = address(start);
 
-            int256 diff =  curr-last;
+            int256 diff = curr - last;
             emit log_named_int('diff', curr - last);
             emit log_named_int('ldif', diff - lastDiff);
 
-            emit log_named_uint('nuggft.activeEthPerShare()', nuggft.activeEthPerShare());
+            emit log_named_uint('nuggft.totalEthPerShare()', nuggft.totalEthPerShare());
             // emit log_named_uint('nuggft.totalProtocolEth()', nuggft.totalProtocolEth());
             // emit log_named_uint('nuggft.totalStakedEth()', nuggft.totalStakedEth());
             emit log_named_uint('nuggft.totalStakedShares()', nuggft.totalStakedShares());
@@ -526,7 +526,7 @@ contract NuggFatherFix is t {
 // Success: test__system1()
 
 //   users length: 2000
-//   nuggft.activeEthPerShare(): 36422938319266817
+//   nuggft.totalEthPerShare(): 36422938319266817
 //   nuggft.totalProtocolEth(): 13721927850988207037
 //   nuggft.totalStakedEth(): 254960568234867720007
 //   nuggft.totalStakedShares(): 7000
@@ -534,7 +534,7 @@ contract NuggFatherFix is t {
 // Success: test__system1()
 
 //   users length: 2000
-//   nuggft.activeEthPerShare(): .220269870602728762
+//   nuggft.totalEthPerShare(): .220269870602728762
 //   nuggft.totalProtocolEth(): 105.652900187038601090
 //   nuggft.totalStakedEth(): 3524.317929643660202576
 //   nuggft.totalStakedShares(): 16000
@@ -542,13 +542,13 @@ contract NuggFatherFix is t {
 // Success: test__system1()
 // *10
 //   users length: 2000
-//   nuggft.activeEthPerShare():  .081046931383505748
+//   nuggft.totalEthPerShare():  .081046931383505748
 //   nuggft.totalProtocolEth(): 36.036371675422002761
 //   nuggft.totalStakedEth():  891.516245218563229016
 //   nuggft.totalStakedShares(): 11000
 
 //   users length: 2000
-//   nuggft.activeEthPerShare():   .009923420616251655
+//   nuggft.totalEthPerShare():   .009923420616251655
 //   nuggft.totalProtocolEth():  10.797105517187750828
 //   nuggft.totalStakedEth():   109.157626778768205405
 //   nuggft.totalStakedShares(): 11000
@@ -556,7 +556,7 @@ contract NuggFatherFix is t {
 // Success: test__system1()
 
 //   users length: 2000
-//   nuggft.activeEthPerShare(): .023820112972809680
+//   nuggft.totalEthPerShare(): .023820112972809680
 //   nuggft.totalProtocolEth(): 23.605706549631210195
 //   nuggft.totalStakedEth(): 262.021242700906482643
 //   nuggft.totalStakedShares(): 11000
@@ -564,13 +564,13 @@ contract NuggFatherFix is t {
 // Success: test__system1()
 
 //   users length: 2000
-//   nuggft.activeEthPerShare(): 22283800801842573
+//   nuggft.totalEthPerShare(): 22283800801842573
 //   nuggft.totalProtocolEth(): 12045486919914902312
 //   nuggft.totalStakedEth(): 133702804811055442627
 //   nuggft.totalStakedShares(): 6000
 
 //   users length: 2000
-//   nuggft.activeEthPerShare(): 1.124042581556443270
+//   nuggft.totalEthPerShare(): 1.124042581556443270
 //   nuggft.totalProtocolEth(): 658.232592803322633239
 //   nuggft.totalStakedEth(): 7306.276780116881258328
 //   nuggft.totalStakedShares(): 6500
@@ -578,7 +578,7 @@ contract NuggFatherFix is t {
 // Success: test__system1()
 
 //   users length: 2000
-//   nuggft.activeEthPerShare(): .179846813049030914
+//   nuggft.totalEthPerShare(): .179846813049030914
 //   nuggft.totalProtocolEth(): 105317214848531614175
 //   nuggft.totalStakedEth(): 1169004284818700946598
 //   nuggft.totalStakedShares(): 6500
@@ -590,7 +590,7 @@ contract NuggFatherFix is t {
 // Success: test__system1()
 
 //   users length: 2000
-//   nuggft.activeEthPerShare(): .178270406414740660
+//   nuggft.totalEthPerShare(): .178270406414740660
 //   nuggft.totalProtocolEth(): 96363895359319273644
 //   nuggft.totalStakedEth(): 1069622438488443964472
 //   nuggft.totalStakedShares(): 6000
@@ -598,7 +598,7 @@ contract NuggFatherFix is t {
 // Success: test__system1()
 
 //   users length: 1000
-//   nuggft.activeEthPerShare():   1.425741271002990526
+//   nuggft.totalEthPerShare():   1.425741271002990526
 //   nuggft.totalProtocolEth():  305.518843786355111578
 //   nuggft.totalStakedEth():   4277.223813008971579744
 //   nuggft.totalStakedShares(): 3000

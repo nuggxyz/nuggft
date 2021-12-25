@@ -18,6 +18,10 @@ contract revertTest__swap is NuggFatherFix {
 
     uint160 charliesTokenId;
 
+    uint96 MIN = 10**13 * 50;
+
+    int96 MININT = int96(int256(uint256(MIN)));
+
     function setUp() public {
         reset();
         epoch = nuggft.epoch();
@@ -48,10 +52,6 @@ contract revertTest__swap is NuggFatherFix {
     /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
         [S:1] - delegate - "msg.value >= minimum offer"
        ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
-
-    uint96 constant MIN = 100 * 10**13;
-
-    int96 constant MININT = 100 * 10**13;
 
     function test__revert__swap__S_1__successWithExactMinOffer()
         public
@@ -195,7 +195,7 @@ contract revertTest__swap is NuggFatherFix {
     }
 
     /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-        [S:5] - delegate - "if commiting, msg.value must be >= active eth per share"
+        [S:5] - delegate - "if commiting, msg.value must be >= total eth per share"
        ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
 
     function test__revert__swap__S_5__failWithVeryHighEPS() public {
@@ -363,7 +363,7 @@ contract revertTest__swap is NuggFatherFix {
     }
 
     /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-        [S:B] - swap - "floor >= activeEthPerShare"
+        [S:B] - swap - "floor >= totalEthPerShare"
        ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
 
     function test__revert__swap__S_B__successWithEqualEPS() public {
@@ -371,7 +371,7 @@ contract revertTest__swap is NuggFatherFix {
 
         scenario_frank_has_a_token_and_spent_50_eth();
 
-        floor = nuggft.activeEthPerShare();
+        floor = nuggft.totalEthPerShare();
 
         nuggft_call(dee, swap(tokenId, floor));
     }
@@ -383,7 +383,7 @@ contract revertTest__swap is NuggFatherFix {
 
         scenario_frank_has_a_token_and_spent_50_eth();
 
-        floor = nuggft.activeEthPerShare();
+        floor = nuggft.totalEthPerShare();
 
         nuggft_call(dee, swap(tokenId, floor + 1));
     }
@@ -395,7 +395,7 @@ contract revertTest__swap is NuggFatherFix {
 
         scenario_frank_has_a_token_and_spent_50_eth();
 
-        floor = nuggft.activeEthPerShare();
+        floor = nuggft.totalEthPerShare();
 
         nuggft_revertCall('S:B', dee, swap(tokenId, floor - 1));
     }
@@ -413,7 +413,7 @@ contract revertTest__swap is NuggFatherFix {
 
         scenario_frank_has_a_token_and_spent_50_eth();
 
-        floor = nuggft.activeEthPerShare();
+        floor = nuggft.totalEthPerShare();
 
         nuggft_revertCall('S:B', dee, swap(tokenId, floor / 2));
     }
@@ -423,7 +423,7 @@ contract revertTest__swap is NuggFatherFix {
 
         scenario_frank_has_a_token_and_spent_50_eth();
 
-        floor = nuggft.activeEthPerShare();
+        floor = nuggft.totalEthPerShare();
 
         nuggft_call(dee, swap(tokenId, floor + 30 ether));
     }
@@ -489,7 +489,7 @@ contract revertTest__swap is NuggFatherFix {
     }
 
     /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-        [S:F] - offer - "swap must be active"
+        [S:F] - offer - "swap must be total"
        ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
 
     function test__revert__swap__S_F__successOfferInActiveSwap() public {
