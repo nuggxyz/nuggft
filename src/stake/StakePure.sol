@@ -80,11 +80,7 @@ library StakePure {
 
         protocolFee = calculateProtocolFeeOf(ethPerShare);
 
-        premium = ((ethPerShare * getStakedShares(cache)) / 10000);
-
-        // require(uint256(premium) * uint256(premium) <= type(uint96).max, 'poo');
-
-        // premium += (((ethPerShare) * 9000) / 10000);
+        premium = ((ethPerShare * getStakedShares(cache)) / 5000);
 
         total = ethPerShare + protocolFee + premium;
     }
@@ -94,17 +90,3 @@ library StakePure {
         res = getStakedShares(cache) == 0 ? 0 : getStakedEth(cache) / getStakedShares(cache);
     }
 }
-
-// .388462191424698825
-// .179595585120778917
-//9.744857104519532829
-// .683870949775377181
-// .117875552479567856
-//6.249897262135775214
-//3.665748059134461014
-//1.321523995093297549
-
-//1.321523995093297549
-//5.363510699612383365
-// .117875552479567856
-// .188600883967308569

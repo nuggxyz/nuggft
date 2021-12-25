@@ -2,18 +2,30 @@
 
 pragma solidity 0.8.9;
 
-library Trust {
-    struct Storage {
-        mapping(address => bool) trusted;
+import {ITrustExternal} from '../interfaces/nuggft/ITrustExternal.sol';
+
+/// @notice Ultra minimal authorization logic for smart contracts.
+/// @author Inspired by Dappsys V2 (https://github.com/dapp-org/dappsys-v2/blob/main/src/auth.sol)
+abstract contract Trust is ITrustExternal {
+    event UserTrustUpdated(address indexed user, bool trusted);
+
+    mapping(address => bool) public override isTrusted;
+
+    constructor(address initialUser) {
+        isTrusted[initialUser] = true;
+
+        emit UserTrustUpdated(initialUser, true);
     }
 
-    function check() internal view {
-        Storage storage store;
+    function setIsTrusted(address user, bool trusted) public virtual requiresTrust {
+        isTrusted[user] = trusted;
 
-        assembly {
-            store.slot := 0x20002467
-        }
+        emit UserTrustUpdated(user, trusted);
+    }
 
-        require(store.trusted[msg.sender], 'T:1');
+    modifier requiresTrust() {
+        require(isTrusted[msg.sender], 'UNTRUSTED');
+
+        _;
     }
 }

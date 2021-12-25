@@ -2,6 +2,7 @@ import { ethers } from 'ethers';
 import { HardhatRuntimeEnvironment } from 'hardhat/types';
 
 import { NamedAccounts } from '../hardhat.config';
+import { toEth } from '../tests/hardhat/lib/shared/conversion';
 import { NuggFT } from '../typechain';
 // import { XNUGG as xNUGG } from '../typechain/XNUGG';
 // import { NuggFT } from '../typechain/NuggFT.d';
@@ -69,11 +70,12 @@ const deployment = async (hre: HardhatRuntimeEnvironment) => {
         const activeEpoch = await nuggft.epoch();
         hre.deployments.log('active epoch is..', activeEpoch.toString());
 
-        // await sendTx(
-        //     nuggft
-        //         .connect(await hre.ethers.getNamedSigner('dee'))
-        //         .delegate(activeEpoch, { value: toEth('.00000005'), gasPrice: toEth('0.0000006') }),
-        // );
+        await sendTx(
+            nuggft.connect(await hre.ethers.getNamedSigner('dee')).delegate((await hre.ethers.getNamedSigner('dee')).address, activeEpoch, {
+                value: toEth('.00000005'),
+                gasPrice: toEth('0.0000006'),
+            }),
+        );
 
         // await sendTx(
         //     nuggft

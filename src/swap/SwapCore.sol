@@ -12,11 +12,6 @@ import {SwapPure} from '../swap/SwapPure.sol';
 
 import {StakeCore} from '../stake/StakeCore.sol';
 
-import {ProofCore} from '../proof/ProofCore.sol';
-
-import {TokenCore} from '../token/TokenCore.sol';
-import {TokenView} from '../token/TokenView.sol';
-
 library SwapCore {
     using SafeCastLib for uint256;
     using SwapPure for uint256;

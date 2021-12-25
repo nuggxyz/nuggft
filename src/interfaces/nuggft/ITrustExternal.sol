@@ -19,5 +19,5 @@ interface ITrustExternal {
                             VIEW FUNCTIONS
     ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━*/
 
-    function trusted(address user) external view returns (bool);
+    function isTrusted(address user) external view returns (bool);
 }
