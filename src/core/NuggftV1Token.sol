@@ -24,7 +24,7 @@ abstract contract NuggftV1Token is INuggftV1Token, NuggftV1Epoch {
     mapping(address => mapping(address => bool)) operatorApprovals;
 
     /// @inheritdoc IERC721
-    function approve(address to, uint256 tokenId) public override {
+    function approve(address to, uint256 tokenId) public payable override {
         address owner = _ownerOf(tokenId.safe160());
 
         require(_isOperatorFor(msg.sender, owner), 'G:1');
@@ -78,7 +78,7 @@ abstract contract NuggftV1Token is INuggftV1Token, NuggftV1Epoch {
         address,
         address,
         uint256
-    ) public pure override {
+    ) public payable override {
         revert();
     }
 
@@ -86,7 +86,7 @@ abstract contract NuggftV1Token is INuggftV1Token, NuggftV1Epoch {
         address,
         address,
         uint256
-    ) public pure override {
+    ) public payable override {
         revert();
     }
 
@@ -95,7 +95,7 @@ abstract contract NuggftV1Token is INuggftV1Token, NuggftV1Epoch {
         address,
         uint256,
         bytes memory
-    ) public pure override {
+    ) public payable override {
         revert();
     }
 

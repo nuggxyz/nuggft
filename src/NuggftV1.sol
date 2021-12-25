@@ -7,8 +7,8 @@ import {NuggftV1File} from './core/NuggftV1File.sol';
 import {Trust} from './core/Trust.sol';
 
 import {INuggftV1Migrator} from './interfaces/nuggftv1/INuggftV1Migrator.sol';
-import {IdotnuggV1Data} from './interfaces/IdotnuggV1.sol';
-import {IdotnuggV1Implementer} from './interfaces/IdotnuggV1.sol';
+import {IDotnuggV1Data} from './interfaces/dotnuggv1/IDotnuggV1Data.sol';
+import {IDotnuggV1Implementer} from './interfaces/dotnuggv1/IDotnuggV1Implementer.sol';
 
 import {INuggftV1Token} from './interfaces/nuggftv1/INuggftV1Token.sol';
 import {INuggftV1Stake} from './interfaces/nuggftv1/INuggftV1Stake.sol';
@@ -59,8 +59,8 @@ contract NuggftV1 is NuggftV1Loan {
                                 CORE
     ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━*/
 
-    /// @inheritdoc IdotnuggV1Implementer
-    function prepareFiles(uint256 tokenId) public view override returns (uint256[][] memory input, IdotnuggV1Data.Data memory data) {
+    /// @inheritdoc IDotnuggV1Implementer
+    function prepareFiles(uint256 tokenId) public view override returns (IDotnuggV1Data.Data memory data) {
         (
             uint256 proof,
             uint8[] memory ids,
@@ -69,9 +69,9 @@ contract NuggftV1 is NuggftV1Loan {
             uint8[] memory yovers
         ) = parsedProofOfIncludingPending(tokenId.safe160());
 
-        input = getBatchFiles(ids);
+        // input = getBatchFiles(ids);
 
-        data = IdotnuggV1Data.Data({
+        data = IDotnuggV1Data.Data({
             version: 1,
             renderedAt: block.timestamp,
             name: 'NuggFT V1',
