@@ -5,12 +5,6 @@ pragma solidity 0.8.9;
 import '../interfaces/IdotnuggV1.sol';
 import '../_test/utils/Print.sol';
 
-/**
- * @title dotnugg V1 - onchain encoder/decoder for dotnugg files
- * @author Nugg Labs - @danny7even & @dub6ix
- * @notice yoU CAN'T HaVe ImAgES oN THe BlOCkcHAIn
- * @dev hold my margarita
- */
 contract MockdotnuggV1Processor is IdotnuggV1Processor {
     function process(
         address implementer,

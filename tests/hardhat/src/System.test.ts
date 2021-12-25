@@ -46,7 +46,7 @@ describe('uint tests', async function () {
             for (let i = 2000; i < 2010; i++) {
                 await fix.nuggft.connect(accounts.dennis).mint(i, { value: await fix.nuggft.minSharePrice() });
                 let working = await fix.nuggft.connect(accounts.frank).minSharePrice();
-                let workingShare = await fix.nuggft.connect(accounts.frank).activeEthPerShare();
+                let workingShare = await fix.nuggft.connect(accounts.frank).totalEthPerShare();
 
                 console.log(
                     'diff: ',
@@ -128,7 +128,7 @@ describe('uint tests', async function () {
 
             console.log('epoch', epoch.toString());
 
-            console.log('activeEthPerShare()', fromEth(await fix.nuggft.activeEthPerShare()));
+            console.log('totalEthPerShare()', fromEth(await fix.nuggft.totalEthPerShare()));
             console.log('totalSupply()', fromEth(await fix.nuggft.totalSupply()));
             console.log('totalStakedEth()', fromEth(await fix.nuggft.totalStakedEth()));
 
@@ -173,7 +173,7 @@ describe('uint tests', async function () {
             await fix.nuggft.connect(accounts.charile).loan(token1);
 
             console.log('bal ', fromEth(await accounts.charile.getBalance()));
-            console.log('activeEthPerShare()', fromEth(await fix.nuggft.activeEthPerShare()));
+            console.log('totalEthPerShare()', fromEth(await fix.nuggft.totalEthPerShare()));
             console.log('totalSupply()', fromEth(await fix.nuggft.totalSupply()));
             console.log('totalProtocolEth()', fromEth(await fix.nuggft.totalProtocolEth()));
 
@@ -181,14 +181,14 @@ describe('uint tests', async function () {
             await fix.nuggft.connect(accounts.charile).rebalance(token1, { value: toEth('40') });
 
             console.log('bal ', fromEth(await accounts.charile.getBalance()));
-            console.log('activeEthPerShare()', fromEth(await fix.nuggft.activeEthPerShare()));
+            console.log('totalEthPerShare()', fromEth(await fix.nuggft.totalEthPerShare()));
             console.log('totalSupply()', fromEth(await fix.nuggft.totalSupply()));
             console.log('totalProtocolEth()', fromEth(await fix.nuggft.totalProtocolEth()));
 
             console.log('totalStakedEth()', fromEth(await fix.nuggft.totalStakedEth()));
             await fix.nuggft.connect(accounts.charile).rebalance(token1, { value: toEth('40') });
             console.log('bal ', fromEth(await accounts.charile.getBalance()));
-            console.log('activeEthPerShare()', fromEth(await fix.nuggft.activeEthPerShare()));
+            console.log('totalEthPerShare()', fromEth(await fix.nuggft.totalEthPerShare()));
             console.log('totalSupply()', fromEth(await fix.nuggft.totalSupply()));
             console.log('totalStakedEth()', fromEth(await fix.nuggft.totalStakedEth()));
 
@@ -196,7 +196,7 @@ describe('uint tests', async function () {
             await fix.nuggft.connect(accounts.charile).rebalance(token1, { value: toEth('40') });
             console.log('bal ', (await accounts.charile.getBalance()).toString());
 
-            console.log('activeEthPerShare()', (await fix.nuggft.activeEthPerShare()).toString());
+            console.log('totalEthPerShare()', (await fix.nuggft.totalEthPerShare()).toString());
             console.log('totalSupply()', fromEth(await fix.nuggft.totalSupply()));
             console.log('totalProtocolEth()', fromEth(await fix.nuggft.totalProtocolEth()));
 
@@ -204,7 +204,7 @@ describe('uint tests', async function () {
 
             await fix.nuggft.connect(accounts.charile).payoff(token1, { value: toEth('90') });
 
-            console.log('activeEthPerShare()', fromEth(await fix.nuggft.activeEthPerShare()));
+            console.log('totalEthPerShare()', fromEth(await fix.nuggft.totalEthPerShare()));
             console.log('totalSupply()', fromEth(await fix.nuggft.totalSupply()));
             console.log('totalStakedEth()', fromEth(await fix.nuggft.totalStakedEth()));
             console.log('bal ', (await accounts.charile.getBalance()).toString());

@@ -2,7 +2,7 @@
 
 pragma solidity 0.8.9;
 
-import {IERC721Receiver} from '../interfaces/IERC721.sol';
+/// Adapted from Rari-Capital/solmate
 
 /// @notice Safe ETH and ERC20 transfer library that gracefully handles missing return values.
 /// @author Modified from Gnosis (https://github.com/gnosis/gp-v2-contracts/blob/main/src/contracts/libraries/GPv2SafeERC20.sol)

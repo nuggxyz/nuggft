@@ -4,19 +4,19 @@ import { HardhatRuntimeEnvironment } from 'hardhat/types';
 
 import { getHRE } from '../shared/deployment';
 import { deployContractWithSalt } from '../shared';
-import { NuggFT } from '../../../../typechain/NuggFT';
-import { NuggFT__factory } from '../../../../typechain/factories/NuggFT__factory';
+import { NuggftV1 } from '../../../../typechain/NuggftV1';
+import { NuggftV1__factory } from '../../../../typechain/factories/NuggftV1__factory';
 import {
     MockdotnuggV1Processor,
     MockdotnuggV1Processor__factory,
-    MockNuggFTV1Migrator,
-    MockNuggFTV1Migrator__factory,
+    MockNuggftV1Migrator,
+    MockNuggftV1Migrator__factory,
 } from '../../../../typechain';
 
 export interface NuggFatherFixture {
     // nuggswap: NuggSwap;
-    migrator: MockNuggFTV1Migrator;
-    nuggft: NuggFT;
+    migrator: MockNuggftV1Migrator;
+    nuggft: NuggftV1;
     deployer: Wallet;
     owner: string;
     ownerStartBal: BigNumber;
@@ -44,20 +44,20 @@ export const NuggFatherFix: Fixture<NuggFatherFixture> = async function (
         args: [],
     });
 
-    const nuggft = await deployContractWithSalt<NuggFT__factory>({
-        factory: 'NuggFT',
+    const nuggft = await deployContractWithSalt<NuggftV1__factory>({
+        factory: 'NuggftV1',
         from: deployer,
         args: [processor.address],
     });
 
-    const migrator = await deployContractWithSalt<MockNuggFTV1Migrator__factory>({
-        factory: 'MockNuggFTV1Migrator',
+    const migrator = await deployContractWithSalt<MockNuggftV1Migrator__factory>({
+        factory: 'MockNuggftV1Migrator',
         from: deployer,
         args: [],
     });
 
-    hre.tracer.nameTags[nuggft.address] = `NuggFT`;
-    hre.tracer.nameTags[migrator.address] = `MockNuggFTV1Migrator`;
+    hre.tracer.nameTags[nuggft.address] = `NuggftV1`;
+    hre.tracer.nameTags[migrator.address] = `MockNuggftV1Migrator`;
 
     await nuggft.connect(deployer).storeFiles(hre.dotnugg.itemsByFeatureByIdArray[0], 0);
     await nuggft.connect(deployer).storeFiles(hre.dotnugg.itemsByFeatureByIdArray[1], 1);
