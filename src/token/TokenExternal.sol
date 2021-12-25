@@ -19,16 +19,14 @@ import {Trust} from '../trust/Trust.sol';
 ///
 /// @dev Implementation of https://eips.ethereum.org/EIPS/eip-721[ERC721] Non-Fungible Token Standard
 ///
-abstract contract TokenExternal is ITokenExternal {
+abstract contract TokenExternal is ITokenExternal, Trust {
     using SafeCastLib for uint256;
 
     uint32 constant TRUSTED_MINT_TOKENS = 500;
     uint32 constant UNTRUSTED_MINT_TOKENS = 10000;
 
     /// @inheritdoc ITokenExternal
-    function trustedMint(uint160 tokenId, address to) external payable override {
-        Trust.check();
-
+    function trustedMint(uint160 tokenId, address to) external payable override requiresTrust {
         require(tokenId < TRUSTED_MINT_TOKENS && tokenId != 0, 'G:1');
 
         require(!TokenView.exists(tokenId), 'G:2');

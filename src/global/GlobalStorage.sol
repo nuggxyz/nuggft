@@ -7,7 +7,6 @@ import {Stake} from '../stake/StakeStorage.sol';
 import {Swap} from '../swap/SwapStorage.sol';
 import {Proof} from '../proof/ProofStorage.sol';
 import {Token} from '../token/TokenStorage.sol';
-import {Loan} from '../loan/LoanStorage.sol';
 
 library Global {
     struct Storage {

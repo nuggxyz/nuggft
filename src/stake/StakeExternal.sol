@@ -18,7 +18,7 @@ import {Trust} from '../trust/Trust.sol';
 
 import {ProofCore} from '../proof/ProofCore.sol';
 
-abstract contract StakeExternal is IStakeExternal {
+abstract contract StakeExternal is IStakeExternal, Trust {
     using SafeCastLib for uint256;
     using StakePure for uint256;
 
@@ -54,8 +54,7 @@ abstract contract StakeExternal is IStakeExternal {
     ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━*/
 
     /// @inheritdoc IStakeExternal
-    function extractProtocolEth() external {
-        Trust.check();
+    function extractProtocolEth() external requiresTrust {
 
         uint256 cache = Stake.sload();
 
@@ -69,8 +68,7 @@ abstract contract StakeExternal is IStakeExternal {
     }
 
     /// @inheritdoc IStakeExternal
-    function setMigrator(address migrator) external {
-        Trust.check();
+    function setMigrator(address migrator) external requiresTrust{
 
         Stake.spointer().trustedMigrator = migrator;
 

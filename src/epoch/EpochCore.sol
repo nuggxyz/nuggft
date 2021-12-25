@@ -13,7 +13,7 @@ library EpochCore {
     }
 
     uint256 constant INTERVAL = 69;
-    uint32 constant OFFSET = 10500;
+    uint32 constant OFFSET = 3000;
 
     function setGenesis() internal {
         Storage storage s;
@@ -61,9 +61,7 @@ library EpochCore {
         epoch = activeEpoch();
         uint256 startblock = toStartBlock(epoch);
         bytes32 bhash = blockhash(startblock - 1);
-        // require(bhash != 0, 'E:0');
-
-        if (bhash == 0) bhash = keccak256(abi.encodePacked(epoch));
+        require(bhash != 0, 'E:0');
         res = uint256(keccak256(abi.encodePacked(bhash, epoch, address(this))));
     }
 }

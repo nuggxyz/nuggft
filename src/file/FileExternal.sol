@@ -21,7 +21,7 @@ import {File} from './FileStorage.sol';
 
 import {Trust} from '../trust/Trust.sol';
 
-abstract contract FileExternal is IFileExternal {
+abstract contract FileExternal is IFileExternal, Trust {
     using SafeCastLib for uint256;
 
     /// @inheritdoc IdotnuggV1Implementer
@@ -39,9 +39,7 @@ abstract contract FileExternal is IFileExternal {
     }
 
     /// @inheritdoc IFileExternal
-    function storeFiles(uint256[][] calldata data, uint8 feature) external override {
-        Trust.check();
-
+    function storeFiles(uint256[][] calldata data, uint8 feature) external override requiresTrust {
         FileCore.storeFiles(feature, data);
     }
 

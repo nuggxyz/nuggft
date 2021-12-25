@@ -15,7 +15,7 @@ import {FileExternal as dotnuggV1} from './file/FileExternal.sol';
 import {StakeExternal as Staked} from './stake/StakeExternal.sol';
 import {LoanExternal as Loanable} from './loan/LoanExternal.sol';
 import {EpochExternal as Epoched} from './epoch/EpochExternal.sol';
-import {TrustExternal as Migratable} from './trust/TrustExternal.sol';
+import {Trust as Trusted} from './trust/Trust.sol';
 
 /// @title NuggFT V1
 /// @author nugg.xyz - danny7even & dub6ix
@@ -28,8 +28,8 @@ import {TrustExternal as Migratable} from './trust/TrustExternal.sol';
 /// the way the swapping logic works makes this only worth calling when a user places an offer - and
 /// we did not want to call "onERC721Recieved" when no token was being sent.
 /// 2.
-contract NuggFT is a, Swapable, Provable, Loanable, Migratable, Staked, Epoched, dotnuggV1, Token {
-    constructor(address _defaultResolver) dotnuggV1(_defaultResolver) {}
+contract NuggFT is a, Swapable, Provable, Loanable, Staked, Epoched, dotnuggV1, Token {
+    constructor(address _defaultResolver) dotnuggV1(_defaultResolver) Trusted(msg.sender) {}
 
     function tokenURI(uint256 tokenId) public view override(dotnuggV1, IERC721Metadata) returns (string memory) {
         return dotnuggV1.tokenURI(tokenId);
