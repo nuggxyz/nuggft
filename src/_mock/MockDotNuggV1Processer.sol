@@ -96,11 +96,16 @@ contract MockdotnuggV1Processor is IDotnuggV1Processor, DotnuggV1Storage {
         uint256 tokenId,
         uint8 width
     ) public view override returns (uint256[] memory resp, IDotnuggV1Data.Data memory dat) {
-        IDotnuggV1Data.Data memory data = IDotnuggV1Implementer(implementer).prepareFiles(tokenId);
+        IDotnuggV1Data.Data memory data = IDotnuggV1Implementer(implementer).dotnuggV1Callback(tokenId);
         uint256[][] memory files = getBatchFiles(implementer, data.ids);
         resp = processCore(files, data, width);
         dat = data;
     }
+
+
+    function storedAmount(        address implementer,        uint8 feature) public override view returns (uint8 res) {
+        return featureLengths[implementer][feature];
+}
 
 
 

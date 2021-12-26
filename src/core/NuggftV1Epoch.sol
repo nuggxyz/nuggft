@@ -12,7 +12,7 @@ abstract contract NuggftV1Epoch is INuggftV1Epoch {
 
     constructor() {
         genesis = block.number;
-        emit Genesis();
+        emit Genesis(block.number, INTERVAL, OFFSET);
     }
 
     /// @inheritdoc INuggftV1Epoch

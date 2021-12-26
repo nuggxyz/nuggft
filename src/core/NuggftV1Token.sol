@@ -2,7 +2,8 @@
 
 pragma solidity 0.8.9;
 
-import {IERC721, IERC165, IERC721Metadata} from '../interfaces/IERC721.sol';
+import {IERC721} from '../interfaces/IERC721.sol';
+
 import {INuggftV1Token} from '../interfaces/nuggftv1/INuggftV1Token.sol';
 
 import {SafeCastLib} from '../libraries/SafeCastLib.sol';
@@ -41,14 +42,6 @@ abstract contract NuggftV1Token is INuggftV1Token, NuggftV1Epoch {
         operatorApprovals[msg.sender][operator] = approved;
 
         emit ApprovalForAll(msg.sender, operator, approved);
-    }
-
-    /// @inheritdoc IERC165
-    function supportsInterface(bytes4 interfaceId) public view virtual override returns (bool) {
-        return
-            interfaceId == type(IERC721).interfaceId ||
-            interfaceId == type(IERC721Metadata).interfaceId ||
-            interfaceId == type(IERC165).interfaceId;
     }
 
     /// @inheritdoc IERC721

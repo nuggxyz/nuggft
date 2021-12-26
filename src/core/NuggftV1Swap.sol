@@ -85,7 +85,7 @@ abstract contract NuggftV1Swap is INuggftV1Swap, NuggftV1Stake {
 
             // if the leader "owns" the swap, then it was initated by them - "commit" must be executed
             if (m.swapData.isOwner()) {
-                require(msg.value >= totalEthPerShare(), 'S:5');
+                require(msg.value >= ethPerShare(), 'S:5');
 
                 uint96 newAmount = commit(s, m);
 
@@ -190,7 +190,7 @@ abstract contract NuggftV1Swap is INuggftV1Swap, NuggftV1Stake {
 
         require(_isOperatorFor(msg.sender, sender), 'S:A');
 
-        require(floor >= totalEthPerShare(), 'S:B');
+        require(floor >= ethPerShare(), 'S:B');
 
         approvedTransferToSelf(tokenId);
 
@@ -266,8 +266,8 @@ abstract contract NuggftV1Swap is INuggftV1Swap, NuggftV1Stake {
 
             nextSwapAmount = m.swapData.eth();
 
-            if (nextSwapAmount < totalEthPerShare()) {
-                nextSwapAmount = totalEthPerShare();
+            if (nextSwapAmount < ethPerShare()) {
+                nextSwapAmount = ethPerShare();
             }
         }
 

@@ -28,7 +28,7 @@ abstract contract NuggftV1Loan is INuggftV1Loan, NuggftV1Swap {
 
         require(_isOperatorFor(msg.sender, sender), 'L:0');
 
-        (uint256 loanData, ) = NuggftV1AgentType.newAgentType(epoch(), sender, totalEthPerShare(), false);
+        (uint256 loanData, ) = NuggftV1AgentType.newAgentType(epoch(), sender, ethPerShare(), false);
 
         loans[tokenId] = loanData; // starting swap data
 
@@ -91,7 +91,7 @@ abstract contract NuggftV1Loan is INuggftV1Loan, NuggftV1Swap {
         loanState.epoch = epoch();
 
         // newPrincipal
-        loanState.eth = totalEthPerShare();
+        loanState.eth = ethPerShare();
 
         (uint256 res, uint96 dust) = NuggftV1AgentType.pack(loanState);
 
@@ -149,7 +149,7 @@ abstract contract NuggftV1Loan is INuggftV1Loan, NuggftV1Swap {
         // the amount of eth currently loanded by user
         uint96 curr = loanState.eth;
 
-        uint96 activeEps = totalEthPerShare();
+        uint96 activeEps = ethPerShare();
 
         toRebalance = ((curr * REBALANCE_FEE_BPS) / 10000);
 

@@ -363,7 +363,7 @@ contract revertTest__swap is NuggFatherFix {
     }
 
     /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-        [S:B] - swap - "floor >= totalEthPerShare"
+        [S:B] - swap - "floor >= ethPerShare"
        ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
 
     function test__revert__swap__S_B__successWithEqualEPS() public {
@@ -371,7 +371,7 @@ contract revertTest__swap is NuggFatherFix {
 
         scenario_frank_has_a_token_and_spent_50_eth();
 
-        floor = nuggft.totalEthPerShare();
+        floor = nuggft.ethPerShare();
 
         nuggft_call(dee, swap(tokenId, floor));
     }
@@ -383,7 +383,7 @@ contract revertTest__swap is NuggFatherFix {
 
         scenario_frank_has_a_token_and_spent_50_eth();
 
-        floor = nuggft.totalEthPerShare();
+        floor = nuggft.ethPerShare();
 
         nuggft_call(dee, swap(tokenId, floor + 1));
     }
@@ -395,7 +395,7 @@ contract revertTest__swap is NuggFatherFix {
 
         scenario_frank_has_a_token_and_spent_50_eth();
 
-        floor = nuggft.totalEthPerShare();
+        floor = nuggft.ethPerShare();
 
         nuggft_revertCall('S:B', dee, swap(tokenId, floor - 1));
     }
@@ -413,7 +413,7 @@ contract revertTest__swap is NuggFatherFix {
 
         scenario_frank_has_a_token_and_spent_50_eth();
 
-        floor = nuggft.totalEthPerShare();
+        floor = nuggft.ethPerShare();
 
         nuggft_revertCall('S:B', dee, swap(tokenId, floor / 2));
     }
@@ -423,7 +423,7 @@ contract revertTest__swap is NuggFatherFix {
 
         scenario_frank_has_a_token_and_spent_50_eth();
 
-        floor = nuggft.totalEthPerShare();
+        floor = nuggft.ethPerShare();
 
         nuggft_call(dee, swap(tokenId, floor + 30 ether));
     }

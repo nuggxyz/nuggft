@@ -2,23 +2,22 @@
 
 pragma solidity 0.8.9;
 
+import {IERC721, IERC165, IERC721Metadata} from './interfaces/IERC721.sol';
+
 import {NuggftV1Loan} from './core/NuggftV1Loan.sol';
-import {NuggftV1File} from './core/NuggftV1File.sol';
+import {NuggftV1Dotnugg} from './core/NuggftV1Dotnugg.sol';
 import {Trust} from './core/Trust.sol';
 
 import {INuggftV1Migrator} from './interfaces/nuggftv1/INuggftV1Migrator.sol';
 import {IDotnuggV1Data} from './interfaces/dotnuggv1/IDotnuggV1Data.sol';
 import {IDotnuggV1Implementer} from './interfaces/dotnuggv1/IDotnuggV1Implementer.sol';
+import {IDotnuggV1ImplementerMetadata} from './interfaces/dotnuggv1/IDotnuggV1ImplementerMetadata.sol';
+import {IDotnuggV1Processor} from './interfaces/dotnuggv1/IDotnuggV1Processor.sol';
 
 import {INuggftV1Token} from './interfaces/nuggftv1/INuggftV1Token.sol';
 import {INuggftV1Stake} from './interfaces/nuggftv1/INuggftV1Stake.sol';
-// import {INuggftV1Proof as Provable} from './interfaces/nuggftv1/INuggftV1Proof.sol';
-// import {INuggftV1File as dotnuggv1} from './interfaces/nuggftv1/INuggftV1File.sol';
-// import {INuggftV1Swap as Swapable} from './interfaces/nuggftv1/INuggftV1Swap.sol';
-// import {INuggftV1Loan as Loanable} from './interfaces/nuggftv1/INuggftV1Loan.sol';
-// import {INuggftV1Epoch as Epoched} from './interfaces/nuggftv1/INuggftV1Epoch.sol';
 
-import {ITrust} from './interfaces/ITrust.sol';
+import {INuggftV1} from './interfaces/nuggftv1/INuggftV1.sol';
 
 import {SafeTransferLib} from './libraries/SafeTransferLib.sol';
 import {SafeCastLib} from './libraries/SafeCastLib.sol';
@@ -36,15 +35,21 @@ import {NuggftV1StakeType} from './types/NuggftV1StakeType.sol';
 /// the way the swapping logic works makes this only worth calling when a user places an offer - and
 /// we did not want to call "onERC721Recieved" when no token was being sent.
 /// 2.
-contract NuggftV1 is NuggftV1Loan {
+contract NuggftV1 is IERC721Metadata, NuggftV1Loan {
     using SafeCastLib for uint256;
 
     using NuggftV1StakeType for uint256;
 
-    constructor(address _defaultResolver) NuggftV1File(_defaultResolver) Trust(msg.sender) {}
+    constructor(address _defaultResolver) NuggftV1Dotnugg(_defaultResolver) Trust(msg.sender) {}
 
-    function tokenURI(uint256 tokenId) public view override(NuggftV1File) returns (string memory) {
-        return NuggftV1File.tokenURI(tokenId);
+    /// @inheritdoc IERC165
+    function supportsInterface(bytes4 interfaceId) public view virtual override returns (bool) {
+        return
+            interfaceId == type(IDotnuggV1Implementer).interfaceId ||
+            interfaceId == type(IDotnuggV1ImplementerMetadata).interfaceId ||
+            interfaceId == type(IERC721).interfaceId ||
+            interfaceId == type(IERC721Metadata).interfaceId ||
+            interfaceId == type(IERC165).interfaceId;
     }
 
     function name() public pure override returns (string memory) {
@@ -55,28 +60,37 @@ contract NuggftV1 is NuggftV1Loan {
         return 'NUGGFT';
     }
 
+    /// @inheritdoc IERC721Metadata
+    function tokenURI(uint256 tokenId) public view virtual override returns (string memory res) {
+        uint160 safeTokenId = tokenId.safe160();
+
+        address resolver = hasResolver(safeTokenId) ? dotnuggV1ResolverOf(safeTokenId) : dotnuggV1Processor;
+
+        res = IDotnuggV1Processor(dotnuggV1Processor).dotnuggToString(
+            address(this),
+            tokenId,
+            resolver,
+            dotnuggV1DefaultWidth,
+            dotnuggV1DefaultZoom
+        );
+    }
+
     /*━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
                                 CORE
     ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━*/
 
     /// @inheritdoc IDotnuggV1Implementer
-    function prepareFiles(uint256 tokenId) public view override returns (IDotnuggV1Data.Data memory data) {
-        (
-            uint256 proof,
-            uint8[] memory ids,
-            uint8[] memory extras,
-            uint8[] memory xovers,
-            uint8[] memory yovers
-        ) = parsedProofOfIncludingPending(tokenId.safe160());
-
-        // input = getBatchFiles(ids);
+    function dotnuggV1Callback(uint256 tokenId) public view override returns (IDotnuggV1Data.Data memory data) {
+        (uint256 proof, uint8[] memory ids, uint8[] memory extras, uint8[] memory xovers, uint8[] memory yovers) = parsedProofOf(
+            tokenId.safe160()
+        );
 
         data = IDotnuggV1Data.Data({
             version: 1,
             renderedAt: block.timestamp,
             name: 'NuggFT V1',
             desc: 'Nugg Fungible Token V1',
-            owner: exists(tokenId.safe160()) ? _ownerOf(tokenId.safe160()) : address(0),
+            owner: proof != 0 ? _ownerOf(tokenId.safe160()) : address(0),
             tokenId: tokenId,
             proof: proof,
             ids: ids,
@@ -90,7 +104,7 @@ contract NuggftV1 is NuggftV1Loan {
     function trustedMint(uint160 tokenId, address to) external payable override requiresTrust {
         require(tokenId < TRUSTED_MINT_TOKENS && tokenId != 0, 'G:1');
 
-        require(!exists(tokenId), 'G:2');
+        // require(!exists(tokenId), 'G:2');
 
         addStakedShareFromMsgValue();
 
@@ -103,7 +117,7 @@ contract NuggftV1 is NuggftV1Loan {
     function mint(uint160 tokenId) public payable override {
         require(tokenId < UNTRUSTED_MINT_TOKENS + TRUSTED_MINT_TOKENS && tokenId > TRUSTED_MINT_TOKENS, 'G:1');
 
-        require(!exists(tokenId), 'G:2');
+        // require(!exists(tokenId), 'G:2');
 
         addStakedShareFromMsgValue();
 
@@ -117,18 +131,20 @@ contract NuggftV1 is NuggftV1Loan {
        ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
 
     /// @inheritdoc INuggftV1Stake
-    function withdrawStake(uint160 tokenId) external {
+    function burn(uint160 tokenId) external {
         uint96 ethOwed = subStakedShare(tokenId);
 
         SafeTransferLib.safeTransferETH(msg.sender, ethOwed);
+
+        emit Burn(tokenId, msg.sender, ethOwed);
     }
 
     /// @inheritdoc INuggftV1Stake
-    function migrateStake(uint160 tokenId) external {
+    function migrate(uint160 tokenId) external {
         require(migrator != address(0), 'T:4');
 
         // stores the proof before deleting the nugg
-        uint256 proof = checkedProofOf(tokenId);
+        uint256 proof = proofOf(tokenId);
 
         uint96 ethOwed = subStakedShare(tokenId);
 
@@ -144,9 +160,10 @@ contract NuggftV1 is NuggftV1Loan {
     /// @param tokenId the id of the nugg being unstaked
     /// @return ethOwed -> the amount of eth owed to the unstaking user - equivilent to "ethPerShare"
     function subStakedShare(uint160 tokenId) internal returns (uint96 ethOwed) {
+        // reverts if token does not exist
         address owner = _ownerOf(tokenId);
 
-        require(_getApproved(tokenId) == address(this) && _isOperatorFor(msg.sender, owner), 'T:3');
+        require(_getApproved(tokenId) == address(this) && owner == msg.sender, 'T:3');
 
         uint256 cache = stake;
 
@@ -161,7 +178,7 @@ contract NuggftV1 is NuggftV1Loan {
 
         emitTransferEvent(owner, address(0), tokenId);
 
-        ethOwed = getEthPerShare(cache);
+        ethOwed = calculateEthPerShare(cache);
 
         /// TODO - test migration
         assert(cache.shares() >= 1);
@@ -172,6 +189,6 @@ contract NuggftV1 is NuggftV1Loan {
 
         stake = cache;
 
-        emit UnStakeEth(ethOwed, msg.sender);
+        emit UnstakeEth(ethOwed, msg.sender);
     }
 }
