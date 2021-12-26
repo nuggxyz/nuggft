@@ -99,14 +99,14 @@ contract revertTest__stake is t, NuggFatherFix {
         nuggft_revertCall('T:3', dennis, burn(tokenId));
     }
 
-    function test__revert__stake__T_3__burn__succeedsOnCorrectOperatorApproval() public {
+    function test__revert__stake__T_3__burn__failsOnCorrectOperatorApproval() public {
         uint160 tokenId = scenario_dee_has_a_token();
 
         nuggft_call(dee, setApprovalForAll(address(mac), true));
 
         nuggft_call(dee, approve(address(nuggft), tokenId));
 
-        nuggft_call(mac, burn(tokenId));
+        nuggft_revertCall('T:3', mac, burn(tokenId));
     }
 
     // migrate
