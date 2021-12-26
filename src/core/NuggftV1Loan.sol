@@ -19,6 +19,7 @@ abstract contract NuggftV1Loan is INuggftV1Loan, NuggftV1Swap {
     mapping(uint160 => uint256) loans;
 
     uint32 constant LIQUIDATION_PERIOD = 1000;
+
     uint96 constant REBALANCE_FEE_BPS = 100;
 
     /// @inheritdoc INuggftV1Loan
@@ -27,17 +28,15 @@ abstract contract NuggftV1Loan is INuggftV1Loan, NuggftV1Swap {
 
         require(_isOperatorFor(msg.sender, sender), 'L:0');
 
-        uint96 principal = totalEthPerShare();
-
-        (uint256 loanData, ) = NuggftV1AgentType.newAgentType(epoch(), sender, principal, false);
+        (uint256 loanData, ) = NuggftV1AgentType.newAgentType(epoch(), sender, totalEthPerShare(), false);
 
         loans[tokenId] = loanData; // starting swap data
 
-        emit TakeLoan(tokenId, principal);
+        emit TakeLoan(tokenId, loanData.eth());
 
         approvedTransferToSelf(tokenId);
 
-        SafeTransferLib.safeTransferETH(sender, principal);
+        SafeTransferLib.safeTransferETH(sender, loanData.eth());
     }
 
     /// @inheritdoc INuggftV1Loan
@@ -50,8 +49,8 @@ abstract contract NuggftV1Loan is INuggftV1Loan, NuggftV1Swap {
 
         address benif = msg.sender;
 
-        // delay liquidation
         if (epochDue >= epoch()) {
+            // if liquidaton deadline has not passed - check perrmission
             require(_isOperatorFor(msg.sender, loaner), 'L:1');
             benif = loaner;
         }
@@ -85,7 +84,7 @@ abstract contract NuggftV1Loan is INuggftV1Loan, NuggftV1Swap {
 
         require(toRebalance <= msg.value, 'L:3');
 
-        // has to be done before newPrincipal is calculated
+        // must be done before new principal is calculated
         addStakedEth(toRebalance);
 
         // new base epoch
@@ -144,8 +143,6 @@ abstract contract NuggftV1Loan is INuggftV1Loan, NuggftV1Swap {
             address loaner
         )
     {
-        // AgentType memory loanState = NuggftV1AgentType.sload(loans[tokenId]);
-
         // ensure loan exists
         require(loanState.account != address(0), 'L:4');
 
