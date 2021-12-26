@@ -59,20 +59,12 @@ abstract contract NuggftV1File is INuggftV1File, NuggftV1Token, Trust {
         featureLengths = ShiftLib.setArray(cache, 0, lengths);
     }
 
-    /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-                            RESOLVER MANAGEMENT
-       ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
-
     /// @inheritdoc IDotnuggV1Implementer
     function setResolver(uint256 tokenId, address to) public virtual override {
         require(_isOperatorForOwner(msg.sender, tokenId.safe160()), 'F:5');
 
         resolvers[tokenId] = to;
     }
-
-    /*━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-                            MAIN FUNCTIONS
-    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━*/
 
     /// @inheritdoc IERC721Metadata
     function tokenURI(uint256 tokenId) public view virtual override returns (string memory res) {
@@ -82,10 +74,6 @@ abstract contract NuggftV1File is INuggftV1File, NuggftV1Token, Trust {
 
         res = IDotnuggV1Processor(dotnuggV1Processor).dotnuggToString(address(this), tokenId, resolver, defaultWidth, defaultZoom);
     }
-
-    /*━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-                                VIEW
-    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━*/
 
     /// @inheritdoc IDotnuggV1Implementer
     function resolverOf(uint256 tokenId) public view virtual override returns (address) {

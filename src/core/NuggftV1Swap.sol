@@ -11,9 +11,12 @@ import {SafeTransferLib} from '../libraries/SafeTransferLib.sol';
 
 import {NuggftV1AgentType} from '../types/NuggftV1AgentType.sol';
 
+/// @notice mechanism for trading of nuggs between users (and items between nuggs)
+/// @dev Explain to a developer any extra details
 abstract contract NuggftV1Swap is INuggftV1Swap, NuggftV1Stake {
-    using NuggftV1AgentType for uint256;
     using SafeCastLib for uint256;
+
+    using NuggftV1AgentType for uint256;
 
     struct Mapping {
         Storage self;
@@ -80,6 +83,7 @@ abstract contract NuggftV1Swap is INuggftV1Swap, NuggftV1Stake {
                 require(!m.offerData.isOwner(), 'NOPE'); // always be caught by the require above
             }
 
+            // if the leader "owns" the swap, then it was initated by them - "commit" must be executed
             if (m.swapData.isOwner()) {
                 require(msg.value >= totalEthPerShare(), 'S:5');
 
@@ -87,6 +91,7 @@ abstract contract NuggftV1Swap is INuggftV1Swap, NuggftV1Stake {
 
                 emit DelegateCommit(tokenId, msg.sender, newAmount);
             } else {
+                // default -
                 uint96 newAmount = offer(s, m);
 
                 emit DelegateOffer(tokenId, msg.sender, newAmount);
@@ -194,11 +199,12 @@ abstract contract NuggftV1Swap is INuggftV1Swap, NuggftV1Stake {
         // make sure swap does not exist - this logically should never happen
         require(m.swapData == 0, 'NOPE2');
 
-        (uint256 dat, ) = NuggftV1AgentType.newAgentType(0, sender, floor, true);
+        // no need to check dust as no value is being transfered
+        (uint256 dat, uint96 dust) = NuggftV1AgentType.newAgentType(0, sender, floor, true);
 
         s.data = dat;
 
-        emit SwapStart(tokenId, sender, floor);
+        emit SwapStart(tokenId, sender, floor - dust);
     }
 
     /// @inheritdoc INuggftV1Swap
@@ -247,6 +253,7 @@ abstract contract NuggftV1Swap is INuggftV1Swap, NuggftV1Stake {
 
         if (m.swapData == 0) {
             if (m.activeEpoch == tokenId) {
+                // swap is minting
                 nextSwapAmount = NuggftV1AgentType.compressEthRoundUp(minSharePrice());
             } else {
                 // swap does not exist
@@ -281,8 +288,7 @@ abstract contract NuggftV1Swap is INuggftV1Swap, NuggftV1Stake {
         require(m.swapData.isOwner(), 'NOPE4');
 
         // forces a user not to commit on their own swap
-        // ensures that owner of swap cannot use thier floor value to place an offer unless someone else has offered
-        // if you
+        // commented out as the logic is handled by S:R
         // require(!m.offerData.isOwner()(), 'S:3');
 
         (uint256 newSwapData, uint96 increment, uint96 dust) = updateSwapDataWithEpoch(m.swapData, m.activeEpoch + 1, m.sender, 0);
@@ -361,10 +367,6 @@ abstract contract NuggftV1Swap is INuggftV1Swap, NuggftV1Stake {
         m = _load(s, account);
     }
 
-    /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-                                ITEM SWAP
-       ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
-
     function loadItemSwap(
         uint160 tokenId,
         uint16 itemId,
@@ -373,10 +375,6 @@ abstract contract NuggftV1Swap is INuggftV1Swap, NuggftV1Stake {
         s = swaps[tokenId].items[itemId];
         m = _load(s, account);
     }
-
-    /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-                                COMMON
-       ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
 
     function _load(Storage storage ptr, address account) private view returns (Memory memory m) {
         uint256 cache = ptr.data;

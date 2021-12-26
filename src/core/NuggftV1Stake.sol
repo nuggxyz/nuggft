@@ -49,7 +49,7 @@ abstract contract NuggftV1Stake is INuggftV1Stake, NuggftV1Proof {
     ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━*/
 
     function totalEthPerShare() public view override returns (uint96 res) {
-        res = getEthPerShare(stake);
+        res = calculateEthPerShare(stake);
     }
 
     function minSharePrice() public view override returns (uint96 res) {
@@ -133,7 +133,7 @@ abstract contract NuggftV1Stake is INuggftV1Stake, NuggftV1Proof {
             uint96 premium
         )
     {
-        ethPerShare = getEthPerShare(cache);
+        ethPerShare = calculateEthPerShare(cache);
 
         protocolFee = calculateProtocolFeeOf(ethPerShare);
 
@@ -143,7 +143,7 @@ abstract contract NuggftV1Stake is INuggftV1Stake, NuggftV1Proof {
     }
 
     // @test manual
-    function getEthPerShare(uint256 cache) internal pure returns (uint96 res) {
+    function calculateEthPerShare(uint256 cache) internal pure returns (uint96 res) {
         res = cache.shares() == 0 ? 0 : cache.staked() / cache.shares();
     }
 }
