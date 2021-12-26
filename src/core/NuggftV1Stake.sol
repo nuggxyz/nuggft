@@ -48,29 +48,34 @@ abstract contract NuggftV1Stake is INuggftV1Stake, NuggftV1Proof {
                                 VIEW
     ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━*/
 
-    function totalEthPerShare() public view override returns (uint96 res) {
+    /// @inheritdoc INuggftV1Stake
+    function ethPerShare() public view override returns (uint96 res) {
         res = calculateEthPerShare(stake);
     }
 
+    /// @inheritdoc INuggftV1Stake
     function minSharePrice() public view override returns (uint96 res) {
         (res, , , ) = minSharePriceBreakdown(stake);
     }
 
-    function totalStakedShares() public view override returns (uint64 res) {
+    /// @inheritdoc INuggftV1Stake
+    function stakedShares() public view override returns (uint64 res) {
         res = stake.shares();
     }
 
-    function totalStakedEth() public view override returns (uint96 res) {
+    /// @inheritdoc INuggftV1Stake
+    function stakedEth() public view override returns (uint96 res) {
         res = stake.staked();
     }
 
-    function totalProtocolEth() public view override returns (uint96 res) {
+    /// @inheritdoc INuggftV1Stake
+    function protocolEth() public view override returns (uint96 res) {
         res = stake.proto();
     }
 
     /// @inheritdoc INuggftV1Stake
     function totalSupply() public view override returns (uint256 res) {
-        res = totalStakedShares();
+        res = stakedShares();
     }
 
     /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -128,18 +133,18 @@ abstract contract NuggftV1Stake is INuggftV1Stake, NuggftV1Proof {
         pure
         returns (
             uint96 total,
-            uint96 ethPerShare,
+            uint96 eps,
             uint96 protocolFee,
             uint96 premium
         )
     {
-        ethPerShare = calculateEthPerShare(cache);
+        eps = calculateEthPerShare(cache);
 
-        protocolFee = calculateProtocolFeeOf(ethPerShare);
+        protocolFee = calculateProtocolFeeOf(eps);
 
-        premium = ((ethPerShare * cache.shares()) / 10000);
+        premium = ((eps * cache.shares()) / 10000);
 
-        total = ethPerShare + protocolFee + premium;
+        total = eps + protocolFee + premium;
     }
 
     // @test manual

@@ -6,13 +6,13 @@ import {INuggftV1Proof} from '../interfaces/nuggftv1/INuggftV1Proof.sol';
 
 import {ShiftLib} from '../libraries/ShiftLib.sol';
 
-import {NuggftV1File} from './NuggftV1File.sol';
+import {NuggftV1Dotnugg} from './NuggftV1Dotnugg.sol';
 
 import {NuggftV1ProofType} from '../types/NuggftV1ProofType.sol';
 
-import {Print} from '../_test/utils/Print.sol';
+// import {Print} from '../_test/utils/Print.sol';
 
-abstract contract NuggftV1Proof is INuggftV1Proof, NuggftV1File {
+abstract contract NuggftV1Proof is INuggftV1Proof, NuggftV1Dotnugg {
     /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
                                 state
        ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
@@ -27,7 +27,7 @@ abstract contract NuggftV1Proof is INuggftV1Proof, NuggftV1File {
     function rotateFeature(uint160 tokenId, uint8 feature) external override {
         require(_isOperatorForOwner(msg.sender, tokenId), 'P:A');
 
-        uint256 working = checkedProofOf(tokenId);
+        uint256 working = proofOf(tokenId);
 
         working = NuggftV1ProofType.rotateDefaultandExtra(working, feature);
 
@@ -48,7 +48,7 @@ abstract contract NuggftV1Proof is INuggftV1Proof, NuggftV1File {
 
         require(xs.length == 8 && ys.length == 8, 'P:C');
 
-        uint256 working = checkedProofOf(tokenId);
+        uint256 working = proofOf(tokenId);
 
         working = NuggftV1ProofType.setNewAnchorOverrides(working, xs, ys);
 
@@ -59,7 +59,12 @@ abstract contract NuggftV1Proof is INuggftV1Proof, NuggftV1File {
 
     /// @inheritdoc INuggftV1Proof
     function proofOf(uint160 tokenId) public view virtual override returns (uint256) {
-        return checkedProofOfIncludingPending(tokenId);
+        if (proofs[tokenId] != 0) return proofs[tokenId];
+
+        (uint256 seed, uint256 epoch, uint256 proof, ) = pendingProof();
+
+        if (epoch == tokenId && seed != 0) return proof;
+        else return 0;
     }
 
     /// @inheritdoc INuggftV1Proof
@@ -76,7 +81,9 @@ abstract contract NuggftV1Proof is INuggftV1Proof, NuggftV1File {
             uint8[] memory overys
         )
     {
-        return parsedProofOfIncludingPending(tokenId);
+        proof = proofOf(tokenId);
+
+        return NuggftV1ProofType.fullProof(proof);
     }
 
     /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -84,42 +91,7 @@ abstract contract NuggftV1Proof is INuggftV1Proof, NuggftV1File {
        ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
 
     function exists(uint160 tokenId) internal view override returns (bool) {
-        return proofs[tokenId] != 0;
-    }
-
-    function checkedProofOf(uint160 tokenId) internal view returns (uint256 res) {
-        res = proofs[tokenId];
-        require(res != 0, 'P:0');
-    }
-
-    function checkedProofOfIncludingPending(uint160 tokenId) internal view returns (uint256 res) {
-        (uint256 seed, uint256 epoch, uint256 proof, ) = pendingProof();
-
-        if (epoch == tokenId && seed != 0) return proof;
-
-        res = proofs[tokenId];
-
-        require(res != 0, 'P:1');
-    }
-
-    function hasProof(uint160 tokenId) internal view returns (bool res) {
-        res = proofs[tokenId] != 0;
-    }
-
-    function parsedProofOfIncludingPending(uint160 tokenId)
-        internal
-        view
-        returns (
-            uint256 proof,
-            uint8[] memory defaultIds,
-            uint8[] memory extraIds,
-            uint8[] memory overxs,
-            uint8[] memory overys
-        )
-    {
-        proof = checkedProofOfIncludingPending(tokenId);
-
-        return NuggftV1ProofType.fullProof(proof);
+        return proofOf(tokenId) != 0;
     }
 
     /*━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -129,7 +101,7 @@ abstract contract NuggftV1Proof is INuggftV1Proof, NuggftV1File {
     function addItem(uint160 tokenId, uint16 itemId) internal {
         require(_isOperatorForOwner(msg.sender, tokenId), 'P:2');
 
-        uint256 working = checkedProofOf(tokenId);
+        uint256 working = proofOf(tokenId);
 
         working = NuggftV1ProofType.pushToExtra(working, itemId);
 
@@ -141,7 +113,7 @@ abstract contract NuggftV1Proof is INuggftV1Proof, NuggftV1File {
     function removeItem(uint160 tokenId, uint16 itemId) internal {
         require(_isOperatorForOwner(msg.sender, tokenId), 'P:4');
 
-        uint256 working = checkedProofOf(tokenId);
+        uint256 working = proofOf(tokenId);
 
         working = NuggftV1ProofType.pullFromExtra(working, itemId);
 
@@ -155,7 +127,7 @@ abstract contract NuggftV1Proof is INuggftV1Proof, NuggftV1File {
     ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━*/
 
     function setProof(uint160 tokenId) internal {
-        require(!hasProof(tokenId), 'P:5');
+        require(proofs[tokenId] == 0, 'P:5');
 
         uint256 randomEnoughSeed = uint256(keccak256(abi.encodePacked(hex'420690', tokenId, blockhash(block.number - 1))));
 
@@ -167,7 +139,7 @@ abstract contract NuggftV1Proof is INuggftV1Proof, NuggftV1File {
     }
 
     function setProofFromEpoch(uint160 tokenId) internal {
-        require(!hasProof(tokenId), 'P:6');
+        require(proofs[tokenId] == 0, 'P:6');
 
         (, uint256 epoch, uint256 res, uint8[] memory picks) = pendingProof();
 

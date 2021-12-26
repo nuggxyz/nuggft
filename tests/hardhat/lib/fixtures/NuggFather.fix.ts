@@ -59,13 +59,13 @@ export const NuggFatherFix: Fixture<NuggFatherFixture> = async function (
     hre.tracer.nameTags[nuggft.address] = `NuggftV1`;
     hre.tracer.nameTags[migrator.address] = `MockNuggftV1Migrator`;
 
-    await nuggft.connect(deployer).storeFiles(hre.dotnugg.itemsByFeatureByIdArray[0], 0);
-    await nuggft.connect(deployer).storeFiles(hre.dotnugg.itemsByFeatureByIdArray[1], 1);
-    await nuggft.connect(deployer).storeFiles(hre.dotnugg.itemsByFeatureByIdArray[2], 2);
-    await nuggft.connect(deployer).storeFiles(hre.dotnugg.itemsByFeatureByIdArray[3], 3);
-    await nuggft.connect(deployer).storeFiles(hre.dotnugg.itemsByFeatureByIdArray[4], 4);
-    await nuggft.connect(deployer).storeFiles(hre.dotnugg.itemsByFeatureByIdArray[5], 5);
-    await nuggft.connect(deployer).storeFiles(hre.dotnugg.itemsByFeatureByIdArray[6], 6);
+    await nuggft.connect(deployer).dotnuggV1StoreFiles(hre.dotnugg.itemsByFeatureByIdArray[0], 0);
+    await nuggft.connect(deployer).dotnuggV1StoreFiles(hre.dotnugg.itemsByFeatureByIdArray[1], 1);
+    await nuggft.connect(deployer).dotnuggV1StoreFiles(hre.dotnugg.itemsByFeatureByIdArray[2], 2);
+    await nuggft.connect(deployer).dotnuggV1StoreFiles(hre.dotnugg.itemsByFeatureByIdArray[3], 3);
+    await nuggft.connect(deployer).dotnuggV1StoreFiles(hre.dotnugg.itemsByFeatureByIdArray[4], 4);
+    await nuggft.connect(deployer).dotnuggV1StoreFiles(hre.dotnugg.itemsByFeatureByIdArray[5], 5);
+    await nuggft.connect(deployer).dotnuggV1StoreFiles(hre.dotnugg.itemsByFeatureByIdArray[6], 6);
 
     console.log(hre.dotnugg.itemsByFeatureByIdHex[2].length);
 

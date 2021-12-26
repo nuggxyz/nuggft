@@ -8,21 +8,22 @@ interface INuggftV1Stake {
        ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
 
     event StakeEth(uint96 stake, uint96 protocol);
-    event UnStakeEth(uint96 stake, address to);
+    event UnstakeEth(uint96 stake, address to);
     event ProtocolEthExtracted(uint96 eth);
     event MigratorV1Updated(address migrator);
     event MigrateV1Sent(address v2, uint160 tokenId, uint256 proof, address owner, uint96 eth);
+    event Burn(uint160 tokenId, address owner, uint96 ethOwed);
 
     /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
                             STATE CHANGING
        ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
 
-    function migrateStake(uint160 tokenId) external;
+    function migrate(uint160 tokenId) external;
 
     /// @notice burns a nugg from existance, dealing the eth worth of that share to the user
     /// @dev should only be called directly
     /// @param tokenId the id of the nugg being burned
-    function withdrawStake(uint160 tokenId) external;
+    function burn(uint160 tokenId) external;
 
     /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
                             VIEW FUNCTIONS
@@ -37,11 +38,11 @@ interface INuggftV1Stake {
     /// @notice returns the amount of eth extractable by protocol
     /// @dev this will be
     /// @return res -> (PROTOCOL_FEE_BPS * [all eth staked] / 10000) - [all previously extracted eth]
-    function totalProtocolEth() external view returns (uint96);
+    function protocolEth() external view returns (uint96);
 
     /// @notice returns the total number of staked shares held by the contract
     /// @dev this is equivilent to the amount of nuggs in existance
-    function totalStakedShares() external view returns (uint64);
+    function stakedShares() external view returns (uint64);
 
     function totalSupply() external view returns (uint256);
 
@@ -49,14 +50,14 @@ interface INuggftV1Stake {
     /// @dev can be used as the market-cap or tvl of all nuggft v1
     /// @dev not equivilent to the balance of eth the contract holds, which also hs protocolEth and
     /// unclaimed eth from unsuccessful swaps
-    function totalStakedEth() external view returns (uint96);
+    function stakedEth() external view returns (uint96);
 
     /// @notice returns the total "ethPerShare" held by the contract
     /// @dev this value not always equivilent to the "floor" price which can consist of perceived value.
     /// can be looked at as an "intrinsic floor"
     /// @dev this is the value that users will receive when their either burn or loan out nuggs
     /// @return res -> [current staked eth] / [current staked shares]
-    function totalEthPerShare() external view returns (uint96);
+    function ethPerShare() external view returns (uint96);
 
     /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
                                 TRUSTED
