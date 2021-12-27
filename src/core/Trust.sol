@@ -24,8 +24,11 @@ abstract contract Trust is ITrust {
     }
 
     modifier requiresTrust() {
-        require(isTrusted[msg.sender], 'UNTRUSTED');
-
+        _requiresTrust();
         _;
+    }
+
+    function _requiresTrust() internal view {
+        require(isTrusted[msg.sender], 'UNTRUSTED');
     }
 }
