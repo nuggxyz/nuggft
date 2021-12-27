@@ -28,4 +28,10 @@ interface IDotnuggV1Resolver {
         IDotnuggV1Data.Data memory data,
         uint8 zoom
     ) external view returns (string memory res);
+
+    function resolveUri(
+        uint256[] memory file,
+        IDotnuggV1Data.Data memory data,
+        uint8 zoom
+    ) external view returns (string memory res);
 }

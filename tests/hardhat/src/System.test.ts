@@ -34,7 +34,7 @@ describe('uint tests', async function () {
         it('should revert if shares = 0', async () => {
             console.log(await fix.nuggft.name());
 
-            const check = await fix.processor.dotnuggToRaw(fix.nuggft.address, 3001, zeroAddress(), 10, 45);
+            const check = await fix.processor.dotnuggToRaw(fix.nuggft.address, await fix.nuggft.epoch(), zeroAddress(), 10, 45);
 
             const token1 = await fix.nuggft.epoch();
 

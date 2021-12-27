@@ -66,7 +66,7 @@ contract NuggftV1 is IERC721Metadata, NuggftV1Loan {
 
         address resolver = hasResolver(safeTokenId) ? dotnuggV1ResolverOf(safeTokenId) : dotnuggV1Processor;
 
-        res = IDotnuggV1Processor(dotnuggV1Processor).dotnuggToString(
+        (, res) = IDotnuggV1Processor(dotnuggV1Processor).dotnuggToUri(
             address(this),
             tokenId,
             resolver,
