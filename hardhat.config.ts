@@ -65,6 +65,12 @@ const DefaultLocalNetworkConfig = {
     },
 };
 
+export const forks = {
+    3: {
+        DotnuggV1Processor: '0x603DED7DE6677FeDC13bf2B334C249584D263da4',
+    },
+};
+
 const DefaultStageNetworkConfig = {
     ...DefaultNetworkConfig,
     gasMultiplier: 2,
@@ -82,10 +88,10 @@ const LocalNetworks: NetworksUserConfig = {
     hardhat: {
         ...DefaultLocalNetworkConfig,
         allowUnlimitedContractSize: true,
-        forking: {
-            enabled: false,
-            url: `https://ropsten.infura.io/v3/${process.env.INFURA_API_KEY}` || '',
-        },
+        // forking: {
+        //     enabled: true,
+        //     url: `https://ropsten.infura.io/v3/${process.env.INFURA_API_KEY}` || '',
+        // },
         loggingEnabled: false,
         gas: 10000000000,
         blockGasLimit: 10000000000,

@@ -1,5 +1,5 @@
 import { Fixture, MockProvider } from 'ethereum-waffle';
-import { BigNumber, Wallet } from 'ethers';
+import { BigNumber, Contract, Wallet } from 'ethers';
 import { HardhatRuntimeEnvironment } from 'hardhat/types';
 
 import { getHRE } from '../shared/deployment';
@@ -7,8 +7,8 @@ import { deployContractWithSalt } from '../shared';
 import { NuggftV1 } from '../../../../typechain/NuggftV1';
 import { NuggftV1__factory } from '../../../../typechain/factories/NuggftV1__factory';
 import {
-    MockdotnuggV1Processor,
-    MockdotnuggV1Processor__factory,
+    IDotnuggV1Processor,
+    IDotnuggV1Processor__factory,
     MockNuggftV1Migrator,
     MockNuggftV1Migrator__factory,
 } from '../../../../typechain';
@@ -22,7 +22,7 @@ export interface NuggFatherFixture {
     ownerStartBal: BigNumber;
     hre: HardhatRuntimeEnvironment;
     blockOffset: BigNumber;
-    processor: MockdotnuggV1Processor;
+    processor: IDotnuggV1Processor;
     // toNuggSwapTokenId(b: BigNumberish): BigNumber;
 }
 
@@ -38,11 +38,19 @@ export const NuggFatherFix: Fixture<NuggFatherFixture> = async function (
     //0x435ccc2eaa41633658be26d804be5A01fEcC9337
     //0x770f070388b13A597b84B557d6B8D1CD94Fc9925
 
-    const processor = await deployContractWithSalt<MockdotnuggV1Processor__factory>({
-        factory: 'MockdotnuggV1Processor',
-        from: deployer,
-        args: [],
-    });
+    const chainId = await hre.getChainId();
+
+    console.log(chainId);
+
+    // const processor = forks[chainId]?.DotnuggV1Processor
+    //     ? (new Contract(forks[chainId].DotnuggV1Processor, IDotnuggV1Processor__factory.abi) as IDotnuggV1Processor)
+    //     : ((await deployContractWithSalt<MockDotnuggV1Processor__factory>({
+    //           factory: 'MockDotnuggV1Processor',
+    //           from: deployer,
+    //           args: [],
+    //       })) as unknown as IDotnuggV1Processor);
+
+    const processor = new Contract('0x603DED7DE6677FeDC13bf2B334C249584D263da4', IDotnuggV1Processor__factory.abi) as IDotnuggV1Processor;
 
     const nuggft = await deployContractWithSalt<NuggftV1__factory>({
         factory: 'NuggftV1',

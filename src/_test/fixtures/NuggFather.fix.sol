@@ -6,7 +6,7 @@ import {DSTestPlus as t} from '../utils/DSTestPlus.sol';
 
 import {User} from '../utils/User.sol';
 
-import {MockdotnuggV1Processor} from '../../_mock/MockdotnuggV1Processer.sol';
+import {MockDotnuggV1Processor} from '../../_mock/MockDotnuggV1Processor.sol';
 
 import {MockNuggftV1Migrator} from '../../_mock/MockNuggftV1Migrator.sol';
 
@@ -29,7 +29,7 @@ contract NuggFatherFix is t {
     using SafeCast for uint256;
     using SafeCast for uint64;
 
-    MockdotnuggV1Processor public processor;
+    MockDotnuggV1Processor public processor;
 
     MockNuggftV1Migrator public migrator;
 
@@ -50,7 +50,7 @@ contract NuggFatherFix is t {
     function reset() public {
         fvm.roll(1);
         fvm.roll(2);
-        processor = new MockdotnuggV1Processor();
+        processor = new MockDotnuggV1Processor();
         migrator = new MockNuggftV1Migrator();
         nuggft = new RiggedNuggft(address(processor));
 
