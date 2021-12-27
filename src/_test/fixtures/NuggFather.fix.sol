@@ -45,6 +45,8 @@ contract NuggFatherFix is t {
 
     User public any;
 
+    constructor() {}
+
     function reset() public {
         fvm.roll(1);
         fvm.roll(2);
@@ -135,30 +137,6 @@ contract NuggFatherFix is t {
 
         assertEq(str.after_staked - str.before_staked, change, 'nuggft balance did not change');
     }
-
-    // modifier changeInMinSharePrice(int192 change) {
-    //     int192 bef = int192(int256(uint256(nuggft.minSharePrice())));
-    //     _;
-    //     int192 aft = int192(int256(uint256(nuggft.minSharePrice())));
-
-    //     assertEq(aft - bef, change);
-    // }
-
-    // modifier changeInStakedShares(int192 change) {
-    //     int192 bef = int192(int256(uint256(nuggft.stakedShares())));
-    //     _;
-    //     int192 aft = int192(int256(uint256(nuggft.stakedShares())));
-
-    //     assertEq(aft - bef, change);
-    // }
-
-    // modifier changeInStakedEth(int192 change) {
-    //     int192 bef = int192(int256(uint256(nuggft.stakedEth())));
-    //     _;
-    //     int192 aft = int192(int256(uint256(nuggft.stakedEth())));
-
-    //     assertEq(aft - bef, change);
-    // }
 
     function nuggft_call(User user, bytes memory args) public payable {
         nuggft_call(user, args, 0);

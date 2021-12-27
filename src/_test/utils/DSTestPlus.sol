@@ -6,11 +6,8 @@ import {DSTest} from '../../../lib/ds-test/src/test.sol';
 
 import {Hevm, ForgeVm} from './Vm.sol';
 
-
 contract DSTestPlus is DSTest {
     Hevm internal constant hevm = Hevm(HEVM_ADDRESS);
-
-    //    Vm vm = Vm(0x7109709ECfa91a80626fF3989D68f67F5b1DD12D);
 
     ForgeVm internal constant fvm = ForgeVm(0x7109709ECfa91a80626fF3989D68f67F5b1DD12D);
 
@@ -39,22 +36,6 @@ contract DSTestPlus is DSTest {
 
     function assertFalse(bool data) internal virtual {
         assertTrue(!data);
-    }
-
-    function assertUint128Eq(uint128 a, uint128 b) internal virtual {
-        assertEq(uint256(a), uint256(b));
-    }
-
-    function assertUint64Eq(uint64 a, uint64 b) internal virtual {
-        assertEq(uint256(a), uint256(b));
-    }
-
-    function assertUint96Eq(uint96 a, uint96 b) internal virtual {
-        assertEq(uint256(a), uint256(b));
-    }
-
-    function assertUint32Eq(uint32 a, uint32 b) internal virtual {
-        assertEq(uint256(a), uint256(b));
     }
 
     function assertBytesEq(bytes memory a, bytes memory b) internal virtual {
