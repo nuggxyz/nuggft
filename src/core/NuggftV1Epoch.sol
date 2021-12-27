@@ -32,18 +32,22 @@ abstract contract NuggftV1Epoch is INuggftV1Epoch {
         res = toStartBlock(_epoch + 1) - 1;
     }
 
-    function activeEpoch() internal view returns (uint32 res) {
-        res = toEpoch(block.number);
+    function calculateSeed() internal view returns (uint256 res, uint32 _epoch) {
+        _epoch = epoch();
+        res = calculateSeedCore(_epoch);
+    }
+
+    function tryCalculateSeed(uint32 _epoch) internal view returns (uint256 res) {
+        res = calculateSeedCore(_epoch);
     }
 
     /// @notice gets unique base based on given epoch and converts encoded bytes to object that can be merged
     /// Note: by using the block hash no one knows what a nugg will look like before it's epoch.
     /// We considered making this harder to manipulate, but we decided that if someone were able to
     /// pull it off and make their own custom nugg, that would be really fucking cool.
-    function calculateSeed() internal view returns (uint256 res, uint32 _epoch) {
-        _epoch = epoch();
+    function calculateSeedCore(uint32 _epoch) internal view returns (uint256 res) {
         uint256 startblock = toStartBlock(_epoch);
-        bytes32 bhash = blockhash(startblock - 1);
+        bytes32 bhash = blockhash(startblock - 2);
         require(bhash != 0, 'E:0');
         res = uint256(keccak256(abi.encodePacked(bhash, _epoch, address(this))));
     }

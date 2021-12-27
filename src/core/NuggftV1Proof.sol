@@ -5,6 +5,7 @@ pragma solidity 0.8.9;
 import {INuggftV1Proof} from '../interfaces/nuggftv1/INuggftV1Proof.sol';
 
 import {ShiftLib} from '../libraries/ShiftLib.sol';
+import {SafeCastLib} from '../libraries/SafeCastLib.sol';
 
 import {NuggftV1Dotnugg} from './NuggftV1Dotnugg.sol';
 
@@ -13,6 +14,7 @@ import {NuggftV1ProofType} from '../types/NuggftV1ProofType.sol';
 // import {Print} from '../_test/utils/Print.sol';
 
 abstract contract NuggftV1Proof is INuggftV1Proof, NuggftV1Dotnugg {
+    using SafeCastLib for uint160;
     /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
                                 state
        ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
@@ -82,6 +84,11 @@ abstract contract NuggftV1Proof is INuggftV1Proof, NuggftV1Dotnugg {
         )
     {
         proof = proofOf(tokenId);
+
+        if (proof == 0) {
+            (proof, ) = initFromSeed(tryCalculateSeed(tokenId.safe32()));
+            require(proof != 0, 'P:L');
+        }
 
         return NuggftV1ProofType.fullProof(proof);
     }
