@@ -1,7 +1,7 @@
 /* eslint-disable prefer-const */
 import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/dist/src/signers';
 import { ethers, waffle } from 'hardhat';
-import { Address } from 'ethereumjs-util';
+import { Address, zeroAddress } from 'ethereumjs-util';
 import { BigNumber } from 'ethers';
 
 import { NamedAccounts } from '../../../hardhat.config';
@@ -33,6 +33,8 @@ describe('uint tests', async function () {
     describe('internal', async () => {
         it('should revert if shares = 0', async () => {
             console.log(await fix.nuggft.name());
+
+            const check = await fix.processor.dotnuggToRaw(fix.nuggft.address, 3001, zeroAddress(), 10, 45);
 
             const token1 = await fix.nuggft.epoch();
 

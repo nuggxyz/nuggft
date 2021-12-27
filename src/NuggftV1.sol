@@ -90,7 +90,8 @@ contract NuggftV1 is IERC721Metadata, NuggftV1Loan {
             renderedAt: block.timestamp,
             name: 'NuggFT V1',
             desc: 'Nugg Fungible Token V1',
-            owner: proof != 0 ? _ownerOf(tokenId.safe160()) : address(0),
+            // code that throws error: owner: proof != 0 ? _ownerOf(tokenId.safe160()) : address(0),
+            owner: owners[tokenId], // fix
             tokenId: tokenId,
             proof: proof,
             ids: ids,
