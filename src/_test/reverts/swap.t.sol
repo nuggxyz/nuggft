@@ -2,11 +2,13 @@
 
 pragma solidity 0.8.9;
 
-import {NuggFatherFix} from '../fixtures/NuggFather.fix.sol';
+import '../fixtures/NuggFather.fix.sol';
 import {SafeCast} from '../fixtures/NuggFather.fix.sol';
 
 contract revertTest__swap is NuggFatherFix {
     using SafeCast for uint96;
+
+    using UserTarget for address;
 
     uint32 epoch;
 
@@ -32,21 +34,21 @@ contract revertTest__swap is NuggFatherFix {
        ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
 
     function test__revert__swap__S_0__successAsSelf() public {
-        nuggft_call(frank, delegate(address(frank), epoch), 30 * 10**16);
+        _nuggft.shouldPass(frank, delegate(address(frank), epoch), 30 * 10**16);
     }
 
     ///////////////////////////////////////////////////////////////////////
 
     function test__revert__swap__S_0__successAsOperator() public {
-        nuggft_call(frank, setApprovalForAll(address(dennis), true));
+        _nuggft.shouldPass(frank, setApprovalForAll(address(dennis), true));
 
-        nuggft_call(dennis, delegate(address(frank), epoch), 30 * 10**16);
+        _nuggft.shouldPass(dennis, delegate(address(frank), epoch), 30 * 10**16);
     }
 
     ///////////////////////////////////////////////////////////////////////
 
     function test__revert__swap__S_0__failAsNotOperator() public {
-        nuggft_revertCall('S:0', dennis, delegate(address(frank), epoch), 30 * 10**16);
+        _nuggft.shouldFail('S:0', dennis, delegate(address(frank), epoch), 30 * 10**16);
     }
 
     /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -59,7 +61,7 @@ contract revertTest__swap is NuggFatherFix {
         changeInNuggftBalance(MININT)
         changeInStaked(MININT, 1)
     {
-        nuggft_call(frank, delegate(address(frank), epoch), MIN);
+        _nuggft.shouldPass(frank, delegate(address(frank), epoch), MIN);
     }
 
     ///////////////////////////////////////////////////////////////////////
@@ -70,19 +72,19 @@ contract revertTest__swap is NuggFatherFix {
         changeInNuggftBalance(MININT + 1)
         changeInStaked(MININT + 1, 1)
     {
-        nuggft_call(frank, delegate(address(frank), epoch), MIN + 1);
+        _nuggft.shouldPass(frank, delegate(address(frank), epoch), MIN + 1);
     }
 
     ///////////////////////////////////////////////////////////////////////
 
     function test__revert__swap__S_1__failWithOneWeiLessThanMin() public {
-        nuggft_revertCall('S:1', frank, delegate(address(frank), epoch), MIN - 1);
+        _nuggft.shouldFail('S:1', frank, delegate(address(frank), epoch), MIN - 1);
     }
 
     ///////////////////////////////////////////////////////////////////////
 
     function test__revert__swap__S_1__failWithZero() public {
-        nuggft_revertCall('S:1', frank, delegate(address(frank), epoch), 0);
+        _nuggft.shouldFail('S:1', frank, delegate(address(frank), epoch), 0);
     }
 
     /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -101,7 +103,7 @@ contract revertTest__swap is NuggFatherFix {
         changeInNuggftBalance(floor.safeInt() + 1 ether)
         changeInStaked(1 ether, 0)
     {
-        nuggft_call(frank, delegate(address(frank), tokenId), floor + 1 ether);
+        _nuggft.shouldPass(frank, delegate(address(frank), tokenId), floor + 1 ether);
     }
 
     ///////////////////////////////////////////////////////////////////////
@@ -119,9 +121,9 @@ contract revertTest__swap is NuggFatherFix {
         changeInNuggftBalance(3 ether + floor.safeInt() * 2)
         changeInStaked(3 ether, 0)
     {
-        nuggft_call(frank, delegate(address(frank), tokenId), floor + 1 ether);
+        _nuggft.shouldPass(frank, delegate(address(frank), tokenId), floor + 1 ether);
 
-        nuggft_call(dee, delegate(address(dee), tokenId), floor + 2 ether);
+        _nuggft.shouldPass(dee, delegate(address(dee), tokenId), floor + 2 ether);
     }
 
     ///////////////////////////////////////////////////////////////////////
@@ -129,7 +131,7 @@ contract revertTest__swap is NuggFatherFix {
     function test__revert__swap__S_R__failWithOwnerOnCommit() public {
         (tokenId, floor) = scenario_dee_has_swapped_a_token();
 
-        nuggft_revertCall('S:R', dee, delegate(address(dee), tokenId), floor + 1 ether * 2);
+        _nuggft.shouldFail('S:R', dee, delegate(address(dee), tokenId), floor + 1 ether * 2);
     }
 
     /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -147,7 +149,7 @@ contract revertTest__swap is NuggFatherFix {
         changeInNuggftBalance(floor.safeInt() + 1 ether)
         changeInStaked(1 ether, 0)
     {
-        nuggft_call(frank, delegate(address(frank), tokenId), floor + 1 ether);
+        _nuggft.shouldPass(frank, delegate(address(frank), tokenId), floor + 1 ether);
     }
 
     ///////////////////////////////////////////////////////////////////////
@@ -156,9 +158,9 @@ contract revertTest__swap is NuggFatherFix {
     function test__revert__swap__S_R__successWithPrevClaimUserAfterClaiming() public {
         (tokenId, floor) = scenario_mac_has_swapped_a_token_dee_swapped();
 
-        nuggft_call(dee, claim(address(dee), tokenId));
+        _nuggft.shouldPass(dee, claim(address(dee), tokenId));
 
-        nuggft_call(dee, delegate(address(dee), tokenId), floor + 1 ether);
+        _nuggft.shouldPass(dee, delegate(address(dee), tokenId), floor + 1 ether);
     }
 
     ///////////////////////////////////////////////////////////////////////
@@ -166,7 +168,7 @@ contract revertTest__swap is NuggFatherFix {
     function test__revert__swap__S_R__failWtihUserWithPrevClaim() public {
         (tokenId, floor) = scenario_mac_has_swapped_a_token_dee_swapped();
 
-        nuggft_revertCall('S:R', dee, delegate(address(dee), tokenId), floor + 1 ether);
+        _nuggft.shouldFail('S:R', dee, delegate(address(dee), tokenId), floor + 1 ether);
     }
 
     /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -175,13 +177,13 @@ contract revertTest__swap is NuggFatherFix {
     function test__revert__swap__S_4__failWithNoSwap() public {
         tokenId = scenario_mac_has_claimed_a_token_dee_swapped();
 
-        nuggft_revertCall('S:4', frank, delegate(address(frank), tokenId), 1 ether);
+        _nuggft.shouldFail('S:4', frank, delegate(address(frank), tokenId), 1 ether);
     }
 
     ///////////////////////////////////////////////////////////////////////
 
     function test__revert__swap__S_4__failWithNonexistantToken() public {
-        nuggft_revertCall('S:4', frank, delegate(address(frank), 50000), 1 ether);
+        _nuggft.shouldFail('S:4', frank, delegate(address(frank), 50000), 1 ether);
     }
 
     ///////////////////////////////////////////////////////////////////////
@@ -189,9 +191,9 @@ contract revertTest__swap is NuggFatherFix {
     function test__revert__swap__S_4__successWithSwap() public {
         (tokenId, floor) = scenario_mac_has_swapped_a_token_dee_swapped();
 
-        nuggft_call(dee, claim(address(dee), tokenId));
+        _nuggft.shouldPass(dee, claim(address(dee), tokenId));
 
-        nuggft_call(dee, delegate(address(dee), tokenId), floor + 1 ether);
+        _nuggft.shouldPass(dee, delegate(address(dee), tokenId), floor + 1 ether);
     }
 
     /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -201,9 +203,9 @@ contract revertTest__swap is NuggFatherFix {
     function test__revert__swap__S_5__failWithVeryHighEPS() public {
         (tokenId, floor) = scenario_mac_has_swapped_a_token_dee_swapped();
 
-        nuggft_call(frank, mint(1500), 50 ether);
+        _nuggft.shouldPass(frank, mint(1500), 50 ether);
 
-        nuggft_revertCall('S:5', frank, delegate(address(frank), tokenId), floor + 1 ether);
+        _nuggft.shouldFail('S:5', frank, delegate(address(frank), tokenId), floor + 1 ether);
     }
 
     ///////////////////////////////////////////////////////////////////////
@@ -211,9 +213,9 @@ contract revertTest__swap is NuggFatherFix {
     function test__revert__swap__S_5__successWithLowEPS() public {
         (tokenId, floor) = scenario_mac_has_swapped_a_token_dee_swapped();
 
-        nuggft_call(frank, mint(1500), floor + .5 ether);
+        _nuggft.shouldPass(frank, mint(1500), floor + .5 ether);
 
-        nuggft_call(frank, delegate(address(frank), tokenId), floor + 1 ether);
+        _nuggft.shouldPass(frank, delegate(address(frank), tokenId), floor + 1 ether);
     }
 
     /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -224,7 +226,7 @@ contract revertTest__swap is NuggFatherFix {
 
         charliesTokenId = scenario_charlie_has_a_token();
 
-        nuggft_call(charlie, delegateItem(charliesTokenId, tokenId, itemId), floor + 1 ether);
+        _nuggft.shouldPass(charlie, delegateItem(charliesTokenId, tokenId, itemId), floor + 1 ether);
     }
 
     ///////////////////////////////////////////////////////////////////////
@@ -234,9 +236,9 @@ contract revertTest__swap is NuggFatherFix {
 
         charliesTokenId = scenario_charlie_has_a_token();
 
-        nuggft_call(charlie, setApprovalForAll(address(mac), true));
+        _nuggft.shouldPass(charlie, setApprovalForAll(address(mac), true));
 
-        nuggft_call(mac, delegateItem(charliesTokenId, tokenId, itemId), floor + 1 ether);
+        _nuggft.shouldPass(mac, delegateItem(charliesTokenId, tokenId, itemId), floor + 1 ether);
     }
 
     ///////////////////////////////////////////////////////////////////////
@@ -246,7 +248,7 @@ contract revertTest__swap is NuggFatherFix {
 
         charliesTokenId = scenario_charlie_has_a_token();
 
-        nuggft_revertCall('S:6', mac, delegateItem(charliesTokenId, tokenId, itemId), floor + 1 ether);
+        _nuggft.shouldFail('S:6', mac, delegateItem(charliesTokenId, tokenId, itemId), floor + 1 ether);
     }
 
     /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -258,7 +260,7 @@ contract revertTest__swap is NuggFatherFix {
 
         charliesTokenId = scenario_charlie_has_a_token();
 
-        nuggft_call(charlie, delegateItem(charliesTokenId, tokenId, itemId), floor + 1 ether);
+        _nuggft.shouldPass(charlie, delegateItem(charliesTokenId, tokenId, itemId), floor + 1 ether);
     }
 
     ///////////////////////////////////////////////////////////////////////
@@ -268,7 +270,7 @@ contract revertTest__swap is NuggFatherFix {
 
         uint160 tokenId2 = scenario_dee_has_a_token_2();
 
-        nuggft_call(dee, delegateItem(tokenId2, tokenId, itemId), floor + 1 ether);
+        _nuggft.shouldPass(dee, delegateItem(tokenId2, tokenId, itemId), floor + 1 ether);
     }
 
     ///////////////////////////////////////////////////////////////////////
@@ -276,7 +278,7 @@ contract revertTest__swap is NuggFatherFix {
     function test__revert__swap__S_7__failWithUserAndOwningToken() public {
         (tokenId, , itemId, floor) = scenario_dee_has_swapped_an_item();
 
-        nuggft_revertCall('S:7', dee, delegateItem(tokenId, tokenId, itemId), floor + 1 ether);
+        _nuggft.shouldFail('S:7', dee, delegateItem(tokenId, tokenId, itemId), floor + 1 ether);
     }
 
     /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -285,7 +287,7 @@ contract revertTest__swap is NuggFatherFix {
     function test__revert__swap__S_8__successAsSelf() public {
         tokenId = scenario_dee_has_swapped_a_token_and_mac_can_claim();
 
-        nuggft_call(mac, claim(address(mac), tokenId));
+        _nuggft.shouldPass(mac, claim(address(mac), tokenId));
     }
 
     ///////////////////////////////////////////////////////////////////////
@@ -293,9 +295,9 @@ contract revertTest__swap is NuggFatherFix {
     function test__revert__swap__S_8__successAsOperator() public {
         tokenId = scenario_dee_has_swapped_a_token_and_mac_can_claim();
 
-        nuggft_call(mac, setApprovalForAll(address(dennis), true));
+        _nuggft.shouldPass(mac, setApprovalForAll(address(dennis), true));
 
-        nuggft_call(dennis, claim(address(mac), tokenId));
+        _nuggft.shouldPass(dennis, claim(address(mac), tokenId));
     }
 
     ///////////////////////////////////////////////////////////////////////
@@ -303,7 +305,7 @@ contract revertTest__swap is NuggFatherFix {
     function test__revert__swap__S_8__failAsNotOperator() public {
         tokenId = scenario_dee_has_swapped_a_token_and_mac_can_claim();
 
-        nuggft_revertCall('S:8', dennis, claim(address(frank), tokenId));
+        _nuggft.shouldFail('S:8', dennis, claim(address(frank), tokenId));
     }
 
     /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -313,7 +315,7 @@ contract revertTest__swap is NuggFatherFix {
     function test__revert__swap__S_9__successAsOwnerOfBuyerTokenId() public {
         (charliesTokenId, tokenId, itemId) = scenario_dee_has_swapped_an_item_and_charlie_can_claim();
 
-        nuggft_call(charlie, claimItem(charliesTokenId, tokenId, itemId));
+        _nuggft.shouldPass(charlie, claimItem(charliesTokenId, tokenId, itemId));
     }
 
     ///////////////////////////////////////////////////////////////////////
@@ -321,9 +323,9 @@ contract revertTest__swap is NuggFatherFix {
     function test__revert__swap__S_9__successAsOperator() public {
         (charliesTokenId, tokenId, itemId) = scenario_dee_has_swapped_an_item_and_charlie_can_claim();
 
-        nuggft_call(charlie, setApprovalForAll(address(mac), true));
+        _nuggft.shouldPass(charlie, setApprovalForAll(address(mac), true));
 
-        nuggft_call(mac, claimItem(charliesTokenId, tokenId, itemId));
+        _nuggft.shouldPass(mac, claimItem(charliesTokenId, tokenId, itemId));
     }
 
     ///////////////////////////////////////////////////////////////////////
@@ -331,7 +333,7 @@ contract revertTest__swap is NuggFatherFix {
     function test__revert__swap__S_9__failAsNotOperator() public {
         (charliesTokenId, tokenId, itemId) = scenario_dee_has_swapped_an_item_and_charlie_can_claim();
 
-        nuggft_revertCall('S:9', mac, claimItem(charliesTokenId, tokenId, itemId));
+        _nuggft.shouldFail('S:9', mac, claimItem(charliesTokenId, tokenId, itemId));
     }
 
     /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -341,7 +343,7 @@ contract revertTest__swap is NuggFatherFix {
     function test__revert__swap__S_A__successAsSelf() public {
         tokenId = scenario_dee_has_a_token_and_can_swap();
 
-        nuggft_call(dee, swap(tokenId, 2 ether));
+        _nuggft.shouldPass(dee, swap(tokenId, 2 ether));
     }
 
     ///////////////////////////////////////////////////////////////////////
@@ -349,9 +351,9 @@ contract revertTest__swap is NuggFatherFix {
     function test__revert__swap__S_A__successAsOperator() public {
         tokenId = scenario_dee_has_a_token_and_can_swap();
 
-        nuggft_call(dee, setApprovalForAll(address(dennis), true));
+        _nuggft.shouldPass(dee, setApprovalForAll(address(dennis), true));
 
-        nuggft_call(dennis, swap(tokenId, 2 ether));
+        _nuggft.shouldPass(dennis, swap(tokenId, 2 ether));
     }
 
     ///////////////////////////////////////////////////////////////////////
@@ -359,7 +361,7 @@ contract revertTest__swap is NuggFatherFix {
     function test__revert__swap__S_A__failAsNotOperator() public {
         tokenId = scenario_dee_has_a_token_and_can_swap();
 
-        nuggft_revertCall('S:A', dennis, swap(tokenId, 2 ether));
+        _nuggft.shouldFail('S:A', dennis, swap(tokenId, 2 ether));
     }
 
     /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -373,7 +375,7 @@ contract revertTest__swap is NuggFatherFix {
 
         floor = nuggft.ethPerShare();
 
-        nuggft_call(dee, swap(tokenId, floor));
+        _nuggft.shouldPass(dee, swap(tokenId, floor));
     }
 
     ///////////////////////////////////////////////////////////////////////
@@ -385,7 +387,7 @@ contract revertTest__swap is NuggFatherFix {
 
         floor = nuggft.ethPerShare();
 
-        nuggft_call(dee, swap(tokenId, floor + 1));
+        _nuggft.shouldPass(dee, swap(tokenId, floor + 1));
     }
 
     ///////////////////////////////////////////////////////////////////////
@@ -397,7 +399,7 @@ contract revertTest__swap is NuggFatherFix {
 
         floor = nuggft.ethPerShare();
 
-        nuggft_revertCall('S:B', dee, swap(tokenId, floor - 1));
+        _nuggft.shouldFail('S:B', dee, swap(tokenId, floor - 1));
     }
 
     function test__revert__swap__S_B__revertWithZero() public {
@@ -405,7 +407,7 @@ contract revertTest__swap is NuggFatherFix {
 
         scenario_frank_has_a_token_and_spent_50_eth();
 
-        nuggft_revertCall('S:B', dee, swap(tokenId, 0));
+        _nuggft.shouldFail('S:B', dee, swap(tokenId, 0));
     }
 
     function test__revert__swap__S_B__revertWithHalfFloor() public {
@@ -415,7 +417,7 @@ contract revertTest__swap is NuggFatherFix {
 
         floor = nuggft.ethPerShare();
 
-        nuggft_revertCall('S:B', dee, swap(tokenId, floor / 2));
+        _nuggft.shouldFail('S:B', dee, swap(tokenId, floor / 2));
     }
 
     function test__revert__swap__S_B__successWithWayTooHigh() public {
@@ -425,7 +427,7 @@ contract revertTest__swap is NuggFatherFix {
 
         floor = nuggft.ethPerShare();
 
-        nuggft_call(dee, swap(tokenId, floor + 30 ether));
+        _nuggft.shouldPass(dee, swap(tokenId, floor + 30 ether));
     }
 
     /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -435,21 +437,21 @@ contract revertTest__swap is NuggFatherFix {
     function test__revert__swap__S_C__successAsOwnerOfBuyerTokenId() public {
         (tokenId, itemId, ) = scenario_dee_has_a_token_and_can_swap_an_item();
 
-        nuggft_call(dee, swapItem(tokenId, itemId, 1 ether));
+        _nuggft.shouldPass(dee, swapItem(tokenId, itemId, 1 ether));
     }
 
     function test__revert__swap__S_C__successAsOperator() public {
         (tokenId, itemId, ) = scenario_dee_has_a_token_and_can_swap_an_item();
 
-        nuggft_call(dee, setApprovalForAll(address(dennis), true));
+        _nuggft.shouldPass(dee, setApprovalForAll(address(dennis), true));
 
-        nuggft_call(dennis, swapItem(tokenId, itemId, 1 ether));
+        _nuggft.shouldPass(dennis, swapItem(tokenId, itemId, 1 ether));
     }
 
     function test__revert__swap__S_C__failAsNotOperator() public {
         (tokenId, itemId, ) = scenario_dee_has_a_token_and_can_swap_an_item();
 
-        nuggft_revertCall('S:C', dennis, swapItem(tokenId, itemId, 1 ether));
+        _nuggft.shouldFail('S:C', dennis, swapItem(tokenId, itemId, 1 ether));
     }
 
     /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -464,28 +466,28 @@ contract revertTest__swap is NuggFatherFix {
         (tokenId, floor) = scenario_mac_has_swapped_a_token_dee_swapped();
 
         // dee got the token here
-        nuggft_call(dee, claim(address(dee), tokenId));
+        _nuggft.shouldPass(dee, claim(address(dee), tokenId));
     }
 
     function test__revert__swap__S_E__failNoOffer() public {
         tokenId = scenario_dee_has_swapped_a_token_and_mac_can_claim();
 
         // dee got the token here
-        nuggft_revertCall('S:E', charlie, claim(address(charlie), tokenId));
+        _nuggft.shouldFail('S:E', charlie, claim(address(charlie), tokenId));
     }
 
     function test__revert__swap__S_E__successAsLeader() public {
         tokenId = scenario_dee_has_swapped_a_token_and_mac_can_claim();
 
         // dee got the token here
-        nuggft_call(mac, claim(address(mac), tokenId));
+        _nuggft.shouldPass(mac, claim(address(mac), tokenId));
     }
 
     function test__revert__swap__S_E__successAsOwner() public {
         tokenId = scenario_dee_has_swapped_a_token_and_mac_can_claim();
 
         // dee got the token here
-        nuggft_call(dee, claim(address(dee), tokenId));
+        _nuggft.shouldPass(dee, claim(address(dee), tokenId));
     }
 
     /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -496,7 +498,7 @@ contract revertTest__swap is NuggFatherFix {
         (tokenId, eth) = scenario_dee_has_swapped_a_token_and_mac_has_delegated();
 
         // dee got the token here
-        nuggft_call(charlie, delegate(address(charlie), tokenId), eth + 1 ether);
+        _nuggft.shouldPass(charlie, delegate(address(charlie), tokenId), eth + 1 ether);
     }
 
     function test__revert__swap__S_F__failOfferInOldSwap() public {
@@ -505,12 +507,12 @@ contract revertTest__swap is NuggFatherFix {
         fvm.roll(2000);
 
         // dee got the token here
-        nuggft_revertCall('S:F', charlie, delegate(address(charlie), tokenId), eth + 1 ether);
+        _nuggft.shouldFail('S:F', charlie, delegate(address(charlie), tokenId), eth + 1 ether);
     }
 
     function test__revert__swap__S_F__failOfferInFutureSwap() public {
         // dee got the token here
-        nuggft_revertCall('S:4', charlie, delegate(address(charlie), 50000), 1 ether);
+        _nuggft.shouldFail('S:4', charlie, delegate(address(charlie), 50000), 1 ether);
     }
 }
 

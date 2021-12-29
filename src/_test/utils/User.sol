@@ -4,6 +4,44 @@ pragma solidity 0.8.9;
 
 import {ForgeVm} from './Vm.sol';
 
+library UserTarget {
+    function shouldPass(
+        address target,
+        User user,
+        bytes memory args
+    ) internal {
+        shouldPass(target, user, args, 0);
+    }
+
+    function shouldPass(
+        address target,
+        User user,
+        bytes memory args,
+        uint96 eth
+    ) internal {
+        user.call(target, args, eth);
+    }
+
+    function shouldFail(
+        address target,
+        string memory message,
+        User user,
+        bytes memory args
+    ) internal {
+        shouldFail(target, message, user, args, 0);
+    }
+
+    function shouldFail(
+        address target,
+        string memory message,
+        User user,
+        bytes memory args,
+        uint96 eth
+    ) internal {
+        user.revertCall(target, message, args, eth);
+    }
+}
+
 contract User {
     ForgeVm internal constant fvm = ForgeVm(0x7109709ECfa91a80626fF3989D68f67F5b1DD12D);
     event log_named_string(string key, string val);
@@ -13,14 +51,6 @@ contract User {
     receive() external payable {}
 
     constructor() payable {}
-
-    // function call(
-    //     address target,
-    //     bytes4 selector,
-    //     bytes memory args
-    // ) public payable virtual returns (bytes memory returnData) {
-    //     returnData = call(target, abi.encodeWithSelector(selector, args));
-    // }
 
     function tryCall(address target, bytes memory data) public payable virtual returns (bool success, bytes memory returnData) {
         (success, returnData) = target.call{value: msg.value}(data);
@@ -49,9 +79,10 @@ contract User {
     function revertCall(
         address target,
         string memory message,
-        bytes memory data
+        bytes memory data,
+        uint256 eth
     ) public payable virtual {
-        (bool callSuccess, bytes memory returnData) = target.call{value: msg.value}(data);
+        (bool callSuccess, bytes memory returnData) = target.call{value: eth}(data);
 
         require(!callSuccess, 'REVERT-CALL SUCCEEDED');
 
