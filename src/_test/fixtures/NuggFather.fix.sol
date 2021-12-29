@@ -4,7 +4,7 @@ pragma solidity 0.8.9;
 
 import {DSTestPlus as t} from '../utils/DSTestPlus.sol';
 
-import {User} from '../utils/User.sol';
+import '../utils/User.sol';
 
 import {MockDotnuggV1Processor} from '../../_mock/MockDotnuggV1Processor.sol';
 
@@ -29,11 +29,15 @@ contract NuggFatherFix is t {
     using SafeCast for uint256;
     using SafeCast for uint64;
 
+    using UserTarget for address;
+
     MockDotnuggV1Processor public processor;
 
     MockNuggftV1Migrator public migrator;
 
     RiggedNuggft public nuggft;
+
+    address public _nuggft;
 
     User public safe;
 
@@ -53,15 +57,24 @@ contract NuggFatherFix is t {
         processor = new MockDotnuggV1Processor();
         migrator = new MockNuggftV1Migrator();
         nuggft = new RiggedNuggft(address(processor));
+        _nuggft = address(nuggft);
+        safe = new User();
 
-        safe = new User{value: 1000 ether}();
-        frank = new User{value: 1000 ether}();
-        charlie = new User{value: 1000 ether}();
-        dennis = new User{value: 1000 ether}();
-        mac = new User{value: 1000 ether}();
-        dee = new User{value: 1000 ether}();
+
+        frank = new User();
+        charlie = new User();
+        dennis = new User();
+        mac = new User();
+        dee = new User();
 
         any = new User();
+
+        safeDeal(address(safe), 30 ether);
+        safeDeal(address(dennis), 30 ether);
+        safeDeal(address(mac), 30 ether);
+        safeDeal(address(dee), 30 ether);
+        safeDeal(address(frank), 90000 ether);
+        safeDeal(address(charlie), 30 ether);
 
         nuggft.setIsTrusted(address(safe), true);
     }
@@ -138,34 +151,34 @@ contract NuggFatherFix is t {
         assertEq(str.after_staked - str.before_staked, change, 'nuggft balance did not change');
     }
 
-    function nuggft_call(User user, bytes memory args) public payable {
-        nuggft_call(user, args, 0);
-    }
+    // function nuggft_call(User user, bytes memory args) public payable {
+    //     nuggft_call(user, args, 0);
+    // }
 
-    function nuggft_call(
-        User user,
-        bytes memory args,
-        uint96 eth
-    ) public payable {
-        user.call(address(nuggft), args, eth);
-    }
+    // function nuggft_call(
+    //     User user,
+    //     bytes memory args,
+    //     uint96 eth
+    // ) public payable {
+    //     user.call(address(nuggft), args, eth);
+    // }
 
-    function nuggft_revertCall(
-        string memory message,
-        User user,
-        bytes memory args
-    ) public payable {
-        nuggft_revertCall(message, user, args, 0);
-    }
+    // function nuggft_revertCall(
+    //     string memory message,
+    //     User user,
+    //     bytes memory args
+    // ) public payable {
+    //     nuggft_revertCall(message, user, args, 0);
+    // }
 
-    function nuggft_revertCall(
-        string memory message,
-        User user,
-        bytes memory args,
-        uint96 eth
-    ) public payable {
-        user.revertCall{value: eth}(address(nuggft), message, args);
-    }
+    // function nuggft_revertCall(
+    //     string memory message,
+    //     User user,
+    //     bytes memory args,
+    //     uint96 eth
+    // ) public payable {
+    //     user.revertCall{value: eth}(address(nuggft), message, args);
+    // }
 
     /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
                                 encodeWithSelector
@@ -265,12 +278,12 @@ contract NuggFatherFix is t {
 
     function scenario_dee_has_a_token() public payable returns (uint160 tokenId) {
         tokenId = 2069;
-        nuggft_call(dee, mint(tokenId));
+        _nuggft.shouldPass(dee, mint(tokenId));
     }
 
     function scenario_frank_has_a_token_and_spent_50_eth() public payable returns (uint160 tokenId) {
         tokenId = 2012;
-        nuggft_call(frank, mint(tokenId), 50 ether);
+        _nuggft.shouldPass(frank, mint(tokenId), 50 ether);
     }
 
     function scenario_frank_has_a_loaned_token() public payable returns (uint160 tokenId) {
@@ -279,10 +292,10 @@ contract NuggFatherFix is t {
         tokenId = scenario_frank_has_a_token_and_spent_50_eth();
 
         {
-            nuggft_call(frank, approve(address(nuggft), tokenId));
+            _nuggft.shouldPass(frank, approve(address(nuggft), tokenId));
         }
 
-        nuggft_call(frank, loan(tokenId));
+        _nuggft.shouldPass(frank, loan(tokenId));
     }
 
     function scenario_frank_has_a_loaned_token_that_has_expired() public payable returns (uint160 tokenId) {
@@ -293,22 +306,22 @@ contract NuggFatherFix is t {
 
     function scenario_dee_has_a_token_2() public payable returns (uint160 tokenId) {
         tokenId = 2400;
-        nuggft_call(dee, mint(tokenId));
+        _nuggft.shouldPass(dee, mint(tokenId));
     }
 
     function scenario_charlie_has_a_token() public payable returns (uint160 tokenId) {
         tokenId = 2070;
-        nuggft_call(charlie, mint(tokenId));
+        _nuggft.shouldPass(charlie, mint(tokenId));
     }
 
     function scenario_migrator_set() public payable {
-        nuggft_call(safe, setMigrator(address(migrator)));
+        _nuggft.shouldPass(safe, setMigrator(address(migrator)));
     }
 
     function scenario_dee_has_a_token_and_can_swap() public payable returns (uint160 tokenId) {
         tokenId = scenario_dee_has_a_token();
 
-        nuggft_call(dee, approve(address(nuggft), tokenId));
+        _nuggft.shouldPass(dee, approve(address(nuggft), tokenId));
     }
 
     function scenario_dee_has_swapped_a_token() public payable returns (uint160 tokenId, uint96 floor) {
@@ -316,7 +329,7 @@ contract NuggFatherFix is t {
 
         floor = 1 ether;
 
-        nuggft_call(dee, swap(tokenId, floor));
+        _nuggft.shouldPass(dee, swap(tokenId, floor));
     }
 
     function scenario_dee_has_swapped_a_token_and_mac_has_delegated() public payable returns (uint160 tokenId, uint96 eth) {
@@ -324,7 +337,7 @@ contract NuggFatherFix is t {
 
         eth = 2 ether;
 
-        nuggft_call(mac, delegate(address(mac), tokenId), eth);
+        _nuggft.shouldPass(mac, delegate(address(mac), tokenId), eth);
     }
 
     function scenario_dee_has_swapped_a_token_and_mac_can_claim() public payable returns (uint160 tokenId) {
@@ -336,16 +349,16 @@ contract NuggFatherFix is t {
     function scenario_mac_has_claimed_a_token_dee_swapped() public payable returns (uint160 tokenId) {
         (tokenId) = scenario_dee_has_swapped_a_token_and_mac_can_claim();
 
-        nuggft_call(mac, claim(address(mac), tokenId));
+        _nuggft.shouldPass(mac, claim(address(mac), tokenId));
     }
 
     function scenario_mac_has_swapped_a_token_dee_swapped() public payable returns (uint160 tokenId, uint96 floor) {
         (tokenId) = scenario_mac_has_claimed_a_token_dee_swapped();
         floor = 3 ether;
 
-        nuggft_call(mac, approve(address(nuggft), tokenId));
+        _nuggft.shouldPass(mac, approve(address(nuggft), tokenId));
 
-        nuggft_call(mac, swap(tokenId, floor));
+        _nuggft.shouldPass(mac, swap(tokenId, floor));
     }
 
     function scenario_dee_has_a_token_and_can_swap_an_item()
@@ -364,7 +377,7 @@ contract NuggFatherFix is t {
         feature = 1;
         itemId = items[feature] | (uint16(feature) << 8);
 
-        nuggft_call(dee, rotateFeature(tokenId, feature));
+        _nuggft.shouldPass(dee, rotateFeature(tokenId, feature));
     }
 
     function scenario_dee_has_swapped_an_item()
@@ -380,7 +393,7 @@ contract NuggFatherFix is t {
         (tokenId, itemId, feature) = scenario_dee_has_a_token_and_can_swap_an_item();
         floor = 3 ether;
 
-        nuggft_call(dee, swapItem(tokenId, itemId, floor));
+        _nuggft.shouldPass(dee, swapItem(tokenId, itemId, floor));
     }
 
     function scenario_dee_has_swapped_an_item_and_charlie_can_claim()
@@ -398,7 +411,7 @@ contract NuggFatherFix is t {
 
         charliesTokenId = scenario_charlie_has_a_token();
 
-        nuggft_call(charlie, delegateItem(charliesTokenId, tokenId, itemId), floor + 1 ether);
+        _nuggft.shouldPass(charlie, delegateItem(charliesTokenId, tokenId, itemId), floor + 1 ether);
 
         fvm.roll(2000);
     }
@@ -443,7 +456,7 @@ contract NuggFatherFix is t {
 
         //   fvm.deal(address(start), 10000 *10**18);
 
-        nuggft_call(start, mint(count++), .08 ether);
+        _nuggft.shouldPass(start, mint(count++), .08 ether);
 
         users[0] = address(start);
 
@@ -455,7 +468,7 @@ contract NuggFatherFix is t {
 
             // fvm.deal(address(tmp), 10000 *10**18);
 
-            nuggft_call(start, mint(count++), nuggft.minSharePrice());
+            _nuggft.shouldPass(start, mint(count++), nuggft.minSharePrice());
 
             int256 curr = nuggft.minSharePrice().safeInt();
 
