@@ -26,3 +26,4 @@ typechain
 out
 tests/dapptools/cache
 abis
+src/_generated
