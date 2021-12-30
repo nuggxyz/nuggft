@@ -2,8 +2,8 @@
 
 pragma solidity 0.8.9;
 
-interface IDotnuggV1Data {
-    struct Data {
+interface IDotnuggV1Metadata {
+    struct Memory {
         uint256 version;
         uint256 renderedAt;
         string name;
@@ -15,5 +15,6 @@ interface IDotnuggV1Data {
         uint8[] extras;
         uint8[] xovers;
         uint8[] yovers;
+        string[] labels;
     }
 }

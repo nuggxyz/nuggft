@@ -6,7 +6,7 @@ import {DSTestPlus as t} from '../utils/DSTestPlus.sol';
 
 import '../utils/User.sol';
 
-import {MockDotnuggV1Processor} from '../../_mock/MockDotnuggV1Processor.sol';
+import {MockDotnuggV1} from '../../_mock/MockDotnuggV1.sol';
 
 import {MockNuggftV1Migrator} from '../../_mock/MockNuggftV1Migrator.sol';
 
@@ -31,7 +31,7 @@ contract NuggFatherFix is t {
 
     using UserTarget for address;
 
-    MockDotnuggV1Processor public processor;
+    MockDotnuggV1 public processor;
 
     MockNuggftV1Migrator public migrator;
 
@@ -54,12 +54,11 @@ contract NuggFatherFix is t {
     function reset() public {
         fvm.roll(1);
         fvm.roll(2);
-        processor = new MockDotnuggV1Processor();
+        processor = new MockDotnuggV1();
         migrator = new MockNuggftV1Migrator();
         nuggft = new RiggedNuggft(address(processor));
         _nuggft = address(nuggft);
         safe = new User();
-
 
         frank = new User();
         charlie = new User();
