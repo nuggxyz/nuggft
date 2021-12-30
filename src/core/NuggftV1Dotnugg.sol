@@ -4,9 +4,8 @@ pragma solidity 0.8.9;
 
 import {IDotnuggV1Storage} from '../interfaces/dotnuggv1/IDotnuggV1Storage.sol';
 
-import {IDotnuggV1Data} from '../interfaces/dotnuggv1/IDotnuggV1Data.sol';
+import {IDotnuggV1Metadata} from '../interfaces/dotnuggv1/IDotnuggV1Metadata.sol';
 import {IDotnuggV1Resolver} from '../interfaces/dotnuggv1/IDotnuggV1Resolver.sol';
-import {IDotnuggV1Processor} from '../interfaces/dotnuggv1/IDotnuggV1Processor.sol';
 import {IDotnuggV1Implementer} from '../interfaces/dotnuggv1/IDotnuggV1Implementer.sol';
 import {IDotnuggV1ImplementerMetadata} from '../interfaces/dotnuggv1/IDotnuggV1ImplementerMetadata.sol';
 
@@ -46,7 +45,7 @@ abstract contract NuggftV1Dotnugg is INuggftV1Dotnugg, NuggftV1Token, Trust {
 
     /// @inheritdoc IDotnuggV1Implementer
     function dotnuggV1StoreFiles(uint256[][] calldata data, uint8 feature) external override requiresTrust {
-        uint8 len = IDotnuggV1Storage(dotnuggV1Processor).storeFiles(feature, data);
+        uint8 len = IDotnuggV1Storage(dotnuggV1Processor).store(feature, data);
 
         uint256 cache = featureLengths;
 

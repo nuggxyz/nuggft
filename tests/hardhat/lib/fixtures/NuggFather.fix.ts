@@ -1,17 +1,14 @@
 import { Fixture, MockProvider } from 'ethereum-waffle';
-import { BigNumber, Contract, Wallet } from 'ethers';
+import { BigNumber, Wallet } from 'ethers';
 import { HardhatRuntimeEnvironment } from 'hardhat/types';
 
 import { getHRE } from '../shared/deployment';
 import { deployContractWithSalt } from '../shared';
 import { NuggftV1 } from '../../../../typechain/NuggftV1';
 import { NuggftV1__factory } from '../../../../typechain/factories/NuggftV1__factory';
-import {
-    IDotnuggV1Processor,
-    IDotnuggV1Processor__factory,
-    MockNuggftV1Migrator,
-    MockNuggftV1Migrator__factory,
-} from '../../../../typechain';
+import { MockNuggftV1Migrator, MockNuggftV1Migrator__factory } from '../../../../typechain';
+import { MockDotnuggV1__factory } from '../../../../typechain/factories/MockDotnuggV1__factory';
+import { IDotnuggV1 } from '../../../../typechain/IDotnuggV1';
 
 export interface NuggFatherFixture {
     // nuggswap: NuggSwap;
@@ -22,7 +19,7 @@ export interface NuggFatherFixture {
     ownerStartBal: BigNumber;
     hre: HardhatRuntimeEnvironment;
     blockOffset: BigNumber;
-    processor: IDotnuggV1Processor;
+    processor: IDotnuggV1;
     // toNuggSwapTokenId(b: BigNumberish): BigNumber;
 }
 
@@ -42,15 +39,13 @@ export const NuggFatherFix: Fixture<NuggFatherFixture> = async function (
 
     console.log(chainId);
 
-    // const processor = forks[chainId]?.DotnuggV1Processor
-    //     ? (new Contract(forks[chainId].DotnuggV1Processor, IDotnuggV1Processor__factory.abi) as IDotnuggV1Processor)
-    //     : ((await deployContractWithSalt<MockDotnuggV1Processor__factory>({
-    //           factory: 'MockDotnuggV1Processor',
-    //           from: deployer,
-    //           args: [],
-    //       })) as unknown as IDotnuggV1Processor);
+    const processor = (await deployContractWithSalt<MockDotnuggV1__factory>({
+        factory: 'MockDotnuggV1',
+        from: deployer,
+        args: [],
+    })) as unknown as IDotnuggV1;
 
-    const processor = new Contract('0x603DED7DE6677FeDC13bf2B334C249584D263da4', IDotnuggV1Processor__factory.abi) as IDotnuggV1Processor;
+    // const processor = new Contract('0x603DED7DE6677FeDC13bf2B334C249584D263da4', IDotnuggV1__factory.abi) as IDotnuggV1;
 
     const nuggft = await deployContractWithSalt<NuggftV1__factory>({
         factory: 'NuggftV1',

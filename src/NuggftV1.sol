@@ -9,10 +9,10 @@ import {NuggftV1Dotnugg} from './core/NuggftV1Dotnugg.sol';
 import {Trust} from './core/Trust.sol';
 
 import {INuggftV1Migrator} from './interfaces/nuggftv1/INuggftV1Migrator.sol';
-import {IDotnuggV1Data} from './interfaces/dotnuggv1/IDotnuggV1Data.sol';
+import {IDotnuggV1Metadata} from './interfaces/dotnuggv1/IDotnuggV1Metadata.sol';
 import {IDotnuggV1Implementer} from './interfaces/dotnuggv1/IDotnuggV1Implementer.sol';
 import {IDotnuggV1ImplementerMetadata} from './interfaces/dotnuggv1/IDotnuggV1ImplementerMetadata.sol';
-import {IDotnuggV1Processor} from './interfaces/dotnuggv1/IDotnuggV1Processor.sol';
+import {IDotnuggV1} from './interfaces/dotnuggv1/IDotnuggV1.sol';
 
 import {INuggftV1Token} from './interfaces/nuggftv1/INuggftV1Token.sol';
 import {INuggftV1Stake} from './interfaces/nuggftv1/INuggftV1Stake.sol';
@@ -66,7 +66,7 @@ contract NuggftV1 is IERC721Metadata, NuggftV1Loan {
 
         address resolver = hasResolver(safeTokenId) ? dotnuggV1ResolverOf(safeTokenId) : dotnuggV1Processor;
 
-        (, res) = IDotnuggV1Processor(dotnuggV1Processor).dotnuggToUri(
+        (, res) = IDotnuggV1(dotnuggV1Processor).dotnuggToUri(
             address(this),
             tokenId,
             resolver,
@@ -80,12 +80,23 @@ contract NuggftV1 is IERC721Metadata, NuggftV1Loan {
     ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━*/
 
     /// @inheritdoc IDotnuggV1Implementer
-    function dotnuggV1Callback(uint256 tokenId) public view override returns (IDotnuggV1Data.Data memory data) {
+    function dotnuggV1Callback(uint256 tokenId) public view override returns (IDotnuggV1Metadata.Memory memory data) {
         (uint256 proof, uint8[] memory ids, uint8[] memory extras, uint8[] memory xovers, uint8[] memory yovers) = parsedProofOf(
             tokenId.safe160()
         );
 
-        data = IDotnuggV1Data.Data({
+        string[] memory labels = new string[](8);
+
+        labels[0] = 'BASE';
+        labels[1] = 'EYES';
+        labels[2] = 'MOUTH';
+        labels[3] = 'HAIR';
+        labels[4] = 'HAT';
+        labels[5] = 'BACK';
+        labels[6] = 'NECK';
+        labels[7] = 'HOLD';
+
+        data = IDotnuggV1Metadata.Memory({
             version: 1,
             renderedAt: block.timestamp,
             name: 'NuggFT V1',
@@ -97,7 +108,8 @@ contract NuggftV1 is IERC721Metadata, NuggftV1Loan {
             ids: ids,
             extras: extras,
             xovers: xovers,
-            yovers: yovers
+            yovers: yovers,
+            labels: labels
         });
     }
 

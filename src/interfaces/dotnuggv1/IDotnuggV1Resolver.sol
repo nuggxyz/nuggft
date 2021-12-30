@@ -2,36 +2,36 @@
 
 pragma solidity 0.8.9;
 
-import {IDotnuggV1Data} from './IDotnuggV1Data.sol';
+import {IDotnuggV1Metadata} from './IDotnuggV1Metadata.sol';
 
 interface IDotnuggV1Resolver {
     function resolveBytes(
         uint256[] memory file,
-        IDotnuggV1Data.Data memory data,
+        IDotnuggV1Metadata.Memory memory data,
         uint8 zoom
     ) external view returns (bytes memory res);
 
     function resolveRaw(
         uint256[] memory file,
-        IDotnuggV1Data.Data memory data,
+        IDotnuggV1Metadata.Memory memory data,
         uint8 zoom
     ) external view returns (uint256[] memory res);
 
-    function resolveData(
+    function resolveMetadata(
         uint256[] memory file,
-        IDotnuggV1Data.Data memory data,
+        IDotnuggV1Metadata.Memory memory data,
         uint8 zoom
-    ) external view returns (IDotnuggV1Data.Data memory res);
+    ) external view returns (IDotnuggV1Metadata.Memory memory res);
 
     function resolveString(
         uint256[] memory file,
-        IDotnuggV1Data.Data memory data,
+        IDotnuggV1Metadata.Memory memory data,
         uint8 zoom
     ) external view returns (string memory res);
 
     function resolveUri(
         uint256[] memory file,
-        IDotnuggV1Data.Data memory data,
+        IDotnuggV1Metadata.Memory memory data,
         uint8 zoom
     ) external view returns (string memory res);
 }
