@@ -8,7 +8,7 @@ import '../../interfaces/dotnuggv1/IDotnuggV1Implementer.sol';
 
 import {SafeCastLib} from '../../libraries/SafeCastLib.sol';
 
-import '../utils/Print.sol';
+import '../utils/logger.sol';
 
 
 library SSTORE2 {
@@ -162,10 +162,10 @@ contract MockDotnuggV1 is IDotnuggV1, DotnuggV1Storage {
         IDotnuggV1Metadata.Memory memory,
         uint8 width
     ) public view returns (uint256[] memory file) {
-        Print.log(width, 'width');
+        logger.log(width, 'width');
 
         for (uint256 i = 0; i < files.length; i++) {
-            Print.log(files[i], 'files[i]');
+            logger.log(files[i], 'files[i]');
         }
         return files[0];
     }

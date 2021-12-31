@@ -4,7 +4,7 @@ pragma solidity 0.8.9;
 
 import './console.sol';
 
-library __ {
+library logger {
     function log(uint256 val, string memory name) internal view {
         console.log('-----------------------');
         console.log('variable: ', name);

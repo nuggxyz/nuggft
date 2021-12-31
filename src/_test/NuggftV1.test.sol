@@ -12,7 +12,7 @@ import {MockNuggftV1Migrator} from './mock/MockNuggftV1Migrator.sol';
 
 import {NuggftV1} from '../NuggftV1.sol';
 
-import './utils/print.sol';
+import './utils/logger.sol';
 
 contract RiggedNuggft is NuggftV1 {
     constructor(address processor) NuggftV1(processor) {
