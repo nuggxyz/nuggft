@@ -2,17 +2,17 @@
 
 pragma solidity 0.8.9;
 
-import {DSTestPlus as t} from '../utils/DSTestPlus.sol';
+import {DSTestPlus as t} from './utils/DSTestPlus.sol';
 
-import '../utils/User.sol';
+import './utils/User.sol';
 
-import {MockDotnuggV1} from '../../_mock/MockDotnuggV1.sol';
+import {MockDotnuggV1} from './mock/MockDotnuggV1.sol';
 
-import {MockNuggftV1Migrator} from '../../_mock/MockNuggftV1Migrator.sol';
+import {MockNuggftV1Migrator} from './mock/MockNuggftV1Migrator.sol';
 
-import {NuggftV1} from '../../NuggftV1.sol';
+import {NuggftV1} from '../NuggftV1.sol';
 
-import '../utils/console.sol';
+import './utils/print.sol';
 
 contract RiggedNuggft is NuggftV1 {
     constructor(address processor) NuggftV1(processor) {
@@ -26,7 +26,7 @@ library SafeCast {
     }
 }
 
-contract NuggFatherFix is t {
+contract NuggftV1Test is t {
     using SafeCast for uint96;
     using SafeCast for uint256;
     using SafeCast for uint64;

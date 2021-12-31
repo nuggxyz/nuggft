@@ -2,10 +2,9 @@
 
 pragma solidity 0.8.9;
 
-import '../fixtures/NuggFather.fix.sol';
-import {SafeCast} from '../fixtures/NuggFather.fix.sol';
+import '../NuggftV1.test.sol';
 
-contract revertTest__swap is NuggFatherFix {
+contract revertTest__swap is NuggftV1Test {
     using SafeCast for uint96;
 
     using UserTarget for address;

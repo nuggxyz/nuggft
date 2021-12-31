@@ -2,26 +2,18 @@
 
 pragma solidity 0.8.9;
 
-import {NuggFatherFix} from '../fixtures/NuggFather.fix.sol';
-import {SafeCast} from '../fixtures/NuggFather.fix.sol';
-
-contract systemTest__one is NuggFatherFix {
-    using SafeCast for uint96;
-
+contract systemTest__one {
     // function setUp() public {
     //     reset();
     // }
-
     // function test__system1() public {
     //     address[] memory users = environmentForge2();
     //     emit log_named_uint('users length', users.length);
-
     //     emit log_named_uint('nuggft.totalEthPerShare()', nuggft.totalEthPerShare());
     //     emit log_named_uint('nuggft.totalProtocolEth()', nuggft.totalProtocolEth());
     //     emit log_named_uint('nuggft.totalStakedEth()', nuggft.totalStakedEth());
     //     emit log_named_uint('nuggft.totalStakedShares()', nuggft.totalStakedShares());
     //     emit log_named_uint('nuggft.minSharePrice()', nuggft.minSharePrice());
-
     //     // assert(false);
     // }
 }
