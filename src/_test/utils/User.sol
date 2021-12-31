@@ -61,6 +61,7 @@ contract User {
         bytes memory data,
         uint256 eth
     ) public payable virtual returns (bytes memory returnData) {
+        require(address(this).balance >= eth, 'INSUFFICIENT_BALANCE_FROM_TARGET');
         bool success;
         (success, returnData) = target.call{value: eth}(data);
 
@@ -82,6 +83,8 @@ contract User {
         bytes memory data,
         uint256 eth
     ) public payable virtual {
+        require(address(this).balance >= eth, 'INSUFFICIENT_BALANCE_FROM_TARGET');
+
         (bool callSuccess, bytes memory returnData) = target.call{value: eth}(data);
 
         require(!callSuccess, 'REVERT-CALL SUCCEEDED');

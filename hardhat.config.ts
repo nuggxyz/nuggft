@@ -289,6 +289,7 @@ const HardhatConfig: HardhatUserConfig = {
         coinmarketcap: process.env.COINMARKETCAP_API_KEY,
         currency: 'USD',
         enabled: true,
+        // gasPrice: 40,
         // excludeContracts: ['contracts/libraries/'],
     },
     networks: {
@@ -316,10 +317,10 @@ const HardhatConfig: HardhatUserConfig = {
     //     clear: true,
     //     runOnCompile: true,
     // },
-    spdxLicenseIdentifier: {
-        overwrite: true,
-        runOnCompile: true,
-    },
+    // spdxLicenseIdentifier: {
+    //     overwrite: true,
+    //     runOnCompile: true,
+    // },
     dotnugg: {
         art: '../nuggft-art',
     },
