@@ -9,6 +9,10 @@ export const toEth = (num: string): ethers.BigNumber => {
     return ethers.utils.parseEther(num);
 };
 
+export const toGwei = (num: string): ethers.BigNumber => {
+    return ethers.utils.parseUnits(num, 'gwei');
+};
+
 export const fromEth = (num: ethers.BigNumberish): string => {
     return ethers.utils.formatUnits(num);
 };

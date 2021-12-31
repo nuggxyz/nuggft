@@ -2,8 +2,8 @@ import { Contract, ethers } from 'ethers';
 import { HardhatRuntimeEnvironment } from 'hardhat/types';
 
 import { NamedAccounts } from '../hardhat.config';
-import { toEth } from '../tests/hardhat/lib/shared/conversion';
-import { IDotnuggV1Processor, IDotnuggV1Processor__factory, NuggftV1 } from '../typechain';
+import { toEth, toGwei } from '../tests/hardhat/lib/shared/conversion';
+import { IDotnuggV1, IDotnuggV1__factory, NuggftV1 } from '../typechain';
 // import { NuggftV1 } from '../typechain';
 // import { XNUGG as xNUGG } from '../typechain/XNUGG';
 // import { NuggftV1 } from '../typechain/NuggftV1.d';
@@ -16,33 +16,34 @@ const deployment = async (hre: HardhatRuntimeEnvironment) => {
     const accounts = (await hre.getNamedAccounts()) as Record<keyof typeof NamedAccounts, string>;
     const eoaDeployer = await hre.ethers.getNamedSigner('deployer');
     hre.deployments.log('EOA deployer: ', accounts.deployer);
-    let dotnuggV1ProcessorAddress: string;
+    let dotnuggV1Address: string;
 
     console.log('frank', accounts.frank);
 
     console.error();
 
     if (chainID === '31337') {
-        const dotnuggV1ProcessorDeployment = await hre.deployments.deploy('MockDotnuggV1Processor', {
+        const dotnuggV1Deployment = await hre.deployments.deploy('MockDotnuggV1', {
             from: eoaDeployer.address,
             log: true,
             args: [],
             // deterministicDeployment: salts[2],
         });
 
-        dotnuggV1ProcessorAddress = dotnuggV1ProcessorDeployment.address;
+        dotnuggV1Address = dotnuggV1Deployment.address;
     } else if (chainID === '3') {
-        dotnuggV1ProcessorAddress = '0xed544dcDA2d612FcEC0Ca4c15569e3dC0b05626E';
+        dotnuggV1Address = '0xd11F88Ae7C7A35a932b23c1E684bC02747425bF9';
     }
 
-    const dotnuggV1Processor = new Contract(dotnuggV1ProcessorAddress, IDotnuggV1Processor__factory.abi) as IDotnuggV1Processor;
+    const dotnuggV1 = new Contract(dotnuggV1Address, IDotnuggV1__factory.abi) as IDotnuggV1;
 
-    hre.deployments.log('using DotnuggV1Processor at address: ', dotnuggV1Processor.address);
+    hre.deployments.log('using DotnuggV1 at address: ', dotnuggV1.address);
 
     const nuggftDeployment = await hre.deployments.deploy('NuggftV1', {
         from: eoaDeployer.address,
         log: true,
-        args: [dotnuggV1Processor.address],
+        args: [dotnuggV1.address],
+        gasPrice: toGwei('20'),
 
         // deterministicDeployment: salts[2],
     });
@@ -54,7 +55,7 @@ const deployment = async (hre: HardhatRuntimeEnvironment) => {
         return (
             await nuggft
                 .connect(eoaDeployer)
-                .dotnuggV1StoreFiles(hre.dotnugg.itemsByFeatureByIdArray[feature], feature)
+                .dotnuggV1StoreFiles(hre.dotnugg.itemsByFeatureByIdArray[feature], feature, { gasPrice: toGwei('20') })
                 .then((data) => {
                     hre.deployments.log(`tx for feature ${feature} sent... waiting to be mined... `, data.hash);
                     return data;
@@ -90,6 +91,7 @@ const deployment = async (hre: HardhatRuntimeEnvironment) => {
     // await sendFiles(4);
     // await sendFiles(5);
     // await sendFiles(6);
+    // await sendFiles(7);
 
     const activeEpoch = await nuggft.epoch();
     const minSharePrice = await nuggft.valueForDelegate(accounts.dee, activeEpoch);
@@ -100,41 +102,41 @@ const deployment = async (hre: HardhatRuntimeEnvironment) => {
     // await sendTx(
     //     nuggft.connect(await hre.ethers.getNamedSigner('deployer')).trustedMint(69, '0x9B0E2b16F57648C7bAF28EDD7772a815Af266E77', {
     //         value: await nuggft.minSharePrice(),
-    //         gasLimit: 10000000,
-    //         gasPrice: toEth('0.0000006'),
+    //         gasPrice: toGwei('20'),
+    //         gasLimit: 1000000,
     //     }),
     // );
 
     // await sendTx(
     //     nuggft.connect(await hre.ethers.getNamedSigner('dee')).delegate((await hre.ethers.getNamedSigner('dee')).address, activeEpoch, {
     //         value: (await nuggft.valueForDelegate(accounts.dee, activeEpoch)).nextSwapAmount,
-    //         gasPrice: toEth('0.0000006'),
-    //         // gasLimit: 10000000,
+    //         gasPrice: toGwei('5'),
+    //         gasLimit: 1000000,
     //     }),
     // );
-    for (let i = 0; i < 10; i++) {
+    for (let i = 3; i < 10; i++) {
         await Promise.all([
             sendTx(
                 nuggft.connect(await hre.ethers.getNamedSigner('dee')).mint(i + 600, {
-                    value: (await nuggft.minSharePrice()).add(toEth('.0001')),
-                    gasPrice: toEth('0.0000006'),
-                    // gasLimit: 10000000,
+                    value: (await nuggft.minSharePrice()).add(toEth('.001')),
+                    gasPrice: toGwei('5'),
+                    gasLimit: 1000000,
                 }),
             ),
             sendTx(
                 nuggft.connect(await hre.ethers.getNamedSigner('frank')).mint(i + 1700, {
-                    value: (await nuggft.minSharePrice()).add(toEth('.0001')),
-                    // gasLimit: 10000000,
-                    gasPrice: toEth('0.0000006'),
+                    value: (await nuggft.minSharePrice()).add(toEth('.002')),
+                    gasPrice: toGwei('5'),
+                    gasLimit: 1000000,
                 }),
             ),
             sendTx(
                 nuggft
                     .connect(await hre.ethers.getNamedSigner('deployer'))
                     .trustedMint(i + 100, '0x9B0E2b16F57648C7bAF28EDD7772a815Af266E77', {
-                        value: (await nuggft.minSharePrice()).add(toEth('.0001')),
-                        // gasLimit: 10000000,
-                        gasPrice: toEth('0.0000006'),
+                        value: (await nuggft.minSharePrice()).add(toEth('.003')),
+                        gasPrice: toGwei('5'),
+                        gasLimit: 1000000,
                     }),
             ),
         ]);
