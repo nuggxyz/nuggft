@@ -13,27 +13,27 @@ library NuggftV1AgentType {
     // 10**13
     uint96 constant COMPRESSION_PERCISION = 0x9184E72A000;
 
-    struct Memory {
-        uint96 eth;
-        uint32 epoch;
-        address account;
-        bool isOwner;
-        bool flag;
-    }
+    // struct Memory {
+    //     uint96 eth;
+    //     uint32 epoch;
+    //     address account;
+    //     bool isOwner;
+    //     bool flag;
+    // }
 
-    function unpack(uint256 packed) internal pure returns (Memory memory m) {
-        if (packed != 0) {
-            m.flag = true;
-            m.epoch = epoch(packed);
-            m.account = account(packed);
-            m.eth = eth(packed);
-            m.isOwner = isOwner(packed);
-        }
-    }
+    // function unpack(uint256 packed) internal pure returns (Memory memory m) {
+    //     if (packed != 0) {
+    //         m.flag = true;
+    //         m.epoch = epoch(packed);
+    //         m.account = account(packed);
+    //         m.eth = eth(packed);
+    //         m.isOwner = isOwner(packed);
+    //     }
+    // }
 
-    function pack(Memory memory m) internal pure returns (uint256 outuput, uint96 dust) {
-        (outuput, dust) = newAgentType(m.epoch, m.account, m.eth, m.isOwner);
-    }
+    // function pack(Memory memory m) internal pure returns (uint256 outuput, uint96 dust) {
+    //     (outuput, dust) = newAgentType(m.epoch, m.account, m.eth, m.isOwner);
+    // }
 
     /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
                                CALCULATION

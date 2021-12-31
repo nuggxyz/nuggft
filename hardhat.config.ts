@@ -252,7 +252,7 @@ const HardhatConfig: HardhatUserConfig = {
                 settings: {
                     optimizer: {
                         enabled: true,
-                        runs: 5000,
+                        runs: 10000,
                     },
                 },
             },
@@ -311,6 +311,7 @@ const HardhatConfig: HardhatUserConfig = {
         alphaSort: true,
         runOnCompile: true,
         disambiguatePaths: false,
+        strict: false,
     },
     // docgen: {
     //     path: './docs',
