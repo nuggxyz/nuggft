@@ -2,11 +2,9 @@
 
 pragma solidity 0.8.9;
 
-import {DSTestPlus as t} from '../utils/DSTestPlus.sol';
+import '../NuggftV1.test.sol';
 
-import '../fixtures/NuggFather.fix.sol';
-
-contract revertTest__stake is t, NuggFatherFix {
+contract revertTest__stake is NuggftV1Test {
     uint32 epoch;
 
     using UserTarget for address;

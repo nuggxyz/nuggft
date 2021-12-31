@@ -2,9 +2,9 @@
 
 pragma solidity 0.8.9;
 
-import '../fixtures/NuggFather.fix.sol';
+import '../NuggftV1.test.sol';
 
-contract revertTest__loan is NuggFatherFix {
+contract revertTest__loan is NuggftV1Test {
     uint32 epoch;
 
     using UserTarget for address;
