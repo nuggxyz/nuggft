@@ -48,7 +48,7 @@ abstract contract NuggftV1Epoch is INuggftV1Epoch {
     function calculateSeedCore(uint32 _epoch) internal view returns (uint256 res) {
         uint256 startblock = toStartBlock(_epoch);
         bytes32 bhash = blockhash(startblock - 2);
-        require(bhash != 0, 'E:0');
+        if (block.chainid == 1) require(bhash != 0, 'E:0');
         res = uint256(keccak256(abi.encodePacked(bhash, _epoch, address(this))));
     }
 }

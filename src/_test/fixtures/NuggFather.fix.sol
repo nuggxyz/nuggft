@@ -12,6 +12,8 @@ import {MockNuggftV1Migrator} from '../../_mock/MockNuggftV1Migrator.sol';
 
 import {NuggftV1} from '../../NuggftV1.sol';
 
+import '../utils/console.sol';
+
 contract RiggedNuggft is NuggftV1 {
     constructor(address processor) NuggftV1(processor) {
         featureLengths = 0x0303030303030303;

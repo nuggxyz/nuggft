@@ -34,6 +34,7 @@ contract revertTest__stake is t, NuggFatherFix {
     }
 
     function test__revert__stake__T_1__fail_fromZero() public {
+        console.logb(34);
         _nuggft.shouldPass(frank, mint((2099)), 30 * 10**18);
 
         _nuggft.shouldFail('T:1', dennis, mint(2909));
@@ -47,9 +48,13 @@ contract revertTest__stake is t, NuggFatherFix {
     }
 
     function test__revert__stake__T_1__failOnTrusted() public {
-        _nuggft.shouldPass(safe, trustedMint(99, address(frank)), 30 * 10**18);
+        // console.log(address(safe).balance);
 
-        _nuggft.shouldFail('T:1', safe, trustedMint(9, address(dennis)), 29 * 10**18);
+        _nuggft.shouldPass(safe, trustedMint(99, address(frank)), 15 * 10**18);
+
+        // console.log(address(safe).balance);
+
+        _nuggft.shouldFail('T:1', safe, trustedMint(9, address(dennis)), 14 * 10**18);
     }
 
     /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
