@@ -11,66 +11,67 @@ import {NuggftV1Dotnugg} from './NuggftV1Dotnugg.sol';
 
 import {NuggftV1ProofType} from '../types/NuggftV1ProofType.sol';
 
-// import {Print} from '../_test/utils/Print.sol';
-
 abstract contract NuggftV1Proof is INuggftV1Proof, NuggftV1Dotnugg {
     using SafeCastLib for uint160;
+    using SafeCastLib for uint256;
+
     /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
                                 state
        ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+    struct Settings {
+        mapping(uint256 => uint256) anchorOverrides;
+        // uint8 displayLen; // default 4
+    }
 
     mapping(uint160 => uint256) proofs;
+
+    mapping(uint160 => Settings) settings;
 
     /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
                            external functions
        ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
 
     /// @inheritdoc INuggftV1Proof
-    function rotateFeature(uint160 tokenId, uint8 feature) external override {
-        require(_isOperatorForOwner(msg.sender, tokenId), 'P:A');
+    function rotate(
+        uint160 tokenId,
+        uint8 index0,
+        uint8 index1
+    ) external override {
+        ensureOperatorForOwner(msg.sender, tokenId);
 
         uint256 working = proofOf(tokenId);
 
-        working = NuggftV1ProofType.rotateDefaultandExtra(working, feature);
-
-        working = NuggftV1ProofType.clearAnchorOverridesForFeature(working, feature);
+        working = NuggftV1ProofType.swapIndexs(working, index0, index1);
 
         proofs[tokenId] = working;
-
-        emit RotateItem(tokenId, working, feature);
     }
 
     /// @inheritdoc INuggftV1Proof
-    function setOverrides(
+    function anchor(
         uint160 tokenId,
-        uint8[] memory xs,
-        uint8[] memory ys
+        uint16 itemId,
+        uint256 x,
+        uint256 y
     ) external override {
-        require(_isOperatorForOwner(msg.sender, tokenId), 'P:B');
+        require(x < 64 && y < 64, 'UNTEESTED:1');
 
-        require(xs.length == 8 && ys.length == 8, 'P:C');
+        ensureOperatorForOwner(msg.sender, tokenId);
 
-        uint256 working = proofOf(tokenId);
-
-        working = NuggftV1ProofType.setNewAnchorOverrides(working, xs, ys);
-
-        proofs[tokenId] = working;
-
-        emit SetAnchorOverrides(tokenId, working, xs, ys);
+        settings[tokenId].anchorOverrides[itemId] = x | (y << 6);
     }
 
     /// @inheritdoc INuggftV1Proof
     function proofOf(uint160 tokenId) public view virtual override returns (uint256) {
         if (proofs[tokenId] != 0) return proofs[tokenId];
 
-        (uint256 seed, uint256 epoch, uint256 proof, ) = pendingProof();
+        (uint256 seed, uint256 epoch, uint256 proof) = pendingProof();
 
         if (epoch == tokenId && seed != 0) return proof;
         else return 0;
     }
 
     /// @inheritdoc INuggftV1Proof
-    function parsedProofOf(uint160 tokenId)
+    function proofToDotnuggMetadata(uint160 tokenId)
         public
         view
         virtual
@@ -78,7 +79,6 @@ abstract contract NuggftV1Proof is INuggftV1Proof, NuggftV1Dotnugg {
         returns (
             uint256 proof,
             uint8[] memory defaultIds,
-            uint8[] memory extraIds,
             uint8[] memory overxs,
             uint8[] memory overys
         )
@@ -86,11 +86,31 @@ abstract contract NuggftV1Proof is INuggftV1Proof, NuggftV1Dotnugg {
         proof = proofOf(tokenId);
 
         if (proof == 0) {
-            (proof, ) = initFromSeed(tryCalculateSeed(tokenId.safe32()));
+            proof = initFromSeed(tryCalculateSeed(tokenId.safe32()));
             require(proof != 0, 'P:L');
         }
 
-        return NuggftV1ProofType.fullProof(proof);
+        defaultIds = new uint8[](8);
+        overxs = new uint8[](8);
+        overys = new uint8[](8);
+
+        defaultIds[0] = uint8(proof & ShiftLib.mask(3));
+
+        for (uint8 i = 0; i < 7; i++) {
+            uint16 item = NuggftV1ProofType.getIndex(proof, i);
+
+            if (item == 0) continue;
+
+            (uint8 feature, uint8 pos) = NuggftV1ProofType.parseItemId(item);
+
+            if (defaultIds[feature] == 0) {
+                uint256 overrides = settings[tokenId].anchorOverrides[item];
+                overys[feature] = uint8(overrides >> 6);
+                overxs[feature] = uint8(overrides & ShiftLib.mask(6));
+
+                defaultIds[feature] = pos;
+            }
+        }
     }
 
     /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -106,27 +126,23 @@ abstract contract NuggftV1Proof is INuggftV1Proof, NuggftV1Dotnugg {
     ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━*/
 
     function addItem(uint160 tokenId, uint16 itemId) internal {
-        require(_isOperatorForOwner(msg.sender, tokenId), 'P:2');
+        ensureOperatorForOwner(msg.sender, tokenId);
 
         uint256 working = proofOf(tokenId);
 
-        working = NuggftV1ProofType.pushToExtra(working, itemId);
+        working = NuggftV1ProofType.setIndex(working, NuggftV1ProofType.search(working, 0), itemId);
 
         proofs[tokenId] = working;
-
-        emit PushItem(tokenId, working, itemId);
     }
 
     function removeItem(uint160 tokenId, uint16 itemId) internal {
-        require(_isOperatorForOwner(msg.sender, tokenId), 'P:4');
+        ensureOperatorForOwner(msg.sender, tokenId);
 
         uint256 working = proofOf(tokenId);
 
-        working = NuggftV1ProofType.pullFromExtra(working, itemId);
+        working = NuggftV1ProofType.setIndex(working, NuggftV1ProofType.search(working, itemId), 0);
 
         proofs[tokenId] = working;
-
-        emit PopItem(tokenId, working, itemId);
     }
 
     /*━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -138,57 +154,47 @@ abstract contract NuggftV1Proof is INuggftV1Proof, NuggftV1Dotnugg {
 
         uint256 randomEnoughSeed = uint256(keccak256(abi.encodePacked(hex'420690', tokenId, blockhash(block.number - 1))));
 
-        (uint256 res, uint8[] memory picks) = initFromSeed(randomEnoughSeed);
+        uint256 res = initFromSeed(randomEnoughSeed);
 
         proofs[tokenId] = res;
-
-        emit SetProof(tokenId, res, picks);
     }
 
     function setProofFromEpoch(uint160 tokenId) internal {
         require(proofs[tokenId] == 0, 'P:6');
 
-        (, uint256 epoch, uint256 res, uint8[] memory picks) = pendingProof();
+        (, uint256 epoch, uint256 res) = pendingProof();
 
         require(epoch == tokenId, 'P:7');
 
         proofs[tokenId] = res;
-
-        emit SetProof(tokenId, res, picks);
     }
 
     // TODO TO BE TESTED
-    function initFromSeed(uint256 seed) internal view returns (uint256 res, uint8[] memory upd) {
+    function initFromSeed(uint256 seed) internal view returns (uint256 res) {
         require(seed != 0, 'P:8');
 
-        uint8[] memory lengths = ShiftLib.getArray(featureLengths, 0);
+        uint256 lengths = featureLengths;
 
-        upd = new uint8[](8);
+        res |= ((safeMod(ShiftLib.get(seed, 8, 0), _lengthOf(lengths, 0))) + 1);
+        res |= ((1 << 8) | ((safeMod(ShiftLib.get(seed, 8, 8), _lengthOf(lengths, 1))) + 1)) << 3;
+        res |= ((2 << 8) | ((safeMod(ShiftLib.get(seed, 8, 16), _lengthOf(lengths, 2))) + 1)) << (3 + 11);
 
-        uint8[] memory picks = ShiftLib.getArray(seed, 0);
+        uint256 sel = ShiftLib.get(seed, 8, 24);
 
-        upd[0] = (safeMod(picks[0], lengths[0])) + 1;
-        upd[1] = (safeMod(picks[1], lengths[1])) + 1;
-        upd[2] = (safeMod(picks[2], lengths[2])) + 1;
+        uint256 val = ShiftLib.get(seed, 8, 32);
 
-        // Print.log(picks[3], 'picks[3]');
+        if (sel < 60) val = (3 << 8) | ((safeMod(val, _lengthOf(lengths, 3))) + 1);
+        else if (sel < 120) val = (4 << 8) | ((safeMod(val, _lengthOf(lengths, 4))) + 1);
+        else if (sel < 180) val = (5 << 8) | ((safeMod(val, _lengthOf(lengths, 5))) + 1);
+        else if (sel < 240) val = (6 << 8) | ((safeMod(val, _lengthOf(lengths, 6))) + 1);
+        else val = (7 << 8) | ((safeMod(val, _lengthOf(lengths, 7))) + 1);
 
-        if (picks[3] < 60) upd[3] = (safeMod(picks[4], lengths[3])) + 1;
-        else if (picks[3] < 120) upd[4] = (safeMod(picks[4], lengths[4])) + 1;
-        else if (picks[3] < 180) upd[5] = (safeMod(picks[4], lengths[5])) + 1;
-        else if (picks[3] < 240)
-            upd[6] = (safeMod(picks[4], lengths[6])) + 1;
-            // FIXME
-        else upd[6] = (safeMod(picks[4], lengths[6])) + 1;
-
-        // Print.log(lengths, 'lengths');
-
-        res = ShiftLib.setArray(res, 0, upd);
+        res |= (val) << (3 + 11 * 2);
     }
 
-    function safeMod(uint8 value, uint8 modder) internal pure returns (uint8) {
+    function safeMod(uint256 value, uint8 modder) internal pure returns (uint256) {
         require(modder != 0, 'P:9');
-        return value % modder;
+        return value.safe8() % modder;
     }
 
     function pendingProof()
@@ -197,12 +203,11 @@ abstract contract NuggftV1Proof is INuggftV1Proof, NuggftV1Dotnugg {
         returns (
             uint256 seed,
             uint256 epoch,
-            uint256 proof,
-            uint8[] memory defaultIds
+            uint256 proof
         )
     {
         (seed, epoch) = calculateSeed();
 
-        (proof, defaultIds) = initFromSeed(seed);
+        proof = initFromSeed(seed);
     }
 }

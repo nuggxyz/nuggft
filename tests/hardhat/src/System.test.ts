@@ -1,7 +1,7 @@
 /* eslint-disable prefer-const */
 import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/dist/src/signers';
 import { ethers, waffle } from 'hardhat';
-import { Address, zeroAddress } from 'ethereumjs-util';
+import { Address } from 'ethereumjs-util';
 import { BigNumber } from 'ethers';
 
 import { NamedAccounts } from '../../../hardhat.config';
@@ -34,7 +34,10 @@ describe('uint tests', async function () {
         it('should revert if shares = 0', async () => {
             console.log(await fix.nuggft.name());
 
-            const check = await fix.processor.dotnuggToRaw(fix.nuggft.address, await fix.nuggft.epoch(), zeroAddress(), 10, 45);
+            // const check = await fix.processor.dotnuggToRaw(fix.nuggft.address, await fix.nuggft.epoch(), zeroAddress(), 10, 45);
+
+            const check = await fix.nuggft.proofToDotnuggMetadata(await fix.nuggft.epoch());
+            console.log({ check });
 
             const token1 = await fix.nuggft.epoch();
 
@@ -107,7 +110,7 @@ describe('uint tests', async function () {
 
             await fix.nuggft.connect(accounts.charile).claim(accounts.charile.address, token1);
 
-            const info = await fix.nuggft.parsedProofOf(token11);
+            const info = await fix.nuggft.proofToDotnuggMetadata(token11);
 
             // eslint-disable-next-line prefer-const
             let dids: number[] = [];
@@ -119,7 +122,7 @@ describe('uint tests', async function () {
 
             console.log(dids[1].toString(), accounts.dee.address);
 
-            await fix.nuggft.connect(accounts.frank).rotateFeature(token11, 1);
+            await fix.nuggft.connect(accounts.frank).rotate(token11, 1, 19);
 
             await fix.nuggft.connect(accounts.frank).swapItem(token11, dids[1], toEth('14'));
             const epoch = await fix.nuggft.connect(accounts.charile).epoch();
@@ -134,7 +137,7 @@ describe('uint tests', async function () {
             console.log('totalSupply()', fromEth(await fix.nuggft.totalSupply()));
             console.log('stakedEth()', fromEth(await fix.nuggft.stakedEth()));
 
-            const info0 = await fix.nuggft.parsedProofOf(token1);
+            const info0 = await fix.nuggft.proofToDotnuggMetadata(token1);
 
             // eslint-disable-next-line prefer-const
             let dids2: number[] = [];
@@ -144,7 +147,7 @@ describe('uint tests', async function () {
                 console.log(i, info0.defaultIds[i], dids2[i]);
             }
 
-            await fix.nuggft.connect(accounts.charile).rotateFeature(token1, 2);
+            await fix.nuggft.connect(accounts.charile).rotate(token1, 2, 20);
 
             await fix.nuggft.connect(accounts.charile).swapItem(token1, dids2[2], toEth('55'));
 
@@ -220,6 +223,10 @@ describe('uint tests', async function () {
             await fix.nuggft.connect(accounts.frank).trustedMint(69, accounts.mac.address, { value: toEth('250') });
 
             await fix.nuggft.connect(accounts.charile).approve(fix.nuggft.address, token1);
+
+            const a = await fix.nuggft.connect(accounts.charile).proofOf(token1);
+
+            console.log(a);
 
             await fix.nuggft.connect(accounts.charile).migrate(token1);
 

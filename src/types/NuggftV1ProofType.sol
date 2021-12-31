@@ -35,78 +35,94 @@ library NuggftV1ProofType {
     /// @return extraIds -> the modifed uint256 proof state
     /// @return xOverrides -> the modifed uint256 proof state
     /// @return yOverrides -> the modifed uint256 proof state
-    function fullProof(uint256 state)
-        internal
-        pure
-        returns (
-            uint256 proof,
-            uint8[] memory defaultIds,
-            uint8[] memory extraIds,
-            uint8[] memory xOverrides,
-            uint8[] memory yOverrides
-        )
-    {
-        proof = state;
-        defaultIds = ShiftLib.getArray(state, 0);
-        extraIds = ShiftLib.getArray(state, 64);
-        xOverrides = ShiftLib.getArray(state, 128);
-        yOverrides = ShiftLib.getArray(state, 192);
-    }
+    // function fullProof(uint256 state)
+    //     internal
+    //     pure
+    //     returns (
+    //         uint256 proof,
+    //         uint8[] memory defaultIds,
+    //         uint8[] memory extraIds,
+    //         uint8[] memory xOverrides,
+    //         uint8[] memory yOverrides
+    //     )
+    // {
+    //     proof = state;
+    //     defaultIds = ShiftLib.getArray(state, 0);
+    //     extraIds = ShiftLib.getArray(state, 64);
+    //     xOverrides = ShiftLib.getArray(state, 128);
+    //     yOverrides = ShiftLib.getArray(state, 192);
+    // }
 
     /// @notice sets an item to the extra array
     /// @dev extra array must be empty at the feature positon being added to
     /// @param state -> the uint256 proof state
     /// @param itemId -> the itemId being added
     /// @return res -> the modifed uint256 proof state
-    function pushToExtra(uint256 state, uint16 itemId) internal pure returns (uint256 res) {
-        uint8[] memory arr = ShiftLib.getArray(state, 64);
+    // function pushToExtra(uint256 state, uint16 itemId) internal pure returns (uint256 res) {
+    //     uint8[] memory arr = ShiftLib.getArray(state, 64);
 
-        (uint8 feat, uint8 pos) = parseItemId(itemId);
+    //     (uint8 feat, uint8 pos) = parseItemId(itemId);
 
-        require(arr[feat] == 0, 'P:D');
+    //     require(arr[feat] == 0, 'P:D');
 
-        arr[feat] = pos;
+    //     arr[feat] = pos;
 
-        res = ShiftLib.setArray(state, 64, arr);
+    //     res = ShiftLib.setArray(state, 64, arr);
+    // }
+
+    /// / @notice removes an item from the extra array
+    // / @dev extra array must NOT be empty at the feature positon being removed
+    // / @dev the extra array must have that specific feature in that postion
+    // / @param state -> the uint256 proof state
+    // / @param itemId -> the itemId being removed
+    // / @return res -> the modifed uint256 proof state
+    // function pullFromExtra(uint256 state, uint16 itemId) internal pure returns (uint256 res) {
+    //     uint8[] memory arr = ShiftLib.getArray(state, 64);
+
+    //     (uint8 feat, uint8 pos) = parseItemId(itemId);
+
+    //     require(feat != 0, 'P:F');
+
+    //     require(arr[feat] == pos, 'P:E');
+
+    //     arr[feat] = 0;
+
+    //     res = ShiftLib.setArray(state, 64, arr);
+    // }
+
+    function search(uint256 state, uint256 itemId) internal pure returns (uint8 index) {
+        state >>= 3;
+
+        do {
+            if (state & 11 == itemId) return index;
+            index++;
+        } while ((state >>= 11) != 0);
+
+        require(index != 22, 'UNTESTED');
+
+        // if (index == 22) revert('UNTESTED');
     }
 
-    /// @notice removes an item from the extra array
-    /// @dev extra array must NOT be empty at the feature positon being removed
-    /// @dev the extra array must have that specific feature in that postion
-    /// @param state -> the uint256 proof state
-    /// @param itemId -> the itemId being removed
-    /// @return res -> the modifed uint256 proof state
-    function pullFromExtra(uint256 state, uint16 itemId) internal pure returns (uint256 res) {
-        uint8[] memory arr = ShiftLib.getArray(state, 64);
-
-        (uint8 feat, uint8 pos) = parseItemId(itemId);
-
-        require(feat != 0, 'P:F');
-
-        require(arr[feat] == pos, 'P:E');
-
-        arr[feat] = 0;
-
-        res = ShiftLib.setArray(state, 64, arr);
+    function swapIndexs(
+        uint256 state,
+        uint8 index1,
+        uint8 index2
+    ) internal pure returns (uint256 res) {
+        uint256 tmp = getIndex(state, index1);
+        res = setIndex(state, index1, getIndex(state, index2));
+        res = setIndex(state, index2, tmp);
     }
 
-    /// @notice swaps the default feauture x with the extra feature x
-    /// @dev either default or extra feature value can be empty (0)
-    /// @param state -> the uint256 proof state
-    /// @param feature -> the feature to switch items for
-    /// @return res -> the modifed uint256 proof state
-    function rotateDefaultandExtra(uint256 state, uint8 feature) internal pure returns (uint256 res) {
-        require(feature != 0, 'P:F');
+    function getIndex(uint256 state, uint8 index) internal pure returns (uint16 res) {
+        res = uint16(ShiftLib.get(state, 11, 3 + 11 * index));
+    }
 
-        uint8[] memory def = ShiftLib.getArray(state, 0);
-        uint8[] memory ext = ShiftLib.getArray(state, 64);
-
-        uint8 tmp = ext[feature];
-        ext[feature] = def[feature];
-        def[feature] = tmp;
-
-        res = ShiftLib.setArray(state, 0, def);
-        res = ShiftLib.setArray(res, 64, ext);
+    function setIndex(
+        uint256 state,
+        uint8 index,
+        uint256 id
+    ) internal pure returns (uint256 res) {
+        res = ShiftLib.set(state, 11, 3 + 11 * index, id);
     }
 
     /// @notice updates the x and y override arrays
@@ -115,30 +131,30 @@ library NuggftV1ProofType {
     /// @param xOverrides -> uint8 array of new x overrides
     /// @param yOverrides -> uint8 array of new x overrides
     /// @return res -> the modifed uint256 proof state
-    function setNewAnchorOverrides(
-        uint256 state,
-        uint8[] memory xOverrides,
-        uint8[] memory yOverrides
-    ) internal pure returns (uint256 res) {
-        res = ShiftLib.setArray(state, 128, xOverrides);
-        res = ShiftLib.setArray(res, 192, yOverrides);
-    }
+    // function setNewAnchorOverrides(
+    //     uint256 state,
+    //     uint8[] memory xOverrides,
+    //     uint8[] memory yOverrides
+    // ) internal pure returns (uint256 res) {
+    //     res = ShiftLib.setArray(state, 128, xOverrides);
+    //     res = ShiftLib.setArray(res, 192, yOverrides);
+    // }
 
     /// @notice clears the anchor overrides for a specific feature
     /// @dev this should be called each time an item is added or removed from a feature
     /// @param state -> the uint256 proof state
     /// @param feature -> the feature to switch items for
     /// @return res -> the modifed uint256 proof state
-    function clearAnchorOverridesForFeature(uint256 state, uint8 feature) internal pure returns (uint256 res) {
-        uint8[] memory x = ShiftLib.getArray(state, 128);
-        uint8[] memory y = ShiftLib.getArray(state, 192);
+    // function clearAnchorOverridesForFeature(uint256 state, uint8 feature) internal pure returns (uint256 res) {
+    //     uint8[] memory x = ShiftLib.getArray(state, 128);
+    //     uint8[] memory y = ShiftLib.getArray(state, 192);
 
-        y[feature] = 0;
-        x[feature] = 0;
+    //     y[feature] = 0;
+    //     x[feature] = 0;
 
-        res = ShiftLib.setArray(state, 128, x);
-        res = ShiftLib.setArray(res, 192, y);
-    }
+    //     res = ShiftLib.setArray(state, 128, x);
+    //     res = ShiftLib.setArray(res, 192, y);
+    // }
 
     /// @notice parses the external itemId into a feautre and position
     /// @dev this follows dotnugg v1 specification

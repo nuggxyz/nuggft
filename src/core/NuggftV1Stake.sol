@@ -105,7 +105,7 @@ abstract contract NuggftV1Stake is INuggftV1Stake, NuggftV1Proof {
 
         stake = cache;
 
-        emit StakeEth(value - protocolFee, protocolFee);
+        // emit StakeEth(value - protocolFee, protocolFee);
     }
 
     /// @notice handles isolated staking of eth
@@ -120,7 +120,7 @@ abstract contract NuggftV1Stake is INuggftV1Stake, NuggftV1Proof {
 
         stake = cache.staked(cache.staked() + eth - protocolFee).proto(cache.proto() + protocolFee);
 
-        emit StakeEth(eth - protocolFee, protocolFee);
+        // emit StakeEth(eth - protocolFee, protocolFee);
     }
 
     function calculateProtocolFeeOf(uint96 any) internal pure returns (uint96 res) {

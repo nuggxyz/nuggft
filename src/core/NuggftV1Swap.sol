@@ -61,17 +61,13 @@ abstract contract NuggftV1Swap is INuggftV1Swap, NuggftV1Stake {
             // the ability to accidently place an offer for nugg A and end up minting nugg B.
             assert(m.offerData == 0);
 
-            (uint256 data, ) = NuggftV1AgentType.newAgentType(m.activeEpoch, m.sender, msg.value.safe96(), false);
-
-            s.data = data;
+            (s.data, ) = NuggftV1AgentType.newAgentType(m.activeEpoch, m.sender, msg.value.safe96(), false);
 
             addStakedShareFromMsgValue();
 
             setProofFromEpoch(tokenId);
 
             emitTransferEvent(address(0), address(this), tokenId);
-
-            emit DelegateMint(tokenId, m.sender, msg.value.safe96());
         } else {
             require(m.swapData != 0, 'S:4');
 
@@ -84,18 +80,7 @@ abstract contract NuggftV1Swap is INuggftV1Swap, NuggftV1Stake {
             }
 
             // if the leader "owns" the swap, then it was initated by them - "commit" must be executed
-            if (m.swapData.isOwner()) {
-                require(msg.value >= ethPerShare(), 'S:5');
-
-                uint96 newAmount = commit(s, m);
-
-                emit DelegateCommit(tokenId, msg.sender, newAmount);
-            } else {
-                // default -
-                uint96 newAmount = offer(s, m);
-
-                emit DelegateOffer(tokenId, msg.sender, newAmount);
-            }
+            m.swapData.isOwner() ? commit(s, m) : offer(s, m);
         }
     }
 
@@ -119,15 +104,7 @@ abstract contract NuggftV1Swap is INuggftV1Swap, NuggftV1Stake {
             require(!m.offerData.isOwner(), 'NOPE'); // always be caught by the require above
         }
 
-        if (m.offerData == 0 && m.swapData.isOwner()) {
-            uint96 newAmount = commit(s, m);
-
-            emit DelegateCommitItem(sellerTokenId, itemId, buyerTokenId, newAmount);
-        } else {
-            uint96 newAmount = offer(s, m);
-
-            emit DelegateOfferItem(sellerTokenId, itemId, buyerTokenId, newAmount);
-        }
+        m.offerData == 0 && m.swapData.isOwner() ? commit(s, m) : offer(s, m);
     }
 
     /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -149,8 +126,6 @@ abstract contract NuggftV1Swap is INuggftV1Swap, NuggftV1Stake {
         } else {
             SafeTransferLib.safeTransferETH(sender, m.offerData.eth());
         }
-
-        emit SwapClaim(tokenId, sender, m.offerData.epoch());
     }
 
     /// @inheritdoc INuggftV1Swap
@@ -176,8 +151,6 @@ abstract contract NuggftV1Swap is INuggftV1Swap, NuggftV1Stake {
         } else {
             SafeTransferLib.safeTransferETH(_ownerOf(buyerTokenId), m.offerData.eth());
         }
-
-        emit SwapClaimItem(sellerTokenId, itemId, buyerTokenId, m.swapData.epoch());
     }
 
     /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -200,11 +173,7 @@ abstract contract NuggftV1Swap is INuggftV1Swap, NuggftV1Stake {
         require(m.swapData == 0, 'NOPE2');
 
         // no need to check dust as no value is being transfered
-        (uint256 dat, uint96 dust) = NuggftV1AgentType.newAgentType(0, sender, floor, true);
-
-        s.data = dat;
-
-        emit SwapStart(tokenId, sender, floor - dust);
+        (s.data, ) = NuggftV1AgentType.newAgentType(0, sender, floor, true);
     }
 
     /// @inheritdoc INuggftV1Swap
@@ -225,11 +194,7 @@ abstract contract NuggftV1Swap is INuggftV1Swap, NuggftV1Stake {
         // cannot sell two of the same item at same time
         require(m.swapData == 0, 'S:D');
 
-        (uint256 dat, uint96 dust) = NuggftV1AgentType.newAgentType(0, address(sellerTokenId), floor, true);
-
-        s.data = dat;
-
-        emit SwapItemStart(sellerTokenId, itemId, floor - dust);
+        (s.data, ) = NuggftV1AgentType.newAgentType(0, address(sellerTokenId), floor, true);
     }
 
     /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -283,6 +248,8 @@ abstract contract NuggftV1Swap is INuggftV1Swap, NuggftV1Stake {
        ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
 
     function commit(Storage storage s, Memory memory m) internal returns (uint96 newAmount) {
+        require(msg.value >= ethPerShare(), 'S:5');
+
         require(m.offerData == 0 && m.swapData != 0, 'NOPE3');
 
         require(m.swapData.isOwner(), 'NOPE4');

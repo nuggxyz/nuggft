@@ -69,6 +69,7 @@ export const NuggFatherFix: Fixture<NuggFatherFixture> = async function (
     await nuggft.connect(deployer).dotnuggV1StoreFiles(hre.dotnugg.itemsByFeatureByIdArray[4], 4);
     await nuggft.connect(deployer).dotnuggV1StoreFiles(hre.dotnugg.itemsByFeatureByIdArray[5], 5);
     await nuggft.connect(deployer).dotnuggV1StoreFiles(hre.dotnugg.itemsByFeatureByIdArray[6], 6);
+    await nuggft.connect(deployer).dotnuggV1StoreFiles(hre.dotnugg.itemsByFeatureByIdArray[7], 7);
 
     console.log(hre.dotnugg.itemsByFeatureByIdHex[2].length);
 

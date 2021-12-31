@@ -3,21 +3,6 @@
 pragma solidity 0.8.9;
 
 interface INuggftV1Swap {
-    /*━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-                                EVENTS
-    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━*/
-
-    event DelegateMint(uint256 epoch, address account, uint96 eth);
-    event DelegateCommit(uint160 tokenId, address account, uint96 eth);
-    event DelegateOffer(uint160 tokenId, address account, uint96 eth);
-    event SwapClaim(uint160 tokenId, address account, uint32 epoch);
-    event SwapStart(uint160 tokenId, address account, uint96 eth);
-
-    event DelegateCommitItem(uint160 sellerTokenId, uint16 itemId, uint160 buyerTokenId, uint96 eth);
-    event DelegateOfferItem(uint160 sellerTokenId, uint16 itemId, uint160 buyerTokenId, uint96 eth);
-    event SwapClaimItem(uint160 sellerTokenId, uint16 itemId, uint160 buyerTokenId, uint32 epoch);
-    event SwapItemStart(uint160 sellerTokenId, uint16 itemId, uint96 eth);
-
     /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
                             STATE CHANGING
        ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
