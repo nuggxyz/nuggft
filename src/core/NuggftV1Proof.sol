@@ -179,17 +179,27 @@ abstract contract NuggftV1Proof is INuggftV1Proof, NuggftV1Dotnugg {
         res |= ((1 << 8) | ((safeMod(ShiftLib.get(seed, 8, 8), _lengthOf(lengths, 1))) + 1)) << 3;
         res |= ((2 << 8) | ((safeMod(ShiftLib.get(seed, 8, 16), _lengthOf(lengths, 2))) + 1)) << (3 + 11);
 
-        uint256 sel = ShiftLib.get(seed, 8, 24);
+        uint256 selA = ShiftLib.get(seed, 8, 24);
 
-        uint256 val = ShiftLib.get(seed, 8, 32);
+        uint256 valA = ShiftLib.get(seed, 8, 32);
 
-        if (sel < 60) val = (3 << 8) | ((safeMod(val, _lengthOf(lengths, 3))) + 1);
-        else if (sel < 120) val = (4 << 8) | ((safeMod(val, _lengthOf(lengths, 4))) + 1);
-        else if (sel < 180) val = (5 << 8) | ((safeMod(val, _lengthOf(lengths, 5))) + 1);
-        else if (sel < 240) val = (6 << 8) | ((safeMod(val, _lengthOf(lengths, 6))) + 1);
-        else val = (7 << 8) | ((safeMod(val, _lengthOf(lengths, 7))) + 1);
+        uint256 selB = ShiftLib.get(seed, 8, 24);
 
-        res |= (val) << (3 + 11 * 2);
+        uint256 valB = ShiftLib.get(seed, 8, 40);
+
+        if (selA < 128) valA = (3 << 8) | ((safeMod(valA, _lengthOf(lengths, 3))) + 1);
+        else valA = (4 << 8) | ((safeMod(valA, _lengthOf(lengths, 4))) + 1);
+
+        res |= (valA) << (3 + 22);
+
+        if (selB < 30) valB = (5 << 8) | ((safeMod(valB, _lengthOf(lengths, 5))) + 1);
+        else if (selB < 55) valB = (6 << 8) | ((safeMod(valB, _lengthOf(lengths, 6))) + 1);
+        else if (selB < 75) valB = (7 << 8) | ((safeMod(valB, _lengthOf(lengths, 7))) + 1);
+        else {
+            return res;
+        }
+
+        res |= (valB) << (3 + 33);
     }
 
     function safeMod(uint256 value, uint8 modder) internal pure returns (uint256) {
