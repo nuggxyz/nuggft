@@ -7,9 +7,9 @@ interface INuggftV1Loan {
                                 EVENTS
     ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━*/
 
-    event TakeLoan(uint160 tokenId, uint96 principal);
-    event Payoff(uint160 tokenId, address account, uint96 payoffAmount);
-    event Rebalance(uint160 tokenId, uint96 fee, uint96 earned);
+    // event TakeLoan(uint160 tokenId, uint96 principal);
+    // event Payoff(uint160 tokenId, address account, uint96 payoffAmount);
+    // event Rebalance(uint160 tokenId, uint96 fee, uint96 earned);
 
     /*━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
                             STATE CHANGING
