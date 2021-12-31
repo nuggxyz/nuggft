@@ -116,6 +116,11 @@ abstract contract NuggftV1Token is INuggftV1Token, NuggftV1Epoch {
         return _isOperatorFor(operator, _ownerOf(tokenId));
     }
 
+    function ensureOperatorForOwner(address operator, uint160 tokenId) internal view returns (address owner) {
+        owner = _ownerOf(tokenId);
+        require(_isOperatorFor(operator, owner), 'P:B');
+    }
+
     function _getApproved(uint160 tokenId) internal view returns (address) {
         require(exists(tokenId), 'T:9:1');
         return approvals[tokenId];

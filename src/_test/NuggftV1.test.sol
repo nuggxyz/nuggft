@@ -152,35 +152,6 @@ contract NuggftV1Test is t {
         assertEq(str.after_staked - str.before_staked, change, 'nuggft balance did not change');
     }
 
-    // function nuggft_call(User user, bytes memory args) public payable {
-    //     nuggft_call(user, args, 0);
-    // }
-
-    // function nuggft_call(
-    //     User user,
-    //     bytes memory args,
-    //     uint96 eth
-    // ) public payable {
-    //     user.call(address(nuggft), args, eth);
-    // }
-
-    // function nuggft_revertCall(
-    //     string memory message,
-    //     User user,
-    //     bytes memory args
-    // ) public payable {
-    //     nuggft_revertCall(message, user, args, 0);
-    // }
-
-    // function nuggft_revertCall(
-    //     string memory message,
-    //     User user,
-    //     bytes memory args,
-    //     uint96 eth
-    // ) public payable {
-    //     user.revertCall{value: eth}(address(nuggft), message, args);
-    // }
-
     /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
                                 encodeWithSelector
        ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
@@ -237,8 +208,12 @@ contract NuggftV1Test is t {
         return abi.encodeWithSelector(nuggft.claimItem.selector, buyerTokenId, sellerTokenId, itemId);
     }
 
-    function rotateFeature(uint256 tokenId, uint256 feature) public view returns (bytes memory res) {
-        return abi.encodeWithSelector(nuggft.rotateFeature.selector, tokenId, feature);
+    function rotate(
+        uint256 tokenId,
+        uint8 index0,
+        uint8 index1
+    ) public view returns (bytes memory res) {
+        return abi.encodeWithSelector(nuggft.rotate.selector, tokenId, index0, index1);
     }
 
     function burn(uint256 tokenId) public view returns (bytes memory res) {
@@ -373,12 +348,12 @@ contract NuggftV1Test is t {
     {
         (tokenId) = scenario_dee_has_a_token();
 
-        (, uint8[] memory items, , , ) = nuggft.parsedProofOf(tokenId);
+        (, uint8[] memory items, , ) = nuggft.proofToDotnuggMetadata(tokenId);
 
         feature = 1;
         itemId = items[feature] | (uint16(feature) << 8);
 
-        _nuggft.shouldPass(dee, rotateFeature(tokenId, feature));
+        // _nuggft.shouldPass(dee, rotate(tokenId, feature));
     }
 
     function scenario_dee_has_swapped_an_item()

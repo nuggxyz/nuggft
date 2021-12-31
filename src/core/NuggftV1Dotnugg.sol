@@ -31,9 +31,6 @@ abstract contract NuggftV1Dotnugg is INuggftV1Dotnugg, NuggftV1Token, Trust {
     /// @inheritdoc IDotnuggV1ImplementerMetadata
     uint8 public override dotnuggV1DefaultZoom = 10;
 
-    mapping(uint8 => uint168[]) sstore2Pointers;
-    // Mapping from token ID to owner address
-
     mapping(uint256 => address) resolvers;
 
     uint256 internal featureLengths;
@@ -49,11 +46,17 @@ abstract contract NuggftV1Dotnugg is INuggftV1Dotnugg, NuggftV1Token, Trust {
 
         uint256 cache = featureLengths;
 
-        uint8[] memory lengths = ShiftLib.getArray(cache, 0);
+        uint256 newLen = _lengthOf(cache, feature) + len;
 
-        lengths[feature] += len;
+        featureLengths = ShiftLib.set(cache, 8, feature * 8, newLen);
+    }
 
-        featureLengths = ShiftLib.setArray(cache, 0, lengths);
+    function lengthOf(uint8 feature) external view returns (uint8) {
+        return _lengthOf(featureLengths, feature);
+    }
+
+    function _lengthOf(uint256 cache, uint8 feature) internal pure returns (uint8) {
+        return uint8(ShiftLib.get(cache, 8, feature * 8));
     }
 
     /// @inheritdoc IDotnuggV1ImplementerMetadata

@@ -4,25 +4,20 @@ pragma solidity 0.8.9;
 
 interface INuggftV1Proof {
     /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-                                  EVENTS
-       ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
-
-    event SetProof(uint160 tokenId, uint256 proof, uint8[] items);
-    event PopItem(uint160 tokenId, uint256 proof, uint16 itemId);
-    event PushItem(uint160 tokenId, uint256 proof, uint16 itemId);
-    event RotateItem(uint160 tokenId, uint256 proof, uint8 feature);
-    event SetAnchorOverrides(uint160 tokenId, uint256 proof, uint8[] xs, uint8[] ys);
-
-    /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
                              STATE CHANGING
        ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
 
-    function rotateFeature(uint160 tokenId, uint8 feature) external;
-
-    function setOverrides(
+    function rotate(
         uint160 tokenId,
-        uint8[] memory xs,
-        uint8[] memory ys
+        uint8 index0,
+        uint8 index1
+    ) external;
+
+    function anchor(
+        uint160 tokenId,
+        uint16 itemId,
+        uint256 x,
+        uint256 y
     ) external;
 
     /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -31,13 +26,12 @@ interface INuggftV1Proof {
 
     function proofOf(uint160 tokenId) external view returns (uint256);
 
-    function parsedProofOf(uint160 tokenId)
+    function proofToDotnuggMetadata(uint160 tokenId)
         external
         view
         returns (
             uint256 proof,
             uint8[] memory defaultIds,
-            uint8[] memory extraIds,
             uint8[] memory overxs,
             uint8[] memory overys
         );

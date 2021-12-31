@@ -81,7 +81,7 @@ contract NuggftV1 is IERC721Metadata, NuggftV1Loan {
 
     /// @inheritdoc IDotnuggV1Implementer
     function dotnuggV1Callback(uint256 tokenId) public view override returns (IDotnuggV1Metadata.Memory memory data) {
-        (uint256 proof, uint8[] memory ids, uint8[] memory extras, uint8[] memory xovers, uint8[] memory yovers) = parsedProofOf(
+        (uint256 proof, uint8[] memory ids, uint8[] memory xovers, uint8[] memory yovers) = proofToDotnuggMetadata(
             tokenId.safe160()
         );
 
@@ -104,9 +104,8 @@ contract NuggftV1 is IERC721Metadata, NuggftV1Loan {
             // code that throws error: owner: proof != 0 ? _ownerOf(tokenId.safe160()) : address(0),
             owner: owners[tokenId], // fix
             tokenId: tokenId,
-            proof: proof,
+            data: abi.encode(proof),
             ids: ids,
-            extras: extras,
             xovers: xovers,
             yovers: yovers,
             labels: labels
@@ -202,6 +201,6 @@ contract NuggftV1 is IERC721Metadata, NuggftV1Loan {
 
         stake = cache;
 
-        emit UnstakeEth(ethOwed, msg.sender);
+        // emit UnstakeEth(ethOwed, msg.sender);
     }
 }

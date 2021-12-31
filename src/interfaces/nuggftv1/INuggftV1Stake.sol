@@ -7,8 +7,6 @@ interface INuggftV1Stake {
                                 EVENTS
        ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
 
-    event StakeEth(uint96 stake, uint96 protocol);
-    event UnstakeEth(uint96 stake, address to);
     event ProtocolEthExtracted(uint96 eth);
     event MigratorV1Updated(address migrator);
     event MigrateV1Sent(address v2, uint160 tokenId, uint256 proof, address owner, uint96 eth);

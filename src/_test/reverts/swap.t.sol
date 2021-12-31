@@ -35,7 +35,7 @@ contract revertTest__swap is NuggftV1Test {
        ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
 
     function test__revert__swap__S_0__successAsSelf() public {
-        console.log(block.number, uint256(blockhash(block.number - 2)), block.chainid);
+        // console.log(block.number, uint256(blockhash(block.number - 2)), block.chainid);
         _nuggft.shouldPass(frank, delegate(address(frank), epoch), 30 * 10**16);
     }
 

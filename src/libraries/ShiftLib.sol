@@ -51,25 +51,25 @@ library ShiftLib {
                                 ARRAYS
     ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━*/
 
-    function getArray(uint256 store, uint8 pos) internal pure returns (uint8[] memory arr) {
-        store = get(store, 64, pos);
+    // function getArray(uint256 store, uint8 pos) internal pure returns (uint8[] memory arr) {
+    //     store = get(store, 64, pos);
 
-        arr = new uint8[](8);
-        for (uint256 i = 0; i < 8; i++) {
-            arr[i] = uint8(store & 0xff);
-            store >>= 8;
-        }
-    }
+    //     arr = new uint8[](8);
+    //     for (uint256 i = 0; i < 8; i++) {
+    //         arr[i] = uint8(store & 0xff);
+    //         store >>= 8;
+    //     }
+    // }
 
-    function setArray(
-        uint256 store,
-        uint8 pos,
-        uint8[] memory arr
-    ) internal pure returns (uint256 res) {
-        for (uint256 i = 8; i > 0; i--) {
-            res |= uint256(arr[i - 1]) << ((8 * (i - 1)));
-        }
+    // function setArray(
+    //     uint256 store,
+    //     uint8 pos,
+    //     uint8[] memory arr
+    // ) internal pure returns (uint256 res) {
+    //     for (uint256 i = 8; i > 0; i--) {
+    //         res |= uint256(arr[i - 1]) << ((8 * (i - 1)));
+    //     }
 
-        res = set(store, 64, pos, res);
-    }
+    //     res = set(store, 64, pos, res);
+    // }
 }

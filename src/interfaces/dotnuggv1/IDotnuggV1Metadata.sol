@@ -10,11 +10,10 @@ interface IDotnuggV1Metadata {
         string desc;
         address owner;
         uint256 tokenId;
-        uint256 proof;
         uint8[] ids;
-        uint8[] extras;
         uint8[] xovers;
         uint8[] yovers;
         string[] labels;
+        bytes data;
     }
 }

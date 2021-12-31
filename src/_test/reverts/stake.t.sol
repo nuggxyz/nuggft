@@ -32,7 +32,7 @@ contract revertTest__stake is NuggftV1Test {
     }
 
     function test__revert__stake__T_1__fail_fromZero() public {
-        console.logb(34);
+        // console.logb(34);
         _nuggft.shouldPass(frank, mint((2099)), 30 * 10**18);
 
         _nuggft.shouldFail('T:1', dennis, mint(2909));
