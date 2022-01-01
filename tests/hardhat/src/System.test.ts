@@ -38,7 +38,14 @@ describe('uint tests', async function () {
 
             const check = await fix.nuggft.proofToDotnuggMetadata(await fix.nuggft.epoch());
             console.log({ check });
+            let tmp = 1;
+            for (let i = 0; i < 8; i++) {
+                let lep = await fix.nuggft.lengthOf(i);
+                tmp *= lep;
+                console.log(i, lep, tmp);
+            }
 
+            console.log(tmp);
             const token1 = await fix.nuggft.epoch();
 
             await fix.nuggft.connect(accounts.mac).delegate(accounts.mac.address, token1, { value: toEth('0.040') });
@@ -226,7 +233,10 @@ describe('uint tests', async function () {
 
             const a = await fix.nuggft.connect(accounts.charile).proofOf(token1);
 
+            const b = await fix.nuggft.connect(accounts.charile).minSharePrice();
+
             console.log(a);
+            console.log(b);
 
             await fix.nuggft.connect(accounts.charile).migrate(token1);
 

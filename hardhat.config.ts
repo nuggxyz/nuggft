@@ -19,6 +19,7 @@ import '../dotnugg-hardhat/src';
 import './tasks/nuggft/delegate';
 import './tasks/nuggft/claim';
 import './tasks/nuggft/rawProcessUri';
+import './tasks/nuggft/minSharePrice';
 
 import { resolve } from 'path';
 
