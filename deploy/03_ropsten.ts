@@ -114,7 +114,7 @@ const deployment = async (hre: HardhatRuntimeEnvironment) => {
     //         gasLimit: 1000000,
     //     }),
     // );
-    for (let i = 3; i < 10; i++) {
+    for (let i = 32; i < 42; i++) {
         await Promise.all([
             sendTx(
                 nuggft.connect(await hre.ethers.getNamedSigner('dee')).mint(i + 600, {
