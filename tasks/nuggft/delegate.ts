@@ -1,6 +1,11 @@
+import { ethers } from 'ethers';
 import { task } from 'hardhat/config';
 
 import { TaskHelper } from '..';
+import { toGwei } from '../../tests/hardhat/lib/shared/conversion';
+import { NuggftV1TrustedMinter, NuggftV1TrustedMinter__factory } from '../../typechain';
+import { NuggftV1Minter__factory } from '../../typechain/factories/NuggftV1Minter__factory';
+import { NuggftV1Minter } from '../../typechain/NuggftV1Minter';
 
 // import { NuggftV1 } from '../../typechain';
 
@@ -47,21 +52,55 @@ task('delegate', 'delegates .69 eth to current epoch from dee', async (args, hre
 });
 
 task('trustedmint', '')
-    .addParam('tokenid', '')
+    .addParam('start', '')
+    .addParam('amount', '')
+
     .setAction(async (args, hre) => {
         //@ts-ignore
-
         await TaskHelper.init(hre);
+        const tm = new ethers.Contract(
+            '0xA922ab269B4575736FCEb46b10c12c7FC8Fd9173',
+            NuggftV1TrustedMinter__factory.abi,
+            TaskHelper.namedSigners['deployer'],
+        ) as NuggftV1TrustedMinter;
 
-        for (let i = 0; i < 32; i++) {
-            await TaskHelper.send(
-                'trustedMint',
-                TaskHelper.nuggft
-                    .connect(TaskHelper.signer('deployer'))
-                    .trustedMint(+args.tokenid + i, '0x4E503501C5DEDCF0607D1E1272Bb4b3c1204CC71', {
-                        value: await TaskHelper.nuggft.minSharePrice(),
-                        gasLimit: 85000,
-                    }),
-            );
-        }
+        // await TaskHelper.send('approval', TaskHelper.nuggft.connect(TaskHelper.namedSigners['deployer']).setIsTrusted(tm.address, true));
+
+        // for (let i = 0; i < 200; i++) {
+        await TaskHelper.send(
+            'trustedMint',
+            tm.mintem(TaskHelper.nuggft.address, '0x4e503501c5dedcf0607d1e1272bb4b3c1204cc71', args.start, args.amount, {
+                // value: toEth('0.'),
+                gasLimit: 8000000,
+                gasPrice: toGwei('4'),
+            }),
+        );
+        // }
+    });
+
+task('mintandswap', '')
+    .addParam('start', '')
+    .addParam('amount', '')
+
+    .setAction(async (args, hre) => {
+        //@ts-ignore
+        await TaskHelper.init(hre);
+        const tm = new ethers.Contract(
+            '0xE97b42Fb6753a806DeDc318e56fCb076d0676793',
+            NuggftV1Minter__factory.abi,
+            TaskHelper.namedSigners['deployer'],
+        ) as NuggftV1Minter;
+
+        // await TaskHelper.send('approval', TaskHelper.nuggft.connect(TaskHelper.namedSigners['deployer']).setIsTrusted(tm.address, true));
+
+        // for (let i = 0; i < 200; i++) {
+        await TaskHelper.send(
+            'trustedMint',
+            tm.mintem(TaskHelper.nuggft.address, args.start, args.amount, {
+                // value: toEth('0.25'),
+                gasLimit: 8000000,
+                gasPrice: toGwei('4'),
+            }),
+        );
+        // }
     });

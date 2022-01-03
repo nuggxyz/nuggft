@@ -3,10 +3,11 @@ import { BigNumber, ethers } from 'ethers';
 import { HardhatRuntimeEnvironment } from 'hardhat/types';
 
 import { fromEth } from '../tests/hardhat/lib/shared/conversion';
-import { NuggftV1 } from '../typechain';
+import { IDotnuggV1, IDotnuggV1__factory, NuggftV1 } from '../typechain';
 
 export class TaskHelper {
     static nuggft: NuggftV1;
+    static dotnugg: IDotnuggV1;
 
     private static hre: HardhatRuntimeEnvironment;
     public static reversedNamedAccounts: Dictionary<string> = {};
@@ -25,6 +26,8 @@ export class TaskHelper {
         Object.entries(this.namedSigners).forEach(([k, v]) => {
             this.reversedNamedAccounts[v.address] = k;
         });
+
+        this.dotnugg = await hre.ethers.getContractAt<IDotnuggV1>(IDotnuggV1__factory.abi, await this.nuggft.dotnuggV1Processor());
     }
 
     static signer(name: string): SignerWithAddress {

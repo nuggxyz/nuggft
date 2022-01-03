@@ -56,7 +56,13 @@ describe('uint tests', async function () {
             let lastShare = BigNumber.from(0);
 
             for (let i = 2000; i < 2010; i++) {
-                await fix.nuggft.connect(accounts.dennis).mint(i, { value: await fix.nuggft.minSharePrice() });
+                await fix.nuggft.connect(accounts.dennis).mint(i, {
+                    value: await fix.nuggft.minSharePrice(),
+                    gasLimit: '89000',
+                    accessList: {
+                        [`${fix.nuggft.address}`]: ['0x000000000000000000000000000000000000000000000000000000000000000a'],
+                    },
+                });
                 let working = await fix.nuggft.connect(accounts.frank).minSharePrice();
                 let workingShare = await fix.nuggft.connect(accounts.frank).ethPerShare();
 
