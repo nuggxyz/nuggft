@@ -11,6 +11,7 @@ import {SafeCastLib} from '../libraries/SafeCastLib.sol';
 import {SafeTransferLib} from '../libraries/SafeTransferLib.sol';
 
 import {NuggftV1StakeType} from '../types/NuggftV1StakeType.sol';
+import '../_test/utils/console.sol';
 
 abstract contract NuggftV1Stake is INuggftV1Stake, NuggftV1Proof {
     using SafeCastLib for uint256;
@@ -86,6 +87,14 @@ abstract contract NuggftV1Stake is INuggftV1Stake, NuggftV1Proof {
     /// @dev this is the only way to add shares - the logic here ensures that "ethPerShare" can never decrease
     function addStakedShareFromMsgValue() internal {
         uint96 value = msg.value.safe96();
+
+        // bytes32 val;
+
+        // assembly {
+        //     val := stake.slot
+        // }
+
+        // console.logBytes32(val);
 
         uint256 cache = stake;
 
