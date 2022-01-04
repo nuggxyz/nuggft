@@ -132,7 +132,9 @@ abstract contract NuggftV1Loan is INuggftV1Loan, NuggftV1Swap {
 
         uint96 activeEps = ethPerShare();
 
-        toRebalance = ((curr * REBALANCE_FEE_BPS) / 10000);
+        assembly {
+            toRebalance := div(mul(curr, REBALANCE_FEE_BPS), 10000)
+        }
 
         toPayoff = curr + toRebalance;
 

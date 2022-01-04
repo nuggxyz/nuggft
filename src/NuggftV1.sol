@@ -123,17 +123,17 @@ contract NuggftV1 is IERC721Metadata, NuggftV1Loan {
         _mintTo(to, tokenId);
     }
 
-    modifier haha() {
-        uint256 price = gasleft();
+    // modifier haha() {
+    //     uint256 price = gasleft();
 
-        _;
-        uint256 price2 = gasleft();
-        // console.log(price, price2, price - price2);
-        assert(price < 90000 && price - price2 < 58000);
-    }
+    //     _;
+    //     uint256 price2 = gasleft();
+    //     // console.log(price, price2, price - price2);
+    //     assert(price < 90000 && price - price2 < 58000);
+    // }
 
     /// @inheritdoc INuggftV1Token
-    function mint(uint160 tokenId) public payable override haha {
+    function mint(uint160 tokenId) public payable override {
         // uint256 price = gasleft();
         // console.log(price);
 
