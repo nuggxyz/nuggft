@@ -132,8 +132,12 @@ abstract contract NuggftV1Stake is INuggftV1Stake, NuggftV1Proof {
         // emit StakeEth(eth - protocolFee, protocolFee);
     }
 
-    function calculateProtocolFeeOf(uint96 any) internal pure returns (uint96 res) {
-        res = (any * PROTOCOL_FEE_BPS) / 10000;
+    function calculateProtocolFeeOf(uint256 any) internal pure returns (uint96 res) {
+        // res = (any * PROTOCOL_FEE_BPS) / 10000;
+
+        assembly {
+            res := div(mul(any, PROTOCOL_FEE_BPS), 10000)
+        }
     }
 
     // @test manual
@@ -151,13 +155,25 @@ abstract contract NuggftV1Stake is INuggftV1Stake, NuggftV1Proof {
 
         protocolFee = calculateProtocolFeeOf(eps);
 
-        premium = ((eps * cache.shares()) / 10000);
+        premium = cache.shares();
+
+        assembly {
+            premium := div(mul(eps, premium), 10000)
+        }
+
+        // premium = ((eps * cache.shares()) / 10000);
 
         total = eps + protocolFee + premium;
     }
 
     // @test manual
     function calculateEthPerShare(uint256 cache) internal pure returns (uint96 res) {
-        res = cache.shares() == 0 ? 0 : cache.staked() / cache.shares();
+        res = cache.shares();
+        if (res == 0) return 0;
+        cache = cache.staked();
+        assembly {
+            res := div(cache, res)
+        }
+        // res = cache.shares() == 0 ? 0 : cache.staked() / cache.shares();
     }
 }

@@ -21,11 +21,24 @@ abstract contract NuggftV1Epoch is INuggftV1Epoch {
     }
 
     function toStartBlock(uint32 _epoch) internal view returns (uint256 res) {
-        res = ((_epoch - OFFSET) * INTERVAL) + genesis;
+        // res = ((_epoch - OFFSET) * INTERVAL) + genesis;
+
+        res = _epoch - OFFSET;
+
+        unchecked {
+            res *= INTERVAL;
+            res += genesis;
+        }
     }
 
     function toEpoch(uint256 blocknum) internal view returns (uint32 res) {
-        res = (uint32(blocknum - genesis) / INTERVAL) + OFFSET;
+        unchecked {
+            blocknum -= genesis;
+        }
+        assembly {
+            res := add(div(blocknum, INTERVAL), OFFSET)
+        }
+        // res = (uint32(blocknum - genesis) / INTERVAL) + OFFSET;
     }
 
     function toEndBlock(uint32 _epoch) internal view returns (uint256 res) {
