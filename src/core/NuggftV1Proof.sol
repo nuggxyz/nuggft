@@ -18,14 +18,8 @@ abstract contract NuggftV1Proof is INuggftV1Proof, NuggftV1Dotnugg {
     /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
                                 state
        ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
-    struct Settings {
-        mapping(uint256 => uint256) anchorOverrides;
-        // uint8 displayLen; // default 4
-    }
 
     mapping(uint160 => uint256) proofs;
-
-    mapping(uint160 => Settings) settings;
 
     /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
                            external functions
@@ -44,20 +38,6 @@ abstract contract NuggftV1Proof is INuggftV1Proof, NuggftV1Dotnugg {
         working = NuggftV1ProofType.swapIndexs(working, index0, index1);
 
         proofs[tokenId] = working;
-    }
-
-    /// @inheritdoc INuggftV1Proof
-    function anchor(
-        uint160 tokenId,
-        uint16 itemId,
-        uint256 x,
-        uint256 y
-    ) external override {
-        require(x < 64 && y < 64, 'UNTEESTED:1');
-
-        ensureOperatorForOwner(msg.sender, tokenId);
-
-        settings[tokenId].anchorOverrides[itemId] = x | (y << 6);
     }
 
     /// @inheritdoc INuggftV1Proof
@@ -80,7 +60,9 @@ abstract contract NuggftV1Proof is INuggftV1Proof, NuggftV1Dotnugg {
             uint256 proof,
             uint8[] memory defaultIds,
             uint8[] memory overxs,
-            uint8[] memory overys
+            uint8[] memory overys,
+            string[] memory styles,
+            string memory background
         )
     {
         proof = proofOf(tokenId);
@@ -93,8 +75,9 @@ abstract contract NuggftV1Proof is INuggftV1Proof, NuggftV1Dotnugg {
         defaultIds = new uint8[](8);
         overxs = new uint8[](8);
         overys = new uint8[](8);
+        styles = new string[](8);
 
-        defaultIds[0] = uint8(proof & ShiftLib.mask(3));
+        // defaultIds[0] = uint8(proof & ShiftLib.mask(3));
 
         for (uint8 i = 0; i < 7; i++) {
             uint16 item = NuggftV1ProofType.getIndex(proof, i);
@@ -107,10 +90,13 @@ abstract contract NuggftV1Proof is INuggftV1Proof, NuggftV1Dotnugg {
                 uint256 overrides = settings[tokenId].anchorOverrides[item];
                 overys[feature] = uint8(overrides >> 6);
                 overxs[feature] = uint8(overrides & ShiftLib.mask(6));
+                styles[feature] = settings[tokenId].styles[item];
 
                 defaultIds[feature] = pos;
             }
         }
+
+        background = settings[tokenId].background;
     }
 
     /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━

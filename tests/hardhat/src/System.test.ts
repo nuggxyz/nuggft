@@ -36,8 +36,8 @@ describe('uint tests', async function () {
 
             // const check = await fix.processor.dotnuggToRaw(fix.nuggft.address, await fix.nuggft.epoch(), zeroAddress(), 10, 45);
 
-            const check = await fix.nuggft.proofToDotnuggMetadata(await fix.nuggft.epoch());
-            console.log({ check });
+            const proof = await fix.nuggft.proofToDotnuggMetadata(await fix.nuggft.epoch());
+            console.log({ proof });
             let tmp = 1;
             for (let i = 0; i < 8; i++) {
                 let lep = await fix.nuggft.lengthOf(i);
@@ -186,7 +186,7 @@ describe('uint tests', async function () {
 
             // console.log(check1, check2, check1.eq(check2));
 
-            console.log(await fix.processor.dotnuggToRaw(fix.nuggft.address, token1, Address.zero().toString(), 45, 10));
+            console.log(await fix.processor.dotnuggToRaw(fix.nuggft.address, token1, Address.zero().toString(), '0x00'));
 
             await fix.nuggft.connect(accounts.charile).loan(token1);
 

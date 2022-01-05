@@ -6,6 +6,8 @@ import {DSTestPlus as t} from './utils/DSTestPlus.sol';
 
 import './utils/User.sol';
 
+import {IDotnuggV1Metadata} from '../interfaces/dotnuggv1/IDotnuggV1Metadata.sol';
+
 import {MockDotnuggV1} from './mock/MockDotnuggV1.sol';
 
 import {MockNuggftV1Migrator} from './mock/MockNuggftV1Migrator.sol';
@@ -348,10 +350,26 @@ contract NuggftV1Test is t {
     {
         (tokenId) = scenario_dee_has_a_token();
 
-        (, uint8[] memory items, , ) = nuggft.proofToDotnuggMetadata(tokenId);
+        IDotnuggV1Metadata.Memory memory m = nuggft.dotnuggV1ImplementerCallback(
+            tokenId
+            // IDotnuggV1Metadata.Memory({
+            //     implementer: _nuggft,
+            //     artifactId: tokenId,
+            //     ids: new uint8[](8),
+            //     xovers: new uint8[](8),
+            //     yovers: new uint8[](8),
+            //     version: 1,
+            //     labels: new string[](8),
+            //     jsonKeys: new string[](8),
+            //     jsonValues: new string[](8),
+            //     styles: new string[](8),
+            //     background: '',
+            //     data: ''
+            // })
+        );
 
         feature = 1;
-        itemId = items[feature] | (uint16(feature) << 8);
+        itemId = m.ids[feature] | (uint16(feature) << 8);
 
         // _nuggft.shouldPass(dee, rotate(tokenId, feature));
     }

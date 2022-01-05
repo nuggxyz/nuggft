@@ -225,7 +225,7 @@ abstract contract NuggftV1Swap is INuggftV1Swap, NuggftV1Stake {
                 return (false, 0, 0);
             }
         } else {
-            if (m.offerData.isOwner()) canDelegate = false;
+            if (m.offerData.isOwner() && m.swapData.isOwner()) canDelegate = false;
 
             senderCurrentOffer = m.offerData.eth();
 

@@ -3,7 +3,6 @@
 pragma solidity 0.8.9;
 
 import {IERC721, IERC165, IERC721Metadata} from './interfaces/IERC721.sol';
-import './_test/utils/console.sol';
 
 import {NuggftV1Loan} from './core/NuggftV1Loan.sol';
 import {NuggftV1Dotnugg} from './core/NuggftV1Dotnugg.sol';
@@ -12,7 +11,6 @@ import {Trust} from './core/Trust.sol';
 import {INuggftV1Migrator} from './interfaces/nuggftv1/INuggftV1Migrator.sol';
 import {IDotnuggV1Metadata} from './interfaces/dotnuggv1/IDotnuggV1Metadata.sol';
 import {IDotnuggV1Implementer} from './interfaces/dotnuggv1/IDotnuggV1Implementer.sol';
-import {IDotnuggV1ImplementerMetadata} from './interfaces/dotnuggv1/IDotnuggV1ImplementerMetadata.sol';
 import {IDotnuggV1} from './interfaces/dotnuggv1/IDotnuggV1.sol';
 
 import {INuggftV1Token} from './interfaces/nuggftv1/INuggftV1Token.sol';
@@ -22,8 +20,10 @@ import {INuggftV1} from './interfaces/nuggftv1/INuggftV1.sol';
 
 import {SafeTransferLib} from './libraries/SafeTransferLib.sol';
 import {SafeCastLib} from './libraries/SafeCastLib.sol';
+import {ShiftLib} from './libraries/ShiftLib.sol';
 
 import {NuggftV1StakeType} from './types/NuggftV1StakeType.sol';
+import {NuggftV1ProofType} from './types/NuggftV1ProofType.sol';
 
 /// @title NuggFT V1
 /// @author nugg.xyz - danny7even & dub6ix
@@ -47,7 +47,6 @@ contract NuggftV1 is IERC721Metadata, NuggftV1Loan {
     function supportsInterface(bytes4 interfaceId) public view virtual override returns (bool) {
         return
             interfaceId == type(IDotnuggV1Implementer).interfaceId ||
-            interfaceId == type(IDotnuggV1ImplementerMetadata).interfaceId ||
             interfaceId == type(IERC721).interfaceId ||
             interfaceId == type(IERC721Metadata).interfaceId ||
             interfaceId == type(IERC165).interfaceId;
@@ -65,49 +64,37 @@ contract NuggftV1 is IERC721Metadata, NuggftV1Loan {
     function tokenURI(uint256 tokenId) public view virtual override returns (string memory res) {
         uint160 safeTokenId = tokenId.safe160();
 
-        address resolver = hasResolver(safeTokenId) ? dotnuggV1ResolverOf(safeTokenId) : dotnuggV1Processor;
+        address resolver = hasResolver(safeTokenId) ? dotnuggV1ResolverOf(safeTokenId) : address(0);
 
-        (, res) = IDotnuggV1(dotnuggV1Processor).dotnuggToUri(
-            address(this),
-            tokenId,
-            resolver,
-            dotnuggV1DefaultWidth,
-            dotnuggV1DefaultZoom
-        );
+        res = IDotnuggV1(dotnuggV1).dotnuggToSvg(address(this), tokenId, resolver, 10, true, false, true, false, '');
     }
 
     /*━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
                                 CORE
     ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━*/
 
-    /// @inheritdoc IDotnuggV1Implementer
-    function dotnuggV1Callback(uint256 tokenId) public view override returns (IDotnuggV1Metadata.Memory memory data) {
-        (uint256 proof, uint8[] memory ids, uint8[] memory xovers, uint8[] memory yovers) = proofToDotnuggMetadata(tokenId.safe160());
+    function dotnuggV1ImplementerCallback(uint256 tokenId) public view override returns (IDotnuggV1Metadata.Memory memory data) {
+        (
+            ,
+            data.ids, //
+            data.xovers,
+            data.yovers,
+            data.styles,
+            data.background
+        ) = proofToDotnuggMetadata(tokenId.safe160());
 
-        string[] memory labels = new string[](8);
+        data.labels = new string[](8);
 
-        labels[0] = 'BASE';
-        labels[1] = 'EYES';
-        labels[2] = 'MOUTH';
-        labels[3] = 'HAIR';
-        labels[4] = 'HAT';
-        labels[5] = 'BACK';
-        labels[6] = 'NECK';
-        labels[7] = 'HOLD';
+        data.labels[0] = 'BASE';
+        data.labels[1] = 'EYES';
+        data.labels[2] = 'MOUTH';
+        data.labels[3] = 'HAIR';
+        data.labels[4] = 'HAT';
+        data.labels[5] = 'BACK';
+        data.labels[6] = 'NECK';
+        data.labels[7] = 'HOLD';
 
-        data = IDotnuggV1Metadata.Memory({
-            version: 1,
-            renderedAt: block.timestamp,
-            name: 'NuggFT V1',
-            desc: 'Nugg Fungible Token V1',
-            owner: owners[tokenId], // fix
-            tokenId: tokenId,
-            data: abi.encode(proof),
-            ids: ids,
-            xovers: xovers,
-            yovers: yovers,
-            labels: labels
-        });
+        return data;
     }
 
     /// @inheritdoc INuggftV1Token

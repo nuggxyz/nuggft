@@ -27,7 +27,7 @@ export class TaskHelper {
             this.reversedNamedAccounts[v.address] = k;
         });
 
-        this.dotnugg = await hre.ethers.getContractAt<IDotnuggV1>(IDotnuggV1__factory.abi, await this.nuggft.dotnuggV1Processor());
+        this.dotnugg = await hre.ethers.getContractAt<IDotnuggV1>(IDotnuggV1__factory.abi, await this.nuggft.dotnuggV1());
     }
 
     static signer(name: string): SignerWithAddress {

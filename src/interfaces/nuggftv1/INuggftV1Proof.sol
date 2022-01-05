@@ -13,13 +13,6 @@ interface INuggftV1Proof {
         uint8 index1
     ) external;
 
-    function anchor(
-        uint160 tokenId,
-        uint16 itemId,
-        uint256 x,
-        uint256 y
-    ) external;
-
     /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
                                VIEW FUNCTIONS
        ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
@@ -33,6 +26,8 @@ interface INuggftV1Proof {
             uint256 proof,
             uint8[] memory defaultIds,
             uint8[] memory overxs,
-            uint8[] memory overys
+            uint8[] memory overys,
+            string[] memory styles,
+            string memory background
         );
 }
