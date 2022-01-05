@@ -5,15 +5,14 @@ pragma solidity 0.8.9;
 import '../../interfaces/dotnuggv1/IDotnuggV1.sol';
 import '../../interfaces/dotnuggv1/IDotnuggV1Metadata.sol';
 import '../../interfaces/dotnuggv1/IDotnuggV1Implementer.sol';
+import '../../interfaces/dotnuggv1/IDotnuggV1File.sol';
 
 import {SafeCastLib} from '../../libraries/SafeCastLib.sol';
 
 import '../utils/logger.sol';
 
-
 library SSTORE2 {
     uint256 internal constant DATA_OFFSET = 1; // We skip the first byte as it's a STOP opcode to ensure the contract can't be called.
-
 
     function read2DArray(address pointer, uint256 index) internal view returns (uint256[] memory) {
         return abi.decode(read(pointer), (uint256[][]))[index];
@@ -67,9 +66,6 @@ library SSTORE2 {
     function read(address pointer) internal view returns (bytes memory) {
         return readBytecode(pointer, DATA_OFFSET, pointer.code.length - DATA_OFFSET);
     }
-
-
-
 
     // function read(address pointer, uint256 start) internal view returns (bytes memory) {
     //     start += DATA_OFFSET;
@@ -197,135 +193,82 @@ abstract contract DotnuggV1Storage is IDotnuggV1Storage {
 }
 
 contract MockDotnuggV1 is IDotnuggV1, DotnuggV1Storage {
-    function process(
-        address implementer,
-        uint256 tokenId,
-        uint8 width
-    ) public view override returns (uint256[] memory resp, IDotnuggV1Metadata.Memory memory dat) {
-        IDotnuggV1Metadata.Memory memory data = IDotnuggV1Implementer(implementer).dotnuggV1Callback(tokenId);
-        uint256[][] memory files = getBatchFiles(implementer, data.ids);
-        resp = processCore(files, data, width);
-        dat = data;
-    }
-
     function stored(address implementer, uint8 feature) public view override returns (uint8 res) {
         return featureLengths[implementer][feature];
     }
 
-    function processCore(
-        uint256[][] memory files,
-        IDotnuggV1Metadata.Memory memory,
-        uint8 width
-    ) public view returns (uint256[] memory file) {
-        logger.log(width, 'width');
-
-        for (uint256 i = 0; i < files.length; i++) {
-            logger.log(files[i], 'files[i]');
-        }
-        return files[0];
-    }
-
-    function resolveBytes(
-        uint256[] memory file,
-        IDotnuggV1Metadata.Memory memory,
-        uint8
-    ) public pure override returns (bytes memory res) {
-        res = abi.encode(file);
-    }
-
-    function resolveMetadata(
-        uint256[] memory,
-        IDotnuggV1Metadata.Memory memory data,
-        uint8
-    ) public pure override returns (IDotnuggV1Metadata.Memory memory res) {
-        res = data;
-    }
-
-    function resolveString(
-        uint256[] memory file,
-        IDotnuggV1Metadata.Memory memory,
-        uint8
-    ) public pure override returns (string memory res) {
-        res = string(abi.encode(file));
-    }
-
-    function resolveUri(
-        uint256[] memory file,
-        IDotnuggV1Metadata.Memory memory,
-        uint8
-    ) public pure override returns (string memory res) {
-        res = string(abi.encode(file));
-    }
-
-    function resolveRaw(
-        uint256[] memory file,
-        IDotnuggV1Metadata.Memory memory,
-        uint8
-    ) public pure override returns (uint256[] memory res) {
-        res = file;
-    }
-
     function dotnuggToRaw(
         address implementer,
-        uint256 tokenId,
+        uint256 artifactId,
         address resolver,
-        uint8 width,
-        uint8 zoom
-    ) public view override returns (address resolvedBy, uint256[] memory res) {
-        (uint256[] memory file, IDotnuggV1Metadata.Memory memory data) = process(implementer, tokenId, width);
+        bytes memory data
+    ) public view override returns (IDotnuggV1File.Raw memory res) {
 
-        if (resolver != address(0)) {
-            res = IDotnuggV1(resolver).resolveRaw(res, data, zoom);
-        } else {
-            res = file;
-        }
+        res.metadata = IDotnuggV1Implementer(implementer).dotnuggV1ImplementerCallback(artifactId);
+
+        // res.file = getBatchFiles(implementer, res.metadata.ids);
     }
+
+    function dotnuggToProcessed(
+        address implementer,
+        uint256 artifactId,
+        address resolver,
+        bytes memory data
+    ) public view override returns (IDotnuggV1File.Processed memory ) {
+        IDotnuggV1File.Raw memory raw = dotnuggToRaw(implementer, artifactId, resolver, data);
+
+        for (uint256 i = 0; i < raw.file.length; i++) {
+            logger.log(raw.file[i], 'files[i]');
+        }
+
+
+    }
+
+    function dotnuggToCompressed(
+        address implementer,
+        uint256 artifactId,
+        address resolver,
+        bytes memory data
+    ) public view override returns (IDotnuggV1File.Compressed memory res) {}
+
+    /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+                                complex proccessors
+       ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+
+    function dotnuggToJson(
+        address implementer,
+        uint256 artifactId,
+        address resolver,
+        bytes memory data
+    ) external view override returns (string memory res) {}
+
+    function dotnuggToSvg(
+        address implementer,
+        uint256 artifactId,
+        address resolver,
+        uint8 zoom,
+        bool rekt,
+        bool background,
+        bool stats,
+        bool base64,
+        bytes memory data
+    ) external view override returns (string memory res) {}
+
+    /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+                                basic proccessors
+       ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
 
     function dotnuggToBytes(
         address implementer,
-        uint256 tokenId,
+        uint256 artifactId,
         address resolver,
-        uint8 width,
-        uint8 zoom
-    ) public view override returns (address resolvedBy, bytes memory res) {
-        (uint256[] memory file, IDotnuggV1Metadata.Memory memory data) = process(implementer, tokenId, width);
-
-        res = IDotnuggV1(resolver).resolveBytes(file, data, zoom);
-    }
+        bytes memory data
+    ) external view override returns (bytes memory res) {}
 
     function dotnuggToString(
         address implementer,
-        uint256 tokenId,
+        uint256 artifactId,
         address resolver,
-        uint8 width,
-        uint8 zoom
-    ) public view override returns (address resolvedBy, string memory res) {
-        (uint256[] memory file, IDotnuggV1Metadata.Memory memory data) = process(implementer, tokenId, width);
-
-        res = IDotnuggV1(resolver).resolveString(file, data, zoom);
-    }
-
-    function dotnuggToUri(
-        address implementer,
-        uint256 tokenId,
-        address resolver,
-        uint8 width,
-        uint8 zoom
-    ) public view override returns (address resolvedBy, string memory res) {
-        (uint256[] memory file, IDotnuggV1Metadata.Memory memory data) = process(implementer, tokenId, width);
-
-        res = IDotnuggV1(resolver).resolveString(file, data, zoom);
-    }
-
-    function dotnuggToMetadata(
-        address implementer,
-        uint256 tokenId,
-        address resolver,
-        uint8 width,
-        uint8 zoom
-    ) public view override returns (address resolvedBy, IDotnuggV1Metadata.Memory memory res) {
-        (uint256[] memory file, IDotnuggV1Metadata.Memory memory data) = process(implementer, tokenId, width);
-
-        res = IDotnuggV1(resolver).resolveMetadata(file, data, zoom);
-    }
+        bytes memory data
+    ) external view override returns (string memory res) {}
 }

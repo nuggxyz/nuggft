@@ -27,8 +27,7 @@ task('dotnuggToRaw', 'runs dotnuggToRaw')
             TaskHelper.nuggft.address,
             args.tokenid,
             hre.ethers.constants.AddressZero,
-            63,
-            10,
+            '0x0',
         );
         if (res) {
             console.log(res[1]);

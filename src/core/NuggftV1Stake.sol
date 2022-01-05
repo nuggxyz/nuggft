@@ -127,8 +127,10 @@ abstract contract NuggftV1Stake is INuggftV1Stake, NuggftV1Proof {
 
         uint96 protocolFee = calculateProtocolFeeOf(eth);
 
-        stake = cache.staked(cache.staked() + eth - protocolFee).proto(cache.proto() + protocolFee);
+        cache = cache.addStaked(eth - protocolFee);
+        cache = cache.addProto(protocolFee);
 
+        stake = cache;
         // emit StakeEth(eth - protocolFee, protocolFee);
     }
 
