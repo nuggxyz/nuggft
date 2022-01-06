@@ -34,7 +34,7 @@ describe('uint tests', async function () {
         it('should revert if shares = 0', async () => {
             console.log(await fix.nuggft.name());
 
-            // const check = await fix.processor.dotnuggToRaw(fix.nuggft.address, await fix.nuggft.epoch(), zeroAddress(), 10, 45);
+            // const check = await fix.processor.raw(fix.nuggft.address, await fix.nuggft.epoch(), zeroAddress(), 10, 45);
 
             const proof = await fix.nuggft.proofToDotnuggMetadata(await fix.nuggft.epoch());
             console.log({ proof });
@@ -186,7 +186,7 @@ describe('uint tests', async function () {
 
             // console.log(check1, check2, check1.eq(check2));
 
-            console.log(await fix.processor.dotnuggToRaw(fix.nuggft.address, token1, Address.zero().toString(), '0x00'));
+            console.log(await fix.processor.raw(fix.nuggft.address, token1, Address.zero().toString(), '0x00'));
 
             await fix.nuggft.connect(accounts.charile).loan(token1);
 

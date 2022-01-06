@@ -4,7 +4,7 @@ import { TaskHelper } from '..';
 
 // import { IDotnuggV1Processor, NuggftV1 } from '../../typechain';
 
-task('dotnuggToRaw', 'runs dotnuggToRaw')
+task('raw', 'runs raw')
     .addParam('tokenid', 'the token to get')
     .setAction(async (args, hre) => {
         // const dn = (await hre.ethers.getContractAt(
@@ -23,10 +23,14 @@ task('dotnuggToRaw', 'runs dotnuggToRaw')
         //     63,
         //     10,
         // );
-        const res = await TaskHelper.dotnugg.dotnuggToString(
+        const res = await TaskHelper.dotnugg.img(
             TaskHelper.nuggft.address,
             args.tokenid,
             hre.ethers.constants.AddressZero,
+            false,
+            false,
+            false,
+            false,
             '0x0',
         );
         if (res) {
