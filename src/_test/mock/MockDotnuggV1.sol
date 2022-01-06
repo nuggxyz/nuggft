@@ -362,7 +362,10 @@ contract MockDotnuggV1 is IDotnuggV1 {
         address implementer,
         uint256 artifactId,
         address resolver,
-        bytes memory data
+        string memory name,
+        string memory desc,
+        bool base64,
+        bytes calldata data
     ) external view override returns (string memory res) {}
 
     function img(
