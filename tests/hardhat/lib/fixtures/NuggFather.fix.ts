@@ -1,5 +1,5 @@
 import { Fixture, MockProvider } from 'ethereum-waffle';
-import { BigNumber, Wallet } from 'ethers';
+import { BigNumber, Contract, Wallet } from 'ethers';
 import { HardhatRuntimeEnvironment } from 'hardhat/types';
 
 import { getHRE } from '../shared/deployment';
@@ -9,6 +9,8 @@ import { NuggftV1__factory } from '../../../../typechain/factories/NuggftV1__fac
 import { MockNuggftV1Migrator, MockNuggftV1Migrator__factory } from '../../../../typechain';
 import { MockDotnuggV1__factory } from '../../../../typechain/factories/MockDotnuggV1__factory';
 import { IDotnuggV1 } from '../../../../typechain/IDotnuggV1';
+import { DotnuggV1StorageProxy__factory } from '../../../../typechain/factories/DotnuggV1StorageProxy__factory';
+import { IDotnuggV1StorageProxy } from '../../../../typechain/IDotnuggV1StorageProxy';
 
 export interface NuggFatherFixture {
     // nuggswap: NuggSwap;
@@ -53,6 +55,12 @@ export const NuggFatherFix: Fixture<NuggFatherFixture> = async function (
         args: [processor.address],
     });
 
+    const dotnuggV1StorageProxy = new Contract(
+        await nuggft.dotnuggV1StorageProxy(),
+        DotnuggV1StorageProxy__factory.abi,
+        deployer,
+    ) as unknown as IDotnuggV1StorageProxy;
+
     const migrator = await deployContractWithSalt<MockNuggftV1Migrator__factory>({
         factory: 'MockNuggftV1Migrator',
         from: deployer,
@@ -61,6 +69,15 @@ export const NuggFatherFix: Fixture<NuggFatherFixture> = async function (
 
     hre.tracer.nameTags[nuggft.address] = `NuggftV1`;
     hre.tracer.nameTags[migrator.address] = `MockNuggftV1Migrator`;
+
+    // await dotnuggV1StorageProxy.store(0, hre.dotnugg.itemsByFeatureByIdArray[0]);
+    // await dotnuggV1StorageProxy.store(1, hre.dotnugg.itemsByFeatureByIdArray[1]);
+    // await dotnuggV1StorageProxy.store(2, hre.dotnugg.itemsByFeatureByIdArray[2]);
+    // await dotnuggV1StorageProxy.store(3, hre.dotnugg.itemsByFeatureByIdArray[3]);
+    // await dotnuggV1StorageProxy.store(4, hre.dotnugg.itemsByFeatureByIdArray[4]);
+    // await dotnuggV1StorageProxy.store(5, hre.dotnugg.itemsByFeatureByIdArray[5]);
+    // await dotnuggV1StorageProxy.store(6, hre.dotnugg.itemsByFeatureByIdArray[6]);
+    // await dotnuggV1StorageProxy.store(7, hre.dotnugg.itemsByFeatureByIdArray[7]);
 
     await nuggft.connect(deployer).dotnuggV1StoreFiles(hre.dotnugg.itemsByFeatureByIdArray[0], 0);
     await nuggft.connect(deployer).dotnuggV1StoreFiles(hre.dotnugg.itemsByFeatureByIdArray[1], 1);
