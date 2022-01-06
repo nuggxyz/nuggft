@@ -103,7 +103,7 @@ contract NuggftV1 is IERC721Metadata, NuggftV1Loan {
 
         // require(!exists(tokenId), 'G:2');
 
-        addStakedShareFromMsgValue();
+        addStakedShareFromMsgValue(0);
 
         setProof(tokenId);
 
@@ -128,7 +128,7 @@ contract NuggftV1 is IERC721Metadata, NuggftV1Loan {
 
         // require(!exists(tokenId), 'G:2');
 
-        addStakedShareFromMsgValue();
+        addStakedShareFromMsgValue(0);
 
         setProof(tokenId);
 

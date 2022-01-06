@@ -18,25 +18,21 @@ abstract contract NuggftV1Loan is INuggftV1Loan, NuggftV1Swap {
 
     mapping(uint160 => uint256) loans;
 
-    uint32 constant LIQUIDATION_PERIOD = 1000;
+    uint32 constant LIQUIDATION_PERIOD = 69;
 
     uint96 constant REBALANCE_FEE_BPS = 100;
 
     /// @inheritdoc INuggftV1Loan
     function loan(uint160 tokenId) external override {
-        address sender = _ownerOf(tokenId);
+        require(_ownerOf(tokenId) == msg.sender, 'L:0');
 
-        require(_isOperatorFor(msg.sender, sender), 'L:0');
-
-        (uint256 loanData, ) = NuggftV1AgentType.newAgentType(epoch(), sender, ethPerShare(), false);
+        (uint256 loanData, ) = NuggftV1AgentType.newAgentType(epoch(), msg.sender, ethPerShare(), false);
 
         loans[tokenId] = loanData; // starting swap data
 
-        // emit TakeLoan(tokenId, loanData.eth());
-
         approvedTransferToSelf(tokenId);
 
-        SafeTransferLib.safeTransferETH(sender, loanData.eth());
+        SafeTransferLib.safeTransferETH(msg.sender, loanData.eth());
     }
 
     /// @inheritdoc INuggftV1Loan
@@ -61,12 +57,6 @@ abstract contract NuggftV1Loan is INuggftV1Loan, NuggftV1Swap {
 
         uint96 overpayment = value - toPayoff;
 
-        // uint96 owed = earned + overpayment;
-
-        // emit Rebalance(tokenId, toRebalance, earned);
-
-        // emit Payoff(tokenId, benif, toPayoff);
-
         addStakedEth(toRebalance + overpayment);
 
         SafeTransferLib.safeTransferETH(benif, owed);
@@ -82,18 +72,12 @@ abstract contract NuggftV1Loan is INuggftV1Loan, NuggftV1Swap {
 
         require(toRebalance <= msg.value, 'L:3');
 
-        // uint96 overpayment = msg.value.safe96() - toRebalance;
-
-        // uint96 owed = earned;
-
         // must be done before new principal is calculated
         addStakedEth(msg.value.safe96());
 
         (uint256 res, uint96 dust) = NuggftV1AgentType.newAgentType(epoch(), loaner, ethPerShare(), false);
 
         loans[tokenId] = res;
-
-        // emit Rebalance(tokenId, toRebalance, earned);
 
         SafeTransferLib.safeTransferETH(loaner, earned + dust);
     }
