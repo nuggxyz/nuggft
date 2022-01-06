@@ -2,8 +2,9 @@
 
 pragma solidity 0.8.9;
 
-import {IDotnuggV1Storage} from '../interfaces/dotnuggv1/IDotnuggV1Storage.sol';
+import {IDotnuggV1StorageProxy} from '../interfaces/dotnuggv1/IDotnuggV1StorageProxy.sol';
 
+import {IDotnuggV1} from '../interfaces/dotnuggv1/IDotnuggV1.sol';
 import {IDotnuggV1Metadata} from '../interfaces/dotnuggv1/IDotnuggV1Metadata.sol';
 import {IDotnuggV1Resolver} from '../interfaces/dotnuggv1/IDotnuggV1Resolver.sol';
 import {IDotnuggV1Implementer} from '../interfaces/dotnuggv1/IDotnuggV1Implementer.sol';
@@ -29,8 +30,11 @@ abstract contract NuggftV1Dotnugg is INuggftV1Dotnugg, NuggftV1Token, Trust {
 
     mapping(uint160 => Settings) settings;
 
+    /// @inheritdoc IDotnuggV1Implementer
+    IDotnuggV1StorageProxy public override dotnuggV1StorageProxy;
+
     /// @inheritdoc INuggftV1Dotnugg
-    address public override dotnuggV1;
+    IDotnuggV1 public override dotnuggV1;
 
     mapping(uint256 => address) resolvers;
 
@@ -38,12 +42,18 @@ abstract contract NuggftV1Dotnugg is INuggftV1Dotnugg, NuggftV1Token, Trust {
 
     constructor(address _dotnuggV1) {
         require(_dotnuggV1 != address(0), 'F:4');
-        dotnuggV1 = _dotnuggV1;
+        dotnuggV1 = IDotnuggV1(_dotnuggV1);
+        dotnuggV1StorageProxy = dotnuggV1.register();
     }
 
     /// @inheritdoc IDotnuggV1Implementer
-    function dotnuggV1StoreFiles(uint256[][] calldata data, uint8 feature) external override requiresTrust {
-        uint8 len = IDotnuggV1Storage(dotnuggV1).store(feature, data);
+    function dotnuggV1TrustCallback(address caller) external view override(IDotnuggV1Implementer) returns (bool res) {
+        return isTrusted[caller];
+    }
+
+    /// @inheritdoc INuggftV1Dotnugg
+    function dotnuggV1StoreFiles(uint256[][] calldata data, uint8 feature) external requiresTrust {
+        uint8 len = dotnuggV1StorageProxy.store(feature, data);
 
         uint256 cache = featureLengths;
 

@@ -11,8 +11,6 @@ interface IDotnuggV1Metadata {
         address implementer;
         uint256 artifactId;
         string[] labels;
-        string[] jsonKeys;
-        string[] jsonValues;
         string[] styles;
         string background;
         bytes data;

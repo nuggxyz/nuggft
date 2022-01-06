@@ -4,28 +4,32 @@ pragma solidity 0.8.9;
 
 import {IDotnuggV1Metadata as Metadata} from './IDotnuggV1Metadata.sol';
 import {IDotnuggV1File as File} from './IDotnuggV1File.sol';
-import {IDotnuggV1Storage} from './IDotnuggV1Storage.sol';
+import {IDotnuggV1StorageProxy} from './IDotnuggV1StorageProxy.sol';
 
-interface IDotnuggV1 is IDotnuggV1Storage {
+interface IDotnuggV1 {
+    function register() external returns (IDotnuggV1StorageProxy proxy);
+
+    function proxyOf(address implementer) external view returns (IDotnuggV1StorageProxy proxy);
+
     /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
                                 core processors
        ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
 
-    function dotnuggToRaw(
+    function raw(
         address implementer,
         uint256 artifactId,
         address resolver,
         bytes calldata data
     ) external view returns (File.Raw memory res);
 
-    function dotnuggToProcessed(
+    function proc(
         address implementer,
         uint256 artifactId,
         address resolver,
         bytes calldata data
     ) external view returns (File.Processed memory res);
 
-    function dotnuggToCompressed(
+    function comp(
         address implementer,
         uint256 artifactId,
         address resolver,
@@ -34,36 +38,35 @@ interface IDotnuggV1 is IDotnuggV1Storage {
 
     /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
                             basic resolved processors
-       ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
-    function dotnuggToBytes(
-        address implementer,
-        uint256 id,
-        address resolver,
-        bytes calldata data
-    ) external view returns (bytes memory res);
+    //    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+    // function byt(
+    //     address implementer,
+    //     uint256 id,
+    //     address resolver,
+    //     bytes calldata data
+    // ) external view returns (bytes memory res);
 
-    function dotnuggToString(
-        address implementer,
-        uint256 id,
-        address resolver,
-        bytes calldata data
-    ) external view returns (string memory res);
+    // function str(
+    //     address implementer,
+    //     uint256 id,
+    //     address resolver,
+    //     bytes calldata data
+    // ) external view returns (string memory res);
 
     /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
                             complex resolved processors
        ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
-    function dotnuggToJson(
+    function dat(
         address implementer,
         uint256 id,
         address resolver,
         bytes calldata data
     ) external view returns (string memory res);
 
-    function dotnuggToSvg(
+    function img(
         address implementer,
         uint256 id,
         address resolver,
-        uint8 zoom,
         bool rekt,
         bool background,
         bool base64,

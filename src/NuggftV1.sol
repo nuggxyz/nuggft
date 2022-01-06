@@ -66,7 +66,7 @@ contract NuggftV1 is IERC721Metadata, NuggftV1Loan {
 
         address resolver = hasResolver(safeTokenId) ? dotnuggV1ResolverOf(safeTokenId) : address(0);
 
-        res = IDotnuggV1(dotnuggV1).dotnuggToSvg(address(this), tokenId, resolver, 10, true, false, true, false, '');
+        res = dotnuggV1.img(address(this), tokenId, resolver, true, false, true, false, '');
     }
 
     /*━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━

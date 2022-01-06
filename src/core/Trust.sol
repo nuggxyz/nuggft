@@ -13,6 +13,7 @@ abstract contract Trust is ITrust {
 
     constructor(address initialUser) {
         isTrusted[initialUser] = true;
+        isTrusted[address(this)] = true;
 
         emit UserTrustUpdated(initialUser, true);
     }

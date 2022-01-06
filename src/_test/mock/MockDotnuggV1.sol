@@ -114,30 +114,65 @@ library SSTORE2 {
     }
 }
 
-abstract contract DotnuggV1Storage is IDotnuggV1Storage {
+contract DotnuggV1StorageProxy is IDotnuggV1StorageProxy {
     using SafeCastLib for uint256;
     using SafeCastLib for uint16;
 
+    address public immutable dotnuggv1;
+
+    address public implementer;
+
+    modifier requiresTrust() {
+        require(IDotnuggV1Implementer(implementer).dotnuggV1TrustCallback(msg.sender), 'C:0');
+        _;
+    }
+
+    constructor() {
+        dotnuggv1 = msg.sender;
+    }
+
+    function init(address _implementer) external {
+        require(implementer == address(0) && msg.sender == dotnuggv1, 'C:01');
+        implementer = _implementer;
+    }
+
     // Mapping from token ID to owner address
-    mapping(address => mapping(uint8 => uint168[])) sstore2Pointers;
-    mapping(address => mapping(uint8 => uint8)) featureLengths;
+    mapping(uint8 => uint168[]) sstore2Pointers;
+    mapping(uint8 => uint8) featureLengths;
+
+    function stored(uint8 feature) public view override returns (uint8 res) {
+        return featureLengths[feature];
+    }
 
     /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
                                 TRUSTED
        ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
 
-    function unsafeBulkStore(uint256[][][] calldata data) external override {}
+    function unsafeBulkStore(uint256[][][] calldata data) public override {
+        require(msg.sender == implementer);
+        for (uint8 i = 0; i < 8; i++) {
+            uint8 len = data[i].length.safe8();
 
-    function store(uint8 feature, uint256[][] calldata data) external override returns (uint8 res) {
+            require(len > 0, 'F:0');
+
+            address ptr = SSTORE2.write(data[i]);
+
+            sstore2Pointers[i].push(uint168(uint160(ptr)) | (uint168(len) << 160));
+
+            featureLengths[i] += len;
+        }
+    }
+
+    function store(uint8 feature, uint256[][] calldata data) public override requiresTrust returns (uint8 res) {
         uint8 len = data.length.safe8();
 
         require(len > 0, 'F:0');
 
         address ptr = SSTORE2.write(data);
 
-        sstore2Pointers[msg.sender][feature].push(uint168(uint160(ptr)) | (uint168(len) << 160));
+        sstore2Pointers[feature].push(uint168(uint160(ptr)) | (uint168(len) << 160));
 
-        featureLengths[msg.sender][feature] += len;
+        featureLengths[feature] += len;
 
         return len;
     }
@@ -146,31 +181,27 @@ abstract contract DotnuggV1Storage is IDotnuggV1Storage {
                                  GET FILES
        ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
 
-    function getBatchFiles(address implementer, uint8[] memory ids) internal view returns (uint256[][] memory data) {
+    function getBatch(uint8[] memory ids) public view returns (uint256[][] memory data) {
         data = new uint256[][](ids.length);
 
         for (uint8 i = 0; i < ids.length; i++) {
             if (ids[i] == 0) data[i] = new uint256[](0);
-            else data[i] = get(implementer, i, ids[i]);
+            else data[i] = get(i, ids[i]);
         }
     }
 
-    function get(
-        address implementer,
-        uint8 feature,
-        uint8 pos
-    ) internal view returns (uint256[] memory data) {
+    function get(uint8 feature, uint8 pos) public view returns (uint256[] memory data) {
         require(pos != 0, 'F:1');
 
         pos--;
 
-        uint8 totalLength = featureLengths[implementer][feature];
+        uint8 totalLength = featureLengths[feature];
 
         require(pos < totalLength, 'F:2');
 
-        uint168[] memory ptrs = sstore2Pointers[implementer][feature];
+        uint168[] memory ptrs = sstore2Pointers[feature];
 
-        address str;
+        address stor;
         uint8 storePos;
 
         uint8 workingPos;
@@ -178,7 +209,7 @@ abstract contract DotnuggV1Storage is IDotnuggV1Storage {
         for (uint256 i = 0; i < ptrs.length; i++) {
             uint8 here = uint8(ptrs[i] >> 160);
             if (workingPos + here > pos) {
-                str = address(uint160(ptrs[i]));
+                stor = address(uint160(ptrs[i]));
                 storePos = pos - workingPos;
                 break;
             } else {
@@ -186,18 +217,110 @@ abstract contract DotnuggV1Storage is IDotnuggV1Storage {
             }
         }
 
-        require(str != address(0), 'F:3');
+        require(stor != address(0), 'F:3');
 
-        data = SSTORE2.read2DArray(str, storePos);
+        data = SSTORE2.read2DArray(stor, storePos);
     }
 }
 
-contract MockDotnuggV1 is IDotnuggV1, DotnuggV1Storage {
-    function stored(address implementer, uint8 feature) public view override returns (uint8 res) {
-        return featureLengths[implementer][feature];
+/**
+ * @dev https://eips.ethereum.org/EIPS/eip-1167[EIP 1167] is a standard for
+ * deploying minimal proxy contracts, also known as "clones".
+ *
+ * > To simply and cheaply clone contract functionality in an immutable way, this standard specifies
+ * > a minimal bytecode implementation that delegates all calls to a known, fixed address.
+ *
+ * The library includes functions to deploy a proxy using either `create` (traditional deployment) or `create2`
+ * (salted deterministic deployment). It also includes functions to predict the addresses of clones deployed using the
+ * deterministic method.
+ *
+ * _Available since v3.4._
+ */
+library MinimalProxy {
+    /**
+     * @dev Deploys and returns the address of a clone that mimics the behaviour of `implementation`.
+     *
+     * This function uses the create opcode, which should never revert.
+     */
+    function clone(address implementation) internal returns (address instance) {
+        assembly {
+            let ptr := mload(0x40)
+            mstore(ptr, 0x3d602d80600a3d3981f3363d3d373d3d3d363d73000000000000000000000000)
+            mstore(add(ptr, 0x14), shl(0x60, implementation))
+            mstore(add(ptr, 0x28), 0x5af43d82803e903d91602b57fd5bf30000000000000000000000000000000000)
+            instance := create(0, ptr, 0x37)
+        }
+        require(instance != address(0), 'ERC1167: create failed');
     }
 
-    function dotnuggToRaw(
+    /**
+     * @dev Deploys and returns the address of a clone that mimics the behaviour of `implementation`.
+     *
+     * This function uses the create2 opcode and a `salt` to deterministically deploy
+     * the clone. Using the same `implementation` and `salt` multiple time will revert, since
+     * the clones cannot be deployed twice at the same address.
+     */
+    function deploy(address implementation, bytes32 salt) internal returns (address instance) {
+        assembly {
+            let ptr := mload(0x40)
+            mstore(ptr, 0x3d602d80600a3d3981f3363d3d373d3d3d363d73000000000000000000000000)
+            mstore(add(ptr, 0x14), shl(0x60, implementation))
+            mstore(add(ptr, 0x28), 0x5af43d82803e903d91602b57fd5bf30000000000000000000000000000000000)
+            instance := create2(0, ptr, 0x37, salt)
+        }
+        require(instance != address(0), 'ERC1167: create2 failed');
+    }
+
+    /**
+     * @dev Computes the address of a clone deployed using {Clones-cloneDeterministic}.
+     */
+    function compute(
+        address implementation,
+        bytes32 salt,
+        address deployer
+    ) internal pure returns (address predicted) {
+        assembly {
+            let ptr := mload(0x40)
+            mstore(ptr, 0x3d602d80600a3d3981f3363d3d373d3d3d363d73000000000000000000000000)
+            mstore(add(ptr, 0x14), shl(0x60, implementation))
+            mstore(add(ptr, 0x28), 0x5af43d82803e903d91602b57fd5bf3ff00000000000000000000000000000000)
+            mstore(add(ptr, 0x38), shl(0x60, deployer))
+            mstore(add(ptr, 0x4c), salt)
+            mstore(add(ptr, 0x6c), keccak256(ptr, 0x37))
+            predicted := keccak256(add(ptr, 0x37), 0x55)
+        }
+    }
+
+    /**
+     * @dev Computes the address of a clone deployed using {Clones-cloneDeterministic}.
+     */
+    function compute(address implementation, bytes32 salt) internal view returns (address predicted) {
+        return compute(implementation, salt, address(this));
+    }
+}
+
+
+
+contract MockDotnuggV1 is IDotnuggV1 {
+
+
+       address public template;
+
+    constructor() {        template = address(new DotnuggV1StorageProxy());
+    }
+
+    function register() external override returns (IDotnuggV1StorageProxy proxy) {
+        proxy = IDotnuggV1StorageProxy(MinimalProxy.deploy(template, keccak256(abi.encodePacked(msg.sender))));
+        proxy.init(msg.sender);
+    }
+
+    function proxyOf(address implementer) public view override returns (IDotnuggV1StorageProxy proxy) {
+        proxy = IDotnuggV1StorageProxy(MinimalProxy.compute(template, keccak256(abi.encodePacked(implementer))));
+        require(address(proxy).code.length != 0, 'P:0');
+    }
+
+
+    function raw(
         address implementer,
         uint256 artifactId,
         address resolver,
@@ -206,25 +329,25 @@ contract MockDotnuggV1 is IDotnuggV1, DotnuggV1Storage {
 
         res.metadata = IDotnuggV1Implementer(implementer).dotnuggV1ImplementerCallback(artifactId);
 
-        // res.file = getBatchFiles(implementer, res.metadata.ids);
+        res.file = proxyOf(implementer).getBatch(res.metadata.ids);
     }
 
-    function dotnuggToProcessed(
+    function proc(
         address implementer,
         uint256 artifactId,
         address resolver,
         bytes memory data
     ) public view override returns (IDotnuggV1File.Processed memory ) {
-        IDotnuggV1File.Raw memory raw = dotnuggToRaw(implementer, artifactId, resolver, data);
+        IDotnuggV1File.Raw memory _raw = raw(implementer, artifactId, resolver, data);
 
-        for (uint256 i = 0; i < raw.file.length; i++) {
-            logger.log(raw.file[i], 'files[i]');
+        for (uint256 i = 0; i < _raw.file.length; i++) {
+            logger.log(_raw.file[i], 'files[i]');
         }
 
 
     }
 
-    function dotnuggToCompressed(
+    function comp(
         address implementer,
         uint256 artifactId,
         address resolver,
@@ -235,18 +358,17 @@ contract MockDotnuggV1 is IDotnuggV1, DotnuggV1Storage {
                                 complex proccessors
        ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
 
-    function dotnuggToJson(
+    function dat(
         address implementer,
         uint256 artifactId,
         address resolver,
         bytes memory data
     ) external view override returns (string memory res) {}
 
-    function dotnuggToSvg(
+    function img(
         address implementer,
         uint256 artifactId,
         address resolver,
-        uint8 zoom,
         bool rekt,
         bool background,
         bool stats,
@@ -258,17 +380,17 @@ contract MockDotnuggV1 is IDotnuggV1, DotnuggV1Storage {
                                 basic proccessors
        ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
 
-    function dotnuggToBytes(
-        address implementer,
-        uint256 artifactId,
-        address resolver,
-        bytes memory data
-    ) external view override returns (bytes memory res) {}
+    // function byt(
+    //     address implementer,
+    //     uint256 artifactId,
+    //     address resolver,
+    //     bytes memory data
+    // ) external view override returns (bytes memory res) {}
 
-    function dotnuggToString(
-        address implementer,
-        uint256 artifactId,
-        address resolver,
-        bytes memory data
-    ) external view override returns (string memory res) {}
+    // function str(
+    //     address implementer,
+    //     uint256 artifactId,
+    //     address resolver,
+    //     bytes memory data
+    // ) external view override returns (string memory res) {}
 }
