@@ -41,7 +41,7 @@ interface INuggftV1Loan {
             uint96 toPayoff,
             uint96 toRebalance,
             uint96 earned,
-            uint32 epochDue,
+            uint24 epochDue,
             address loaner
         );
 

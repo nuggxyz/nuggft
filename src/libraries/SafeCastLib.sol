@@ -27,6 +27,17 @@ library SafeCastLib {
         y = uint32(x);
     }
 
+    function safe24(uint256 x) internal pure returns (uint24 y) {
+        assembly {
+            if gt(x, 0xfff) {
+                revert(0, 0)
+            }
+            y := x
+        }
+        require(x <= type(uint24).max);
+        y = uint24(x);
+    }
+
     function safe16(uint256 x) internal pure returns (uint16 y) {
         require(x <= type(uint16).max);
         y = uint16(x);

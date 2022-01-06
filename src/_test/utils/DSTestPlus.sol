@@ -47,36 +47,10 @@ contract DSTestPlus is DSTest {
         }
     }
 
-    function safeDeal(address user, uint256 amount) internal {
-        if (detectDeal(user, amount)) {
-            fvm.deal(user, amount);
-            return;
+    function mockBlockhash(uint256 blocknum) internal view returns (bytes32 res) {
+        if (block.number - blocknum < 256) {
+            return keccak256(abi.encodePacked(blocknum));
         }
-
-        bool callStatus;
-        assembly {
-            callStatus := call(gas(), user, amount, 0, 0, 0, 0)
-        }
-        assert(callStatus);
-    }
-
-    function detectDeal(address _to, uint256 _amount) public returns (bool) {
-        bool success;
-        bytes memory data = abi.encodeWithSelector(fvm.deal.selector, _to, _amount);
-        address _fvm = address(fvm);
-        assembly {
-            success := call(
-                gas(), // gas remaining
-                _fvm, // destination address
-                0, // no ether
-                add(data, 32), // input buffer (starts after the first 32 bytes in the `data` array)
-                mload(data), // input length (loaded from the first 32 bytes in the `data` array)
-                0, // output buffer
-                0 // output length
-            )
-        }
-
-        return success;
     }
 }
 

@@ -4,7 +4,7 @@ pragma solidity 0.8.9;
 
 import '../NuggftV1.test.sol';
 
-contract revertTest__stake is NuggftV1Test {
+contract revert__NuggftV1Stake is NuggftV1Test {
     uint32 epoch;
 
     using UserTarget for address;
@@ -21,17 +21,17 @@ contract revertTest__stake is NuggftV1Test {
     // mint
     // ────
 
-    function test__revert__stake__T_1__success() public {
+    function test__revert__NuggftV1Stake__T_1__success() public {
         _nuggft.shouldPass(frank, mint(2099), 30 * 10**16);
     }
 
-    function test__revert__stake__T_1__fail() public {
+    function test__revert__NuggftV1Stake__T_1__fail() public {
         _nuggft.shouldPass(frank, mint((2099)), 30 * 10**18);
 
         _nuggft.shouldFail('T:1', dennis, mint(2909), 29 * 10**18);
     }
 
-    function test__revert__stake__T_1__fail_fromZero() public {
+    function test__revert__NuggftV1Stake__T_1__fail_fromZero() public {
         // console.logb(34);
         _nuggft.shouldPass(frank, mint((2099)), 30 * 10**18);
 
@@ -41,11 +41,11 @@ contract revertTest__stake is NuggftV1Test {
     // trustedMint
     // ────
 
-    function test__revert__stake__T_1__successOnTrusted() public {
+    function test__revert__NuggftV1Stake__T_1__successOnTrusted() public {
         _nuggft.shouldPass(safe, trustedMint(99, address(frank)), 30 * 10**16);
     }
 
-    function test__revert__stake__T_1__failOnTrusted() public {
+    function test__revert__NuggftV1Stake__T_1__failOnTrusted() public {
         // console.log(address(safe).balance);
 
         _nuggft.shouldPass(safe, trustedMint(99, address(frank)), 15 * 10**18);
@@ -66,19 +66,19 @@ contract revertTest__stake is NuggftV1Test {
     // burn
     // ─────────────
 
-    function test__revert__stake__T_3__burn__fail() public {
+    function test__revert__NuggftV1Stake__T_3__burn__fail() public {
         uint160 tokenId = scenario_dee_has_a_token();
 
         _nuggft.shouldFail('T:3', mac, burn(tokenId));
     }
 
-    function test__revert__stake__T_3__burn__failOnNoApproval() public {
+    function test__revert__NuggftV1Stake__T_3__burn__failOnNoApproval() public {
         uint160 tokenId = scenario_dee_has_a_token();
 
         _nuggft.shouldFail('T:3', dee, burn(tokenId));
     }
 
-    function test__revert__stake__T_3__burn__succeeds() public {
+    function test__revert__NuggftV1Stake__T_3__burn__succeeds() public {
         uint160 tokenId = scenario_dee_has_a_token();
 
         _nuggft.shouldPass(dee, approve(address(nuggft), tokenId));
@@ -86,7 +86,7 @@ contract revertTest__stake is NuggftV1Test {
         _nuggft.shouldPass(dee, burn(tokenId));
     }
 
-    function test__revert__stake__T_3__burn__failOnIncorrectApproval() public {
+    function test__revert__NuggftV1Stake__T_3__burn__failOnIncorrectApproval() public {
         uint160 tokenId = scenario_dee_has_a_token();
 
         _nuggft.shouldPass(dee, approve(address(mac), tokenId));
@@ -94,7 +94,7 @@ contract revertTest__stake is NuggftV1Test {
         _nuggft.shouldFail('T:3', dee, burn(tokenId));
     }
 
-    function test__revert__stake__T_3__burn__failOnIncorrectOperatorApproval() public {
+    function test__revert__NuggftV1Stake__T_3__burn__failOnIncorrectOperatorApproval() public {
         uint160 tokenId = scenario_dee_has_a_token();
 
         _nuggft.shouldPass(dee, setApprovalForAll(address(mac), true));
@@ -104,7 +104,7 @@ contract revertTest__stake is NuggftV1Test {
         _nuggft.shouldFail('T:3', dennis, burn(tokenId));
     }
 
-    function test__revert__stake__T_3__burn__failsOnCorrectOperatorApproval() public {
+    function test__revert__NuggftV1Stake__T_3__burn__failsOnCorrectOperatorApproval() public {
         uint160 tokenId = scenario_dee_has_a_token();
 
         _nuggft.shouldPass(dee, setApprovalForAll(address(mac), true));
@@ -117,7 +117,7 @@ contract revertTest__stake is NuggftV1Test {
     // migrate
     // ─────────────
 
-    function test__revert__stake__T_3__migrate__fail() public {
+    function test__revert__NuggftV1Stake__T_3__migrate__fail() public {
         uint160 tokenId = scenario_dee_has_a_token();
 
         scenario_migrator_set();
@@ -125,7 +125,7 @@ contract revertTest__stake is NuggftV1Test {
         _nuggft.shouldFail('T:3', dee, migrate(tokenId));
     }
 
-    function test__revert__stake__T_3__migrate__succeeds() public {
+    function test__revert__NuggftV1Stake__T_3__migrate__succeeds() public {
         uint160 tokenId = scenario_dee_has_a_token();
 
         scenario_migrator_set();
@@ -142,13 +142,13 @@ contract revertTest__stake is NuggftV1Test {
     // migrate
     // ────────────
 
-    function test__revert__stake__T_4_fail() public {
+    function test__revert__NuggftV1Stake__T_4__fail() public {
         uint160 tokenId = scenario_dee_has_a_token();
 
         _nuggft.shouldFail('T:4', dee, migrate(tokenId));
     }
 
-    function test__revert__stake__T_4_succeeds() public {
+    function test__revert__NuggftV1Stake__T_4__succeeds() public {
         uint160 tokenId = scenario_dee_has_a_token();
 
         _nuggft.shouldPass(dee, approve(address(nuggft), tokenId));
@@ -158,7 +158,7 @@ contract revertTest__stake is NuggftV1Test {
         _nuggft.shouldPass(dee, migrate(tokenId));
     }
 
-    function test__revert__stake__T_4_succeedsWithApproval() public {
+    function test__revert__NuggftV1Stake__T_4__succeedsWithApproval() public {
         uint160 tokenId = scenario_dee_has_a_token();
 
         _nuggft.shouldPass(dee, approve(address(nuggft), tokenId));

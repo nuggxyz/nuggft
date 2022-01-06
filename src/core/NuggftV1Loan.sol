@@ -18,7 +18,7 @@ abstract contract NuggftV1Loan is INuggftV1Loan, NuggftV1Swap {
 
     mapping(uint160 => uint256) loans;
 
-    uint32 constant LIQUIDATION_PERIOD = 69;
+    uint24 constant LIQUIDATION_PERIOD = 69;
 
     uint96 constant REBALANCE_FEE_BPS = 100;
 
@@ -26,7 +26,7 @@ abstract contract NuggftV1Loan is INuggftV1Loan, NuggftV1Swap {
     function loan(uint160 tokenId) external override {
         require(_ownerOf(tokenId) == msg.sender, 'L:0');
 
-        (uint256 loanData, ) = NuggftV1AgentType.newAgentType(epoch(), msg.sender, ethPerShare(), false);
+        uint256 loanData = NuggftV1AgentType.newAgentType(epoch(), msg.sender, ethPerShare(), false);
 
         loans[tokenId] = loanData; // starting swap data
 
@@ -37,7 +37,7 @@ abstract contract NuggftV1Loan is INuggftV1Loan, NuggftV1Swap {
 
     /// @inheritdoc INuggftV1Loan
     function payoff(uint160 tokenId) external payable override {
-        (uint96 toPayoff, uint96 toRebalance, uint96 owed, uint96 epochDue, address loaner) = loanInfo(tokenId);
+        (uint96 toPayoff, uint96 toRebalance, uint96 owed, uint24 epochDue, address loaner) = loanInfo(tokenId);
 
         assert(address(this) == _ownerOf(tokenId)); // should always be true - should revert in loanInfo
 
@@ -75,11 +75,11 @@ abstract contract NuggftV1Loan is INuggftV1Loan, NuggftV1Swap {
         // must be done before new principal is calculated
         addStakedEth(msg.value.safe96());
 
-        (uint256 res, uint96 dust) = NuggftV1AgentType.newAgentType(epoch(), loaner, ethPerShare(), false);
+        uint256 res = NuggftV1AgentType.newAgentType(epoch(), loaner, ethPerShare(), false);
 
         loans[tokenId] = res;
 
-        SafeTransferLib.safeTransferETH(loaner, earned + dust);
+        SafeTransferLib.safeTransferETH(loaner, earned);
     }
 
     /// @inheritdoc INuggftV1Loan
@@ -101,7 +101,7 @@ abstract contract NuggftV1Loan is INuggftV1Loan, NuggftV1Swap {
             uint96 toPayoff,
             uint96 toRebalance,
             uint96 earned,
-            uint32 epochDue,
+            uint24 epochDue,
             address loaner
         )
     {
@@ -122,9 +122,11 @@ abstract contract NuggftV1Loan is INuggftV1Loan, NuggftV1Swap {
 
         toPayoff = curr + toRebalance;
 
-        // value earned while lone was taken out
-        earned = toPayoff >= activeEps ? 0 : activeEps - toPayoff;
+        unchecked {
+            // value earned while lone was taken out
+            earned = toPayoff >= activeEps ? 0 : activeEps - toPayoff;
 
-        epochDue = cache.epoch() + LIQUIDATION_PERIOD;
+            epochDue = cache.epoch() + LIQUIDATION_PERIOD;
+        }
     }
 }

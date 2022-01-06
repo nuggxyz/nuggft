@@ -68,7 +68,7 @@ abstract contract NuggftV1Proof is INuggftV1Proof, NuggftV1Dotnugg {
         proof = proofOf(tokenId);
 
         if (proof == 0) {
-            proof = initFromSeed(tryCalculateSeed(tokenId.safe32()));
+            proof = initFromSeed(tryCalculateSeed(tokenId.safe24()));
             require(proof != 0, 'P:L');
         }
 

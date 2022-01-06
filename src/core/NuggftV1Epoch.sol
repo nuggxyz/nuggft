@@ -7,8 +7,8 @@ import {INuggftV1Epoch} from '../interfaces/nuggftv1/INuggftV1Epoch.sol';
 abstract contract NuggftV1Epoch is INuggftV1Epoch {
     uint256 public immutable genesis;
 
-    uint32 constant INTERVAL = 69;
-    uint32 constant OFFSET = 3000;
+    uint16 constant INTERVAL = 69;
+    uint24 constant OFFSET = 3000;
 
     constructor() {
         genesis = block.number;
@@ -16,52 +16,49 @@ abstract contract NuggftV1Epoch is INuggftV1Epoch {
     }
 
     /// @inheritdoc INuggftV1Epoch
-    function epoch() public view override returns (uint32 res) {
-        res = toEpoch(block.number);
+    function epoch() public view override returns (uint24 res) {
+        res = toEpoch(block.number, genesis);
     }
 
-    function toStartBlock(uint32 _epoch) internal view returns (uint256 res) {
-        // res = ((_epoch - OFFSET) * INTERVAL) + genesis;
-
-        res = _epoch - OFFSET;
-
-        unchecked {
-            res *= INTERVAL;
-            res += genesis;
-        }
-    }
-
-    function toEpoch(uint256 blocknum) internal view returns (uint32 res) {
-        unchecked {
-            blocknum -= genesis;
-        }
-        assembly {
-            res := add(div(blocknum, INTERVAL), OFFSET)
-        }
-        // res = (uint32(blocknum - genesis) / INTERVAL) + OFFSET;
-    }
-
-    function toEndBlock(uint32 _epoch) internal view returns (uint256 res) {
-        res = toStartBlock(_epoch + 1) - 1;
-    }
-
-    function calculateSeed() internal view returns (uint256 res, uint32 _epoch) {
+    function calculateSeed() internal view returns (uint256 res, uint24 _epoch) {
         _epoch = epoch();
-        res = calculateSeedCore(_epoch);
+        res = calculateSeed(_epoch);
     }
 
-    function tryCalculateSeed(uint32 _epoch) internal view returns (uint256 res) {
-        res = calculateSeedCore(_epoch);
+    function tryCalculateSeed(uint24 _epoch) internal view returns (uint256 res) {
+        res = calculateSeed(_epoch);
     }
 
     /// @notice gets unique base based on given epoch and converts encoded bytes to object that can be merged
     /// Note: by using the block hash no one knows what a nugg will look like before it's epoch.
     /// We considered making this harder to manipulate, but we decided that if someone were able to
     /// pull it off and make their own custom nugg, that would be really fucking cool.
-    function calculateSeedCore(uint32 _epoch) internal view returns (uint256 res) {
-        uint256 startblock = toStartBlock(_epoch);
-        bytes32 bhash = blockhash(startblock - 2);
+    function calculateSeed(uint24 _epoch) internal view returns (uint256 res) {
+        uint256 startblock = toStartBlock(_epoch, genesis);
+        bytes32 bhash = getBlockHash(startblock - 2);
         require(bhash != 0, 'E:0');
         res = uint256(keccak256(abi.encodePacked(bhash, _epoch, address(this))));
+    }
+
+    function getBlockHash(uint256 blocknum) internal view virtual returns (bytes32 res) {
+        return blockhash(blocknum);
+    }
+
+    function toStartBlock(uint24 _epoch, uint256 gen) internal pure returns (uint256 res) {
+        assembly {
+            res := add(mul(sub(_epoch, OFFSET), INTERVAL), gen)
+        }
+    }
+
+    function toEpoch(uint256 blocknum, uint256 gen) internal pure returns (uint24 res) {
+        assembly {
+            res := add(div(sub(blocknum, gen), INTERVAL), OFFSET)
+        }
+    }
+
+    function toEndBlock(uint24 _epoch, uint256 gen) internal pure returns (uint256 res) {
+        unchecked {
+            res = toStartBlock(_epoch + 1, gen) - 1;
+        }
     }
 }

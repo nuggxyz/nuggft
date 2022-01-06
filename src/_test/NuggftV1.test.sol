@@ -20,6 +20,12 @@ contract RiggedNuggft is NuggftV1 {
     constructor(address processor) NuggftV1(processor) {
         featureLengths = 0x0303030303030303;
     }
+
+    function getBlockHash(uint256 blocknum) internal view override returns (bytes32 res) {
+        if (block.number - blocknum < 256) {
+            return keccak256(abi.encodePacked(blocknum));
+        }
+    }
 }
 
 library SafeCast {
@@ -72,12 +78,12 @@ contract NuggftV1Test is t {
 
         any = new User();
 
-        safeDeal(address(safe), 30 ether);
-        safeDeal(address(dennis), 30 ether);
-        safeDeal(address(mac), 30 ether);
-        safeDeal(address(dee), 30 ether);
-        safeDeal(address(frank), 90000 ether);
-        safeDeal(address(charlie), 30 ether);
+        fvm.deal(address(safe), 30 ether);
+        fvm.deal(address(dennis), 30 ether);
+        fvm.deal(address(mac), 30 ether);
+        fvm.deal(address(dee), 30 ether);
+        fvm.deal(address(frank), 90000 ether);
+        fvm.deal(address(charlie), 30 ether);
 
         nuggft.setIsTrusted(address(safe), true);
     }
@@ -158,8 +164,8 @@ contract NuggftV1Test is t {
                                 encodeWithSelector
        ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
 
-    function delegate(address sender, uint256 tokenId) public view returns (bytes memory res) {
-        return abi.encodeWithSelector(nuggft.delegate.selector, sender, tokenId);
+    function delegate(uint256 tokenId) public view returns (bytes memory res) {
+        return abi.encodeWithSelector(nuggft.delegate.selector, tokenId);
     }
 
     function delegateItem(
@@ -170,8 +176,8 @@ contract NuggftV1Test is t {
         return abi.encodeWithSelector(nuggft.delegateItem.selector, buyerTokenId, sellerTokenId, itemId);
     }
 
-    function claim(address sender, uint256 tokenId) public view returns (bytes memory res) {
-        return abi.encodeWithSelector(nuggft.claim.selector, sender, tokenId);
+    function claim(uint256 tokenId) public view returns (bytes memory res) {
+        return abi.encodeWithSelector(nuggft.claim.selector, tokenId);
     }
 
     function swap(uint256 tokenId, uint96 floor) public view returns (bytes memory res) {
@@ -315,7 +321,7 @@ contract NuggftV1Test is t {
 
         eth = 2 ether;
 
-        _nuggft.shouldPass(mac, delegate(address(mac), tokenId), eth);
+        _nuggft.shouldPass(mac, delegate(tokenId), eth);
     }
 
     function scenario_dee_has_swapped_a_token_and_mac_can_claim() public payable returns (uint160 tokenId) {
@@ -327,7 +333,7 @@ contract NuggftV1Test is t {
     function scenario_mac_has_claimed_a_token_dee_swapped() public payable returns (uint160 tokenId) {
         (tokenId) = scenario_dee_has_swapped_a_token_and_mac_can_claim();
 
-        _nuggft.shouldPass(mac, claim(address(mac), tokenId));
+        _nuggft.shouldPass(mac, claim(tokenId));
     }
 
     function scenario_mac_has_swapped_a_token_dee_swapped() public payable returns (uint160 tokenId, uint96 floor) {

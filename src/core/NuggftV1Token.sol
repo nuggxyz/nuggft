@@ -26,13 +26,11 @@ abstract contract NuggftV1Token is INuggftV1Token, NuggftV1Epoch {
 
     /// @inheritdoc IERC721
     function approve(address to, uint256 tokenId) public payable override {
-        address owner = _ownerOf(tokenId.safe160());
-
-        require(_isOperatorFor(msg.sender, owner), 'G:1');
+        require(_ownerOf(tokenId.safe160()) == msg.sender, 'Z:1');
 
         approvals[tokenId] = to;
 
-        emit Approval(owner, to, tokenId);
+        emit Approval(msg.sender, to, tokenId);
     }
 
     /// @inheritdoc IERC721
