@@ -4,18 +4,18 @@ pragma solidity 0.8.9;
 
 import '../NuggftV1.test.sol';
 
-import '../../core/NuggftV1Epoch.sol';
+import {NuggftV1Epoch} from '../../core/NuggftV1Epoch.sol';
 
 contract general__NuggftV1Epoch is NuggftV1Test, NuggftV1Epoch {
     using UserTarget for address;
 
     function setUp() public {
         reset();
-        fvm.roll(13952818);
+        // fvm.roll(13952818);
     }
 
     /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-        [pure: toEpoch]
+        [pure] toEpoch
        ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
 
     function safe__toEpoch(uint32 blocknum, uint256 gen) internal pure returns (uint32 res) {
@@ -41,7 +41,7 @@ contract general__NuggftV1Epoch is NuggftV1Test, NuggftV1Epoch {
     }
 
     /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-        [pure: toStartBlock]
+        [pure] toStartBlock
        ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
 
     function safe__toStartBlock(uint24 _epoch, uint256 gen) internal pure returns (uint256 res) {
@@ -60,9 +60,6 @@ contract general__NuggftV1Epoch is NuggftV1Test, NuggftV1Epoch {
         uint256 got = toStartBlock(epoch, gen);
         uint256 exp = safe__toStartBlock(epoch, gen);
 
-        console.log('input -- epoch: ', epoch, ' gen: ', gen);
-        console.log('res   -- exp: ', exp, ' got: ', got);
-
         assertEq(got, exp, 'toStartBlock: real != safe');
     }
 
@@ -75,7 +72,7 @@ contract general__NuggftV1Epoch is NuggftV1Test, NuggftV1Epoch {
     }
 
     /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-        [pure: toEndBlock]
+        [pure] toEndBlock
        ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
 
     function safe__toEndBlock(uint24 _epoch, uint256 gen) internal pure returns (uint256 res) {
@@ -91,16 +88,12 @@ contract general__NuggftV1Epoch is NuggftV1Test, NuggftV1Epoch {
 
         if (_epoch < OFFSET || _epoch > 1000000) return;
         if (gen < 1000000) return;
-        // if (16000000 < gen || gen < 13000000) return;
 
         if (gen == 0) return;
         if (epoch == 0) return;
 
         uint256 got = toEndBlock(epoch, gen);
         uint256 exp = safe__toEndBlock(epoch, gen);
-
-        // console.log('input -- epoch: ', epoch, ' gen: ', gen);
-        // console.log('res   -- exp: ', exp, ' got: ', got);
 
         assertEq(got, exp, 'toEndBlock: real != safe');
     }
@@ -116,4 +109,8 @@ contract general__NuggftV1Epoch is NuggftV1Test, NuggftV1Epoch {
     function test__general__NuggftV1Epoch__toEndBlock__gas__semisafe() public view {
         semisafe__toEndBlock(OFFSET + 100, genesis);
     }
+
+    /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+        [pure] toEndBlock
+       ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
 }

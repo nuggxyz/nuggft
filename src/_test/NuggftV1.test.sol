@@ -22,9 +22,17 @@ contract RiggedNuggft is NuggftV1 {
     }
 
     function getBlockHash(uint256 blocknum) internal view override returns (bytes32 res) {
-        if (block.number - blocknum < 256) {
+        if (block.number >= blocknum && block.number - blocknum < 256) {
             return keccak256(abi.encodePacked(blocknum));
         }
+    }
+
+    function external__calculateSeed() external view returns (uint256 res, uint24 _epoch) {
+        return calculateSeed();
+    }
+
+    function external__calculateSeed(uint24 epoch) external view returns (uint256 res) {
+        return calculateSeed(epoch);
     }
 }
 
@@ -59,11 +67,21 @@ contract NuggftV1Test is t {
 
     User public any;
 
+    struct Users {
+        address frank;
+        address dee;
+        address mac;
+        address dennis;
+        address charlie;
+        address safe;
+    }
+
+    Users public users;
+
     constructor() {}
 
     function reset() public {
-        fvm.roll(1);
-        fvm.roll(2);
+        fvm.roll(1000001);
         processor = new MockDotnuggV1();
         migrator = new MockNuggftV1Migrator();
         nuggft = new RiggedNuggft(address(processor));
@@ -76,7 +94,25 @@ contract NuggftV1Test is t {
         mac = new User();
         dee = new User();
 
-        any = new User();
+        users.frank = fvm.addr(12);
+        fvm.deal(users.frank, 90000 ether);
+
+        users.dee = fvm.addr(13);
+        fvm.deal(users.dee, 90000 ether);
+
+        users.mac = fvm.addr(14);
+        fvm.deal(users.mac, 90000 ether);
+
+        users.dennis = fvm.addr(15);
+        fvm.deal(users.dennis, 90000 ether);
+
+        users.charlie = fvm.addr(16);
+        fvm.deal(users.charlie, 90000 ether);
+
+        users.safe = fvm.addr(17);
+        fvm.deal(users.safe, 90000 ether);
+
+        // any = new User();
 
         fvm.deal(address(safe), 30 ether);
         fvm.deal(address(dennis), 30 ether);
@@ -86,6 +122,7 @@ contract NuggftV1Test is t {
         fvm.deal(address(charlie), 30 ether);
 
         nuggft.setIsTrusted(address(safe), true);
+        nuggft.setIsTrusted(users.safe, true);
     }
 
     /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━

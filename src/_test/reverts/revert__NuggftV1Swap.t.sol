@@ -36,6 +36,7 @@ contract revert__NuggftV1Swap is NuggftV1Test {
 
     function test__revert__NuggftV1Swap__S_0__successAsSelf() public {
         // console.log(block.number, uint256(blockhash(block.number - 2)), block.chainid);
+
         _nuggft.shouldPass(frank, delegate(epoch), 30 * 10**16);
     }
 
@@ -80,7 +81,11 @@ contract revert__NuggftV1Swap is NuggftV1Test {
     ///////////////////////////////////////////////////////////////////////
 
     function test__revert__NuggftV1Swap__S_1__failWithOneWeiLessThanMin() public {
-        _nuggft.shouldFail('S:1', frank, delegate(epoch), MIN - 1);
+        fvm.startPrank(address(frank));
+
+        fvm.expectRevert('S:1');
+
+        nuggft.delegate{value: MIN - 1}(epoch);
     }
 
     ///////////////////////////////////////////////////////////////////////
