@@ -6,11 +6,11 @@ import '../../interfaces/nuggftv1/INuggftV1.sol';
 
 contract NuggftV1MinterHelper {
     function delegateem(address nuggftv1, uint160 id) external payable {
-        INuggftV1(nuggftv1).delegate{value: msg.value}(address(this), id);
+        INuggftV1(nuggftv1).delegate{value: msg.value}(id);
     }
 
     function claimem(address nuggftv1, uint160 id) external {
-        INuggftV1(nuggftv1).claim(address(this), id);
+        INuggftV1(nuggftv1).claim(id);
 
         payable(msg.sender).transfer(address(this).balance);
     }

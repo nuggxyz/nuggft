@@ -45,10 +45,10 @@ abstract contract NuggftV1Swap is INuggftV1Swap, NuggftV1Stake {
        ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
 
     /// @inheritdoc INuggftV1Swap
-    function delegate(address sender, uint160 tokenId) external payable override {
-        require(_isOperatorFor(msg.sender, sender), 'S:0');
+    function delegate(uint160 tokenId) external payable override {
+        // require(_isOperatorFor(msg.sender, sender), 'S:0');
 
-        (Storage storage s, Memory memory m) = loadTokenSwap(tokenId, sender);
+        (Storage storage s, Memory memory m) = loadTokenSwap(tokenId, msg.sender);
 
         // make sure user is not the owner of swap
         // we do not know how much to give them when they call "claim" otherwise
@@ -67,7 +67,7 @@ abstract contract NuggftV1Swap is INuggftV1Swap, NuggftV1Stake {
 
             (s.data, ) = NuggftV1AgentType.newAgentType(m.activeEpoch, m.sender, lead, false);
 
-            addStakedShareFromMsgValue();
+            addStakedShareFromMsgValue(0);
 
             setProofFromEpoch(tokenId);
 
@@ -96,7 +96,7 @@ abstract contract NuggftV1Swap is INuggftV1Swap, NuggftV1Stake {
         uint160 sellerTokenId,
         uint16 itemId
     ) external payable override {
-        require(_isOperatorForOwner(msg.sender, buyerTokenId), 'S:6');
+        require(_ownerOf(buyerTokenId) == msg.sender, 'S:6');
 
         (Storage storage s, Memory memory m) = loadItemSwap(sellerTokenId, itemId, address(buyerTokenId));
 
@@ -120,19 +120,19 @@ abstract contract NuggftV1Swap is INuggftV1Swap, NuggftV1Stake {
        ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
 
     /// @inheritdoc INuggftV1Swap
-    function claim(address sender, uint160 tokenId) external override {
-        require(_isOperatorFor(msg.sender, sender), 'S:8');
+    function claim(uint160 tokenId) external override {
+        // require(_isOperatorFor(msg.sender, sender), 'S:8');
 
-        (Storage storage s, Memory memory m) = loadTokenSwap(tokenId, sender);
+        (Storage storage s, Memory memory m) = loadTokenSwap(tokenId, msg.sender);
 
-        delete s.offers[sender];
+        delete s.offers[msg.sender];
 
         if (checkClaimerIsWinnerOrLoser(m)) {
             delete s.data;
 
-            checkedTransferFromSelf(sender, tokenId);
+            checkedTransferFromSelf(msg.sender, tokenId);
         } else {
-            SafeTransferLib.safeTransferETH(sender, m.offerData.eth());
+            SafeTransferLib.safeTransferETH(msg.sender, m.offerData.eth());
         }
     }
 
@@ -142,7 +142,7 @@ abstract contract NuggftV1Swap is INuggftV1Swap, NuggftV1Stake {
         uint160 sellerTokenId,
         uint16 itemId
     ) external override {
-        require(_isOperatorForOwner(msg.sender, buyerTokenId), 'S:9');
+        require(_ownerOf(buyerTokenId) == msg.sender, 'S:9');
 
         (Storage storage s, Memory memory m) = loadItemSwap(sellerTokenId, itemId, address(buyerTokenId));
 
@@ -167,21 +167,19 @@ abstract contract NuggftV1Swap is INuggftV1Swap, NuggftV1Stake {
 
     /// @inheritdoc INuggftV1Swap
     function swap(uint160 tokenId, uint96 floor) external override {
-        address sender = _ownerOf(tokenId);
-
-        require(_isOperatorFor(msg.sender, sender), 'S:A');
+        require(_ownerOf(tokenId) == msg.sender, 'S:A');
 
         require(floor >= ethPerShare(), 'S:B');
 
         approvedTransferToSelf(tokenId);
 
-        (Storage storage s, Memory memory m) = loadTokenSwap(tokenId, sender);
+        (Storage storage s, Memory memory m) = loadTokenSwap(tokenId, msg.sender);
 
         // make sure swap does not exist - this logically should never happen
         require(m.swapData == 0, 'NOPE2');
 
         // no need to check dust as no value is being transfered
-        (s.data, ) = NuggftV1AgentType.newAgentType(0, sender, floor, true);
+        (s.data, ) = NuggftV1AgentType.newAgentType(0, msg.sender, floor, true);
     }
 
     /// @inheritdoc INuggftV1Swap
@@ -190,7 +188,7 @@ abstract contract NuggftV1Swap is INuggftV1Swap, NuggftV1Stake {
         uint16 itemId,
         uint96 floor
     ) external override {
-        require(_isOperatorForOwner(msg.sender, sellerTokenId), 'S:C');
+        require(_ownerOf(sellerTokenId) == msg.sender, 'S:C');
 
         // will revert if they do not have the item
         removeItem(sellerTokenId, itemId);
