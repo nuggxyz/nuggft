@@ -22,27 +22,42 @@ contract revert__NuggftV1Stake is NuggftV1Test {
     // ────
 
     function test__revert__NuggftV1Stake__T_1__success() public {
-        _nuggft.shouldPass(frank, mint(2099), 30 * 10**16);
+        _nuggft.shouldPass(frank, mint(2099), 30 ether);
     }
 
-    function test__revert__NuggftV1Stake__T_1__fail() public {
-        _nuggft.shouldPass(frank, mint((2099)), 30 * 10**18);
+    function test__revert__NuggftV1Stake__T_1__failWithValue() public {
+        test__revert__NuggftV1Stake__T_1__success();
 
-        _nuggft.shouldFail('T:1', dennis, mint(2909), 29 * 10**18);
+        fvm.startPrank(users.dennis);
+
+        fvm.expectRevert('T:1');
+
+        nuggft.mint{value: 29 ether}(2909);
+
+        fvm.stopPrank();
     }
 
-    function test__revert__NuggftV1Stake__T_1__fail_fromZero() public {
-        // console.logb(34);
-        _nuggft.shouldPass(frank, mint((2099)), 30 * 10**18);
+    function test__revert__NuggftV1Stake__T_1__failWithZero() public {
+        test__revert__NuggftV1Stake__T_1__success();
 
-        _nuggft.shouldFail('T:1', dennis, mint(2909));
+        fvm.startPrank(users.dennis);
+
+        fvm.expectRevert('T:1');
+
+        nuggft.mint{value: 0}(2909);
+
+        fvm.stopPrank();
     }
 
     // trustedMint
     // ────
 
     function test__revert__NuggftV1Stake__T_1__successOnTrusted() public {
-        _nuggft.shouldPass(safe, trustedMint(99, address(frank)), 30 * 10**16);
+        fvm.startPrank(users.safe);
+
+        nuggft.trustedMint{value: 30 ether}(200, users.frank);
+
+        fvm.stopPrank();
     }
 
     function test__revert__NuggftV1Stake__T_1__failOnTrusted() public {
