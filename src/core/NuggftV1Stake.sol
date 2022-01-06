@@ -88,14 +88,6 @@ abstract contract NuggftV1Stake is INuggftV1Stake, NuggftV1Proof {
     function addStakedShareFromMsgValue() internal {
         uint96 value = msg.value.safe96();
 
-        // bytes32 val;
-
-        // assembly {
-        //     val := stake.slot
-        // }
-
-        // console.logBytes32(val);
-
         uint256 cache = stake;
 
         (uint96 totalPrice, , uint96 protocolFee, ) = minSharePriceBreakdown(cache);
@@ -114,7 +106,7 @@ abstract contract NuggftV1Stake is INuggftV1Stake, NuggftV1Proof {
 
         stake = cache;
 
-        // emit StakeEth(value - protocolFee, protocolFee);
+        emit Stake(cache);
     }
 
     /// @notice handles isolated staking of eth
@@ -131,7 +123,8 @@ abstract contract NuggftV1Stake is INuggftV1Stake, NuggftV1Proof {
         cache = cache.addProto(protocolFee);
 
         stake = cache;
-        // emit StakeEth(eth - protocolFee, protocolFee);
+
+        emit Stake(cache);
     }
 
     function calculateProtocolFeeOf(uint256 any) internal pure returns (uint96 res) {

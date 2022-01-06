@@ -77,7 +77,7 @@ abstract contract NuggftV1Proof is INuggftV1Proof, NuggftV1Dotnugg {
         overys = new uint8[](8);
         styles = new string[](8);
 
-        // defaultIds[0] = uint8(proof & ShiftLib.mask(3));
+        defaultIds[0] = uint8(proof & 0x3);
 
         for (uint8 i = 0; i < 7; i++) {
             uint16 item = NuggftV1ProofType.getIndex(proof, i);
@@ -159,33 +159,49 @@ abstract contract NuggftV1Proof is INuggftV1Proof, NuggftV1Dotnugg {
     function initFromSeed(uint256 seed) internal view returns (uint256 res) {
         require(seed != 0, 'P:8');
 
-        uint256 lengths = featureLengths;
+        uint256 l = featureLengths;
 
-        res |= ((safeMod(ShiftLib.get(seed, 8, 0), _lengthOf(lengths, 0))) + 1);
-        res |= ((1 << 8) | ((safeMod(ShiftLib.get(seed, 8, 8), _lengthOf(lengths, 1))) + 1)) << 3;
-        res |= ((2 << 8) | ((safeMod(ShiftLib.get(seed, 8, 16), _lengthOf(lengths, 2))) + 1)) << (3 + 11);
+        res |= ((safeMod(seed & 0xff, _lengthOf(l, 0))) + 1);
+        res |= ((1 << 8) | ((((seed >>= 8) & 0xff % _lengthOf(l, 1))) + 1)) << 3;
+        res |= ((2 << 8) | ((((seed >>= 8) & 0xff % _lengthOf(l, 2))) + 1)) << (3 + 11);
 
-        uint256 selA = ShiftLib.get(seed, 8, 24);
+        uint256 selA = (seed >>= 8) & 0xff;
 
-        uint256 valA = ShiftLib.get(seed, 8, 32);
+        selA = selA < 128 ? 3 : 4;
 
-        uint256 selB = ShiftLib.get(seed, 8, 24);
+        res |= ((selA << 8) | ((safeMod((seed >>= 8) & 0xff, _lengthOf(l, uint8(selA)))) + 1)) << (3 + 22);
 
-        uint256 valB = ShiftLib.get(seed, 8, 40);
+        uint256 selB = (seed >>= 8) & 0xff;
 
-        if (selA < 128) valA = (3 << 8) | ((safeMod(valA, _lengthOf(lengths, 3))) + 1);
-        else valA = (4 << 8) | ((safeMod(valA, _lengthOf(lengths, 4))) + 1);
+        selB = selB < 30 //
+            ? 5
+            : selB < 55
+            ? 6
+            : selB < 75
+            ? 7
+            : 0;
 
-        res |= (valA) << (3 + 22);
-
-        if (selB < 30) valB = (5 << 8) | ((safeMod(valB, _lengthOf(lengths, 5))) + 1);
-        else if (selB < 55) valB = (6 << 8) | ((safeMod(valB, _lengthOf(lengths, 6))) + 1);
-        else if (selB < 75) valB = (7 << 8) | ((safeMod(valB, _lengthOf(lengths, 7))) + 1);
-        else {
-            return res;
+        if (selB != 0) {
+            res |= ((selB << 8) | ((safeMod((seed >>= 8) & 0xff, _lengthOf(l, uint8(selB)))) + 1)) << (3 + 33);
         }
 
-        res |= (valB) << (3 + 33);
+        uint256 selC = (seed >>= 8) & 0xff;
+
+        selC = selC < 30 //
+            ? 5
+            : selC < 55
+            ? 6
+            : selC < 75
+            ? 7
+            : selC < 115
+            ? 4
+            : selC < 155
+            ? 3
+            : selC < 205
+            ? 2
+            : 1;
+
+        res |= ((selC << 8) | ((safeMod((seed >>= 8) & 0xff, _lengthOf(l, uint8(selC)))) + 1)) << (3 + 66);
     }
 
     function safeMod(uint256 value, uint8 modder) internal pure returns (uint256) {

@@ -53,6 +53,8 @@ abstract contract NuggftV1Swap is INuggftV1Swap, NuggftV1Stake {
         // make sure user is not the owner of swap
         // we do not know how much to give them when they call "claim" otherwise
 
+        uint96 lead;
+
         if (m.activeEpoch == tokenId && m.swapData == 0) {
             // to ensure we at least have enough to increment the offer amount by 2%
             require(msg.value >= MIN_OFFER, 'S:1');
@@ -61,7 +63,9 @@ abstract contract NuggftV1Swap is INuggftV1Swap, NuggftV1Stake {
             // the ability to accidently place an offer for nugg A and end up minting nugg B.
             assert(m.offerData == 0);
 
-            (s.data, ) = NuggftV1AgentType.newAgentType(m.activeEpoch, m.sender, msg.value.safe96(), false);
+            lead = msg.value.safe96();
+
+            (s.data, ) = NuggftV1AgentType.newAgentType(m.activeEpoch, m.sender, lead, false);
 
             addStakedShareFromMsgValue();
 
@@ -80,8 +84,10 @@ abstract contract NuggftV1Swap is INuggftV1Swap, NuggftV1Stake {
             }
 
             // if the leader "owns" the swap, then it was initated by them - "commit" must be executed
-            m.swapData.isOwner() ? commit(s, m) : offer(s, m);
+            (lead) = m.swapData.isOwner() ? commit(s, m) : offer(s, m);
         }
+
+        emit Delegate(tokenId, msg.sender, lead);
     }
 
     /// @inheritdoc INuggftV1Swap
@@ -104,7 +110,9 @@ abstract contract NuggftV1Swap is INuggftV1Swap, NuggftV1Stake {
             require(!m.offerData.isOwner(), 'NOPE'); // always be caught by the require above
         }
 
-        m.offerData == 0 && m.swapData.isOwner() ? commit(s, m) : offer(s, m);
+        uint96 lead = m.offerData == 0 && m.swapData.isOwner() ? commit(s, m) : offer(s, m);
+
+        emit DelegateItem((uint176(itemId) << 160) | sellerTokenId, buyerTokenId, lead);
     }
 
     /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -247,7 +255,7 @@ abstract contract NuggftV1Swap is INuggftV1Swap, NuggftV1Stake {
                                 internal
        ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
 
-    function commit(Storage storage s, Memory memory m) internal returns (uint96 newAmount) {
+    function commit(Storage storage s, Memory memory m) internal returns (uint96 lead) {
         require(msg.value >= ethPerShare(), 'S:5');
 
         require(m.offerData == 0 && m.swapData != 0, 'NOPE3');
@@ -264,12 +272,11 @@ abstract contract NuggftV1Swap is INuggftV1Swap, NuggftV1Stake {
 
         s.offers[m.swapData.account()] = m.swapData.isOwner(false).epoch(m.activeEpoch + 1);
 
+        lead = newSwapData.eth();
         addStakedEth(increment + dust);
-
-        return newSwapData.eth();
     }
 
-    function offer(Storage storage s, Memory memory m) internal returns (uint96 newAmount) {
+    function offer(Storage storage s, Memory memory m) internal returns (uint96 lead) {
         // make sure swap is still active
         require(m.activeEpoch <= m.swapData.epoch(), 'S:F');
 
@@ -284,9 +291,8 @@ abstract contract NuggftV1Swap is INuggftV1Swap, NuggftV1Stake {
 
         s.data = newSwapData;
 
+        lead = newSwapData.eth();
         addStakedEth(increment + dust);
-
-        return newSwapData.eth();
     }
 
     function checkClaimerIsWinnerOrLoser(Memory memory m) internal pure returns (bool winner) {

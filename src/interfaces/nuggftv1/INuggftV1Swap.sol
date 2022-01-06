@@ -3,6 +3,9 @@
 pragma solidity 0.8.9;
 
 interface INuggftV1Swap {
+    event Delegate(uint160 indexed tokenId, address user, uint96 lead);
+    event DelegateItem(uint176 indexed sellingItemId, uint160 nugg, uint96 lead);
+
     /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
                             STATE CHANGING
        ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
