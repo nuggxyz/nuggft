@@ -11,7 +11,7 @@ library NuggftV1AgentType {
     using SafeCastLib for uint256;
 
     // 10**13
-    uint96 constant COMPRESSION_PERCISION = 0x9184E72A000;
+    uint96 constant COMPRESSION_LOSS = 10e8;
 
     /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
                                CALCULATION
@@ -23,28 +23,24 @@ library NuggftV1AgentType {
         assembly {
             res := div(res, 10000)
         }
-        // return compressEthRoundUp((MathLib.safeDivNonZero96(value * 10200, 10000)));
     }
 
     // @test  manual
     function compressEthRoundDown(uint96 value) internal pure returns (uint96 res) {
-        // res = MathLib.safeDivNonZero96(value / COMPRESSION_PERCISION) * COMPRESSION_PERCISION;
-
         assembly {
-            res := mul(div(value, COMPRESSION_PERCISION), COMPRESSION_PERCISION)
+            res := mul(div(value, COMPRESSION_LOSS), COMPRESSION_LOSS)
         }
     }
 
     // @test  manual
     function compressEthRoundUp(uint96 value) internal pure returns (uint96 res) {
         assembly {
-            res := mod(value, COMPRESSION_PERCISION)
+            res := mod(value, COMPRESSION_LOSS)
         }
         if (res > 0) {
             assembly {
-                res := mul(add(div(value, COMPRESSION_PERCISION), 1), COMPRESSION_PERCISION)
+                res := mul(add(div(value, COMPRESSION_LOSS), 1), COMPRESSION_LOSS)
             }
-            // return ((value / COMPRESSION_PERCISION) + 1) * COMPRESSION_PERCISION;
         } else {
             return compressEthRoundDown(value);
         }
@@ -54,37 +50,35 @@ library NuggftV1AgentType {
                               SHIFT HELPERS
        ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
     // @test input output unit test
-    // type(uint96).max / 10**13 = 0x01C25C268497681 =  7922816251426433
-    // type(uint56).max          = 0x100000000000000 = 72057594037927936
+    // type(uint96).max / 10e8 =   792281625142643375935
+    // type(uint70).max          = 1180591620717411303423
     function eth(uint256 input) internal pure returns (uint96 res) {
-        input = ShiftLib.get(input, 56, 160);
+        input = ShiftLib.get(input, 70, 160);
         assembly {
-            input := mul(input, COMPRESSION_PERCISION)
+            res := mul(input, COMPRESSION_LOSS)
         }
-        return input.safe96();
+        // return input.safe96();
     }
 
-    function eth(uint256 input, uint96 update) internal pure returns (uint256 cache, uint96 rem) {
+    function eth(uint256 input, uint96 update) internal pure returns (uint256 cache) {
         assembly {
-            rem := mod(update, COMPRESSION_PERCISION)
-            update := div(update, COMPRESSION_PERCISION)
+            update := div(update, COMPRESSION_LOSS) // bye byte wei
         }
-        // rem = update % COMPRESSION_PERCISION;
-        cache = ShiftLib.set(input, 56, 160, update);
+        cache = ShiftLib.set(input, 70, 160, update);
     }
 
     // @test  input output unit test
-    function epoch(uint256 input, uint32 update) internal pure returns (uint256 res) {
-        return ShiftLib.set(input, 32, 216, update);
+    function epoch(uint256 input, uint24 update) internal pure returns (uint256 res) {
+        return ShiftLib.set(input, 24, 230, update);
     }
 
-    function epoch(uint256 input) internal pure returns (uint32 res) {
-        return ShiftLib.get(input, 32, 216).safe32();
+    function epoch(uint256 input) internal pure returns (uint24 res) {
+        return uint24(ShiftLib.get(input, 24, 230));
     }
 
     // @test  input output unit test
     function account(uint256 input) internal pure returns (address res) {
-        res = address(ShiftLib.get(input, 160, 0).safe160());
+        res = address(uint160(ShiftLib.get(input, 160, 0)));
     }
 
     function account(uint256 input, address update) internal pure returns (uint256 output) {
@@ -107,15 +101,15 @@ library NuggftV1AgentType {
 
     // @test  manual
     function newAgentType(
-        uint32 _epoch,
+        uint24 _epoch,
         address _account,
         uint96 _eth,
         bool _isOwner
-    ) internal pure returns (uint256 res, uint96 dust) {
+    ) internal pure returns (uint256 res) {
         res = epoch(res, _epoch);
         res = account(res, _account);
         if (_isOwner) res = isOwner(res, true);
-        (res, dust) = eth(res, _eth);
+        (res) = eth(res, _eth);
         res = flag(res);
     }
 }

@@ -31,7 +31,7 @@ abstract contract NuggftV1Swap is INuggftV1Swap, NuggftV1Stake {
     struct Memory {
         uint256 swapData;
         uint256 offerData;
-        uint32 activeEpoch;
+        uint24 activeEpoch;
         address sender;
     }
 
@@ -65,7 +65,7 @@ abstract contract NuggftV1Swap is INuggftV1Swap, NuggftV1Stake {
 
             lead = msg.value.safe96();
 
-            (s.data, ) = NuggftV1AgentType.newAgentType(m.activeEpoch, m.sender, lead, false);
+            (s.data) = NuggftV1AgentType.newAgentType(m.activeEpoch, m.sender, lead, false);
 
             addStakedShareFromMsgValue(0);
 
@@ -179,7 +179,7 @@ abstract contract NuggftV1Swap is INuggftV1Swap, NuggftV1Stake {
         require(m.swapData == 0, 'NOPE2');
 
         // no need to check dust as no value is being transfered
-        (s.data, ) = NuggftV1AgentType.newAgentType(0, msg.sender, floor, true);
+        (s.data) = NuggftV1AgentType.newAgentType(0, msg.sender, floor, true);
     }
 
     /// @inheritdoc INuggftV1Swap
@@ -200,7 +200,7 @@ abstract contract NuggftV1Swap is INuggftV1Swap, NuggftV1Stake {
         // cannot sell two of the same item at same time
         require(m.swapData == 0, 'S:D');
 
-        (s.data, ) = NuggftV1AgentType.newAgentType(0, address(sellerTokenId), floor, true);
+        (s.data) = NuggftV1AgentType.newAgentType(0, address(sellerTokenId), floor, true);
     }
 
     /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -264,14 +264,14 @@ abstract contract NuggftV1Swap is INuggftV1Swap, NuggftV1Stake {
         // commented out as the logic is handled by S:R
         // require(!m.offerData.isOwner()(), 'S:3');
 
-        (uint256 newSwapData, uint96 increment, uint96 dust) = updateSwapDataWithEpoch(m.swapData, m.activeEpoch + 1, m.sender, 0);
+        (uint256 newSwapData, uint96 increment) = updateSwapDataWithEpoch(m.swapData, m.activeEpoch + 1, m.sender, 0);
 
         s.data = newSwapData;
 
         s.offers[m.swapData.account()] = m.swapData.isOwner(false).epoch(m.activeEpoch + 1);
 
         lead = newSwapData.eth();
-        addStakedEth(increment + dust);
+        addStakedEth(increment);
     }
 
     function offer(Storage storage s, Memory memory m) internal returns (uint96 lead) {
@@ -280,17 +280,12 @@ abstract contract NuggftV1Swap is INuggftV1Swap, NuggftV1Stake {
 
         if (m.swapData.account() != m.sender) s.offers[m.swapData.account()] = m.swapData;
 
-        (uint256 newSwapData, uint96 increment, uint96 dust) = updateSwapDataWithEpoch(
-            m.swapData,
-            m.swapData.epoch(),
-            m.sender,
-            m.offerData.eth()
-        );
+        (uint256 newSwapData, uint96 increment) = updateSwapDataWithEpoch(m.swapData, m.swapData.epoch(), m.sender, m.offerData.eth());
 
         s.data = newSwapData;
 
         lead = newSwapData.eth();
-        addStakedEth(increment + dust);
+        addStakedEth(increment);
     }
 
     function checkClaimerIsWinnerOrLoser(Memory memory m) internal pure returns (bool winner) {
@@ -306,25 +301,17 @@ abstract contract NuggftV1Swap is INuggftV1Swap, NuggftV1Stake {
     // @test  unit
     function updateSwapDataWithEpoch(
         uint256 prevSwapData,
-        uint32 _epoch,
+        uint24 _epoch,
         address account,
         uint96 currUserOffer
-    )
-        internal
-        view
-        returns (
-            uint256 res,
-            uint96 increment,
-            uint96 dust
-        )
-    {
+    ) internal view returns (uint256 res, uint96 increment) {
         uint96 baseEth = prevSwapData.eth();
 
         currUserOffer += msg.value.safe96();
 
         require(NuggftV1AgentType.addIncrement(baseEth) <= currUserOffer, 'S:G');
 
-        (res, dust) = NuggftV1AgentType.newAgentType(_epoch, account, currUserOffer, false);
+        (res) = NuggftV1AgentType.newAgentType(_epoch, account, currUserOffer, false);
 
         increment = currUserOffer - baseEth;
     }
