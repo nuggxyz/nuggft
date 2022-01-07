@@ -6,8 +6,6 @@ import {IDotnuggV1Implementer} from '../dotnuggv1/IDotnuggV1Implementer.sol';
 import {IDotnuggV1} from '../dotnuggv1/IDotnuggV1.sol';
 
 interface INuggftV1Dotnugg is IDotnuggV1Implementer {
-    event DotnuggV1ResolverUpdated(uint256 tokenId, address to);
-
     function setDotnuggV1Resolver(uint256 tokenId, address to) external;
 
     function dotnuggV1ResolverOf(uint256 tokenId) external view returns (address resolver);

@@ -38,7 +38,7 @@ abstract contract NuggftV1Swap is INuggftV1Swap, NuggftV1Stake {
     mapping(uint16 => uint256) protocolItems;
     mapping(uint160 => Mapping) swaps;
 
-    uint96 public constant MIN_OFFER = 10**13 * 50;
+    uint96 public constant MIN_OFFER = 10**8 * 100;
 
     /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
                                   delegate
@@ -112,7 +112,7 @@ abstract contract NuggftV1Swap is INuggftV1Swap, NuggftV1Stake {
 
         uint96 lead = m.offerData == 0 && m.swapData.isOwner() ? commit(s, m) : offer(s, m);
 
-        emit DelegateItem((uint176(itemId) << 160) | sellerTokenId, buyerTokenId, lead);
+        emit DelegateItem(encodeSellingItemId(sellerTokenId, itemId), buyerTokenId, lead);
     }
 
     /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -134,6 +134,8 @@ abstract contract NuggftV1Swap is INuggftV1Swap, NuggftV1Stake {
         } else {
             SafeTransferLib.safeTransferETH(msg.sender, m.offerData.eth());
         }
+
+        emit Claim(tokenId, msg.sender);
     }
 
     /// @inheritdoc INuggftV1Swap
@@ -159,6 +161,8 @@ abstract contract NuggftV1Swap is INuggftV1Swap, NuggftV1Stake {
         } else {
             SafeTransferLib.safeTransferETH(_ownerOf(buyerTokenId), m.offerData.eth());
         }
+
+        emit ClaimItem(encodeSellingItemId(sellerTokenId, itemId), buyerTokenId);
     }
 
     /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -180,27 +184,31 @@ abstract contract NuggftV1Swap is INuggftV1Swap, NuggftV1Stake {
 
         // no need to check dust as no value is being transfered
         (s.data) = NuggftV1AgentType.newAgentType(0, msg.sender, floor, true);
+
+        emit Swap(tokenId, floor);
     }
 
     /// @inheritdoc INuggftV1Swap
     function swapItem(
-        uint160 sellerTokenId,
+        uint160 tokenId,
         uint16 itemId,
         uint96 floor
     ) external override {
-        require(_ownerOf(sellerTokenId) == msg.sender, 'S:C');
+        require(_ownerOf(tokenId) == msg.sender, 'S:C');
 
         // will revert if they do not have the item
-        removeItem(sellerTokenId, itemId);
+        removeItem(tokenId, itemId);
 
         protocolItems[itemId]++;
 
-        (Storage storage s, Memory memory m) = loadItemSwap(sellerTokenId, itemId, address(sellerTokenId));
+        (Storage storage s, Memory memory m) = loadItemSwap(tokenId, itemId, address(tokenId));
 
         // cannot sell two of the same item at same time
         require(m.swapData == 0, 'S:D');
 
-        (s.data) = NuggftV1AgentType.newAgentType(0, address(sellerTokenId), floor, true);
+        (s.data) = NuggftV1AgentType.newAgentType(0, address(tokenId), floor, true);
+
+        emit Swap(tokenId, floor);
     }
 
     /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -345,5 +353,9 @@ abstract contract NuggftV1Swap is INuggftV1Swap, NuggftV1Stake {
         } else {
             m.offerData = ptr.offers[account];
         }
+    }
+
+    function encodeSellingItemId(uint160 tokenId, uint16 itemId) internal pure returns (uint176) {
+        return (uint176(itemId) << 160) | tokenId;
     }
 }

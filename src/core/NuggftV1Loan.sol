@@ -32,12 +32,16 @@ abstract contract NuggftV1Loan is INuggftV1Loan, NuggftV1Swap {
 
         approvedTransferToSelf(tokenId);
 
-        SafeTransferLib.safeTransferETH(msg.sender, loanData.eth());
+        uint96 value = loanData.eth();
+
+        SafeTransferLib.safeTransferETH(msg.sender, value);
+
+        emit Loan(tokenId, value);
     }
 
     /// @inheritdoc INuggftV1Loan
-    function payoff(uint160 tokenId) external payable override {
-        (uint96 toPayoff, uint96 toRebalance, uint96 owed, uint24 epochDue, address loaner) = loanInfo(tokenId);
+    function liquidate(uint160 tokenId) external payable override {
+        (uint96 toLiquidate, uint96 toRebalance, uint96 owed, uint24 epochDue, address loaner) = loanInfo(tokenId);
 
         assert(address(this) == _ownerOf(tokenId)); // should always be true - should revert in loanInfo
 
@@ -53,15 +57,17 @@ abstract contract NuggftV1Loan is INuggftV1Loan, NuggftV1Swap {
 
         uint96 value = msg.value.safe96();
 
-        require(toPayoff <= value, 'L:2');
+        require(toLiquidate <= value, 'L:2');
 
-        uint96 overpayment = value - toPayoff;
+        uint96 overpayment = value - toLiquidate;
 
         addStakedEth(toRebalance + overpayment);
 
         SafeTransferLib.safeTransferETH(benif, owed);
 
         checkedTransferFromSelf(benif, tokenId);
+
+        emit Liquidate(tokenId, value, msg.sender);
     }
 
     /// @inheritdoc INuggftV1Loan
@@ -72,18 +78,22 @@ abstract contract NuggftV1Loan is INuggftV1Loan, NuggftV1Swap {
 
         require(toRebalance <= msg.value, 'L:3');
 
+        uint96 value = msg.value.safe96();
+
         // must be done before new principal is calculated
-        addStakedEth(msg.value.safe96());
+        addStakedEth(value);
 
         uint256 res = NuggftV1AgentType.newAgentType(epoch(), loaner, ethPerShare(), false);
 
         loans[tokenId] = res;
 
         SafeTransferLib.safeTransferETH(loaner, earned);
+
+        emit Rebalance(tokenId, value);
     }
 
     /// @inheritdoc INuggftV1Loan
-    function valueForPayoff(uint160 tokenId) external view returns (uint96 res) {
+    function valueForLiquidate(uint160 tokenId) external view returns (uint96 res) {
         (res, , , , ) = loanInfo(tokenId);
     }
 
@@ -98,7 +108,7 @@ abstract contract NuggftV1Loan is INuggftV1Loan, NuggftV1Swap {
         view
         override
         returns (
-            uint96 toPayoff,
+            uint96 toLiquidate,
             uint96 toRebalance,
             uint96 earned,
             uint24 epochDue,
@@ -120,11 +130,11 @@ abstract contract NuggftV1Loan is INuggftV1Loan, NuggftV1Swap {
             toRebalance := div(mul(curr, REBALANCE_FEE_BPS), 10000)
         }
 
-        toPayoff = curr + toRebalance;
+        toLiquidate = curr + toRebalance;
 
         unchecked {
             // value earned while lone was taken out
-            earned = toPayoff >= activeEps ? 0 : activeEps - toPayoff;
+            earned = toLiquidate >= activeEps ? 0 : activeEps - toLiquidate;
 
             epochDue = cache.epoch() + LIQUIDATION_PERIOD;
         }

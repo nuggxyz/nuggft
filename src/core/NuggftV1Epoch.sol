@@ -29,10 +29,7 @@ abstract contract NuggftV1Epoch is INuggftV1Epoch {
         res = calculateSeed(_epoch);
     }
 
-    /// @notice gets unique base based on given epoch and converts encoded bytes to object that can be merged
-    /// Note: by using the block hash no one knows what a nugg will look like before it's epoch.
-    /// We considered making this harder to manipulate, but we decided that if someone were able to
-    /// pull it off and make their own custom nugg, that would be really fucking cool.
+    /// @notice calculates a random-enough seed that will stay the
     function calculateSeed(uint24 _epoch) internal view returns (uint256 res) {
         uint256 startblock = toStartBlock(_epoch, genesis);
         bytes32 bhash = getBlockHash(startblock - 2);

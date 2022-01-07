@@ -31,10 +31,12 @@ task('raw', 'runs raw')
             false,
             false,
             false,
-            '0x0',
+            '0x00',
         );
+
+        // fix.processor.img(fix.implementer.address, 69, constants.AddressZero, false, false, false, false, '0x00')
         if (res) {
-            console.log(res[1]);
+            console.log(res);
             const end = new Date().getTime() - start.getTime(),
                 hrend = process.hrtime(hrstart);
             console.info('Execution time: %dms', end);

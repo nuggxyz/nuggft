@@ -201,7 +201,7 @@ abstract contract NuggftV1Proof is INuggftV1Proof, NuggftV1Dotnugg {
             ? 2
             : 1;
 
-        res |= ((selC << 8) | ((safeMod((seed >>= 8) & 0xff, _lengthOf(l, uint8(selC)))) + 1)) << (3 + 66);
+        res |= ((selC << 8) | ((safeMod((seed >>= 8) & 0xff, _lengthOf(l, uint8(selC)))) + 1)) << (3 + 77);
     }
 
     function safeMod(uint256 value, uint8 modder) internal pure returns (uint256) {

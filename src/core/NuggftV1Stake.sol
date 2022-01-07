@@ -31,11 +31,11 @@ abstract contract NuggftV1Stake is INuggftV1Stake, NuggftV1Proof {
     function extractProtocolEth() external requiresTrust {
         uint256 cache = stake;
 
-        emit ProtocolEthExtracted(cache.proto());
-
         SafeTransferLib.safeTransferETH(msg.sender, cache.proto());
 
-        stake = cache.proto(0);
+        cache = cache.proto(0);
+
+        emit Stake(cache);
     }
 
     /// @inheritdoc INuggftV1Stake

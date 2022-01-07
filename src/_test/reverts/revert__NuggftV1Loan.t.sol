@@ -65,19 +65,19 @@ contract revert__NuggftV1Loan is NuggftV1Test {
     }
 
     /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-        [L:1] - payoff - "msg.sender must be operator for unexpired loan"
+        [L:1] - liquidate - "msg.sender must be operator for unexpired loan"
        ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
 
     function test__revert__NuggftV1Loan__L_1__successAsSelf() public {
         uint160 tokenId = scenario_frank_has_a_loaned_token();
 
-        _nuggft.shouldPass(frank, payoff(tokenId), nuggft.valueForPayoff(tokenId));
+        _nuggft.shouldPass(frank, liquidate(tokenId), nuggft.valueForLiquidate(tokenId));
     }
 
     function test__revert__NuggftV1Loan__L_1__successAsSelfExpired() public {
         uint160 tokenId = scenario_frank_has_a_loaned_token_that_has_expired();
 
-        _nuggft.shouldPass(frank, payoff(tokenId), nuggft.valueForPayoff(tokenId));
+        _nuggft.shouldPass(frank, liquidate(tokenId), nuggft.valueForLiquidate(tokenId));
     }
 
     function test__revert__NuggftV1Loan__L_1__successAsOperator() public {
@@ -85,7 +85,7 @@ contract revert__NuggftV1Loan is NuggftV1Test {
 
         _nuggft.shouldPass(frank, setApprovalForAll(address(mac), true));
 
-        _nuggft.shouldPass(mac, payoff(tokenId), nuggft.valueForPayoff(tokenId));
+        _nuggft.shouldPass(mac, liquidate(tokenId), nuggft.valueForLiquidate(tokenId));
     }
 
     function test__revert__NuggftV1Loan__L_1__successAsOperatorExpired() public {
@@ -93,59 +93,59 @@ contract revert__NuggftV1Loan is NuggftV1Test {
 
         _nuggft.shouldPass(frank, setApprovalForAll(address(mac), true));
 
-        _nuggft.shouldPass(mac, payoff(tokenId), nuggft.valueForPayoff(tokenId));
+        _nuggft.shouldPass(mac, liquidate(tokenId), nuggft.valueForLiquidate(tokenId));
     }
 
     function test__revert__NuggftV1Loan__L_1__successNotOperatorExpired() public {
         uint160 tokenId = scenario_frank_has_a_loaned_token_that_has_expired();
 
-        _nuggft.shouldPass(mac, payoff(tokenId), nuggft.valueForPayoff(tokenId));
+        _nuggft.shouldPass(mac, liquidate(tokenId), nuggft.valueForLiquidate(tokenId));
     }
 
     function test__revert__NuggftV1Loan__L_1__failAsNotOperatorNotExpired() public {
         uint160 tokenId = scenario_frank_has_a_loaned_token();
 
-        _nuggft.shouldFail('L:1', mac, payoff(tokenId), nuggft.valueForPayoff(tokenId));
+        _nuggft.shouldFail('L:1', mac, liquidate(tokenId), nuggft.valueForLiquidate(tokenId));
     }
 
     /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-        [L:2] - payoff - "msg.value not high enough"
+        [L:2] - liquidate - "msg.value not high enough"
        ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
 
-    function test__revert__NuggftV1Loan__L_2__successPayoffExact() public {
+    function test__revert__NuggftV1Loan__L_2__successLiquidateExact() public {
         uint160 tokenId = scenario_frank_has_a_loaned_token();
 
-        _nuggft.shouldPass(frank, payoff(tokenId), nuggft.valueForPayoff(tokenId));
+        _nuggft.shouldPass(frank, liquidate(tokenId), nuggft.valueForLiquidate(tokenId));
     }
 
-    function test__revert__NuggftV1Loan__L_2__successPayoffWeiHigher() public {
+    function test__revert__NuggftV1Loan__L_2__successLiquidateWeiHigher() public {
         uint160 tokenId = scenario_frank_has_a_loaned_token();
 
-        _nuggft.shouldPass(frank, payoff(tokenId), nuggft.valueForPayoff(tokenId) + 1);
+        _nuggft.shouldPass(frank, liquidate(tokenId), nuggft.valueForLiquidate(tokenId) + 1);
     }
 
-    function test__revert__NuggftV1Loan__L_2__failPayoffWeiLower() public {
+    function test__revert__NuggftV1Loan__L_2__failLiquidateWeiLower() public {
         uint160 tokenId = scenario_frank_has_a_loaned_token();
 
-        _nuggft.shouldFail('L:2', frank, payoff(tokenId), nuggft.valueForPayoff(tokenId) - 1);
+        _nuggft.shouldFail('L:2', frank, liquidate(tokenId), nuggft.valueForLiquidate(tokenId) - 1);
     }
 
-    function test__revert__NuggftV1Loan__L_2__successPayoffWayHigher() public {
+    function test__revert__NuggftV1Loan__L_2__successLiquidateWayHigher() public {
         uint160 tokenId = scenario_frank_has_a_loaned_token();
 
-        _nuggft.shouldPass(frank, payoff(tokenId), nuggft.valueForPayoff(tokenId) + 50 ether);
+        _nuggft.shouldPass(frank, liquidate(tokenId), nuggft.valueForLiquidate(tokenId) + 50 ether);
     }
 
-    function test__revert__NuggftV1Loan__L_2__failPayoffWayLower() public {
+    function test__revert__NuggftV1Loan__L_2__failLiquidateWayLower() public {
         uint160 tokenId = scenario_frank_has_a_loaned_token();
 
-        _nuggft.shouldFail('L:2', frank, payoff(tokenId), nuggft.valueForPayoff(tokenId) / 2);
+        _nuggft.shouldFail('L:2', frank, liquidate(tokenId), nuggft.valueForLiquidate(tokenId) / 2);
     }
 
-    function test__revert__NuggftV1Loan__L_2__failPayoffZero() public {
+    function test__revert__NuggftV1Loan__L_2__failLiquidateZero() public {
         uint160 tokenId = scenario_frank_has_a_loaned_token();
 
-        _nuggft.shouldFail('L:2', frank, payoff(tokenId), 0);
+        _nuggft.shouldFail('L:2', frank, liquidate(tokenId), 0);
     }
 
     /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -202,12 +202,12 @@ contract revert__NuggftV1Loan is NuggftV1Test {
         _nuggft.shouldPass(frank, loanInfo(tokenId));
     }
 
-    function test__revert__NuggftV1Loan__L_4__failDoesNotExistAfterPayoff() public {
+    function test__revert__NuggftV1Loan__L_4__failDoesNotExistAfterLiquidate() public {
         uint160 tokenId = scenario_frank_has_a_loaned_token();
 
         _nuggft.shouldPass(frank, loanInfo(tokenId));
 
-        _nuggft.shouldPass(frank, payoff(tokenId), nuggft.valueForPayoff(tokenId) + 1);
+        _nuggft.shouldPass(frank, liquidate(tokenId), nuggft.valueForLiquidate(tokenId) + 1);
 
         _nuggft.shouldFail('L:4', frank, loanInfo(tokenId));
     }

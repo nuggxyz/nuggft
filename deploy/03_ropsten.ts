@@ -2,9 +2,8 @@ import { Contract, ethers } from 'ethers';
 import { HardhatRuntimeEnvironment } from 'hardhat/types';
 
 import { NamedAccounts } from '../hardhat.config';
-import { toGwei } from '../tests/hardhat/lib/shared/conversion';
+import { toEth, toGwei } from '../tests/hardhat/lib/shared/conversion';
 import { IDotnuggV1, IDotnuggV1__factory, NuggftV1 } from '../typechain';
-import { NuggftV1Minter } from '../typechain/NuggftV1Minter';
 // import { NuggftV1 } from '../typechain';
 // import { XNUGG as xNUGG } from '../typechain/XNUGG';
 // import { NuggftV1 } from '../typechain/NuggftV1.d';
@@ -33,7 +32,13 @@ const deployment = async (hre: HardhatRuntimeEnvironment) => {
 
         dotnuggV1Address = dotnuggV1Deployment.address;
     } else if (chainID === '3') {
-        dotnuggV1Address = '0xF7895Bc8A3C3A8B91D834b888a6BdEaE4a2fb098';
+        dotnuggV1Address = '0x0857A644Aeb95685b4eeb63570Cef8a056e57D07';
+    } else if (chainID === '5') {
+        dotnuggV1Address = '0x6adffE28e703be151A7157D425B680E74166bC15';
+    } else if (chainID === '42') {
+        dotnuggV1Address = '0x6adffE28e703be151A7157D425B680E74166bC15';
+    } else if (chainID === '4') {
+        dotnuggV1Address = '0x6adffE28e703be151A7157D425B680E74166bC15';
     }
 
     const dotnuggV1 = new Contract(dotnuggV1Address, IDotnuggV1__factory.abi) as IDotnuggV1;
@@ -44,7 +49,7 @@ const deployment = async (hre: HardhatRuntimeEnvironment) => {
         from: eoaDeployer.address,
         log: true,
         args: [dotnuggV1.address],
-        gasPrice: toGwei('20'),
+        // gasPrice: toGwei('20'),
 
         // deterministicDeployment: salts[2],
     });
@@ -52,22 +57,22 @@ const deployment = async (hre: HardhatRuntimeEnvironment) => {
 
     const nuggft = await hre.ethers.getContractAt<NuggftV1>('NuggftV1', nuggftDeployment.address);
 
-    const tm = await hre.deployments.deploy('NuggftV1Minter', {
-        from: eoaDeployer.address,
-        log: true,
-        args: [],
-        gasPrice: toGwei('20'),
+    // const tm = await hre.deployments.deploy('NuggftV1Minter', {
+    //     from: eoaDeployer.address,
+    //     log: true,
+    //     args: [],
+    //     gasPrice: toGwei('20'),
 
-        // deterministicDeployment: salts[2],
-    });
+    //     // deterministicDeployment: salts[2],
+    // });
 
-    const minter = await hre.ethers.getContractAt<NuggftV1Minter>('NuggftV1Minter', tm.address);
+    // const minter = await hre.ethers.getContractAt<NuggftV1Minter>('NuggftV1Minter', tm.address);
 
     const sendFiles = async (feature: number) => {
         return (
             await nuggft
                 .connect(eoaDeployer)
-                .dotnuggV1StoreFiles(hre.dotnugg.itemsByFeatureByIdArray[feature], feature, { gasPrice: toGwei('20') })
+                .dotnuggV1StoreFiles(hre.dotnugg.itemsByFeatureByIdArray[feature], feature)
                 .then((data) => {
                     hre.deployments.log(`tx for feature ${feature} sent... waiting to be mined... `, data.hash);
                     return data;
@@ -95,22 +100,23 @@ const deployment = async (hre: HardhatRuntimeEnvironment) => {
             });
     };
 
-    // await sendFiles(0);
-    // // 0x0272be2a172ebea775fd7ed68c32b0dc1032c55d;
-    // await sendFiles(1);
-    // await sendFiles(2);
-    // await sendFiles(3);
-    // await sendFiles(4);
-    // await sendFiles(5);
-    // await sendFiles(6);
-    // await sendFiles(7);
-    // await sendTx(
-    //     nuggft.connect(await hre.ethers.getNamedSigner('deployer')).trustedMint(69, '0x9B0E2b16F57648C7bAF28EDD7772a815Af266E77', {
-    //         value: toEth('.002'),
-    //         gasPrice: toGwei('20'),
-    //         gasLimit: 1000000,
-    //     }),
-    // );
+    await sendFiles(0);
+    // 0x0272be2a172ebea775fd7ed68c32b0dc1032c55d;
+    await sendFiles(1);
+    await sendFiles(2);
+    await sendFiles(3);
+    await sendFiles(4);
+    await sendFiles(5);
+    await sendFiles(6);
+    await sendFiles(7);
+
+    await sendTx(
+        nuggft.connect(await hre.ethers.getNamedSigner('deployer')).trustedMint(69, '0x9B0E2b16F57648C7bAF28EDD7772a815Af266E77', {
+            value: toEth('.002'),
+            gasPrice: toGwei('20'),
+            gasLimit: 1000000,
+        }),
+    );
     // await sendTx(minter.connect(await hre.ethers.getNamedSigner('deployer')).mintem(nuggft.address, 501, 20, { value: toEth('.25') }));
 
     // const activeEpoch = await nuggft.epoch();
@@ -119,13 +125,13 @@ const deployment = async (hre: HardhatRuntimeEnvironment) => {
     // hre.deployments.log('active epoch is...', activeEpoch.toString());
     // hre.deployments.log('minSharePrice is..', minSharePrice.toString());
 
-    // await sendTx(
-    //     nuggft.connect(await hre.ethers.getNamedSigner('deployer')).trustedMint(69, '0x9B0E2b16F57648C7bAF28EDD7772a815Af266E77', {
-    //         value: await nuggft.minSharePrice(),
-    //         gasPrice: toGwei('20'),
-    //         gasLimit: 1000000,
-    //     }),
-    // );
+    await sendTx(
+        nuggft.connect(await hre.ethers.getNamedSigner('deployer')).mint(770, {
+            value: await nuggft.minSharePrice(),
+            gasPrice: toGwei('20'),
+            gasLimit: 1000000,
+        }),
+    );
 
     // await sendTx(
     //     nuggft.connect(await hre.ethers.getNamedSigner('dee')).delegate((await hre.ethers.getNamedSigner('dee')).address, activeEpoch, {
