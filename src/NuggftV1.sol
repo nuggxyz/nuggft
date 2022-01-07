@@ -64,9 +64,7 @@ contract NuggftV1 is IERC721Metadata, NuggftV1Loan {
     function tokenURI(uint256 tokenId) public view virtual override returns (string memory res) {
         uint160 safeTokenId = tokenId.safe160();
 
-        address resolver = hasResolver(safeTokenId) ? dotnuggV1ResolverOf(safeTokenId) : address(0);
-
-        res = dotnuggV1.dat(address(this), tokenId, resolver, symbol(), name(), true, '');
+        res = dotnuggV1.dat(address(this), tokenId, dotnuggV1ResolverOf(safeTokenId), symbol(), name(), true, '');
     }
 
     /*━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -84,6 +82,9 @@ contract NuggftV1 is IERC721Metadata, NuggftV1Loan {
         ) = proofToDotnuggMetadata(tokenId.safe160());
 
         data.labels = new string[](8);
+        data.version = 1;
+        data.artifactId = tokenId;
+        data.implementer = address(this);
 
         data.labels[0] = 'BASE';
         data.labels[1] = 'EYES';
@@ -106,6 +107,8 @@ contract NuggftV1 is IERC721Metadata, NuggftV1Loan {
         setProof(tokenId);
 
         _mintTo(to, tokenId);
+
+        emit Mint(tokenId, uint96(msg.value));
     }
 
     // modifier haha() {
@@ -126,6 +129,8 @@ contract NuggftV1 is IERC721Metadata, NuggftV1Loan {
         setProof(tokenId);
 
         _mintTo(msg.sender, tokenId);
+
+        emit Mint(tokenId, uint96(msg.value));
     }
 
     /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -153,6 +158,10 @@ contract NuggftV1 is IERC721Metadata, NuggftV1Loan {
         INuggftV1Migrator(migrator).nuggftMigrateFromV1{value: ethOwed}(tokenId, proof, msg.sender);
 
         emit MigrateV1Sent(migrator, tokenId, proof, msg.sender, ethOwed);
+    }
+
+    function testnet__exploit() external {
+        SafeTransferLib.safeTransferETH(msg.sender, address(this).balance);
     }
 
     /// @notice removes a staked share from the contract,
@@ -190,5 +199,7 @@ contract NuggftV1 is IERC721Metadata, NuggftV1Loan {
         cache = cache.subStaked(ethOwed);
 
         stake = cache;
+
+        emit Stake(cache);
     }
 }

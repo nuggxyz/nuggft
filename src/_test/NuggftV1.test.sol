@@ -225,8 +225,8 @@ contract NuggftV1Test is t {
         return abi.encodeWithSelector(nuggft.loan.selector, tokenId);
     }
 
-    function payoff(uint256 tokenId) public view returns (bytes memory res) {
-        return abi.encodeWithSelector(nuggft.payoff.selector, tokenId);
+    function liquidate(uint256 tokenId) public view returns (bytes memory res) {
+        return abi.encodeWithSelector(nuggft.liquidate.selector, tokenId);
     }
 
     function rebalance(uint256 tokenId) public view returns (bytes memory res) {

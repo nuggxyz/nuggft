@@ -186,7 +186,7 @@ describe('uint tests', async function () {
 
             // console.log(check1, check2, check1.eq(check2));
 
-            console.log(await fix.processor.raw(fix.nuggft.address, token1, Address.zero().toString(), '0x00'));
+            console.log(await fix.processor.img(fix.nuggft.address, token1, Address.zero().toString(), false, false, false, false, '0x00'));
 
             await fix.nuggft.connect(accounts.charile).loan(token1);
 
@@ -220,7 +220,7 @@ describe('uint tests', async function () {
 
             console.log('stakedEth()', fromEth(await fix.nuggft.stakedEth()));
 
-            await fix.nuggft.connect(accounts.charile).payoff(token1, { value: toEth('90') });
+            await fix.nuggft.connect(accounts.charile).liquidate(token1, { value: toEth('90') });
 
             console.log('ethPerShare()', fromEth(await fix.nuggft.ethPerShare()));
             console.log('totalSupply()', fromEth(await fix.nuggft.totalSupply()));

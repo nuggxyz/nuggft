@@ -76,7 +76,7 @@ abstract contract NuggftV1Dotnugg is INuggftV1Dotnugg, NuggftV1Token, Trust {
 
         resolvers[tokenId] = to;
 
-        emit DotnuggV1ResolverUpdated(tokenId, to);
+        emit DotnuggV1ConfigUpdated(tokenId);
     }
 
     /// @inheritdoc INuggftV1Dotnugg
@@ -96,6 +96,8 @@ abstract contract NuggftV1Dotnugg is INuggftV1Dotnugg, NuggftV1Token, Trust {
         ensureOperatorForOwner(msg.sender, tokenId);
 
         settings[tokenId].anchorOverrides[itemId] = x | (y << 6);
+
+        emit DotnuggV1ConfigUpdated(tokenId);
     }
 
     /// @inheritdoc INuggftV1Dotnugg
@@ -103,6 +105,8 @@ abstract contract NuggftV1Dotnugg is INuggftV1Dotnugg, NuggftV1Token, Trust {
         ensureOperatorForOwner(msg.sender, tokenId);
 
         settings[tokenId].background = s;
+
+        emit DotnuggV1ConfigUpdated(tokenId);
     }
 
     /// @inheritdoc INuggftV1Dotnugg
@@ -114,6 +118,8 @@ abstract contract NuggftV1Dotnugg is INuggftV1Dotnugg, NuggftV1Token, Trust {
         ensureOperatorForOwner(msg.sender, tokenId);
 
         settings[tokenId].styles[itemId] = s;
+
+        emit DotnuggV1ConfigUpdated(tokenId);
     }
 
     function hasResolver(uint160 tokenId) internal view returns (bool) {
