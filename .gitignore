@@ -27,3 +27,6 @@ out
 tests/dapptools/cache
 abis
 src/_generated
+hardhat/cache
+hardhat/artifacts
+hardhat/abis

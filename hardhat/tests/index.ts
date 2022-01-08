@@ -3,7 +3,7 @@ import { ethers } from 'hardhat';
 import { HardhatRuntimeEnvironment } from 'hardhat/types';
 import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/dist/src/signers';
 
-import { GetARGsTypeFromFactory, GetContractTypeFromFactory, MinEthersFactory } from '../../../typechain/common';
+import { GetARGsTypeFromFactory, GetContractTypeFromFactory, MinEthersFactory } from '../typechain/common';
 
 export const getHRE = (): HardhatRuntimeEnvironment => {
     return require('hardhat') as HardhatRuntimeEnvironment;

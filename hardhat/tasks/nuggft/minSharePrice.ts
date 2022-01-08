@@ -1,7 +1,7 @@
 import { task } from 'hardhat/config';
 
-import { fromEth } from '../../tests/hardhat/lib/shared/conversion';
-import { NuggftV1 } from '../../typechain';
+import { fromEth } from '../../utils/conversion';
+import { NuggftV1 } from '../../../typechain';
 
 task('minSharePrice', 'gets min share price').setAction(async (args, hre) => {
     //@ts-ignore

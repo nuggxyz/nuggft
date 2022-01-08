@@ -16,10 +16,10 @@ import 'hardhat-storage-layout';
 import 'hardhat-tracer';
 import 'hardhat-spdx-license-identifier';
 import '../dotnugg-hardhat/src';
-import './tasks/nuggft/delegate';
-import './tasks/nuggft/claim';
-import './tasks/nuggft/rawProcessUri';
-import './tasks/nuggft/minSharePrice';
+import './hardhat/tasks/nuggft/delegate';
+import './hardhat/tasks/nuggft/claim';
+import './hardhat/tasks/nuggft/rawProcessUri';
+import './hardhat/tasks/nuggft/minSharePrice';
 
 import { resolve } from 'path';
 
@@ -234,17 +234,17 @@ const HardhatConfig: HardhatUserConfig = {
         apiKey: process.env.ETHERSCAN_API_KEY,
     },
     typechain: {
-        outDir: 'typechain',
+        outDir: 'hardhat/typechain',
         target: 'ethers-v5',
     },
     mocha: {
         timeout: 20000 * 6,
     },
     paths: {
-        artifacts: 'artifacts',
-        cache: 'cache',
+        artifacts: 'hardhat/artifacts',
+        cache: 'hardhat/cache',
         sources: 'src',
-        tests: 'tests',
+        tests: 'hardhat/tests',
     },
     solidity: {
         compilers: [
@@ -302,7 +302,7 @@ const HardhatConfig: HardhatUserConfig = {
         eachLine: removeConsoleLog((bre) => bre.network.name !== 'hardhat' && bre.network.name !== 'localhost'),
     },
     abiExporter: {
-        path: './abis',
+        path: './hardhat/abis',
         clear: true,
         flat: true,
         only: [],
