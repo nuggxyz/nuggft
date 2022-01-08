@@ -7,6 +7,8 @@ import '../../interfaces/nuggftv1/INuggftV1.sol';
 contract NuggftV1MinterHelper {
     function delegateem(address nuggftv1, uint160 id) external payable {
         INuggftV1(nuggftv1).delegate{value: msg.value}(id);
+
+        // payable(msg.sender).transfer(address(this).balance);
     }
 
     function claimem(address nuggftv1, uint160 id) external {
@@ -19,6 +21,12 @@ contract NuggftV1MinterHelper {
 contract NuggftV1Minter {
     address immutable minterHelper;
     address immutable deployer;
+
+    uint160[] toClaimFromHelper;
+    uint160[] toClaim;
+
+    uint256 claimedIndex;
+    uint256 claimedFromHelperIndex;
 
     constructor() {
         minterHelper = address(new NuggftV1MinterHelper());
@@ -34,6 +42,7 @@ contract NuggftV1Minter {
         for (uint256 i = start; i < start + amount; i++) {
             INuggftV1(nuggftv1).trustedMint{value: INuggftV1(nuggftv1).minSharePrice()}(uint160(i), to);
         }
+        payable(msg.sender).transfer(address(this).balance);
     }
 
     function mint(
@@ -50,18 +59,36 @@ contract NuggftV1Minter {
 
             (, uint96 amt, ) = INuggftV1(nuggftv1).valueForDelegate(minterHelper, uint160(i));
 
-            if (i % 2 == 0) NuggftV1MinterHelper(minterHelper).delegateem{value: amt}(nuggftv1, i);
+            if (i % 2 == 0) {
+                NuggftV1MinterHelper(minterHelper).delegateem{value: amt}(nuggftv1, i);
+                toClaimFromHelper.push(i);
+            } else {
+                toClaim.push(i);
+            }
         }
+
+        payable(msg.sender).transfer(address(this).balance);
     }
 
-    function claim(
-        address nuggftv1,
-        uint160 start,
-        uint160 amount
-    ) external {
-        for (uint160 i = start; i < start + amount; i++) {
-            NuggftV1MinterHelper(minterHelper).claimem(nuggftv1, i);
+    function claimHelper(address nuggftv1, uint160 amount) external {
+        uint256 i = claimedIndex;
+        uint256 start = i;
+        for (; i < start + amount; i++) {
+            NuggftV1MinterHelper(minterHelper).claimem(nuggftv1, toClaim[claimedIndex]);
         }
+        claimedIndex = i;
+        payable(msg.sender).transfer(address(this).balance);
+    }
+
+    function claimSelf(address nuggftv1, uint160 amount) external {
+        uint256 i = claimedIndex;
+        uint256 start = i;
+        for (; i < start + amount; i++) {
+            INuggftV1(nuggftv1).claim(toClaim[claimedIndex]);
+        }
+        claimedIndex = i;
+
+        payable(msg.sender).transfer(address(this).balance);
     }
 
     function byebye() external {

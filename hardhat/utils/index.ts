@@ -6,10 +6,10 @@ import { MinEthersFactory, GetContractTypeFromFactory, GetARGsTypeFromFactory } 
 
 import { getHRE } from './deployment';
 
-const nameofFactory =
-    <T>() =>
-    (name: keyof T) =>
-        name;
+// const nameofFactory =
+//     <T>() =>
+//     (name: keyof T) =>
+//         name;
 export const deployContract = async <CF extends MinEthersFactory<GetContractTypeFromFactory<CF>, any>>({
     factory,
     args,
