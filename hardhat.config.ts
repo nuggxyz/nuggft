@@ -16,10 +16,6 @@ import 'hardhat-storage-layout';
 import 'hardhat-tracer';
 import 'hardhat-spdx-license-identifier';
 import '../dotnugg-hardhat/src';
-import './hardhat/tasks/nuggft/delegate';
-import './hardhat/tasks/nuggft/claim';
-import './hardhat/tasks/nuggft/rawProcessUri';
-import './hardhat/tasks/nuggft/minSharePrice';
 
 import { resolve } from 'path';
 
@@ -28,18 +24,21 @@ import { utils } from 'ethers';
 import { removeConsoleLog } from 'hardhat-preprocessor';
 import { HardhatUserConfig, NetworksUserConfig, NetworkUserConfig } from 'hardhat/types';
 
+import { toGwei } from './hardhat/utils/conversion';
+
 dotenvConfig({ path: resolve(__dirname, '.env') });
 
-export const GAS_PRICE = utils.parseUnits('5', 'gwei');
+export const GAS_PRICE = utils.parseUnits('15', 'gwei');
 
 export const NamedAccounts = {
-    main: { default: 0 },
-    dev: { default: 1 },
-    charile: { default: 2 },
+    __trusted: { default: 0 },
+    __special: { default: 1 },
+    __special__dotnugg: { default: 2 },
     frank: { default: 3 },
     mac: { default: 4 },
     dee: { default: 5 },
     dennis: { default: 6 },
+    charile: { default: 7 },
     deployer: { default: 16 },
     predeployer: { default: 19 }, // used to deploy stuff that will already exist on chain
 };
@@ -52,9 +51,7 @@ export const NetworkTags = {
 };
 
 const DefaultNetworkConfig: NetworkUserConfig = {
-    accounts: {
-        mnemonic: process.env.UNSAFE_PRIVATE_MNEMONIC,
-    },
+    accounts: [process.env.TRUSTED_PRIV_KEY, process.env.SPECIAL_PRIV_KEY, process.env.SPECIAL_PRIV_KEY_2],
 };
 
 const DefaultLocalNetworkConfig = {
@@ -64,17 +61,21 @@ const DefaultLocalNetworkConfig = {
         mnemonic: 'many dark suns glow like gods fury when they eats that nugg',
         accountsBalance: '990000000000000000000',
     },
-};
-
-export const forks = {
-    3: {
-        DotnuggV1Processor: '0x603DED7DE6677FeDC13bf2B334C249584D263da4',
-    },
+    // accounts: [
+    //     {
+    //         privateKey: process.env.TRUSTED_PRIV_KEY,
+    //         balance: '990000000000000000000',
+    //     },
+    //     {
+    //         privateKey: process.env.SPECIAL_PRIV_KEY,
+    //         balance: '990000000000000000000',
+    //     },
+    // ],
 };
 
 const DefaultStageNetworkConfig = {
     ...DefaultNetworkConfig,
-    gasMultiplier: 2,
+    gasMultiplier: 25,
     tags: [NetworkTags.STAGING],
 };
 
@@ -90,14 +91,29 @@ const LocalNetworks: NetworksUserConfig = {
         ...DefaultLocalNetworkConfig,
         allowUnlimitedContractSize: true,
         // forking: {
-        //     enabled: true,
+        //     enabled: false,
         //     url: `https://ropsten.infura.io/v3/${process.env.INFURA_API_KEY}` || '',
         // },
-        loggingEnabled: false,
+        // loggingEnabled: true,
+
         gas: 10000000000,
-        blockGasLimit: 10000000000,
+        blockGasLimit: 10000000000000,
         gasPrice: parseInt(GAS_PRICE.toString(), 10),
-        saveDeployments: false,
+        saveDeployments: true,
+        accounts: [
+            {
+                privateKey: process.env.TRUSTED_PRIV_KEY,
+                balance: '990000000000000000000',
+            },
+            {
+                privateKey: process.env.SPECIAL_PRIV_KEY,
+                balance: '0',
+            },
+            {
+                privateKey: process.env.SPECIAL_PRIV_KEY_2,
+                balance: '990000000000000000000',
+            },
+        ],
     },
 };
 
@@ -106,69 +122,25 @@ const StagingNetworks: NetworksUserConfig = {
         ...DefaultStageNetworkConfig,
         url: `https://ropsten.infura.io/v3/${process.env.INFURA_API_KEY}`,
         chainId: 3,
-        gasPrice: 'auto',
-        // gasPrice: parseInt(GAS_PRICE.toString(), 10),
+        gasPrice: toGwei('4.9').toNumber(),
     },
     rinkeby: {
         ...DefaultStageNetworkConfig,
         url: `https://rinkeby.infura.io/v3/${process.env.INFURA_API_KEY}`,
         chainId: 4,
+        gasPrice: toGwei('4.9').toNumber(),
     },
     goerli: {
         ...DefaultStageNetworkConfig,
         url: `https://goerli.infura.io/v3/${process.env.INFURA_API_KEY}`,
         chainId: 5,
+        gasPrice: toGwei('4.9').toNumber(),
     },
     kovan: {
         ...DefaultStageNetworkConfig,
         url: `https://kovan.infura.io/v3/${process.env.INFURA_API_KEY}`,
         chainId: 42,
-    },
-    'moonbase-alphanet': {
-        ...DefaultStageNetworkConfig,
-        url: 'https://rpc.testnet.moonbeam.network',
-        chainId: 1287,
-    },
-
-    'poloygon-mumbia': {
-        ...DefaultStageNetworkConfig,
-        url: `https://polygon-mumbai.infura.io/v3/${process.env.INFURA_API_KEY}`,
-        chainId: 80001,
-    },
-    chapel: {
-        ...DefaultStageNetworkConfig,
-        url: `https://data-seed-prebsc-1-s1.binance.org:8545`,
-        chainId: 97,
-    },
-    'arbitrum-testnet': {
-        ...DefaultStageNetworkConfig,
-        url: 'https://kovan3.arbitrum.io/rpc',
-        chainId: 79377087078960,
-    },
-    'heco-testnet': {
-        ...DefaultStageNetworkConfig,
-        url: 'https://http-testnet.hecochain.com',
-        chainId: 256,
-    },
-    fuji: {
-        ...DefaultStageNetworkConfig,
-        url: 'https://api.avax-test.network/ext/bc/C/rpc',
-        chainId: 43113,
-    },
-    'harmony-testnet': {
-        ...DefaultStageNetworkConfig,
-        url: 'https://api.s0.b.hmny.io',
-        chainId: 1666700000,
-    },
-    'okex-testnet': {
-        ...DefaultStageNetworkConfig,
-        url: 'https://exchaintestrpc.okex.org',
-        chainId: 65,
-    },
-    'fantom-testnet': {
-        ...DefaultStageNetworkConfig,
-        url: 'https://rpc.testnet.fantom.network',
-        chainId: 4002,
+        gasPrice: toGwei('4.9').toNumber(),
     },
 };
 
@@ -176,55 +148,8 @@ const ProductionNetworks: NetworksUserConfig = {
     mainnet: {
         ...DefaultProductionNetworkConfig,
         url: `https://mainnet.infura.io/v3/${process.env.INFURA_API_KEY}`,
-        gasPrice: 120 * 1000000000,
+        gasPrice: toGwei('40').toNumber(),
         chainId: 1,
-    },
-    bsc: {
-        ...DefaultProductionNetworkConfig,
-        url: process.env.BSC_NODE ? process.env.BSC_NODE : `https://bsc-dataseed.binance.org:443`,
-        chainId: 56,
-    },
-    polygon: {
-        ...DefaultProductionNetworkConfig,
-        url: `https://polygon-mainnet.infura.io/v3/${process.env.INFURA_API_KEY}`,
-        chainId: 137,
-    },
-    fantom: {
-        ...DefaultProductionNetworkConfig,
-        url: 'https://rpcapi.fantom.network',
-        chainId: 250,
-    },
-    xdai: {
-        ...DefaultProductionNetworkConfig,
-        url: 'https://rpc.xdaichain.com',
-        chainId: 100,
-    },
-    heco: {
-        ...DefaultProductionNetworkConfig,
-        url: 'https://http-mainnet.hecochain.com',
-        chainId: 128,
-    },
-    avalanche: {
-        ...DefaultProductionNetworkConfig,
-        url: 'https://api.avax.network/ext/bc/C/rpc',
-        chainId: 43114,
-        gasPrice: 470000000000,
-    },
-    harmony: {
-        ...DefaultProductionNetworkConfig,
-        url: 'https://api.s0.t.hmny.io',
-        chainId: 1666600000,
-    },
-    okex: {
-        ...DefaultProductionNetworkConfig,
-        url: 'https://exchainrpc.okex.org',
-        chainId: 66,
-    },
-    arbitrum: {
-        ...DefaultProductionNetworkConfig,
-        url: 'https://arb1.arbitrum.io/rpc',
-        chainId: 42161,
-        blockGasLimit: 700000,
     },
 };
 const HardhatConfig: HardhatUserConfig = {
@@ -234,17 +159,20 @@ const HardhatConfig: HardhatUserConfig = {
         apiKey: process.env.ETHERSCAN_API_KEY,
     },
     typechain: {
-        outDir: 'hardhat/typechain',
+        outDir: 'typechain',
         target: 'ethers-v5',
     },
     mocha: {
         timeout: 20000 * 6,
     },
+
     paths: {
-        artifacts: 'hardhat/artifacts',
-        cache: 'hardhat/cache',
+        artifacts: './hardhat/artifacts',
+        cache: './hardhat/cache',
         sources: 'src',
-        tests: 'hardhat/tests',
+        tests: './hardhat/tests',
+        deploy: './hardhat/deploy',
+        deployments: './hardhat/deployments',
     },
     solidity: {
         compilers: [
@@ -257,40 +185,12 @@ const HardhatConfig: HardhatUserConfig = {
                     },
                 },
             },
-            {
-                version: '0.6.12',
-                settings: {
-                    optimizer: {
-                        enabled: true,
-                        runs: 200,
-                    },
-                },
-            },
-            {
-                version: '0.6.8',
-                settings: {
-                    optimizer: {
-                        enabled: true,
-                        runs: 200,
-                    },
-                },
-            },
-            {
-                version: '0.7.6',
-                settings: {
-                    optimizer: {
-                        enabled: true,
-                        runs: 800,
-                    },
-                },
-            },
         ],
     },
     gasReporter: {
         coinmarketcap: process.env.COINMARKETCAP_API_KEY,
         currency: 'USD',
         enabled: true,
-        // gasPrice: 40,
         // excludeContracts: ['contracts/libraries/'],
     },
     networks: {
@@ -305,14 +205,13 @@ const HardhatConfig: HardhatUserConfig = {
         path: './hardhat/abis',
         clear: true,
         flat: true,
-        only: [],
+        only: ['NuggftV1', 'DotnuggV1'],
         spacing: 2,
     },
     contractSizer: {
         alphaSort: true,
         runOnCompile: true,
         disambiguatePaths: false,
-        strict: false,
     },
     // docgen: {
     //     path: './docs',

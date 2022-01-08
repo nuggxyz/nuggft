@@ -47,19 +47,31 @@ abstract contract NuggftV1Dotnugg is INuggftV1Dotnugg, NuggftV1Token, Trust {
     }
 
     /// @inheritdoc IDotnuggV1Implementer
-    function dotnuggV1TrustCallback(address caller) external view override(IDotnuggV1Implementer) returns (bool res) {
-        return isTrusted[caller];
+    function dotnuggV1StoreCallback(
+        address caller,
+        uint8 feature,
+        uint8 amount,
+        address
+    ) external override(IDotnuggV1Implementer) returns (bool ok) {
+        require(msg.sender == address(dotnuggV1StorageProxy), 'D:0');
+
+        ok = isTrusted[caller];
+
+        if (!ok) return false;
+
+        uint256 cache = featureLengths;
+
+        uint256 newLen = _lengthOf(cache, feature) + amount;
+
+        featureLengths = ShiftLib.set(cache, 8, feature * 8, newLen);
     }
 
     /// @inheritdoc INuggftV1Dotnugg
     function dotnuggV1StoreFiles(uint256[][] calldata data, uint8 feature) external requiresTrust {
-        uint8 len = dotnuggV1StorageProxy.store(feature, data);
-
-        uint256 cache = featureLengths;
-
-        uint256 newLen = _lengthOf(cache, feature) + len;
-
-        featureLengths = ShiftLib.set(cache, 8, feature * 8, newLen);
+        // uint8 len = dotnuggV1StorageProxy.store(feature, data);
+        // uint256 cache = featureLengths;
+        // uint256 newLen = _lengthOf(cache, feature) + len;
+        // featureLengths = ShiftLib.set(cache, 8, feature * 8, newLen);
     }
 
     function lengthOf(uint8 feature) external view returns (uint8) {

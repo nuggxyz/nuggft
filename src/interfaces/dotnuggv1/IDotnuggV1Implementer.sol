@@ -10,7 +10,12 @@ interface IDotnuggV1Implementer {
 
     function dotnuggV1ImplementerCallback(uint256 artifactId) external view returns (IDotnuggV1Metadata.Memory memory data);
 
-    function dotnuggV1TrustCallback(address caller) external returns (bool);
+    function dotnuggV1StoreCallback(
+        address caller,
+        uint8 feature,
+        uint8 amount,
+        address storagePointer
+    ) external returns (bool ok);
 
     function dotnuggV1StorageProxy() external returns (IDotnuggV1StorageProxy res);
 }
