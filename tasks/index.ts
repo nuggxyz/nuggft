@@ -3,11 +3,12 @@ import { BigNumber, ethers } from 'ethers';
 import { HardhatRuntimeEnvironment } from 'hardhat/types';
 
 import { fromEth } from '../tests/hardhat/lib/shared/conversion';
-import { IDotnuggV1, IDotnuggV1__factory, NuggftV1 } from '../typechain';
+import { IDotnuggV1, IDotnuggV1__factory, NuggftV1, NuggftV1Minter } from '../typechain';
 
 export class TaskHelper {
     static nuggft: NuggftV1;
     static dotnugg: IDotnuggV1;
+    static minter: NuggftV1Minter;
 
     private static hre: HardhatRuntimeEnvironment;
     public static reversedNamedAccounts: Dictionary<string> = {};
@@ -20,6 +21,10 @@ export class TaskHelper {
         const dep = await hre.deployments.get('NuggftV1');
 
         this.nuggft = await hre.ethers.getContractAt<NuggftV1>('NuggftV1', dep.address);
+
+        const dep2 = await hre.deployments.get('NuggftV1Minter');
+
+        this.minter = await hre.ethers.getContractAt<NuggftV1Minter>('NuggftV1Minter', dep2.address);
 
         this.namedSigners = await hre.ethers.getNamedSigners();
 
