@@ -2,15 +2,15 @@ import { Fixture, MockProvider } from 'ethereum-waffle';
 import { BigNumber, Contract, Wallet } from 'ethers';
 import { HardhatRuntimeEnvironment } from 'hardhat/types';
 
-import { getHRE } from '../shared/deployment';
-import { deployContractWithSalt } from '../shared';
-import { NuggftV1 } from '../../../../typechain/NuggftV1';
-import { NuggftV1__factory } from '../../../../typechain/factories/NuggftV1__factory';
-import { MockNuggftV1Migrator, MockNuggftV1Migrator__factory } from '../../../../typechain';
-import { MockDotnuggV1__factory } from '../../../../typechain/factories/MockDotnuggV1__factory';
-import { IDotnuggV1 } from '../../../../typechain/IDotnuggV1';
-import { DotnuggV1StorageProxy__factory } from '../../../../typechain/factories/DotnuggV1StorageProxy__factory';
-import { IDotnuggV1StorageProxy } from '../../../../typechain/IDotnuggV1StorageProxy';
+import { getHRE } from '../utils/deployment';
+import { deployContractWithSalt } from '../utils';
+import { NuggftV1 } from '../typechain/NuggftV1';
+import { NuggftV1__factory } from '../typechain/factories/NuggftV1__factory';
+import { MockNuggftV1Migrator, MockNuggftV1Migrator__factory } from '../typechain';
+import { MockDotnuggV1__factory } from '../typechain/factories/MockDotnuggV1__factory';
+import { IDotnuggV1 } from '../typechain/IDotnuggV1';
+import { DotnuggV1StorageProxy__factory } from '../typechain/factories/DotnuggV1StorageProxy__factory';
+import { IDotnuggV1StorageProxy } from '../typechain/IDotnuggV1StorageProxy';
 
 export interface NuggFatherFixture {
     // nuggswap: NuggSwap;

@@ -2,7 +2,7 @@ import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/dist/src/signers';
 import { BigNumber, ethers } from 'ethers';
 import { HardhatRuntimeEnvironment } from 'hardhat/types';
 
-import { fromEth } from '../tests/hardhat/lib/shared/conversion';
+import { fromEth } from '../utils/conversion';
 import { IDotnuggV1, IDotnuggV1__factory, NuggftV1, NuggftV1Minter } from '../typechain';
 
 export class TaskHelper {

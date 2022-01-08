@@ -4,11 +4,12 @@ import { ethers, waffle } from 'hardhat';
 import { Address } from 'ethereumjs-util';
 import { BigNumber } from 'ethers';
 
-import { NamedAccounts } from '../../../hardhat.config';
-import { Mining } from '../lib/shared/mining';
-import { prepareAccounts } from '../lib/shared';
-import { fromEth, toEth } from '../lib/shared/conversion';
-import { NuggFatherFix, NuggFatherFixture } from '../lib/fixtures/NuggFather.fix';
+import { NamedAccounts } from '../../hardhat.config';
+import { toEth, fromEth } from '../utils/conversion';
+import { NuggFatherFixture, NuggFatherFix } from '../fixtures/NuggFather.fix';
+import { Mining } from '../utils/mining';
+
+import { prepareAccounts } from '.';
 
 const createFixtureLoader = waffle.createFixtureLoader;
 const {

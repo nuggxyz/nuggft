@@ -1,8 +1,8 @@
 import { Contract, ethers } from 'ethers';
 import { HardhatRuntimeEnvironment } from 'hardhat/types';
 
-import { NamedAccounts } from '../hardhat.config';
-import { toGwei } from '../tests/hardhat/lib/shared/conversion';
+import { NamedAccounts } from '../../hardhat.config';
+import { toGwei } from '../utils/conversion';
 import { IDotnuggV1, IDotnuggV1__factory, NuggftV1 } from '../typechain';
 // import { NuggftV1 } from '../typechain';
 // import { XNUGG as xNUGG } from '../typechain/XNUGG';
