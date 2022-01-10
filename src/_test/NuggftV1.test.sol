@@ -17,7 +17,7 @@ import {NuggftV1} from '../NuggftV1.sol';
 import './utils/logger.sol';
 
 contract RiggedNuggft is NuggftV1 {
-    constructor(address processor) NuggftV1(processor) {
+    constructor(address[] memory trusted , address processor) NuggftV1(trusted, processor) {
         featureLengths = 0x0303030303030303;
     }
 
@@ -84,7 +84,10 @@ contract NuggftV1Test is t {
         fvm.roll(1000001);
         processor = new MockDotnuggV1();
         migrator = new MockNuggftV1Migrator();
-        nuggft = new RiggedNuggft(address(processor));
+
+        address[] memory trusted = new address[](1);
+        trusted[0] = address(this);
+        nuggft = new RiggedNuggft(trusted,address(processor));
         _nuggft = address(nuggft);
         safe = new User();
 

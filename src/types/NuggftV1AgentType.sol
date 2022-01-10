@@ -50,7 +50,7 @@ library NuggftV1AgentType {
                               SHIFT HELPERS
        ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
     // @test input output unit test
-    // type(uint96).max / 10e8 =   792281625142643375935
+    // type(uint96).max / 10e8 =    792281625142643375935
     // type(uint70).max          = 1180591620717411303423
     function eth(uint256 input) internal pure returns (uint96 res) {
         input = ShiftLib.get(input, 70, 160);

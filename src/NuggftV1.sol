@@ -41,7 +41,7 @@ contract NuggftV1 is IERC721Metadata, NuggftV1Loan {
 
     using NuggftV1StakeType for uint256;
 
-    constructor(address _defaultResolver) NuggftV1Dotnugg(_defaultResolver) Trust(msg.sender) {}
+    constructor(address[] memory trusted, address _defaultResolver) NuggftV1Dotnugg(_defaultResolver) Trust(trusted) {}
 
     /// @inheritdoc IERC165
     function supportsInterface(bytes4 interfaceId) public view virtual override returns (bool) {
