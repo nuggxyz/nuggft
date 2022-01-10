@@ -3,14 +3,11 @@ import { ethers } from 'ethers';
 import { HardhatRuntimeEnvironment } from 'hardhat/types';
 
 import { NamedAccounts } from '../../hardhat.config';
+import { NuggftV1Minter, IDotnuggV1, IDotnuggV1__factory, NuggftV1 } from '../../typechain';
 
 import { fromEth } from './conversion';
 
 export class Helper {
-    // static nuggft: NuggftV1;
-    // static dotnugg: IDotnuggV1;
-    // static minter: NuggftV1Minter;
-
     public static chainID: string;
 
     private static hre: HardhatRuntimeEnvironment;
@@ -21,22 +18,13 @@ export class Helper {
     static async init(hre: HardhatRuntimeEnvironment) {
         this.hre = hre;
 
-        this.chainID = await hre.getChainId();
-        // const dep = await hre.deployments.get('NuggftV1');
-
-        // this.nuggft = await hre.ethers.getContractAt<NuggftV1>('NuggftV1', dep.address);
-
-        // const dep2 = await hre.deployments.get('NuggftV1Minter');
-
-        // this.minter = await hre.ethers.getContractAt<NuggftV1Minter>('NuggftV1Minter', dep2.address);
-
         this.namedSigners = await hre.ethers.getNamedSigners();
+
+        this.chainID = await hre.getChainId();
 
         Object.entries(this.namedSigners).forEach(([k, v]) => {
             this.reversedNamedAccounts[v.address] = k;
         });
-
-        // this.dotnugg = await hre.ethers.getContractAt<IDotnuggV1>(IDotnuggV1__factory.abi, await this.nuggft.dotnuggV1());
     }
 
     static signer(name: string): SignerWithAddress {
@@ -92,4 +80,26 @@ export class Helper {
                 console.log(`#################### end tx ${c} ####################`);
             });
     };
+}
+
+export class OnchainHelper extends Helper {
+    static nuggft: NuggftV1;
+    static dotnugg: IDotnuggV1;
+    static minter: NuggftV1Minter;
+
+    public static chainID: string;
+
+    static async init(hre: HardhatRuntimeEnvironment) {
+        super.init(hre);
+
+        const dep = await hre.deployments.get('NuggftV1');
+
+        this.nuggft = await hre.ethers.getContractAt<NuggftV1>('NuggftV1', dep.address, this.namedSigners.__trusted);
+
+        const dep2 = await hre.deployments.get('NuggftV1Minter');
+
+        this.minter = await hre.ethers.getContractAt<NuggftV1Minter>('NuggftV1Minter', dep2.address, this.namedSigners.__trusted);
+
+        this.dotnugg = await hre.ethers.getContractAt<IDotnuggV1>(IDotnuggV1__factory.abi, await this.nuggft.dotnuggV1());
+    }
 }

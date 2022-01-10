@@ -16,7 +16,7 @@ import 'hardhat-storage-layout';
 import 'hardhat-tracer';
 import 'hardhat-spdx-license-identifier';
 import '../dotnugg-hardhat/src';
-
+import './hardhat/tasks/main';
 import { resolve } from 'path';
 
 import { config as dotenvConfig } from 'dotenv';

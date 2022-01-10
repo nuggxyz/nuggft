@@ -1,7 +1,5 @@
 import { task } from 'hardhat/config';
 
-import { TaskHelper } from '..';
-
 // import { NuggftV1 } from '../../typechain';
 
 task('delegate', 'delegates .69 eth to current epoch from dee', async (args, hre) => {
@@ -78,26 +76,6 @@ task('delegate', 'delegates .69 eth to current epoch from dee', async (args, hre
 //     );
 //     // }
 // });
-
-task('mint-a-lot', '')
-    .addParam('start', '')
-    .addParam('amount', '')
-    .addParam('sendeth', '')
-    .setAction(async (args, hre) => {
-        //@ts-ignore
-        await TaskHelper.init(hre);
-
-        // for (let i = 0; i < 200; i++) {
-        await TaskHelper.send(
-            'trustedMint',
-            TaskHelper.minter.connect(TaskHelper.namedSigners['deployer']).mint(TaskHelper.nuggft.address, args.start, args.amount, {
-                // value: toEth('2'),
-                gasLimit: 20000000,
-                // gasPrice: toGwei('2'),
-            }),
-        );
-        // }
-    });
 
 // task('mintandswap', '')
 //     .addParam('start', '')
