@@ -129,6 +129,19 @@ task('trusted-mint-a-lot', '').setAction(async (args, hre) => {
     // }
 });
 
+task('view-lengthof', '').setAction(async (args, hre) => {
+    //@ts-ignore
+    await OnchainHelper.init(hre);
+
+    console.log(await OnchainHelper.nuggft.lengthOf(1));
+    console.log(await OnchainHelper.nuggft.lengthOf(1));
+    console.log(await OnchainHelper.nuggft.lengthOf(1));
+    console.log(await OnchainHelper.nuggft.lengthOf(1));
+    console.log(await OnchainHelper.nuggft.lengthOf(1));
+
+    // }
+});
+
 task('claim-a-lot', '').setAction(async (args, hre) => {
     //@ts-ignore
     await OnchainHelper.init(hre);

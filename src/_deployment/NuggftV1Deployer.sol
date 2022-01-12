@@ -13,7 +13,7 @@ contract NuggftV1Deployer {
         address dotnugg,
         uint256[][][] memory nuggs
     ) {
-        nuggft = new NuggftV1{salt: salt}(trusted, dotnugg);
+        nuggft = new NuggftV1{salt: salt}();
 
         nuggft.dotnuggV1StorageProxy().unsafeBulkStore(nuggs);
 
