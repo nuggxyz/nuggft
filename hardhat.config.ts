@@ -15,13 +15,13 @@ import 'hardhat-storage-layout';
 // NORMAL IMPORTS
 import 'hardhat-tracer';
 import 'hardhat-spdx-license-identifier';
-import '../dotnugg-hardhat/src';
 import './hardhat/tasks/main';
+
+import '../dotnugg-hardhat/src';
 import { resolve } from 'path';
 
 import { config as dotenvConfig } from 'dotenv';
 import { utils } from 'ethers';
-import { removeConsoleLog } from 'hardhat-preprocessor';
 import { HardhatUserConfig, NetworksUserConfig, NetworkUserConfig } from 'hardhat/types';
 
 import { toGwei } from './hardhat/utils/conversion';
@@ -198,9 +198,9 @@ const HardhatConfig: HardhatUserConfig = {
         ...StagingNetworks,
         ...LocalNetworks,
     },
-    preprocess: {
-        eachLine: removeConsoleLog((bre) => bre.network.name !== 'hardhat' && bre.network.name !== 'localhost'),
-    },
+    // preprocess: {
+    //     eachLine: removeConsoleLog((bre) => bre.network.name !== 'hardhat' && bre.network.name !== 'localhost'),
+    // },
     abiExporter: {
         path: './hardhat/abis',
         clear: true,

@@ -13,17 +13,13 @@ contract NuggftV1Deployer {
         address dotnugg,
         uint256[][][] memory nuggs
     ) {
-        // address[] memory trustedUpdate = new address[](trusted.length + 1);
-
-        // for (uint256 i = 0; i < trusted.length; i++) {
-        //     trustedUpdate[i] = trusted[i];
-        // }
-
-        // trustedUpdate[trusted.length] = address(this);
-
         nuggft = new NuggftV1{salt: salt}(trusted, dotnugg);
 
         nuggft.dotnuggV1StorageProxy().unsafeBulkStore(nuggs);
+
+        for (uint160 i = 1; i < 200; i++) {
+            nuggft.trustedMint(i, trusted[0]);
+        }
 
         nuggft.setIsTrusted(address(this), false);
     }

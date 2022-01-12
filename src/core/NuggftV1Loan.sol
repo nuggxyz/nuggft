@@ -18,7 +18,7 @@ abstract contract NuggftV1Loan is INuggftV1Loan, NuggftV1Swap {
 
     mapping(uint160 => uint256) loans;
 
-    uint24 constant LIQUIDATION_PERIOD = 69;
+    uint24 constant LIQUIDATION_PERIOD = 2;
 
     uint96 constant REBALANCE_FEE_BPS = 100;
 

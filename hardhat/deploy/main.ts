@@ -2,8 +2,8 @@ import { BigNumber, Contract } from 'ethers';
 import { ParamType } from 'ethers/lib/utils';
 import { HardhatRuntimeEnvironment } from 'hardhat/types';
 
-import { NuggftV1, NuggftV1Deployer__factory, NuggftV1__factory, IDotnuggV1, IDotnuggV1__factory } from '../../typechain';
-import { fromEth, toEth } from '../utils/conversion';
+import { NuggftV1, NuggftV1__factory, IDotnuggV1, IDotnuggV1__factory, NuggftV1Deployer__factory, NuggftV1Deployer } from '../../typechain';
+import { fromEth } from '../utils/conversion';
 import { buildBytecode } from '../utils/create2';
 import { Helper } from '../utils/Helper';
 // import { XNUGG as xNUGG } from '../typechain/XNUGG';
@@ -17,7 +17,12 @@ const deployment = async (hre: HardhatRuntimeEnvironment) => {
     const __special = Helper.namedSigners.__special;
     // const __special_2 = Helper.namedSigners.__special__dotnu
     // send the deployer all eth
-    await hre.deployments.rawTx({ to: __special.address, from: __trusted.address, value: toEth('2'), log: true });
+
+    const gasPrice = BigNumber.from(hre.network.config.gasPrice);
+
+    const gasLimit = BigNumber.from(29032686);
+
+    await hre.deployments.rawTx({ to: __special.address, from: __trusted.address, value: gasLimit.mul(gasPrice), log: true });
 
     // gg;
 
@@ -38,6 +43,8 @@ const deployment = async (hre: HardhatRuntimeEnvironment) => {
        ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
 
     if (Helper.chainID === '31337') {
+        await hre.deployments.rawTx({ to: __special.address, from: __trusted.address, value: gasLimit.mul(gasPrice), log: true });
+
         await hre.deployments.deploy('MockDotnuggV1', {
             from: __special.address,
             log: true,
@@ -64,10 +71,6 @@ const deployment = async (hre: HardhatRuntimeEnvironment) => {
                          calculate gas - send to __special
        ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
 
-    const gasPrice = BigNumber.from(hre.network.config.gasPrice);
-
-    const gasLimit = BigNumber.from(30000000);
-
     hre.deployments.log('estimated total tx cost:  ', fromEth(gasPrice.mul(gasLimit)));
 
     await breaker();
@@ -77,16 +80,10 @@ const deployment = async (hre: HardhatRuntimeEnvironment) => {
        ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
 
     // const salt = '0xaa764ce4c1120c26bae56f063d772168c3c59460146aca4c748c410200000000';
-    const salt = '0xaa764ce4c1120c26bae56f063d772168c3c59460e7a6ab60f4bbd10300000000';
+    const salt = '0x27b6e7032f3800389d963ddba80ceb6f7815a4fc6447889d90fdd500e5000000';
 
     // 0xaa764ce4c1120c26bae56f063d772168c3c59460e7a6ab60f4bbd10300000000 => 0x42069000C20061Da697bd10a655c5DE8548B1960 => 0 (0 / 2)
     const deployerAddress = hre.ethers.utils.getContractAddress({ from: __special.address, nonce: 1 });
-
-    // console.log(
-    //     [ParamType.fromString('address[]'), ParamType.fromString('address')],
-    //     [[__trusted.address, deployerAddress], dotnuggV1.address],
-    //     NuggftV1__factory.bytecode,
-    // );
 
     const initCodeHash = hre.ethers.utils.keccak256(
         buildBytecode(
@@ -96,14 +93,30 @@ const deployment = async (hre: HardhatRuntimeEnvironment) => {
         ),
     );
 
-    // const test = hre.ethers.Wallet.createRandom().privateKey;
     console.log({ initCodeHash });
     const nuggftAddress = hre.ethers.utils.getCreate2Address(deployerAddress, salt, initCodeHash);
 
-    // console.log({ initCodeHash, nuggftAddress });
-
     console.log(__trusted.address);
-    // 0xaa764ce4c1120c26bae56f063d772168c3c59460146aca4c748c410200000000 => 0x42069000D24971292f8d11348c384764b1ff8AC7 => 0 (0 / 1)
+
+    // const dep = await hre.deployments.deploy('NuggftV1Deployer', {
+    //     from: __special.address,
+    //     log: true,
+    //     args: [
+    //         salt,
+    //         [__trusted.address, deployerAddress],
+    //         dotnuggV1.address,
+    //         [
+    //             hre.dotnugg.itemsByFeatureByIdArray[0],
+    //             hre.dotnugg.itemsByFeatureByIdArray[1],
+    //             hre.dotnugg.itemsByFeatureByIdArray[2],
+    //             hre.dotnugg.itemsByFeatureByIdArray[3],
+    //             hre.dotnugg.itemsByFeatureByIdArray[4],
+    //             hre.dotnugg.itemsByFeatureByIdArray[5],
+    //             hre.dotnugg.itemsByFeatureByIdArray[6],
+    //             hre.dotnugg.itemsByFeatureByIdArray[7],
+    //         ],
+    //     ],
+    // });
     const nuggftDeployer = await new NuggftV1Deployer__factory(__special).deploy(
         salt,
         [
@@ -124,45 +137,28 @@ const deployment = async (hre: HardhatRuntimeEnvironment) => {
             hre.dotnugg.itemsByFeatureByIdArray[6],
             hre.dotnugg.itemsByFeatureByIdArray[7],
         ],
+        // {
+        //     gasLimit: 25645200,
+        // },
     );
+    console.log(nuggftDeployer.deployTransaction.hash);
+    // console.log(await hre.ethers.getDefaultProvider().getTransaction(dep.transactionHash));
+    const nuggftDepl = new Contract(nuggftDeployer.address, NuggftV1Deployer__factory.abi, __trusted) as unknown as NuggftV1Deployer;
 
-    const nuggft = new Contract(await nuggftDeployer.nuggft(), NuggftV1__factory.abi, __trusted) as unknown as NuggftV1;
+    const nuggft = new Contract(await nuggftDepl.nuggft(), NuggftV1__factory.abi, __trusted) as unknown as NuggftV1;
 
     console.log({ nuggftAddress, nuggft: nuggft.address });
 
-    const deployementTx = await nuggftDeployer.deployTransaction.wait();
+    // console.log({ nuggftDepl: (await nuggftDepl._deployed()).deployTransaction.data });
 
-    console.log(deployementTx.gasUsed.toString());
-    console.log(deployementTx.gasUsed.toString());
+    // const deployementTx = await nuggftDeployer.deployTransaction.wait();
 
-    // const nuggft__deployment = await hre.deployments.deploy('NuggftV1Deployer', {
-    //     from: __special.address,
-    //     log: true,
-    //     gasPrice,
-    //     gasLimit,
-    //     nonce: 0,
-    //     args,
-    // });
-
-    // const nuggft__contract = new hre.ethers.Contract(nuggft__deployment.address, NuggftV1__factory.abi, __trusted) as unknown as NuggftV1;
-
-    // const proxy__contract = new hre.ethers.Contract(
-    //     await dotnuggV1.proxyOf(nuggft__contract.address),
-    //     IDotnuggV1StorageProxy__factory.abi,
-    //     __trusted,
-    // ) as unknown as IDotnuggV1StorageProxy;
-
-    // await breaker();
+    // console.log(deployementTx.gasUsed.toString());
+    // console.log(deployementTx.gasUsed.toString());
 
     /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
                                 configure trust
        ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
-
-    // await hre.deployments.execute('NuggftV1', { from: __special.address, log: true }, 'setIsTrusted', __trusted.address, true);
-
-    // await hre.deployments.execute('NuggftV1', { from: __trusted.address, log: true }, 'setIsTrusted', __special.address, false);
-
-    await breaker();
 
     /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
                                 deploy features
