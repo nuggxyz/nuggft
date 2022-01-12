@@ -18,7 +18,7 @@ import {NuggftV1Token} from './NuggftV1Token.sol';
 
 import {Trust} from './Trust.sol';
 
-import {PureDeployerCallback} from '../_deployment/PureDeployer.sol';
+// import {PureDeployerCallback} from '../_deployment/PureDeployer.sol';
 
 abstract contract NuggftV1Dotnugg is INuggftV1Dotnugg, NuggftV1Token, Trust {
     using SafeCastLib for uint256;
@@ -43,15 +43,19 @@ abstract contract NuggftV1Dotnugg is INuggftV1Dotnugg, NuggftV1Token, Trust {
     uint256 internal featureLengths;
 
     constructor() {
-        dotnuggV1 = PureDeployerCallback(
-            address(
-                uint160(
-                    uint256(
-                        keccak256(abi.encodePacked(bytes1(0xd6), bytes1(0x94), msg.sender, bytes1(0x02))) //
-                    )
-                ) //
-            )
-        ).dotnuggV1();
+        // dotnuggV1 = IDotnuggV1(
+        //     address(
+        //         PureDeployerCallback(
+        //             address(
+        //                 uint160(
+        //                     uint256(
+        //                         keccak256(abi.encodePacked(bytes1(0xd6), bytes1(0x94), msg.sender, bytes1(0x02))) //
+        //                     )
+        //                 ) //
+        //             )
+        //         ).dotnuggV1()
+        //     )
+        // );
 
         dotnuggV1StorageProxy = dotnuggV1.register();
     }
@@ -148,7 +152,3 @@ abstract contract NuggftV1Dotnugg is INuggftV1Dotnugg, NuggftV1Token, Trust {
         return resolvers[tokenId] != address(0);
     }
 }
-
-
-
-

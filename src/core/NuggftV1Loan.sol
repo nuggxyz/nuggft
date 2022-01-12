@@ -13,7 +13,6 @@ import {NuggftV1Swap} from './NuggftV1Swap.sol';
 
 abstract contract NuggftV1Loan is INuggftV1Loan, NuggftV1Swap {
     using SafeCastLib for uint256;
-
     using NuggftV1AgentType for uint256;
 
     mapping(uint160 => uint256) loans;
