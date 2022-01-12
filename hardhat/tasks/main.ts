@@ -1,10 +1,36 @@
 import { ParamType } from 'ethers/lib/utils';
 import { task } from 'hardhat/config';
 
-import { NuggftV1Deployer__factory, NuggftV1__factory } from '../../typechain';
+import { IDotnuggV1StorageProxy__factory, NuggftV1__factory } from '../../typechain';
+import { IDotnuggV1StorageProxyInterface } from '../../typechain/IDotnuggV1StorageProxy';
 import { toEth } from '../utils/conversion';
-import { buildBytecode } from '../utils/create2';
+import { buildBytecode, encodeParams } from '../utils/create2';
 import { Helper, OnchainHelper } from '../utils/Helper';
+
+task('build-params', '').setAction(async (_, hre) => {
+    const param = ParamType.fromString('uint256[-1][-1][8]');
+
+    console.log(
+        encodeParams(
+            (hre.ethers.Contract.getInterface(IDotnuggV1StorageProxy__factory.abi) as IDotnuggV1StorageProxyInterface).functions[
+                'unsafeBulkStore(uint256[][][])'
+            ].inputs,
+
+            [
+                [
+                    hre.dotnugg.itemsByFeatureByIdArray[0],
+                    hre.dotnugg.itemsByFeatureByIdArray[1],
+                    hre.dotnugg.itemsByFeatureByIdArray[2],
+                    hre.dotnugg.itemsByFeatureByIdArray[3],
+                    hre.dotnugg.itemsByFeatureByIdArray[4],
+                    hre.dotnugg.itemsByFeatureByIdArray[5],
+                    hre.dotnugg.itemsByFeatureByIdArray[6],
+                    hre.dotnugg.itemsByFeatureByIdArray[7],
+                ],
+            ],
+        ),
+    );
+});
 
 task('build-txs', '')
     .addOptionalParam('salt', '')
@@ -18,23 +44,23 @@ task('build-txs', '')
 
         const deployerAddress = hre.ethers.utils.getContractAddress({ from: __special.address, nonce: 1 });
 
-        const unsigned = new NuggftV1Deployer__factory(__special).getDeployTransaction(
-            args.salt,
-            [__trusted.address, deployerAddress],
-            dotnuggAddress,
-            [
-                hre.dotnugg.itemsByFeatureByIdArray[0],
-                hre.dotnugg.itemsByFeatureByIdArray[1],
-                hre.dotnugg.itemsByFeatureByIdArray[2],
-                hre.dotnugg.itemsByFeatureByIdArray[3],
-                hre.dotnugg.itemsByFeatureByIdArray[4],
-                hre.dotnugg.itemsByFeatureByIdArray[5],
-                hre.dotnugg.itemsByFeatureByIdArray[6],
-                hre.dotnugg.itemsByFeatureByIdArray[7],
-            ],
-        );
+        // const unsigned = new NuggftV1Deployer__factory(__special).getDeployTransaction(
+        //     args.salt,
+        //     [__trusted.address, deployerAddress],
+        //     dotnuggAddress,
+        //     [
+        //         hre.dotnugg.itemsByFeatureByIdArray[0],
+        //         hre.dotnugg.itemsByFeatureByIdArray[1],
+        //         hre.dotnugg.itemsByFeatureByIdArray[2],
+        //         hre.dotnugg.itemsByFeatureByIdArray[3],
+        //         hre.dotnugg.itemsByFeatureByIdArray[4],
+        //         hre.dotnugg.itemsByFeatureByIdArray[5],
+        //         hre.dotnugg.itemsByFeatureByIdArray[6],
+        //         hre.dotnugg.itemsByFeatureByIdArray[7],
+        //     ],
+        // );
 
-        console.log(unsigned.data);
+        // console.log(unsigned.data);
     });
 
 task('get-args', '').setAction(async (args, hre) => {

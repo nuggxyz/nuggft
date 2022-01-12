@@ -1,29 +1,30 @@
 import { BigNumber, BigNumberish } from 'ethers';
-import { ethers } from 'hardhat';
+
+import { getHRE } from './deployment';
 
 export class Mining {
     public static async advanceBlock() {
-        return await ethers.provider.send('evm_mine', []);
+        return await getHRE().ethers.provider.send('evm_mine', []);
     }
 
     public static async advanceBlockTo(blockNumber: BigNumberish) {
-        for (let i = await ethers.provider.getBlockNumber(); i < blockNumber; i++) {
+        for (let i = await getHRE().ethers.provider.getBlockNumber(); i < blockNumber; i++) {
             await Mining.advanceBlock();
         }
     }
 
     public static async increase(value: BigNumber) {
-        await ethers.provider.send('evm_increaseTime', [value.toNumber()]);
+        await getHRE().ethers.provider.send('evm_increaseTime', [value.toNumber()]);
         await Mining.advanceBlock();
     }
 
     public static async latest() {
-        const block = await ethers.provider.getBlock('latest');
+        const block = await getHRE().ethers.provider.getBlock('latest');
         return BigNumber.from(block.timestamp);
     }
 
     public static async pending() {
-        const block = await ethers.provider.getBlock('pending');
+        const block = await getHRE().ethers.provider.getBlock('pending');
         // console.log({ block });
         return BigNumber.from(block.timestamp);
     }
@@ -34,7 +35,7 @@ export class Mining {
     }
 
     public static async advanceTime(time: BigNumberish) {
-        await ethers.provider.send('evm_increaseTime', [time]);
+        await getHRE().ethers.provider.send('evm_increaseTime', [time]);
     }
 
     public static duration = {

@@ -17,8 +17,7 @@ import {SafeCastLib} from '../libraries/SafeCastLib.sol';
 import {NuggftV1Token} from './NuggftV1Token.sol';
 
 import {Trust} from './Trust.sol';
-
-// import {PureDeployerCallback} from '../_deployment/PureDeployer.sol';
+import '../_test/utils/logger.sol';
 
 abstract contract NuggftV1Dotnugg is INuggftV1Dotnugg, NuggftV1Token, Trust {
     using SafeCastLib for uint256;
@@ -42,21 +41,7 @@ abstract contract NuggftV1Dotnugg is INuggftV1Dotnugg, NuggftV1Token, Trust {
 
     uint256 internal featureLengths;
 
-    constructor() {
-        // (bool ok, bytes memory res) = address(
-        //     uint160(
-        //         uint256(
-        //             keccak256(abi.encodePacked(bytes1(0xd6), bytes1(0x94), msg.sender, bytes1(0x02))) //
-        //         )
-        //     ) //
-        // ).call(abi.encodeWithSelector(bytes4(0x8e3b3a6b)));
-
-        // require(ok);
-
-        // dotnuggV1 = IDotnuggV1(abi.decode(res, (address)));
-
-        dotnuggV1StorageProxy = dotnuggV1.register();
-    }
+    constructor() {}
 
     /// @inheritdoc IDotnuggV1Implementer
     function dotnuggV1StoreCallback(
@@ -76,14 +61,6 @@ abstract contract NuggftV1Dotnugg is INuggftV1Dotnugg, NuggftV1Token, Trust {
         uint256 newLen = _lengthOf(cache, feature) + amount;
 
         featureLengths = ShiftLib.set(cache, 8, feature * 8, newLen);
-    }
-
-    /// @inheritdoc INuggftV1Dotnugg
-    function dotnuggV1StoreFiles(uint256[][] calldata data, uint8 feature) external requiresTrust {
-        // uint8 len = dotnuggV1StorageProxy.store(feature, data);
-        // uint256 cache = featureLengths;
-        // uint256 newLen = _lengthOf(cache, feature) + len;
-        // featureLengths = ShiftLib.set(cache, 8, feature * 8, newLen);
     }
 
     function lengthOf(uint8 feature) external view returns (uint8) {
@@ -150,3 +127,51 @@ abstract contract NuggftV1Dotnugg is INuggftV1Dotnugg, NuggftV1Token, Trust {
         return resolvers[tokenId] != address(0);
     }
 }
+
+// let ptr := mload(0x40)
+
+// mstore8(ptr, 0xd6)
+// mstore8(add(ptr, 1), 0x94)
+// mstore(add(ptr, 2), shl(96, caller()))
+// mstore8(add(ptr, 22), 0x02)
+
+// let ok := staticcall(gas(), keccak256(ptr, 23), add(32, sel), 0x4, 0, 20)
+// if iszero(ok) {
+//     revert(0x0, 0x0)
+// }
+
+// require(address(dotnuggV1) != address(0), 'UHOH:0');
+
+// console.log(address(dotnuggV1));
+
+// // dotnuggV1 = IDotnuggV1(dotnuggV1);
+// // dotnuggV1 = IDotnuggV1(a);
+// dotnuggV1StorageProxy = dotnuggV1.register();
+
+// let addr := mload(0x40)
+
+// mstore(addr, shl(72, or(shl(176, 0xd6), or(shl(168, 0x94), or(shl(8, caller()), 0x02)))))
+
+// let sig := mload(0x40)
+
+// mstore(sig, 0x8e3b3a6b)
+
+// let ok := staticcall(gas(), keccak256(addr, 23), sig, 0x4, 0, 32)
+// if iszero(ok) {
+//     revert(0, 0x4)
+// }
+
+// let ret := mload(0x40)
+// returndatacopy(ret, 0, 32)
+// sstore(dotnuggV1.slot, mload(ret))
+
+// mstore(sig, 0x1aa3a008)
+
+// ok := call(gas(), mload(ret), 0, sig, 0x4, 0, 32)
+// if iszero(ok) {
+//     revert(0, 0x4)
+// }
+
+// ret := mload(0x40)
+// returndatacopy(ret, 0, 32)
+// sstore(dotnuggV1StorageProxy.slot, mload(ret))

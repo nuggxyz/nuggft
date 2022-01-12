@@ -148,6 +148,11 @@ contract DotnuggV1StorageProxy is IDotnuggV1StorageProxy {
                                 TRUSTED
        ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
 
+
+        //    function unsafeBulkStore2(bytes calldata data) public override {
+        //         unsafeBulkStore(abi.decode(data, (uint256[][][])));
+        //    }
+
     function unsafeBulkStore(uint256[][][] calldata data) public override {
         for (uint8 i = 0; i < 8; i++) {
             uint8 len = data[i].length.safe8();

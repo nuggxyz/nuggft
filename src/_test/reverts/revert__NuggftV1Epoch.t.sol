@@ -11,6 +11,7 @@ contract revert__NuggftV1Epoch is NuggftV1Test, NuggftV1Epoch {
 
     function setUp() public {
         reset();
+        fvm.roll(15000);
     }
 
     /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━

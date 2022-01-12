@@ -1,8 +1,8 @@
-import { BigNumber, Contract } from 'ethers';
+import { BigNumber } from 'ethers';
 import { ParamType } from 'ethers/lib/utils';
 import { HardhatRuntimeEnvironment } from 'hardhat/types';
 
-import { NuggftV1, NuggftV1__factory, IDotnuggV1, IDotnuggV1__factory, NuggftV1Deployer__factory, NuggftV1Deployer } from '../../typechain';
+import { NuggftV1__factory, IDotnuggV1, IDotnuggV1__factory } from '../../typechain';
 import { fromEth } from '../utils/conversion';
 import { buildBytecode } from '../utils/create2';
 import { Helper } from '../utils/Helper';
@@ -117,37 +117,37 @@ const deployment = async (hre: HardhatRuntimeEnvironment) => {
     //         ],
     //     ],
     // });
-    const nuggftDeployer = await new NuggftV1Deployer__factory(__special).deploy(
-        salt,
-        [
-            __trusted.address,
-            hre.ethers.utils.getContractAddress({
-                from: __special.address,
-                nonce: 1,
-            }),
-        ],
-        dotnuggV1.address,
-        [
-            hre.dotnugg.itemsByFeatureByIdArray[0],
-            hre.dotnugg.itemsByFeatureByIdArray[1],
-            hre.dotnugg.itemsByFeatureByIdArray[2],
-            hre.dotnugg.itemsByFeatureByIdArray[3],
-            hre.dotnugg.itemsByFeatureByIdArray[4],
-            hre.dotnugg.itemsByFeatureByIdArray[5],
-            hre.dotnugg.itemsByFeatureByIdArray[6],
-            hre.dotnugg.itemsByFeatureByIdArray[7],
-        ],
-        // {
-        //     gasLimit: 25645200,
-        // },
-    );
-    console.log(nuggftDeployer.deployTransaction.hash);
+    // const nuggftDeployer = await new NuggftV1Deployer__factory(__special).deploy(
+    //     salt,
+    //     [
+    //         __trusted.address,
+    //         hre.ethers.utils.getContractAddress({
+    //             from: __special.address,
+    //             nonce: 1,
+    //         }),
+    //     ],
+    //     dotnuggV1.address,
+    //     [
+    //         hre.dotnugg.itemsByFeatureByIdArray[0],
+    //         hre.dotnugg.itemsByFeatureByIdArray[1],
+    //         hre.dotnugg.itemsByFeatureByIdArray[2],
+    //         hre.dotnugg.itemsByFeatureByIdArray[3],
+    //         hre.dotnugg.itemsByFeatureByIdArray[4],
+    //         hre.dotnugg.itemsByFeatureByIdArray[5],
+    //         hre.dotnugg.itemsByFeatureByIdArray[6],
+    //         hre.dotnugg.itemsByFeatureByIdArray[7],
+    //     ],
+    //     // {
+    //     //     gasLimit: 25645200,
+    //     // },
+    // );
+    // console.log(nuggftDeployer.deployTransaction.hash);
     // console.log(await hre.ethers.getDefaultProvider().getTransaction(dep.transactionHash));
-    const nuggftDepl = new Contract(nuggftDeployer.address, NuggftV1Deployer__factory.abi, __trusted) as unknown as NuggftV1Deployer;
+    // const nuggftDepl = new Contract(nuggftDeployer.address, NuggftV1Deployer__factory.abi, __trusted) as unknown as NuggftV1Deployer;
 
-    const nuggft = new Contract(await nuggftDepl.nuggft(), NuggftV1__factory.abi, __trusted) as unknown as NuggftV1;
+    // const nuggft = new Contract(await nuggftDepl.nuggft(), NuggftV1__factory.abi, __trusted) as unknown as NuggftV1;
 
-    console.log({ nuggftAddress, nuggft: nuggft.address });
+    // console.log({ nuggftAddress, nuggft: nuggft.address });
 
     // console.log({ nuggftDepl: (await nuggftDepl._deployed()).deployTransaction.data });
 

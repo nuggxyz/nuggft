@@ -25,7 +25,7 @@ contract revert__NuggftV1Swap is NuggftV1Test {
 
     function setUp() public {
         reset();
-        fvm.roll(57);
+        fvm.roll(15000);
 
         epoch = nuggft.epoch();
     }

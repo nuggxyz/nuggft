@@ -12,8 +12,6 @@ interface INuggftV1Dotnugg is IDotnuggV1Implementer {
 
     function dotnuggV1() external returns (IDotnuggV1);
 
-    function dotnuggV1StoreFiles(uint256[][] calldata data, uint8 feature) external;
-
     function setDotnuggV1AnchorOverrides(
         uint160 tokenId,
         uint16 itemId,
