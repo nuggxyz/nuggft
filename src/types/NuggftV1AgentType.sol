@@ -19,9 +19,9 @@ library NuggftV1AgentType {
 
     // @test  manual
     function addIncrement(uint96 value) internal pure returns (uint96 res) {
-        res = value * 10200;
+        // res = value * 10200; -- increment can never go highter than uint96
         assembly {
-            res := div(res, 10000)
+            res := div(mul(value, 10200), 10000)
         }
     }
 

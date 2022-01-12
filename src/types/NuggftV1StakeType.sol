@@ -41,13 +41,18 @@ library NuggftV1StakeType {
     }
 
     function addStaked(uint256 cache, uint96 add) internal pure returns (uint256 res) {
-        add += staked(cache);
-        res = staked(cache, add);
+        unchecked {
+            // maybe oot
+            add += staked(cache);
+            res = staked(cache, add);
+        }
     }
 
     function subStaked(uint256 cache, uint96 sub) internal pure returns (uint256 res) {
-        sub = staked(cache) - sub;
-        res = staked(cache, sub);
+        unchecked {
+            sub = staked(cache) - sub;
+            res = staked(cache, sub);
+        }
     }
 
     // @test input output unit test
@@ -56,13 +61,17 @@ library NuggftV1StakeType {
     }
 
     function addShares(uint256 cache, uint64 add) internal pure returns (uint256 res) {
-        add += shares(cache);
-        res = shares(cache, add);
+        unchecked {
+            add += shares(cache);
+            res = shares(cache, add);
+        }
     }
 
     function subShares(uint256 cache, uint64 sub) internal pure returns (uint256 res) {
-        sub = shares(cache) - sub;
-        res = shares(cache, sub);
+        unchecked {
+            sub = shares(cache) - sub;
+            res = shares(cache, sub);
+        }
     }
 
     function shares(uint256 cache, uint64 update) internal pure returns (uint256 res) {
