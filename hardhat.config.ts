@@ -99,21 +99,22 @@ const LocalNetworks: NetworksUserConfig = {
         gas: 10000000000,
         blockGasLimit: 10000000000000,
         gasPrice: parseInt(GAS_PRICE.toString(), 10),
-        saveDeployments: true,
-        accounts: [
-            {
-                privateKey: process.env.TRUSTED_PRIV_KEY,
-                balance: '990000000000000000000',
-            },
-            {
-                privateKey: process.env.SPECIAL_PRIV_KEY,
-                balance: '0',
-            },
-            {
-                privateKey: process.env.SPECIAL_PRIV_KEY_2,
-                balance: '990000000000000000000',
-            },
-        ],
+        saveDeployments: false,
+        // accounts: NamedAccounts,
+        // accounts: [
+        //     {
+        //         privateKey: process.env.TRUSTED_PRIV_KEY,
+        //         balance: '990000000000000000000',
+        //     },
+        //     {
+        //         privateKey: process.env.SPECIAL_PRIV_KEY,
+        //         balance: '0',
+        //     },
+        //     {
+        //         privateKey: process.env.SPECIAL_PRIV_KEY_2,
+        //         balance: '990000000000000000000',
+        //     },
+        // ],
     },
 };
 

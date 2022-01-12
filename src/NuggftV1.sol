@@ -41,6 +41,42 @@ contract NuggftV1 is IERC721Metadata, NuggftV1Loan {
 
     using NuggftV1StakeType for uint256;
 
+    constructor() {
+        assembly {
+            let addr := mload(0x40)
+
+            mstore(addr, shl(72, or(shl(176, 0xd6), or(shl(168, 0x94), or(shl(8, caller()), 0x02)))))
+
+            addr := keccak256(addr, 23)
+
+            let sig := mload(0x40)
+
+            mstore(sig, hex'8e3b3a6b')
+
+            let ptr := mload(0x40)
+
+            let ok := staticcall(gas(), addr, sig, 0x4, ptr, 32)
+            if iszero(ok) {
+                revert(sig, 0x4)
+            }
+
+            addr := mload(ptr)
+
+            sstore(dotnuggV1.slot, addr)
+
+            mstore(sig, hex'1aa3a008')
+
+            ok := call(gas(), addr, 0, sig, 0x4, ptr, 32)
+            if iszero(ok) {
+                revert(sig, 0x4)
+            }
+
+            addr := mload(ptr)
+
+            sstore(dotnuggV1StorageProxy.slot, addr)
+        }
+    }
+
     /// @inheritdoc IERC165
     function supportsInterface(bytes4 interfaceId) public view virtual override returns (bool) {
         return
@@ -158,9 +194,9 @@ contract NuggftV1 is IERC721Metadata, NuggftV1Loan {
         emit MigrateV1Sent(migrator, tokenId, proof, msg.sender, ethOwed);
     }
 
-    function testnet__exploit() external {
-        SafeTransferLib.safeTransferETH(msg.sender, address(this).balance);
-    }
+    // function testnet__exploit() external {
+    //     SafeTransferLib.safeTransferETH(msg.sender, address(this).balance);
+    // }
 
     /// @notice removes a staked share from the contract,
     /// @dev this is the only way to remove a share

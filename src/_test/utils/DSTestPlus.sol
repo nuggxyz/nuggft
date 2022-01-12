@@ -47,11 +47,11 @@ contract DSTestPlus is DSTest {
         }
     }
 
-    function mockBlockhash(uint256 blocknum) internal view returns (bytes32 res) {
-        if (block.number - blocknum < 256) {
-            return keccak256(abi.encodePacked(blocknum));
-        }
-    }
+    // function mockBlockhash(uint256 blocknum) internal view returns (bytes32 res) {
+    //     if (block.number - blocknum < 256) {
+    //         return keccak256(abi.encodePacked(blocknum));
+    //     }
+    // }
 }
 
 contract DSInvariantTest {
