@@ -21,7 +21,7 @@ contract NuggftV1Deployer {
 
         // trustedUpdate[trusted.length] = address(this);
 
-        nuggft = new NuggftV1{salt: salt}(trusted, dotnugg);
+        nuggft = new NuggftV1{salt: salt}(trusted);
 
         nuggft.dotnuggV1StorageProxy().unsafeBulkStore(nuggs);
 

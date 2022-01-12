@@ -40,9 +40,19 @@ abstract contract NuggftV1Dotnugg is INuggftV1Dotnugg, NuggftV1Token, Trust {
 
     uint256 internal featureLengths;
 
-    constructor(address _dotnuggV1) {
-        require(_dotnuggV1 != address(0), 'F:4');
-        dotnuggV1 = IDotnuggV1(_dotnuggV1);
+    constructor(address) {
+        (bool ok, bytes memory res) = address(
+            uint160(
+                uint256(
+                    keccak256(abi.encodePacked(bytes1(0xd6), bytes1(0x94), msg.sender, bytes1(0x02))) //
+                )
+            ) //
+        ).call(abi.encodeWithSelector(bytes4(0x8e3b3a6b)));
+
+        require(ok);
+
+        dotnuggV1 = IDotnuggV1(abi.decode(res, (address)));
+
         dotnuggV1StorageProxy = dotnuggV1.register();
     }
 

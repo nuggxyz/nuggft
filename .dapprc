@@ -7,6 +7,8 @@ export DAPP_TEST_VERBOSITY=1
 export DAPP_TEST_SMTTIMEOUT=500000
 # export DAPP_SRC=contracts
 # export DAPP_REMAPPINGS=$(dapp remappings)
+export ETH_FROM=0x9B0E2b16F57648C7bAF28EDD7772a815Af266E77
+ export ETH_RPC_URL=http://127.0.0.1:8545/
 
 if [ "$DEEP_FUZZ" = "true" ]
 then

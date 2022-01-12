@@ -1,10 +1,41 @@
 import { ParamType } from 'ethers/lib/utils';
 import { task } from 'hardhat/config';
 
-import { NuggftV1__factory } from '../../typechain';
+import { NuggftV1Deployer__factory, NuggftV1__factory } from '../../typechain';
 import { toEth } from '../utils/conversion';
 import { buildBytecode } from '../utils/create2';
-import { OnchainHelper } from '../utils/Helper';
+import { OnchainHelper, Helper } from '../utils/Helper';
+
+task('build-txs', '')
+    .addOptionalParam('salt', '')
+    .setAction(async (args: { salt: string }, hre) => {
+        await Helper.init(hre);
+
+        const __trusted = Helper.namedSigners.__trusted;
+        const __special = Helper.namedSigners.__special;
+
+        const dotnuggAddress = hre.ethers.utils.getContractAddress({ from: __special.address, nonce: 0 });
+
+        const deployerAddress = hre.ethers.utils.getContractAddress({ from: __special.address, nonce: 1 });
+
+        const unsigned = new NuggftV1Deployer__factory(__special).getDeployTransaction(
+            args.salt,
+            [__trusted.address, deployerAddress],
+            dotnuggAddress,
+            [
+                hre.dotnugg.itemsByFeatureByIdArray[0],
+                hre.dotnugg.itemsByFeatureByIdArray[1],
+                hre.dotnugg.itemsByFeatureByIdArray[2],
+                hre.dotnugg.itemsByFeatureByIdArray[3],
+                hre.dotnugg.itemsByFeatureByIdArray[4],
+                hre.dotnugg.itemsByFeatureByIdArray[5],
+                hre.dotnugg.itemsByFeatureByIdArray[6],
+                hre.dotnugg.itemsByFeatureByIdArray[7],
+            ],
+        );
+
+        console.log(unsigned.data);
+    });
 
 task('get-args', '').setAction(async (args, hre) => {
     const wallet = hre.ethers.Wallet.createRandom();
@@ -12,6 +43,32 @@ task('get-args', '').setAction(async (args, hre) => {
     const dotnuggAddress = hre.ethers.utils.getContractAddress({ from: wallet.address, nonce: 0 });
 
     const deployerAddress = hre.ethers.utils.getContractAddress({ from: wallet.address, nonce: 1 });
+
+    const initCodeHash = hre.ethers.utils.keccak256(
+        buildBytecode(
+            [ParamType.fromString('address[]'), ParamType.fromString('address')],
+            [['0x9B0E2b16F57648C7bAF28EDD7772a815Af266E77', deployerAddress], dotnuggAddress],
+            NuggftV1__factory.bytecode,
+        ),
+    );
+
+    console.log(`export FACTORY="${deployerAddress}"`);
+    console.log(`export CALLER="${wallet.address}"`);
+    console.log(`export INIT_CODE_HASH="${initCodeHash}"`);
+
+    console.log('deployer private key: ', wallet.privateKey);
+
+    // console.log('deployerAddress: ', deployerAddress);
+
+    // console.log('deployerAddress: ', deployerAddress);
+});
+
+task('get-args-2', '').setAction(async (args, hre) => {
+    const wallet = hre.ethers.Wallet.createRandom();
+
+    const deployerAddress = hre.ethers.utils.getContractAddress({ from: wallet.address, nonce: 1 });
+
+    const dotnuggAddress = hre.ethers.utils.getContractAddress({ from: deployerAddress, nonce: 1 });
 
     const initCodeHash = hre.ethers.utils.keccak256(
         buildBytecode(

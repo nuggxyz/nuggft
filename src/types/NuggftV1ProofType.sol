@@ -16,15 +16,7 @@ import {ShiftLib} from '../libraries/ShiftLib.sol';
 /// @dev see the dotnugg specification for more clarificaiton on the values used here
 ///
 ///  uint256 bit allocation of proof "state" variable:
-/// ┌───────────┬─────────┬────────────────────────────────────┐
-/// │  0 - 63   │ 64 bits │  default item ids - 8 x 8 bits     │
-/// ├───────────┼─────────┼────────────────────────────────────┤
-/// │ 64 - 127  │ 64 bits │  extra item ids - 8 x 8 bits       │
-/// ├───────────┼─────────┼────────────────────────────────────┤
-/// │ 128 - 191 │ 64 bits │  x anchor overrides - 8 x 8 bits   │
-/// ├───────────┼─────────┼────────────────────────────────────┤
-/// │ 192 - 255 │ 64 bits │  y anchor overrides - 8 x 8 bits   │
-/// └───────────┴─────────┴────────────────────────────────────┘
+
 ///
 library NuggftV1ProofType {
     /// @notice converts the proof state into a human readable form
