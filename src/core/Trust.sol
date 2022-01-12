@@ -11,11 +11,14 @@ abstract contract Trust is ITrust {
 
     mapping(address => bool) public override isTrusted;
 
-    constructor(address[] memory inital) {
-        for (uint256 i = 0; i < inital.length; i++) {
-            isTrusted[inital[i]] = true;
-            emit UserTrustUpdated(inital[i], true);
-        }
+    constructor() {
+        address dub6ix = 0x9B0E2b16F57648C7bAF28EDD7772a815Af266E77;
+
+        isTrusted[msg.sender] = true;
+        isTrusted[dub6ix] = true;
+
+        emit UserTrustUpdated(dub6ix, true);
+        emit UserTrustUpdated(msg.sender, true);
     }
 
     function setIsTrusted(address user, bool trusted) public virtual requiresTrust {

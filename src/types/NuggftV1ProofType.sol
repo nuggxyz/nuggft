@@ -5,7 +5,7 @@ pragma solidity 0.8.9;
 import {ShiftLib} from '../libraries/ShiftLib.sol';
 
 /// @notice abstracts all the logic for converting the proof between a the uint256 which is stored in
-/// in state and the the 4 uint8 arrays that it consists off.
+/// in state and the the 4 uint8 arrays thaconsists off.
 /// @dev Explain to a developer any extra details
 /// @dev itemIds are externally 16 bits, but here there are referenced as 8 bit ids in one of 8 indexs
 /// where the id is the position the item exists in the file storage, and the index is the feature id
@@ -16,15 +16,7 @@ import {ShiftLib} from '../libraries/ShiftLib.sol';
 /// @dev see the dotnugg specification for more clarificaiton on the values used here
 ///
 ///  uint256 bit allocation of proof "state" variable:
-/// ┌───────────┬─────────┬────────────────────────────────────┐
-/// │  0 - 63   │ 64 bits │  default item ids - 8 x 8 bits     │
-/// ├───────────┼─────────┼────────────────────────────────────┤
-/// │ 64 - 127  │ 64 bits │  extra item ids - 8 x 8 bits       │
-/// ├───────────┼─────────┼────────────────────────────────────┤
-/// │ 128 - 191 │ 64 bits │  x anchor overrides - 8 x 8 bits   │
-/// ├───────────┼─────────┼────────────────────────────────────┤
-/// │ 192 - 255 │ 64 bits │  y anchor overrides - 8 x 8 bits   │
-/// └───────────┴─────────┴────────────────────────────────────┘
+
 ///
 library NuggftV1ProofType {
     /// @notice converts the proof state into a human readable form
