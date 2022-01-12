@@ -5,18 +5,20 @@ pragma solidity 0.8.9;
 import {NuggftV1} from '../NuggftV1.sol';
 
 // import {DotnuggV1} from '../../../dotnugg-core/src/DotnuggV1.sol';
+
 // import {IDotnuggV1} from '../../../dotnugg-core/src/interfaces/IDotnuggV1.sol';
 
 contract PureDeployerCallback {
     address public dotnuggV1;
 
-    // constructor(address _dotnugg) {
-    //     dotnuggV1 = _dotnugg;
-    // }
+    constructor(address _dotnugg) {
+        dotnuggV1 = _dotnugg;
+    }
 }
 
 contract PureDeployer {
     NuggftV1 public nuggft;
+
     address public dotnugg;
 
     constructor(
@@ -26,7 +28,7 @@ contract PureDeployer {
     ) {
         // dotnugg = new DotnuggV1{salt: dotnuggSalt}(); // nonce 1
 
-        // new PureDeployerCallback(dotnugg); // nonce 2
+        new PureDeployerCallback(address(dotnugg)); // nonce 2
 
         nuggft = new NuggftV1{salt: nuggftSalt}(); // nonce 3
 
