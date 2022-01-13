@@ -6,7 +6,13 @@ import { getHRE } from '../utils/deployment';
 import { deployContractWithSalt } from '../utils';
 import { NuggftV1 } from '../../typechain/NuggftV1';
 import { NuggftV1__factory } from '../../typechain/factories/NuggftV1__factory';
-import { ABC__factory, IDotnuggV1, MockDotnuggV1__factory, MockNuggftV1Migrator, MockNuggftV1Migrator__factory } from '../../typechain';
+import {
+    PureDeployer__factory,
+    IDotnuggV1,
+    MockDotnuggV1__factory,
+    MockNuggftV1Migrator,
+    MockNuggftV1Migrator__factory,
+} from '../../typechain';
 import { IDotnuggV1__factory } from '../../typechain/factories/IDotnuggV1__factory';
 import { encodeParams } from '../utils/create2';
 
@@ -47,8 +53,8 @@ export const NuggFatherFix: Fixture<NuggFatherFixture> = async function (
 
     // const dotnugg = new Contract('0x603DED7DE6677FeDC13bf2B334C249584D263da4', IDotnuggV1__factory.abi) as IDotnuggV1;
 
-    const dep = await deployContractWithSalt<ABC__factory>({
-        factory: 'ABC',
+    const dep = await deployContractWithSalt<PureDeployer__factory>({
+        factory: 'PureDeployer',
         from: deployer,
         args: [],
     });

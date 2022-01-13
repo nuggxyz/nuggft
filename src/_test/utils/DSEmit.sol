@@ -2,7 +2,7 @@
 
 pragma solidity 0.8.9;
 
-abstract contract DSEmit {
+library DSEmit {
     event log(string);
     event logs(bytes);
 
@@ -21,4 +21,26 @@ abstract contract DSEmit {
     event log_named_uint(string key, uint256 val);
     event log_named_bytes(string key, bytes val);
     event log_named_string(string key, string val);
+
+    struct cp {
+        string label;
+        uint256 left;
+    }
+
+    function ptr() private pure returns (cp storage s) {
+        assembly {
+            s.slot := 0x432343243242342534
+        }
+    }
+
+    function startMeasuringGas(string memory label) internal {
+        ptr().label = label;
+        ptr().left = gasleft();
+    }
+
+    function stopMeasuringGas() internal {
+        uint256 checkpointGasLeft2 = gasleft();
+
+        emit log_named_uint(ptr().label, ptr().left - checkpointGasLeft2);
+    }
 }
