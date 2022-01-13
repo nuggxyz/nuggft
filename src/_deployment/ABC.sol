@@ -2,6 +2,8 @@
 
 pragma solidity 0.8.9;
 
+import {DotnuggV1} from '../../../dotnugg-core/src/DotnuggV1.sol';
+
 contract PureDeployerCallback {
     address public dotnuggV1;
 
