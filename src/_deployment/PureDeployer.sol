@@ -2,7 +2,7 @@
 
 pragma solidity 0.8.9;
 
-import {DotnuggV1} from '../../../dotnugg-core/src/DotnuggV1.sol';
+import '../_test/utils/DSEmit.sol';
 
 contract PureDeployerCallback {
     address public dotnuggV1;
@@ -12,13 +12,14 @@ contract PureDeployerCallback {
     }
 }
 
-contract ABC {
+//'init(bytes32,bytes32,bytes,bytes,bytes)'
+contract PureDeployer {
     address public __dotnugg;
     address public __nuggft;
 
     function init(
-        uint256 nuggftSalt,
-        uint256 dotnuggSalt,
+        bytes32 nuggftSalt,
+        bytes32 dotnuggSalt,
         bytes memory nuggftCode,
         bytes memory dotnuggCode,
         bytes memory nuggs
@@ -34,27 +35,36 @@ contract ABC {
         /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
            [1] - deploy DotnuggV1
            ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+        DSEmit.startMeasuringGas('B');
+
         assembly {
             dotnugg := create2(0x0, add(dotnuggCode, 0x20), mload(dotnuggCode), dotnuggSalt)
         }
 
         require(dotnugg != address(0), 'OOPS:1');
+        DSEmit.stopMeasuringGas();
+
+        DSEmit.startMeasuringGas('B2');
 
         new PureDeployerCallback(dotnugg);
+
+        DSEmit.stopMeasuringGas();
 
         /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
            [2] - deploy NuggftV1
            ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+        DSEmit.startMeasuringGas('C');
 
         assembly {
             nuggft := create2(0x0, add(nuggftCode, 0x20), mload(nuggftCode), nuggftSalt)
         }
 
         require(nuggft != address(0), 'OOPS:2');
-
+        DSEmit.stopMeasuringGas();
         /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
            [3] - call NuggftV1 "dotnuggV1StorageProxy()"
            ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+        DSEmit.startMeasuringGas('C');
 
         bytes memory proxy_call = hex'b91b6cbf';
 
@@ -69,11 +79,14 @@ contract ABC {
 
         require(proxy != address(0), 'OOPS:3/2');
 
+        DSEmit.stopMeasuringGas();
+
         /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
            [4] - call DotnuggV1StorageProxy "unsafeBulkStore(uint256[][][])"
            ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+        DSEmit.startMeasuringGas('C');
 
-        nuggs = bytes.concat(hex'87ae7031', nuggs);
+        nuggs = bytes.concat(hex'6ce05d4a', nuggs);
 
         assembly {
             success := call(gas(), proxy, 0x0, add(nuggs, 0x20), mload(nuggs), 0x0, 0)
@@ -81,9 +94,12 @@ contract ABC {
 
         require(success, 'OOPS:4');
 
+        DSEmit.stopMeasuringGas();
+
         /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
            [5] - call NuggftV1 "setIsTrusted(address,bool)"
            ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+        DSEmit.startMeasuringGas('C');
 
         bytes memory remove_trust_call = abi.encodeWithSelector(bytes4(keccak256('setIsTrusted(address,bool)')), address(this), false);
 
@@ -95,5 +111,9 @@ contract ABC {
 
         __dotnugg = dotnugg;
         __nuggft = nuggft;
+
+        DSEmit.stopMeasuringGas();
+
+        // selfdestruct(payable(msg.sender));
     }
 }

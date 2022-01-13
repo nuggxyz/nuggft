@@ -13,7 +13,7 @@ import {MockDotnuggV1} from './mock/MockDotnuggV1.sol';
 import {MockNuggftV1Migrator} from './mock/MockNuggftV1Migrator.sol';
 
 import {NuggftV1} from '../NuggftV1.sol';
-import {ABC} from '../_deployment/ABC.sol';
+import {PureDeployer} from '../_deployment/PureDeployer.sol';
 
 import './utils/logger.sol';
 
@@ -81,16 +81,19 @@ contract NuggftV1Test is t {
 
     Users public users;
 
+    address internal dub6ix = 0x9B0E2b16F57648C7bAF28EDD7772a815Af266E77;
+
     // constructor() {}
 
     function reset() public {
         fvm.roll(15000);
         // bytes memory tmp = hex'000100';
 
-        (_processor, _nuggft, _proxy, ) = new ABC().init(0, 0, type(RiggedNuggft).creationCode, type(MockDotnuggV1).creationCode, tmpdata);
+        PureDeployer dep = new PureDeployer();
+        dep.init(0, 0, type(RiggedNuggft).creationCode, type(MockDotnuggV1).creationCode, tmpdata);
 
-        processor = MockDotnuggV1(_processor);
-        nuggft = RiggedNuggft(_nuggft);
+        processor = MockDotnuggV1(dep.__dotnugg());
+        nuggft = RiggedNuggft(dep.__nuggft());
 
         safe = new User();
 
