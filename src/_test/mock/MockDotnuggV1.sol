@@ -153,14 +153,15 @@ contract DotnuggV1StorageProxy is IDotnuggV1StorageProxy {
         //         unsafeBulkStore(abi.decode(data, (uint256[][][])));
         //    }
 
-    function unsafeBulkStore(uint256[][][] calldata data) public override {
+    function unsafeBulkStore(bytes[] calldata data) public override {
         for (uint8 i = 0; i < 8; i++) {
             uint8 len = data[i].length.safe8();
 
 
             require(len > 0, 'F:0');
 
-            address ptr = SSTORE2.write(data[i]);
+            // address ptr = SSTORE2.write(data[i]);
+            address ptr = address(0);
 
             bool ok = IDotnuggV1Implementer(implementer).dotnuggV1StoreCallback(msg.sender, i, len, ptr);
 
@@ -173,13 +174,13 @@ contract DotnuggV1StorageProxy is IDotnuggV1StorageProxy {
         }
     }
 
-    function store(uint8 feature, uint256[][] calldata data) public override  returns (uint8 res) {
+    function store(uint8 feature, bytes calldata data) public override  returns (uint8 res) {
         uint8 len = data.length.safe8();
 
         require(len > 0, 'F:0');
 
 
-        address ptr = SSTORE2.write(data);
+        address ptr = address(0);
 
         require(IDotnuggV1Implementer(implementer).dotnuggV1StoreCallback(msg.sender, feature, len, ptr), 'C:0');
 
@@ -390,6 +391,20 @@ contract MockDotnuggV1 is IDotnuggV1 {
         bool stats,
         bool base64,
         bytes memory data
+    ) external view override returns (string memory res) {}
+
+
+    function chunk(
+        address implementer,
+        uint256 artifactId,
+        address resolver,
+        bool rekt,
+        bool background,
+        bool stats,
+        bool base64,
+        bytes memory data,
+        uint8,
+        uint8
     ) external view override returns (string memory res) {}
 
     /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━

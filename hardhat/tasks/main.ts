@@ -3,6 +3,7 @@ import { task } from 'hardhat/config';
 
 import { IDotnuggV1StorageProxy__factory, NuggftV1__factory } from '../../typechain';
 import { IDotnuggV1StorageProxyInterface } from '../../typechain/IDotnuggV1StorageProxy';
+import { DelegateEvent } from '../../typechain/RiggedNuggft';
 import { toEth } from '../utils/conversion';
 import { buildBytecode, encodeParams } from '../utils/create2';
 import { Helper, OnchainHelper } from '../utils/Helper';
@@ -137,6 +138,12 @@ task('mint-a-lot', '').setAction(async (args, hre) => {
 task('trusted-mint-a-lot', '').setAction(async (args, hre) => {
     //@ts-ignore
     await OnchainHelper.init(hre);
+
+    OnchainHelper.nuggft.interface.parseLog({
+        // @ts-ignore
+        topics: OnchainHelper.nuggft.filters['Delegate(uint160,address,uint96)'](0x69, null, null).topics,
+        data: '0x00000000000000000',
+    }).args as unknown as DelegateEvent;
 
     await OnchainHelper.send('trust', OnchainHelper.nuggft.setIsTrusted(OnchainHelper.minter.address, true));
 

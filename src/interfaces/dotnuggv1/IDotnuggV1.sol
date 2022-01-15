@@ -55,8 +55,22 @@ interface IDotnuggV1 {
         address resolver,
         bool rekt,
         bool background,
-        bool base64,
         bool stats,
+        bool base64,
         bytes calldata data
     ) external view returns (string memory res);
+
+    function chunk(
+        address implementer,
+        uint256 id,
+        address resolver,
+        bool rekt,
+        bool background,
+        bool stats,
+        bool base64,
+        bytes calldata data,
+        uint8 chunks,
+        uint8 index
+    ) external view returns (string memory res);
 }
+// 0x01388800182ebb81fd8922eea79d1ace76f1612e

@@ -5,9 +5,9 @@ pragma solidity 0.8.9;
 interface IDotnuggV1StorageProxy {
     function stored(uint8 feature) external view returns (uint8);
 
-    function store(uint8 feature, uint256[][] calldata data) external returns (uint8 amount);
+    function store(uint8 feature, bytes calldata data) external returns (uint8 amount);
 
-    function unsafeBulkStore(uint256[][][] calldata data) external;
+    function unsafeBulkStore(bytes[] calldata data) external;
 
     function init(address _implementer) external;
 
