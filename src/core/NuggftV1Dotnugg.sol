@@ -41,7 +41,7 @@ abstract contract NuggftV1Dotnugg is INuggftV1Dotnugg, NuggftV1Token, Trust {
 
     uint256 internal featureLengths;
 
-    constructor() {}
+    // function init(dotnuggV1)
 
     /// @inheritdoc IDotnuggV1Implementer
     function dotnuggV1StoreCallback(

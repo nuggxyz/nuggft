@@ -120,7 +120,27 @@ abstract contract NuggftV1Swap is INuggftV1Swap, NuggftV1Stake {
        ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
 
     /// @inheritdoc INuggftV1Swap
-    function claim(uint160 tokenId) external override {
+    function multiclaim(uint160[] calldata tokenIds) external override {
+        for (uint256 i = 0; i < tokenIds.length; i++) {
+            claim(tokenIds[i]);
+        }
+    }
+
+    /// @inheritdoc INuggftV1Swap
+    function multiclaimItem(
+        uint160[] calldata buyerTokenIds,
+        uint160[] calldata sellerTokenIds,
+        uint16[] calldata itemIds
+    ) external override {
+        require(itemIds.length == sellerTokenIds.length && itemIds.length == buyerTokenIds.length, 'S:Y');
+
+        for (uint256 i = 0; i < itemIds.length; i++) {
+            claimItem(buyerTokenIds[i], sellerTokenIds[i], itemIds[i]);
+        }
+    }
+
+    /// @inheritdoc INuggftV1Swap
+    function claim(uint160 tokenId) public override {
         // require(_isOperatorFor(msg.sender, sender), 'S:8');
 
         (Storage storage s, Memory memory m) = loadTokenSwap(tokenId, msg.sender);
@@ -143,7 +163,7 @@ abstract contract NuggftV1Swap is INuggftV1Swap, NuggftV1Stake {
         uint160 buyerTokenId,
         uint160 sellerTokenId,
         uint16 itemId
-    ) external override {
+    ) public override {
         require(_ownerOf(buyerTokenId) == msg.sender, 'S:9');
 
         (Storage storage s, Memory memory m) = loadItemSwap(sellerTokenId, itemId, address(buyerTokenId));

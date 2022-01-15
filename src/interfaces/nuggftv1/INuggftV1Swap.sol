@@ -30,6 +30,14 @@ interface INuggftV1Swap {
         uint16 itemid
     ) external;
 
+    function multiclaim(uint160[] calldata tokenIds) external;
+
+    function multiclaimItem(
+        uint160[] calldata buyerTokenIds,
+        uint160[] calldata sellerTokenIds,
+        uint16[] calldata itemIds
+    ) external;
+
     function swap(uint160 tokenId, uint96 floor) external;
 
     function swapItem(
