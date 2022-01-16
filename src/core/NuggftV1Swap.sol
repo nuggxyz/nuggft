@@ -38,7 +38,7 @@ abstract contract NuggftV1Swap is INuggftV1Swap, NuggftV1Stake {
     mapping(uint16 => uint256) protocolItems;
     mapping(uint160 => Mapping) swaps;
 
-    uint96 public constant MIN_OFFER = 10**8 * 100;
+    uint96 public constant MIN_OFFER = 10 gwei;
 
     /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
                                   delegate
