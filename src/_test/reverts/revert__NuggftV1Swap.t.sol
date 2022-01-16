@@ -19,7 +19,7 @@ contract revert__NuggftV1Swap is NuggftV1Test {
 
     uint160 charliesTokenId;
 
-    uint96 MIN = 10**13 * 50;
+    uint96 MIN = 10 gwei;
 
     int96 MININT = int96(int256(uint256(MIN)));
 
@@ -35,18 +35,34 @@ contract revert__NuggftV1Swap is NuggftV1Test {
        ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
 
     function test__revert__NuggftV1Swap__S_0__successAsSelf() public {
-        // console.log(block.number, uint256(blockhash(block.number - 2)), block.chainid);
+        uint96 value = 30 * 10**16;
 
-        _nuggft.shouldPass(frank, delegate(epoch), 30 * 10**16);
+        forge.vm.startPrank(users.frank);
+        {
+            forge.vm.deal(users.frank, value);
+            nuggft.delegate{value: value}(tokenId);
+        }
+        forge.vm.stopPrank();
     }
 
     ///////////////////////////////////////////////////////////////////////
 
-    function test__revert__NuggftV1Swap__S_0__successAsOperator() public {
-        _nuggft.shouldPass(frank, setApprovalForAll(address(dennis), true));
+    // function test__revert__NuggftV1Swap__S_0__successAsOperator() public {
+    //     uint96 value = 30 * 10**16;
 
-        _nuggft.shouldPass(dennis, delegate(epoch), 30 * 10**16);
-    }
+    //     forge.vm.startPrank(users.frank);
+    //     {
+    //         nuggft.setApprovalForAll(_nuggft, users.dennis);
+    //     }
+    //     forge.vm.stopPrank();
+
+    //     forge.vm.startPrank(users.dennis);
+    //     {
+    //         forge.vm.deal(users.dennis, value);
+    //         nuggft.delegate(tokenId);
+    //     }
+    //     forge.vm.stopPrank();
+    // }
 
     ///////////////////////////////////////////////////////////////////////
 
@@ -58,40 +74,72 @@ contract revert__NuggftV1Swap is NuggftV1Test {
         [S:1] - delegate - "msg.value >= minimum offer"
        ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
 
-    function test__revert__NuggftV1Swap__S_1__successWithExactMinOffer()
-        public
-        changeInUserBalance(frank, -1 * MININT)
-        changeInNuggftBalance(MININT)
-        changeInStaked(MININT, 1)
-    {
-        _nuggft.shouldPass(frank, delegate(epoch), MIN);
+    function test__revert__NuggftV1Swap__S_1__successWithExactMinOffer() public {
+        uint96 value = MIN;
+
+        expectBalChange(users.frank, value, dir.down);
+        expectBalChange(_nuggft, value, dir.up);
+        expectStakeChange(value, 1, dir.up);
+
+        forge.vm.startPrank(users.frank);
+        {
+            forge.vm.deal(users.frank, MIN);
+            nuggft.delegate{value: MIN}(tokenId);
+        }
+        forge.vm.stopPrank();
+
+        check();
     }
 
     ///////////////////////////////////////////////////////////////////////
 
-    function test__revert__NuggftV1Swap__S_1__successWithHigherMinOffer()
-        public
-        changeInUserBalance(frank, -1 * (MININT + 1))
-        changeInNuggftBalance(MININT + 1)
-        changeInStaked(MININT + 1, 1)
-    {
-        _nuggft.shouldPass(frank, delegate(epoch), MIN + 1);
+    function test__revert__NuggftV1Swap__S_1__successWithHigherMinOffer() public {
+        uint96 value = MIN + 1;
+
+        expectBalChange(users.frank, value, dir.down);
+        expectBalChange(_nuggft, value, dir.up);
+        expectStakeChange(value, 1, dir.up);
+
+        forge.vm.startPrank(users.frank);
+        {
+            forge.vm.deal(users.frank, MIN + 1);
+            nuggft.delegate{value: MIN + 1}(tokenId);
+        }
+        forge.vm.stopPrank();
+
+        check();
     }
 
     ///////////////////////////////////////////////////////////////////////
 
     function test__revert__NuggftV1Swap__S_1__failWithOneWeiLessThanMin() public {
-        fvm.startPrank(address(frank));
+        tokenId = nuggft.epoch();
 
-        fvm.expectRevert('S:1');
+        uint96 value = MIN - 1;
 
-        nuggft.delegate{value: MIN - 1}(epoch);
+        forge.vm.startPrank(users.frank);
+        {
+            forge.vm.deal(users.frank, value);
+            forge.vm.expectRevert('S:1');
+            nuggft.delegate{value: value}(tokenId);
+        }
+        forge.vm.stopPrank();
     }
 
     ///////////////////////////////////////////////////////////////////////
 
     function test__revert__NuggftV1Swap__S_1__failWithZero() public {
-        _nuggft.shouldFail('S:1', frank, delegate(epoch), 0);
+        tokenId = nuggft.epoch();
+
+        uint96 value = 0;
+
+        forge.vm.startPrank(users.frank);
+        {
+            forge.vm.deal(users.frank, value);
+            forge.vm.expectRevert('S:1');
+            nuggft.delegate{value: value}(tokenId);
+        }
+        forge.vm.stopPrank();
     }
 
     /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -101,16 +149,21 @@ contract revert__NuggftV1Swap is NuggftV1Test {
     function test__revert__NuggftV1Swap__S_R__successWithNotOwner() public {
         (tokenId, floor) = scenario_dee_has_swapped_a_token();
 
-        wrap__revert__NuggftV1Swap__S_R__successWithNotOwner();
-    }
+        uint96 value = floor + 1 ether;
 
-    function wrap__revert__NuggftV1Swap__S_R__successWithNotOwner()
-        internal
-        changeInUserBalance(frank, -1 * (floor.safeInt() + 1 ether))
-        changeInNuggftBalance(floor.safeInt() + 1 ether)
-        changeInStaked(1 ether, 0)
-    {
-        _nuggft.shouldPass(frank, delegate(tokenId), floor + 1 ether);
+        forge.vm.deal(users.frank, value);
+
+        expectBalChange(users.frank, value, dir.down);
+        expectBalChange(_nuggft, value, dir.up);
+        expectStakeChange(1 ether, 0, dir.up);
+
+        forge.vm.startPrank(users.frank);
+        {
+            nuggft.delegate{value: value}(tokenId);
+        }
+        forge.vm.stopPrank();
+
+        check();
     }
 
     ///////////////////////////////////////////////////////////////////////
@@ -118,19 +171,31 @@ contract revert__NuggftV1Swap is NuggftV1Test {
     function test__revert__NuggftV1Swap__S_R__successWithOwnerAfterSomeoneElseDelegates() public {
         (tokenId, floor) = scenario_dee_has_swapped_a_token();
 
-        wrap__revert__NuggftV1Swap__S_R__successWithOwnerAfterSomeoneElseDelegates();
-    }
+        uint96 value = floor + 1 ether;
 
-    function wrap__revert__NuggftV1Swap__S_R__successWithOwnerAfterSomeoneElseDelegates()
-        public
-        changeInUserBalance(frank, -1 * (floor.safeInt() + 1 ether))
-        changeInUserBalance(dee, -1 * (floor.safeInt() + 1 ether * 2))
-        changeInNuggftBalance(3 ether + floor.safeInt() * 2)
-        changeInStaked(3 ether, 0)
-    {
-        _nuggft.shouldPass(frank, delegate(tokenId), floor + 1 ether);
+        uint96 value2 = floor + 2 ether;
 
-        _nuggft.shouldPass(dee, delegate(tokenId), floor + 2 ether);
+        forge.vm.deal(users.frank, value);
+        forge.vm.deal(users.dee, value2);
+
+        expectBalChange(users.frank, value, dir.down);
+        expectBalChange(users.dee, value2, dir.down);
+        expectBalChange(_nuggft, value + value2, dir.up);
+        expectStakeChange(3 ether, 0, dir.up);
+
+        forge.vm.startPrank(users.frank);
+        {
+            nuggft.delegate{value: value}(tokenId);
+        }
+        forge.vm.stopPrank();
+
+        forge.vm.startPrank(users.dee);
+        {
+            nuggft.delegate{value: value2}(tokenId);
+        }
+        forge.vm.stopPrank();
+
+        check();
     }
 
     ///////////////////////////////////////////////////////////////////////
@@ -147,16 +212,21 @@ contract revert__NuggftV1Swap is NuggftV1Test {
     function test__revert__NuggftV1Swap__S_R__successWithUserWithNoPrevClaim() public {
         (tokenId, floor) = scenario_mac_has_swapped_a_token_dee_swapped();
 
-        wrap__revert__NuggftV1Swap__S_R__successWithUserWithNoPrevClaim();
-    }
+        uint96 value = floor + 1 ether;
 
-    function wrap__revert__NuggftV1Swap__S_R__successWithUserWithNoPrevClaim()
-        internal
-        changeInUserBalance(frank, -1 * (floor.safeInt() + 1 ether))
-        changeInNuggftBalance(floor.safeInt() + 1 ether)
-        changeInStaked(1 ether, 0)
-    {
-        _nuggft.shouldPass(frank, delegate(tokenId), floor + 1 ether);
+        forge.vm.deal(users.frank, value);
+
+        expectBalChange(users.frank, value, dir.down);
+        expectBalChange(_nuggft, value, dir.up);
+        expectStakeChange(1 ether, 0, dir.up);
+
+        forge.vm.startPrank(users.frank);
+        {
+            nuggft.delegate{value: value}(tokenId);
+        }
+        forge.vm.stopPrank();
+
+        check();
     }
 
     ///////////////////////////////////////////////////////////////////////
@@ -165,9 +235,16 @@ contract revert__NuggftV1Swap is NuggftV1Test {
     function test__revert__NuggftV1Swap__S_R__successWithPrevClaimUserAfterClaiming() public {
         (tokenId, floor) = scenario_mac_has_swapped_a_token_dee_swapped();
 
-        _nuggft.shouldPass(dee, claim(tokenId));
+        uint96 value = floor + 1 ether;
 
-        _nuggft.shouldPass(dee, delegate(tokenId), floor + 1 ether);
+        forge.vm.deal(users.dee, value);
+
+        forge.vm.startPrank(users.dee);
+        {
+            nuggft.claim(tokenId);
+            nuggft.delegate{value: value}(tokenId);
+        }
+        forge.vm.stopPrank();
     }
 
     ///////////////////////////////////////////////////////////////////////
@@ -175,7 +252,16 @@ contract revert__NuggftV1Swap is NuggftV1Test {
     function test__revert__NuggftV1Swap__S_R__failWtihUserWithPrevClaim() public {
         (tokenId, floor) = scenario_mac_has_swapped_a_token_dee_swapped();
 
-        _nuggft.shouldFail('S:R', dee, delegate(tokenId), floor + 1 ether);
+        uint96 value = floor + 1 ether;
+
+        forge.vm.deal(users.dee, value);
+
+        forge.vm.startPrank(users.dee);
+        {
+            forge.vm.expectRevert('S:R');
+            nuggft.delegate{value: value}(tokenId);
+        }
+        forge.vm.stopPrank();
     }
 
     /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -358,7 +444,7 @@ contract revert__NuggftV1Swap is NuggftV1Test {
     }
 
     /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-        [S:B] - swap - "floor >= ethPerShare"
+        [S:B] - swap - "floor >= eps"
        ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
 
     function test__revert__NuggftV1Swap__S_B__successWithEqualEPS() public {
@@ -366,7 +452,7 @@ contract revert__NuggftV1Swap is NuggftV1Test {
 
         scenario_frank_has_a_token_and_spent_50_eth();
 
-        floor = nuggft.ethPerShare();
+        floor = nuggft.eps();
 
         _nuggft.shouldPass(dee, swap(tokenId, floor));
     }
@@ -378,7 +464,7 @@ contract revert__NuggftV1Swap is NuggftV1Test {
 
         scenario_frank_has_a_token_and_spent_50_eth();
 
-        floor = nuggft.ethPerShare();
+        floor = nuggft.eps();
 
         _nuggft.shouldPass(dee, swap(tokenId, floor + 1));
     }
@@ -390,7 +476,7 @@ contract revert__NuggftV1Swap is NuggftV1Test {
 
         scenario_frank_has_a_token_and_spent_50_eth();
 
-        floor = nuggft.ethPerShare();
+        floor = nuggft.eps();
 
         _nuggft.shouldFail('S:B', dee, swap(tokenId, floor - 1));
     }
@@ -408,7 +494,7 @@ contract revert__NuggftV1Swap is NuggftV1Test {
 
         scenario_frank_has_a_token_and_spent_50_eth();
 
-        floor = nuggft.ethPerShare();
+        floor = nuggft.eps();
 
         _nuggft.shouldFail('S:B', dee, swap(tokenId, floor / 2));
     }
@@ -418,7 +504,7 @@ contract revert__NuggftV1Swap is NuggftV1Test {
 
         scenario_frank_has_a_token_and_spent_50_eth();
 
-        floor = nuggft.ethPerShare();
+        floor = nuggft.eps();
 
         _nuggft.shouldPass(dee, swap(tokenId, floor + 30 ether));
     }

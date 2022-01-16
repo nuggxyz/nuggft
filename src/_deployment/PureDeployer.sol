@@ -111,29 +111,29 @@ contract PureDeployer {
 
         require(success, 'OOPS:4');
 
-        for (uint160 i = 100; i < 200; i += 2) {
-            bytes memory trusted_mint = abi.encodeWithSelector(
-                bytes4(keccak256('trustedMint(uint160,address)')),
-                i,
-                0x4E503501C5DEDCF0607D1E1272Bb4b3c1204CC71
-            );
+        // for (uint160 i = 100; i < 200; i += 2) {
+        //     bytes memory trusted_mint = abi.encodeWithSelector(
+        //         bytes4(keccak256('trustedMint(uint160,address)')),
+        //         i,
+        //         0x4E503501C5DEDCF0607D1E1272Bb4b3c1204CC71
+        //     );
 
-            assembly {
-                success := call(gas(), nuggft, 0x0, add(trusted_mint, 0x20), mload(trusted_mint), 0x0, 0x0)
-            }
+        //     assembly {
+        //         success := call(gas(), nuggft, 0x0, add(trusted_mint, 0x20), mload(trusted_mint), 0x0, 0x0)
+        //     }
 
-            bytes memory trusted_minter = abi.encodeWithSelector(
-                bytes4(keccak256('trustedMint(uint160,address)')),
-                i + 1,
-                0x9B0E2b16F57648C7bAF28EDD7772a815Af266E77
-            );
+        //     bytes memory trusted_minter = abi.encodeWithSelector(
+        //         bytes4(keccak256('trustedMint(uint160,address)')),
+        //         i + 1,
+        //         0x9B0E2b16F57648C7bAF28EDD7772a815Af266E77
+        //     );
 
-            assembly {
-                success := call(gas(), nuggft, 0x0, add(trusted_minter, 0x20), mload(trusted_minter), 0x0, 0x0)
-            }
+        //     assembly {
+        //         success := call(gas(), nuggft, 0x0, add(trusted_minter, 0x20), mload(trusted_minter), 0x0, 0x0)
+        //     }
 
-            if (!success) break;
-        }
+        //     if (!success) break;
+        // }
 
         // DSEmit.stopMeasuringGas();
 
