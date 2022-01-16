@@ -25,7 +25,7 @@ abstract contract NuggftV1Loan is INuggftV1Loan, NuggftV1Swap {
     function loan(uint160 tokenId) external override {
         require(_ownerOf(tokenId) == msg.sender, 'L:0');
 
-        uint256 loanData = NuggftV1AgentType.newAgentType(epoch(), msg.sender, ethPerShare(), false);
+        uint256 loanData = NuggftV1AgentType.newAgentType(epoch(), msg.sender, eps(), false);
 
         loans[tokenId] = loanData; // starting swap data
 
@@ -82,7 +82,7 @@ abstract contract NuggftV1Loan is INuggftV1Loan, NuggftV1Swap {
         // must be done before new principal is calculated
         addStakedEth(value);
 
-        uint256 res = NuggftV1AgentType.newAgentType(epoch(), loaner, ethPerShare(), false);
+        uint256 res = NuggftV1AgentType.newAgentType(epoch(), loaner, eps(), false);
 
         loans[tokenId] = res;
 
@@ -123,7 +123,7 @@ abstract contract NuggftV1Loan is INuggftV1Loan, NuggftV1Swap {
         // the amount of eth currently loanded by user
         uint96 curr = cache.eth();
 
-        uint96 activeEps = ethPerShare();
+        uint96 activeEps = eps();
 
         assembly {
             toRebalance := div(mul(curr, REBALANCE_FEE_BPS), 10000)

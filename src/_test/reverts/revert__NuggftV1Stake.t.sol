@@ -23,53 +23,67 @@ contract revert__NuggftV1Stake is NuggftV1Test {
     // mint
     // ────
 
-    function test__revert__NuggftV1Stake__T_1__success() public {
+    function test__revert__NuggftV1Stake__T_1__mint__success() public {
         _nuggft.shouldPass(frank, mint(2099), 30 ether);
     }
 
-    function test__revert__NuggftV1Stake__T_1__failWithValue() public {
-        test__revert__NuggftV1Stake__T_1__success();
+    function test__revert__NuggftV1Stake__T_1__mint__failWithValue() public {
+        test__revert__NuggftV1Stake__T_1__mint__success();
 
         fvm.startPrank(users.dennis);
+        {
+            fvm.expectRevert('T:1');
 
-        fvm.expectRevert('T:1');
-
-        nuggft.mint{value: 29 ether}(2909);
-
+            nuggft.mint{value: 29 ether}(2909);
+        }
         fvm.stopPrank();
     }
 
-    function test__revert__NuggftV1Stake__T_1__failWithZero() public {
-        test__revert__NuggftV1Stake__T_1__success();
+    function test__revert__NuggftV1Stake__T_1__mint__failWithZero() public {
+        test__revert__NuggftV1Stake__T_1__mint__success();
 
         fvm.startPrank(users.dennis);
-
-        fvm.expectRevert('T:1');
-
-        nuggft.mint{value: 0}(2909);
-
+        {
+            fvm.expectRevert('T:1');
+            nuggft.mint{value: 0}(2909);
+        }
         fvm.stopPrank();
     }
 
     // trustedMint
     // ────
 
-    function test__revert__NuggftV1Stake__T_1__successOnTrusted() public {
+    function test__revert__NuggftV1Stake__T_1__mint__successOnTrusted() public {
         fvm.startPrank(users.safe);
-
-        nuggft.trustedMint{value: 30 ether}(200, users.frank);
-
+        {
+            nuggft.trustedMint{value: 30 ether}(200, users.frank);
+        }
         fvm.stopPrank();
     }
 
-    function test__revert__NuggftV1Stake__T_1__failOnTrusted() public {
-        // console.log(address(safe).balance);
+    function test__revert__NuggftV1Stake__T_1__trustedMint__failOnTrustedNotEnoughValue() public {
+        require(nuggft.shares() == 0, 'OOPS');
 
-        _nuggft.shouldPass(safe, trustedMint(99, address(frank)), 15 * 10**18);
+        forge.vm.startPrank(users.safe);
+        {
+            uint160 tokenId = 499;
 
-        // console.log(address(safe).balance);
+            uint96 value = 500 gwei;
 
-        _nuggft.shouldFail('T:1', safe, trustedMint(9, address(dennis)), 14 * 10**18);
+            forge.vm.deal(users.safe, value);
+
+            nuggft.trustedMint{value: value}(tokenId, users.frank);
+
+            tokenId = 498;
+
+            value = 450 gwei;
+
+            forge.vm.deal(users.safe, value);
+
+            forge.vm.expectRevert('T:1');
+            nuggft.trustedMint{value: value}(tokenId, users.dennis);
+        }
+        forge.vm.stopPrank();
     }
 
     /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -83,63 +97,103 @@ contract revert__NuggftV1Stake is NuggftV1Test {
     // burn
     // ─────────────
 
-    function test__revert__NuggftV1Stake__T_3__burn__fail() public {
+    function test__revert__NuggftV1Stake__T_3__burn__failNotOwner() public {
         uint160 tokenId = scenario_dee_has_a_token();
 
-        _nuggft.shouldFail('T:3', mac, burn(tokenId));
+        fvm.startPrank(users.mac);
+        {
+            forge.vm.expectRevert('T:3');
+            nuggft.burn(tokenId);
+        }
+        fvm.stopPrank();
     }
 
-    function test__revert__NuggftV1Stake__T_3__burn__failOnNoApproval() public {
+    function test__revert__NuggftV1Stake__T_3__burn__failNoApproval() public {
         uint160 tokenId = scenario_dee_has_a_token();
 
-        _nuggft.shouldFail('T:3', dee, burn(tokenId));
+        fvm.startPrank(users.dee);
+        {
+            forge.vm.expectRevert('T:3');
+            nuggft.burn(tokenId);
+        }
+        fvm.stopPrank();
     }
 
-    function test__revert__NuggftV1Stake__T_3__burn__succeeds() public {
+    function test__revert__NuggftV1Stake__T_3__burn__succeedsWithApproval() public {
         uint160 tokenId = scenario_dee_has_a_token();
 
-        _nuggft.shouldPass(dee, approve(address(nuggft), tokenId));
-
-        _nuggft.shouldPass(dee, burn(tokenId));
+        fvm.startPrank(users.dee);
+        {
+            nuggft.approve(_nuggft, tokenId);
+            nuggft.burn(tokenId);
+        }
+        fvm.stopPrank();
     }
 
     function test__revert__NuggftV1Stake__T_3__burn__failOnIncorrectApproval() public {
         uint160 tokenId = scenario_dee_has_a_token();
 
-        _nuggft.shouldPass(dee, approve(address(mac), tokenId));
+        fvm.startPrank(users.dee);
+        {
+            nuggft.approve(users.mac, tokenId);
 
-        _nuggft.shouldFail('T:3', dee, burn(tokenId));
+            forge.vm.expectRevert('T:3');
+            nuggft.burn(tokenId);
+        }
+        fvm.stopPrank();
     }
 
     function test__revert__NuggftV1Stake__T_3__burn__failOnIncorrectOperatorApproval() public {
         uint160 tokenId = scenario_dee_has_a_token();
 
-        _nuggft.shouldPass(dee, setApprovalForAll(address(mac), true));
+        fvm.startPrank(users.dee);
+        {
+            nuggft.approve(_nuggft, tokenId);
 
-        _nuggft.shouldPass(dee, approve(address(nuggft), tokenId));
+            nuggft.setApprovalForAll(users.mac, true);
+        }
+        fvm.stopPrank();
 
-        _nuggft.shouldFail('T:3', dennis, burn(tokenId));
+        fvm.startPrank(users.dennis);
+        {
+            forge.vm.expectRevert('T:3');
+            nuggft.burn(tokenId);
+        }
+        fvm.stopPrank();
     }
 
     function test__revert__NuggftV1Stake__T_3__burn__failsOnCorrectOperatorApproval() public {
         uint160 tokenId = scenario_dee_has_a_token();
 
-        _nuggft.shouldPass(dee, setApprovalForAll(address(mac), true));
+        fvm.startPrank(users.dee);
+        {
+            nuggft.approve(_nuggft, tokenId);
 
-        _nuggft.shouldPass(dee, approve(address(nuggft), tokenId));
+            nuggft.setApprovalForAll(users.mac, true);
+        }
+        fvm.stopPrank();
 
-        _nuggft.shouldFail('T:3', mac, burn(tokenId));
+        fvm.startPrank(users.mac);
+        {
+            forge.vm.expectRevert('T:3');
+            nuggft.burn(tokenId);
+        }
+        fvm.stopPrank();
     }
 
     // migrate
     // ─────────────
-
-    function test__revert__NuggftV1Stake__T_3__migrate__fail() public {
+    function test__revert__NuggftV1Stake__T_3__migrate__failNoApproval() public {
         uint160 tokenId = scenario_dee_has_a_token();
 
         scenario_migrator_set();
 
-        _nuggft.shouldFail('T:3', dee, migrate(tokenId));
+        fvm.startPrank(users.dee);
+        {
+            forge.vm.expectRevert('T:3');
+            nuggft.migrate(tokenId);
+        }
+        fvm.stopPrank();
     }
 
     function test__revert__NuggftV1Stake__T_3__migrate__succeeds() public {
@@ -147,9 +201,13 @@ contract revert__NuggftV1Stake is NuggftV1Test {
 
         scenario_migrator_set();
 
-        _nuggft.shouldPass(dee, approve(address(nuggft), tokenId));
+        fvm.startPrank(users.dee);
+        {
+            nuggft.approve(_nuggft, tokenId);
 
-        _nuggft.shouldPass(dee, migrate(tokenId));
+            nuggft.migrate(tokenId);
+        }
+        fvm.stopPrank();
     }
 
     /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -159,30 +217,33 @@ contract revert__NuggftV1Stake is NuggftV1Test {
     // migrate
     // ────────────
 
-    function test__revert__NuggftV1Stake__T_4__fail() public {
+    function test__revert__NuggftV1Stake__T_4__migrate__fail() public {
         uint160 tokenId = scenario_dee_has_a_token();
 
-        _nuggft.shouldFail('T:4', dee, migrate(tokenId));
+        // _nuggft.shouldFail('T:4', dee, migrate(tokenId));
+
+        fvm.startPrank(users.dee);
+        {
+            // nuggft.approve(_nuggft, tokenId);
+
+            forge.vm.expectRevert('T:4');
+            nuggft.migrate(tokenId);
+        }
+        fvm.stopPrank();
     }
 
-    function test__revert__NuggftV1Stake__T_4__succeeds() public {
+    function test__revert__NuggftV1Stake__T_4__migrate__succeeds() public {
         uint160 tokenId = scenario_dee_has_a_token();
 
-        _nuggft.shouldPass(dee, approve(address(nuggft), tokenId));
+        fvm.startPrank(users.dee);
+        {
+            nuggft.approve(_nuggft, tokenId);
 
-        _nuggft.shouldPass(safe, setMigrator(address(migrator)));
+            scenario_migrator_set();
 
-        _nuggft.shouldPass(dee, migrate(tokenId));
-    }
-
-    function test__revert__NuggftV1Stake__T_4__succeedsWithApproval() public {
-        uint160 tokenId = scenario_dee_has_a_token();
-
-        _nuggft.shouldPass(dee, approve(address(nuggft), tokenId));
-
-        _nuggft.shouldPass(safe, setMigrator(address(migrator)));
-
-        _nuggft.shouldPass(dee, migrate(tokenId));
+            nuggft.migrate(tokenId);
+        }
+        fvm.stopPrank();
     }
 
     /// values add on top of each other

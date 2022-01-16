@@ -40,7 +40,7 @@ contract NuggftV1Minter {
         uint256 amount
     ) external payable {
         for (uint256 i = start; i < start + amount; i++) {
-            INuggftV1(nuggftv1).trustedMint{value: INuggftV1(nuggftv1).minSharePrice()}(uint160(i), to);
+            INuggftV1(nuggftv1).trustedMint{value: INuggftV1(nuggftv1).msp()}(uint160(i), to);
         }
         payable(msg.sender).transfer(address(this).balance);
     }
@@ -51,8 +51,8 @@ contract NuggftV1Minter {
         uint160 amount
     ) external payable {
         for (uint160 i = start; i < start + amount; i++) {
-            INuggftV1(nuggftv1).mint{value: INuggftV1(nuggftv1).minSharePrice()}(uint160(i));
-            uint96 floor = INuggftV1(nuggftv1).ethPerShare() * 3;
+            INuggftV1(nuggftv1).mint{value: INuggftV1(nuggftv1).msp()}(uint160(i));
+            uint96 floor = INuggftV1(nuggftv1).eps() * 3;
             INuggftV1(nuggftv1).approve(nuggftv1, uint160(i));
 
             INuggftV1(nuggftv1).swap(uint160(i), floor);

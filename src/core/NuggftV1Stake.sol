@@ -50,33 +50,33 @@ abstract contract NuggftV1Stake is INuggftV1Stake, NuggftV1Proof {
     ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━*/
 
     /// @inheritdoc INuggftV1Stake
-    function ethPerShare() public view override returns (uint96 res) {
+    function eps() public view override returns (uint96 res) {
         res = calculateEthPerShare(stake);
     }
 
     /// @inheritdoc INuggftV1Stake
-    function minSharePrice() public view override returns (uint96 res) {
+    function msp() public view override returns (uint96 res) {
         (res, , , ) = minSharePriceBreakdown(stake);
     }
 
-    /// @inheritdoc INuggftV1Stake
-    function stakedShares() public view override returns (uint64 res) {
+    // / @inheritdoc INuggftV1Stake
+    function shares() public view override returns (uint64 res) {
         res = stake.shares();
     }
 
     /// @inheritdoc INuggftV1Stake
-    function stakedEth() public view override returns (uint96 res) {
+    function staked() public view override returns (uint96 res) {
         res = stake.staked();
     }
 
     /// @inheritdoc INuggftV1Stake
-    function protocolEth() public view override returns (uint96 res) {
+    function proto() public view override returns (uint96 res) {
         res = stake.proto();
     }
 
     /// @inheritdoc INuggftV1Stake
     function totalSupply() public view override returns (uint256 res) {
-        res = stakedShares();
+        res = shares();
     }
 
     /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -141,24 +141,24 @@ abstract contract NuggftV1Stake is INuggftV1Stake, NuggftV1Proof {
         pure
         returns (
             uint96 total,
-            uint96 eps,
+            uint96 ethPerShare,
             uint96 protocolFee,
             uint96 premium
         )
     {
-        eps = calculateEthPerShare(cache);
+        ethPerShare = calculateEthPerShare(cache);
 
-        protocolFee = calculateProtocolFeeOf(eps);
+        protocolFee = calculateProtocolFeeOf(ethPerShare);
 
         premium = cache.shares();
 
         assembly {
-            premium := div(mul(eps, premium), 10000)
+            premium := div(mul(ethPerShare, premium), 10000)
         }
 
         // premium = ((eps * cache.shares()) / 10000);
 
-        total = eps + protocolFee + premium;
+        total = ethPerShare + protocolFee + premium;
     }
 
     // @test manual

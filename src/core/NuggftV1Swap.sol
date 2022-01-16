@@ -193,7 +193,7 @@ abstract contract NuggftV1Swap is INuggftV1Swap, NuggftV1Stake {
     function swap(uint160 tokenId, uint96 floor) external override {
         require(_ownerOf(tokenId) == msg.sender, 'S:A');
 
-        require(floor >= ethPerShare(), 'S:B');
+        require(floor >= eps(), 'S:B');
 
         approvedTransferToSelf(tokenId);
 
@@ -253,7 +253,7 @@ abstract contract NuggftV1Swap is INuggftV1Swap, NuggftV1Stake {
         if (m.swapData == 0) {
             if (m.activeEpoch == tokenId) {
                 // swap is minting
-                nextSwapAmount = NuggftV1AgentType.compressEthRoundUp(minSharePrice());
+                nextSwapAmount = NuggftV1AgentType.compressEthRoundUp(msp());
             } else {
                 // swap does not exist
                 return (false, 0, 0);
@@ -265,8 +265,8 @@ abstract contract NuggftV1Swap is INuggftV1Swap, NuggftV1Stake {
 
             nextSwapAmount = m.swapData.eth();
 
-            if (nextSwapAmount < ethPerShare()) {
-                nextSwapAmount = ethPerShare();
+            if (nextSwapAmount < eps()) {
+                nextSwapAmount = eps();
             }
         }
 
@@ -282,7 +282,7 @@ abstract contract NuggftV1Swap is INuggftV1Swap, NuggftV1Stake {
        ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
 
     function commit(Storage storage s, Memory memory m) internal returns (uint96 lead) {
-        require(msg.value >= ethPerShare(), 'S:5');
+        require(msg.value >= eps(), 'S:5');
 
         require(m.offerData == 0 && m.swapData != 0, 'NOPE3');
 
