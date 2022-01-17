@@ -24,7 +24,6 @@ contract revert__NuggftV1Loan is NuggftV1Test {
         forge.vm.startPrank(users.frank);
         {
             nuggft.approve(_nuggft, tokenId);
-
             nuggft.loan(tokenId);
         }
         forge.vm.stopPrank();
@@ -43,6 +42,7 @@ contract revert__NuggftV1Loan is NuggftV1Test {
         forge.vm.startPrank(users.dennis);
         {
             forge.vm.expectRevert('L:0');
+
             nuggft.loan(tokenId);
         }
         forge.vm.stopPrank();
