@@ -11,7 +11,6 @@ import {SafeCastLib} from '../libraries/SafeCastLib.sol';
 import {SafeTransferLib} from '../libraries/SafeTransferLib.sol';
 
 import {NuggftV1StakeType} from '../types/NuggftV1StakeType.sol';
-import '../_test/utils/console.sol';
 
 abstract contract NuggftV1Stake is INuggftV1Stake, NuggftV1Proof {
     using SafeCastLib for uint256;

@@ -7,8 +7,6 @@ import '../NuggftV1.test.sol';
 import {NuggftV1Epoch} from '../../core/NuggftV1Epoch.sol';
 
 contract general__NuggftV1Epoch is NuggftV1Test, NuggftV1Epoch {
-    using UserTarget for address;
-
     // function test__setUp() public {
     //     // reset();
     //     // fvm.roll(13952818);

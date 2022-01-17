@@ -2,15 +2,9 @@
 
 pragma solidity 0.8.9;
 
-import {DSTest} from '../../../lib/ds-test/src/test.sol';
+import {DSTest as ogDSTest} from '../../../lib/ds-test/src/test.sol';
 
-import {Hevm, ForgeVm} from './Vm.sol';
-
-contract DSTestPlus is DSTest {
-    Hevm internal constant hevm = Hevm(HEVM_ADDRESS);
-
-    ForgeVm internal constant fvm = ForgeVm(0x7109709ECfa91a80626fF3989D68f67F5b1DD12D);
-
+contract DSTest is ogDSTest {
     address internal constant DEAD_ADDRESS = 0xDeaDbeefdEAdbeefdEadbEEFdeadbeEFdEaDbeeF;
 
     bytes32 checkpointLabel;
@@ -47,11 +41,11 @@ contract DSTestPlus is DSTest {
         }
     }
 
-    // function mockBlockhash(uint256 blocknum) internal view returns (bytes32 res) {
-    //     if (block.number - blocknum < 256) {
-    //         return keccak256(abi.encodePacked(blocknum));
-    //     }
-    // }
+    function mockBlockhash(uint256 blocknum) internal view returns (bytes32 res) {
+        if (block.number - blocknum < 256) {
+            return keccak256(abi.encodePacked(blocknum));
+        }
+    }
 }
 
 contract DSInvariantTest {

@@ -2,10 +2,6 @@
 
 pragma solidity 0.8.9;
 
-import {DSTestPlus as t} from './utils/DSTestPlus.sol';
-
-import './utils/User.sol';
-
 import {IDotnuggV1Metadata} from '../interfaces/dotnuggv1/IDotnuggV1Metadata.sol';
 
 import {MockDotnuggV1} from './mock/MockDotnuggV1.sol';
@@ -15,8 +11,7 @@ import {MockNuggftV1Migrator} from './mock/MockNuggftV1Migrator.sol';
 import {NuggftV1} from '../NuggftV1.sol';
 import {PureDeployer} from '../_deployment/PureDeployer.sol';
 
-import './utils/logger.sol';
-import './utils/Vm.sol';
+import './utils/forge.sol';
 
 contract RiggedNuggft is NuggftV1 {
     constructor() {
@@ -44,12 +39,10 @@ library SafeCast {
     }
 }
 
-contract NuggftV1Test is t {
+contract NuggftV1Test is ForgeTest {
     using SafeCast for uint96;
     using SafeCast for uint256;
     using SafeCast for uint64;
-
-    using UserTarget for address;
 
     MockDotnuggV1 public processor;
 
@@ -60,16 +53,6 @@ contract NuggftV1Test is t {
     address public _nuggft;
     address public _processor;
     address public _proxy;
-
-    User public safe;
-
-    User public frank;
-    User public charlie;
-    User public dennis;
-    User public mac;
-    User public dee;
-
-    User public any;
 
     struct Users {
         address frank;
@@ -87,7 +70,7 @@ contract NuggftV1Test is t {
     // constructor() {}
 
     function reset() public {
-        fvm.roll(15000);
+        forge.vm.roll(15000);
         // bytes memory tmp = hex'000100';
 
         PureDeployer dep = new PureDeployer(0, 0, type(RiggedNuggft).creationCode, type(MockDotnuggV1).creationCode, tmpdata);
@@ -100,47 +83,29 @@ contract NuggftV1Test is t {
 
         _processor = address(processor);
 
-        safe = new User();
-
         migrator = new MockNuggftV1Migrator();
 
-        frank = new User();
-        charlie = new User();
-        dennis = new User();
-        mac = new User();
-        dee = new User();
+        users.frank = forge.vm.addr(12);
+        forge.vm.deal(users.frank, 90000 ether);
 
-        users.frank = fvm.addr(12);
-        fvm.deal(users.frank, 90000 ether);
+        users.dee = forge.vm.addr(13);
+        forge.vm.deal(users.dee, 90000 ether);
 
-        users.dee = fvm.addr(13);
-        fvm.deal(users.dee, 90000 ether);
+        users.mac = forge.vm.addr(14);
+        forge.vm.deal(users.mac, 90000 ether);
 
-        users.mac = fvm.addr(14);
-        fvm.deal(users.mac, 90000 ether);
+        users.dennis = forge.vm.addr(15);
+        forge.vm.deal(users.dennis, 90000 ether);
 
-        users.dennis = fvm.addr(15);
-        fvm.deal(users.dennis, 90000 ether);
+        users.charlie = forge.vm.addr(16);
+        forge.vm.deal(users.charlie, 90000 ether);
 
-        users.charlie = fvm.addr(16);
-        fvm.deal(users.charlie, 90000 ether);
+        users.safe = forge.vm.addr(17);
+        forge.vm.deal(users.safe, 90000 ether);
 
-        users.safe = fvm.addr(17);
-        fvm.deal(users.safe, 90000 ether);
-
-        // any = new User();
-
-        fvm.deal(address(safe), 30 ether);
-        fvm.deal(address(dennis), 30 ether);
-        fvm.deal(address(mac), 30 ether);
-        fvm.deal(address(dee), 30 ether);
-        fvm.deal(address(frank), 90000 ether);
-        fvm.deal(address(charlie), 30 ether);
-
-        fvm.startPrank(0x9B0E2b16F57648C7bAF28EDD7772a815Af266E77);
-        nuggft.setIsTrusted(address(safe), true);
+        forge.vm.startPrank(0x9B0E2b16F57648C7bAF28EDD7772a815Af266E77);
         nuggft.setIsTrusted(users.safe, true);
-        fvm.stopPrank();
+        forge.vm.stopPrank();
     }
 
     /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -196,26 +161,6 @@ contract NuggftV1Test is t {
             str.after_shares > 0 ? str.after_staked / str.after_shares : int256(0),
             'EPS is not ending with correct value'
         );
-    }
-
-    modifier changeInUserBalance(User user, int192 change) {
-        ChangeCheck memory str;
-
-        str.before_staked = int192(int256(uint256(address(user).balance)));
-        _;
-        str.after_staked = int192(int256(uint256(address(user).balance)));
-
-        assertEq(str.after_staked - str.before_staked, change, 'user balance did not change');
-    }
-
-    modifier changeInNuggftBalance(int192 change) {
-        ChangeCheck memory str;
-
-        str.before_staked = int192(int256(uint256(address(nuggft).balance)));
-        _;
-        str.after_staked = int192(int256(uint256(address(nuggft).balance)));
-
-        assertEq(str.after_staked - str.before_staked, change, 'nuggft balance did not change');
     }
 
     modifier baldiff(address user, int192 exp) {
@@ -362,7 +307,7 @@ contract NuggftV1Test is t {
     function scenario_frank_has_a_loaned_token_that_has_expired() public payable returns (uint160 tokenId) {
         tokenId = scenario_frank_has_a_loaned_token();
 
-        fvm.roll(200000);
+        forge.vm.roll(200000);
     }
 
     function scenario_dee_has_a_token_2() public payable returns (uint160 tokenId) {
@@ -412,7 +357,7 @@ contract NuggftV1Test is t {
     function scenario_dee_has_swapped_a_token_and_mac_can_claim() public payable returns (uint160 tokenId) {
         (tokenId, ) = scenario_dee_has_swapped_a_token_and_mac_has_delegated();
 
-        fvm.roll(2000);
+        forge.vm.roll(2000);
     }
 
     function scenario_mac_has_claimed_a_token_dee_swapped() public payable returns (uint160 tokenId) {
@@ -506,7 +451,7 @@ contract NuggftV1Test is t {
 
         nuggft.delegateItem{value: floor + 1 ether}(charliesTokenId, tokenId, itemId);
 
-        fvm.roll(2000);
+        forge.vm.roll(2000);
     }
 
     /*━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -519,7 +464,7 @@ contract NuggftV1Test is t {
     //     User start = new User{value: 69 ether}();
     //     uint160 count = 501;
 
-    //                 fvm.deal(address(start), 69 ether);
+    //                 forge.vm.deal(address(start), 69 ether);
 
     //     nuggft_call(start, mint(count++), .01 ether);
     //     nuggft_call(start, mint(count++), nuggft.msp());
@@ -530,7 +475,7 @@ contract NuggftV1Test is t {
     //     for (uint256 i = 1; i < users.length; i++) {
     //         User tmp = new User{value: 69 ether}();
 
-    //         fvm.deal(address(tmp), 69 ether);
+    //         forge.vm.deal(address(tmp), 69 ether);
 
     //         nuggft_call(tmp, mint(count++), nuggft.msp());
     //         nuggft_call(tmp, mint(count++), nuggft.msp());
@@ -547,7 +492,7 @@ contract NuggftV1Test is t {
     //     User start = new User{value: 1000000000 ether}();
     //     uint160 count = 501;
 
-    //     //   fvm.deal(address(start), 10000 *10**18);
+    //     //   forge.vm.deal(address(start), 10000 *10**18);
 
     //     _nuggft.shouldPass(start, mint(count++), .08 ether);
 
@@ -559,7 +504,7 @@ contract NuggftV1Test is t {
     //     for (uint256 i = 1; i < users.length; i++) {
     //         // User tmp = new User{value: 100000000 ether}();
 
-    //         // fvm.deal(address(tmp), 10000 *10**18);
+    //         // forge.vm.deal(address(tmp), 10000 *10**18);
 
     //         _nuggft.shouldPass(start, mint(count++), nuggft.msp());
 
@@ -596,7 +541,7 @@ contract NuggftV1Test is t {
 
     //     //     nuggft_call(User(payable(users[funner])), delegate(users[funner], epoch), nuggft.msp());
 
-    //     //     fvm.roll(bn);
+    //     //     forge.vm.roll(bn);
 
     //     //     bn += 70;
 

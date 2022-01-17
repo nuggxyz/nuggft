@@ -11,7 +11,7 @@ module.exports = {
         {
             files: '*.sol',
             options: {
-                printWidth: 140,
+                printWidth: 160,
                 tabWidth: 4,
                 useTabs: false,
                 //  singleQuote: false,

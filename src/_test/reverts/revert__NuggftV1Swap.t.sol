@@ -7,11 +7,9 @@ import '../NuggftV1.test.sol';
 contract revert__NuggftV1Swap is NuggftV1Test {
     using SafeCast for uint96;
 
-    using UserTarget for address;
-
     function setUp() public {
         reset();
-        fvm.roll(15000);
+        forge.vm.roll(15000);
     }
 
     /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -283,7 +281,7 @@ contract revert__NuggftV1Swap is NuggftV1Test {
 
         uint160 tokenId2 = 1500;
 
-        uint96 value = 50 ether;
+        uint96 value = 1500 ether;
         uint96 value2 = floor + 1 ether;
 
         forge.vm.deal(users.frank, value + value2);
@@ -767,7 +765,7 @@ contract revert__NuggftV1Swap is NuggftV1Test {
     function test__revert__NuggftV1Swap__S_F__failOfferInOldSwap() public {
         (uint160 tokenId, uint96 eth) = scenario_dee_has_swapped_a_token_and_mac_has_delegated();
 
-        fvm.roll(2000);
+        forge.vm.roll(2000);
 
         uint96 value = eth + 1 ether;
 
