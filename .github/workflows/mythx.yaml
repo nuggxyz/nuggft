@@ -56,4 +56,4 @@ jobs:
                     src/core \
                     src/libraries \
                     src/types \
-                    src/deployments
+                    src/_deployment
