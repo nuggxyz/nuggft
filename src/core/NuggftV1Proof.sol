@@ -141,7 +141,7 @@ abstract contract NuggftV1Proof is INuggftV1Proof, NuggftV1Dotnugg {
 
         uint256 randomEnoughSeed = uint256(keccak256(abi.encodePacked(hex'420690', tokenId, blockhash(block.number - 1))));
 
-        uint256 res = initFromSeed(randomEnoughSeed);
+        uint256 res = initFromSeed(randomEnoughSeed & ShiftLib.mask(88));
 
         proofs[tokenId] = res;
     }

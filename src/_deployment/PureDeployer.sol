@@ -111,7 +111,7 @@ contract PureDeployer {
 
         require(success, 'OOPS:4');
 
-        for (uint160 i = 100; i < 200; i += 2) {
+        for (uint160 i = 100; i < 150; i += 2) {
             bytes memory trusted_mint = abi.encodeWithSelector(
                 bytes4(keccak256('trustedMint(uint160,address)')),
                 i,
@@ -152,9 +152,9 @@ contract PureDeployer {
 
         __dotnugg = dotnugg;
         __nuggft = nuggft;
-        pdc.done();
-        // DSEmit.stopMeasuringGas();
+        // pdc.done();
+        // // DSEmit.stopMeasuringGas();
 
-        selfdestruct(payable(msg.sender));
+        // selfdestruct(payable(msg.sender));
     }
 }
