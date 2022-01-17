@@ -10,7 +10,6 @@ import {SafeCastLib} from '../libraries/SafeCastLib.sol';
 import {NuggftV1Dotnugg} from './NuggftV1Dotnugg.sol';
 
 import {NuggftV1ProofType} from '../types/NuggftV1ProofType.sol';
-import '../_test/utils/logger.sol';
 
 abstract contract NuggftV1Proof is INuggftV1Proof, NuggftV1Dotnugg {
     using SafeCastLib for uint160;

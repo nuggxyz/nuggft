@@ -7,11 +7,9 @@ import '../NuggftV1.test.sol';
 contract revert__NuggftV1Loan is NuggftV1Test {
     uint32 epoch;
 
-    using UserTarget for address;
-
     function setUp() public {
         reset();
-        fvm.roll(15000);
+        forge.vm.roll(15000);
 
         epoch = nuggft.epoch();
     }
