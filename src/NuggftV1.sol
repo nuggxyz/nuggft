@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: MIT
 
 pragma solidity 0.8.9;
+// pragma experimental SMTChecker;
 
 import {IERC721, IERC165, IERC721Metadata} from './interfaces/IERC721.sol';
 
