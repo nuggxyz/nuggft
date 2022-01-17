@@ -19,8 +19,10 @@ library NuggftV1StakeType {
     }
 
     function addProto(uint256 cache, uint96 add) internal pure returns (uint256 res) {
-        add += proto(cache);
-        res = proto(cache, add);
+        unchecked {
+            add += proto(cache);
+            res = proto(cache, add);
+        }
     }
 
     function subProto(uint256 cache, uint96 sub) internal pure returns (uint256 res) {

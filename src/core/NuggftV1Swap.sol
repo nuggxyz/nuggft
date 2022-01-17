@@ -40,6 +40,10 @@ abstract contract NuggftV1Swap is INuggftV1Swap, NuggftV1Stake {
 
     uint96 public constant MIN_OFFER = 10 gwei;
 
+    /// scenario
+    /// stress
+    // -- 8000 people delegate
+
     /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
                                   delegate
        ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
