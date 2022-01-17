@@ -11,18 +11,18 @@ jobs:
         steps:
             - uses: actions/checkout@v2
 
-            - name: Set up node
-              uses: actions/setup-node@v1
-              with:
-                  node-version: 16
+            # - name: Set up node
+            #   uses: actions/setup-node@v1
+            #   with:
+            #       node-version: 16
 
             - name: Set up Python 3.8
               uses: actions/setup-python@v2
               with:
                   python-version: 3.8
 
-            - name: Install node dependencies
-              run: yarn install --frozen-lockfile
+            # - name: Install node dependencies
+            #   run: yarn install --frozen-lockfile
 
             - name: Install pip3
               run: |
@@ -52,12 +52,12 @@ jobs:
                     --group-name "@nuggxyz/nuggftv1-core@${{ github.sha }}" \
                     --solc-version 0.8.9 \
                     --check-properties \
-                    src/NuggftV1.sol
-                    src/core/NuggftV1Dotnugg.sol
-                    src/core/NuggftV1Epoch.sol
-                    src/core/NuggftV1Loan.sol
-                    src/core/NuggftV1Proof.sol
-                    src/core/NuggftV1Stake.sol
-                    src/core/NuggftV1Swap.sol
-                    src/core/NuggftV1Token.sol
+                    src/NuggftV1.sol \
+                    src/core/NuggftV1Dotnugg.sol \
+                    src/core/NuggftV1Epoch.sol \
+                    src/core/NuggftV1Loan.sol \
+                    src/core/NuggftV1Proof.sol \
+                    src/core/NuggftV1Stake.sol \
+                    src/core/NuggftV1Swap.sol \
+                    src/core/NuggftV1Token.sol \
                     src/core/Trust.sol
