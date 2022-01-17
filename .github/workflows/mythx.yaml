@@ -40,12 +40,13 @@ jobs:
               run: |
                   solc-select install 0.8.9
                   solc-select use 0.8.9
-            # --mode quick \
+
             - name: Submit code to Mythx
               run: |
                   mythx --api-key ${{ secrets.MYTHX_API_KEY }} \
                     --yes \
                     analyze \
+                    --mode deep \
                     --async \
                     --create-group \
                     --group-name "@nuggxyz/nuggftv1-core@${{ github.sha }}" \
