@@ -2,7 +2,7 @@
 
 pragma solidity 0.8.9;
 
-import './vm.sol';
+import './forge.sol';
 
 struct StdStorage {
     mapping(address => mapping(bytes4 => mapping(bytes32 => uint256))) slots;
