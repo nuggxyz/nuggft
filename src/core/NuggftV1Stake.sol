@@ -136,6 +136,7 @@ abstract contract NuggftV1Stake is INuggftV1Stake, NuggftV1Proof {
     }
 
     // @test manual
+    // make sure the assembly works like regular (checked solidity)
     function minSharePriceBreakdown(uint256 cache)
         internal
         pure

@@ -24,7 +24,17 @@ contract revert__NuggftV1Stake is NuggftV1Test {
     // ────
 
     function test__revert__NuggftV1Stake__T_1__mint__success() public {
-        _nuggft.shouldPass(frank, mint(2099), 30 ether);
+        uint160 tokenId = 2099;
+
+        uint96 value = 30 ether;
+
+        forge.vm.deal(users.frank, 30 ether);
+
+        fvm.startPrank(users.frank);
+        {
+            nuggft.mint{value: value}(tokenId);
+        }
+        fvm.stopPrank();
     }
 
     function test__revert__NuggftV1Stake__T_1__mint__failWithValue() public {

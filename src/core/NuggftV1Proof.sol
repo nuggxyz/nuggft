@@ -10,6 +10,7 @@ import {SafeCastLib} from '../libraries/SafeCastLib.sol';
 import {NuggftV1Dotnugg} from './NuggftV1Dotnugg.sol';
 
 import {NuggftV1ProofType} from '../types/NuggftV1ProofType.sol';
+import '../_test/utils/logger.sol';
 
 abstract contract NuggftV1Proof is INuggftV1Proof, NuggftV1Dotnugg {
     using SafeCastLib for uint160;
@@ -162,16 +163,22 @@ abstract contract NuggftV1Proof is INuggftV1Proof, NuggftV1Dotnugg {
         uint256 l = featureLengths;
 
         res |= ((safeMod(seed & 0xff, _lengthOf(l, 0))) + 1);
-        res |= ((1 << 8) | ((((seed >>= 8) & 0xff % _lengthOf(l, 1))) + 1)) << 3;
-        res |= ((2 << 8) | ((((seed >>= 8) & 0xff % _lengthOf(l, 2))) + 1)) << (3 + 11);
+        // logger.log(res, 'a', seed, 'seed');
 
-        uint256 selA = (seed >>= 8) & 0xff;
+        res |= ((1 << 8) | (((((seed >>= 8) & 0xff) % _lengthOf(l, 1))) + 1)) << 3;
+
+        // logger.log(res, 'b', seed, 'seed');
+        res |= ((2 << 8) | (((((seed >>= 8) & 0xff) % _lengthOf(l, 2))) + 1)) << (14);
+
+        // logger.log(res, 'c', seed, 'seed');
+
+        uint256 selA = ((seed >>= 8) & 0xff);
 
         selA = selA < 128 ? 3 : 4;
 
-        res |= ((selA << 8) | ((safeMod((seed >>= 8) & 0xff, _lengthOf(l, uint8(selA)))) + 1)) << (3 + 22);
+        res |= ((selA << 8) | ((safeMod(((seed >>= 8) & 0xff), _lengthOf(l, uint8(selA)))) + 1)) << (3 + 22);
 
-        uint256 selB = (seed >>= 8) & 0xff;
+        uint256 selB = ((seed >>= 8) & 0xff);
 
         selB = selB < 30 //
             ? 5
@@ -182,10 +189,10 @@ abstract contract NuggftV1Proof is INuggftV1Proof, NuggftV1Dotnugg {
             : 0;
 
         if (selB != 0) {
-            res |= ((selB << 8) | ((safeMod((seed >>= 8) & 0xff, _lengthOf(l, uint8(selB)))) + 1)) << (3 + 33);
+            res |= ((selB << 8) | ((safeMod(((seed >>= 8) & 0xff), _lengthOf(l, uint8(selB)))) + 1)) << (3 + 33);
         }
 
-        uint256 selC = (seed >>= 8) & 0xff;
+        uint256 selC = ((seed >>= 8) & 0xff);
 
         selC = selC < 30 //
             ? 5
