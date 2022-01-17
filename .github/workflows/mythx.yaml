@@ -52,4 +52,4 @@ jobs:
                     --group-name "@nuggxyz/nuggftv1-core@${{ github.sha }}" \
                     --solc-version 0.8.9 \
                     --check-properties \
-                    contracts/NuggftV1.sol
+                    src/NuggftV1.sol
