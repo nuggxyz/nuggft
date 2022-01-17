@@ -46,7 +46,7 @@ jobs:
                   mythx --api-key ${{ secrets.MYTHX_API_KEY }} \
                     --yes \
                     analyze \
-                    --mode quick \
+                    # --mode quick \
                     --async \
                     --create-group \
                     --group-name "@nuggxyz/nuggftv1-core@${{ github.sha }}" \
