@@ -46,10 +46,18 @@ jobs:
                   mythx --api-key ${{ secrets.MYTHX_API_KEY }} \
                     --yes \
                     analyze \
-                    --mode deep \
+                    --mode standard \
                     --async \
                     --create-group \
                     --group-name "@nuggxyz/nuggftv1-core@${{ github.sha }}" \
                     --solc-version 0.8.9 \
                     --check-properties \
                     src/NuggftV1.sol
+                    src/core/NuggftV1Dotnugg.sol
+                    src/core/NuggftV1Epoch.sol
+                    src/core/NuggftV1Loan.sol
+                    src/core/NuggftV1Proof.sol
+                    src/core/NuggftV1Stake.sol
+                    src/core/NuggftV1Swap.sol
+                    src/core/NuggftV1Token.sol
+                    src/core/Trust.sol
