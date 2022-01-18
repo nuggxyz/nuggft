@@ -29,8 +29,6 @@ abstract contract NuggftV1Loan is INuggftV1Loan, NuggftV1Swap {
 
         loans[tokenId] = loanData; // starting swap data
 
-        approvedTransferToSelf(tokenId);
-
         uint96 value = loanData.eth();
 
         SafeTransferLib.safeTransferETH(msg.sender, value);
@@ -40,60 +38,80 @@ abstract contract NuggftV1Loan is INuggftV1Loan, NuggftV1Swap {
 
     /// @inheritdoc INuggftV1Loan
     function liquidate(uint160 tokenId) external payable override {
-        (uint96 toLiquidate, uint96 toRebalance, uint96 owed, uint24 epochDue, address loaner) = loanInfo(tokenId);
-
-        assert(address(this) == _ownerOf(tokenId)); // should always be true - should revert in loanInfo
+        uint256 cache = loans[tokenId];
 
         delete loans[tokenId];
 
-        address benif = msg.sender;
+        require(cache != 0, 'L:X');
+
+        uint24 epochDue = cache.epoch() + LIQUIDATION_PERIOD;
 
         if (epochDue >= epoch()) {
             // if liquidaton deadline has not passed - check perrmission
-            require(_isOperatorFor(msg.sender, loaner), 'L:1');
-            benif = loaner;
+            require(msg.sender == cache.account(), 'L:1');
+        } else {
+            // loan is past due
+            if (msg.sender != cache.account()) {
+                liquidationTransfer(msg.sender, tokenId);
+            }
         }
 
-        uint96 value = msg.value.safe96();
+        uint96 activeEps = eps();
+
+        (uint96 toLiquidate, uint96 fee, uint96 earned) = calc(cache.eth(), activeEps);
+
+        toLiquidate = toLiquidate == 0 ? activeEps : toLiquidate;
+
+        uint96 value = uint96(msg.value);
 
         require(toLiquidate <= value, 'L:2');
 
-        uint96 overpayment = value - toLiquidate;
+        unchecked {
+            //  (value - toLiquidate) = overpayment;
+            addStakedEth(fee + (value - toLiquidate));
+        }
 
-        addStakedEth(toRebalance + overpayment);
-
-        SafeTransferLib.safeTransferETH(benif, owed);
-
-        checkedTransferFromSelf(benif, tokenId);
+        SafeTransferLib.safeTransferETH(msg.sender, earned);
 
         emit Liquidate(tokenId, value, msg.sender);
     }
 
     /// @inheritdoc INuggftV1Loan
-    function rebalance(uint160 tokenId) external payable override {
-        (, uint96 toRebalance, uint96 earned, , address loaner) = loanInfo(tokenId);
+    function rebalance(uint160 tokenId) external override {
+        uint256 cache = loans[tokenId];
 
-        assert(address(this) == _ownerOf(tokenId)); // should always be true - should revert in loanInfo
+        require(cache != 0, 'L:X');
 
-        require(toRebalance <= msg.value, 'L:3');
+        uint96 acitveEps = eps();
 
-        uint96 value = msg.value.safe96();
+        (, uint96 fee, uint96 earned) = calc(cache.eth(), acitveEps);
+
+        require(fee != 0, 'L:9');
 
         // must be done before new principal is calculated
-        addStakedEth(value);
+        addStakedEth(fee);
 
-        uint256 res = NuggftV1AgentType.newAgentType(epoch(), loaner, eps(), false);
+        loans[tokenId] = NuggftV1AgentType.newAgentType(epoch(), cache.account(), acitveEps, false);
 
-        loans[tokenId] = res;
+        SafeTransferLib.safeTransferETH(cache.account(), earned);
 
-        SafeTransferLib.safeTransferETH(loaner, earned);
+        emit Rebalance(tokenId, fee);
+    }
 
-        emit Rebalance(tokenId, value);
+    function liquidationTransfer(address to, uint160 tokenId) internal {
+        owners[tokenId] = to;
+
+        emit Transfer(address(this), to, tokenId);
+    }
+
+    function loaned(uint160 tokenId) public view returns (bool res) {
+        return loans[tokenId] != 0;
     }
 
     /// @inheritdoc INuggftV1Loan
     function valueForLiquidate(uint160 tokenId) external view returns (uint96 res) {
         (res, , , , ) = loanInfo(tokenId);
+        if (res == 0) return eps();
     }
 
     /// @inheritdoc INuggftV1Loan
@@ -108,7 +126,7 @@ abstract contract NuggftV1Loan is INuggftV1Loan, NuggftV1Swap {
         override
         returns (
             uint96 toLiquidate,
-            uint96 toRebalance,
+            uint96 fee,
             uint96 earned,
             uint24 epochDue,
             address loaner
@@ -118,24 +136,34 @@ abstract contract NuggftV1Loan is INuggftV1Loan, NuggftV1Swap {
 
         loaner = cache.account();
 
-        require(loaner != address(0), 'L:4');
+        epochDue = cache.epoch() + LIQUIDATION_PERIOD;
 
-        // the amount of eth currently loanded by user
-        uint96 curr = cache.eth();
+        (toLiquidate, fee, earned) = calc(cache.eth(), eps());
+    }
 
-        uint96 activeEps = eps();
+    // flashloaning nuggs
+
+    function calc(uint96 principal, uint96 activeEps)
+        internal
+        pure
+        returns (
+            uint96 toLiquidate,
+            uint96 fee,
+            uint96 earned
+        )
+    {
+        // // principal can never be below activeEps
+        assert(principal <= activeEps);
 
         assembly {
-            toRebalance := div(mul(curr, REBALANCE_FEE_BPS), 10000)
-        }
+            let checkFee := div(principal, REBALANCE_FEE_BPS)
 
-        toLiquidate = curr + toRebalance;
-
-        unchecked {
-            // value earned while lone was taken out
-            earned = toLiquidate >= activeEps ? 0 : activeEps - toLiquidate;
-
-            epochDue = cache.epoch() + LIQUIDATION_PERIOD;
+            // (activeEps - fee >= principal)
+            if gt(sub(activeEps, checkFee), principal) {
+                fee := checkFee
+                toLiquidate := add(principal, fee)
+                earned := sub(activeEps, toLiquidate)
+            }
         }
     }
 }

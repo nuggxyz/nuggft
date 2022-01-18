@@ -19,6 +19,7 @@ import {NuggftV1Token} from './NuggftV1Token.sol';
 import {Trust} from './Trust.sol';
 import '../_test/utils/logger.sol';
 
+/// @custom:testing test each function
 abstract contract NuggftV1Dotnugg is INuggftV1Dotnugg, NuggftV1Token, Trust {
     using SafeCastLib for uint256;
     using SafeCastLib for uint16;
@@ -40,8 +41,6 @@ abstract contract NuggftV1Dotnugg is INuggftV1Dotnugg, NuggftV1Token, Trust {
     mapping(uint256 => address) resolvers;
 
     uint256 internal featureLengths;
-
-    // function init(dotnuggV1)
 
     /// @inheritdoc IDotnuggV1Implementer
     function dotnuggV1StoreCallback(

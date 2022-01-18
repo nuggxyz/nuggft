@@ -65,12 +65,11 @@ contract revert__NuggftV1Loan is NuggftV1Test {
         forge.vm.stopPrank();
     }
 
-    function test__revert__NuggftV1Loan__N_1__loan__failAsSelfHasNotApprovedContract() public {
+    function test__revert__NuggftV1Loan__N_1__loan__passAsSelfHasNotApprovedContract() public {
         uint160 tokenId = scenario_frank_has_a_token_and_spent_50_eth();
 
         forge.vm.startPrank(users.frank);
         {
-            forge.vm.expectRevert('N:1');
             nuggft.loan(tokenId);
         }
         forge.vm.stopPrank();
@@ -132,7 +131,7 @@ contract revert__NuggftV1Loan is NuggftV1Test {
         forge.vm.stopPrank();
     }
 
-    function test__revert__NuggftV1Loan__L_1__liquidate__successAsOperator() public {
+    function test__revert__NuggftV1Loan__L_1__liquidate__failAsOperator() public {
         uint160 tokenId = scenario_frank_has_a_loaned_token();
 
         uint96 value = nuggft.valueForLiquidate(tokenId);
@@ -145,6 +144,7 @@ contract revert__NuggftV1Loan is NuggftV1Test {
 
         forge.vm.startPrank(users.mac);
         {
+            forge.vm.expectRevert('L:1');
             nuggft.liquidate{value: value}(tokenId);
         }
         forge.vm.stopPrank();
@@ -277,118 +277,118 @@ contract revert__NuggftV1Loan is NuggftV1Test {
         [L:3] - rebalance - "msg.value not high enough"
        ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
 
-    function test__revert__NuggftV1Loan__L_3__rebalance__successRebalanceExact() public {
-        uint160 tokenId = scenario_frank_has_a_loaned_token();
+    // function test__revert__NuggftV1Loan__L_3__rebalance__successRebalanceExact() public {
+    //     uint160 tokenId = scenario_frank_has_a_loaned_token();
 
-        uint96 value = nuggft.valueForRebalance(tokenId);
+    //     uint96 value = nuggft.valueForRebalance(tokenId);
 
-        forge.vm.startPrank(users.frank);
-        {
-            nuggft.rebalance{value: value}(tokenId);
-        }
-        forge.vm.stopPrank();
-    }
+    //     forge.vm.startPrank(users.frank);
+    //     {
+    //         nuggft.rebalance{value: value}(tokenId);
+    //     }
+    //     forge.vm.stopPrank();
+    // }
 
-    function test__revert__NuggftV1Loan__L_3__rebalance__successRebalanceWeiHigher() public {
-        uint160 tokenId = scenario_frank_has_a_loaned_token();
+    // function test__revert__NuggftV1Loan__L_3__rebalance__successRebalanceWeiHigher() public {
+    //     uint160 tokenId = scenario_frank_has_a_loaned_token();
 
-        uint96 value = nuggft.valueForRebalance(tokenId);
+    //     uint96 value = nuggft.valueForRebalance(tokenId);
 
-        forge.vm.startPrank(users.frank);
-        {
-            nuggft.rebalance{value: value + 1}(tokenId);
-        }
-        forge.vm.stopPrank();
-    }
+    //     forge.vm.startPrank(users.frank);
+    //     {
+    //         nuggft.rebalance{value: value + 1}(tokenId);
+    //     }
+    //     forge.vm.stopPrank();
+    // }
 
-    function test__revert__NuggftV1Loan__L_3__rebalance__failRebalanceWeiLower() public {
-        uint160 tokenId = scenario_frank_has_a_loaned_token();
+    // function test__revert__NuggftV1Loan__L_3__rebalance__failRebalanceWeiLower() public {
+    //     uint160 tokenId = scenario_frank_has_a_loaned_token();
 
-        uint96 value = nuggft.valueForRebalance(tokenId);
+    //     uint96 value = nuggft.valueForRebalance(tokenId);
 
-        forge.vm.startPrank(users.frank);
-        {
-            forge.vm.expectRevert('L:3');
-            nuggft.rebalance{value: value - 1}(tokenId);
-        }
-        forge.vm.stopPrank();
-    }
+    //     forge.vm.startPrank(users.frank);
+    //     {
+    //         forge.vm.expectRevert('L:3');
+    //         nuggft.rebalance{value: value - 1}(tokenId);
+    //     }
+    //     forge.vm.stopPrank();
+    // }
 
-    function test__revert__NuggftV1Loan__L_3__rebalance__successRebalanceWayHigher() public {
-        uint160 tokenId = scenario_frank_has_a_loaned_token();
+    // function test__revert__NuggftV1Loan__L_3__rebalance__successRebalanceWayHigher() public {
+    //     uint160 tokenId = scenario_frank_has_a_loaned_token();
 
-        uint96 value = nuggft.valueForRebalance(tokenId);
+    //     uint96 value = nuggft.valueForRebalance(tokenId);
 
-        forge.vm.startPrank(users.frank);
-        {
-            nuggft.rebalance{value: value + 50 ether}(tokenId);
-        }
-        forge.vm.stopPrank();
-    }
+    //     forge.vm.startPrank(users.frank);
+    //     {
+    //         nuggft.rebalance{value: value + 50 ether}(tokenId);
+    //     }
+    //     forge.vm.stopPrank();
+    // }
 
-    function test__revert__NuggftV1Loan__L_3__rebalance__failRebalanceWayLower() public {
-        uint160 tokenId = scenario_frank_has_a_loaned_token();
+    // function test__revert__NuggftV1Loan__L_3__rebalance__failRebalanceWayLower() public {
+    //     uint160 tokenId = scenario_frank_has_a_loaned_token();
 
-        uint96 value = nuggft.valueForRebalance(tokenId);
+    //     uint96 value = nuggft.valueForRebalance(tokenId);
 
-        forge.vm.startPrank(users.frank);
-        {
-            forge.vm.expectRevert('L:3');
-            nuggft.rebalance{value: value / 2}(tokenId);
-        }
-        forge.vm.stopPrank();
-    }
+    //     forge.vm.startPrank(users.frank);
+    //     {
+    //         forge.vm.expectRevert('L:3');
+    //         nuggft.rebalance{value: value / 2}(tokenId);
+    //     }
+    //     forge.vm.stopPrank();
+    // }
 
-    function test__revert__NuggftV1Loan__L_3__rebalance__failRebalanceZero() public {
-        uint160 tokenId = scenario_frank_has_a_loaned_token();
+    // function test__revert__NuggftV1Loan__L_3__rebalance__failRebalanceZero() public {
+    //     uint160 tokenId = scenario_frank_has_a_loaned_token();
 
-        forge.vm.startPrank(users.frank);
-        {
-            forge.vm.expectRevert('L:3');
-            nuggft.rebalance{value: 0}(tokenId);
-        }
-        forge.vm.stopPrank();
-    }
+    //     forge.vm.startPrank(users.frank);
+    //     {
+    //         forge.vm.expectRevert('L:3');
+    //         nuggft.rebalance(tokenId);
+    //     }
+    //     forge.vm.stopPrank();
+    // }
 
     /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
         [L:4] - loanInfo - "loan exists"
        ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
 
-    function test__revert__NuggftV1Loan__L_4__loanInfo__failDoesNotExist() public {
-        uint160 tokenId = 42000;
+    // function test__revert__NuggftV1Loan__L_4__loanInfo__failDoesNotExist() public {
+    //     uint160 tokenId = 42000;
 
-        forge.vm.startPrank(users.frank);
-        {
-            forge.vm.expectRevert('L:4');
-            nuggft.loanInfo(tokenId);
-        }
-        forge.vm.stopPrank();
-    }
+    //     forge.vm.startPrank(users.frank);
+    //     {
+    //         forge.vm.expectRevert('L:4');
+    //         nuggft.loanInfo(tokenId);
+    //     }
+    //     forge.vm.stopPrank();
+    // }
 
-    function test__revert__NuggftV1Loan__L_4__loanInfo__successDoesExist() public {
-        uint160 tokenId = scenario_frank_has_a_loaned_token();
+    // function test__revert__NuggftV1Loan__L_4__loanInfo__successDoesExist() public {
+    //     uint160 tokenId = scenario_frank_has_a_loaned_token();
 
-        forge.vm.startPrank(users.frank);
-        {
-            nuggft.loanInfo(tokenId);
-        }
-        forge.vm.stopPrank();
-    }
+    //     forge.vm.startPrank(users.frank);
+    //     {
+    //         nuggft.loanInfo(tokenId);
+    //     }
+    //     forge.vm.stopPrank();
+    // }
 
-    function test__revert__NuggftV1Loan__L_4__loanInfo__failDoesNotExistAfterLiquidate() public {
-        uint160 tokenId = scenario_frank_has_a_loaned_token();
+    // function test__revert__NuggftV1Loan__L_4__loanInfo__failDoesNotExistAfterLiquidate() public {
+    //     uint160 tokenId = scenario_frank_has_a_loaned_token();
 
-        uint96 value = nuggft.valueForLiquidate(tokenId);
+    //     uint96 value = nuggft.valueForLiquidate(tokenId);
 
-        forge.vm.startPrank(users.frank);
-        {
-            nuggft.loanInfo(tokenId);
+    //     forge.vm.startPrank(users.frank);
+    //     {
+    //         nuggft.loanInfo(tokenId);
 
-            nuggft.liquidate{value: value}(tokenId);
+    //         nuggft.liquidate{value: value}(tokenId);
 
-            forge.vm.expectRevert('L:4');
-            nuggft.loanInfo(tokenId);
-        }
-        forge.vm.stopPrank();
-    }
+    //         forge.vm.expectRevert('L:4');
+    //         nuggft.loanInfo(tokenId);
+    //     }
+    //     forge.vm.stopPrank();
+    // }
 }
