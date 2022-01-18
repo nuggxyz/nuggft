@@ -12,6 +12,12 @@ library SafeTransferLib {
        ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
 
     function safeTransferETH(address to, uint256 amount) internal {
+        assembly {
+            if iszero(amount) {
+                return(0x0, 0x0)
+            }
+        }
+
         bool callStatus;
 
         assembly {

@@ -42,14 +42,14 @@ abstract contract NuggftV1Swap is INuggftV1Swap, NuggftV1Stake {
 
     /// scenario
     /// stress
-    // -- 8000 people delegate
+    // -- 8000 people offer
 
     /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-                                  delegate
+                                  offer
        ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
 
     /// @inheritdoc INuggftV1Swap
-    function delegate(uint160 tokenId) external payable override {
+    function offer(uint160 tokenId) external payable override {
         // require(_isOperatorFor(msg.sender, sender), 'S:0');
 
         (Storage storage s, Memory memory m) = loadTokenSwap(tokenId, msg.sender);
@@ -88,14 +88,14 @@ abstract contract NuggftV1Swap is INuggftV1Swap, NuggftV1Stake {
             }
 
             // if the leader "owns" the swap, then it was initated by them - "commit" must be executed
-            (lead) = m.swapData.flag() ? commit(s, m) : offer(s, m);
+            (lead) = m.swapData.flag() ? commit(s, m) : carry(s, m);
         }
 
-        emit Delegate(tokenId, msg.sender, lead);
+        emit Offer(tokenId, msg.sender, lead);
     }
 
     /// @inheritdoc INuggftV1Swap
-    function delegateItem(
+    function offerItem(
         uint160 buyerTokenId,
         uint160 sellerTokenId,
         uint16 itemId
@@ -114,9 +114,9 @@ abstract contract NuggftV1Swap is INuggftV1Swap, NuggftV1Stake {
             require(!m.offerData.flag(), 'NOPE'); // always be caught by the require above
         }
 
-        uint96 lead = m.offerData == 0 && m.swapData.flag() ? commit(s, m) : offer(s, m);
+        uint96 lead = m.offerData == 0 && m.swapData.flag() ? commit(s, m) : carry(s, m);
 
-        emit DelegateItem(encodeSellingItemId(sellerTokenId, itemId), buyerTokenId, lead);
+        emit OfferItem(encodeSellingItemId(sellerTokenId, itemId), buyerTokenId, lead);
     }
 
     /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -124,29 +124,24 @@ abstract contract NuggftV1Swap is INuggftV1Swap, NuggftV1Stake {
        ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
 
     /// @inheritdoc INuggftV1Swap
+    function claim(uint160 tokenId) external override {
+        uint96 value = _claim(tokenId);
+
+        SafeTransferLib.safeTransferETH(msg.sender, value);
+    }
+
+    /// @inheritdoc INuggftV1Swap
     function multiclaim(uint160[] calldata tokenIds) external override {
+        uint256 acc;
+
         for (uint256 i = 0; i < tokenIds.length; i++) {
-            claim(tokenIds[i]);
+            acc += _claim(tokenIds[i]);
         }
+
+        SafeTransferLib.safeTransferETH(msg.sender, acc);
     }
 
-    /// @inheritdoc INuggftV1Swap
-    function multiclaimItem(
-        uint160[] calldata buyerTokenIds,
-        uint160[] calldata sellerTokenIds,
-        uint16[] calldata itemIds
-    ) external override {
-        require(itemIds.length == sellerTokenIds.length && itemIds.length == buyerTokenIds.length, 'S:Y');
-
-        for (uint256 i = 0; i < itemIds.length; i++) {
-            claimItem(buyerTokenIds[i], sellerTokenIds[i], itemIds[i]);
-        }
-    }
-
-    /// @inheritdoc INuggftV1Swap
-    function claim(uint160 tokenId) public override {
-        // require(_isOperatorFor(msg.sender, sender), 'S:8');
-
+    function _claim(uint160 tokenId) internal returns (uint96 value) {
         (Storage storage s, Memory memory m) = loadTokenSwap(tokenId, msg.sender);
 
         delete s.offers[msg.sender];
@@ -156,7 +151,7 @@ abstract contract NuggftV1Swap is INuggftV1Swap, NuggftV1Stake {
 
             checkedTransferFromSelf(msg.sender, tokenId);
         } else {
-            SafeTransferLib.safeTransferETH(msg.sender, m.offerData.eth());
+            value = m.offerData.eth();
         }
 
         emit Claim(tokenId, msg.sender);
@@ -168,7 +163,34 @@ abstract contract NuggftV1Swap is INuggftV1Swap, NuggftV1Stake {
         uint160 sellerTokenId,
         uint16 itemId
     ) public override {
-        require(_ownerOf(buyerTokenId) == msg.sender, 'S:9');
+        uint96 value = _claimItem(buyerTokenId, sellerTokenId, itemId);
+
+        SafeTransferLib.safeTransferETH(msg.sender, value);
+    }
+
+    /// @inheritdoc INuggftV1Swap
+    function multiclaimItem(
+        uint160[] calldata buyerTokenIds,
+        uint160[] calldata sellerTokenIds,
+        uint16[] calldata itemIds
+    ) external override {
+        require(itemIds.length == sellerTokenIds.length && itemIds.length == buyerTokenIds.length, 'S:Y');
+
+        uint96 value;
+
+        for (uint256 i = 0; i < itemIds.length; i++) {
+            value += _claimItem(buyerTokenIds[i], sellerTokenIds[i], itemIds[i]);
+        }
+
+        SafeTransferLib.safeTransferETH(msg.sender, value);
+    }
+
+    function _claimItem(
+        uint160 buyerTokenId,
+        uint160 sellerTokenId,
+        uint16 itemId
+    ) internal returns (uint96 value) {
+        require(isAgent(msg.sender, buyerTokenId), 'S:9');
 
         (Storage storage s, Memory memory m) = loadItemSwap(sellerTokenId, itemId, address(buyerTokenId));
 
@@ -177,25 +199,25 @@ abstract contract NuggftV1Swap is INuggftV1Swap, NuggftV1Stake {
         if (checkClaimerIsWinnerOrLoser(m)) {
             delete s.data;
 
-            require(protocolItems[itemId] > 0, 'P:3');
+            assert(protocolItems[itemId] > 0);
 
             addItem(buyerTokenId, itemId);
 
             protocolItems[itemId]--;
         } else {
-            SafeTransferLib.safeTransferETH(_ownerOf(buyerTokenId), m.offerData.eth());
+            value = m.offerData.eth();
         }
 
         emit ClaimItem(encodeSellingItemId(sellerTokenId, itemId), buyerTokenId);
     }
 
     /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-                                  swap
+                                  sell
        ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
 
     /// @inheritdoc INuggftV1Swap
-    function swap(uint160 tokenId, uint96 floor) external override {
-        require(_ownerOf(tokenId) == msg.sender, 'S:A');
+    function sell(uint160 tokenId, uint96 floor) external override {
+        require(isOwner(msg.sender, tokenId), 'S:A');
 
         require(floor >= eps(), 'S:B');
 
@@ -209,11 +231,11 @@ abstract contract NuggftV1Swap is INuggftV1Swap, NuggftV1Stake {
         // no need to check dust as no value is being transfered
         (s.data) = NuggftV1AgentType.newAgentType(0, msg.sender, floor, true);
 
-        emit Swap(tokenId, floor);
+        emit Sell(tokenId, floor);
     }
 
     /// @inheritdoc INuggftV1Swap
-    function swapItem(
+    function sellItem(
         uint160 tokenId,
         uint16 itemId,
         uint96 floor
@@ -232,7 +254,7 @@ abstract contract NuggftV1Swap is INuggftV1Swap, NuggftV1Stake {
 
         (s.data) = NuggftV1AgentType.newAgentType(0, address(tokenId), floor, true);
 
-        emit Swap(tokenId, floor);
+        emit Sell(tokenId, floor);
     }
 
     /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -240,17 +262,17 @@ abstract contract NuggftV1Swap is INuggftV1Swap, NuggftV1Stake {
        ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
 
     // / @inheritdoc INuggftV1Swap
-    function valueForDelegate(address sender, uint160 tokenId)
+    function valueForOffer(address sender, uint160 tokenId)
         external
         view
         override
         returns (
-            bool canDelegate,
+            bool canOffer,
             uint96 nextSwapAmount,
             uint96 senderCurrentOffer
         )
     {
-        canDelegate = true;
+        canOffer = true;
 
         (, Memory memory m) = loadTokenSwap(tokenId, sender);
 
@@ -263,7 +285,7 @@ abstract contract NuggftV1Swap is INuggftV1Swap, NuggftV1Stake {
                 return (false, 0, 0);
             }
         } else {
-            if (m.offerData.flag() && m.swapData.flag()) canDelegate = false;
+            if (m.offerData.flag() && m.swapData.flag()) canOffer = false;
 
             senderCurrentOffer = m.offerData.eth();
 
@@ -306,7 +328,7 @@ abstract contract NuggftV1Swap is INuggftV1Swap, NuggftV1Stake {
         addStakedEth(increment);
     }
 
-    function offer(Storage storage s, Memory memory m) internal returns (uint96 lead) {
+    function carry(Storage storage s, Memory memory m) internal returns (uint96 lead) {
         // make sure swap is still active
         require(m.activeEpoch <= m.swapData.epoch(), 'S:F');
 
@@ -317,6 +339,7 @@ abstract contract NuggftV1Swap is INuggftV1Swap, NuggftV1Stake {
         s.data = newSwapData;
 
         lead = newSwapData.eth();
+
         addStakedEth(increment);
     }
 

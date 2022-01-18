@@ -12,7 +12,7 @@ contract system__NuggftV1Swap is NuggftV1Test {
     }
 
     /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-        [S:0] - delegate - "msg.sender is operator for sender"
+        [S:0] - offer - "msg.sender is operator for sender"
        ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
 }
 

@@ -5,8 +5,8 @@ pragma solidity 0.8.9;
 import '../interfaces/nuggftv1/INuggftV1.sol';
 
 contract NuggftV1MinterHelper {
-    function delegateem(address nuggftv1, uint160 id) external payable {
-        INuggftV1(nuggftv1).delegate{value: msg.value}(id);
+    function offerem(address nuggftv1, uint160 id) external payable {
+        INuggftV1(nuggftv1).offer{value: msg.value}(id);
 
         // payable(msg.sender).transfer(address(this).balance);
     }
@@ -55,12 +55,12 @@ contract NuggftV1Minter {
             uint96 floor = INuggftV1(nuggftv1).eps() * 3;
             INuggftV1(nuggftv1).approve(nuggftv1, uint160(i));
 
-            INuggftV1(nuggftv1).swap(uint160(i), floor);
+            INuggftV1(nuggftv1).sell(uint160(i), floor);
 
-            (, uint96 amt, ) = INuggftV1(nuggftv1).valueForDelegate(minterHelper, uint160(i));
+            (, uint96 amt, ) = INuggftV1(nuggftv1).valueForOffer(minterHelper, uint160(i));
 
             if (i % 2 == 0) {
-                NuggftV1MinterHelper(minterHelper).delegateem{value: amt}(nuggftv1, i);
+                NuggftV1MinterHelper(minterHelper).offerem{value: amt}(nuggftv1, i);
                 toClaimFromHelper.push(i);
             } else {
                 toClaim.push(i);
