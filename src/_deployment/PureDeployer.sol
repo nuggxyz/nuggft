@@ -2,6 +2,8 @@
 
 pragma solidity 0.8.9;
 
+import '../interfaces/nuggftv1/INuggftV1.sol';
+
 // import '../_test/utils/DSEmit.sol';
 
 contract PureDeployerCallback {
@@ -14,12 +16,35 @@ contract PureDeployerCallback {
     function done() external {
         selfdestruct(payable(msg.sender));
     }
+
+    function offerem(address nuggftv1, uint160 id) external payable {
+        INuggftV1(nuggftv1).offer{value: msg.value}(id);
+
+        // payable(msg.sender).transfer(address(this).balance);
+    }
+
+    function claimem(address nuggftv1, uint160 id) external {
+        INuggftV1(nuggftv1).claim(id);
+
+        payable(msg.sender).transfer(address(this).balance);
+    }
 }
 
 //'init(bytes32,bytes32,bytes,bytes,bytes)'
 contract PureDeployer {
     address public __dotnugg;
     address public __nuggft;
+
+    address immutable minterHelper;
+    address immutable deployer;
+
+    uint160[] toClaimFromHelper;
+    uint160[] toClaim;
+
+    uint256 claimedIndex;
+    uint256 claimedFromHelperIndex;
+
+    uint160 index = 500;
 
     constructor(
         bytes32 nuggftSalt,
@@ -62,8 +87,9 @@ contract PureDeployer {
         // DSEmit.stopMeasuringGas();
 
         // DSEmit.startMeasuringGas('B2');
+        deployer = msg.sender;
 
-        PureDeployerCallback pdc = new PureDeployerCallback(dotnugg);
+        minterHelper = address(new PureDeployerCallback(dotnugg));
 
         // DSEmit.stopMeasuringGas();
 
@@ -111,50 +137,74 @@ contract PureDeployer {
 
         require(success, 'OOPS:4');
 
-        for (uint160 i = 100; i < 150; i += 2) {
-            bytes memory trusted_mint = abi.encodeWithSelector(
-                bytes4(keccak256('trustedMint(uint160,address)')),
-                i,
-                0x4E503501C5DEDCF0607D1E1272Bb4b3c1204CC71
-            );
+        // /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+        //    [5] - call NuggftV1 "setIsTrusted(address,bool)"
+        //    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+        // // DSEmit.startMeasuringGas('C');
 
-            assembly {
-                success := call(gas(), nuggft, 0x0, add(trusted_mint, 0x20), mload(trusted_mint), 0x0, 0x0)
-            }
+        // bytes memory add_trust_call = abi.encodeWithSelector(bytes4(keccak256('setIsTrusted(address,bool)')), address(minter), true);
 
-            bytes memory trusted_minter = abi.encodeWithSelector(
-                bytes4(keccak256('trustedMint(uint160,address)')),
-                i + 1,
-                0x9B0E2b16F57648C7bAF28EDD7772a815Af266E77
-            );
+        // assembly {
+        //     success := call(gas(), nuggft, 0x0, add(add_trust_call, 0x20), mload(add_trust_call), 0x0, 0x0)
+        // }
 
-            assembly {
-                success := call(gas(), nuggft, 0x0, add(trusted_minter, 0x20), mload(trusted_minter), 0x0, 0x0)
-            }
+        // require(success, 'OOPS:5');
 
-            if (!success) break;
-        }
+        // // DSEmit.stopMeasuringGas();
 
-        // DSEmit.stopMeasuringGas();
+        // /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+        //    [5] - call NuggftV1 "setIsTrusted(address,bool)"
+        //    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+        // // DSEmit.startMeasuringGas('C');
 
-        /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-           [5] - call NuggftV1 "setIsTrusted(address,bool)"
-           ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
-        // DSEmit.startMeasuringGas('C');
+        // bytes memory remove_trust_call = abi.encodeWithSelector(bytes4(keccak256('setIsTrusted(address,bool)')), address(this), false);
 
-        bytes memory remove_trust_call = abi.encodeWithSelector(bytes4(keccak256('setIsTrusted(address,bool)')), address(this), false);
+        // assembly {
+        //     success := call(gas(), nuggft, 0x0, add(remove_trust_call, 0x20), mload(remove_trust_call), 0x0, 0x0)
+        // }
 
-        assembly {
-            success := call(gas(), nuggft, 0x0, add(remove_trust_call, 0x20), mload(remove_trust_call), 0x0, 0x0)
-        }
-
-        require(success, 'OOPS:5');
+        // require(success, 'OOPS:5');
 
         __dotnugg = dotnugg;
         __nuggft = nuggft;
+
         // pdc.done();
         // // DSEmit.stopMeasuringGas();
 
         // selfdestruct(payable(msg.sender));
+    }
+
+    function trustMint(
+        address to,
+        uint256 start,
+        uint256 amount
+    ) external payable {
+        for (uint256 i = start; i < start + amount; i++) {
+            INuggftV1(__nuggft).trustedMint{value: INuggftV1(__nuggft).msp()}(uint160(i), to);
+        }
+        payable(msg.sender).transfer(address(this).balance);
+    }
+
+    function mint(uint160 amount) external payable {
+        for (uint160 i = index; i < index + amount; i++) {
+            INuggftV1(__nuggft).mint{value: INuggftV1(__nuggft).msp()}(uint160(i));
+            uint96 floor = INuggftV1(__nuggft).eps() * 3;
+            INuggftV1(__nuggft).approve(__nuggft, uint160(i));
+
+            INuggftV1(__nuggft).sell(uint160(i), floor);
+
+            (, uint96 amt, ) = INuggftV1(__nuggft).valueForOffer(minterHelper, uint160(i));
+
+            if (i % 2 == 0) {
+                PureDeployerCallback(minterHelper).offerem{value: amt}(__nuggft, i);
+                toClaimFromHelper.push(i);
+            } else {
+                toClaim.push(i);
+            }
+        }
+
+        index += amount;
+
+        payable(msg.sender).transfer(address(this).balance);
     }
 }
