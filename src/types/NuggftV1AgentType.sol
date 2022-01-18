@@ -86,17 +86,17 @@ library NuggftV1AgentType {
     }
 
     // @test  input output unit test
-    function isOwner(uint256 input, bool update) internal pure returns (uint256 res) {
-        return ShiftLib.set(input, 1, 255, update ? 0x1 : 0x0);
+    function flag(uint256 input, bool update) internal pure returns (uint256 res) {
+        return ShiftLib.set(input, 1, 254, update ? 0x1 : 0x0);
     }
 
-    function isOwner(uint256 input) internal pure returns (bool output) {
-        output = ShiftLib.get(input, 1, 255) == 0x1;
+    function flag(uint256 input) internal pure returns (bool output) {
+        output = ShiftLib.get(input, 1, 254) == 0x1;
     }
 
     // @test  check to see if it does this - will be easy
-    function flag(uint256 input) internal pure returns (uint256 res) {
-        res = ShiftLib.set(input, 1, 254, 0x01);
+    function _mark(uint256 input) private pure returns (uint256 res) {
+        res = ShiftLib.set(input, 1, 255, 0x01);
     }
 
     // @test  manual
@@ -104,12 +104,12 @@ library NuggftV1AgentType {
         uint24 _epoch,
         address _account,
         uint96 _eth,
-        bool _isOwner
+        bool _flag
     ) internal pure returns (uint256 res) {
         res = epoch(res, _epoch);
         res = account(res, _account);
-        if (_isOwner) res = isOwner(res, true);
+        res = flag(res, _flag);
         (res) = eth(res, _eth);
-        res = flag(res);
+        res = _mark(res);
     }
 }

@@ -84,11 +84,11 @@ abstract contract NuggftV1Swap is INuggftV1Swap, NuggftV1Stake {
                 // prevents owner from COMMITTING on their own swap - not offering
                 require(m.offerData.epoch() >= m.activeEpoch, 'S:R');
 
-                require(!m.offerData.isOwner(), 'NOPE'); // always be caught by the require above
+                require(!m.offerData.flag(), 'NOPE'); // always be caught by the require above
             }
 
             // if the leader "owns" the swap, then it was initated by them - "commit" must be executed
-            (lead) = m.swapData.isOwner() ? commit(s, m) : offer(s, m);
+            (lead) = m.swapData.flag() ? commit(s, m) : offer(s, m);
         }
 
         emit Delegate(tokenId, msg.sender, lead);
@@ -111,10 +111,10 @@ abstract contract NuggftV1Swap is INuggftV1Swap, NuggftV1Stake {
             // prevents owner from COMMITTING on their own swap - not offering
             require(m.offerData.epoch() >= m.activeEpoch, 'S:7');
 
-            require(!m.offerData.isOwner(), 'NOPE'); // always be caught by the require above
+            require(!m.offerData.flag(), 'NOPE'); // always be caught by the require above
         }
 
-        uint96 lead = m.offerData == 0 && m.swapData.isOwner() ? commit(s, m) : offer(s, m);
+        uint96 lead = m.offerData == 0 && m.swapData.flag() ? commit(s, m) : offer(s, m);
 
         emit DelegateItem(encodeSellingItemId(sellerTokenId, itemId), buyerTokenId, lead);
     }
@@ -263,7 +263,7 @@ abstract contract NuggftV1Swap is INuggftV1Swap, NuggftV1Stake {
                 return (false, 0, 0);
             }
         } else {
-            if (m.offerData.isOwner() && m.swapData.isOwner()) canDelegate = false;
+            if (m.offerData.flag() && m.swapData.flag()) canDelegate = false;
 
             senderCurrentOffer = m.offerData.eth();
 
@@ -290,17 +290,17 @@ abstract contract NuggftV1Swap is INuggftV1Swap, NuggftV1Stake {
 
         require(m.offerData == 0 && m.swapData != 0, 'NOPE3');
 
-        require(m.swapData.isOwner(), 'NOPE4');
+        require(m.swapData.flag(), 'NOPE4');
 
         // forces a user not to commit on their own swap
         // commented out as the logic is handled by S:R
-        // require(!m.offerData.isOwner()(), 'S:3');
+        // require(!m.offerData.flag()(), 'S:3');
 
         (uint256 newSwapData, uint96 increment) = updateSwapDataWithEpoch(m.swapData, m.activeEpoch + 1, m.sender, 0);
 
         s.data = newSwapData;
 
-        s.offers[m.swapData.account()] = m.swapData.isOwner(false).epoch(m.activeEpoch + 1);
+        s.offers[m.swapData.account()] = m.swapData.flag(false).epoch(m.activeEpoch + 1);
 
         lead = newSwapData.eth();
         addStakedEth(increment);
@@ -325,9 +325,9 @@ abstract contract NuggftV1Swap is INuggftV1Swap, NuggftV1Stake {
 
         bool isOver = m.activeEpoch > m.swapData.epoch();
         bool isLeader = m.offerData.account() == m.swapData.account();
-        bool isOwner = m.swapData.isOwner() && m.offerData.isOwner();
+        bool flag = m.swapData.flag() && m.offerData.flag();
 
-        return isLeader && (isOwner || isOver);
+        return isLeader && (flag || isOver);
     }
 
     // @test  unit

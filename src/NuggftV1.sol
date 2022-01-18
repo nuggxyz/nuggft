@@ -214,11 +214,11 @@ contract NuggftV1 is IERC721Metadata, NuggftV1Loan {
         uint256 cache = stake;
 
         // hanles all logic not related to staking the nugg
-        delete owners[tokenId];
+        delete agency[tokenId];
         delete approvals[tokenId];
 
         delete swaps[tokenId];
-        delete loans[tokenId];
+        // delete loans[tokenId];
         delete proofs[tokenId];
         delete resolvers[tokenId];
 
