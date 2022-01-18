@@ -2,7 +2,7 @@
 
 pragma solidity 0.8.9;
 
-import '../../interfaces/nuggftv1/INuggftV1.sol';
+import '../interfaces/nuggftv1/INuggftV1.sol';
 
 contract NuggftV1TrustedMinter {
     address immutable deployer;

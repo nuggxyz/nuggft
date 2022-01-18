@@ -2,7 +2,7 @@
 
 pragma solidity 0.8.9;
 
-import '../NuggftV1.test.sol';
+import '../../NuggftV1.test.sol';
 
 contract revert__NuggftV1Loan is NuggftV1Test {
     uint32 epoch;
