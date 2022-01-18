@@ -1,5 +1,7 @@
 // SPDX-License-Identifier: MIT
-
+// [PASS] test__txgas__NuggftV1Loan__liquidate() (gas: 23084)
+// [PASS] test__txgas__NuggftV1Loan__loan() (gas: 12629)
+// [PASS] test__txgas__NuggftV1Loan__rebalance() (gas: 22559)
 pragma solidity 0.8.9;
 
 import {INuggftV1Swap} from '../interfaces/nuggftv1/INuggftV1Swap.sol';
@@ -7,6 +9,7 @@ import {INuggftV1Swap} from '../interfaces/nuggftv1/INuggftV1Swap.sol';
 import {NuggftV1Stake} from './NuggftV1Stake.sol';
 
 import {SafeCastLib} from '../libraries/SafeCastLib.sol';
+
 import {SafeTransferLib} from '../libraries/SafeTransferLib.sol';
 
 import {NuggftV1AgentType} from '../types/NuggftV1AgentType.sol';
@@ -50,8 +53,6 @@ abstract contract NuggftV1Swap is INuggftV1Swap, NuggftV1Stake {
 
     /// @inheritdoc INuggftV1Swap
     function offer(uint160 tokenId) external payable override {
-        // require(_isOperatorFor(msg.sender, sender), 'S:0');
-
         (Storage storage s, Memory memory m) = loadTokenSwap(tokenId, msg.sender);
 
         // make sure user is not the owner of swap
@@ -61,7 +62,7 @@ abstract contract NuggftV1Swap is INuggftV1Swap, NuggftV1Stake {
 
         if (m.activeEpoch == tokenId && m.swapData == 0) {
             // to ensure we at least have enough to increment the offer amount by 2%
-            require(msg.value >= MIN_OFFER, 'S:1');
+            require(msg.value >= MIN_OFFER, hex'21');
 
             // we do not need this, could take tokenId out as an argument - but do not want to give users
             // the ability to accidently place an offer for nugg A and end up minting nugg B.
@@ -75,16 +76,16 @@ abstract contract NuggftV1Swap is INuggftV1Swap, NuggftV1Stake {
 
             setProofFromEpoch(tokenId);
 
-            emitTransferEvent(address(0), address(this), tokenId);
+            emit Transfer(address(0), address(this), tokenId);
         } else {
-            require(m.swapData != 0, 'S:4');
+            require(m.swapData != 0, hex'24');
 
             if (m.offerData != 0) {
                 // forces user to claim previous swap before acting on this one
                 // prevents owner from COMMITTING on their own swap - not offering
-                require(m.offerData.epoch() >= m.activeEpoch, 'S:R');
+                require(m.offerData.epoch() >= m.activeEpoch, hex'20');
 
-                require(!m.offerData.flag(), 'NOPE'); // always be caught by the require above
+                assert(!m.offerData.flag()); // always be caught by the require above
             }
 
             // if the leader "owns" the swap, then it was initated by them - "commit" must be executed
@@ -100,18 +101,18 @@ abstract contract NuggftV1Swap is INuggftV1Swap, NuggftV1Stake {
         uint160 sellerTokenId,
         uint16 itemId
     ) external payable override {
-        require(_ownerOf(buyerTokenId) == msg.sender, 'S:6');
+        require(_ownerOf(buyerTokenId) == msg.sender, hex'26');
 
         (Storage storage s, Memory memory m) = loadItemSwap(sellerTokenId, itemId, address(buyerTokenId));
 
-        require(m.swapData != 0, 'S:S');
+        require(m.swapData != 0, hex'22');
 
         if (m.offerData != 0) {
             // forces user to claim previous swap before acting on this one
             // prevents owner from COMMITTING on their own swap - not offering
-            require(m.offerData.epoch() >= m.activeEpoch, 'S:7');
+            require(m.offerData.epoch() >= m.activeEpoch, hex'27');
 
-            require(!m.offerData.flag(), 'NOPE'); // always be caught by the require above
+            assert(!m.offerData.flag()); // always be caught by the require above
         }
 
         uint96 lead = m.offerData == 0 && m.swapData.flag() ? commit(s, m) : carry(s, m);
@@ -174,7 +175,7 @@ abstract contract NuggftV1Swap is INuggftV1Swap, NuggftV1Stake {
         uint160[] calldata sellerTokenIds,
         uint16[] calldata itemIds
     ) external override {
-        require(itemIds.length == sellerTokenIds.length && itemIds.length == buyerTokenIds.length, 'S:Y');
+        require(itemIds.length == sellerTokenIds.length && itemIds.length == buyerTokenIds.length, hex'23');
 
         uint96 value;
 
@@ -190,7 +191,7 @@ abstract contract NuggftV1Swap is INuggftV1Swap, NuggftV1Stake {
         uint160 sellerTokenId,
         uint16 itemId
     ) internal returns (uint96 value) {
-        require(isAgent(msg.sender, buyerTokenId), 'S:9');
+        require(isAgent(msg.sender, buyerTokenId), hex'29');
 
         (Storage storage s, Memory memory m) = loadItemSwap(sellerTokenId, itemId, address(buyerTokenId));
 
@@ -217,16 +218,16 @@ abstract contract NuggftV1Swap is INuggftV1Swap, NuggftV1Stake {
 
     /// @inheritdoc INuggftV1Swap
     function sell(uint160 tokenId, uint96 floor) external override {
-        require(isOwner(msg.sender, tokenId), 'S:A');
+        require(isOwner(msg.sender, tokenId), hex'2A');
 
-        require(floor >= eps(), 'S:B');
+        require(floor >= eps(), hex'2B');
 
         approvedTransferToSelf(tokenId);
 
         (Storage storage s, Memory memory m) = loadTokenSwap(tokenId, msg.sender);
 
         // make sure swap does not exist - this logically should never happen
-        require(m.swapData == 0, 'NOPE2');
+        assert(m.swapData == 0);
 
         // no need to check dust as no value is being transfered
         (s.data) = NuggftV1AgentType.newAgentType(0, msg.sender, floor, true);
@@ -240,7 +241,7 @@ abstract contract NuggftV1Swap is INuggftV1Swap, NuggftV1Stake {
         uint16 itemId,
         uint96 floor
     ) external override {
-        require(_ownerOf(tokenId) == msg.sender, 'S:C');
+        require(_ownerOf(tokenId) == msg.sender, hex'2C');
 
         // will revert if they do not have the item
         removeItem(tokenId, itemId);
@@ -250,7 +251,7 @@ abstract contract NuggftV1Swap is INuggftV1Swap, NuggftV1Stake {
         (Storage storage s, Memory memory m) = loadItemSwap(tokenId, itemId, address(tokenId));
 
         // cannot sell two of the same item at same time
-        require(m.swapData == 0, 'S:D');
+        require(m.swapData == 0, hex'2D');
 
         (s.data) = NuggftV1AgentType.newAgentType(0, address(tokenId), floor, true);
 
@@ -308,29 +309,32 @@ abstract contract NuggftV1Swap is INuggftV1Swap, NuggftV1Stake {
        ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
 
     function commit(Storage storage s, Memory memory m) internal returns (uint96 lead) {
-        require(msg.value >= eps(), 'S:5');
+        require(msg.value >= eps(), hex'25');
 
-        require(m.offerData == 0 && m.swapData != 0, 'NOPE3');
+        assert(m.offerData == 0 && m.swapData != 0);
 
-        require(m.swapData.flag(), 'NOPE4');
+        assert(m.swapData.flag());
 
         // forces a user not to commit on their own swap
         // commented out as the logic is handled by S:R
-        // require(!m.offerData.flag()(), 'S:3');
+        // require(!m.offerData.flag()(), 0x23);
 
-        (uint256 newSwapData, uint96 increment) = updateSwapDataWithEpoch(m.swapData, m.activeEpoch + 1, m.sender, 0);
+        uint24 newEpoch = m.activeEpoch + 1;
+
+        (uint256 newSwapData, uint96 increment) = updateSwapDataWithEpoch(m.swapData, newEpoch, m.sender, 0);
 
         s.data = newSwapData;
 
-        s.offers[m.swapData.account()] = m.swapData.flag(false).epoch(m.activeEpoch + 1);
+        s.offers[m.swapData.account()] = m.swapData.flag(false).epoch(newEpoch);
 
         lead = newSwapData.eth();
+
         addStakedEth(increment);
     }
 
     function carry(Storage storage s, Memory memory m) internal returns (uint96 lead) {
         // make sure swap is still active
-        require(m.activeEpoch <= m.swapData.epoch(), 'S:F');
+        require(m.activeEpoch <= m.swapData.epoch(), hex'2F');
 
         if (m.swapData.account() != m.sender) s.offers[m.swapData.account()] = m.swapData;
 
@@ -344,7 +348,7 @@ abstract contract NuggftV1Swap is INuggftV1Swap, NuggftV1Stake {
     }
 
     function checkClaimerIsWinnerOrLoser(Memory memory m) internal pure returns (bool winner) {
-        require(m.offerData != 0, 'S:E');
+        require(m.offerData != 0, hex'2E');
 
         bool isOver = m.activeEpoch > m.swapData.epoch();
         bool isLeader = m.offerData.account() == m.swapData.account();
@@ -362,9 +366,9 @@ abstract contract NuggftV1Swap is INuggftV1Swap, NuggftV1Stake {
     ) internal view returns (uint256 res, uint96 increment) {
         uint96 baseEth = prevSwapData.eth();
 
-        currUserOffer += msg.value.safe96();
+        currUserOffer += uint96(msg.value);
 
-        require(NuggftV1AgentType.addIncrement(baseEth) <= currUserOffer, 'S:G');
+        require(NuggftV1AgentType.addIncrement(baseEth) <= currUserOffer, hex'26');
 
         (res) = NuggftV1AgentType.newAgentType(_epoch, account, currUserOffer, false);
 

@@ -108,27 +108,85 @@ contract logic__NuggftV1Loan is NuggftV1Test, NuggftV1Loan {
         assertEq(rc, sc2);
     }
 
-    function test__logic__NuggftV1Loan__calc__logs() public view {
-        uint96 principal = 928455029464035206174343168;
-        uint96 activeEps = 928455029464035206174343168;
-
-        (uint96 rb, uint96 rc) = calc(principal, activeEps);
-
-        logger.log(rb, 'fee', rc, 'earned', principal, 'principal', type(uint96).max, 'max');
-
-        unchecked {
-            uint96 fee = (principal) / 100;
-            logger.log(activeEps - principal - fee, 'check');
-            logger.log(activeEps - fee, 'check2');
-            console.log(activeEps - fee > principal);
-            console.log(fee);
-            logger.log(fee, 'fee');
-
-            bool check;
-            assembly {
-                check := gt(sub(activeEps, fee), principal)
+    function abc() public view {
+        assembly {
+            if 0x01 {
+                mstore(0, 0x69)
+                revert(31, 1)
             }
-            console.log(check);
         }
+    }
+
+    function cerror(bool con, uint256 code) public view {
+        assembly {
+            if iszero(con) {
+                mstore(0, code)
+                revert(31, 1)
+            }
+        }
+    }
+
+    function zerror(bool con, string memory code) public view {
+        require(con, code);
+    }
+
+    function test__logic__NuggftV1Loan__calc__logs__2() public {
+        forge.vm.expectRevert('A:A');
+        this.abc2();
+    }
+
+    function test__logic__NuggftV1Loan__calc__cerror_1() public {
+        // forge.vm.expectRevert(hex'69');
+        cerror(true, 0x69);
+    }
+
+    function test__logic__NuggftV1Loan__calc__cerror_2() public {
+        // forge.vm.expectRevert(hex'69');
+        zerror(true, hex'69');
+    }
+
+    function test__logic__NuggftV1Loan__calc__cerror_3() public {
+        // forge.vm.expectRevert(hex'69');
+        assembly {
+            if iszero(0x1) {
+                mstore(0, 0x69)
+                revert(31, 1)
+            }
+        }
+    }
+
+    function test__logic__NuggftV1Loan__calc__cerror_4() public {
+        // forge.vm.expectRevert(hex'69');
+        require(true, hex'69');
+    }
+
+    function test__logic__NuggftV1Loan__calc__logs() public {
+        forge.vm.expectRevert(hex'69');
+        this.abc();
+        // uint96 principal = 928455029464035206174343168;
+        // uint96 activeEps = 928455029464035206174343168;
+
+        // (uint96 rb, uint96 rc) = calc(principal, activeEps);
+
+        // logger.log(rb, 'fee', rc, 'earned', principal, 'principal', type(uint96).max, 'max');
+
+        // unchecked {
+        //     uint96 fee = (principal) / 100;
+        //     logger.log(activeEps - principal - fee, 'check');
+        //     logger.log(activeEps - fee, 'check2');
+        //     console.log(activeEps - fee > principal);
+        //     console.log(fee);
+        //     logger.log(fee, 'fee');
+
+        //     bool check;
+        //     assembly {
+        //         check := gt(sub(activeEps, fee), principal)
+        //     }
+        //     console.log(check);
+        // }
+    }
+
+    function abc2() public view {
+        require(false, 'A:A');
     }
 }

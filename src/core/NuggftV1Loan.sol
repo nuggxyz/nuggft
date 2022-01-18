@@ -23,7 +23,7 @@ abstract contract NuggftV1Loan is INuggftV1Loan, NuggftV1Swap {
     function loan(uint160 tokenId) external override {
         uint256 cache = agency[tokenId];
 
-        require(cache.account() == msg.sender, 'L:0');
+        require(cache.account() == msg.sender, hex'30');
 
         cache = NuggftV1AgentType.newAgentType(epoch(), msg.sender, eps(), true);
 
@@ -40,11 +40,11 @@ abstract contract NuggftV1Loan is INuggftV1Loan, NuggftV1Swap {
     function liquidate(uint160 tokenId) external payable override {
         uint256 cache = agency[tokenId];
 
-        require(cache.flag(), 'L:X');
+        require(cache.flag(), hex'33');
 
         if (cache.epoch() + LIQUIDATION_PERIOD >= epoch()) {
             // if liquidaton deadline has not passed - check perrmission
-            require(msg.sender == cache.account(), 'L:1');
+            require(msg.sender == cache.account(), hex'31');
         } else {
             // loan is past due
             if (msg.sender != cache.account()) {
@@ -62,7 +62,7 @@ abstract contract NuggftV1Loan is INuggftV1Loan, NuggftV1Swap {
 
             payment += uint96(msg.value);
 
-            require(debt <= payment, 'L:2');
+            require(debt <= payment, hex'32');
 
             payment -= debt;
         }
@@ -79,18 +79,18 @@ abstract contract NuggftV1Loan is INuggftV1Loan, NuggftV1Swap {
         uint256 cache = agency[tokenId];
 
         // make sure this nugg is loaned
-        require(cache.flag(), 'L:X');
+        require(cache.flag(), hex'33');
 
         (uint96 fee, uint96 payment) = calc(cache.eth(), eps());
 
         // @todo why is this here? need to add comment
-        require(fee != 0, 'L:9');
+        require(fee != 0, hex'39');
 
         unchecked {
             payment += uint96(msg.value);
 
             // make sure there is enough value to cover the fee
-            require(fee <= payment, 'L:9');
+            require(fee <= payment, hex'39');
 
             payment -= fee;
         }
