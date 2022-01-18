@@ -3,20 +3,20 @@
 pragma solidity 0.8.9;
 
 interface INuggftV1Swap {
-    event Delegate(uint160 indexed tokenId, address user, uint96 lead);
-    event DelegateItem(uint176 indexed sellingItemId, uint160 nugg, uint96 lead);
+    event Offer(uint160 indexed tokenId, address user, uint96 lead);
+    event OfferItem(uint176 indexed sellingItemId, uint160 nugg, uint96 lead);
     event Claim(uint160 indexed tokenId, address user);
     event ClaimItem(uint176 indexed sellingItemId, uint160 nugg);
-    event Swap(uint160 indexed tokenId, uint96 floor);
-    event SwapItem(uint176 indexed sellingItemId, uint96 floor);
+    event Sell(uint160 indexed tokenId, uint96 floor);
+    event SellItem(uint176 indexed sellingItemId, uint96 floor);
 
     /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
                             STATE CHANGING
        ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
 
-    function delegate(uint160 tokenId) external payable;
+    function offer(uint160 tokenId) external payable;
 
-    function delegateItem(
+    function offerItem(
         uint160 buyerTokenId,
         uint160 sellerTokenId,
         uint16 itemId
@@ -38,9 +38,9 @@ interface INuggftV1Swap {
         uint16[] calldata itemIds
     ) external;
 
-    function swap(uint160 tokenId, uint96 floor) external;
+    function sell(uint160 tokenId, uint96 floor) external;
 
-    function swapItem(
+    function sellItem(
         uint160 sellerTokenId,
         uint16 itemid,
         uint96 floor
@@ -50,18 +50,18 @@ interface INuggftV1Swap {
                             VIEW FUNCTIONS
     ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━*/
 
-    /// @notice calculates the minimum eth that must be sent with a delegate call
-    /// @dev returns 0 if no delegate can be made for this oken
-    /// @param tokenId -> the token to be delegated to
+    /// @notice calculates the minimum eth that must be sent with a offer call
+    /// @dev returns 0 if no offer can be made for this oken
+    /// @param tokenId -> the token to be offerd to
     /// @param sender -> the address of the user who will be delegating
-    /// @return canDelegate -> instead of reverting this function will return false
-    /// @return nextOfferAmount -> the minimum value that must be sent with a delegate call
+    /// @return canOffer -> instead of reverting this function will return false
+    /// @return nextOfferAmount -> the minimum value that must be sent with a offer call
     /// @return senderCurrentOffer ->
-    function valueForDelegate(address sender, uint160 tokenId)
+    function valueForOffer(address sender, uint160 tokenId)
         external
         view
         returns (
-            bool canDelegate,
+            bool canOffer,
             uint96 nextOfferAmount,
             uint96 senderCurrentOffer
         );

@@ -134,6 +134,16 @@ abstract contract NuggftV1Token is INuggftV1Token, NuggftV1Epoch {
         if (owner == address(0)) return address(this);
     }
 
+    function isOwner(address sender, uint160 tokenId) internal view returns (bool res) {
+        uint256 cache = agency[tokenId];
+        return cache.account() == sender && !cache.flag();
+    }
+
+    function isAgent(address sender, uint160 tokenId) internal view returns (bool res) {
+        uint256 cache = agency[tokenId];
+        return cache.account() == sender;
+    }
+
     function _isApprovedOrOwner(address spender, uint160 tokenId) internal view returns (bool) {
         address owner = _ownerOf(tokenId);
         return (spender == owner || _getApproved(tokenId) == spender || _isOperatorFor(owner, spender));

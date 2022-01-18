@@ -317,46 +317,46 @@ contract NuggftV1Test is ForgeTest {
         nuggft.setMigrator(address(_migrator));
     }
 
-    function scenario_dee_has_a_token_and_can_swap() public payable returns (uint160 tokenId) {
+    function scenario_dee_has_a_token_and_can_sell() public payable returns (uint160 tokenId) {
         tokenId = scenario_dee_has_a_token();
 
         forge.vm.prank(users.dee);
         nuggft.approve(_nuggft, tokenId);
     }
 
-    function scenario_dee_has_swapped_a_token() public payable returns (uint160 tokenId, uint96 floor) {
-        tokenId = scenario_dee_has_a_token_and_can_swap();
+    function scenario_dee_has_sold_a_token() public payable returns (uint160 tokenId, uint96 floor) {
+        tokenId = scenario_dee_has_a_token_and_can_sell();
 
         floor = 1 ether;
 
         forge.vm.prank(users.dee);
-        nuggft.swap(tokenId, floor);
+        nuggft.sell(tokenId, floor);
     }
 
-    function scenario_dee_has_swapped_a_token_and_mac_has_delegated() public payable returns (uint160 tokenId, uint96 eth) {
-        (tokenId, ) = scenario_dee_has_swapped_a_token();
+    function scenario_dee_has_sold_a_token_and_mac_has_offered() public payable returns (uint160 tokenId, uint96 eth) {
+        (tokenId, ) = scenario_dee_has_sold_a_token();
 
         eth = 2 ether;
 
         forge.vm.prank(users.mac);
-        nuggft.delegate{value: eth}(tokenId);
+        nuggft.offer{value: eth}(tokenId);
     }
 
-    function scenario_dee_has_swapped_a_token_and_mac_can_claim() public payable returns (uint160 tokenId) {
-        (tokenId, ) = scenario_dee_has_swapped_a_token_and_mac_has_delegated();
+    function scenario_dee_has_sold_a_token_and_mac_can_claim() public payable returns (uint160 tokenId) {
+        (tokenId, ) = scenario_dee_has_sold_a_token_and_mac_has_offered();
 
         forge.vm.roll(2000);
     }
 
-    function scenario_mac_has_claimed_a_token_dee_swapped() public payable returns (uint160 tokenId) {
-        (tokenId) = scenario_dee_has_swapped_a_token_and_mac_can_claim();
+    function scenario_mac_has_claimed_a_token_dee_sold() public payable returns (uint160 tokenId) {
+        (tokenId) = scenario_dee_has_sold_a_token_and_mac_can_claim();
 
         forge.vm.prank(users.mac);
         nuggft.claim(tokenId);
     }
 
-    function scenario_mac_has_swapped_a_token_dee_swapped() public payable returns (uint160 tokenId, uint96 floor) {
-        (tokenId) = scenario_mac_has_claimed_a_token_dee_swapped();
+    function scenario_mac_has_sold_a_token_dee_sold() public payable returns (uint160 tokenId, uint96 floor) {
+        (tokenId) = scenario_mac_has_claimed_a_token_dee_sold();
 
         floor = 3 ether;
 
@@ -364,10 +364,10 @@ contract NuggftV1Test is ForgeTest {
         nuggft.approve(_nuggft, tokenId);
 
         forge.vm.prank(users.mac);
-        nuggft.swap(tokenId, floor);
+        nuggft.sell(tokenId, floor);
     }
 
-    function scenario_dee_has_a_token_and_can_swap_an_item()
+    function scenario_dee_has_a_token_and_can_sell_an_item()
         public
         payable
         returns (
@@ -402,7 +402,7 @@ contract NuggftV1Test is ForgeTest {
         // _nuggft.shouldPass(dee, rotate(tokenId, feature));
     }
 
-    function scenario_dee_has_swapped_an_item()
+    function scenario_dee_has_sold_an_item()
         public
         payable
         returns (
@@ -412,15 +412,15 @@ contract NuggftV1Test is ForgeTest {
             uint96 floor
         )
     {
-        (tokenId, itemId, feature) = scenario_dee_has_a_token_and_can_swap_an_item();
+        (tokenId, itemId, feature) = scenario_dee_has_a_token_and_can_sell_an_item();
         floor = 3 ether;
 
         forge.vm.prank(users.dee);
 
-        nuggft.swapItem(tokenId, itemId, floor);
+        nuggft.sellItem(tokenId, itemId, floor);
     }
 
-    function scenario_dee_has_swapped_an_item_and_charlie_can_claim()
+    function scenario_dee_has_sold_an_item_and_charlie_can_claim()
         public
         payable
         returns (
@@ -431,13 +431,13 @@ contract NuggftV1Test is ForgeTest {
     {
         uint256 feature;
         uint96 floor;
-        (tokenId, feature, itemId, floor) = scenario_dee_has_swapped_an_item();
+        (tokenId, feature, itemId, floor) = scenario_dee_has_sold_an_item();
 
         charliesTokenId = scenario_charlie_has_a_token();
 
         forge.vm.prank(users.charlie);
 
-        nuggft.delegateItem{value: floor + 1 ether}(charliesTokenId, tokenId, itemId);
+        nuggft.offerItem{value: floor + 1 ether}(charliesTokenId, tokenId, itemId);
 
         forge.vm.roll(2000);
     }
@@ -527,7 +527,7 @@ contract NuggftV1Test is ForgeTest {
 
     //     //     uint256 funner = uint256(keccak256(abi.encodePacked(epoch))) % 100;
 
-    //     //     nuggft_call(User(payable(users[funner])), delegate(users[funner], epoch), nuggft.msp());
+    //     //     nuggft_call(User(payable(users[funner])), offer(users[funner], epoch), nuggft.msp());
 
     //     //     forge.vm.roll(bn);
 

@@ -79,7 +79,7 @@ abstract contract NuggftV1Stake is INuggftV1Stake, NuggftV1Proof {
     }
 
     /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-                            ADD STAKE & SHARES
+                                   adders
        ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
 
     /// @notice handles the adding of shares - ensures enough eth is being added

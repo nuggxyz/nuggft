@@ -2,7 +2,7 @@ import { task } from 'hardhat/config';
 
 // import { NuggftV1 } from '../../typechain';
 
-task('delegate', 'delegates .69 eth to current epoch from dee', async (args, hre) => {
+task('offer', 'offers .69 eth to current epoch from dee', async (args, hre) => {
     //@ts-ignore
     // const accounts = await hre.getNamedAccounts();
     // let txcount = 0;
@@ -30,7 +30,7 @@ task('delegate', 'delegates .69 eth to current epoch from dee', async (args, hre
     // );
     // for (let i = 0; i < 100; i++) {
     //     await sendTx(
-    //         nuggft.connect(signer).delegate(accounts.dee, await nuggft.epoch(), {
+    //         nuggft.connect(signer).offer(accounts.dee, await nuggft.epoch(), {
     //             value: (await nuggft.valueForDelegate(accounts.dee, await nuggft.epoch())).nextSwapAmount,
     //             gasPrice: toEth('0.0000006'),
     //         }),
@@ -39,7 +39,7 @@ task('delegate', 'delegates .69 eth to current epoch from dee', async (args, hre
     // const nuggft = await hre.ethers.getContractAt<NuggFT>('NuggFT', '0x726d53FD72Fc16DcF4C62CE098e4A94705f1EC5F');
     // const activeEpoch = await nuggft.epoch();
     // console.log('active epoch is..', activeEpoch.toString());
-    // const tx4 = await nuggft.connect(await hre.ethers.getNamedSigner('dee')).delegate(activeEpoch, { value: toEth('.69') });
+    // const tx4 = await nuggft.connect(await hre.ethers.getNamedSigner('dee')).offer(activeEpoch, { value: toEth('.69') });
     // console.log('tx4 sent... waiting to be mined... ', tx4.hash);
     // await tx4.wait();
 });
