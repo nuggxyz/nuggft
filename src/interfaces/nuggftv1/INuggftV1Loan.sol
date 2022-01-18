@@ -17,7 +17,7 @@ interface INuggftV1Loan {
                             STATE CHANGING
     ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━*/
 
-    function rebalance(uint160 tokenId) external;
+    function rebalance(uint160 tokenId) external payable;
 
     function loan(uint160 tokenId) external;
 
@@ -31,20 +31,20 @@ interface INuggftV1Loan {
     /// @dev contract ->
     /// @dev frontend -> used to set the amount of eth for user
     /// @param tokenId the token who's current loan to check
-    /// @return toLiquidate ->  the current amount loaned out, plus the final rebalance fee
-    /// @return toRebalance ->  the fee a user must pay to rebalance (and extend) the loan on their nugg
+    /// @return isLoaned -> indicating if the token is loaned
+    /// @return debt ->  the current amount loaned out, plus the final rebalance fee
+    /// @return fee ->  the fee a user must pay to rebalance (and extend) the loan on their nugg
     /// @return earned -> the amount of eth the minSharePrice has increased since loan was last rebalanced
-    /// @return epochDue -> the final epoch a user is safe from liquidation (inclusive)
-    /// @return loaner -> the user responsable for the loan
+    /// @return insolventEpoch -> the epoch the loan becomes insolvent
     function loanInfo(uint160 tokenId)
         external
         view
         returns (
-            uint96 toLiquidate,
-            uint96 toRebalance,
+            bool isLoaned,
+            uint96 debt,
+            uint96 fee,
             uint96 earned,
-            uint24 epochDue,
-            address loaner
+            uint24 insolventEpoch
         );
 
     /// @notice "toLiquidate" value from "loanInfo"

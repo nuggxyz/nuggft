@@ -7,6 +7,7 @@ import {IERC721} from '../interfaces/IERC721.sol';
 import {INuggftV1Token} from '../interfaces/nuggftv1/INuggftV1Token.sol';
 
 import {SafeCastLib} from '../libraries/SafeCastLib.sol';
+import {NuggftV1AgentType} from '../types/NuggftV1AgentType.sol';
 
 import {NuggftV1Epoch} from './NuggftV1Epoch.sol';
 
@@ -14,12 +15,15 @@ import {NuggftV1Epoch} from './NuggftV1Epoch.sol';
 /// @dev Implementation of https://eips.ethereum.org/EIPS/eip-721[ERC721] Non-Fungible Token Standard
 ///
 abstract contract NuggftV1Token is INuggftV1Token, NuggftV1Epoch {
+    using NuggftV1AgentType for uint256;
+
     using SafeCastLib for uint256;
 
     uint32 constant TRUSTED_MINT_TOKENS = 500;
     uint32 constant UNTRUSTED_MINT_TOKENS = 10000;
 
-    mapping(uint256 => address) owners;
+    mapping(uint256 => uint256) agency;
+
     // mapping(address => uint256) balances;
     mapping(uint256 => address) approvals;
     mapping(address => mapping(address => bool)) operatorApprovals;
@@ -95,7 +99,7 @@ abstract contract NuggftV1Token is INuggftV1Token, NuggftV1Epoch {
     ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━*/
 
     function _mintTo(address to, uint160 tokenId) internal {
-        owners[tokenId] = to;
+        agency[tokenId] = NuggftV1AgentType.newAgentType(0, to, 0, false);
 
         emit Transfer(address(0), to, tokenId);
     }
@@ -126,7 +130,7 @@ abstract contract NuggftV1Token is INuggftV1Token, NuggftV1Epoch {
 
     function _ownerOf(uint160 tokenId) internal view returns (address owner) {
         require(exists(tokenId), 'T:9:2');
-        owner = owners[tokenId];
+        owner = agency[tokenId].account();
         if (owner == address(0)) return address(this);
     }
 
@@ -142,7 +146,7 @@ abstract contract NuggftV1Token is INuggftV1Token, NuggftV1Epoch {
     function checkedTransferFromSelf(address to, uint160 tokenId) internal {
         require(_ownerOf(tokenId) == address(this), 'N:0');
 
-        owners[tokenId] = to;
+        agency[tokenId] = uint160(to);
 
         emitTransferEvent(address(this), to, tokenId);
     }
@@ -150,7 +154,7 @@ abstract contract NuggftV1Token is INuggftV1Token, NuggftV1Epoch {
     function approvedTransferToSelf(uint160 tokenId) internal {
         require(_isOperatorForOwner(msg.sender, tokenId) && _getApproved(tokenId) == address(this), 'N:1');
 
-        delete owners[tokenId];
+        delete agency[tokenId];
 
         // Clear approvals from the previous owner
         delete approvals[tokenId];
