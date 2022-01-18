@@ -161,15 +161,60 @@ abstract contract NuggftV1Proof is INuggftV1Proof, NuggftV1Dotnugg {
 
         uint256 l = featureLengths;
 
+        // assembly {
+        //     function seeder(dat, feat) -> b {
+        //         b := and(shr(mul(feat, 8), dat), 0xff)
+        //     }
+
+        //     function id(feat) -> b {
+        //         b := shl(0x8, feat)
+        //     }
+
+        //     function build(s, dat, feat) -> b {
+        //         b := and(shr(mul(feat, 8), dat), 0xff)
+        //         if iszero(b) {
+        //             revert(0, 0)
+        //         }
+        //         b := add(0x1, mod(seeder(s, feat), b))
+
+        //         b := or(id(feat), b)
+
+        //         b := shl(add(mul(gt(feat, 0), 3), mul(0xb, feat)), b)
+        //     }
+
+        //     let dats := featureLengths.slot
+
+        //     res := or(res, build(seed, l, 0))
+
+        //     res := or(res, build(seed, l, 1))
+
+        //     res := or(res, build(seed, l, 2))
+
+        //     let p1 := seeder(seed, 16)
+        //     let p2 := seeder(seed, 17)
+
+        //     switch lt(p1, 128)
+        //     case 1 {
+        //         res := or(res, build(seed, l, 3))
+        //     }
+        //     default {
+        //         res := or(res, build(seed, l, 5))
+        //     }
+
+        //     if lt(p1, 128) {
+
+        //     }
+
+        //     // let ptr := mload(0x40)
+
+        //     // mstore(ptr, sload(featureLengths.slot))
+        // }
+
         res |= ((safeMod(seed & 0xff, _lengthOf(l, 0))) + 1);
-        // logger.log(res, 'a', seed, 'seed');
 
         res |= ((1 << 8) | (((((seed >>= 8) & 0xff) % _lengthOf(l, 1))) + 1)) << 3;
 
-        // logger.log(res, 'b', seed, 'seed');
         res |= ((2 << 8) | (((((seed >>= 8) & 0xff) % _lengthOf(l, 2))) + 1)) << (14);
-
-        // logger.log(res, 'c', seed, 'seed');
 
         uint256 selA = ((seed >>= 8) & 0xff);
 
@@ -179,13 +224,7 @@ abstract contract NuggftV1Proof is INuggftV1Proof, NuggftV1Dotnugg {
 
         uint256 selB = ((seed >>= 8) & 0xff);
 
-        selB = selB < 30 //
-            ? 5
-            : selB < 55
-            ? 6
-            : selB < 75
-            ? 7
-            : 0;
+        selB = selB < 30 ? 5 : selB < 55 ? 6 : selB < 75 ? 7 : 0;
 
         if (selB != 0) {
             res |= ((selB << 8) | ((safeMod(((seed >>= 8) & 0xff), _lengthOf(l, uint8(selB)))) + 1)) << (3 + 33);
@@ -193,19 +232,7 @@ abstract contract NuggftV1Proof is INuggftV1Proof, NuggftV1Dotnugg {
 
         uint256 selC = ((seed >>= 8) & 0xff);
 
-        selC = selC < 30 //
-            ? 5
-            : selC < 55
-            ? 6
-            : selC < 75
-            ? 7
-            : selC < 115
-            ? 4
-            : selC < 155
-            ? 3
-            : selC < 205
-            ? 2
-            : 1;
+        selC = selC < 30 ? 5 : selC < 55 ? 6 : selC < 75 ? 7 : selC < 115 ? 4 : selC < 155 ? 3 : selC < 205 ? 2 : 1;
 
         res |= ((selC << 8) | ((safeMod((seed >>= 8) & 0xff, _lengthOf(l, uint8(selC)))) + 1)) << (3 + 77);
     }

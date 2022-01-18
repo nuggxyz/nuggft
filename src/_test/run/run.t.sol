@@ -37,6 +37,11 @@ contract runner {
     }
 
     function run() public view {
+        assembly {
+            mstore(0, 0x69)
+            revert(31, 1)
+        }
+
         uint96 principal = 15492382718154506240;
         uint96 activeEps = 15492382718154506241;
 
