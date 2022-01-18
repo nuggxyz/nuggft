@@ -46,7 +46,7 @@ contract NuggftV1Test is ForgeTest {
 
     MockDotnuggV1 public processor;
 
-    MockNuggftV1Migrator public migrator;
+    MockNuggftV1Migrator public _migrator;
 
     RiggedNuggft public nuggft;
 
@@ -83,7 +83,7 @@ contract NuggftV1Test is ForgeTest {
 
         _processor = address(processor);
 
-        migrator = new MockNuggftV1Migrator();
+        _migrator = new MockNuggftV1Migrator();
 
         users.frank = forge.vm.addr(12);
         forge.vm.deal(users.frank, 90000 ether);
@@ -138,11 +138,7 @@ contract NuggftV1Test is ForgeTest {
 
         str.before_eps = nuggft.eps().safeInt();
 
-        assertEq(
-            str.before_eps,
-            str.before_shares > 0 ? str.before_staked / str.before_shares : int256(0),
-            'EPS is starting off with an incorrect value'
-        );
+        assertEq(str.before_eps, str.before_shares > 0 ? str.before_staked / str.before_shares : int256(0), 'EPS is starting off with an incorrect value');
 
         _;
         str.after_staked = nuggft.staked().safeInt();
@@ -156,11 +152,7 @@ contract NuggftV1Test is ForgeTest {
         assertEq(str.after_shares - str.before_shares, shareChange, 'shares difference is not what is expected');
 
         str.after_eps = nuggft.eps().safeInt();
-        assertEq(
-            str.after_eps,
-            str.after_shares > 0 ? str.after_staked / str.after_shares : int256(0),
-            'EPS is not ending with correct value'
-        );
+        assertEq(str.after_eps, str.after_shares > 0 ? str.after_staked / str.after_shares : int256(0), 'EPS is not ending with correct value');
     }
 
     modifier baldiff(address user, int192 exp) {
@@ -230,11 +222,7 @@ contract NuggftV1Test is ForgeTest {
             stakeChange.expected_stake_change - take(10, stakeChange.expected_stake_change),
             'staked change is not 90 percent of expected change'
         );
-        assertEq(
-            stakeChange.after_shares - stakeChange.before_shares,
-            stakeChange.expected_share_change,
-            'shares difference is not what is expected'
-        );
+        assertEq(stakeChange.after_shares - stakeChange.before_shares, stakeChange.expected_share_change, 'shares difference is not what is expected');
 
         stakeChange.after_eps = nuggft.eps().safeInt();
         assertEq(
@@ -326,7 +314,7 @@ contract NuggftV1Test is ForgeTest {
 
     function scenario_migrator_set() public payable {
         forge.vm.prank(users.safe);
-        nuggft.setMigrator(address(migrator));
+        nuggft.setMigrator(address(_migrator));
     }
 
     function scenario_dee_has_a_token_and_can_swap() public payable returns (uint160 tokenId) {

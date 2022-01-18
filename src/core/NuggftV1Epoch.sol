@@ -4,6 +4,7 @@ pragma solidity 0.8.9;
 
 import {INuggftV1Epoch} from '../interfaces/nuggftv1/INuggftV1Epoch.sol';
 
+/// @custom:testing OK
 abstract contract NuggftV1Epoch is INuggftV1Epoch {
     uint256 public immutable genesis;
 

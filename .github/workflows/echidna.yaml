@@ -1,0 +1,39 @@
+name: echidna
+
+on:
+    push:
+        branches:
+            - main
+    pull_request:
+
+jobs:
+    echidna:
+        name: echidna
+        runs-on: ubuntu-latest
+        strategy:
+            fail-fast: false
+            matrix:
+                testName:
+                    - QuadMath_Echidna
+
+        steps:
+            - uses: actions/checkout@v2
+
+            - name: Set up Python 3.8
+              uses: actions/setup-python@v2
+              with:
+                  python-version: 3.8
+
+            - name: Install pip3
+              run: |
+                  python -m pip install --upgrade pip
+            - name: Install slither
+              run: |
+                  pip3 install slither-analyzer
+            - name: Install echidna
+              run: |
+                  sudo wget -O /tmp/echidna-test.tar.gz https://github.com/crytic/echidna/releases/download/v1.7.2/echidna-test-1.7.2-Ubuntu-18.04.tar.gz
+                  sudo tar -xf /tmp/echidna-test.tar.gz -C /usr/bin
+                  sudo chmod +x /usr/bin/echidna-test
+            - name: Run ${{ matrix.testName }}
+              run: echidna-test . --contract ${{ matrix.testName }} --config echidna.config.yml
