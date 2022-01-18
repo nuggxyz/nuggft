@@ -2,7 +2,7 @@
 
 pragma solidity 0.8.9;
 
-import '../NuggftV1.test.sol';
+import '../../NuggftV1.test.sol';
 
 contract general__NuggftV1Swap is NuggftV1Test {
     uint160 internal constant LOAN_TOKENID = 1499;

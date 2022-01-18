@@ -2,12 +2,13 @@
 
 pragma solidity 0.8.9;
 
-import '../NuggftV1.test.sol';
-import {ShiftLib} from '../../libraries/ShiftLib.sol';
-import {NuggftV1Loan} from '../../core/NuggftV1Loan.sol';
-import {NuggftV1Token} from '../../core/NuggftV1Token.sol';
+import '../../NuggftV1.test.sol';
 
-contract general__NuggftV1Loan is NuggftV1Test, NuggftV1Loan {
+import {ShiftLib} from '../../../libraries/ShiftLib.sol';
+import {NuggftV1Loan} from '../../../core/NuggftV1Loan.sol';
+import {NuggftV1Token} from '../../../core/NuggftV1Token.sol';
+
+contract logic__NuggftV1Loan is NuggftV1Test, NuggftV1Loan {
     /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
                                   overrides
        ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
@@ -27,7 +28,7 @@ contract general__NuggftV1Loan is NuggftV1Test, NuggftV1Loan {
                                 tx gas
        ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
 
-    function test__general__NuggftV1Loan__calc__tx__gas() public pure {
+    function test__logic__NuggftV1Loan__calc__tx__gas() public pure {
         calc(type(uint96).max, type(uint96).max);
     }
 
@@ -70,23 +71,23 @@ contract general__NuggftV1Loan is NuggftV1Test, NuggftV1Loan {
         earned = activeEps - (principal + fee);
     }
 
-    function test__general__NuggftV1Loan__calc__gas() public pure {
+    function test__logic__NuggftV1Loan__calc__gas() public pure {
         calc(type(uint96).max, type(uint96).max);
     }
 
-    function test__general__NuggftV1Loan__safe__calc__0__gas() public pure {
+    function test__logic__NuggftV1Loan__safe__calc__0__gas() public pure {
         safe__calc__0(type(uint96).max, type(uint96).max);
     }
 
-    function test__general__NuggftV1Loan__safe__calc__1__gas() public pure {
+    function test__logic__NuggftV1Loan__safe__calc__1__gas() public pure {
         safe__calc__1(type(uint96).max, type(uint96).max);
     }
 
-    function test__general__NuggftV1Loan__safe__calc__2__gas() public pure {
+    function test__logic__NuggftV1Loan__safe__calc__2__gas() public pure {
         safe__calc__2(type(uint96).max, type(uint96).max);
     }
 
-    function test__general__NuggftV1Loan__calc__safe(uint96 principal, uint96 activeEps) public {
+    function test__logic__NuggftV1Loan__calc__safe(uint96 principal, uint96 activeEps) public {
         if (principal > activeEps) return;
 
         (uint256 rb, uint96 rc) = calc(principal, activeEps);
@@ -107,7 +108,7 @@ contract general__NuggftV1Loan is NuggftV1Test, NuggftV1Loan {
         assertEq(rc, sc2);
     }
 
-    function test__general__NuggftV1Loan__calc__logs() public view {
+    function test__logic__NuggftV1Loan__calc__logs() public view {
         uint96 principal = 928455029464035206174343168;
         uint96 activeEps = 928455029464035206174343168;
 

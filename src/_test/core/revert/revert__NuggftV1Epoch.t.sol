@@ -2,9 +2,9 @@
 
 pragma solidity 0.8.9;
 
-import '../NuggftV1.test.sol';
+import '../../NuggftV1.test.sol';
 
-import {NuggftV1Epoch} from '../../core/NuggftV1Epoch.sol';
+import {NuggftV1Epoch} from '../../../core/NuggftV1Epoch.sol';
 
 contract revert__NuggftV1Epoch is NuggftV1Test, NuggftV1Epoch {
     function setUp() public {

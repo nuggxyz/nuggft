@@ -2,12 +2,12 @@
 
 pragma solidity 0.8.9;
 
-import '../NuggftV1.test.sol';
-import {ShiftLib} from '../../libraries/ShiftLib.sol';
-import {NuggftV1Proof} from '../../core/NuggftV1Proof.sol';
-import {NuggftV1Token} from '../../core/NuggftV1Token.sol';
+import '../../NuggftV1.test.sol';
+import {ShiftLib} from '../../../libraries/ShiftLib.sol';
+import {NuggftV1Proof} from '../../../core/NuggftV1Proof.sol';
+import {NuggftV1Token} from '../../../core/NuggftV1Token.sol';
 
-contract general__NuggftV1Proof is NuggftV1Test, NuggftV1Proof {
+contract logic__NuggftV1Proof is NuggftV1Test, NuggftV1Proof {
     function dotnuggV1ImplementerCallback(uint256 tokenId) public view override returns (IDotnuggV1Metadata.Memory memory data) {}
 
     function supportsInterface(bytes4 interfaceId) public view virtual override returns (bool) {}
@@ -24,7 +24,7 @@ contract general__NuggftV1Proof is NuggftV1Test, NuggftV1Proof {
 
     // function approve(address user, uint256 tokenId) public payable override(NuggftV1Test, NuggftV1Token) {}
 
-    function test__general__NuggftV1Proof__initFromSeed() public {
+    function test__logic__NuggftV1Proof__initFromSeed() public {
         uint256 seed = uint256(keccak256(abi.encodePacked(uint256(0x420691333))));
 
         uint8[] memory lens = new uint8[](8);
