@@ -112,7 +112,7 @@ abstract contract NuggftV1Stake is INuggftV1Stake, NuggftV1Proof {
     /// @dev supply of eth goes up while supply of shares stays constant - increasing "minSharePrice"
     /// @param eth the amount of eth being staked - must be some portion of msg.value
     function addStakedEth(uint96 eth) internal {
-        require(msg.value >= eth, 'T:2'); // "value of tx too low"
+        // require(msg.value >= eth, 'T:2'); // "value of tx too low"
 
         uint256 cache = stake;
 

@@ -2,10 +2,6 @@
 
 pragma solidity 0.8.9;
 
-/// Adapted from Rari-Capital/solmate
-
-/// @notice Safe unsigned integer casting library that reverts on overflow.
-/// @author Modified from OpenZeppelin (https://github.com/OpenZeppelin/openzeppelin-contracts/blob/master/contracts/utils/math/SafeCast.sol)
 library SafeCastLib {
     function safe160(uint256 x) internal pure returns (uint160 y) {
         require(x <= type(uint160).max);
@@ -30,12 +26,13 @@ library SafeCastLib {
     function safe24(uint256 x) internal pure returns (uint24 y) {
         assembly {
             if gt(x, 0xfff) {
-                revert(0, 0)
+                mstore(0x00, 0x69)
+                revert(0x19, 0x01)
             }
             y := x
         }
-        require(x <= type(uint24).max);
-        y = uint24(x);
+        // require(x <= type(uint24).max);
+        // y = uint24(x);
     }
 
     function safe16(uint256 x) internal pure returns (uint16 y) {

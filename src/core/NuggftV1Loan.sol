@@ -55,21 +55,21 @@ abstract contract NuggftV1Loan is INuggftV1Loan, NuggftV1Swap {
 
         agency[tokenId] = NuggftV1AgentType.newAgentType(0, msg.sender, 0, false);
 
-        (uint96 fee, uint96 payment) = calc(cache.eth(), eps());
+        (uint96 fee, uint96 earned) = calc(cache.eth(), eps());
 
         unchecked {
             uint96 debt = cache.eth() + fee;
 
-            payment += uint96(msg.value);
+            earned += uint96(msg.value);
 
-            require(debt <= payment, hex'32');
+            require(debt <= earned, hex'32');
 
-            payment -= debt;
+            earned -= debt;
         }
 
         addStakedEth(fee);
 
-        SafeTransferLib.safeTransferETH(msg.sender, payment);
+        SafeTransferLib.safeTransferETH(msg.sender, earned);
 
         emit Liquidate(tokenId, fee, msg.sender);
     }
@@ -81,18 +81,17 @@ abstract contract NuggftV1Loan is INuggftV1Loan, NuggftV1Swap {
         // make sure this nugg is loaned
         require(cache.flag(), hex'33');
 
-        (uint96 fee, uint96 payment) = calc(cache.eth(), eps());
+        require(msg.sender == cache.account(), hex'39');
 
-        // @todo why is this here? need to add comment
-        require(fee != 0, hex'39');
+        (uint96 fee, uint96 earned) = calc(cache.eth(), eps());
 
         unchecked {
-            payment += uint96(msg.value);
+            earned += uint96(msg.value);
 
             // make sure there is enough value to cover the fee
-            require(fee <= payment, hex'39');
+            require(fee <= earned, hex'3a');
 
-            payment -= fee;
+            earned -= fee;
         }
 
         addStakedEth(fee);
@@ -100,10 +99,53 @@ abstract contract NuggftV1Loan is INuggftV1Loan, NuggftV1Swap {
         // we need to recalculate eps here because it has changed after "addStakedEth"
         agency[tokenId] = NuggftV1AgentType.newAgentType(epoch(), cache.account(), eps(), true);
 
-        // we transfer overpayment to the owner
-        SafeTransferLib.safeTransferETH(cache.account(), payment);
+        // we transfer overearned to the owner
+        SafeTransferLib.safeTransferETH(cache.account(), earned);
 
         emit Rebalance(tokenId, fee);
+    }
+
+    /// @inheritdoc INuggftV1Loan
+    function multirebalance(uint160[] memory tokenIds) external payable override {
+        uint96 acc = uint96(msg.value);
+        uint96 accFee = 0;
+
+        uint96 _eps = eps();
+
+        for (uint256 i = 0; i < tokenIds.length; i++) {
+            uint256 cache = agency[tokenIds[i]];
+
+            // make sure this nugg is loaned
+            require(cache.flag(), hex'33');
+
+            require(msg.sender == cache.account(), hex'39');
+
+            (uint96 fee, uint96 payment) = calc(cache.eth(), _eps);
+
+            unchecked {
+                payment += acc;
+
+                // make sure there is enough value to cover the fee
+                require(fee <= payment, hex'3a');
+
+                payment -= fee;
+
+                accFee += fee;
+
+                acc = payment;
+            }
+
+            emit Rebalance(tokenIds[i], fee);
+        }
+
+        addStakedEth(accFee);
+
+        uint256 common = NuggftV1AgentType.newAgentType(epoch(), msg.sender, eps(), true);
+
+        for (uint256 i = 0; i < tokenIds.length; i++) agency[tokenIds[i]] = common;
+
+        // we transfer overearned to the owner
+        SafeTransferLib.safeTransferETH(msg.sender, acc);
     }
 
     function loaned(uint160 tokenId) external view returns (bool res) {
