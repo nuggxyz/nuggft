@@ -111,7 +111,7 @@ abstract contract NuggftV1Swap is INuggftV1Swap, NuggftV1Stake {
         uint160 sellerTokenId,
         uint16 itemId
     ) external payable override {
-        require(_ownerOf(buyerTokenId) == msg.sender, hex'26');
+        require(isAgent(msg.sender, buyerTokenId), hex'26');
 
         (Storage storage s, Memory memory m) = loadItemSwap(sellerTokenId, itemId, address(buyerTokenId));
 
@@ -159,11 +159,9 @@ abstract contract NuggftV1Swap is INuggftV1Swap, NuggftV1Stake {
         delete s.offers[msg.sender];
 
         if (checkClaimerIsWinnerOrLoser(m)) {
-            // delete s.data;
+           agency[tokenId] = NuggftV1AgentType.create(0, msg.sender, 0, NuggftV1AgentType.Flag.OWN);
 
-            agency[tokenId] = NuggftV1AgentType.create(0, msg.sender, 0, NuggftV1AgentType.Flag.OWN);
-
-            // checkedTransferFromSelf(msg.sender, tokenId);
+            emit Transfer(address(this), msg.sender, tokenId);
         } else {
             value = m.offerData.eth();
         }
@@ -253,7 +251,7 @@ abstract contract NuggftV1Swap is INuggftV1Swap, NuggftV1Stake {
         uint16 itemId,
         uint96 floor
     ) external override {
-        require(_ownerOf(tokenId) == msg.sender, hex'2C');
+        require(isAgent(msg.sender, tokenId), hex'2C');
 
         // will revert if they do not have the item
         removeItem(tokenId, itemId);

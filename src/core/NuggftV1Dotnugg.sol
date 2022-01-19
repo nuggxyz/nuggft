@@ -72,7 +72,7 @@ abstract contract NuggftV1Dotnugg is INuggftV1Dotnugg, NuggftV1Token, Trust {
 
     /// @inheritdoc INuggftV1Dotnugg
     function setDotnuggV1Resolver(uint256 tokenId, address to) public virtual override {
-        require(_isOperatorForOwner(msg.sender, tokenId.safe160()), 'F:5');
+        require(isAgent(msg.sender, uint160(tokenId)), 'F:5');
 
         resolvers[tokenId] = to;
 
@@ -93,7 +93,7 @@ abstract contract NuggftV1Dotnugg is INuggftV1Dotnugg, NuggftV1Token, Trust {
     ) external override {
         require(x < 64 && y < 64, 'UNTEESTED:1');
 
-        ensureOperatorForOwner(msg.sender, tokenId);
+        require(isAgent(msg.sender, tokenId), hex'50');
 
         settings[tokenId].anchorOverrides[itemId] = x | (y << 6);
 
@@ -102,7 +102,7 @@ abstract contract NuggftV1Dotnugg is INuggftV1Dotnugg, NuggftV1Token, Trust {
 
     /// @inheritdoc INuggftV1Dotnugg
     function setDotnuggV1Background(uint160 tokenId, string memory s) external override {
-        ensureOperatorForOwner(msg.sender, tokenId);
+        require(isAgent(msg.sender, tokenId), hex'51');
 
         settings[tokenId].background = s;
 
@@ -115,7 +115,7 @@ abstract contract NuggftV1Dotnugg is INuggftV1Dotnugg, NuggftV1Token, Trust {
         uint16 itemId,
         string memory s
     ) external override {
-        ensureOperatorForOwner(msg.sender, tokenId);
+        require(isAgent(msg.sender, tokenId), hex'52');
 
         settings[tokenId].styles[itemId] = s;
 

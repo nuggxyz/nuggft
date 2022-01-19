@@ -92,7 +92,7 @@ abstract contract NuggftV1Stake is INuggftV1Stake, NuggftV1Proof {
         (uint96 totalPrice, , uint96 protocolFee, ) = minSharePriceBreakdown(cache);
 
         // logically unnessesary - to help front end
-        require(value >= totalPrice, 'T:1'); // "not enough eth to create share"
+        require(value >= totalPrice, hex'71'); // "not enough eth to create share"
 
         uint96 overpay = value - totalPrice;
 
@@ -112,7 +112,7 @@ abstract contract NuggftV1Stake is INuggftV1Stake, NuggftV1Proof {
     /// @dev supply of eth goes up while supply of shares stays constant - increasing "minSharePrice"
     /// @param eth the amount of eth being staked - must be some portion of msg.value
     function addStakedEth(uint96 eth) internal {
-        // require(msg.value >= eth, 'T:2'); // "value of tx too low"
+        // require(msg.value >= eth, hex'72'); // "value of tx too low"
 
         uint256 cache = stake;
 

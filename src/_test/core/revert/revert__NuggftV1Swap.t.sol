@@ -337,28 +337,28 @@ contract revert__NuggftV1Swap is NuggftV1Test {
         forge.vm.stopPrank();
     }
 
-    function test__revert__NuggftV1Swap__0x26__failAsOperator() public {
-        (uint160 tokenId, , uint16 itemId, uint96 floor) = scenario_dee_has_sold_an_item();
+    // function test__revert__NuggftV1Swap__0x26__failAsOperator() public {
+    //     (uint160 tokenId, , uint16 itemId, uint96 floor) = scenario_dee_has_sold_an_item();
 
-        uint160 charliesTokenId = scenario_charlie_has_a_token();
+    //     uint160 charliesTokenId = scenario_charlie_has_a_token();
 
-        uint96 value = floor + 1 ether;
+    //     uint96 value = floor + 1 ether;
 
-        forge.vm.deal(users.mac, value);
+    //     forge.vm.deal(users.mac, value);
 
-        forge.vm.startPrank(users.charlie);
-        {
-            nuggft.setApprovalForAll(users.mac, true);
-        }
-        forge.vm.stopPrank();
+    //     forge.vm.startPrank(users.charlie);
+    //     {
+    //         nuggft.setApprovalForAll(users.mac, true);
+    //     }
+    //     forge.vm.stopPrank();
 
-        forge.vm.startPrank(users.mac);
-        {
-            forge.vm.expectRevert(hex'26');
-            nuggft.offerItem{value: value}(charliesTokenId, tokenId, itemId);
-        }
-        forge.vm.stopPrank();
-    }
+    //     forge.vm.startPrank(users.mac);
+    //     {
+    //         forge.vm.expectRevert(hex'26');
+    //         nuggft.offerItem{value: value}(charliesTokenId, tokenId, itemId);
+    //     }
+    //     forge.vm.stopPrank();
+    // }
 
     function test__revert__NuggftV1Swap__0x26__failAsNotOperator() public {
         (uint160 tokenId, , uint16 itemId, uint96 floor) = scenario_dee_has_sold_an_item();
@@ -455,22 +455,22 @@ contract revert__NuggftV1Swap is NuggftV1Test {
         forge.vm.stopPrank();
     }
 
-    function test__revert__NuggftV1Swap__0x29__failAsOperator() public {
-        (uint160 charliesTokenId, uint160 tokenId, uint16 itemId) = scenario_dee_has_sold_an_item_and_charlie_can_claim();
+    // function test__revert__NuggftV1Swap__0x29__failAsOperator() public {
+    //     (uint160 charliesTokenId, uint160 tokenId, uint16 itemId) = scenario_dee_has_sold_an_item_and_charlie_can_claim();
 
-        forge.vm.startPrank(users.charlie);
-        {
-            nuggft.setApprovalForAll(users.mac, true);
-        }
-        forge.vm.stopPrank();
+    //     forge.vm.startPrank(users.charlie);
+    //     {
+    //         nuggft.setApprovalForAll(users.mac, true);
+    //     }
+    //     forge.vm.stopPrank();
 
-        forge.vm.startPrank(users.mac);
-        {
-            forge.vm.expectRevert(hex'29');
-            nuggft.claimItem(charliesTokenId, tokenId, itemId);
-        }
-        forge.vm.stopPrank();
-    }
+    //     forge.vm.startPrank(users.mac);
+    //     {
+    //         forge.vm.expectRevert(hex'29');
+    //         nuggft.claimItem(charliesTokenId, tokenId, itemId);
+    //     }
+    //     forge.vm.stopPrank();
+    // }
 
     function test__revert__NuggftV1Swap__0x29__failAsNotOperator() public {
         (uint160 charliesTokenId, uint160 tokenId, uint16 itemId) = scenario_dee_has_sold_an_item_and_charlie_can_claim();
@@ -499,24 +499,24 @@ contract revert__NuggftV1Swap is NuggftV1Test {
         forge.vm.stopPrank();
     }
 
-    function test__revert__NuggftV1Swap__0x2A__failsAsOperator() public {
-        uint160 tokenId = scenario_dee_has_a_token_and_can_sell();
+    // function test__revert__NuggftV1Swap__0x2A__failsAsOperator() public {
+    //     uint160 tokenId = scenario_dee_has_a_token_and_can_sell();
 
-        uint96 value = 2 ether;
+    //     uint96 value = 2 ether;
 
-        forge.vm.startPrank(users.dee);
-        {
-            nuggft.setApprovalForAll(users.dennis, true);
-        }
-        forge.vm.stopPrank();
+    //     forge.vm.startPrank(users.dee);
+    //     {
+    //         nuggft.setApprovalForAll(users.dennis, true);
+    //     }
+    //     forge.vm.stopPrank();
 
-        forge.vm.startPrank(users.dennis);
-        {
-            forge.vm.expectRevert(hex'2A');
-            nuggft.sell(tokenId, value);
-        }
-        forge.vm.stopPrank();
-    }
+    //     forge.vm.startPrank(users.dennis);
+    //     {
+    //         forge.vm.expectRevert(hex'2A');
+    //         nuggft.sell(tokenId, value);
+    //     }
+    //     forge.vm.stopPrank();
+    // }
 
     function test__revert__NuggftV1Swap__0x2A__failAsNotOperator() public {
         uint160 tokenId = scenario_dee_has_a_token_and_can_sell();
@@ -648,24 +648,24 @@ contract revert__NuggftV1Swap is NuggftV1Test {
         forge.vm.stopPrank();
     }
 
-    function test__revert__NuggftV1Swap__0x2C__failAsOperator() public {
-        (uint160 tokenId, uint16 itemId, ) = scenario_dee_has_a_token_and_can_sell_an_item();
+    // function test__revert__NuggftV1Swap__0x2C__failAsOperator() public {
+    //     (uint160 tokenId, uint16 itemId, ) = scenario_dee_has_a_token_and_can_sell_an_item();
 
-        uint96 value = 1 ether;
+    //     uint96 value = 1 ether;
 
-        forge.vm.startPrank(users.dee);
-        {
-            nuggft.setApprovalForAll(users.dennis, true);
-        }
-        forge.vm.stopPrank();
+    //     forge.vm.startPrank(users.dee);
+    //     {
+    //         nuggft.setApprovalForAll(users.dennis, true);
+    //     }
+    //     forge.vm.stopPrank();
 
-        forge.vm.startPrank(users.dennis);
-        {
-            forge.vm.expectRevert(hex'2C');
-            nuggft.sellItem(tokenId, itemId, value);
-        }
-        forge.vm.stopPrank();
-    }
+    //     forge.vm.startPrank(users.dennis);
+    //     {
+    //         forge.vm.expectRevert(hex'2C');
+    //         nuggft.sellItem(tokenId, itemId, value);
+    //     }
+    //     forge.vm.stopPrank();
+    // }
 
     function test__revert__NuggftV1Swap__0x2C__failAsNotOperator() public {
         (uint160 tokenId, uint16 itemId, ) = scenario_dee_has_a_token_and_can_sell_an_item();
@@ -729,22 +729,22 @@ contract revert__NuggftV1Swap is NuggftV1Test {
         forge.vm.stopPrank();
     }
 
-    function test__revert__NuggftV1Swap__0x2E__failAsOperator() public {
-        uint160 tokenId = scenario_dee_has_sold_a_token_and_mac_can_claim();
+    // function test__revert__NuggftV1Swap__0x2E__failAsOperator() public {
+    //     uint160 tokenId = scenario_dee_has_sold_a_token_and_mac_can_claim();
 
-        forge.vm.startPrank(users.mac);
-        {
-            nuggft.setApprovalForAll(users.dennis, true);
-        }
-        forge.vm.stopPrank();
+    //     forge.vm.startPrank(users.mac);
+    //     {
+    //         nuggft.setApprovalForAll(users.dennis, true);
+    //     }
+    //     forge.vm.stopPrank();
 
-        forge.vm.startPrank(users.dennis);
-        {
-            forge.vm.expectRevert(hex'2E');
-            nuggft.claim(tokenId);
-        }
-        forge.vm.stopPrank();
-    }
+    //     forge.vm.startPrank(users.dennis);
+    //     {
+    //         forge.vm.expectRevert(hex'2E');
+    //         nuggft.claim(tokenId);
+    //     }
+    //     forge.vm.stopPrank();
+    // }
 
     /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
         [S:F] - offer - "sell must be total"
