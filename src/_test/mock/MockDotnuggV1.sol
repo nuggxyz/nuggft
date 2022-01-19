@@ -7,7 +7,7 @@ import '../../interfaces/dotnuggv1/IDotnuggV1Metadata.sol';
 import '../../interfaces/dotnuggv1/IDotnuggV1Implementer.sol';
 import '../../interfaces/dotnuggv1/IDotnuggV1File.sol';
 
-import {SafeCastLib} from '../../libraries/SafeCastLib.sol';
+import {CastLib} from '../../libraries/CastLib.sol';
 
 import '../utils/logger.sol';
 
@@ -115,8 +115,8 @@ library SSTORE2 {
 }
 
 contract DotnuggV1StorageProxy is IDotnuggV1StorageProxy {
-    using SafeCastLib for uint256;
-    using SafeCastLib for uint16;
+    using CastLib for uint256;
+    using CastLib for uint16;
 
     address public immutable dotnuggv1;
 
@@ -155,7 +155,7 @@ contract DotnuggV1StorageProxy is IDotnuggV1StorageProxy {
 
     function unsafeBulkStore(bytes[] calldata data) public override {
         for (uint8 i = 0; i < 8; i++) {
-            uint8 len = data[i].length.safe8();
+            uint8 len = data[i].length.to8();
 
 
             require(len > 0, 'F:0');
@@ -175,7 +175,7 @@ contract DotnuggV1StorageProxy is IDotnuggV1StorageProxy {
     }
 
     function store(uint8 feature, bytes calldata data) public override  returns (uint8 res) {
-        uint8 len = data.length.safe8();
+        uint8 len = data.length.to8();
 
         require(len > 0, 'F:0');
 

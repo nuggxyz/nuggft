@@ -4,7 +4,7 @@ pragma solidity 0.8.9;
 
 import {INuggftV1Loan} from '../interfaces/nuggftv1/INuggftV1Loan.sol';
 
-import {SafeCastLib} from '../libraries/SafeCastLib.sol';
+import {CastLib} from '../libraries/CastLib.sol';
 import {TransferLib} from '../libraries/TransferLib.sol';
 
 import {NuggftV1AgentType} from '../types/NuggftV1AgentType.sol';
@@ -12,7 +12,7 @@ import {NuggftV1AgentType} from '../types/NuggftV1AgentType.sol';
 import {NuggftV1Swap} from './NuggftV1Swap.sol';
 
 abstract contract NuggftV1Loan is INuggftV1Loan, NuggftV1Swap {
-    using SafeCastLib for uint256;
+    using CastLib for uint256;
     using NuggftV1AgentType for uint256;
 
     uint24 constant LIQUIDATION_PERIOD = 2;

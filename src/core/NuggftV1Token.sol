@@ -6,7 +6,7 @@ import {IERC721} from '../interfaces/IERC721.sol';
 
 import {INuggftV1Token} from '../interfaces/nuggftv1/INuggftV1Token.sol';
 
-import {SafeCastLib} from '../libraries/SafeCastLib.sol';
+import {CastLib} from '../libraries/CastLib.sol';
 import {NuggftV1AgentType} from '../types/NuggftV1AgentType.sol';
 
 import {NuggftV1Epoch} from './NuggftV1Epoch.sol';
@@ -17,7 +17,7 @@ import {NuggftV1Epoch} from './NuggftV1Epoch.sol';
 abstract contract NuggftV1Token is INuggftV1Token, NuggftV1Epoch {
     using NuggftV1AgentType for uint256;
 
-    using SafeCastLib for uint256;
+    using CastLib for uint256;
 
     uint32 constant TRUSTED_MINT_TOKENS = 500;
     uint32 constant UNTRUSTED_MINT_TOKENS = 10000;
@@ -42,12 +42,12 @@ abstract contract NuggftV1Token is INuggftV1Token, NuggftV1Epoch {
     function ownerOf(uint256 tokenId) external view override returns (address) {
         uint256 cache = agency[tokenId];
         require(cache != 0, hex'40');
-        return cache.account(); //_ownerOf(tokenId.safe160());
+        return cache.account(); //_ownerOf(tokenId.to160());
     }
 
     /// @inheritdoc IERC721
     function getApproved(uint256) external pure override returns (address) {
-        return address(0); //_getApproved(tokenId.safe160());
+        return address(0); //_getApproved(tokenId.to160());
     }
 
     /// @inheritdoc IERC721

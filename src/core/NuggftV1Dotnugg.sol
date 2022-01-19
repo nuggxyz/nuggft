@@ -13,7 +13,7 @@ import {ShiftLib} from '../libraries/ShiftLib.sol';
 
 import {INuggftV1Dotnugg} from '../interfaces/nuggftv1/INuggftV1Dotnugg.sol';
 
-import {SafeCastLib} from '../libraries/SafeCastLib.sol';
+import {CastLib} from '../libraries/CastLib.sol';
 import {NuggftV1Token} from './NuggftV1Token.sol';
 
 import {Trust} from './Trust.sol';
@@ -21,8 +21,8 @@ import '../_test/utils/logger.sol';
 
 /// @custom:testing test each function
 abstract contract NuggftV1Dotnugg is INuggftV1Dotnugg, NuggftV1Token, Trust {
-    using SafeCastLib for uint256;
-    using SafeCastLib for uint16;
+    using CastLib for uint256;
+    using CastLib for uint16;
 
     struct Settings {
         mapping(uint256 => uint256) anchorOverrides;
@@ -81,7 +81,7 @@ abstract contract NuggftV1Dotnugg is INuggftV1Dotnugg, NuggftV1Token, Trust {
 
     /// @inheritdoc INuggftV1Dotnugg
     function dotnuggV1ResolverOf(uint256 tokenId) public view virtual override returns (address) {
-        return resolvers[tokenId.safe160()];
+        return resolvers[tokenId.to160()];
     }
 
     /// @inheritdoc INuggftV1Dotnugg

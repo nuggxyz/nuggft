@@ -3,12 +3,12 @@
 pragma solidity 0.8.9;
 
 import {ShiftLib} from '../libraries/ShiftLib.sol';
-import {SafeCastLib} from '../libraries/SafeCastLib.sol';
+import {CastLib} from '../libraries/CastLib.sol';
 
 /// @notice Explain to an end user what this does
 /// @dev Explain to a developer any extra details
 library NuggftV1AgentType {
-    using SafeCastLib for uint256;
+    using CastLib for uint256;
 
     // 10**13
     uint96 constant COMPRESSION_LOSS = 10e8;
@@ -57,7 +57,7 @@ library NuggftV1AgentType {
         assembly {
             res := mul(input, COMPRESSION_LOSS)
         }
-        // return input.safe96();
+        // return input.to96();
     }
 
     function eth(uint256 input, uint96 update) internal pure returns (uint256 cache) {

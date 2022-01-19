@@ -4,7 +4,7 @@ pragma solidity 0.8.9;
 
 import {INuggftV1Swap} from '../interfaces/nuggftv1/INuggftV1Swap.sol';
 import {NuggftV1Stake} from './NuggftV1Stake.sol';
-import {SafeCastLib} from '../libraries/SafeCastLib.sol';
+import {CastLib} from '../libraries/CastLib.sol';
 import {TransferLib} from '../libraries/TransferLib.sol';
 
 import {NuggftV1AgentType} from '../types/NuggftV1AgentType.sol';
@@ -13,7 +13,7 @@ import '../_test/utils/forge.sol';
 /// @notice mechanism for trading of nuggs between users (and items between nuggs)
 /// @dev Explain to a developer any extra details
 abstract contract NuggftV1Swap is INuggftV1Swap, NuggftV1Stake {
-    using SafeCastLib for uint256;
+    using CastLib for uint256;
 
     using NuggftV1AgentType for uint256;
 
