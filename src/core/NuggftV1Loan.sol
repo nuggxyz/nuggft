@@ -25,7 +25,7 @@ abstract contract NuggftV1Loan is INuggftV1Loan, NuggftV1Swap {
 
         require(cache.account() == msg.sender, hex'30');
 
-        cache = NuggftV1AgentType.newAgentType(epoch(), msg.sender, eps(), true);
+        cache = NuggftV1AgentType.create(epoch(), msg.sender, eps(), NuggftV1AgentType.Flag.LOAN);
 
         agency[tokenId] = cache; // starting swap data
 
@@ -40,7 +40,7 @@ abstract contract NuggftV1Loan is INuggftV1Loan, NuggftV1Swap {
     function liquidate(uint160 tokenId) external payable override {
         uint256 cache = agency[tokenId];
 
-        require(cache.flag(), hex'33');
+        require(cache.flag() == NuggftV1AgentType.Flag.LOAN, hex'33');
 
         if (cache.epoch() + LIQUIDATION_PERIOD >= epoch()) {
             // if liquidaton deadline has not passed - check perrmission
@@ -53,7 +53,7 @@ abstract contract NuggftV1Loan is INuggftV1Loan, NuggftV1Swap {
             }
         }
 
-        agency[tokenId] = NuggftV1AgentType.newAgentType(0, msg.sender, 0, false);
+        agency[tokenId] = NuggftV1AgentType.create(0, msg.sender, 0, NuggftV1AgentType.Flag.OWN);
 
         (uint96 fee, uint96 earned) = calc(cache.eth(), eps());
 
@@ -79,7 +79,7 @@ abstract contract NuggftV1Loan is INuggftV1Loan, NuggftV1Swap {
         uint256 cache = agency[tokenId];
 
         // make sure this nugg is loaned
-        require(cache.flag(), hex'33');
+        require(cache.flag() == NuggftV1AgentType.Flag.LOAN, hex'33');
 
         require(msg.sender == cache.account(), hex'39');
 
@@ -97,7 +97,7 @@ abstract contract NuggftV1Loan is INuggftV1Loan, NuggftV1Swap {
         addStakedEth(fee);
 
         // we need to recalculate eps here because it has changed after "addStakedEth"
-        agency[tokenId] = NuggftV1AgentType.newAgentType(epoch(), cache.account(), eps(), true);
+        agency[tokenId] = NuggftV1AgentType.create(epoch(), cache.account(), eps(), NuggftV1AgentType.Flag.LOAN);
 
         // we transfer overearned to the owner
         TransferLib.sendEth(cache.account(), earned);
@@ -116,7 +116,7 @@ abstract contract NuggftV1Loan is INuggftV1Loan, NuggftV1Swap {
             uint256 cache = agency[tokenIds[i]];
 
             // make sure this nugg is loaned
-            require(cache.flag(), hex'33');
+            require(cache.flag() == NuggftV1AgentType.Flag.LOAN, hex'33');
 
             require(msg.sender == cache.account(), hex'39');
 
@@ -140,7 +140,7 @@ abstract contract NuggftV1Loan is INuggftV1Loan, NuggftV1Swap {
 
         addStakedEth(accFee);
 
-        uint256 common = NuggftV1AgentType.newAgentType(epoch(), msg.sender, eps(), true);
+        uint256 common = NuggftV1AgentType.create(epoch(), msg.sender, eps(), NuggftV1AgentType.Flag.LOAN);
 
         for (uint256 i = 0; i < tokenIds.length; i++) agency[tokenIds[i]] = common;
 
@@ -149,7 +149,7 @@ abstract contract NuggftV1Loan is INuggftV1Loan, NuggftV1Swap {
     }
 
     function loaned(uint160 tokenId) external view returns (bool res) {
-        return agency[tokenId].flag();
+        return agency[tokenId].flag() == NuggftV1AgentType.Flag.LOAN;
     }
 
     /// @inheritdoc INuggftV1Loan
@@ -181,7 +181,7 @@ abstract contract NuggftV1Loan is INuggftV1Loan, NuggftV1Swap {
     {
         uint256 cache = agency[tokenId];
 
-        isLoaned = cache.flag();
+        isLoaned = cache.flag() == NuggftV1AgentType.Flag.LOAN;
 
         insolventEpoch = cache.epoch() + LIQUIDATION_PERIOD;
 

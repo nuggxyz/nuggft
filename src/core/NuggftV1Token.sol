@@ -99,7 +99,7 @@ abstract contract NuggftV1Token is INuggftV1Token, NuggftV1Epoch {
     ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━*/
 
     function _mintTo(address to, uint160 tokenId) internal {
-        agency[tokenId] = NuggftV1AgentType.newAgentType(0, to, 0, false);
+        agency[tokenId] = NuggftV1AgentType.create(0, to, 0, NuggftV1AgentType.Flag.OWN);
 
         emit Transfer(address(0), to, tokenId);
     }
@@ -136,12 +136,12 @@ abstract contract NuggftV1Token is INuggftV1Token, NuggftV1Epoch {
 
     function isOwner(address sender, uint160 tokenId) internal view returns (bool res) {
         uint256 cache = agency[tokenId];
-        return cache.account() == sender && !cache.flag();
+        return cache.account() == sender && cache.flag() == NuggftV1AgentType.Flag.OWN;
     }
 
     function isAgent(address sender, uint160 tokenId) internal view returns (bool res) {
         uint256 cache = agency[tokenId];
-        return cache.account() == sender;
+        return cache.account() == sender && (cache.flag() == NuggftV1AgentType.Flag.OWN || cache.flag() == NuggftV1AgentType.Flag.LOAN);
     }
 
     function _isApprovedOrOwner(address spender, uint160 tokenId) internal view returns (bool) {
