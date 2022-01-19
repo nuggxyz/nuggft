@@ -35,3 +35,33 @@ library gas {
         console.log(lab, ptr().left - checkpointGasLeft2);
     }
 }
+
+contract GasTracker {
+    modifier trackGas() {
+        uint256 a;
+        assembly {
+            a := gas()
+        }
+
+        _;
+        assembly {
+            a := sub(a, gas())
+        }
+
+        console.log('gas used: ', a);
+    }
+
+    modifier trackGas2(string memory mem) {
+        uint256 a;
+        assembly {
+            a := gas()
+        }
+
+        _;
+        assembly {
+            a := sub(a, gas())
+        }
+
+        console.log(mem, a);
+    }
+}

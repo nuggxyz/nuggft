@@ -30,6 +30,12 @@ contract txgas__NuggftV1Loan is NuggftV1Test {
         nuggft.loan(LOAN_TOKENID);
     }
 
+    function test__txgas__NuggftV1Loan__mutlirebalance() public {
+        uint160[] memory a = new uint160[](1);
+        a[0] = REBALANCE_TOKENID;
+        nuggft.multirebalance{value: 200 ether}(a);
+    }
+
     function test__txgas__NuggftV1Loan__rebalance() public {
         nuggft.rebalance{value: 200 ether}(REBALANCE_TOKENID);
     }

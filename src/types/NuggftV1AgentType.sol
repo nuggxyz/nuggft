@@ -50,10 +50,10 @@ library NuggftV1AgentType {
                               SHIFT HELPERS
        ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
     // @test input output unit test
-    // type(uint96).max / 10e8 =    792281625142643375935
-    // type(uint70).max          = 1180591620717411303423
+    // type(uint96).max / 10e9 =     79228162514264337593
+    // type(uint69).max          =  590295810358705651712
     function eth(uint256 input) internal pure returns (uint96 res) {
-        input = ShiftLib.get(input, 70, 160);
+        input = ShiftLib.get(input, 69, 160);
         assembly {
             res := mul(input, COMPRESSION_LOSS)
         }
@@ -64,16 +64,16 @@ library NuggftV1AgentType {
         assembly {
             update := div(update, COMPRESSION_LOSS) // bye byte wei
         }
-        cache = ShiftLib.set(input, 70, 160, update);
+        cache = ShiftLib.set(input, 69, 160, update);
     }
 
     // @test  input output unit test
     function epoch(uint256 input, uint24 update) internal pure returns (uint256 res) {
-        return ShiftLib.set(input, 24, 230, update);
+        return ShiftLib.set(input, 24, 229, update);
     }
 
     function epoch(uint256 input) internal pure returns (uint24 res) {
-        return uint24(ShiftLib.get(input, 24, 230));
+        return uint24(ShiftLib.get(input, 24, 229));
     }
 
     // @test  input output unit test
@@ -86,30 +86,46 @@ library NuggftV1AgentType {
     }
 
     // @test  input output unit test
-    function flag(uint256 input, bool update) internal pure returns (uint256 res) {
-        return ShiftLib.set(input, 1, 254, update ? 0x1 : 0x0);
+    function flag(uint256 input, Flag update) internal pure returns (uint256 res) {
+        return ShiftLib.set(input, 2, 253, uint8(update));
     }
 
-    function flag(uint256 input) internal pure returns (bool output) {
-        output = ShiftLib.get(input, 1, 254) == 0x1;
+    function flag(uint256 input) internal pure returns (Flag output) {
+        output = Flag(ShiftLib.get(input, 2, 253));
     }
+
+    // // @test  input output unit test
+    // function flag2(uint256 input, bool update) internal pure returns (uint256 res) {
+    //     return ShiftLib.set(input, 1, 254, update ? 0x1 : 0x0);
+    // }
+
+    // function flag2(uint256 input) internal pure returns (bool output) {
+    //     output = ShiftLib.get(input, 1, 254) == 0x1;
+    // }
 
     // @test  check to see if it does this - will be easy
     function _mark(uint256 input) private pure returns (uint256 res) {
         res = ShiftLib.set(input, 1, 255, 0x01);
     }
 
+    enum Flag {
+        NONE,
+        SWAP,
+        LOAN,
+        OWN
+    }
+
     // @test  manual
-    function newAgentType(
+    function create(
         uint24 _epoch,
         address _account,
         uint96 _eth,
-        bool _flag
+        Flag _flag
     ) internal pure returns (uint256 res) {
         res = epoch(res, _epoch);
         res = account(res, _account);
         res = flag(res, _flag);
-        (res) = eth(res, _eth);
+        res = eth(res, _eth);
         res = _mark(res);
     }
 }
