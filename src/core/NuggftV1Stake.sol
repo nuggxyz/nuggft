@@ -30,7 +30,7 @@ abstract contract NuggftV1Stake is INuggftV1Stake, NuggftV1Proof {
     function extractProtocolEth() external requiresTrust {
         uint256 cache = stake;
 
-        TransferLib.sendEth(msg.sender, cache.proto());
+        TransferLib.give(msg.sender, cache.proto());
 
         cache = cache.proto(0);
 
