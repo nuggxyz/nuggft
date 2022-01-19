@@ -146,3 +146,76 @@ contract logic__ShiftLib__imask is NuggftV1Test {
         assertEq(ShiftLib.imask(255, 255), 0x7fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff, '(255, 255)');
     }
 }
+
+contract logic__ShiftLib__get is NuggftV1Test {
+    function get__safe__a(
+        uint256 _store,
+        uint8 bits,
+        uint8 pos
+    ) public pure returns (uint256 res) {
+        res = (1 << bits) - 1;
+        res = (_store >> pos) & res;
+    }
+
+    function test__logic__ShiftLib__gas__get__a() public view trackGas returns (uint256 res) {
+        (uint256 _store, uint8 bits, uint8 pos) = (60, 128, 3);
+
+        res = get__safe__a(_store, bits, pos);
+    }
+
+    function test__logic__ShiftLib__gas__get() public view trackGas returns (uint256 res) {
+        (uint256 _store, uint8 bits, uint8 pos) = (60, 128, 3);
+
+        res = ShiftLib.get(_store, bits, pos);
+    }
+
+    function test__logic__ShiftLib__symbolic__get(
+        uint256 _store,
+        uint8 bits,
+        uint8 pos
+    ) public {
+        uint256 a = get__safe__a(_store, bits, pos);
+
+        uint256 real = ShiftLib.get(_store, bits, pos);
+
+        assertEq(a, real, 'A');
+    }
+}
+
+contract logic__ShiftLib__set is NuggftV1Test {
+    function set__safe__a(
+        uint256 _store,
+        uint8 bits,
+        uint8 pos,
+        uint256 value
+    ) public pure returns (uint256 res) {
+        res = ~(((1 << bits) - 1) << pos);
+        value = value << pos;
+        res = (_store & res) | value;
+    }
+
+    function test__logic__ShiftLib__gas__set__a() public view trackGas returns (uint256 res) {
+        (uint256 _store, uint8 bits, uint8 pos, uint256 value) = (60, 128, 3, 4);
+
+        res = set__safe__a(_store, bits, pos, value);
+    }
+
+    function test__logic__ShiftLib__gas__set() public view trackGas returns (uint256 res) {
+        (uint256 _store, uint8 bits, uint8 pos, uint256 value) = (60, 128, 3, 4);
+
+        res = ShiftLib.set(_store, bits, pos, value);
+    }
+
+    function test__logic__ShiftLib__symbolic__set(
+        uint256 _store,
+        uint8 bits,
+        uint8 pos,
+        uint256 value
+    ) public {
+        uint256 a = set__safe__a(_store, bits, pos, value);
+
+        uint256 real = ShiftLib.set(_store, bits, pos, value);
+
+        assertEq(a, real, 'B');
+    }
+}
