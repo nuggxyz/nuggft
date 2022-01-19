@@ -31,7 +31,7 @@ abstract contract NuggftV1Loan is INuggftV1Loan, NuggftV1Swap {
 
         uint96 value = cache.eth();
 
-        TransferLib.sendEth(msg.sender, value);
+        TransferLib.give(msg.sender, value);
 
         emit Loan(tokenId, value);
     }
@@ -69,7 +69,7 @@ abstract contract NuggftV1Loan is INuggftV1Loan, NuggftV1Swap {
 
         addStakedEth(fee);
 
-        TransferLib.sendEth(msg.sender, earned);
+        TransferLib.give(msg.sender, earned);
 
         emit Liquidate(tokenId, fee, msg.sender);
     }
@@ -100,7 +100,7 @@ abstract contract NuggftV1Loan is INuggftV1Loan, NuggftV1Swap {
         agency[tokenId] = NuggftV1AgentType.create(epoch(), cache.account(), eps(), NuggftV1AgentType.Flag.LOAN);
 
         // we transfer overearned to the owner
-        TransferLib.sendEth(cache.account(), earned);
+        TransferLib.give(cache.account(), earned);
 
         emit Rebalance(tokenId, fee);
     }
@@ -145,7 +145,7 @@ abstract contract NuggftV1Loan is INuggftV1Loan, NuggftV1Swap {
         for (uint256 i = 0; i < tokenIds.length; i++) agency[tokenIds[i]] = common;
 
         // we transfer overearned to the owner
-        TransferLib.sendEth(msg.sender, acc);
+        TransferLib.give(msg.sender, acc);
     }
 
     function loaned(uint160 tokenId) external view returns (bool res) {

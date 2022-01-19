@@ -3,15 +3,11 @@
 pragma solidity 0.8.9;
 
 library TransferLib {
-    function sendEth(address to, uint256 amount) internal {
+    function give(address to, uint256 amount) internal {
         assembly {
-            if iszero(amount) {
-                return(amount, amount)
-            }
-
             if iszero(call(gas(), to, amount, 0, 0, 0, 0)) {
-                mstore(0, 0x69)
-                revert(31, 1)
+                mstore(0, 0x01)
+                revert(0x19, 0x01)
             }
         }
     }

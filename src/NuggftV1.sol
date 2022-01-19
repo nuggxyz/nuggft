@@ -176,7 +176,7 @@ contract NuggftV1 is IERC721Metadata, NuggftV1Loan {
     function burn(uint160 tokenId) external {
         uint96 ethOwed = subStakedShare(tokenId);
 
-        TransferLib.sendEth(msg.sender, ethOwed);
+        TransferLib.give(msg.sender, ethOwed);
 
         emit Burn(tokenId, msg.sender, ethOwed);
     }
@@ -196,7 +196,7 @@ contract NuggftV1 is IERC721Metadata, NuggftV1Loan {
     }
 
     // function testnet__exploit() external {
-    //     TransferLib.sendEth(msg.sender, address(this).balance);
+    //     TransferLib.give(msg.sender, address(this).balance);
     // }
 
     /// @notice removes a staked share from the contract,

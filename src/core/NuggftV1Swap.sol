@@ -139,7 +139,7 @@ abstract contract NuggftV1Swap is INuggftV1Swap, NuggftV1Stake {
 
     /// @inheritdoc INuggftV1Swap
     function claim(uint160 tokenId) external override {
-        TransferLib.sendEth(msg.sender, _claim(tokenId));
+        TransferLib.give(msg.sender, _claim(tokenId));
     }
 
     /// @inheritdoc INuggftV1Swap
@@ -150,7 +150,7 @@ abstract contract NuggftV1Swap is INuggftV1Swap, NuggftV1Stake {
             acc += _claim(tokenIds[i]);
         }
 
-        TransferLib.sendEth(msg.sender, acc);
+        TransferLib.give(msg.sender, acc);
     }
 
     function _claim(uint160 tokenId) internal returns (uint96 value) {
@@ -159,7 +159,7 @@ abstract contract NuggftV1Swap is INuggftV1Swap, NuggftV1Stake {
         delete s.offers[msg.sender];
 
         if (checkClaimerIsWinnerOrLoser(m)) {
-           agency[tokenId] = NuggftV1AgentType.create(0, msg.sender, 0, NuggftV1AgentType.Flag.OWN);
+            agency[tokenId] = NuggftV1AgentType.create(0, msg.sender, 0, NuggftV1AgentType.Flag.OWN);
 
             emit Transfer(address(this), msg.sender, tokenId);
         } else {
@@ -175,7 +175,7 @@ abstract contract NuggftV1Swap is INuggftV1Swap, NuggftV1Stake {
         uint160 sellerTokenId,
         uint16 itemId
     ) public override {
-        TransferLib.sendEth(msg.sender, _claimItem(buyerTokenId, sellerTokenId, itemId));
+        TransferLib.give(msg.sender, _claimItem(buyerTokenId, sellerTokenId, itemId));
     }
 
     /// @inheritdoc INuggftV1Swap
@@ -192,7 +192,7 @@ abstract contract NuggftV1Swap is INuggftV1Swap, NuggftV1Stake {
             acc += _claimItem(buyerTokenIds[i], sellerTokenIds[i], itemIds[i]);
         }
 
-        TransferLib.sendEth(msg.sender, acc);
+        TransferLib.give(msg.sender, acc);
     }
 
     function _claimItem(
