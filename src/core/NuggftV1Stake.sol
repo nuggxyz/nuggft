@@ -7,13 +7,13 @@ import {NuggftV1Proof} from './NuggftV1Proof.sol';
 import {INuggftV1Migrator} from '../interfaces/nuggftv1/INuggftV1Migrator.sol';
 import {INuggftV1Stake} from '../interfaces/nuggftv1/INuggftV1Stake.sol';
 
-import {SafeCastLib} from '../libraries/SafeCastLib.sol';
+import {CastLib} from '../libraries/CastLib.sol';
 import {TransferLib} from '../libraries/TransferLib.sol';
 
 import {NuggftV1StakeType} from '../types/NuggftV1StakeType.sol';
 
 abstract contract NuggftV1Stake is INuggftV1Stake, NuggftV1Proof {
-    using SafeCastLib for uint256;
+    using CastLib for uint256;
     using NuggftV1StakeType for uint256;
 
     address public migrator;
@@ -85,7 +85,7 @@ abstract contract NuggftV1Stake is INuggftV1Stake, NuggftV1Proof {
     /// @notice handles the adding of shares - ensures enough eth is being added
     /// @dev this is the only way to add shares - the logic here ensures that "ethPerShare" can never decrease
     function addStakedShareFromMsgValue(uint96 offset) internal {
-        uint96 value = msg.value.safe96() - offset;
+        uint96 value = msg.value.to96() - offset;
 
         uint256 cache = stake;
 

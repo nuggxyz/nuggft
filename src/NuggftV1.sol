@@ -20,7 +20,7 @@ import {INuggftV1Stake} from './interfaces/nuggftv1/INuggftV1Stake.sol';
 import {INuggftV1} from './interfaces/nuggftv1/INuggftV1.sol';
 
 import {TransferLib} from './libraries/TransferLib.sol';
-import {SafeCastLib} from './libraries/SafeCastLib.sol';
+import {CastLib} from './libraries/CastLib.sol';
 import {ShiftLib} from './libraries/ShiftLib.sol';
 
 import {NuggftV1StakeType} from './types/NuggftV1StakeType.sol';
@@ -38,7 +38,7 @@ import {NuggftV1ProofType} from './types/NuggftV1ProofType.sol';
 /// we did not want to call "onERC721Recieved" when no token was being sent.
 /// 2.
 contract NuggftV1 is IERC721Metadata, NuggftV1Loan {
-    using SafeCastLib for uint256;
+    using CastLib for uint256;
 
     using NuggftV1StakeType for uint256;
 
@@ -97,7 +97,7 @@ contract NuggftV1 is IERC721Metadata, NuggftV1Loan {
 
     /// @inheritdoc IERC721Metadata
     function tokenURI(uint256 tokenId) public view virtual override returns (string memory res) {
-        uint160 safeTokenId = tokenId.safe160();
+        uint160 safeTokenId = tokenId.to160();
 
         res = dotnuggV1.dat(address(this), tokenId, dotnuggV1ResolverOf(safeTokenId), symbol(), name(), true, '');
     }
@@ -114,7 +114,7 @@ contract NuggftV1 is IERC721Metadata, NuggftV1Loan {
             data.yovers,
             data.styles,
             data.background
-        ) = proofToDotnuggMetadata(tokenId.safe160());
+        ) = proofToDotnuggMetadata(tokenId.to160());
 
         data.labels = new string[](8);
         data.version = 1;

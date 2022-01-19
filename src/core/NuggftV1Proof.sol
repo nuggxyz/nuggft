@@ -5,15 +5,15 @@ pragma solidity 0.8.9;
 import {INuggftV1Proof} from '../interfaces/nuggftv1/INuggftV1Proof.sol';
 
 import {ShiftLib} from '../libraries/ShiftLib.sol';
-import {SafeCastLib} from '../libraries/SafeCastLib.sol';
+import {CastLib} from '../libraries/CastLib.sol';
 
 import {NuggftV1Dotnugg} from './NuggftV1Dotnugg.sol';
 
 import {NuggftV1ProofType} from '../types/NuggftV1ProofType.sol';
 
 abstract contract NuggftV1Proof is INuggftV1Proof, NuggftV1Dotnugg {
-    using SafeCastLib for uint160;
-    using SafeCastLib for uint256;
+    using CastLib for uint160;
+    using CastLib for uint256;
 
     /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
                                 state
@@ -68,7 +68,7 @@ abstract contract NuggftV1Proof is INuggftV1Proof, NuggftV1Dotnugg {
         proof = proofOf(tokenId);
 
         if (proof == 0) {
-            proof = initFromSeed(tryCalculateSeed(tokenId.safe24()));
+            proof = initFromSeed(tryCalculateSeed(tokenId.to24()));
             require(proof != 0, 'P:L');
         }
 
@@ -239,7 +239,7 @@ abstract contract NuggftV1Proof is INuggftV1Proof, NuggftV1Dotnugg {
 
     function safeMod(uint256 value, uint8 modder) internal pure returns (uint256) {
         require(modder != 0, 'P:9');
-        return value.safe8() % modder;
+        return value.to8() % modder;
     }
 
     function pendingProof()
