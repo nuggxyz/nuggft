@@ -5,7 +5,7 @@ pragma solidity 0.8.9;
 import {INuggftV1Loan} from '../interfaces/nuggftv1/INuggftV1Loan.sol';
 
 import {SafeCastLib} from '../libraries/SafeCastLib.sol';
-import {SafeTransferLib} from '../libraries/SafeTransferLib.sol';
+import {TransferLib} from '../libraries/TransferLib.sol';
 
 import {NuggftV1AgentType} from '../types/NuggftV1AgentType.sol';
 
@@ -31,7 +31,7 @@ abstract contract NuggftV1Loan is INuggftV1Loan, NuggftV1Swap {
 
         uint96 value = cache.eth();
 
-        SafeTransferLib.safeTransferETH(msg.sender, value);
+        TransferLib.sendEth(msg.sender, value);
 
         emit Loan(tokenId, value);
     }
@@ -69,7 +69,7 @@ abstract contract NuggftV1Loan is INuggftV1Loan, NuggftV1Swap {
 
         addStakedEth(fee);
 
-        SafeTransferLib.safeTransferETH(msg.sender, earned);
+        TransferLib.sendEth(msg.sender, earned);
 
         emit Liquidate(tokenId, fee, msg.sender);
     }
@@ -100,7 +100,7 @@ abstract contract NuggftV1Loan is INuggftV1Loan, NuggftV1Swap {
         agency[tokenId] = NuggftV1AgentType.newAgentType(epoch(), cache.account(), eps(), true);
 
         // we transfer overearned to the owner
-        SafeTransferLib.safeTransferETH(cache.account(), earned);
+        TransferLib.sendEth(cache.account(), earned);
 
         emit Rebalance(tokenId, fee);
     }
@@ -145,7 +145,7 @@ abstract contract NuggftV1Loan is INuggftV1Loan, NuggftV1Swap {
         for (uint256 i = 0; i < tokenIds.length; i++) agency[tokenIds[i]] = common;
 
         // we transfer overearned to the owner
-        SafeTransferLib.safeTransferETH(msg.sender, acc);
+        TransferLib.sendEth(msg.sender, acc);
     }
 
     function loaned(uint160 tokenId) external view returns (bool res) {

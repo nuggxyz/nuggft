@@ -75,7 +75,7 @@ contract logic__NuggftV1Proof is NuggftV1Test, NuggftV1Proof {
 
             for (uint256 j = 0; j < 8; j++) {
                 if (ids[j] != 0) {
-                    trickery[j] &= ShiftLib.fullsubmask(1, ids[j] - 1);
+                    trickery[j] &= ShiftLib.imask(1, ids[j] - 1);
                 }
             }
         }

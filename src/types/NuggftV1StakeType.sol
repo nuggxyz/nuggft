@@ -14,7 +14,7 @@ library NuggftV1StakeType {
     }
 
     function proto(uint256 cache, uint96 update) internal pure returns (uint256 res) {
-        res = cache & ShiftLib.fullsubmask(96, 0);
+        res = cache & ShiftLib.imask(96, 0);
         res |= update;
     }
 
@@ -38,7 +38,7 @@ library NuggftV1StakeType {
 
     function staked(uint256 cache, uint96 update) internal pure returns (uint256 res) {
         // clear stakedEth
-        res = cache & ShiftLib.fullsubmask(96, 96);
+        res = cache & ShiftLib.imask(96, 96);
         res |= uint256(update) << 96;
     }
 

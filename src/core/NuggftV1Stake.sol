@@ -8,7 +8,7 @@ import {INuggftV1Migrator} from '../interfaces/nuggftv1/INuggftV1Migrator.sol';
 import {INuggftV1Stake} from '../interfaces/nuggftv1/INuggftV1Stake.sol';
 
 import {SafeCastLib} from '../libraries/SafeCastLib.sol';
-import {SafeTransferLib} from '../libraries/SafeTransferLib.sol';
+import {TransferLib} from '../libraries/TransferLib.sol';
 
 import {NuggftV1StakeType} from '../types/NuggftV1StakeType.sol';
 
@@ -30,7 +30,7 @@ abstract contract NuggftV1Stake is INuggftV1Stake, NuggftV1Proof {
     function extractProtocolEth() external requiresTrust {
         uint256 cache = stake;
 
-        SafeTransferLib.safeTransferETH(msg.sender, cache.proto());
+        TransferLib.sendEth(msg.sender, cache.proto());
 
         cache = cache.proto(0);
 
