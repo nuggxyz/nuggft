@@ -23,7 +23,7 @@ abstract contract NuggftV1Loan is INuggftV1Loan, NuggftV1Swap {
     function loan(uint160 tokenId) external override {
         uint256 cache = agency[tokenId];
 
-        require(cache.account() == msg.sender, hex'30');
+        require(isOwner(msg.sender, tokenId), hex'30');
 
         cache = NuggftV1AgentType.create(epoch(), msg.sender, eps(), NuggftV1AgentType.Flag.LOAN);
 
