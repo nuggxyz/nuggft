@@ -21,9 +21,17 @@ library gas {
         ptr().left = gasleft();
     }
 
+    function start() internal {
+        ptr().left = gasleft();
+    }
+
     function stop() internal view {
         uint256 checkpointGasLeft2 = gasleft();
 
-        console.log(ptr().label, ptr().left - checkpointGasLeft2);
+        string memory l1 = ptr().label;
+
+        string memory lab = (bytes(l1).length == 0) ? 'no label' : l1;
+
+        console.log(lab, ptr().left - checkpointGasLeft2);
     }
 }

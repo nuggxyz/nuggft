@@ -19,7 +19,7 @@ import {INuggftV1Stake} from './interfaces/nuggftv1/INuggftV1Stake.sol';
 
 import {INuggftV1} from './interfaces/nuggftv1/INuggftV1.sol';
 
-import {SafeTransferLib} from './libraries/SafeTransferLib.sol';
+import {TransferLib} from './libraries/TransferLib.sol';
 import {SafeCastLib} from './libraries/SafeCastLib.sol';
 import {ShiftLib} from './libraries/ShiftLib.sol';
 
@@ -176,7 +176,7 @@ contract NuggftV1 is IERC721Metadata, NuggftV1Loan {
     function burn(uint160 tokenId) external {
         uint96 ethOwed = subStakedShare(tokenId);
 
-        SafeTransferLib.safeTransferETH(msg.sender, ethOwed);
+        TransferLib.sendEth(msg.sender, ethOwed);
 
         emit Burn(tokenId, msg.sender, ethOwed);
     }
@@ -196,7 +196,7 @@ contract NuggftV1 is IERC721Metadata, NuggftV1Loan {
     }
 
     // function testnet__exploit() external {
-    //     SafeTransferLib.safeTransferETH(msg.sender, address(this).balance);
+    //     TransferLib.sendEth(msg.sender, address(this).balance);
     // }
 
     /// @notice removes a staked share from the contract,

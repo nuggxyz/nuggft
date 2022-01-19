@@ -5,7 +5,8 @@ pragma solidity 0.8.9;
 import {INuggftV1Swap} from '../interfaces/nuggftv1/INuggftV1Swap.sol';
 import {NuggftV1Stake} from './NuggftV1Stake.sol';
 import {SafeCastLib} from '../libraries/SafeCastLib.sol';
-import {SafeTransferLib} from '../libraries/SafeTransferLib.sol';
+import {TransferLib} from '../libraries/TransferLib.sol';
+
 import {NuggftV1AgentType} from '../types/NuggftV1AgentType.sol';
 import '../_test/utils/forge.sol';
 
@@ -127,7 +128,7 @@ abstract contract NuggftV1Swap is INuggftV1Swap, NuggftV1Stake {
 
     /// @inheritdoc INuggftV1Swap
     function claim(uint160 tokenId) external override {
-        SafeTransferLib.safeTransferETH(msg.sender, _claim(tokenId));
+        TransferLib.sendEth(msg.sender, _claim(tokenId));
     }
 
     /// @inheritdoc INuggftV1Swap
@@ -138,7 +139,7 @@ abstract contract NuggftV1Swap is INuggftV1Swap, NuggftV1Stake {
             acc += _claim(tokenIds[i]);
         }
 
-        SafeTransferLib.safeTransferETH(msg.sender, acc);
+        TransferLib.sendEth(msg.sender, acc);
     }
 
     function _claim(uint160 tokenId) internal returns (uint96 value) {
@@ -163,7 +164,7 @@ abstract contract NuggftV1Swap is INuggftV1Swap, NuggftV1Stake {
         uint160 sellerTokenId,
         uint16 itemId
     ) public override {
-        SafeTransferLib.safeTransferETH(msg.sender, _claimItem(buyerTokenId, sellerTokenId, itemId));
+        TransferLib.sendEth(msg.sender, _claimItem(buyerTokenId, sellerTokenId, itemId));
     }
 
     /// @inheritdoc INuggftV1Swap
@@ -180,7 +181,7 @@ abstract contract NuggftV1Swap is INuggftV1Swap, NuggftV1Stake {
             value += _claimItem(buyerTokenIds[i], sellerTokenIds[i], itemIds[i]);
         }
 
-        SafeTransferLib.safeTransferETH(msg.sender, value);
+        TransferLib.sendEth(msg.sender, value);
     }
 
     function _claimItem(

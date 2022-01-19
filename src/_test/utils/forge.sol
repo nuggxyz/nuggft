@@ -10,6 +10,19 @@ import './gas.sol';
 import './vm.sol';
 
 abstract contract ForgeTest is DSTest {
+    modifier trackGas() {
+        uint256 a;
+        assembly {
+            a := gas()
+        }
+
+        _;
+        assembly {
+            a := sub(a, gas())
+        }
+
+        console.log('gas used: ', a);
+    }
     modifier prank(address user, uint256 value) {
         forge.vm.deal(user, value);
         forge.vm.startPrank(user);
