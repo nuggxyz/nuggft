@@ -5,6 +5,7 @@ pragma solidity 0.8.9;
 import '../../NuggftV1.test.sol';
 
 contract revert__NuggftV1Loan is NuggftV1Test {
+    uint160 internal constant LOAN_TOKENID = 700;
     uint32 epoch;
 
     function setUp() public {
@@ -90,6 +91,20 @@ contract revert__NuggftV1Loan is NuggftV1Test {
             nuggft.loan(tokenId);
         }
         forge.vm.stopPrank();
+    }
+
+    function test__revert__NuggftV1Loan__0x30__loan__loanSameNuggTwice() public {
+        forge.vm.deal(users.frank, 10 ether);
+
+        forge.vm.startPrank(users.frank);
+
+        nuggft.mint{value: 1 ether}(LOAN_TOKENID);
+
+        nuggft.loan(LOAN_TOKENID);
+
+        nuggft.mint{value: 1 ether}(LOAN_TOKENID + 1);
+
+        nuggft.loan(LOAN_TOKENID);
     }
 
     function test__revert__NuggftV1Loan__0x30__loan__failAsNotOperatorHasNotApprovedContract() public {
