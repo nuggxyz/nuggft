@@ -183,7 +183,7 @@ contract NuggftV1 is IERC721Metadata, NuggftV1Loan {
 
     /// @inheritdoc INuggftV1Stake
     function migrate(uint160 tokenId) external {
-        require(migrator != address(0), 'T:4');
+        require(migrator != address(0), hex'74');
 
         // stores the proof before deleting the nugg
         uint256 proof = proofOf(tokenId);
@@ -206,23 +206,19 @@ contract NuggftV1 is IERC721Metadata, NuggftV1Loan {
     /// @param tokenId the id of the nugg being unstaked
     /// @return ethOwed -> the amount of eth owed to the unstaking user - equivilent to "ethPerShare"
     function subStakedShare(uint160 tokenId) internal returns (uint96 ethOwed) {
-        // reverts if token does not exist
-        address owner = _ownerOf(tokenId);
-
-        require(_getApproved(tokenId) == address(this) && owner == msg.sender, 'T:3');
+        require(isOwner(msg.sender, tokenId), hex'73');
 
         uint256 cache = stake;
 
         // hanles all logic not related to staking the nugg
         delete agency[tokenId];
-        delete approvals[tokenId];
 
         delete swaps[tokenId];
         // delete loans[tokenId];
         delete proofs[tokenId];
         delete resolvers[tokenId];
 
-        emitTransferEvent(owner, address(0), tokenId);
+        emit Transfer(msg.sender, address(0), tokenId);
 
         ethOwed = calculateEthPerShare(cache);
 

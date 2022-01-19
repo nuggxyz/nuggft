@@ -24,39 +24,20 @@ contract revert__NuggftV1Loan is NuggftV1Test {
 
         forge.vm.startPrank(users.frank);
         {
-            nuggft.approve(_nuggft, tokenId);
+            // nuggft.approve(_nuggft, tokenId);
             nuggft.loan(tokenId);
         }
         forge.vm.stopPrank();
     }
 
-    function test__revert__NuggftV1Loan__0x30__loan__failAsOperator() public {
+    function test__revert__NuggftV1Loan__0x30__loan__failAsNotAgent() public {
         uint160 tokenId = scenario_frank_has_a_token_and_spent_50_eth();
 
-        forge.vm.startPrank(users.frank);
-        {
-            nuggft.approve(_nuggft, tokenId);
-            nuggft.setApprovalForAll(users.dennis, true);
-        }
-        forge.vm.stopPrank();
-
-        forge.vm.startPrank(users.dennis);
-        {
-            forge.vm.expectRevert(hex'30');
-
-            nuggft.loan(tokenId);
-        }
-        forge.vm.stopPrank();
-    }
-
-    function test__revert__NuggftV1Loan__0x30__loan__failAsNotOperator() public {
-        uint160 tokenId = scenario_frank_has_a_token_and_spent_50_eth();
-
-        forge.vm.startPrank(users.frank);
-        {
-            nuggft.approve(_nuggft, tokenId);
-        }
-        forge.vm.stopPrank();
+        // forge.vm.startPrank(users.frank);
+        // {
+        //     nuggft.approve(_nuggft, tokenId);
+        // }
+        // forge.vm.stopPrank();
 
         forge.vm.startPrank(users.dennis);
         {
@@ -76,23 +57,6 @@ contract revert__NuggftV1Loan is NuggftV1Test {
         forge.vm.stopPrank();
     }
 
-    function test__revert__NuggftV1Loan__0x30__loan__failAsOperatorHasNotApprovedContract() public {
-        uint160 tokenId = scenario_frank_has_a_token_and_spent_50_eth();
-
-        forge.vm.startPrank(users.frank);
-        {
-            nuggft.setApprovalForAll(users.dennis, true);
-        }
-        forge.vm.stopPrank();
-
-        forge.vm.startPrank(users.dennis);
-        {
-            forge.vm.expectRevert(hex'30');
-            nuggft.loan(tokenId);
-        }
-        forge.vm.stopPrank();
-    }
-
     function test__revert__NuggftV1Loan__0x30__loan__loanSameNuggTwice() public {
         forge.vm.deal(users.frank, 10 ether);
 
@@ -104,18 +68,9 @@ contract revert__NuggftV1Loan is NuggftV1Test {
 
         nuggft.mint{value: 1 ether}(LOAN_TOKENID + 1);
 
+        forge.vm.expectRevert(hex'30');
+
         nuggft.loan(LOAN_TOKENID);
-    }
-
-    function test__revert__NuggftV1Loan__0x30__loan__failAsNotOperatorHasNotApprovedContract() public {
-        uint160 tokenId = scenario_frank_has_a_token_and_spent_50_eth();
-
-        forge.vm.startPrank(users.dennis);
-        {
-            forge.vm.expectRevert(hex'30');
-            nuggft.loan(tokenId);
-        }
-        forge.vm.stopPrank();
     }
 
     /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -146,16 +101,16 @@ contract revert__NuggftV1Loan is NuggftV1Test {
         forge.vm.stopPrank();
     }
 
-    function test__revert__NuggftV1Loan__0x31__liquidate__failAsOperator() public {
+    function test__revert__NuggftV1Loan__0x31__liquidate__failAsNotAgentNotExpired() public {
         uint160 tokenId = scenario_frank_has_a_loaned_token();
 
         uint96 value = nuggft.valueForLiquidate(tokenId);
 
-        forge.vm.startPrank(users.frank);
-        {
-            nuggft.setApprovalForAll(users.mac, true);
-        }
-        forge.vm.stopPrank();
+        // forge.vm.startPrank(users.frank);
+        // {
+        //     nuggft.setApprovalForAll(users.mac, true);
+        // }
+        // forge.vm.stopPrank();
 
         forge.vm.startPrank(users.mac);
         {
@@ -165,44 +120,19 @@ contract revert__NuggftV1Loan is NuggftV1Test {
         forge.vm.stopPrank();
     }
 
-    function test__revert__NuggftV1Loan__0x31__liquidate__successAsOperatorExpired() public {
+    function test__revert__NuggftV1Loan__0x31__liquidate__successAsNotAgentExpired() public {
         uint160 tokenId = scenario_frank_has_a_loaned_token_that_has_expired();
 
         uint96 value = nuggft.valueForLiquidate(tokenId);
 
-        forge.vm.startPrank(users.frank);
-        {
-            nuggft.setApprovalForAll(users.mac, true);
-        }
-        forge.vm.stopPrank();
+        // forge.vm.startPrank(users.frank);
+        // {
+        //     nuggft.setApprovalForAll(users.mac, true);
+        // }
+        // forge.vm.stopPrank();
 
         forge.vm.startPrank(users.mac);
         {
-            nuggft.liquidate{value: value}(tokenId);
-        }
-        forge.vm.stopPrank();
-    }
-
-    function test__revert__NuggftV1Loan__0x31__liquidate__successNotOperatorExpired() public {
-        uint160 tokenId = scenario_frank_has_a_loaned_token_that_has_expired();
-
-        uint96 value = nuggft.valueForLiquidate(tokenId);
-
-        forge.vm.startPrank(users.mac);
-        {
-            nuggft.liquidate{value: value}(tokenId);
-        }
-        forge.vm.stopPrank();
-    }
-
-    function test__revert__NuggftV1Loan__0x31__liquidate__failAsNotOperatorNotExpired() public {
-        uint160 tokenId = scenario_frank_has_a_loaned_token();
-
-        uint96 value = nuggft.valueForLiquidate(tokenId);
-
-        forge.vm.startPrank(users.mac);
-        {
-            forge.vm.expectRevert(hex'31');
             nuggft.liquidate{value: value}(tokenId);
         }
         forge.vm.stopPrank();

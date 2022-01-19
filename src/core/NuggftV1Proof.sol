@@ -31,7 +31,7 @@ abstract contract NuggftV1Proof is INuggftV1Proof, NuggftV1Dotnugg {
         uint8 index0,
         uint8 index1
     ) external override {
-        ensureOperatorForOwner(msg.sender, tokenId);
+        require(isAgent(msg.sender, tokenId), hex'60');
 
         uint256 working = proofOf(tokenId);
 
@@ -112,7 +112,7 @@ abstract contract NuggftV1Proof is INuggftV1Proof, NuggftV1Dotnugg {
     ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━*/
 
     function addItem(uint160 tokenId, uint16 itemId) internal {
-        ensureOperatorForOwner(msg.sender, tokenId);
+        require(isAgent(msg.sender, tokenId), "SHOULDN'T HAPPEN 1");
 
         uint256 working = proofOf(tokenId);
 
@@ -122,7 +122,7 @@ abstract contract NuggftV1Proof is INuggftV1Proof, NuggftV1Dotnugg {
     }
 
     function removeItem(uint160 tokenId, uint16 itemId) internal {
-        ensureOperatorForOwner(msg.sender, tokenId);
+        require(isAgent(msg.sender, tokenId), "SHOULDN'T HAPPEN 2");
 
         uint256 working = proofOf(tokenId);
 

@@ -285,8 +285,8 @@ contract NuggftV1Test is ForgeTest {
 
         tokenId = scenario_frank_has_a_token_and_spent_50_eth();
 
-        forge.vm.prank(users.frank);
-        nuggft.approve(_nuggft, tokenId);
+        // forge.vm.prank(users.frank);
+        // nuggft.approve(_nuggft, tokenId);
 
         forge.vm.prank(users.frank);
         nuggft.loan(tokenId);
@@ -320,8 +320,8 @@ contract NuggftV1Test is ForgeTest {
     function scenario_dee_has_a_token_and_can_sell() public payable returns (uint160 tokenId) {
         tokenId = scenario_dee_has_a_token();
 
-        forge.vm.prank(users.dee);
-        nuggft.approve(_nuggft, tokenId);
+        // forge.vm.prank(users.dee);
+        // nuggft.approve(_nuggft, tokenId);
     }
 
     function scenario_dee_has_sold_a_token() public payable returns (uint160 tokenId, uint96 floor) {
@@ -360,8 +360,8 @@ contract NuggftV1Test is ForgeTest {
 
         floor = 3 ether;
 
-        forge.vm.prank(users.mac);
-        nuggft.approve(_nuggft, tokenId);
+        // forge.vm.prank(users.mac);
+        // nuggft.approve(_nuggft, tokenId);
 
         forge.vm.prank(users.mac);
         nuggft.sell(tokenId, floor);
