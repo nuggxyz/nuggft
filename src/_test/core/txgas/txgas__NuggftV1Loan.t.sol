@@ -4,7 +4,7 @@ pragma solidity 0.8.9;
 
 import '../../NuggftV1.test.sol';
 
-contract general__NuggftV1Loan is NuggftV1Test {
+contract txgas__NuggftV1Loan is NuggftV1Test {
     uint160 internal constant LOAN_TOKENID = 1499;
     uint160 internal constant REBALANCE_TOKENID = 1498;
     uint160 internal constant LIQUIDATE_TOKENID = 1497;
@@ -17,11 +17,12 @@ contract general__NuggftV1Loan is NuggftV1Test {
 
         nuggft.mint{value: 100 ether}(LOAN_TOKENID);
         nuggft.mint{value: 100 ether}(REBALANCE_TOKENID);
+        nuggft.loan(REBALANCE_TOKENID);
+
         nuggft.mint{value: 100 ether}(LIQUIDATE_TOKENID);
 
         forge.vm.roll(400);
 
-        nuggft.loan(REBALANCE_TOKENID);
         nuggft.loan(LIQUIDATE_TOKENID);
     }
 

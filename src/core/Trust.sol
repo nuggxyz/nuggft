@@ -4,8 +4,6 @@ pragma solidity 0.8.9;
 
 import {ITrust} from '../interfaces/ITrust.sol';
 
-/// @notice Ultra minimal authorization logic for smart contracts.
-/// @author Inspired by Dappsys V2 (https://github.com/dapp-org/dappsys-v2/blob/main/src/auth.sol)
 abstract contract Trust is ITrust {
     event UserTrustUpdated(address indexed user, bool trusted);
 

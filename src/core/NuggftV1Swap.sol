@@ -1,18 +1,13 @@
 // SPDX-License-Identifier: MIT
-// [PASS] test__txgas__NuggftV1Loan__liquidate() (gas: 23084)
-// [PASS] test__txgas__NuggftV1Loan__loan() (gas: 12629)
-// [PASS] test__txgas__NuggftV1Loan__rebalance() (gas: 22559)
+
 pragma solidity 0.8.9;
 
 import {INuggftV1Swap} from '../interfaces/nuggftv1/INuggftV1Swap.sol';
-
 import {NuggftV1Stake} from './NuggftV1Stake.sol';
-
 import {SafeCastLib} from '../libraries/SafeCastLib.sol';
-
 import {SafeTransferLib} from '../libraries/SafeTransferLib.sol';
-
 import {NuggftV1AgentType} from '../types/NuggftV1AgentType.sol';
+import '../_test/utils/forge.sol';
 
 /// @notice mechanism for trading of nuggs between users (and items between nuggs)
 /// @dev Explain to a developer any extra details
@@ -53,12 +48,15 @@ abstract contract NuggftV1Swap is INuggftV1Swap, NuggftV1Stake {
 
     /// @inheritdoc INuggftV1Swap
     function offer(uint160 tokenId) external payable override {
+        // console.log(tokenId);
+
         (Storage storage s, Memory memory m) = loadTokenSwap(tokenId, msg.sender);
 
         // make sure user is not the owner of swap
         // we do not know how much to give them when they call "claim" otherwise
 
         uint96 lead;
+        // console.log(tokenId);
 
         if (m.activeEpoch == tokenId && m.swapData == 0) {
             // to ensure we at least have enough to increment the offer amount by 2%
@@ -67,12 +65,15 @@ abstract contract NuggftV1Swap is INuggftV1Swap, NuggftV1Stake {
             // we do not need this, could take tokenId out as an argument - but do not want to give users
             // the ability to accidently place an offer for nugg A and end up minting nugg B.
             assert(m.offerData == 0);
+            // console.log(m.offerData);
 
             lead = msg.value.safe96();
+            // console.log(lead);
 
             (s.data) = NuggftV1AgentType.newAgentType(m.activeEpoch, m.sender, lead, false);
-
+            // console.log(s.data);
             addStakedShareFromMsgValue(0);
+            // console.log(s.data);
 
             setProofFromEpoch(tokenId);
 
@@ -126,9 +127,7 @@ abstract contract NuggftV1Swap is INuggftV1Swap, NuggftV1Stake {
 
     /// @inheritdoc INuggftV1Swap
     function claim(uint160 tokenId) external override {
-        uint96 value = _claim(tokenId);
-
-        SafeTransferLib.safeTransferETH(msg.sender, value);
+        SafeTransferLib.safeTransferETH(msg.sender, _claim(tokenId));
     }
 
     /// @inheritdoc INuggftV1Swap
@@ -164,9 +163,7 @@ abstract contract NuggftV1Swap is INuggftV1Swap, NuggftV1Stake {
         uint160 sellerTokenId,
         uint16 itemId
     ) public override {
-        uint96 value = _claimItem(buyerTokenId, sellerTokenId, itemId);
-
-        SafeTransferLib.safeTransferETH(msg.sender, value);
+        SafeTransferLib.safeTransferETH(msg.sender, _claimItem(buyerTokenId, sellerTokenId, itemId));
     }
 
     /// @inheritdoc INuggftV1Swap
@@ -281,6 +278,8 @@ abstract contract NuggftV1Swap is INuggftV1Swap, NuggftV1Stake {
             if (m.activeEpoch == tokenId) {
                 // swap is minting
                 nextSwapAmount = NuggftV1AgentType.compressEthRoundUp(msp());
+
+                // console.log(nextSwapAmount);
             } else {
                 // swap does not exist
                 return (false, 0, 0);
@@ -301,6 +300,8 @@ abstract contract NuggftV1Swap is INuggftV1Swap, NuggftV1Stake {
             nextSwapAmount = MIN_OFFER;
         } else {
             nextSwapAmount = NuggftV1AgentType.addIncrement(nextSwapAmount);
+
+            // console.log('2', nextSwapAmount);
         }
     }
 
@@ -316,7 +317,7 @@ abstract contract NuggftV1Swap is INuggftV1Swap, NuggftV1Stake {
         assert(m.swapData.flag());
 
         // forces a user not to commit on their own swap
-        // commented out as the logic is handled by S:R
+        //commented out as the logic is handled by S:R
         // require(!m.offerData.flag()(), 0x23);
 
         uint24 newEpoch = m.activeEpoch + 1;

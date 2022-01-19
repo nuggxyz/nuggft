@@ -19,6 +19,8 @@ interface INuggftV1Loan {
 
     function rebalance(uint160 tokenId) external payable;
 
+    function multirebalance(uint160[] memory tokenId) external payable;
+
     function loan(uint160 tokenId) external;
 
     function liquidate(uint160 tokenId) external payable;
