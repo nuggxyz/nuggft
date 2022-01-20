@@ -157,10 +157,10 @@ abstract contract NuggftV1Stake is INuggftV1Stake, NuggftV1Proof {
 
         assembly {
             premium := div(mul(ethPerShare, premium), 10000)
+            total := add(ethPerShare, add(protocolFee, premium))
         }
 
         // premium = ((eps * cache.shares()) / 10000);
-        total = ethPerShare + protocolFee + premium;
     }
 
     // @test manual
