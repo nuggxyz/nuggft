@@ -163,14 +163,8 @@ abstract contract NuggftV1Stake is INuggftV1Stake, NuggftV1Proof {
 
     // @test manual
     function calculateEthPerShare(uint256 cache) internal pure returns (uint96 res) {
-        // res = cache.shares();
-        // if (res == 0) return 0;
-        // cache = cache.staked();
         assembly {
             res := shr(192, cache)
-            // if iszero(res) {
-            //     return(0, 0)
-            // }
             res := div(and(shr(96, cache), sub(shl(96, 1), 1)), res)
         }
 
