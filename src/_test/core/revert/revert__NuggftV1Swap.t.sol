@@ -9,14 +9,14 @@ contract revert__NuggftV1Swap is NuggftV1Test {
 
     function setUp() public {
         reset();
-        forge.vm.roll(15000);
+        forge.vm.roll(1000);
     }
 
     /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
         [S:0] - offer - "msg.sender is operator for sender"
        ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
 
-    function test__revert__NuggftV1Swap__0x20__successAsSelf() public {
+    function test__revert__NuggftV1Swap__0x0F__successAsSelf() public {
         uint160 tokenId = nuggft.epoch();
 
         uint96 value = 30 * 10**16;
@@ -104,7 +104,7 @@ contract revert__NuggftV1Swap is NuggftV1Test {
         [S:3a] - offer - "if commiting, offerer should not be owner of sell"
        ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
 
-    function test__revert__NuggftV1Swap__0x20__successWithNotOwner() public {
+    function test__revert__NuggftV1Swap__0x0F__successWithNotOwner() public {
         (uint160 tokenId, uint96 floor) = scenario_dee_has_sold_a_token();
 
         uint96 value = floor + 1 ether;
@@ -124,7 +124,7 @@ contract revert__NuggftV1Swap is NuggftV1Test {
         check();
     }
 
-    function test__revert__NuggftV1Swap__0x20__successWithOwnerAfterSomeoneElseOffers() public {
+    function test__revert__NuggftV1Swap__0x0F__successWithOwnerAfterSomeoneElseOffers() public {
         (uint160 tokenId, uint96 floor) = scenario_dee_has_sold_a_token();
 
         uint96 value = floor + 1 ether;
@@ -154,7 +154,7 @@ contract revert__NuggftV1Swap is NuggftV1Test {
         check();
     }
 
-    function test__revert__NuggftV1Swap__0x20__failWithOwnerOnCommit() public {
+    function test__revert__NuggftV1Swap__0x0F__failWithOwnerOnCommit() public {
         (uint160 tokenId, uint96 floor) = scenario_dee_has_sold_a_token();
 
         uint96 value = floor + 1 ether * 2;
@@ -163,7 +163,7 @@ contract revert__NuggftV1Swap is NuggftV1Test {
 
         forge.vm.startPrank(users.dee);
         {
-            forge.vm.expectRevert(hex'20');
+            forge.vm.expectRevert(hex'0F');
             nuggft.offer{value: value}(tokenId);
         }
         forge.vm.stopPrank();
@@ -172,7 +172,7 @@ contract revert__NuggftV1Swap is NuggftV1Test {
     /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
         [S:3b] - offer - "if not minting, offerer must claim previous offers for the specific token"
        ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
-    function test__revert__NuggftV1Swap__0x20__successWithUserWithNoPrevClaim() public {
+    function test__revert__NuggftV1Swap__0x0F__successWithUserWithNoPrevClaim() public {
         (uint160 tokenId, uint96 floor) = scenario_mac_has_sold_a_token_dee_sold();
 
         uint96 value = floor + 1 ether;
@@ -193,7 +193,7 @@ contract revert__NuggftV1Swap is NuggftV1Test {
     }
 
     // LOL - MASSIVE bug found with this test
-    function test__revert__NuggftV1Swap__0x20__successWithPrevClaimUserAfterClaiming() public {
+    function test__revert__NuggftV1Swap__0x0F__successWithPrevClaimUserAfterClaiming() public {
         (uint160 tokenId, uint96 floor) = scenario_mac_has_sold_a_token_dee_sold();
 
         uint96 value = floor + 1 ether;
@@ -208,7 +208,7 @@ contract revert__NuggftV1Swap is NuggftV1Test {
         forge.vm.stopPrank();
     }
 
-    function test__revert__NuggftV1Swap__0x20__failWtihUserWithPrevClaim() public {
+    function test__revert__NuggftV1Swap__0x0F__failWtihUserWithPrevClaim() public {
         (uint160 tokenId, uint96 floor) = scenario_mac_has_sold_a_token_dee_sold();
 
         uint96 value = floor + 1 ether;
@@ -217,7 +217,7 @@ contract revert__NuggftV1Swap is NuggftV1Test {
 
         forge.vm.startPrank(users.dee);
         {
-            forge.vm.expectRevert(hex'20');
+            forge.vm.expectRevert(hex'0F');
             nuggft.offer{value: value}(tokenId);
         }
         forge.vm.stopPrank();
@@ -262,6 +262,8 @@ contract revert__NuggftV1Swap is NuggftV1Test {
         uint96 value = floor + 1 ether;
 
         forge.vm.deal(users.dee, value);
+
+        nuggft.epoch();
 
         forge.vm.startPrank(users.dee);
         {

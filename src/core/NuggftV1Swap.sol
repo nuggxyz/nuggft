@@ -63,13 +63,15 @@ abstract contract NuggftV1Swap is INuggftV1Swap, NuggftV1Stake {
             // we do not need this, could take tokenId out as an argument - but do not want to give users
             // the ability to accidently place an offer for nugg A and end up minting nugg B.
             assert(m.offerData == 0);
-            // console.log(m.offerData);
 
-            updatedAgency = NuggftV1AgentType.create(m.activeEpoch, m.sender, uint96(msg.value), NuggftV1AgentType.Flag.SWAP);
+            uint256 tmp = m.activeEpoch;
+            // updatedAgency = NuggftV1AgentType.create(m.activeEpoch, m.sender, uint96(msg.value), NuggftV1AgentType.Flag.SWAP);
 
-            // console.log(s.data);
+            assembly {
+                updatedAgency := or(caller(), or(shl(160, div(callvalue(), 1000000000)), or(shl(230, tmp), shl(254, 0x1))))
+            }
+
             addStakedShareFromMsgValue(0);
-            // console.log(s.data);
 
             setProofFromEpoch(tokenId);
 
@@ -77,17 +79,19 @@ abstract contract NuggftV1Swap is INuggftV1Swap, NuggftV1Stake {
         } else {
             require(m.swapData.flag() == NuggftV1AgentType.Flag.SWAP, hex'24');
 
+            // require((m.swapData >> 254) == uint256(NuggftV1AgentType.Flag.SWAP, hex'24');
+
             if (m.offerData != 0) {
                 // forces user to claim previous swap before acting on this one
                 // prevents owner from COMMITTING on their own swap - not offering
-                require(m.offerData.epoch() >= m.activeEpoch, hex'20');
+                require(m.offerData.epoch() >= m.activeEpoch, hex'0F');
 
                 // assert(!m.offerData.flag()); // always be caught by the require above
             }
 
-            // if (m.swapData.flag()) {
+            // if the leader "owns" the swap, then it was initated by them - "commit" must be executed
             if (m.swapData.epoch() == 0) {
-                emit Transfer(m.swapData.account(), address(this), tokenId);
+                emit Transfer(address(uint160(m.swapData)), address(this), tokenId);
 
                 // agency[tokenId] = agency[tokenId].account(address(this));
 
@@ -95,14 +99,16 @@ abstract contract NuggftV1Swap is INuggftV1Swap, NuggftV1Stake {
             } else {
                 updatedAgency = carry(s, m);
             }
-
-            // if the leader "owns" the swap, then it was initated by them - "commit" must be executed
-            // (lead) = m.swapData.flag() ? commit(s, m) : carry(s, m);
         }
 
-        agency[tokenId] = updatedAgency;
+        assembly {
+            // agency[tokenId] = updatedAgency;
+            mstore(0, tokenId)
+            mstore(0x20, agency.slot)
+            sstore(keccak256(0, 64), updatedAgency)
+        }
 
-        emit Offer(tokenId, msg.sender, updatedAgency.eth());
+        emit Offer(tokenId, bytes32(updatedAgency));
     }
 
     /// @inheritdoc INuggftV1Swap
@@ -130,7 +136,7 @@ abstract contract NuggftV1Swap is INuggftV1Swap, NuggftV1Stake {
 
         s.data = updatedAgency;
 
-        emit OfferItem(encodeSellingItemId(sellerTokenId, itemId), buyerTokenId, updatedAgency.eth());
+        emit OfferItem(encodeSellingItemId(sellerTokenId, itemId), bytes32(updatedAgency));
     }
 
     /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -159,7 +165,12 @@ abstract contract NuggftV1Swap is INuggftV1Swap, NuggftV1Stake {
         delete s.offers[msg.sender];
 
         if (checkClaimerIsWinnerOrLoser(m)) {
-            agency[tokenId] = NuggftV1AgentType.create(0, msg.sender, 0, NuggftV1AgentType.Flag.OWN);
+            // agency[tokenId] = NuggftV1AgentType.create(0, msg.sender, 0, NuggftV1AgentType.Flag.OWN);
+            assembly {
+                mstore(0, tokenId)
+                mstore(0x20, agency.slot)
+                sstore(keccak256(0, 64), or(caller(), shl(254, 0x3)))
+            }
 
             emit Transfer(address(this), msg.sender, tokenId);
         } else {
@@ -231,18 +242,18 @@ abstract contract NuggftV1Swap is INuggftV1Swap, NuggftV1Stake {
 
         require(floor >= eps(), hex'2B');
 
-        // approvedTransferToSelf(tokenId);
+        // uint256 updatedAgency = NuggftV1AgentType.create(0, msg.sender, floor, NuggftV1AgentType.Flag.SWAP);
+        uint256 updatedAgency;
 
-        (, Memory memory m) = loadTokenSwap(tokenId, msg.sender);
+        assembly {
+            updatedAgency := or(caller(), or(shl(160, div(floor, 1000000000)), or(shl(230, 0), shl(254, 0x1))))
 
-        // make sure swap does not exist - this logically should never happen
-        assert(m.swapData.flag() == NuggftV1AgentType.Flag.OWN);
+            mstore(0, tokenId)
+            mstore(0x20, agency.slot)
+            sstore(keccak256(0, 64), updatedAgency)
+        }
 
-        agency[tokenId] = NuggftV1AgentType.create(0, msg.sender, floor, NuggftV1AgentType.Flag.SWAP);
-
-        // (s.data) = NuggftV1AgentType.create(0, msg.sender, floor, true);
-
-        emit Sell(tokenId, floor);
+        emit Sell(tokenId, bytes32(updatedAgency));
     }
 
     /// @inheritdoc INuggftV1Swap
@@ -256,16 +267,18 @@ abstract contract NuggftV1Swap is INuggftV1Swap, NuggftV1Stake {
         // will revert if they do not have the item
         removeItem(tokenId, itemId);
 
-        protocolItems[itemId]++;
+        unchecked {
+            protocolItems[itemId]++;
+        }
 
         (Storage storage s, Memory memory m) = loadItemSwap(tokenId, itemId, address(tokenId));
 
         // cannot sell two of the same item at same time
         require(m.swapData == 0, hex'2D');
 
-        (s.data) = NuggftV1AgentType.create(0, address(tokenId), floor, NuggftV1AgentType.Flag.SWAP);
-
-        emit Sell(tokenId, floor);
+        uint256 updatedAgency = NuggftV1AgentType.create(0, address(tokenId), floor, NuggftV1AgentType.Flag.SWAP);
+        (s.data) = updatedAgency;
+        emit Sell(tokenId, bytes32(updatedAgency));
     }
 
     /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -291,8 +304,6 @@ abstract contract NuggftV1Swap is INuggftV1Swap, NuggftV1Stake {
             if (m.activeEpoch == tokenId) {
                 // swap is minting
                 nextSwapAmount = NuggftV1AgentType.compressEthRoundUp(msp());
-
-                // console.log(nextSwapAmount);
             } else {
                 // swap does not exist
                 return (false, 0, 0);
@@ -358,34 +369,63 @@ abstract contract NuggftV1Swap is INuggftV1Swap, NuggftV1Stake {
         );
     }
 
+    // @scenario - leader claims in the middle of a swap
+
     function checkClaimerIsWinnerOrLoser(Memory memory m) internal pure returns (bool winner) {
         require(m.offerData != 0, hex'2E');
 
-        bool isOver = m.activeEpoch > m.swapData.epoch();
-        bool isLeader = m.offerData.account() == m.swapData.account();
-        bool isOwner = m.swapData.epoch() == 0 && m.offerData == m.swapData;
+        bool isLeader = uint160(m.offerData) == uint160(m.swapData);
 
-        return isLeader && (isOwner || isOver);
+        if (isLeader) {
+            bool isOver = m.activeEpoch > m.swapData.epoch();
+            bool isOwner = m.swapData.epoch() == 0 && m.offerData == m.swapData;
+
+            require(isOver || isOwner, hex'67');
+
+            return true;
+        }
+
+        // return isLeader && (isOwner || isOver);
     }
 
     // @test  unit
     function updateSwapDataWithEpoch(
         uint256 prevSwapData,
-        uint24 _epoch,
+        uint256 _epoch,
         address account,
-        uint96 currUserOffer
+        uint256 currUserOffer
     ) internal returns (uint256 res) {
         uint96 baseEth = prevSwapData.eth();
 
-        unchecked {
-            currUserOffer += uint96(msg.value);
+        // unchecked {
+        //     currUserOffer += uint96(msg.value);
+        // }
+
+        // require(NuggftV1AgentType.addIncrement(baseEth) <= currUserOffer, hex'26');
+        // res = NuggftV1AgentType.create(_epoch, account, currUserOffer, NuggftV1AgentType.Flag.SWAP);
+
+        // // assembly {
+        // //     res := or(account, or(shl(160, div(currUserOffer, 1000000000)), or(shl(230, _epoch), shl(254, 0x1))))
+        // // }
+
+        // unchecked {
+        //     addStakedEth(uint96(currUserOffer - baseEth));
+        // }
+
+        assembly {
+            currUserOffer := add(currUserOffer, callvalue())
+            // let inc := div(mul(baseEth, 10200), 10000)
+            if gt(div(mul(baseEth, 10200), 10000), currUserOffer) {
+                mstore(0x00, 0x26)
+                revert(0x19, 0x01)
+            }
+
+            res := or(account, or(shl(160, div(currUserOffer, 1000000000)), or(shl(230, _epoch), shl(254, 0x1))))
+
+            baseEth := sub(currUserOffer, baseEth)
         }
 
-        require(NuggftV1AgentType.addIncrement(baseEth) <= currUserOffer, hex'26');
-
-        (res) = NuggftV1AgentType.create(_epoch, account, currUserOffer, NuggftV1AgentType.Flag.SWAP);
-
-        addStakedEth(currUserOffer - baseEth);
+        addStakedEth(baseEth);
     }
 
     /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━

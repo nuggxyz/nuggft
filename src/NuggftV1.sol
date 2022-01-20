@@ -195,10 +195,6 @@ contract NuggftV1 is IERC721Metadata, NuggftV1Loan {
         emit MigrateV1Sent(migrator, tokenId, proof, msg.sender, ethOwed);
     }
 
-    // function testnet__exploit() external {
-    //     TransferLib.give(msg.sender, address(this).balance);
-    // }
-
     /// @notice removes a staked share from the contract,
     /// @dev this is the only way to remove a share
     /// @dev caculcates but does not handle dealing the eth - which is handled by the two helpers above
@@ -231,6 +227,6 @@ contract NuggftV1 is IERC721Metadata, NuggftV1Loan {
 
         stake = cache;
 
-        emit Stake(cache);
+        emit Stake(bytes32(cache));
     }
 }

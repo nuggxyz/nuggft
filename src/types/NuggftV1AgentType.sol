@@ -53,7 +53,7 @@ library NuggftV1AgentType {
     // type(uint96).max / 10e9 =     79228162514264337593
     // type(uint69).max          =  590295810358705651712
     function eth(uint256 input) internal pure returns (uint96 res) {
-        input = ShiftLib.get(input, 69, 160);
+        input = ShiftLib.get(input, 70, 160);
         assembly {
             res := mul(input, COMPRESSION_LOSS)
         }
@@ -64,16 +64,16 @@ library NuggftV1AgentType {
         assembly {
             update := div(update, COMPRESSION_LOSS) // bye byte wei
         }
-        cache = ShiftLib.set(input, 69, 160, update);
+        cache = ShiftLib.set(input, 70, 160, update);
     }
 
     // @test  input output unit test
     function epoch(uint256 input, uint24 update) internal pure returns (uint256 res) {
-        return ShiftLib.set(input, 24, 229, update);
+        return ShiftLib.set(input, 24, 230, update);
     }
 
     function epoch(uint256 input) internal pure returns (uint24 res) {
-        return uint24(ShiftLib.get(input, 24, 229));
+        return uint24(ShiftLib.get(input, 24, 230));
     }
 
     // @test  input output unit test
@@ -87,11 +87,11 @@ library NuggftV1AgentType {
 
     // @test  input output unit test
     function flag(uint256 input, Flag update) internal pure returns (uint256 res) {
-        return ShiftLib.set(input, 2, 253, uint8(update));
+        return ShiftLib.set(input, 2, 254, uint8(update));
     }
 
     function flag(uint256 input) internal pure returns (Flag output) {
-        output = Flag(ShiftLib.get(input, 2, 253));
+        output = Flag(ShiftLib.get(input, 2, 254));
     }
 
     // // @test  input output unit test
@@ -104,9 +104,9 @@ library NuggftV1AgentType {
     // }
 
     // @test  check to see if it does this - will be easy
-    function _mark(uint256 input) private pure returns (uint256 res) {
-        res = ShiftLib.set(input, 1, 255, 0x01);
-    }
+    // function _mark(uint256 input) private pure returns (uint256 res) {
+    //     res = ShiftLib.set(input, 1, 255, 0x01);
+    // }
 
     enum Flag {
         NONE,
@@ -126,6 +126,6 @@ library NuggftV1AgentType {
         res = account(res, _account);
         res = flag(res, _flag);
         res = eth(res, _eth);
-        res = _mark(res);
+        // res = _mark(res);
     }
 }
