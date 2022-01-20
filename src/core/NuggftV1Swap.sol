@@ -48,14 +48,6 @@ abstract contract NuggftV1Swap is INuggftV1Swap, NuggftV1Stake {
         uint256 swapData = agency[tokenId];
         uint24 activeEpoch = epoch();
 
-        uint256 offerData;
-
-        if (uint160(msg.sender) == uint160(swapData)) {
-            offerData = swapData;
-        } else {
-            offerData = swaps[tokenId].self.offers[msg.sender];
-        }
-
         // make sure user is not the owner of swap
         // we do not know how much to give them when they call "claim" otherwise
 
@@ -69,7 +61,7 @@ abstract contract NuggftV1Swap is INuggftV1Swap, NuggftV1Stake {
 
             // we do not need this, could take tokenId out as an argument - but do not want to give users
             // the ability to accidently place an offer for nugg A and end up minting nugg B.
-            assert(offerData == 0);
+            // assert(offerData == 0);
 
             // updatedAgency = NuggftV1AgentType.create(m.activeEpoch, m.sender, uint96(msg.value), NuggftV1AgentType.Flag.SWAP);
 
@@ -84,6 +76,14 @@ abstract contract NuggftV1Swap is INuggftV1Swap, NuggftV1Stake {
             emit Transfer(address(0), address(this), tokenId);
         } else {
             require(swapData.flag() == NuggftV1AgentType.Flag.SWAP, hex'24');
+
+            uint256 offerData;
+
+            if (uint160(msg.sender) == uint160(swapData)) {
+                offerData = swapData;
+            } else {
+                offerData = swaps[tokenId].self.offers[msg.sender];
+            }
 
             // require((swapData >> 254) == uint256(NuggftV1AgentType.Flag.SWAP, hex'24');
 
