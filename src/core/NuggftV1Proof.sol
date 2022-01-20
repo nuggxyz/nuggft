@@ -11,7 +11,9 @@ import {NuggftV1Dotnugg} from './NuggftV1Dotnugg.sol';
 
 import {NuggftV1ProofType} from '../types/NuggftV1ProofType.sol';
 
-abstract contract NuggftV1Proof is INuggftV1Proof, NuggftV1Dotnugg {
+import '../_test/utils/forge.sol';
+
+abstract contract NuggftV1Proof is INuggftV1Proof, NuggftV1Dotnugg, GasTracker {
     using CastLib for uint160;
     using CastLib for uint256;
 
@@ -103,9 +105,9 @@ abstract contract NuggftV1Proof is INuggftV1Proof, NuggftV1Dotnugg {
                              internal functions
        ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
 
-    function exists(uint160 tokenId) internal view override returns (bool) {
-        return proofOf(tokenId) != 0;
-    }
+    // function exists(uint160 tokenId) internal view override returns (bool) {
+    //     return proofOf(tokenId) != 0;
+    // }
 
     /*━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
                             SWAP MANAGEMENT
@@ -156,7 +158,7 @@ abstract contract NuggftV1Proof is INuggftV1Proof, NuggftV1Dotnugg {
     }
 
     // TODO TO BE TESTED
-    function initFromSeed(uint256 seed) internal view returns (uint256 res) {
+    function initFromSeed(uint256 seed) internal view trackGas returns (uint256 res) {
         require(seed != 0, 'P:8');
 
         uint256 l = featureLengths;

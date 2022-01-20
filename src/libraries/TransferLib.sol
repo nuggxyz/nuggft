@@ -12,12 +12,3 @@ library TransferLib {
         }
     }
 }
-
-//    bool callStatus;
-
-//         assembly {
-//             // Transfer the ETH and store if it succeeded or not.
-//             callStatus := call(gas(), to, amount, 0, 0, 0, 0)
-//         }
-
-//         require(callStatus, 'Z:0');

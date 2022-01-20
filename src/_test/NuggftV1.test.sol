@@ -70,7 +70,7 @@ contract NuggftV1Test is ForgeTest {
     // constructor() {}
 
     function reset() public {
-        forge.vm.roll(15000);
+        forge.vm.roll(1000);
         // bytes memory tmp = hex'000100';
 
         PureDeployer dep = new PureDeployer(0, 0, type(RiggedNuggft).creationCode, type(MockDotnuggV1).creationCode, tmpdata);
@@ -295,7 +295,7 @@ contract NuggftV1Test is ForgeTest {
     function scenario_frank_has_a_loaned_token_that_has_expired() public payable returns (uint160 tokenId) {
         tokenId = scenario_frank_has_a_loaned_token();
 
-        forge.vm.roll(200000);
+        forge.vm.roll(2000000);
     }
 
     function scenario_dee_has_a_token_2() public payable returns (uint160 tokenId) {

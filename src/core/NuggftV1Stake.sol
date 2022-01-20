@@ -34,7 +34,7 @@ abstract contract NuggftV1Stake is INuggftV1Stake, NuggftV1Proof {
 
         cache = cache.proto(0);
 
-        emit Stake(cache);
+        emit Stake(bytes32(cache));
     }
 
     /// @inheritdoc INuggftV1Stake
@@ -105,7 +105,7 @@ abstract contract NuggftV1Stake is INuggftV1Stake, NuggftV1Proof {
 
         stake = cache;
 
-        emit Stake(cache);
+        emit Stake(bytes32(cache));
     }
 
     /// @notice handles isolated staking of eth
@@ -123,7 +123,7 @@ abstract contract NuggftV1Stake is INuggftV1Stake, NuggftV1Proof {
 
         stake = cache;
 
-        emit Stake(cache);
+        emit Stake(bytes32(cache));
     }
 
     function calculateProtocolFeeOf(uint256 any) internal pure returns (uint96 res) {

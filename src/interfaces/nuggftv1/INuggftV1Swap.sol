@@ -3,12 +3,12 @@
 pragma solidity 0.8.9;
 
 interface INuggftV1Swap {
-    event Offer(uint160 indexed tokenId, address user, uint96 lead);
-    event OfferItem(uint176 indexed sellingItemId, uint160 nugg, uint96 lead);
+    event Offer(uint160 indexed tokenId, bytes32 agency);
+    event OfferItem(uint176 indexed sellingItemId, bytes32 agency);
     event Claim(uint160 indexed tokenId, address user);
     event ClaimItem(uint176 indexed sellingItemId, uint160 nugg);
-    event Sell(uint160 indexed tokenId, uint96 floor);
-    event SellItem(uint176 indexed sellingItemId, uint96 floor);
+    event Sell(uint160 indexed tokenId, bytes32 agency);
+    event SellItem(uint176 indexed sellingItemId, bytes32 agency);
 
     /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
                             STATE CHANGING
