@@ -18,6 +18,7 @@ abstract contract NuggftV1Epoch is INuggftV1Epoch {
 
     /// @inheritdoc INuggftV1Epoch
     function epoch() public view override returns (uint24 res) {
+        require(block.number >= genesis, hex'03');
         res = toEpoch(block.number, genesis);
     }
 
