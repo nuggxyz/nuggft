@@ -52,6 +52,7 @@ abstract contract NuggftV1Swap is INuggftV1Swap, NuggftV1Stake {
         // we do not know how much to give them when they call "claim" otherwise
 
         uint256 updatedAgency;
+        uint256 currUserOffer;
 
         // logger.log(m.activeEpoch, 'm.activeEpoch', tokenId, 'tokenId', m.swapData, 'm.swapData');
 
@@ -66,7 +67,8 @@ abstract contract NuggftV1Swap is INuggftV1Swap, NuggftV1Stake {
             // updatedAgency = NuggftV1AgentType.create(m.activeEpoch, m.sender, uint96(msg.value), NuggftV1AgentType.Flag.SWAP);
 
             assembly {
-                updatedAgency := or(caller(), or(shl(160, div(callvalue(), 1000000000)), or(shl(230, activeEpoch), shl(254, 0x1))))
+                currUserOffer := callvalue()
+                // updatedAgency := or(caller(), or(shl(160, div(callvalue(), 1000000000)), or(shl(230, activeEpoch), shl(254, 0x1))))
             }
 
             addStakedShareFromMsgValue(0);
@@ -118,7 +120,7 @@ abstract contract NuggftV1Swap is INuggftV1Swap, NuggftV1Stake {
             }
 
             uint96 baseEth = swapData.eth();
-            uint96 currUserOffer = offerData.eth();
+            currUserOffer = offerData.eth();
 
             assembly {
                 currUserOffer := add(currUserOffer, callvalue())
@@ -128,8 +130,6 @@ abstract contract NuggftV1Swap is INuggftV1Swap, NuggftV1Stake {
                     revert(0x19, 0x01)
                 }
 
-                updatedAgency := or(caller(), or(shl(160, div(currUserOffer, 1000000000)), or(shl(230, activeEpoch), shl(254, 0x1))))
-
                 baseEth := sub(currUserOffer, baseEth)
             }
 
@@ -137,6 +137,8 @@ abstract contract NuggftV1Swap is INuggftV1Swap, NuggftV1Stake {
         }
 
         assembly {
+            updatedAgency := or(caller(), or(shl(160, div(currUserOffer, 1000000000)), or(shl(230, activeEpoch), shl(254, 0x1))))
+
             // agency[tokenId] = updatedAgency;
             mstore(0, tokenId)
             mstore(0x20, agency.slot)
