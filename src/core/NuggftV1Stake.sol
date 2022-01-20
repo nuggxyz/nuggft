@@ -94,10 +94,12 @@ abstract contract NuggftV1Stake is INuggftV1Stake, NuggftV1Proof {
         // logically unnessesary - to help front end
         require(value >= totalPrice, hex'71'); // "not enough eth to create share"
 
-        uint96 overpay = value - totalPrice;
+        unchecked {
+            uint96 overpay = value - totalPrice;
+            protocolFee += calculateProtocolFeeOf(overpay);
+        }
 
         // the rest of the value gets added to stakedEth
-        protocolFee += calculateProtocolFeeOf(overpay);
 
         cache = cache.addShares(1);
         cache = cache.addStaked(value - protocolFee);
@@ -117,8 +119,9 @@ abstract contract NuggftV1Stake is INuggftV1Stake, NuggftV1Proof {
         uint256 cache = stake;
 
         uint96 protocolFee = calculateProtocolFeeOf(eth);
-
-        cache = cache.addStaked(eth - protocolFee);
+        unchecked {
+            cache = cache.addStaked(eth - protocolFee);
+        }
         cache = cache.addProto(protocolFee);
 
         stake = cache;
@@ -126,7 +129,7 @@ abstract contract NuggftV1Stake is INuggftV1Stake, NuggftV1Proof {
         emit Stake(bytes32(cache));
     }
 
-    function calculateProtocolFeeOf(uint256 any) internal pure returns (uint96 res) {
+    function calculateProtocolFeeOf(uint96 any) internal pure returns (uint96 res) {
         // res = (any * PROTOCOL_FEE_BPS) / 10000;
 
         assembly {
@@ -157,7 +160,6 @@ abstract contract NuggftV1Stake is INuggftV1Stake, NuggftV1Proof {
         }
 
         // premium = ((eps * cache.shares()) / 10000);
-
         total = ethPerShare + protocolFee + premium;
     }
 
