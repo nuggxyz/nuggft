@@ -22,15 +22,13 @@ interface INuggftV1Swap {
         uint16 itemId
     ) external payable;
 
-    function claim(uint160 tokenId) external;
-
     function claimItem(
         uint160 buyerTokenId,
         uint160 sellerTokenId,
         uint16 itemid
     ) external;
 
-    function multiclaim(uint160[] calldata tokenIds) external;
+    function claim(uint160[] calldata tokenIds) external;
 
     function multiclaimItem(
         uint160[] calldata buyerTokenIds,

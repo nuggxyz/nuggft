@@ -16,7 +16,7 @@ contract revert__NuggftV1Swap is NuggftV1Test {
         [S:0] - offer - "msg.sender is operator for sender"
        ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
 
-    function test__revert__NuggftV1Swap__0x0F__successAsSelf() public {
+    function test__revert__NuggftV1Swap__0x0F__offer__successAsSelf() public {
         uint160 tokenId = nuggft.epoch();
 
         uint96 value = 30 * 10**16;
@@ -33,10 +33,10 @@ contract revert__NuggftV1Swap is NuggftV1Test {
         [S:1] - offer - "msg.value >= minimum offer"
        ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
 
-    function test__revert__NuggftV1Swap__0x21__successWithExactMinOffer() public {
+    function test__revert__NuggftV1Swap__0x71__offer__successWithExactMinOffer() public {
         uint160 tokenId = nuggft.epoch();
 
-        uint96 value = nuggft.MIN_OFFER();
+        uint96 value = 10**8;
         forge.vm.deal(users.frank, value);
 
         expectBalChange(users.frank, value, dir.down);
@@ -52,10 +52,10 @@ contract revert__NuggftV1Swap is NuggftV1Test {
         check();
     }
 
-    function test__revert__NuggftV1Swap__0x21__successWithHigherMinOffer() public {
+    function test__revert__NuggftV1Swap__0x71__offer__successWithHigherMinOffer() public {
         uint160 tokenId = nuggft.epoch();
 
-        uint96 value = nuggft.MIN_OFFER() + 1;
+        uint96 value = 10**8 + 1;
 
         forge.vm.deal(users.frank, value);
 
@@ -72,21 +72,38 @@ contract revert__NuggftV1Swap is NuggftV1Test {
         check();
     }
 
-    function test__revert__NuggftV1Swap__0x21__failWithOneWeiLessThanMin() public {
+    function test__revert__NuggftV1Swap__0x71__offer__passWithOneWeiLessThanMin() public {
         uint160 tokenId = nuggft.epoch();
 
-        uint96 value = nuggft.MIN_OFFER() - 1;
+        uint96 value = 10**8 - 1;
 
         forge.vm.startPrank(users.frank);
         {
             forge.vm.deal(users.frank, value);
-            forge.vm.expectRevert(hex'21');
+            // forge.vm.expectRevert(hex'21');
             nuggft.offer{value: value}(tokenId);
         }
         forge.vm.stopPrank();
     }
 
-    function test__revert__NuggftV1Swap__0x21__failWithZero() public {
+    function test__revert__NuggftV1Swap__0x71__offer__failWithOneWeiLessThanMinAfterSomeValue() public {
+        uint160 tokenId = nuggft.epoch();
+
+        forge.vm.startPrank(users.frank);
+        {
+            forge.vm.deal(users.frank, 1 ether);
+            nuggft.mint{value: 1 ether}(500);
+
+            uint96 value = 10**8 - 1;
+
+            forge.vm.deal(users.frank, value);
+            forge.vm.expectRevert(hex'71');
+            nuggft.offer{value: value}(tokenId);
+        }
+        forge.vm.stopPrank();
+    }
+
+    function test__revert__NuggftV1Swap__0x71__offer__passWithZero() public {
         uint160 tokenId = nuggft.epoch();
 
         uint96 value = 0;
@@ -94,7 +111,24 @@ contract revert__NuggftV1Swap is NuggftV1Test {
         forge.vm.startPrank(users.frank);
         {
             forge.vm.deal(users.frank, value);
-            forge.vm.expectRevert(hex'21');
+            // forge.vm.expectRevert(hex'21');
+            nuggft.offer{value: value}(tokenId);
+        }
+        forge.vm.stopPrank();
+    }
+
+    function test__revert__NuggftV1Swap__0x71__offer__failWithZeroAfterSomeValue() public {
+        uint160 tokenId = nuggft.epoch();
+
+        forge.vm.startPrank(users.frank);
+        {
+            forge.vm.deal(users.frank, 1 ether);
+            nuggft.mint{value: 1 ether}(500);
+
+            uint96 value = 0;
+
+            forge.vm.deal(users.frank, value);
+            forge.vm.expectRevert(hex'71');
             nuggft.offer{value: value}(tokenId);
         }
         forge.vm.stopPrank();
@@ -202,7 +236,7 @@ contract revert__NuggftV1Swap is NuggftV1Test {
 
         forge.vm.startPrank(users.dee);
         {
-            nuggft.claim(tokenId);
+            nuggft.claim(lib.singleton160(tokenId));
             nuggft.offer{value: value}(tokenId);
         }
         forge.vm.stopPrank();
@@ -267,7 +301,7 @@ contract revert__NuggftV1Swap is NuggftV1Test {
 
         forge.vm.startPrank(users.dee);
         {
-            nuggft.claim(tokenId);
+            nuggft.claim(lib.singleton160(tokenId));
 
             nuggft.offer{value: value}(tokenId);
         }
@@ -278,7 +312,7 @@ contract revert__NuggftV1Swap is NuggftV1Test {
         [S:5] - offer - "if commiting, msg.value must be >= total eth per share"
        ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
 
-    function test__revert__NuggftV1Swap__0x25__failWithVeryHighEPS() public {
+    function test__revert__NuggftV1Swap__0x25__passWithVeryHighEPS() public {
         (uint160 tokenId, uint96 floor) = scenario_mac_has_sold_a_token_dee_sold();
 
         uint160 tokenId2 = 1500;
@@ -292,7 +326,7 @@ contract revert__NuggftV1Swap is NuggftV1Test {
         {
             nuggft.mint{value: value}(tokenId2);
 
-            forge.vm.expectRevert(hex'25');
+            // forge.vm.expectRevert(hex'25');
             nuggft.offer{value: value2}(tokenId);
         }
         forge.vm.stopPrank();
@@ -438,7 +472,7 @@ contract revert__NuggftV1Swap is NuggftV1Test {
 
         forge.vm.startPrank(users.mac);
         {
-            nuggft.claim(tokenId);
+            nuggft.claim(lib.singleton160(tokenId));
         }
         forge.vm.stopPrank();
     }
@@ -695,7 +729,7 @@ contract revert__NuggftV1Swap is NuggftV1Test {
 
         forge.vm.startPrank(users.dee);
         {
-            nuggft.claim(tokenId);
+            nuggft.claim(lib.singleton160(tokenId));
         }
         forge.vm.stopPrank();
     }
@@ -706,7 +740,7 @@ contract revert__NuggftV1Swap is NuggftV1Test {
         forge.vm.startPrank(users.charlie);
         {
             forge.vm.expectRevert(hex'2E');
-            nuggft.claim(tokenId);
+            nuggft.claim(lib.singleton160(tokenId));
         }
         forge.vm.stopPrank();
     }
@@ -716,7 +750,7 @@ contract revert__NuggftV1Swap is NuggftV1Test {
 
         forge.vm.startPrank(users.mac);
         {
-            nuggft.claim(tokenId);
+            nuggft.claim(lib.singleton160(tokenId));
         }
         forge.vm.stopPrank();
     }
@@ -726,7 +760,7 @@ contract revert__NuggftV1Swap is NuggftV1Test {
 
         forge.vm.startPrank(users.dee);
         {
-            nuggft.claim(tokenId);
+            nuggft.claim(lib.singleton160(tokenId));
         }
         forge.vm.stopPrank();
     }
@@ -743,7 +777,7 @@ contract revert__NuggftV1Swap is NuggftV1Test {
     //     forge.vm.startPrank(users.dennis);
     //     {
     //         forge.vm.expectRevert(hex'2E');
-    //         nuggft.claim(tokenId);
+    //         nuggft.claim(lib.singleton160(tokenId));
     //     }
     //     forge.vm.stopPrank();
     // }

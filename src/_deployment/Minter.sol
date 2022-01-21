@@ -11,11 +11,11 @@ contract NuggftV1MinterHelper {
         // payable(msg.sender).transfer(address(this).balance);
     }
 
-    function claimem(address nuggftv1, uint160 id) external {
-        INuggftV1(nuggftv1).claim(id);
+    // function claimem(address nuggftv1, uint160 id) external {
+    //     INuggftV1(nuggftv1).claim(id);
 
-        payable(msg.sender).transfer(address(this).balance);
-    }
+    //     payable(msg.sender).transfer(address(this).balance);
+    // }
 }
 
 contract NuggftV1Minter {
@@ -70,26 +70,26 @@ contract NuggftV1Minter {
         payable(msg.sender).transfer(address(this).balance);
     }
 
-    function claimHelper(address nuggftv1, uint160 amount) external {
-        uint256 i = claimedIndex;
-        uint256 start = i;
-        for (; i < start + amount; i++) {
-            NuggftV1MinterHelper(minterHelper).claimem(nuggftv1, toClaim[claimedIndex]);
-        }
-        claimedIndex = i;
-        payable(msg.sender).transfer(address(this).balance);
-    }
+    // function claimHelper(address nuggftv1, uint160 amount) external {
+    //     uint256 i = claimedIndex;
+    //     uint256 start = i;
+    //     for (; i < start + amount; i++) {
+    //         NuggftV1MinterHelper(minterHelper).claimem(nuggftv1, toClaim[claimedIndex]);
+    //     }
+    //     claimedIndex = i;
+    //     payable(msg.sender).transfer(address(this).balance);
+    // }
 
-    function claimSelf(address nuggftv1, uint160 amount) external {
-        uint256 i = claimedIndex;
-        uint256 start = i;
-        for (; i < start + amount; i++) {
-            INuggftV1(nuggftv1).claim(toClaim[claimedIndex]);
-        }
-        claimedIndex = i;
+    // function claimSelf(address nuggftv1, uint160 amount) external {
+    //     uint256 i = claimedIndex;
+    //     uint256 start = i;
+    //     for (; i < start + amount; i++) {
+    //         INuggftV1(nuggftv1).claim(toClaim[claimedIndex]);
+    //     }
+    //     claimedIndex = i;
 
-        payable(msg.sender).transfer(address(this).balance);
-    }
+    //     payable(msg.sender).transfer(address(this).balance);
+    // }
 
     function byebye() external {
         require(msg.sender == deployer);
