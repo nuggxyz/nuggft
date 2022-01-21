@@ -48,9 +48,20 @@ abstract contract NuggftV1Swap is INuggftV1Swap, NuggftV1Stake {
                                   offer
        ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
 
+    // function thash(uint160 tokenId) internal pure returns (uint256 res) {
+    // //     assembly {
+    // //         let ptr := mload(0x40)
+    // //         mstore(ptr, tokenId)
+    // //         mstore(add(ptr, 0x20), agency.slot)
+
+    // //         res := keccak256(ptr, 64)
+    // //     }
+    // // }
+
     /// @inheritdoc INuggftV1Swap
     function offer(uint160 tokenId) external payable override {
         uint256 shash;
+
         uint256 swapData;
 
         assembly {
@@ -75,15 +86,8 @@ abstract contract NuggftV1Swap is INuggftV1Swap, NuggftV1Stake {
             // to ensure we at least have enough to increment the offer amount by 2%
             require(msg.value >= MIN_OFFER, hex'21');
 
-            // we do not need this, could take tokenId out as an argument - but do not want to give users
-            // the ability to accidently place an offer for nugg A and end up minting nugg B.
-            // assert(offerData == 0);
-
-            // updatedAgency = NuggftV1AgentType.create(m.activeEpoch, m.sender, uint96(msg.value), NuggftV1AgentType.Flag.SWAP);
-
             assembly {
                 currUserOffer := div(callvalue(), 1000000000)
-                // updatedAgency := or(caller(), or(shl(160, div(callvalue(), 1000000000)), or(shl(230, activeEpoch), shl(254, 0x1))))
             }
 
             addStakedShareFromMsgValue(0);
@@ -102,21 +106,16 @@ abstract contract NuggftV1Swap is INuggftV1Swap, NuggftV1Stake {
                 offerData = offers[tokenId][msg.sender];
             }
 
-            // require((swapData >> 254) == uint256(NuggftV1AgentType.Flag.SWAP, hex'24');
-
             if (offerData != 0) {
                 // forces user to claim previous swap before acting on this one
                 // prevents owner from COMMITTING on their own swap - not offering
                 require(offerData.epoch() >= activeEpoch, hex'0F');
-
-                // assert(!offerData.flag()); // always be caught by the require above
             }
 
             // if the leader "owns" the swap, then it was initated by them - "commit" must be executed
             if (swapData.epoch() == 0) {
                 emit Transfer(address(uint160(swapData)), address(this), tokenId);
 
-                // agency[tokenId] = agency[tokenId].account(address(this));
                 require(msg.value >= eps(), hex'25');
 
                 unchecked {
@@ -194,9 +193,6 @@ abstract contract NuggftV1Swap is INuggftV1Swap, NuggftV1Stake {
             swapData := sload(shash)
         }
 
-        // uint256 swapData = itemAgency[sellerTokenId][itemId];
-        uint24 activeEpoch = epoch();
-
         require(swapData != 0, hex'22');
 
         uint256 offerData;
@@ -207,12 +203,12 @@ abstract contract NuggftV1Swap is INuggftV1Swap, NuggftV1Stake {
             offerData = itemOffers[encodeSellingItemId(sellerTokenId, itemId)][buyerTokenId];
         }
 
+        uint24 activeEpoch = epoch();
+
         if (offerData != 0) {
             // forces user to claim previous swap before acting on this one
             // prevents owner from COMMITTING on their own swap - not offering
             require(offerData.epoch() >= activeEpoch, hex'27');
-
-            // assert(!m.offerData.flag()); // always be caught by the require above
         }
 
         if (offerData == 0 && (swapData.epoch() == 0)) {
@@ -238,36 +234,30 @@ abstract contract NuggftV1Swap is INuggftV1Swap, NuggftV1Stake {
             itemOffers[encodeSellingItemId(sellerTokenId, itemId)][uint160(swapData)] = swapData;
         }
 
-        uint256 currSwapOffer;
-        uint256 currUserOffer;
-
-        assembly {
-            let mask := sub(shl(70, 1), 1)
-            currSwapOffer := and(shr(160, swapData), mask)
-            currUserOffer := and(shr(160, offerData), mask)
-            currUserOffer := add(currUserOffer, div(callvalue(), 1000000000))
-
-            if gt(div(mul(currSwapOffer, 10200), 10000), currUserOffer) {
-                mstore(0x00, 0x28)
-                revert(0x19, 0x01)
-            }
-
-            currSwapOffer := mul(sub(currUserOffer, currSwapOffer), 1000000000)
-        }
-
-        addStakedEth(uint96(currSwapOffer));
+        uint256 last;
 
         uint256 updatedAgency;
 
         assembly {
-            updatedAgency := or(buyerTokenId, or(shl(160, currUserOffer), or(shl(230, activeEpoch), shl(254, 0x1))))
+            let mask := sub(shl(70, 1), 1)
+            last := and(shr(160, swapData), mask)
+            let next := and(shr(160, offerData), mask)
+            next := add(next, div(callvalue(), 1000000000))
 
-            // mstore(0, tokenId)
-            // mstore(0x20, agency.slot)
+            // ensure next >= (last + 2%)
+            if gt(div(mul(last, 10200), 10000), next) {
+                mstore(0x00, 0x28)
+                revert(0x19, 0x01)
+            }
+
+            last := mul(sub(next, last), 1000000000)
+
+            updatedAgency := or(buyerTokenId, or(shl(160, next), or(shl(230, activeEpoch), shl(254, 0x1))))
+
             sstore(shash, updatedAgency)
         }
 
-        // itemAgency[encodeSellingItemId(sellerTokenId, itemId)] = updatedAgency;
+        addStakedEth(uint96(last));
 
         emit OfferItem(encodeSellingItemId(sellerTokenId, itemId), bytes32(updatedAgency));
     }
@@ -278,7 +268,15 @@ abstract contract NuggftV1Swap is INuggftV1Swap, NuggftV1Stake {
 
     /// @inheritdoc INuggftV1Swap
     function claim(uint160 tokenId) external override {
-        TransferLib.give(msg.sender, _claim(tokenId));
+        uint256 value = _claim(tokenId);
+        assembly {
+            if iszero(call(gas(), caller(), value, 0, 0, 0, 0)) {
+                mstore(0, 0x01)
+                revert(0x19, 0x01)
+            }
+        }
+
+        // TransferLib.give(msg.sender, _claim(tokenId));
     }
 
     /// @inheritdoc INuggftV1Swap
@@ -289,11 +287,29 @@ abstract contract NuggftV1Swap is INuggftV1Swap, NuggftV1Stake {
             acc += _claim(tokenIds[i]);
         }
 
-        TransferLib.give(msg.sender, acc);
+        // TransferLib.give(msg.sender, acc);
+
+        assembly {
+            if iszero(call(gas(), caller(), acc, 0, 0, 0, 0)) {
+                mstore(0, 0x01)
+                revert(0x19, 0x01)
+            }
+        }
     }
 
     function _claim(uint160 tokenId) internal returns (uint96 value) {
-        uint256 swapData = agency[tokenId];
+        uint256 shash;
+
+        uint256 swapData;
+
+        assembly {
+            let ptr := mload(0x40)
+            mstore(ptr, tokenId)
+            mstore(add(ptr, 0x20), agency.slot)
+
+            shash := keccak256(ptr, 64)
+            swapData := sload(shash)
+        }
 
         // require(swapData != 0, hex'22');
 
@@ -316,15 +332,14 @@ abstract contract NuggftV1Swap is INuggftV1Swap, NuggftV1Stake {
             assembly {
                 let real := and(shr(230, swapData), 0xffffff)
 
-                // // require "isOwner" or "isOver
+                // require "isOwner" or "isOver"
+                // == require(real == 0 || active > real)
                 if and(iszero(iszero(real)), iszero(gt(active, real))) {
                     mstore(0x00, 0x67)
                     revert(31, 0x01)
                 }
 
-                mstore(0, tokenId)
-                mstore(0x20, agency.slot)
-                sstore(keccak256(0, 64), or(caller(), shl(254, 0x3)))
+                sstore(shash, or(caller(), shl(254, 0x3)))
             }
 
             emit Transfer(address(this), msg.sender, tokenId);
