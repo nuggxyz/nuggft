@@ -13,7 +13,7 @@ import {NuggftV1ProofType} from '../types/NuggftV1ProofType.sol';
 
 import '../_test/utils/forge.sol';
 
-abstract contract NuggftV1Proof is INuggftV1Proof, NuggftV1Dotnugg, GasTracker {
+abstract contract NuggftV1Proof is INuggftV1Proof, NuggftV1Dotnugg {
     using CastLib for uint160;
     using CastLib for uint256;
 
