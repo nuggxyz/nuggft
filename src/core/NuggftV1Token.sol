@@ -106,12 +106,6 @@ abstract contract NuggftV1Token is INuggftV1Token, NuggftV1Epoch {
         return agency[tokenId] != 0;
     }
 
-    // function _ownerOf(uint160 tokenId) internal view returns (address owner) {
-    //     require(exists(tokenId), hex'79:2');
-    //     owner = agency[tokenId].account();
-    //     if (owner == address(0)) return address(this);
-    // }
-
     function isOwner(address sender, uint160 tokenId) internal view returns (bool res) {
         uint256 cache = agency[tokenId];
         return cache.account() == sender && cache.flag() == NuggftV1AgentType.Flag.OWN;

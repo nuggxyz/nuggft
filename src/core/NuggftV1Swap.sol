@@ -35,7 +35,12 @@ abstract contract NuggftV1Swap is INuggftV1Swap, NuggftV1Stake {
     }
 
     mapping(uint16 => uint256) protocolItems;
-    mapping(uint160 => Mapping) swaps;
+    // mapping(uint160 => Mapping) swaps;
+
+    mapping(uint160 => mapping(address => uint256)) offers;
+
+    mapping(uint176 => mapping(uint160 => uint256)) itemOffers;
+    mapping(uint176 => uint256) itemAgency;
 
     uint96 public constant MIN_OFFER = 100 gwei;
 
@@ -45,7 +50,18 @@ abstract contract NuggftV1Swap is INuggftV1Swap, NuggftV1Stake {
 
     /// @inheritdoc INuggftV1Swap
     function offer(uint160 tokenId) external payable override {
-        uint256 swapData = agency[tokenId];
+        uint256 shash;
+        uint256 swapData;
+
+        assembly {
+            let ptr := mload(0x40)
+            mstore(ptr, tokenId)
+            mstore(add(ptr, 0x20), agency.slot)
+
+            shash := keccak256(ptr, 64)
+            swapData := sload(shash)
+        }
+
         uint24 activeEpoch = epoch();
 
         // make sure user is not the owner of swap
@@ -83,7 +99,7 @@ abstract contract NuggftV1Swap is INuggftV1Swap, NuggftV1Stake {
             if (uint160(msg.sender) == uint160(swapData)) {
                 offerData = swapData;
             } else {
-                offerData = swaps[tokenId].self.offers[msg.sender];
+                offerData = offers[tokenId][msg.sender];
             }
 
             // require((swapData >> 254) == uint256(NuggftV1AgentType.Flag.SWAP, hex'24');
@@ -107,7 +123,7 @@ abstract contract NuggftV1Swap is INuggftV1Swap, NuggftV1Stake {
                     activeEpoch++;
                 }
 
-                swaps[tokenId].self.offers[address(uint160(swapData))] = swapData.epoch(activeEpoch);
+                offers[tokenId][address(uint160(swapData))] = swapData.epoch(activeEpoch);
             } else {
                 assembly {
                     let ep := and(shr(230, swapData), 0xffffff)
@@ -121,7 +137,7 @@ abstract contract NuggftV1Swap is INuggftV1Swap, NuggftV1Stake {
                 }
                 // require(activeEpoch <= swapData.epoch(), hex'2F');
 
-                swaps[tokenId].self.offers[swapData.account()] = swapData;
+                offers[tokenId][address(uint160(swapData))] = swapData;
             }
 
             uint256 currSwapOffer;
@@ -131,7 +147,7 @@ abstract contract NuggftV1Swap is INuggftV1Swap, NuggftV1Stake {
                 currSwapOffer := and(shr(160, swapData), mask)
                 currUserOffer := and(shr(160, offerData), mask)
                 currUserOffer := add(currUserOffer, div(callvalue(), 1000000000))
-                // let inc := div(mul(baseEth, 10200), 10000)
+
                 if gt(div(mul(currSwapOffer, 10200), 10000), currUserOffer) {
                     mstore(0x00, 0x26)
                     revert(0x19, 0x01)
@@ -148,10 +164,7 @@ abstract contract NuggftV1Swap is INuggftV1Swap, NuggftV1Stake {
         assembly {
             updatedAgency := or(caller(), or(shl(160, currUserOffer), or(shl(230, activeEpoch), shl(254, 0x1))))
 
-            // agency[tokenId] = updatedAgency;
-            mstore(0, tokenId)
-            mstore(0x20, agency.slot)
-            sstore(keccak256(0, 64), updatedAgency)
+            sstore(shash, updatedAgency)
         }
 
         emit Offer(tokenId, bytes32(updatedAgency));
@@ -165,7 +178,23 @@ abstract contract NuggftV1Swap is INuggftV1Swap, NuggftV1Stake {
     ) external payable override {
         require(isAgent(msg.sender, buyerTokenId), hex'26');
 
-        uint256 swapData = swaps[sellerTokenId].items[itemId].data;
+        uint256 shash = itemId;
+
+        uint256 swapData;
+
+        assembly {
+            let ptr := mload(0x40)
+            shash := or(shl(160, shash), sellerTokenId)
+
+            mstore(ptr, shash)
+            mstore(add(ptr, 0x20), itemAgency.slot)
+
+            shash := keccak256(ptr, 0x40)
+
+            swapData := sload(shash)
+        }
+
+        // uint256 swapData = itemAgency[sellerTokenId][itemId];
         uint24 activeEpoch = epoch();
 
         require(swapData != 0, hex'22');
@@ -175,7 +204,7 @@ abstract contract NuggftV1Swap is INuggftV1Swap, NuggftV1Stake {
         if (buyerTokenId == uint160(swapData)) {
             offerData = swapData;
         } else {
-            offerData = swaps[sellerTokenId].items[itemId].offers[address(buyerTokenId)];
+            offerData = itemOffers[encodeSellingItemId(sellerTokenId, itemId)][buyerTokenId];
         }
 
         if (offerData != 0) {
@@ -193,7 +222,7 @@ abstract contract NuggftV1Swap is INuggftV1Swap, NuggftV1Stake {
                 activeEpoch++;
             }
 
-            swaps[sellerTokenId].items[itemId].offers[swapData.account()] = swapData.epoch(activeEpoch);
+            itemOffers[encodeSellingItemId(sellerTokenId, itemId)][uint160(swapData)] = swapData.epoch(activeEpoch);
         } else {
             assembly {
                 let ep := and(shr(230, swapData), 0xffffff)
@@ -206,7 +235,7 @@ abstract contract NuggftV1Swap is INuggftV1Swap, NuggftV1Stake {
                 activeEpoch := ep
             }
 
-            swaps[sellerTokenId].items[itemId].offers[swapData.account()] = swapData;
+            itemOffers[encodeSellingItemId(sellerTokenId, itemId)][uint160(swapData)] = swapData;
         }
 
         uint256 currSwapOffer;
@@ -219,7 +248,7 @@ abstract contract NuggftV1Swap is INuggftV1Swap, NuggftV1Stake {
             currUserOffer := add(currUserOffer, div(callvalue(), 1000000000))
 
             if gt(div(mul(currSwapOffer, 10200), 10000), currUserOffer) {
-                mstore(0x00, 0x26)
+                mstore(0x00, 0x28)
                 revert(0x19, 0x01)
             }
 
@@ -232,9 +261,13 @@ abstract contract NuggftV1Swap is INuggftV1Swap, NuggftV1Stake {
 
         assembly {
             updatedAgency := or(buyerTokenId, or(shl(160, currUserOffer), or(shl(230, activeEpoch), shl(254, 0x1))))
+
+            // mstore(0, tokenId)
+            // mstore(0x20, agency.slot)
+            sstore(shash, updatedAgency)
         }
 
-        swaps[sellerTokenId].items[itemId].data = updatedAgency;
+        // itemAgency[encodeSellingItemId(sellerTokenId, itemId)] = updatedAgency;
 
         emit OfferItem(encodeSellingItemId(sellerTokenId, itemId), bytes32(updatedAgency));
     }
@@ -260,13 +293,35 @@ abstract contract NuggftV1Swap is INuggftV1Swap, NuggftV1Stake {
     }
 
     function _claim(uint160 tokenId) internal returns (uint96 value) {
-        (Storage storage s, Memory memory m) = loadTokenSwap(tokenId, msg.sender);
+        uint256 swapData = agency[tokenId];
 
-        delete s.offers[msg.sender];
+        // require(swapData != 0, hex'22');
 
-        if (checkClaimerIsWinnerOrLoser(m)) {
-            // agency[tokenId] = NuggftV1AgentType.create(0, msg.sender, 0, NuggftV1AgentType.Flag.OWN);
+        uint256 offerData;
+
+        if (uint160(msg.sender) == uint160(swapData)) {
+            offerData = swapData;
+        } else {
+            offerData = offers[tokenId][msg.sender];
+        }
+
+        require(offerData != 0, hex'2E');
+
+        delete offers[tokenId][msg.sender];
+
+        // if user is the leader
+        if (uint160(offerData) == uint160(swapData)) {
+            uint24 active = epoch();
+
             assembly {
+                let real := and(shr(230, swapData), 0xffffff)
+
+                // // require "isOwner" or "isOver
+                if and(iszero(iszero(real)), iszero(gt(active, real))) {
+                    mstore(0x00, 0x67)
+                    revert(31, 0x01)
+                }
+
                 mstore(0, tokenId)
                 mstore(0x20, agency.slot)
                 sstore(keccak256(0, 64), or(caller(), shl(254, 0x3)))
@@ -274,7 +329,9 @@ abstract contract NuggftV1Swap is INuggftV1Swap, NuggftV1Stake {
 
             emit Transfer(address(this), msg.sender, tokenId);
         } else {
-            value = m.offerData.eth();
+            assembly {
+                value := mul(and(shr(offerData, 160), sub(shl(70, 1), 1)), 1000000000)
+            }
         }
 
         emit Claim(tokenId, msg.sender);
@@ -313,12 +370,28 @@ abstract contract NuggftV1Swap is INuggftV1Swap, NuggftV1Stake {
     ) internal returns (uint96 value) {
         require(isAgent(msg.sender, buyerTokenId), hex'29');
 
-        (Storage storage s, Memory memory m) = loadItemSwap(sellerTokenId, itemId, address(buyerTokenId));
+        uint256 swapData = itemAgency[encodeSellingItemId(sellerTokenId, itemId)];
 
-        delete s.offers[address(buyerTokenId)];
+        // require(swapData != 0, hex'22');
 
-        if (checkClaimerIsWinnerOrLoser(m)) {
-            delete s.data;
+        uint256 offerData;
+
+        if (buyerTokenId == uint160(swapData)) {
+            offerData = swapData;
+        } else {
+            offerData = itemOffers[encodeSellingItemId(sellerTokenId, itemId)][buyerTokenId];
+        }
+
+        delete itemOffers[encodeSellingItemId(sellerTokenId, itemId)][buyerTokenId];
+
+        require(offerData != 0, hex'2E');
+
+        // if "isLeader"
+        if (uint160(offerData) == uint160(swapData)) {
+            // require "isOwner" or "isOver
+            require(swapData.epoch() == 0 || epoch() > swapData.epoch(), hex'67');
+
+            delete itemAgency[encodeSellingItemId(sellerTokenId, itemId)];
 
             assert(protocolItems[itemId] > 0);
 
@@ -326,7 +399,10 @@ abstract contract NuggftV1Swap is INuggftV1Swap, NuggftV1Stake {
 
             protocolItems[itemId]--;
         } else {
-            value = m.offerData.eth();
+            assembly {
+                // extract "eth" from offerData object and decompress
+                value := mul(and(shr(offerData, 160), sub(shl(70, 1), 1)), 1000000000)
+            }
         }
 
         emit ClaimItem(encodeSellingItemId(sellerTokenId, itemId), buyerTokenId);
@@ -342,11 +418,11 @@ abstract contract NuggftV1Swap is INuggftV1Swap, NuggftV1Stake {
 
         require(floor >= eps(), hex'2B');
 
-        // uint256 updatedAgency = NuggftV1AgentType.create(0, msg.sender, floor, NuggftV1AgentType.Flag.SWAP);
         uint256 updatedAgency;
 
         assembly {
-            updatedAgency := or(caller(), or(shl(160, div(floor, 1000000000)), or(shl(230, 0), shl(254, 0x1))))
+            // updatedAgency = [ flag: SWAP | epoch: 0 | eth: floor/10**8 | addr: msg.sender ]
+            updatedAgency := or(shl(254, 0x1), or(shl(230, 0), or(shl(160, div(floor, 1000000000)), caller())))
 
             mstore(0, tokenId)
             mstore(0x20, agency.slot)
@@ -371,13 +447,20 @@ abstract contract NuggftV1Swap is INuggftV1Swap, NuggftV1Stake {
             protocolItems[itemId]++;
         }
 
-        (Storage storage s, Memory memory m) = loadItemSwap(tokenId, itemId, address(tokenId));
+        uint256 swapData = itemAgency[encodeSellingItemId(tokenId, itemId)];
 
         // cannot sell two of the same item at same time
-        require(m.swapData == 0, hex'2D');
+        require(swapData == 0, hex'2D');
 
-        uint256 updatedAgency = NuggftV1AgentType.create(0, address(tokenId), floor, NuggftV1AgentType.Flag.SWAP);
-        (s.data) = updatedAgency;
+        uint256 updatedAgency;
+
+        assembly {
+            // updatedAgency = [ flag: SWAP | epoch: 0 | eth: floor/10**8 | addr: tokenId ]
+            updatedAgency := or(shl(254, 0x1), or(shl(230, 0), or(shl(160, div(floor, 1000000000)), tokenId)))
+        }
+
+        itemAgency[encodeSellingItemId(tokenId, itemId)] = updatedAgency;
+
         emit Sell(tokenId, bytes32(updatedAgency));
     }
 
@@ -398,10 +481,19 @@ abstract contract NuggftV1Swap is INuggftV1Swap, NuggftV1Stake {
     {
         canOffer = true;
 
-        (, Memory memory m) = loadTokenSwap(tokenId, sender);
+        uint256 swapData = agency[tokenId];
+        uint24 activeEpoch = epoch();
 
-        if (m.swapData == 0) {
-            if (m.activeEpoch == tokenId) {
+        uint256 offerData;
+
+        if (uint160(sender) == uint160(swapData)) {
+            offerData = swapData;
+        } else {
+            offerData = offers[tokenId][sender];
+        }
+
+        if (swapData == 0) {
+            if (activeEpoch == tokenId) {
                 // swap is minting
                 nextSwapAmount = NuggftV1AgentType.compressEthRoundUp(msp());
             } else {
@@ -409,11 +501,11 @@ abstract contract NuggftV1Swap is INuggftV1Swap, NuggftV1Stake {
                 return (false, 0, 0);
             }
         } else {
-            if (m.swapData.epoch() == 0 && m.offerData == m.swapData) canOffer = false;
+            if (swapData.epoch() == 0 && offerData == swapData) canOffer = false;
 
-            senderCurrentOffer = m.offerData.eth();
+            senderCurrentOffer = offerData.eth();
 
-            nextSwapAmount = m.swapData.eth();
+            nextSwapAmount = swapData.eth();
 
             if (nextSwapAmount < eps()) {
                 nextSwapAmount = eps();
@@ -471,22 +563,22 @@ abstract contract NuggftV1Swap is INuggftV1Swap, NuggftV1Stake {
 
     // @scenario - leader claims in the middle of a swap
 
-    function checkClaimerIsWinnerOrLoser(Memory memory m) internal pure returns (bool winner) {
-        require(m.offerData != 0, hex'2E');
+    // function checkClaimerIsWinnerOrLoser(Memory memory m) internal pure returns (bool winner) {
+    //     require(m.offerData != 0, hex'2E');
 
-        bool isLeader = uint160(m.offerData) == uint160(m.swapData);
+    //     bool isLeader = uint160(m.offerData) == uint160(m.swapData);
 
-        if (isLeader) {
-            bool isOver = m.activeEpoch > m.swapData.epoch();
-            bool isOwner = m.swapData.epoch() == 0 && m.offerData == m.swapData;
+    //     if (isLeader) {
+    //         bool isOver = m.activeEpoch > m.swapData.epoch();
+    //         bool isOwner = m.swapData.epoch() == 0 && m.offerData == m.swapData;
 
-            require(isOver || isOwner, hex'67');
+    //         require(isOver || isOwner, hex'67');
 
-            return true;
-        }
+    //         return true;
+    //     }
 
-        // return isLeader && (isOwner || isOver);
-    }
+    //     // return isLeader && (isOwner || isOver);
+    // }
 
     // // @test  unit
     // function updateSwapDataWithEpoch(
@@ -517,36 +609,36 @@ abstract contract NuggftV1Swap is INuggftV1Swap, NuggftV1Stake {
                                 TOKEN SWAP
        ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
 
-    function loadTokenSwap(uint160 tokenId, address account) internal view returns (Storage storage s, Memory memory m) {
-        s = swaps[tokenId].self;
-        m = _load(agency[tokenId], s, account);
-    }
+    // function loadTokenSwap(uint160 tokenId, address account) internal view returns (Storage storage s, Memory memory m) {
+    //     s = swaps[tokenId].self;
+    //     m = _load(agency[tokenId], s, account);
+    // }
 
-    function loadItemSwap(
-        uint160 tokenId,
-        uint16 itemId,
-        address account
-    ) internal view returns (Storage storage s, Memory memory m) {
-        s = swaps[tokenId].items[itemId];
-        m = _load(s.data, s, account);
-    }
+    // function loadItemSwap(
+    //     uint160 tokenId,
+    //     uint16 itemId,
+    //     address account
+    // ) internal view returns (Storage storage s, Memory memory m) {
+    //     s = swaps[tokenId].items[itemId];
+    //     m = _load(s.data, s, account);
+    // }
 
-    function _load(
-        uint256 cache,
-        Storage storage ptr,
-        address account
-    ) private view returns (Memory memory m) {
-        // uint256 cache = ptr.data;
-        m.swapData = cache;
-        m.activeEpoch = epoch();
-        m.sender = account;
+    // function _load(
+    //     uint256 cache,
+    //     Storage storage ptr,
+    //     address account
+    // ) private view returns (Memory memory m) {
+    //     // uint256 cache = ptr.data;
+    //     m.swapData = cache;
+    //     m.activeEpoch = epoch();
+    //     m.sender = account;
 
-        if (account == cache.account()) {
-            m.offerData = cache;
-        } else {
-            m.offerData = ptr.offers[account];
-        }
-    }
+    //     if (account == cache.account()) {
+    //         m.offerData = cache;
+    //     } else {
+    //         m.offerData = ptr.offers[account];
+    //     }
+    // }
 
     function encodeSellingItemId(uint160 tokenId, uint16 itemId) internal pure returns (uint176) {
         return (uint176(itemId) << 160) | tokenId;

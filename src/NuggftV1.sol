@@ -209,7 +209,7 @@ contract NuggftV1 is IERC721Metadata, NuggftV1Loan {
         // hanles all logic not related to staking the nugg
         delete agency[tokenId];
 
-        delete swaps[tokenId];
+        // delete swaps[tokenId];
         // delete loans[tokenId];
         delete proofs[tokenId];
         delete resolvers[tokenId];
