@@ -158,7 +158,7 @@ abstract contract NuggftV1Proof is INuggftV1Proof, NuggftV1Dotnugg, GasTracker {
     }
 
     // TODO TO BE TESTED
-    function initFromSeed(uint256 seed) internal view trackGas returns (uint256 res) {
+    function initFromSeed(uint256 seed) internal view returns (uint256 res) {
         require(seed != 0, 'P:8');
 
         uint256 l = featureLengths;
