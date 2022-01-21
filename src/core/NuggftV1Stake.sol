@@ -116,15 +116,29 @@ abstract contract NuggftV1Stake is INuggftV1Stake, NuggftV1Proof {
     function addStakedEth(uint96 eth) internal {
         // require(msg.value >= eth, hex'72'); // "value of tx too low"
 
-        uint256 cache = stake;
+        uint256 cache;
 
-        uint96 protocolFee = calculateProtocolFeeOf(eth);
-        unchecked {
-            cache = cache.addStaked(eth - protocolFee);
+        assembly {
+            cache := sload(stake.slot)
+
+            let pro := div(mul(eth, PROTOCOL_FEE_BPS), 10000)
+
+            let tmp := shl(96, add(and(shr(96, cache), sub(shl(96, 1), 1)), sub(eth, pro)))
+
+            cache := or(tmp, and(cache, not(shl(96, sub(shl(96, 1), 1)))))
+
+            cache := add(cache, pro)
+
+            sstore(stake.slot, cache)
         }
-        cache = cache.addProto(protocolFee);
 
-        stake = cache;
+        // uint96 protocolFee = calculateProtocolFeeOf(eth);
+        // unchecked {
+        //     cache = cache.addStaked(eth - protocolFee);
+        // }
+        // cache = cache.addProto(protocolFee);
+
+        // stake = cache;
 
         emit Stake(bytes32(cache));
     }
@@ -153,10 +167,10 @@ abstract contract NuggftV1Stake is INuggftV1Stake, NuggftV1Proof {
 
         protocolFee = calculateProtocolFeeOf(ethPerShare);
 
-        premium = cache.shares();
+        // premium = cache.shares();
 
         assembly {
-            premium := div(mul(ethPerShare, premium), 10000)
+            premium := div(mul(ethPerShare, shr(192, cache)), 10000)
             total := add(ethPerShare, add(protocolFee, premium))
         }
 
