@@ -1,3 +1,3 @@
 #!/bin/bash
 
-forge snapshot --force  --optimize --optimize-runs 100000 -v
+forge clean && forge snapshot --force  --optimize --optimize-runs 1000000 -v
