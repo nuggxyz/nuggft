@@ -50,7 +50,11 @@ abstract contract NuggftV1Stake is INuggftV1Stake, NuggftV1Proof {
 
     /// @inheritdoc INuggftV1Stake
     function eps() public view override returns (uint96 res) {
-        res = calculateEthPerShare(stake);
+        assembly {
+            let cache := sload(stake.slot)
+            res := shr(192, cache)
+            res := div(and(shr(96, cache), sub(shl(96, 1), 1)), res)
+        }
     }
 
     /// @inheritdoc INuggftV1Stake
@@ -84,71 +88,64 @@ abstract contract NuggftV1Stake is INuggftV1Stake, NuggftV1Proof {
 
     /// @notice handles the adding of shares - ensures enough eth is being added
     /// @dev this is the only way to add shares - the logic here ensures that "ethPerShare" can never decrease
-    function addStakedShareFromMsgValue(uint96 offset) internal trackGas {
-        uint96 value = msg.value.to96() - offset;
+    function addStakedShareFromMsgValue() internal trackGas {
+        uint256 cache;
 
-        uint256 cache = stake;
+        assembly {
+            // load stake to callstack
+            cache := sload(stake.slot)
 
-        (uint96 totalPrice, , uint96 protocolFee, ) = minSharePriceBreakdown(cache);
+            let shrs := shr(192, cache)
 
-        // logically unnessesary - to help front end
-        require(value >= totalPrice, hex'71'); // "not enough eth to create share"
+            let _eps := div(and(shr(96, cache), sub(shl(96, 1), 1)), shrs)
 
-        unchecked {
-            uint96 overpay = value - totalPrice;
-            protocolFee += calculateProtocolFeeOf(overpay);
+            let fee := div(mul(_eps, PROTOCOL_FEE_BPS), 10000)
+
+            let premium := div(mul(_eps, shrs), 10000)
+
+            let _msp := add(_eps, add(fee, premium))
+
+            // ensure value >= msp
+            if gt(_msp, callvalue()) {
+                // ERRORx71
+                mstore(0x00, 0x71)
+                revert(31, 0x01)
+            }
+
+            // caculate value proveded over msp
+            // will not overflow because of ERRORx71
+            let overpay := sub(callvalue(), _msp)
+
+            // add fee of overpay to fee
+            fee := add(div(mul(overpay, PROTOCOL_FEE_BPS), 10000), fee)
+
+            // combine the shares, eth, and protocol fee and add to stake cashe
+            // cache = cache + [shares: 1 | eth: (value - fee) | fee: fee]
+            cache := add(cache, or(shl(192, 1), or(shl(96, sub(callvalue(), fee)), fee)))
+
+            sstore(stake.slot, cache)
         }
-
-        // the rest of the value gets added to stakedEth
-
-        cache = cache.addShares(1);
-        cache = cache.addStaked(value - protocolFee);
-        cache = cache.addProto(protocolFee);
-
-        stake = cache;
 
         emit Stake(bytes32(cache));
     }
 
     /// @notice handles isolated staking of eth
     /// @dev supply of eth goes up while supply of shares stays constant - increasing "minSharePrice"
-    /// @param eth the amount of eth being staked - must be some portion of msg.value
-    function addStakedEth(uint96 eth) internal {
-        // require(msg.value >= eth, hex'72'); // "value of tx too low"
-
+    /// @param value the amount of eth being staked - must be some portion of msg.value
+    function addStakedEth(uint96 value) internal {
         uint256 cache;
 
         assembly {
             cache := sload(stake.slot)
 
-            let pro := div(mul(eth, PROTOCOL_FEE_BPS), 10000)
+            let pro := div(mul(value, PROTOCOL_FEE_BPS), 10000)
 
-            let tmp := shl(96, add(and(shr(96, cache), sub(shl(96, 1), 1)), sub(eth, pro)))
-
-            cache := or(tmp, and(cache, not(shl(96, sub(shl(96, 1), 1)))))
-
-            cache := add(cache, pro)
+            cache := add(cache, or(shl(96, sub(value, pro)), pro))
 
             sstore(stake.slot, cache)
         }
 
-        // uint96 protocolFee = calculateProtocolFeeOf(eth);
-        // unchecked {
-        //     cache = cache.addStaked(eth - protocolFee);
-        // }
-        // cache = cache.addProto(protocolFee);
-
-        // stake = cache;
-
         emit Stake(bytes32(cache));
-    }
-
-    function calculateProtocolFeeOf(uint96 any) internal pure returns (uint96 res) {
-        // res = (any * PROTOCOL_FEE_BPS) / 10000;
-
-        assembly {
-            res := div(mul(any, PROTOCOL_FEE_BPS), 10000)
-        }
     }
 
     // @test manual
@@ -163,18 +160,13 @@ abstract contract NuggftV1Stake is INuggftV1Stake, NuggftV1Proof {
             uint96 premium
         )
     {
-        ethPerShare = calculateEthPerShare(cache);
-
-        protocolFee = calculateProtocolFeeOf(ethPerShare);
-
-        // premium = cache.shares();
-
         assembly {
-            premium := div(mul(ethPerShare, shr(192, cache)), 10000)
+            let shrs := shr(192, cache)
+            ethPerShare := div(and(shr(96, cache), sub(shl(96, 1), 1)), shrs)
+            protocolFee := div(mul(ethPerShare, PROTOCOL_FEE_BPS), 10000)
+            premium := div(mul(ethPerShare, shrs), 10000)
             total := add(ethPerShare, add(protocolFee, premium))
         }
-
-        // premium = ((eps * cache.shares()) / 10000);
     }
 
     // @test manual
@@ -183,7 +175,5 @@ abstract contract NuggftV1Stake is INuggftV1Stake, NuggftV1Proof {
             res := shr(192, cache)
             res := div(and(shr(96, cache), sub(shl(96, 1), 1)), res)
         }
-
-        // res = cache.shares() == 0 ? 0 : cache.staked() / cache.shares();
     }
 }

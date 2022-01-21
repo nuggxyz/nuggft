@@ -6,6 +6,18 @@ library forge {
     Vm internal constant vm = Vm(address(bytes20(uint160(uint256(keccak256('hevm cheat code'))))));
 }
 
+library lib {
+    function singleton(uint256 a) internal pure returns (uint256[] memory array) {
+        array = new uint256[](1);
+        array[0] = a;
+    }
+
+    function singleton160(uint160 a) internal pure returns (uint160[] memory array) {
+        array = new uint160[](1);
+        array[0] = a;
+    }
+}
+
 interface Vm {
     // Set block.timestamp (newTimestamp)
     function warp(uint256) external;
