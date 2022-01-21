@@ -51,7 +51,6 @@ abstract contract NuggftV1Swap is INuggftV1Swap, NuggftV1Stake {
         // make sure user is not the owner of swap
         // we do not know how much to give them when they call "claim" otherwise
 
-        uint256 updatedAgency;
         uint256 currUserOffer;
 
         // logger.log(m.activeEpoch, 'm.activeEpoch', tokenId, 'tokenId', m.swapData, 'm.swapData');
@@ -144,6 +143,8 @@ abstract contract NuggftV1Swap is INuggftV1Swap, NuggftV1Stake {
             addStakedEth(uint96(currSwapOffer));
         }
 
+        uint256 updatedAgency;
+
         assembly {
             updatedAgency := or(caller(), or(shl(160, currUserOffer), or(shl(230, activeEpoch), shl(254, 0x1))))
 
@@ -164,22 +165,76 @@ abstract contract NuggftV1Swap is INuggftV1Swap, NuggftV1Stake {
     ) external payable override {
         require(isAgent(msg.sender, buyerTokenId), hex'26');
 
-        (Storage storage s, Memory memory m) = loadItemSwap(sellerTokenId, itemId, address(buyerTokenId));
+        uint256 swapData = swaps[sellerTokenId].items[itemId].data;
+        uint24 activeEpoch = epoch();
 
-        require(m.swapData != 0, hex'22');
+        require(swapData != 0, hex'22');
 
-        if (m.offerData != 0) {
+        uint256 offerData;
+
+        if (buyerTokenId == uint160(swapData)) {
+            offerData = swapData;
+        } else {
+            offerData = swaps[sellerTokenId].items[itemId].offers[address(buyerTokenId)];
+        }
+
+        if (offerData != 0) {
             // forces user to claim previous swap before acting on this one
             // prevents owner from COMMITTING on their own swap - not offering
-            require(m.offerData.epoch() >= m.activeEpoch, hex'27');
+            require(offerData.epoch() >= activeEpoch, hex'27');
 
             // assert(!m.offerData.flag()); // always be caught by the require above
         }
 
-        // uint96 lead = m.offerData == 0 && m.swapData.flag() ? commit(s, m) : carry(s, m);
-        uint256 updatedAgency = m.offerData == 0 && (m.swapData.epoch() == 0) ? commit(s, m) : carry(s, m);
+        if (offerData == 0 && (swapData.epoch() == 0)) {
+            require(msg.value >= eps(), hex'25');
 
-        s.data = updatedAgency;
+            unchecked {
+                activeEpoch++;
+            }
+
+            swaps[sellerTokenId].items[itemId].offers[swapData.account()] = swapData.epoch(activeEpoch);
+        } else {
+            assembly {
+                let ep := and(shr(230, swapData), 0xffffff)
+
+                if lt(ep, activeEpoch) {
+                    mstore(0x00, 0x2f)
+                    revert(31, 0x01)
+                }
+
+                activeEpoch := ep
+            }
+
+            swaps[sellerTokenId].items[itemId].offers[swapData.account()] = swapData;
+        }
+
+        uint256 currSwapOffer;
+        uint256 currUserOffer;
+
+        assembly {
+            let mask := sub(shl(70, 1), 1)
+            currSwapOffer := and(shr(160, swapData), mask)
+            currUserOffer := and(shr(160, offerData), mask)
+            currUserOffer := add(currUserOffer, div(callvalue(), 1000000000))
+
+            if gt(div(mul(currSwapOffer, 10200), 10000), currUserOffer) {
+                mstore(0x00, 0x26)
+                revert(0x19, 0x01)
+            }
+
+            currSwapOffer := mul(sub(currUserOffer, currSwapOffer), 1000000000)
+        }
+
+        addStakedEth(uint96(currSwapOffer));
+
+        uint256 updatedAgency;
+
+        assembly {
+            updatedAgency := or(buyerTokenId, or(shl(160, currUserOffer), or(shl(230, activeEpoch), shl(254, 0x1))))
+        }
+
+        swaps[sellerTokenId].items[itemId].data = updatedAgency;
 
         emit OfferItem(encodeSellingItemId(sellerTokenId, itemId), bytes32(updatedAgency));
     }
@@ -378,41 +433,41 @@ abstract contract NuggftV1Swap is INuggftV1Swap, NuggftV1Stake {
                                 internal
        ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
 
-    function commit(Storage storage s, Memory memory m) internal returns (uint256 updatedAgency) {
-        require(msg.value >= eps(), hex'25');
+    // function commit(Storage storage s, Memory memory m) internal returns (uint256 updatedAgency) {
+    //     require(msg.value >= eps(), hex'25');
 
-        // require(m.offerData == 0 && m.swapData.epoch() == 0, hex'03');
+    //     // require(m.offerData == 0 && m.swapData.epoch() == 0, hex'03');
 
-        // require(m.swapData.flag() == NuggftV1AgentType.Flag.SWAP, hex'04');
+    //     // require(m.swapData.flag() == NuggftV1AgentType.Flag.SWAP, hex'04');
 
-        // forces a user not to commit on their own swap
-        //commented out as the logic is handled by S:R
-        // require(!m.offerData.flag()(), 0x23);
+    //     // forces a user not to commit on their own swap
+    //     //commented out as the logic is handled by S:R
+    //     // require(!m.offerData.flag()(), 0x23);
 
-        uint24 newEpoch;
+    //     uint24 newEpoch;
 
-        unchecked {
-            newEpoch = m.activeEpoch + 1;
-        }
+    //     unchecked {
+    //         newEpoch = m.activeEpoch + 1;
+    //     }
 
-        updatedAgency = updateSwapDataWithEpoch(m.swapData, newEpoch, m.sender, 0);
+    //     updatedAgency = updateSwapDataWithEpoch(m.swapData, newEpoch, m.sender, 0);
 
-        s.offers[m.swapData.account()] = m.swapData.epoch(newEpoch);
-    }
+    //     s.offers[m.swapData.account()] = m.swapData.epoch(newEpoch);
+    // }
 
-    function carry(Storage storage s, Memory memory m) internal returns (uint256 updatedAgency) {
-        // make sure swap is still active
-        require(m.activeEpoch <= m.swapData.epoch(), hex'2F');
+    // function carry(Storage storage s, Memory memory m) internal returns (uint256 updatedAgency) {
+    //     // make sure swap is still active
+    //     require(m.activeEpoch <= m.swapData.epoch(), hex'2F');
 
-        if (m.swapData.account() != m.sender) s.offers[m.swapData.account()] = m.swapData;
+    //     if (m.swapData.account() != m.sender) s.offers[m.swapData.account()] = m.swapData;
 
-        updatedAgency = updateSwapDataWithEpoch(
-            m.swapData, //
-            m.swapData.epoch(),
-            m.sender,
-            m.offerData.eth()
-        );
-    }
+    //     updatedAgency = updateSwapDataWithEpoch(
+    //         m.swapData, //
+    //         m.swapData.epoch(),
+    //         m.sender,
+    //         m.offerData.eth()
+    //     );
+    // }
 
     // @scenario - leader claims in the middle of a swap
 
@@ -433,30 +488,30 @@ abstract contract NuggftV1Swap is INuggftV1Swap, NuggftV1Stake {
         // return isLeader && (isOwner || isOver);
     }
 
-    // @test  unit
-    function updateSwapDataWithEpoch(
-        uint256 prevSwapData,
-        uint256 _epoch,
-        address account,
-        uint256 currUserOffer
-    ) internal returns (uint256 res) {
-        uint96 baseEth = prevSwapData.eth();
+    // // @test  unit
+    // function updateSwapDataWithEpoch(
+    //     uint256 prevSwapData,
+    //     uint256 _epoch,
+    //     address account,
+    //     uint256 currUserOffer
+    // ) internal returns (uint256 res) {
+    //     uint96 baseEth = prevSwapData.eth();
 
-        assembly {
-            currUserOffer := add(currUserOffer, callvalue())
-            // let inc := div(mul(baseEth, 10200), 10000)
-            if gt(div(mul(baseEth, 10200), 10000), currUserOffer) {
-                mstore(0x00, 0x26)
-                revert(0x19, 0x01)
-            }
+    //     assembly {
+    //         currUserOffer := add(currUserOffer, callvalue())
+    //         // let inc := div(mul(baseEth, 10200), 10000)
+    //         if gt(div(mul(baseEth, 10200), 10000), currUserOffer) {
+    //             mstore(0x00, 0x26)
+    //             revert(0x19, 0x01)
+    //         }
 
-            res := or(account, or(shl(160, div(currUserOffer, 1000000000)), or(shl(230, _epoch), shl(254, 0x1))))
+    //         res := or(account, or(shl(160, div(currUserOffer, 1000000000)), or(shl(230, _epoch), shl(254, 0x1))))
 
-            baseEth := sub(currUserOffer, baseEth)
-        }
+    //         baseEth := sub(currUserOffer, baseEth)
+    //     }
 
-        addStakedEth(baseEth);
-    }
+    //     addStakedEth(baseEth);
+    // }
 
     /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
                                 TOKEN SWAP

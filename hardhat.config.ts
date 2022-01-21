@@ -51,26 +51,26 @@ export const NetworkTags = {
 };
 
 const DefaultNetworkConfig: NetworkUserConfig = {
-    accounts: [process.env.TRUSTED_PRIV_KEY, process.env.SPECIAL_PRIV_KEY, process.env.SPECIAL_PRIV_KEY_2],
+    // accounts: [process.env.TRUSTED_PRIV_KEY, process.env.SPECIAL_PRIV_KEY, process.env.SPECIAL_PRIV_KEY_2],
 };
 
 const DefaultLocalNetworkConfig = {
     live: false,
     saveDeployments: true,
-    // accounts: {
-    //     mnemonic: 'many dark suns glow like gods fury when they eats that nugg',
-    //     accountsBalance: '990000000000000000000',
-    // },
-    accounts: [
-        {
-            privateKey: process.env.TRUSTED_PRIV_KEY,
-            balance: '990000000000000000000',
-        },
-        {
-            privateKey: process.env.SPECIAL_PRIV_KEY,
-            balance: '990000000000000000000',
-        },
-    ],
+    accounts: {
+        mnemonic: 'many dark suns glow like gods fury when they eats that nugg',
+        accountsBalance: '990000000000000000000',
+    },
+    // accounts: [
+    //     {
+    //         privateKey: process.env.TRUSTED_PRIV_KEY,
+    //         balance: '990000000000000000000',
+    //     },
+    //     {
+    //         privateKey: process.env.SPECIAL_PRIV_KEY,
+    //         balance: '990000000000000000000',
+    //     },
+    // ],
 };
 
 const DefaultStageNetworkConfig = {
