@@ -67,7 +67,7 @@ abstract contract NuggftV1Swap is INuggftV1Swap, NuggftV1Stake {
             // updatedAgency = NuggftV1AgentType.create(m.activeEpoch, m.sender, uint96(msg.value), NuggftV1AgentType.Flag.SWAP);
 
             assembly {
-                currUserOffer := callvalue()
+                currUserOffer := div(callvalue(), 1000000000)
                 // updatedAgency := or(caller(), or(shl(160, div(callvalue(), 1000000000)), or(shl(230, activeEpoch), shl(254, 0x1))))
             }
 
@@ -110,34 +110,42 @@ abstract contract NuggftV1Swap is INuggftV1Swap, NuggftV1Stake {
 
                 swaps[tokenId].self.offers[address(uint160(swapData))] = swapData.epoch(activeEpoch);
             } else {
-                require(activeEpoch <= swapData.epoch(), hex'2F');
+                assembly {
+                    let ep := and(shr(230, swapData), 0xffffff)
+
+                    if lt(ep, activeEpoch) {
+                        mstore(0x00, 0x2f)
+                        revert(31, 0x01)
+                    }
+
+                    activeEpoch := ep
+                }
+                // require(activeEpoch <= swapData.epoch(), hex'2F');
 
                 swaps[tokenId].self.offers[swapData.account()] = swapData;
-
-                activeEpoch = swapData.epoch();
-
-                // updatedAgency = carry(s, m);
             }
 
-            uint96 baseEth = swapData.eth();
-            currUserOffer = offerData.eth();
+            uint256 currSwapOffer;
 
             assembly {
-                currUserOffer := add(currUserOffer, callvalue())
+                let mask := sub(shl(70, 1), 1)
+                currSwapOffer := and(shr(160, swapData), mask)
+                currUserOffer := and(shr(160, offerData), mask)
+                currUserOffer := add(currUserOffer, div(callvalue(), 1000000000))
                 // let inc := div(mul(baseEth, 10200), 10000)
-                if gt(div(mul(baseEth, 10200), 10000), currUserOffer) {
+                if gt(div(mul(currSwapOffer, 10200), 10000), currUserOffer) {
                     mstore(0x00, 0x26)
                     revert(0x19, 0x01)
                 }
 
-                baseEth := sub(currUserOffer, baseEth)
+                currSwapOffer := mul(sub(currUserOffer, currSwapOffer), 1000000000)
             }
 
-            addStakedEth(baseEth);
+            addStakedEth(uint96(currSwapOffer));
         }
 
         assembly {
-            updatedAgency := or(caller(), or(shl(160, div(currUserOffer, 1000000000)), or(shl(230, activeEpoch), shl(254, 0x1))))
+            updatedAgency := or(caller(), or(shl(160, currUserOffer), or(shl(230, activeEpoch), shl(254, 0x1))))
 
             // agency[tokenId] = updatedAgency;
             mstore(0, tokenId)
