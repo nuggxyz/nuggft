@@ -193,7 +193,7 @@ contract PureDeployer {
 
             INuggftV1(__nuggft).sell(uint160(i), floor);
 
-            (, uint96 amt, ) = INuggftV1(__nuggft).valueForOffer(minterHelper, uint160(i));
+            (, uint96 amt, ) = INuggftV1(__nuggft).check(minterHelper, uint160(i));
 
             if (i % 2 == 0) {
                 PureDeployerCallback(minterHelper).offerem{value: amt}(__nuggft, i);

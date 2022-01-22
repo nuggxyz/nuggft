@@ -290,7 +290,7 @@ abstract contract NuggftV1Swap is INuggftV1Swap, NuggftV1ItemSwap {
        ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
 
     // / @inheritdoc INuggftV1Swap
-    function valueForOffer(address sender, uint160 tokenId)
+    function check(address sender, uint160 tokenId)
         external
         view
         override

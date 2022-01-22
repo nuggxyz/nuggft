@@ -33,7 +33,7 @@ contract logic__NuggftV1Loan is NuggftV1Test {
             (, , , , uint24 b_insolventEpoch) = nuggft.loanInfo(LOAN_TOKENID);
 
             uint160 tokenId = nuggft.epoch();
-            (, uint96 nextSwapAmount, uint96 senderCurrentOffer) = nuggft.valueForOffer(users.frank, tokenId);
+            (, uint96 nextSwapAmount, uint96 senderCurrentOffer) = nuggft.check(users.frank, tokenId);
 
             uint96 value = nextSwapAmount - senderCurrentOffer;
             forge.vm.startPrank(users.frank);

@@ -28,7 +28,7 @@ interface INuggftV1Swap {
     /// @return canOffer -> instead of reverting this function will return false
     /// @return nextOfferAmount -> the minimum value that must be sent with a offer call
     /// @return senderCurrentOffer ->
-    function valueForOffer(address sender, uint160 tokenId)
+    function check(address sender, uint160 tokenId)
         external
         view
         returns (
