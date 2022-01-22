@@ -27,7 +27,7 @@ abstract contract NuggftV1Swap is INuggftV1Swap, NuggftV1Stake {
 
     /// @inheritdoc INuggftV1Swap
     function offer(uint160 tokenId) external payable override {
-        uint256 shash;
+        uint256 loc;
 
         uint256 swapData;
 
@@ -44,9 +44,9 @@ abstract contract NuggftV1Swap is INuggftV1Swap, NuggftV1Stake {
             mstore(0x00, tokenId)
             mstore(0x20, agency.slot)
 
-            shash := keccak256(0x0, 64)
+            loc := keccak256(0x0, 64)
 
-            swapData := sload(shash)
+            swapData := sload(loc)
         }
 
         // make sure user is not the owner of swap
@@ -108,7 +108,7 @@ abstract contract NuggftV1Swap is INuggftV1Swap, NuggftV1Stake {
 
                 if gt(div(mul(last, 10200), 10000), next) {
                     mstore(0x00, 0x26)
-                    revert(0x19, 0x01)
+                    revert(0x1F, 0x01)
                 }
 
                 last := mul(sub(next, last), 1000000000)
@@ -122,7 +122,7 @@ abstract contract NuggftV1Swap is INuggftV1Swap, NuggftV1Stake {
         assembly {
             updatedAgency := or(caller(), or(shl(160, next), or(shl(230, active), shl(254, 0x1))))
 
-            sstore(shash, updatedAgency)
+            sstore(loc, updatedAgency)
         }
 
         emit Offer(tokenId, bytes32(updatedAgency));
@@ -136,7 +136,7 @@ abstract contract NuggftV1Swap is INuggftV1Swap, NuggftV1Stake {
     ) external payable override {
         require(isAgent(msg.sender, buyerTokenId), hex'26');
 
-        uint256 shash = itemId;
+        uint256 loc = itemId;
 
         uint256 swapData;
 
@@ -150,12 +150,12 @@ abstract contract NuggftV1Swap is INuggftV1Swap, NuggftV1Stake {
             next := div(callvalue(), 1000000000)
 
             let ptr := mload(0x40)
-            shash := or(shl(160, shash), sellerTokenId)
-            mstore(ptr, shash)
+            loc := or(shl(160, loc), sellerTokenId)
+            mstore(ptr, loc)
             mstore(add(ptr, 0x20), itemAgency.slot)
 
-            shash := keccak256(ptr, 0x40)
-            swapData := sload(shash)
+            loc := keccak256(ptr, 0x40)
+            swapData := sload(loc)
         }
 
         require(swapData != 0, hex'22');
@@ -207,14 +207,14 @@ abstract contract NuggftV1Swap is INuggftV1Swap, NuggftV1Stake {
             // ensure next >= (last + 2%)
             if gt(div(mul(last, 10200), 10000), next) {
                 mstore(0x00, 0x28)
-                revert(0x19, 0x01)
+                revert(0x1F, 0x01)
             }
 
             last := mul(sub(next, last), 1000000000)
 
             updatedAgency := or(buyerTokenId, or(shl(160, next), or(shl(230, active), shl(254, 0x1))))
 
-            sstore(shash, updatedAgency)
+            sstore(loc, updatedAgency)
         }
 
         addStakedEth(uint96(last));
@@ -236,7 +236,7 @@ abstract contract NuggftV1Swap is INuggftV1Swap, NuggftV1Stake {
     //         }
     //         if iszero(call(gas(), caller(), value, 0, 0, 0, 0)) {
     //             mstore(0, 0x01)
-    //             revert(0x19, 0x01)
+    //             revert(0x1F, 0x01)
     //         }
     //     }
     // }
@@ -257,15 +257,15 @@ abstract contract NuggftV1Swap is INuggftV1Swap, NuggftV1Stake {
         for (uint256 i = 0; i < tokenIds.length; i++) {
             uint160 tokenId = tokenIds[i];
 
-            uint256 shash;
+            uint256 loc;
 
             uint256 swapData;
 
             assembly {
                 mstore(0x00, tokenId)
 
-                shash := keccak256(0x00, 64)
-                swapData := sload(shash)
+                loc := keccak256(0x00, 64)
+                swapData := sload(loc)
             }
 
             uint256 offerData = swapData;
@@ -290,7 +290,7 @@ abstract contract NuggftV1Swap is INuggftV1Swap, NuggftV1Stake {
                         revert(31, 0x01)
                     }
 
-                    sstore(shash, or(caller(), shl(254, 0x3)))
+                    sstore(loc, or(caller(), shl(254, 0x3)))
                 }
 
                 emit Transfer(address(this), msg.sender, tokenId);
@@ -309,13 +309,13 @@ abstract contract NuggftV1Swap is INuggftV1Swap, NuggftV1Stake {
             }
             if iszero(call(gas(), caller(), mul(acc, 1000000000), 0, 0, 0, 0)) {
                 mstore(0, 0x01)
-                revert(0x19, 0x01)
+                revert(0x1F, 0x01)
             }
         }
     }
 
     // function _claim(uint160 tokenId) internal returns (uint96 value) {
-    //     uint256 shash;
+    //     uint256 loc;
 
     //     uint256 swapData;
 
@@ -324,8 +324,8 @@ abstract contract NuggftV1Swap is INuggftV1Swap, NuggftV1Stake {
     //         mstore(ptr, tokenId)
     //         mstore(add(ptr, 0x20), agency.slot)
 
-    //         shash := keccak256(ptr, 64)
-    //         swapData := sload(shash)
+    //         loc := keccak256(ptr, 64)
+    //         swapData := sload(loc)
     //     }
 
     //     // require(swapData != 0, hex'22');
@@ -356,7 +356,7 @@ abstract contract NuggftV1Swap is INuggftV1Swap, NuggftV1Stake {
     //                 revert(31, 0x01)
     //             }
 
-    //             sstore(shash, or(caller(), shl(254, 0x3)))
+    //             sstore(loc, or(caller(), shl(254, 0x3)))
     //         }
 
     //         emit Transfer(address(this), msg.sender, tokenId);
@@ -383,7 +383,7 @@ abstract contract NuggftV1Swap is INuggftV1Swap, NuggftV1Stake {
             }
             if iszero(call(gas(), caller(), value, 0, 0, 0, 0)) {
                 mstore(0, 0x01)
-                revert(0x19, 0x01)
+                revert(0x1F, 0x01)
             }
         }
     }
@@ -408,7 +408,7 @@ abstract contract NuggftV1Swap is INuggftV1Swap, NuggftV1Stake {
             }
             if iszero(call(gas(), caller(), acc, 0, 0, 0, 0)) {
                 mstore(0, 0x01)
-                revert(0x19, 0x01)
+                revert(0x1F, 0x01)
             }
         }
     }
@@ -640,7 +640,7 @@ abstract contract NuggftV1Swap is INuggftV1Swap, NuggftV1Stake {
     //         // let inc := div(mul(baseEth, 10200), 10000)
     //         if gt(div(mul(baseEth, 10200), 10000), currUserOffer) {
     //             mstore(0x00, 0x26)
-    //             revert(0x19, 0x01)
+    //             revert(0x1F, 0x01)
     //         }
 
     //         res := or(account, or(shl(160, div(currUserOffer, 1000000000)), or(shl(230, _epoch), shl(254, 0x1))))
