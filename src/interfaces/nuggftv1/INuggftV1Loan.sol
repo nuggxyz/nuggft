@@ -17,9 +17,9 @@ interface INuggftV1Loan {
                             STATE CHANGING
     ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━*/
 
-    function rebalance(uint160 tokenId) external payable;
+    function rebalance(uint160[] calldata tokenIds) external payable;
 
-    function multirebalance(uint160[] memory tokenId) external payable;
+    // function multirebalance(uint160[] memory tokenId) external payable;
 
     function loan(uint160 tokenId) external;
 
