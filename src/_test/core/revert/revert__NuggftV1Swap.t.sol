@@ -236,7 +236,7 @@ contract revert__NuggftV1Swap is NuggftV1Test {
 
         forge.vm.startPrank(users.dee);
         {
-            nuggft.claim(lib.singleton160(tokenId), lib.singletonAddress(users.dee));
+            nuggft.claim(lib.sarr160(tokenId), lib.sarrAddress(users.dee));
             nuggft.offer{value: value}(tokenId);
         }
         forge.vm.stopPrank();
@@ -301,7 +301,7 @@ contract revert__NuggftV1Swap is NuggftV1Test {
 
         forge.vm.startPrank(users.dee);
         {
-            nuggft.claim(lib.singleton160(tokenId), lib.singletonAddress(users.dee));
+            nuggft.claim(lib.sarr160(tokenId), lib.sarrAddress(users.dee));
 
             nuggft.offer{value: value}(tokenId);
         }
@@ -458,7 +458,7 @@ contract revert__NuggftV1Swap is NuggftV1Test {
 
         forge.vm.startPrank(users.dee);
         {
-            forge.vm.expectRevert(hex'27');
+            forge.vm.expectRevert(hex'0f');
             nuggft.offerItem{value: value}(tokenId, tokenId, itemId);
         }
         forge.vm.stopPrank();
@@ -472,7 +472,7 @@ contract revert__NuggftV1Swap is NuggftV1Test {
 
         forge.vm.startPrank(users.mac);
         {
-            nuggft.claim(lib.singleton160(tokenId), lib.singletonAddress(users.mac));
+            nuggft.claim(lib.sarr160(tokenId), lib.sarrAddress(users.mac));
         }
         forge.vm.stopPrank();
     }
@@ -486,7 +486,7 @@ contract revert__NuggftV1Swap is NuggftV1Test {
 
         forge.vm.startPrank(users.charlie);
         {
-            nuggft.claimItem(charliesTokenId, tokenId, itemId);
+            nuggft.claimItem(lib.sarr160(charliesTokenId), lib.sarr160(tokenId), lib.sarr16(itemId));
         }
         forge.vm.stopPrank();
     }
@@ -514,7 +514,7 @@ contract revert__NuggftV1Swap is NuggftV1Test {
         forge.vm.startPrank(users.mac);
         {
             forge.vm.expectRevert(hex'29');
-            nuggft.claimItem(charliesTokenId, tokenId, itemId);
+            nuggft.claimItem(lib.sarr160(charliesTokenId), lib.sarr160(tokenId), lib.sarr16(itemId));
         }
         forge.vm.stopPrank();
     }
@@ -729,7 +729,7 @@ contract revert__NuggftV1Swap is NuggftV1Test {
 
         forge.vm.startPrank(users.dee);
         {
-            nuggft.claim(lib.singleton160(tokenId), lib.singletonAddress(users.dee));
+            nuggft.claim(lib.sarr160(tokenId), lib.sarrAddress(users.dee));
         }
         forge.vm.stopPrank();
     }
@@ -740,7 +740,7 @@ contract revert__NuggftV1Swap is NuggftV1Test {
         forge.vm.startPrank(users.charlie);
         {
             forge.vm.expectRevert(hex'2E');
-            nuggft.claim(lib.singleton160(tokenId), lib.singletonAddress(users.charlie));
+            nuggft.claim(lib.sarr160(tokenId), lib.sarrAddress(users.charlie));
         }
         forge.vm.stopPrank();
     }
@@ -750,7 +750,7 @@ contract revert__NuggftV1Swap is NuggftV1Test {
 
         forge.vm.startPrank(users.mac);
         {
-            nuggft.claim(lib.singleton160(tokenId), lib.singletonAddress(users.mac));
+            nuggft.claim(lib.sarr160(tokenId), lib.sarrAddress(users.mac));
         }
         forge.vm.stopPrank();
     }
@@ -760,7 +760,7 @@ contract revert__NuggftV1Swap is NuggftV1Test {
 
         forge.vm.startPrank(users.dee);
         {
-            nuggft.claim(lib.singleton160(tokenId), lib.singletonAddress(users.dee));
+            nuggft.claim(lib.sarr160(tokenId), lib.sarrAddress(users.dee));
         }
         forge.vm.stopPrank();
     }
@@ -777,7 +777,7 @@ contract revert__NuggftV1Swap is NuggftV1Test {
     //     forge.vm.startPrank(users.dennis);
     //     {
     //         forge.vm.expectRevert(hex'2E');
-    //         nuggft.claim(lib.singleton160(tokenId));
+    //         nuggft.claim(lib.sarr160(tokenId));
     //     }
     //     forge.vm.stopPrank();
     // }

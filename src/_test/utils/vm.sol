@@ -7,17 +7,27 @@ library forge {
 }
 
 library lib {
-    function singleton(uint256 a) internal pure returns (uint256[] memory array) {
+    function sarr(uint256 a) internal pure returns (uint256[] memory array) {
         array = new uint256[](1);
         array[0] = a;
     }
 
-    function singleton160(uint160 a) internal pure returns (uint160[] memory array) {
+    function sarr160(uint160 a) internal pure returns (uint160[] memory array) {
         array = new uint160[](1);
         array[0] = a;
     }
 
-    function singletonAddress(address a) internal pure returns (address[] memory array) {
+    function sarr176(uint176 a) internal pure returns (uint176[] memory array) {
+        array = new uint176[](1);
+        array[0] = a;
+    }
+
+    function sarr16(uint16 a) internal pure returns (uint16[] memory array) {
+        array = new uint16[](1);
+        array[0] = a;
+    }
+
+    function sarrAddress(address a) internal pure returns (address[] memory array) {
         array = new address[](1);
         array[0] = a;
     }
