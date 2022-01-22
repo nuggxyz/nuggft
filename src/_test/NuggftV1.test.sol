@@ -352,7 +352,7 @@ contract NuggftV1Test is ForgeTest {
         (tokenId) = scenario_dee_has_sold_a_token_and_mac_can_claim();
 
         forge.vm.prank(users.mac);
-        nuggft.claim(lib.singleton160(tokenId), lib.singletonAddress(users.mac));
+        nuggft.claim(lib.sarr160(tokenId), lib.sarrAddress(users.mac));
     }
 
     function scenario_mac_has_sold_a_token_dee_sold() public payable returns (uint160 tokenId, uint96 floor) {

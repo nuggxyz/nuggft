@@ -20,6 +20,7 @@ abstract contract NuggftV1Epoch is INuggftV1Epoch {
     bytes32 constant LIQUIDATE = 0x7dc78d32e32a79dbb28ffc73e80d5c0d1961c893f5b437aa8328ab854f08e09f;
     bytes32 constant LOAN = 0x764dd32e4d33677f4bc9a37133c10ecef6409f7feb33af67a31d1fb01b392867;
     bytes32 constant CLAIM = 0x938187ad30d2557f8eb68b094a2305a858ec4f65c86a957b4bc26d9c0a496fef;
+    bytes32 constant CLAIMITEM = 0x7a0576b9edc37a53c7e05ae220b6a871cf584ae6724a63f704609baec1e72853;
 
     constructor() {
         genesis = block.number;
