@@ -7,7 +7,7 @@ library TransferLib {
         assembly {
             if iszero(call(gas(), to, amount, 0, 0, 0, 0)) {
                 mstore(0, 0x01)
-                revert(0x19, 0x01)
+                revert(0x1F, 0x01)
             }
         }
     }
