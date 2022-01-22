@@ -57,7 +57,7 @@ contract NuggftV1Minter {
 
             INuggftV1(nuggftv1).sell(uint160(i), floor);
 
-            (, uint96 amt, ) = INuggftV1(nuggftv1).valueForOffer(minterHelper, uint160(i));
+            (, uint96 amt, ) = INuggftV1(nuggftv1).check(minterHelper, uint160(i));
 
             if (i % 2 == 0) {
                 NuggftV1MinterHelper(minterHelper).offerem{value: amt}(nuggftv1, i);
