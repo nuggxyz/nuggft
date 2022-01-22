@@ -19,6 +19,8 @@ abstract contract NuggftV1Token is INuggftV1Token, NuggftV1Epoch {
 
     using CastLib for uint256;
 
+    bytes32 constant TRANSFER_HASH = 0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef;
+
     uint32 constant TRUSTED_MINT_TOKENS = 500;
     uint32 constant UNTRUSTED_MINT_TOKENS = 10000;
 
@@ -39,10 +41,13 @@ abstract contract NuggftV1Token is INuggftV1Token, NuggftV1Epoch {
     }
 
     /// @inheritdoc IERC721
-    function ownerOf(uint256 tokenId) external view override returns (address) {
+    function ownerOf(uint256 tokenId) external view override returns (address res) {
         uint256 cache = agency[tokenId];
         require(cache != 0, hex'40');
-        return cache.account(); //_ownerOf(tokenId.to160());
+        if (cache >> 254 == 0x01 && (cache << 2) >> 232 != 0) {
+            return address(this);
+        }
+        return cache.account();
     }
 
     /// @inheritdoc IERC721

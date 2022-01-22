@@ -236,7 +236,7 @@ contract revert__NuggftV1Swap is NuggftV1Test {
 
         forge.vm.startPrank(users.dee);
         {
-            nuggft.claim(lib.singleton160(tokenId));
+            nuggft.claim(lib.singleton160(tokenId), lib.singletonAddress(users.dee));
             nuggft.offer{value: value}(tokenId);
         }
         forge.vm.stopPrank();
@@ -301,7 +301,7 @@ contract revert__NuggftV1Swap is NuggftV1Test {
 
         forge.vm.startPrank(users.dee);
         {
-            nuggft.claim(lib.singleton160(tokenId));
+            nuggft.claim(lib.singleton160(tokenId), lib.singletonAddress(users.dee));
 
             nuggft.offer{value: value}(tokenId);
         }
@@ -472,7 +472,7 @@ contract revert__NuggftV1Swap is NuggftV1Test {
 
         forge.vm.startPrank(users.mac);
         {
-            nuggft.claim(lib.singleton160(tokenId));
+            nuggft.claim(lib.singleton160(tokenId), lib.singletonAddress(users.mac));
         }
         forge.vm.stopPrank();
     }
@@ -729,7 +729,7 @@ contract revert__NuggftV1Swap is NuggftV1Test {
 
         forge.vm.startPrank(users.dee);
         {
-            nuggft.claim(lib.singleton160(tokenId));
+            nuggft.claim(lib.singleton160(tokenId), lib.singletonAddress(users.dee));
         }
         forge.vm.stopPrank();
     }
@@ -740,7 +740,7 @@ contract revert__NuggftV1Swap is NuggftV1Test {
         forge.vm.startPrank(users.charlie);
         {
             forge.vm.expectRevert(hex'2E');
-            nuggft.claim(lib.singleton160(tokenId));
+            nuggft.claim(lib.singleton160(tokenId), lib.singletonAddress(users.charlie));
         }
         forge.vm.stopPrank();
     }
@@ -750,7 +750,7 @@ contract revert__NuggftV1Swap is NuggftV1Test {
 
         forge.vm.startPrank(users.mac);
         {
-            nuggft.claim(lib.singleton160(tokenId));
+            nuggft.claim(lib.singleton160(tokenId), lib.singletonAddress(users.mac));
         }
         forge.vm.stopPrank();
     }
@@ -760,7 +760,7 @@ contract revert__NuggftV1Swap is NuggftV1Test {
 
         forge.vm.startPrank(users.dee);
         {
-            nuggft.claim(lib.singleton160(tokenId));
+            nuggft.claim(lib.singleton160(tokenId), lib.singletonAddress(users.dee));
         }
         forge.vm.stopPrank();
     }

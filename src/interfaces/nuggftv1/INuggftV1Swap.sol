@@ -5,7 +5,7 @@ pragma solidity 0.8.9;
 interface INuggftV1Swap {
     event Offer(uint160 indexed tokenId, bytes32 agency);
     event OfferItem(uint176 indexed sellingItemId, bytes32 agency);
-    event Claim(uint160 indexed tokenId, address user);
+    event Claim(uint160 indexed tokenId, address indexed account);
     event ClaimItem(uint176 indexed sellingItemId, uint160 nugg);
     event Sell(uint160 indexed tokenId, bytes32 agency);
     event SellItem(uint176 indexed sellingItemId, bytes32 agency);
@@ -28,7 +28,7 @@ interface INuggftV1Swap {
         uint16 itemid
     ) external;
 
-    function claim(uint160[] calldata tokenIds) external;
+    function claim(uint160[] calldata tokenIds, address[] calldata accounts) external;
 
     function multiclaimItem(
         uint160[] calldata buyerTokenIds,

@@ -27,105 +27,130 @@ abstract contract NuggftV1Swap is INuggftV1Swap, NuggftV1Stake {
 
     /// @inheritdoc INuggftV1Swap
     function offer(uint160 tokenId) external payable override {
-        uint256 loc;
+        uint256 agency__slot;
 
-        uint256 swapData;
+        uint256 agency__cache;
+        uint256 next;
 
-        uint256 next = genesis;
-
-        uint24 active;
+        uint256 active = epoch();
+        uint256 ptr;
 
         assembly {
-            active := add(div(sub(number(), next), INTERVAL), OFFSET)
+            next := div(callvalue(), LOSS)
 
-            next := div(callvalue(), 1000000000)
+            ptr := mload(0x40)
 
-            // let ptr := mload(0x40)
-            mstore(0x00, tokenId)
-            mstore(0x20, agency.slot)
+            mstore(ptr, tokenId)
+            mstore(add(ptr, 0x20), agency.slot)
 
-            loc := keccak256(0x0, 64)
+            agency__slot := keccak256(ptr, 0x40)
+            agency__cache := sload(agency__slot)
 
-            swapData := sload(loc)
+            mstore(0x40, add(ptr, 0x40))
         }
 
         // make sure user is not the owner of swap
         // we do not know how much to give them when they call "claim" otherwise
 
-        if (active == tokenId && swapData == 0) {
+        if (active == tokenId && agency__cache == 0) {
             addStakedShareFromMsgValue();
 
             setProofFromEpoch(tokenId);
 
-            emit Transfer(address(0), address(this), tokenId);
+            assembly {
+                log4(0x00, 0x00, TRANSFER, 0, address(), tokenId)
+            }
         } else {
-            // ensure that the agency flag is "SWAP" (0x01)
-            require((swapData >> 254) == 0x01, hex'24');
-
-            uint256 offerData = swapData;
-
-            if (uint160(msg.sender) != uint160(swapData)) {
-                offerData = offers[tokenId][msg.sender];
-            }
-
-            if (offerData != 0) {
-                // forces user to claim previous swap before acting on this one
-                // prevents owner from COMMITTING on their own swap - not offering
-                require(offerData.epoch() >= active, hex'0F');
-            }
-
-            // if the leader "owns" the swap, then it was initated by them - "commit" must be executed
-            // we know if a swap has been offered upon by checking if the epoch is 0
-            if ((swapData >> 230) & 0xffffff == 0) {
-                unchecked {
-                    active++;
-                }
-
-                offers[tokenId][address(uint160(swapData))] = swapData | (uint256(active) << 230);
-
-                emit Transfer(address(uint160(swapData)), address(this), tokenId);
-            } else {
-                assembly {
-                    let ep := and(shr(230, swapData), 0xffffff)
-
-                    if lt(ep, active) {
-                        mstore(0x00, 0x2f)
-                        revert(31, 0x01)
-                    }
-
-                    active := ep
-                }
-
-                offers[tokenId][address(uint160(swapData))] = swapData;
-            }
-
             uint256 last;
 
             assembly {
-                let mask := sub(shl(70, 1), 1)
-                last := and(shr(160, swapData), mask)
-                next := add(and(shr(160, offerData), mask), next)
-
-                if gt(div(mul(last, 10200), 10000), next) {
-                    mstore(0x00, 0x26)
-                    revert(0x1F, 0x01)
+                // ensure that the agency flag is "SWAP" (0x01)
+                if iszero(eq(shr(254, agency__cache), 0x01)) {
+                    mstore8(0x0, 0x24) // ERR:0x24
+                    revert(0x00, 0x01)
                 }
 
-                last := mul(sub(next, last), 1000000000)
+                // calculate and store the offer[tokenId]__slot
+                // tokenId already exists at ptr
+                mstore(add(ptr, 0x20), offers.slot)
+                mstore(add(ptr, 0x20), keccak256(ptr, 0x40))
+
+                let lastLead := shr(96, shl(96, agency__cache))
+
+                let offer__cache := agency__cache
+
+                if iszero(eq(caller(), lastLead)) {
+                    mstore(ptr, caller())
+                    offer__cache := sload(keccak256(ptr, 0x40))
+                }
+
+                // check to see if user has offered by checking if cache != 0
+                if iszero(iszero(offer__cache)) {
+                    // check to see if the epoch from offer__cache has expired
+                    // this accomplishes two important goals:
+                    // 1. forces user to claim previous swap before acting on this one
+                    // 2. prevents owner from offering on their own swap before someone else has
+                    if lt(shr(232, shl(2, offer__cache)), active) {
+                        mstore8(0x0, 0x0F) // ERR:0x0F
+                        revert(0x00, 0x01)
+                    }
+                }
+
+                // check to see if the epoch stored in agency__cache == 0
+                switch iszero(shr(232, shl(2, agency__cache)))
+                // if so, we know this swap has not yet been offered on
+                // we update the epoch and we transfer the token to the contract
+                case 1 {
+                    active := add(active, SALE_LEN)
+
+                    agency__cache := or(agency__cache, shl(230, active))
+
+                    log4(0x00, 0x00, TRANSFER, lastLead, address(), tokenId)
+                }
+                // otherwise we validate the epoch to ensure the swap is still active
+                default {
+                    let agency__epoch := shr(232, shl(2, agency__cache))
+
+                    if lt(agency__epoch, active) {
+                        mstore8(0x0, 0x2F) // ERR:0x2F
+                        revert(0x00, 0x01)
+                    }
+
+                    active := agency__epoch
+                }
+
+                last := shr(186, shl(26, agency__cache))
+                next := add(shr(186, shl(26, offer__cache)), next)
+
+                if gt(div(mul(last, 10200), 10000), next) {
+                    mstore8(0x0, 0x72)
+                    revert(0x00, 0x01)
+                }
+
+                last := mul(sub(next, last), LOSS)
+
+                // record agency so we know how much to repay previous leader
+                mstore(ptr, shr(96, shl(96, agency__cache)))
+                sstore(keccak256(ptr, 0x40), agency__cache)
             }
 
             addStakedEth(uint96(last));
         }
 
-        uint256 updatedAgency;
-
         assembly {
-            updatedAgency := or(caller(), or(shl(160, next), or(shl(230, active), shl(254, 0x1))))
-
-            sstore(loc, updatedAgency)
+            // update agency to reflect the new leader
+            //
+            // agency[tokenId] = {
+            //     flag  = SWAP
+            //     epoch = active or active +1
+            //     eth   = new highest value / 10**8
+            //     addr  = msg.sender
+            // }
+            agency__cache := or(shl(254, 0x01), or(shl(230, active), or(shl(160, next), caller())))
+            sstore(agency__slot, agency__cache)
         }
 
-        emit Offer(tokenId, bytes32(updatedAgency));
+        emit Offer(tokenId, bytes32(agency__cache));
     }
 
     /// @inheritdoc INuggftV1Swap
@@ -140,21 +165,20 @@ abstract contract NuggftV1Swap is INuggftV1Swap, NuggftV1Stake {
 
         uint256 swapData;
 
-        uint24 active;
+        uint24 active = epoch();
 
         uint256 next = genesis;
 
         assembly {
-            active := add(div(sub(number(), next), INTERVAL), OFFSET)
+            next := div(callvalue(), LOSS)
 
-            next := div(callvalue(), 1000000000)
-
-            let ptr := mload(0x40)
             loc := or(shl(160, loc), sellerTokenId)
-            mstore(ptr, loc)
-            mstore(add(ptr, 0x20), itemAgency.slot)
 
-            loc := keccak256(ptr, 0x40)
+            mstore(0x00, loc)
+            mstore(0x20, itemAgency.slot)
+
+            loc := keccak256(0x00, 0x40)
+
             swapData := sload(loc)
         }
 
@@ -182,14 +206,14 @@ abstract contract NuggftV1Swap is INuggftV1Swap, NuggftV1Stake {
             itemOffers[encItemId(sellerTokenId, itemId)][uint160(swapData)] = swapData | (uint256(active) << 230);
         } else {
             assembly {
-                let ep := and(shr(230, swapData), 0xffffff)
+                let swapData__epoch := shr(232, shl(2, swapData))
 
-                if lt(ep, active) {
-                    mstore(0x00, 0x2f)
-                    revert(31, 0x01)
+                if lt(swapData__epoch, active) {
+                    mstore8(0x0, 0x2f)
+                    revert(0x00, 0x01)
                 }
 
-                active := ep
+                active := swapData__epoch
             }
 
             itemOffers[encItemId(sellerTokenId, itemId)][uint160(swapData)] = swapData;
@@ -200,9 +224,8 @@ abstract contract NuggftV1Swap is INuggftV1Swap, NuggftV1Stake {
         uint256 updatedAgency;
 
         assembly {
-            let mask := sub(shl(70, 1), 1)
-            last := and(shr(160, swapData), mask)
-            next := add(and(shr(160, offerData), mask), next)
+            last := shr(186, shl(26, swapData))
+            next := add(shr(186, shl(26, offerData)), next)
 
             // ensure next >= (last + 2%)
             if gt(div(mul(last, 10200), 10000), next) {
@@ -210,7 +233,7 @@ abstract contract NuggftV1Swap is INuggftV1Swap, NuggftV1Stake {
                 revert(0x1F, 0x01)
             }
 
-            last := mul(sub(next, last), 1000000000)
+            last := mul(sub(next, last), LOSS)
 
             updatedAgency := or(buyerTokenId, or(shl(160, next), or(shl(230, active), shl(254, 0x1))))
 
@@ -226,90 +249,115 @@ abstract contract NuggftV1Swap is INuggftV1Swap, NuggftV1Stake {
                                   claim
        ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
 
-    // /// @inheritdoc INuggftV1Swap
-    // function claim(uint160 tokenId) external override {
-    //     uint256 value = _claim(tokenId);
-
-    //     assembly {
-    //         if iszero(value) {
-    //             return(0, 0)
-    //         }
-    //         if iszero(call(gas(), caller(), value, 0, 0, 0, 0)) {
-    //             mstore(0, 0x01)
-    //             revert(0x1F, 0x01)
-    //         }
-    //     }
-    // }
-
     /// @inheritdoc INuggftV1Swap
-    function claim(uint160[] calldata tokenIds) external override {
-        uint256 acc;
-        uint24 active;
-
-        uint256 gen = genesis;
+    function claim(uint160[] calldata tokenIds, address[] calldata accounts) external override {
+        uint256 active = epoch();
 
         assembly {
-            active := add(div(sub(number(), gen), INTERVAL), OFFSET)
+            let ptr := mload(0x40)
+            let acc := 0
 
-            mstore(0x20, agency.slot)
-        }
+            let len := calldataload(sub(tokenIds.offset, 0x20))
 
-        for (uint256 i = 0; i < tokenIds.length; i++) {
-            uint160 tokenId = tokenIds[i];
-
-            uint256 loc;
-
-            uint256 swapData;
-
-            assembly {
-                mstore(0x00, tokenId)
-
-                loc := keccak256(0x00, 64)
-                swapData := sload(loc)
+            if iszero(eq(len, calldataload(sub(accounts.offset, 0x20)))) {
+                // arrays are not the same length
+                mstore8(0x0, 0x99)
+                // calldatacopy(0x00, tokenIds.offset, 0x32)
+                revert(0x00, 0x01)
             }
 
-            uint256 offerData = swapData;
+            mstore(add(ptr, 0x20), agency.slot)
 
-            if (uint160(msg.sender) != uint160(swapData)) {
-                offerData = offers[tokenId][msg.sender];
-            }
+            mstore(add(ptr, 0x60), offers.slot)
 
-            require(offerData != 0, hex'2E');
+            for {
+                let i := 0
+                let tokenPtr := tokenIds.offset
+                let accntPtr := accounts.offset
+            } lt(i, len) {
+                i := add(i, 1)
+                tokenPtr := add(tokenPtr, 0x20)
+                accntPtr := add(accntPtr, 0x20)
+            } {
+                let tokenId := calldataload(tokenPtr)
 
-            delete offers[tokenId][msg.sender];
+                let addr := calldataload(accntPtr)
 
-            // if user is the leader
-            if (uint160(offerData) == uint160(swapData)) {
-                assembly {
-                    let real := and(shr(230, swapData), 0xffffff)
+                mstore(ptr, tokenId)
+
+                let agency__slo := keccak256(ptr, 0x40)
+
+                mstore(add(ptr, 0x40), tokenId)
+
+                let offerSlot := keccak256(add(ptr, 0x40), 0x40)
+
+                mstore(add(ptr, 0x40), addr)
+
+                mstore(add(ptr, 0x60), offerSlot)
+
+                offerSlot := keccak256(add(ptr, 0x40), 0x40)
+
+                let agency__cache := sload(agency__slo)
+
+                switch eq(addr, shr(96, shl(96, agency__cache)))
+                case 1 {
+                    let real := shr(232, shl(2, agency__cache))
 
                     // require "isOwner" or "isOver"
                     // == require(real == 0 || active > real)
                     if and(iszero(iszero(real)), iszero(gt(active, real))) {
-                        mstore(0x00, 0x67)
-                        revert(31, 0x01)
+                        mstore8(0x0, 0x67)
+                        revert(0x00, 0x01)
                     }
 
-                    sstore(loc, or(caller(), shl(254, 0x3)))
+                    sstore(offerSlot, 0)
+
+                    sstore(agency__slo, or(caller(), shl(254, 0x3)))
+                }
+                default {
+                    let offer__cache := sload(offerSlot)
+
+                    if iszero(offer__cache) {
+                        mstore8(0x0, 0x2E)
+                        revert(0x00, 0x01)
+                    }
+
+                    // update state before we potentially send value
+                    sstore(offerSlot, 0)
+
+                    switch eq(caller(), addr)
+                    case 1 {
+                        acc := add(acc, shr(186, shl(26, offer__cache)))
+                    }
+                    default {
+                        // let real := shr(232, shl(2, offer__cache))
+
+                        // if swap is active, require the user is the caller
+                        if gt(active, shr(232, shl(2, offer__cache))) {
+                            if iszero(eq(caller(), addr)) {
+                                mstore8(0x0, 0x68)
+                                revert(0x00, 0x01)
+                            }
+                        }
+
+                        let amt := mul(shr(186, shl(26, offer__cache)), LOSS)
+
+                        if iszero(call(gas(), addr, amt, 0, 0, 0, 0)) {
+                            mstore8(0x0, 0x91)
+                            revert(0x00, 0x01)
+                        }
+                    }
                 }
 
-                emit Transfer(address(this), msg.sender, tokenId);
-            } else {
-                assembly {
-                    acc := add(acc, and(shr(offerData, 160), sub(shl(70, 1), 1)))
-                }
+                log3(0x00, 0x00, CLAIM, tokenId, addr)
             }
 
-            emit Claim(tokenId, msg.sender);
-        }
-
-        assembly {
             if iszero(acc) {
                 return(0, 0)
             }
-            if iszero(call(gas(), caller(), mul(acc, 1000000000), 0, 0, 0, 0)) {
-                mstore(0, 0x01)
-                revert(0x1F, 0x01)
+            if iszero(call(gas(), caller(), mul(acc, LOSS), 0, 0, 0, 0)) {
+                mstore8(0x0, 0x92)
+                revert(0x00, 0x01)
             }
         }
     }
@@ -347,7 +395,7 @@ abstract contract NuggftV1Swap is INuggftV1Swap, NuggftV1Stake {
     //         uint24 active = epoch();
 
     //         assembly {
-    //             let real := and(shr(230, swapData), 0xffffff)
+    //             let real := shr(232, shl(2, swapData))
 
     //             // require "isOwner" or "isOver"
     //             // == require(real == 0 || active > real)
@@ -362,7 +410,7 @@ abstract contract NuggftV1Swap is INuggftV1Swap, NuggftV1Stake {
     //         emit Transfer(address(this), msg.sender, tokenId);
     //     } else {
     //         assembly {
-    //             value := mul(and(shr(offerData, 160), sub(shl(70, 1), 1)), 1000000000)
+    //             value := mul(and(shr(offerData, 160), sub(shl(70, 1), 1)), LOSS)
     //         }
     //     }
 
@@ -451,7 +499,7 @@ abstract contract NuggftV1Swap is INuggftV1Swap, NuggftV1Stake {
         } else {
             assembly {
                 // extract "eth" from offerData object and decompress
-                value := mul(and(shr(offerData, 160), sub(shl(70, 1), 1)), 1000000000)
+                value := mul(and(shr(offerData, 160), sub(shl(70, 1), 1)), LOSS)
             }
         }
 
@@ -472,7 +520,7 @@ abstract contract NuggftV1Swap is INuggftV1Swap, NuggftV1Stake {
 
         assembly {
             // updatedAgency = [ flag: SWAP | epoch: 0 | eth: floor/10**8 | addr: msg.sender ]
-            updatedAgency := or(shl(254, 0x1), or(shl(230, 0), or(shl(160, div(floor, 1000000000)), caller())))
+            updatedAgency := or(shl(254, 0x1), or(shl(230, 0), or(shl(160, div(floor, LOSS)), caller())))
 
             mstore(0, tokenId)
             mstore(0x20, agency.slot)
@@ -506,7 +554,7 @@ abstract contract NuggftV1Swap is INuggftV1Swap, NuggftV1Stake {
 
         assembly {
             // updatedAgency = [ flag: SWAP | epoch: 0 | eth: floor/10**8 | addr: tokenId ]
-            updatedAgency := or(shl(254, 0x1), or(shl(230, 0), or(shl(160, div(floor, 1000000000)), tokenId)))
+            updatedAgency := or(shl(254, 0x1), or(shl(230, 0), or(shl(160, div(floor, LOSS)), tokenId)))
         }
 
         itemAgency[encItemId(tokenId, itemId)] = updatedAgency;
@@ -643,7 +691,7 @@ abstract contract NuggftV1Swap is INuggftV1Swap, NuggftV1Stake {
     //             revert(0x1F, 0x01)
     //         }
 
-    //         res := or(account, or(shl(160, div(currUserOffer, 1000000000)), or(shl(230, _epoch), shl(254, 0x1))))
+    //         res := or(account, or(shl(160, div(currUserOffer, LOSS)), or(shl(230, _epoch), shl(254, 0x1))))
 
     //         baseEth := sub(currUserOffer, baseEth)
     //     }
