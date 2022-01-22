@@ -16,6 +16,11 @@ library lib {
         array = new uint160[](1);
         array[0] = a;
     }
+
+    function singletonAddress(address a) internal pure returns (address[] memory array) {
+        array = new address[](1);
+        array[0] = a;
+    }
 }
 
 interface Vm {

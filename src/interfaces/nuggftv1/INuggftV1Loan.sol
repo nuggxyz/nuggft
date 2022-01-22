@@ -7,11 +7,11 @@ interface INuggftV1Loan {
                                 EVENTS
     ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━*/
 
-    event Loan(uint160 indexed tokenId, uint96 value);
+    event Loan(uint160 indexed tokenId, bytes32 agency);
 
-    event Rebalance(uint160 indexed tokenId, uint96 value);
+    event Rebalance(uint160 indexed tokenId, bytes32 agency);
 
-    event Liquidate(uint160 indexed tokenId, uint96 value, address user);
+    event Liquidate(uint160 indexed tokenId, bytes32 agency);
 
     /*━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
                             STATE CHANGING

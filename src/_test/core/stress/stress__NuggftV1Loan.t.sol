@@ -47,7 +47,7 @@ contract logic__NuggftV1Loan is NuggftV1Test {
 
             {
                 require(b_insolventEpoch == a_insolventEpoch || b_insolventEpoch == a_insolventEpoch - 1, 'A');
-                // console.log(frankStartBal, users.frank.balance);
+                console.log(frankStartBal, users.frank.balance);
                 require(frankStartBal - value - valueforRebal == users.frank.balance, 'B');
             }
 
