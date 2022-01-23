@@ -23,14 +23,14 @@ contract logic__NuggftV1Loan is NuggftV1Test {
         nuggft.loan(LOAN_TOKENID);
     }
 
-    function test__stress__NuggftV1Loan__rebalance() public {
+    function test__stress__NuggftV1Loan__rebalance2() public {
         console.log(nuggft.eps(), nuggft.msp());
         forge.vm.deal(users.frank, 1000000000 ether);
 
         for (uint256 i = 0; i < 1000; i++) {
             uint96 frankStartBal = uint96(users.frank.balance);
 
-            (, , , , uint24 b_insolventEpoch) = nuggft.loanInfo(LOAN_TOKENID);
+            (, , , , , uint24 b_insolventEpoch) = nuggft.debt(LOAN_TOKENID);
 
             uint160 tokenId = nuggft.epoch();
             (, uint96 nextSwapAmount, uint96 senderCurrentOffer) = nuggft.check(users.frank, tokenId);
@@ -39,11 +39,11 @@ contract logic__NuggftV1Loan is NuggftV1Test {
             forge.vm.startPrank(users.frank);
             nuggft.offer{value: value}(tokenId);
 
-            uint96 valueforRebal = nuggft.valueForRebalance(LOAN_TOKENID);
+            uint96 valueforRebal = nuggft.vfr(lib.sarr160(LOAN_TOKENID))[0];
             forge.vm.startPrank(users.frank);
             nuggft.rebalance{value: valueforRebal}(lib.sarr160(LOAN_TOKENID));
 
-            (, , , , uint24 a_insolventEpoch) = nuggft.loanInfo(LOAN_TOKENID);
+            (, , , , , uint24 a_insolventEpoch) = nuggft.debt(LOAN_TOKENID);
 
             {
                 require(b_insolventEpoch == a_insolventEpoch || b_insolventEpoch == a_insolventEpoch - 1, 'A');

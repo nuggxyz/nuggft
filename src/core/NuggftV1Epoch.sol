@@ -11,7 +11,8 @@ abstract contract NuggftV1Epoch is INuggftV1Epoch {
     uint16 constant INTERVAL = 69;
     uint24 constant OFFSET = 3000;
 
-    uint256 constant LOSS = 1000000000;
+    uint256 constant LOSS = .1 gwei;
+
     uint256 constant SALE_LEN = 1;
 
     bytes32 constant TRANSFER = 0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef;
@@ -21,6 +22,15 @@ abstract contract NuggftV1Epoch is INuggftV1Epoch {
     bytes32 constant LOAN = 0x764dd32e4d33677f4bc9a37133c10ecef6409f7feb33af67a31d1fb01b392867;
     bytes32 constant CLAIM = 0x938187ad30d2557f8eb68b094a2305a858ec4f65c86a957b4bc26d9c0a496fef;
     bytes32 constant CLAIMITEM = 0x7a0576b9edc37a53c7e05ae220b6a871cf584ae6724a63f704609baec1e72853;
+    bytes32 constant SELL = 0x251e78527ba3c62fcb4405d22087f8ab0c434b97b46e2d7f020d112e763171b3;
+    bytes32 constant OFFER = 0x82cc12214e0c6e2eaeafbb2aaf730e41d45e9cc2d0467fb2f0fcf709e9443886;
+
+    uint8 constant SWAP_FLAG = 0x3;
+    uint8 constant LOAN_FLAG = 0x2;
+    uint8 constant OWN_FLAG = 0x01;
+
+    // unknown
+    bytes32 constant SELLITEM = 0x251e78527ba3c62fcb4405d22087f8ab0c434b97b46e2d7f020d112e76310000;
 
     constructor() {
         genesis = block.number;

@@ -101,14 +101,6 @@ abstract contract NuggftV1Proof is INuggftV1Proof, NuggftV1Dotnugg {
         background = settings[tokenId].background;
     }
 
-    /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-                             internal functions
-       ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
-
-    // function exists(uint160 tokenId) internal view override returns (bool) {
-    //     return proofOf(tokenId) != 0;
-    // }
-
     /*━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
                             SWAP MANAGEMENT
     ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━*/
@@ -148,7 +140,7 @@ abstract contract NuggftV1Proof is INuggftV1Proof, NuggftV1Dotnugg {
     }
 
     function setProofFromEpoch(uint160 tokenId) internal {
-        require(proofs[tokenId] == 0, 'P:6');
+        // require(proofs[tokenId] == 0, 'P:6');
 
         (, uint256 epoch, uint256 res) = pendingProof();
 

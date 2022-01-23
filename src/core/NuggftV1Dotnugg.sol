@@ -10,14 +10,11 @@ import {IDotnuggV1Resolver} from '../interfaces/dotnuggv1/IDotnuggV1Resolver.sol
 import {IDotnuggV1Implementer} from '../interfaces/dotnuggv1/IDotnuggV1Implementer.sol';
 
 import {ShiftLib} from '../libraries/ShiftLib.sol';
-
 import {INuggftV1Dotnugg} from '../interfaces/nuggftv1/INuggftV1Dotnugg.sol';
-
 import {CastLib} from '../libraries/CastLib.sol';
 import {NuggftV1Token} from './NuggftV1Token.sol';
 
 import {Trust} from './Trust.sol';
-import '../_test/utils/logger.sol';
 
 /// @custom:testing test each function
 abstract contract NuggftV1Dotnugg is INuggftV1Dotnugg, NuggftV1Token, Trust {
@@ -126,51 +123,3 @@ abstract contract NuggftV1Dotnugg is INuggftV1Dotnugg, NuggftV1Token, Trust {
         return resolvers[tokenId] != address(0);
     }
 }
-
-// let ptr := mload(0x40)
-
-// mstore8(ptr, 0xd6)
-// mstore8(add(ptr, 1), 0x94)
-// mstore(add(ptr, 2), shl(96, caller()))
-// mstore8(add(ptr, 22), 0x02)
-
-// let ok := staticcall(gas(), keccak256(ptr, 23), add(32, sel), 0x4, 0, 20)
-// if iszero(ok) {
-//     revert(0x0, 0x0)
-// }
-
-// require(address(dotnuggV1) != address(0), 'UHOH:0');
-
-// console.log(address(dotnuggV1));
-
-// // dotnuggV1 = IDotnuggV1(dotnuggV1);
-// // dotnuggV1 = IDotnuggV1(a);
-// dotnuggV1StorageProxy = dotnuggV1.register();
-
-// let addr := mload(0x40)
-
-// mstore(addr, shl(72, or(shl(176, 0xd6), or(shl(168, 0x94), or(shl(8, caller()), 0x02)))))
-
-// let sig := mload(0x40)
-
-// mstore(sig, 0x8e3b3a6b)
-
-// let ok := staticcall(gas(), keccak256(addr, 23), sig, 0x4, 0, 32)
-// if iszero(ok) {
-//     revert(0, 0x4)
-// }
-
-// let ret := mload(0x40)
-// returndatacopy(ret, 0, 32)
-// sstore(dotnuggV1.slot, mload(ret))
-
-// mstore(sig, 0x1aa3a008)
-
-// ok := call(gas(), mload(ret), 0, sig, 0x4, 0, 32)
-// if iszero(ok) {
-//     revert(0, 0x4)
-// }
-
-// ret := mload(0x40)
-// returndatacopy(ret, 0, 32)
-// sstore(dotnuggV1StorageProxy.slot, mload(ret))
