@@ -24,7 +24,6 @@ contract logic__NuggftV1Loan is NuggftV1Test {
     }
 
     function test__stress__NuggftV1Loan__rebalance2() public {
-        console.log(nuggft.eps(), nuggft.msp());
         forge.vm.deal(users.frank, 1000000000 ether);
 
         for (uint256 i = 0; i < 1000; i++) {
@@ -39,6 +38,8 @@ contract logic__NuggftV1Loan is NuggftV1Test {
             forge.vm.startPrank(users.frank);
             nuggft.offer{value: value}(tokenId);
 
+            (, , , uint96 __fee, uint96 __earn, ) = nuggft.debt(LOAN_TOKENID);
+
             uint96 valueforRebal = nuggft.vfr(lib.sarr160(LOAN_TOKENID))[0];
             forge.vm.startPrank(users.frank);
             nuggft.rebalance{value: valueforRebal}(lib.sarr160(LOAN_TOKENID));
@@ -47,8 +48,11 @@ contract logic__NuggftV1Loan is NuggftV1Test {
 
             {
                 require(b_insolventEpoch == a_insolventEpoch || b_insolventEpoch == a_insolventEpoch - 1, 'A');
-                console.log(frankStartBal, users.frank.balance);
-                require(frankStartBal - value - valueforRebal == users.frank.balance, 'B');
+                // console.log(frankStartBal, users.frank.balance);
+                console.log(nuggft.eps(), nuggft.msp());
+
+                // require(frankStartBal - value - valueforRebal == users.frank.balance, 'B');
+                require(frankStartBal - value + __earn - __fee == users.frank.balance, 'D');
             }
 
             forge.vm.roll(block.number + 1);
