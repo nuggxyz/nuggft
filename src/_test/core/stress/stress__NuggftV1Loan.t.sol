@@ -51,8 +51,8 @@ contract logic__NuggftV1Loan is NuggftV1Test {
                 // console.log(frankStartBal, users.frank.balance);
                 console.log(nuggft.eps(), nuggft.msp());
 
-                // require(frankStartBal - value - valueforRebal == users.frank.balance, 'B');
-                require(frankStartBal - value + __earn - __fee == users.frank.balance, 'D');
+                require(frankStartBal - value - valueforRebal == users.frank.balance, 'B');
+                // require(frankStartBal - value + __earn - __fee == users.frank.balance, 'D');
             }
 
             forge.vm.roll(block.number + 1);

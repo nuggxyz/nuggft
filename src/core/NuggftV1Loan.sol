@@ -7,10 +7,6 @@ import {INuggftV1Loan} from '../interfaces/nuggftv1/INuggftV1Loan.sol';
 import {NuggftV1Swap} from './NuggftV1Swap.sol';
 
 abstract contract NuggftV1Loan is INuggftV1Loan, NuggftV1Swap {
-    uint24 constant LIQUIDATION_PERIOD = 2;
-
-    uint96 constant REBALANCE_FEE_BPS = 100;
-
     /// @inheritdoc INuggftV1Loan
     function loan(uint160 tokenId) external override {
         uint96 amt = eps();
@@ -18,6 +14,10 @@ abstract contract NuggftV1Loan is INuggftV1Loan, NuggftV1Swap {
         uint256 active = epoch();
 
         assembly {
+            function iso(val, left, right) -> b {
+                b := shr(right, shl(left, val))
+            }
+
             let mptr := mload(0x40)
 
             // calculate agency.slot storeage ptr
@@ -29,14 +29,14 @@ abstract contract NuggftV1Loan is INuggftV1Loan, NuggftV1Swap {
             let agency__cache := sload(agency__sptr)
 
             // ensure the caller is the agent
-            if iszero(eq(shr(96, shl(96, agency__cache)), caller())) {
-                mstore8(0x0, 0x2A)
+            if iszero(eq(iso(agency__cache, 96, 96), caller())) {
+                mstore8(0x0, Error__NotAgent)
                 revert(0x00, 0x01)
             }
 
             // ensure the agent is the owner
             if iszero(eq(shr(254, agency__cache), 0x1)) {
-                mstore8(0x0, 0x2C)
+                mstore8(0x0, Error__NotOwner)
                 revert(0x00, 0x01)
             }
 
@@ -83,11 +83,15 @@ abstract contract NuggftV1Loan is INuggftV1Loan, NuggftV1Swap {
         uint256 active = epoch();
 
         assembly {
+            function iso(val, left, right) -> b {
+                b := shr(right, shl(left, val))
+            }
+
             let stake__cache := sload(stake.slot)
 
             let shrs := shr(192, stake__cache)
 
-            let activeEps := div(shr(160, shl(64, stake__cache)), shrs)
+            let activeEps := div(iso(stake__cache, 64, 160), shrs)
 
             let mptr := mload(0x40)
 
@@ -98,7 +102,7 @@ abstract contract NuggftV1Loan is INuggftV1Loan, NuggftV1Swap {
 
             agency__cache := sload(agency__slot)
 
-            let loaner := shr(96, shl(96, agency__cache))
+            let loaner := iso(agency__cache, 96, 96)
 
             // ensure that the agency flag is LOAN
             if iszero(eq(shr(254, agency__cache), 0x02)) {
@@ -107,7 +111,7 @@ abstract contract NuggftV1Loan is INuggftV1Loan, NuggftV1Swap {
             }
 
             if iszero(eq(caller(), loaner)) {
-                switch lt(add(shr(232, shl(2, agency__cache)), LIQUIDATION_PERIOD), active)
+                switch lt(add(iso(agency__cache, 2, 232), LIQUIDATION_PERIOD), active)
                 case 1 {
                     log4(0x00, 0x00, TRANSFER, loaner, caller(), tokenId)
                 }
@@ -119,7 +123,7 @@ abstract contract NuggftV1Loan is INuggftV1Loan, NuggftV1Swap {
 
             let earn := 0
 
-            let principal := mul(shr(186, shl(26, agency__cache)), LOSS)
+            let principal := mul(iso(agency__cache, 26, 186), LOSS)
 
             let fee := sub(activeEps, principal)
 
@@ -179,6 +183,10 @@ abstract contract NuggftV1Loan is INuggftV1Loan, NuggftV1Swap {
         uint256 active = epoch();
 
         assembly {
+            function iso(val, left, right) -> b {
+                b := shr(right, shl(left, val))
+            }
+
             // load the length of the calldata array
             let len := calldataload(sub(tokenIds.offset, 0x20))
 
@@ -186,7 +194,7 @@ abstract contract NuggftV1Loan is INuggftV1Loan, NuggftV1Swap {
 
             let shrs := shr(192, stake__cache)
 
-            let activeEps := div(shr(160, shl(64, stake__cache)), shrs)
+            let activeEps := div(iso(stake__cache, 64, 160), shrs)
 
             // ======================================================================
             // memory layout as offset from mptr:
@@ -231,8 +239,8 @@ abstract contract NuggftV1Loan is INuggftV1Loan, NuggftV1Swap {
                 }
 
                 // if loan is expired, allow anyone to rebalance
-                if gt(shr(232, shl(2, agency__cache)), active) {
-                    if iszero(eq(caller(), shr(96, shl(96, agency__cache)))) {
+                if gt(iso(agency__cache, 2, 232), active) {
+                    if iszero(eq(caller(), iso(agency__cache, 96, 96))) {
                         mstore8(0x0, 0x3B) // ERR:0x3B
                         revert(0x00, 0x01)
                     }
@@ -240,7 +248,7 @@ abstract contract NuggftV1Loan is INuggftV1Loan, NuggftV1Swap {
 
                 // parse agency for principal, converting it back to eth
                 // represents the value that has been sent to the user for this loan
-                let principal := mul(shr(186, shl(26, agency__cache)), LOSS)
+                let principal := mul(iso(agency__cache, 26, 186), LOSS)
 
                 // the amount of value earned by this token since last rebalance
                 // must be computed because fee needs to be paid
@@ -251,7 +259,6 @@ abstract contract NuggftV1Loan is INuggftV1Loan, NuggftV1Swap {
                 let fee := sub(activeEps, principal)
 
                 // true fee
-                //
                 let checkFee := div(principal, REBALANCE_FEE_BPS)
 
                 // check if fee is
@@ -271,7 +278,7 @@ abstract contract NuggftV1Loan is INuggftV1Loan, NuggftV1Swap {
 
                 accFee := add(accFee, fee)
 
-                mstore(add(add(mptr, 0x60), mul(i, 0xA0)), shr(96, shl(96, agency__cache)))
+                mstore(add(add(mptr, 0x60), mul(i, 0xA0)), iso(agency__cache, 96, 96))
             }
 
             let pro := div(accFee, PROTOCOL_FEE_BPS)
@@ -280,7 +287,7 @@ abstract contract NuggftV1Loan is INuggftV1Loan, NuggftV1Swap {
 
             sstore(stake.slot, stake__cache)
 
-            let newPrincipal := div(shr(160, shl(64, stake__cache)), mul(shrs, LOSS))
+            let newPrincipal := div(iso(stake__cache, 64, 160), mul(shrs, LOSS))
 
             for {
                 let i := 0
