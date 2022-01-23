@@ -20,7 +20,7 @@ abstract contract NuggftV1Stake is INuggftV1Stake, NuggftV1Proof {
 
     uint256 internal stake;
 
-    uint96 constant PROTOCOL_FEE_BPS = 1000;
+    uint96 constant PROTOCOL_FEE_BPS = 10;
 
     /*━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
                                 TRUSTED
@@ -115,7 +115,7 @@ abstract contract NuggftV1Stake is INuggftV1Stake, NuggftV1Proof {
             let overpay := sub(callvalue(), _msp)
 
             // add fee of overpay to fee
-            fee := add(div(mul(overpay, PROTOCOL_FEE_BPS), 10000), fee)
+            fee := add(div(overpay, PROTOCOL_FEE_BPS), fee)
 
             // update stake
             // =======================
@@ -143,7 +143,7 @@ abstract contract NuggftV1Stake is INuggftV1Stake, NuggftV1Proof {
         assembly {
             let cache := sload(stake.slot)
 
-            let pro := div(mul(value, PROTOCOL_FEE_BPS), 10000)
+            let pro := div(value, PROTOCOL_FEE_BPS)
 
             cache := add(cache, or(shl(96, sub(value, pro)), pro))
 
@@ -171,7 +171,7 @@ abstract contract NuggftV1Stake is INuggftV1Stake, NuggftV1Proof {
         assembly {
             let shrs := shr(192, cache)
             ethPerShare := div(and(shr(96, cache), sub(shl(96, 1), 1)), shrs)
-            protocolFee := div(mul(ethPerShare, PROTOCOL_FEE_BPS), 10000)
+            protocolFee := div(ethPerShare, PROTOCOL_FEE_BPS)
             premium := div(mul(ethPerShare, shrs), 10000)
             total := add(ethPerShare, add(protocolFee, premium))
         }

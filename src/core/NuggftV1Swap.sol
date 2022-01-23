@@ -2,20 +2,15 @@
 
 pragma solidity 0.8.9;
 
-import {NuggftV1ItemSwap} from './NuggftV1ItemSwap.sol';
 import {INuggftV1Swap} from '../interfaces/nuggftv1/INuggftV1Swap.sol';
-import {NuggftV1Stake} from './NuggftV1Stake.sol';
-import {CastLib} from '../libraries/CastLib.sol';
-import {TransferLib} from '../libraries/TransferLib.sol';
 
-import {NuggftV1AgentType} from '../types/NuggftV1AgentType.sol';
-import '../_test/utils/forge.sol';
+import {NuggftV1ItemSwap} from './NuggftV1ItemSwap.sol';
+
+import {NuggftV1Stake} from './NuggftV1Stake.sol';
 
 /// @notice mechanism for trading of nuggs between users (and items between nuggs)
 /// @dev Explain to a developer any extra details
 abstract contract NuggftV1Swap is INuggftV1Swap, NuggftV1ItemSwap {
-    using NuggftV1AgentType for uint256;
-
     mapping(uint160 => mapping(address => uint256)) offers;
 
     /// @inheritdoc INuggftV1Swap
@@ -29,23 +24,27 @@ abstract contract NuggftV1Swap is INuggftV1Swap, NuggftV1ItemSwap {
         uint256 mptr;
 
         assembly {
+            // store callvalue formatted in .1 gwei for caculation of total offer
             next := div(callvalue(), LOSS)
 
             mptr := mload(0x40)
 
+            // ========= memory =========
+            // 0x00: tokenId
+            // 0x20: agency.slot
+            // ==========================
             mstore(mptr, tokenId)
             mstore(add(mptr, 0x20), agency.slot)
 
             agency__sptr := keccak256(mptr, 0x40)
             agency__cache := sload(agency__sptr)
-
-            mstore(0x40, add(mptr, 0x40))
         }
 
         // check to see if this nugg needs to be minted
         if (active == tokenId && agency__cache == 0) {
             setProofFromEpoch(tokenId);
 
+            // no need to update free memory pointer because we no longer rely on it being empty
             addStakedShareFromMsgValue__dirty();
 
             assembly {
@@ -65,9 +64,16 @@ abstract contract NuggftV1Swap is INuggftV1Swap, NuggftV1ItemSwap {
                     revert(0x00, 0x01)
                 }
 
-                // calculate and store the offer[tokenId]__slot
-                // tokenId already exists at mptr
+                // ========= memory =========
+                // 0x00: tokenId
+                // 0x20: offers.slot
+                // ==========================
                 mstore(add(mptr, 0x20), offers.slot)
+
+                // ========= memory =========
+                // 0x00: tokenId
+                // 0x20: offers[tokenId].slot
+                // ==========================
                 mstore(add(mptr, 0x20), keccak256(mptr, 0x40))
 
                 let agency__addr := shr(96, shl(96, agency__cache))
@@ -80,8 +86,13 @@ abstract contract NuggftV1Swap is INuggftV1Swap, NuggftV1ItemSwap {
 
                 // check to see if msg.sender is the leader
                 if iszero(eq(caller(), agency__addr)) {
+                    // ========= memory =========
+                    // 0x00: msg.sender
+                    // 0x20: offers[tokenId].slot
+                    // ==========================
                     // if not, we update offer__cache
                     mstore(mptr, caller())
+
                     offer__cache := sload(keccak256(mptr, 0x40))
                 }
 
@@ -136,8 +147,13 @@ abstract contract NuggftV1Swap is INuggftV1Swap, NuggftV1ItemSwap {
                 // saving local variables
                 last := mul(next, LOSS)
 
+                // ========= memory =========
+                // 0x00: prev leader
+                // 0x20: offers[tokenId].slot
+                // ==========================
                 // record agency so we know how much to repay previous leader
                 mstore(mptr, shr(96, shl(96, agency__cache)))
+
                 sstore(keccak256(mptr, 0x40), agency__cache)
 
                 // clear previous leader from agency cache
@@ -162,6 +178,10 @@ abstract contract NuggftV1Swap is INuggftV1Swap, NuggftV1ItemSwap {
 
             sstore(agency__sptr, agency__cache)
 
+            // ========= memory =========
+            // 0x00: agency__cache
+            // 0x20: offers[tokenId].slot
+            // ==========================
             mstore(mptr, agency__cache)
 
             log2(mptr, 0x20, OFFER, tokenId)
@@ -186,8 +206,7 @@ abstract contract NuggftV1Swap is INuggftV1Swap, NuggftV1ItemSwap {
             // value to keep track of value to send to caller
             let acc := 0
 
-            // memory layout as offset from mptr:
-            // ==========================
+            // ========= memory =========
             // 0x00: tokenId                keccak = agency[tokenId].slot = "agency__sptr"
             // 0x20: agency.slot
             // --------------------------
@@ -403,13 +422,13 @@ abstract contract NuggftV1Swap is INuggftV1Swap, NuggftV1ItemSwap {
         if (swapData == 0) {
             if (activeEpoch == tokenId) {
                 // swap is minting
-                nextSwapAmount = NuggftV1AgentType.compressEthRoundUp(msp());
+                nextSwapAmount = msp();
             } else {
                 // swap does not exist
                 return (false, 0, 0);
             }
         } else {
-            if (swapData.epoch() == 0 && offerData == swapData) canOffer = false;
+            if ((swapData >> 230) & 0xffffff == 0 && offerData == swapData) canOffer = false;
 
             senderCurrentOffer = uint96(((offerData << 26) >> 186) * LOSS);
 
