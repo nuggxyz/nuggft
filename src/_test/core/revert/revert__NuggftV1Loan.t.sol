@@ -16,10 +16,10 @@ contract revert__NuggftV1Loan is NuggftV1Test {
     }
 
     /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-        hex[30] - loan - "msg.sender is operator for sender"
+        hex[2A] - loan - "msg.sender is operator for sender"
        ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
 
-    function test__revert__NuggftV1Loan__0x30__loan__successAsSelf() public {
+    function test__revert__NuggftV1Loan__0x2A__loan__successAsSelf() public {
         uint160 tokenId = scenario_frank_has_a_token_and_spent_50_eth();
 
         forge.vm.startPrank(users.frank);
@@ -30,7 +30,7 @@ contract revert__NuggftV1Loan is NuggftV1Test {
         forge.vm.stopPrank();
     }
 
-    function test__revert__NuggftV1Loan__0x30__loan__failAsNotAgent() public {
+    function test__revert__NuggftV1Loan__0x2A__loan__failAsNotAgent() public {
         uint160 tokenId = scenario_frank_has_a_token_and_spent_50_eth();
 
         // forge.vm.startPrank(users.frank);
@@ -41,7 +41,7 @@ contract revert__NuggftV1Loan is NuggftV1Test {
 
         forge.vm.startPrank(users.dennis);
         {
-            forge.vm.expectRevert(hex'30');
+            forge.vm.expectRevert(hex'2A');
             nuggft.loan(tokenId);
         }
         forge.vm.stopPrank();
@@ -57,7 +57,7 @@ contract revert__NuggftV1Loan is NuggftV1Test {
         forge.vm.stopPrank();
     }
 
-    function test__revert__NuggftV1Loan__0x30__loan__loanSameNuggTwice() public {
+    function test__revert__NuggftV1Loan__0x2C__loan__loanSameNuggTwice() public {
         forge.vm.deal(users.frank, 10 ether);
 
         forge.vm.startPrank(users.frank);
@@ -68,7 +68,7 @@ contract revert__NuggftV1Loan is NuggftV1Test {
 
         nuggft.mint{value: 1 ether}(LOAN_TOKENID + 1);
 
-        forge.vm.expectRevert(hex'30');
+        forge.vm.expectRevert(hex'2C');
 
         nuggft.loan(LOAN_TOKENID);
     }

@@ -18,11 +18,6 @@ abstract contract NuggftV1Swap is INuggftV1Swap, NuggftV1ItemSwap {
 
     mapping(uint160 => mapping(address => uint256)) offers;
 
-    /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-                                  offer
-       ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
-    // we do not know how much to give them when they call "claim" otherwise
-
     /// @inheritdoc INuggftV1Swap
     function offer(uint160 tokenId) external payable override {
         uint256 agency__sptr;
@@ -172,10 +167,6 @@ abstract contract NuggftV1Swap is INuggftV1Swap, NuggftV1ItemSwap {
             log2(mptr, 0x20, OFFER, tokenId)
         }
     }
-
-    /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-                                  claim
-       ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
 
     /// @inheritdoc INuggftV1Swap
     function claim(uint160[] calldata tokenIds, address[] calldata accounts) external override {
@@ -337,10 +328,6 @@ abstract contract NuggftV1Swap is INuggftV1Swap, NuggftV1ItemSwap {
         }
     }
 
-    /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-                                  sell
-       ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
-
     /// @inheritdoc INuggftV1Swap
     function sell(uint160 tokenId, uint96 floor) external override {
         // ensure the user
@@ -388,10 +375,6 @@ abstract contract NuggftV1Swap is INuggftV1Swap, NuggftV1ItemSwap {
             log2(mptr, 0x20, SELL, tokenId)
         }
     }
-
-    /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-                                    view
-       ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
 
     // @inheritdoc INuggftV1Swap
     function check(address sender, uint160 tokenId)
