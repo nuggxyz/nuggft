@@ -275,9 +275,9 @@ abstract contract NuggftV1Loan is INuggftV1Loan, NuggftV1Swap {
                 // ==========================
                 // agency[tokenId] = {
                 //     flag  = LOAN(0x02)
-                //     epoch = 0
-                //     eth   = 0
-                //     addr  = msg.sender
+                //     epoch = active
+                //     eth   = eps
+                //     addr  = loaner
                 // }
                 // =========================
                 let agency__cache := or(shl(254, 0x2), or(shl(230, active), or(shl(160, afterEth), account)))
