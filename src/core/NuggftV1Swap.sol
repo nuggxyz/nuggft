@@ -40,8 +40,11 @@ abstract contract NuggftV1Swap is INuggftV1Swap, NuggftV1ItemSwap {
             agency__cache := sload(agency__sptr)
         }
 
+        // uint256 agency__cache = agency[tokenId];
+
         // check to see if this nugg needs to be minted
         if (active == tokenId && agency__cache == 0) {
+            // mint
             setProofFromEpoch(tokenId);
 
             // no need to update free memory pointer because we no longer rely on it being empty
@@ -58,6 +61,10 @@ abstract contract NuggftV1Swap is INuggftV1Swap, NuggftV1ItemSwap {
             uint256 last;
 
             assembly {
+                function iso(val, left, right) -> b {
+                    b := shr(right, shl(left, val))
+                }
+
                 // ensure that the agency flag is "SWAP" (0x03)
                 if iszero(eq(shr(254, agency__cache), 0x03)) {
                     mstore8(0x0, 0x24) // ERR:0x24
@@ -76,9 +83,9 @@ abstract contract NuggftV1Swap is INuggftV1Swap, NuggftV1ItemSwap {
                 // ==========================
                 mstore(add(mptr, 0x20), keccak256(mptr, 0x40))
 
-                let agency__addr := shr(96, shl(96, agency__cache))
+                let agency__addr := iso(agency__cache, 96, 96)
 
-                let agency__epoch := shr(232, shl(2, agency__cache))
+                let agency__epoch := iso(agency__cache, 2, 232)
 
                 // we assume offer__cache is same as agency__cache
                 // this will only be the case for the leader
@@ -102,7 +109,7 @@ abstract contract NuggftV1Swap is INuggftV1Swap, NuggftV1ItemSwap {
                     // this accomplishes two important goals:
                     // 1. forces user to claim previous swap before acting on this one
                     // 2. prevents owner from offering on their own swap before someone else has
-                    if lt(shr(232, shl(2, offer__cache)), active) {
+                    if lt(iso(offer__cache, 2, 232), active) {
                         mstore8(0x0, 0x0F) // ERR:0x0F
                         revert(0x00, 0x01)
                     }
@@ -111,6 +118,8 @@ abstract contract NuggftV1Swap is INuggftV1Swap, NuggftV1ItemSwap {
                 // check to see if the swap's epoch is 0
                 switch iszero(agency__epoch)
                 case 1 {
+                    // commit
+
                     // if so, we know this swap has not yet been offered on
                     // update the epoch to begin auction
                     agency__cache := xor(agency__cache, shl(230, add(active, SALE_LEN)))
@@ -120,6 +129,8 @@ abstract contract NuggftV1Swap is INuggftV1Swap, NuggftV1ItemSwap {
                     log4(0x00, 0x00, TRANSFER, agency__addr, address(), tokenId)
                 }
                 default {
+                    // carry
+
                     // otherwise we validate the epoch to ensure the swap is still active
                     if lt(agency__epoch, active) {
                         mstore8(0x0, 0x2F) // ERR:0x2F
@@ -128,10 +139,10 @@ abstract contract NuggftV1Swap is INuggftV1Swap, NuggftV1ItemSwap {
                 }
 
                 // parse last offer value
-                last := shr(186, shl(26, agency__cache))
+                last := iso(agency__cache, 26, 186)
 
                 // parse and caculate next offer value
-                next := add(shr(186, shl(26, offer__cache)), next)
+                next := add(iso(offer__cache, 26, 186), next)
 
                 // ensure next offer includes at least a 2% increment
                 if gt(div(mul(last, 10200), 10000), next) {
@@ -152,7 +163,7 @@ abstract contract NuggftV1Swap is INuggftV1Swap, NuggftV1ItemSwap {
                 // 0x20: offers[tokenId].slot
                 // ==========================
                 // record agency so we know how much to repay previous leader
-                mstore(mptr, shr(96, shl(96, agency__cache)))
+                mstore(mptr, iso(agency__cache, 96, 96))
 
                 sstore(keccak256(mptr, 0x40), agency__cache)
 
@@ -193,6 +204,10 @@ abstract contract NuggftV1Swap is INuggftV1Swap, NuggftV1ItemSwap {
         uint256 active = epoch();
 
         assembly {
+            function iso(val, left, right) -> b {
+                b := shr(right, shl(left, val))
+            }
+
             // extract length of tokenIds array from calldata
             let len := calldataload(sub(tokenIds.offset, 0x20))
 
@@ -259,9 +274,9 @@ abstract contract NuggftV1Swap is INuggftV1Swap, NuggftV1ItemSwap {
                 offer__sptr := keccak256(add(mptr, 0x80), 0x40)
 
                 // check if the offerer is the current agent
-                switch eq(offerer, shr(96, shl(96, agency__cache)))
+                switch eq(offerer, iso(agency__cache, 96, 96))
                 case 1 {
-                    let agency__epoch := shr(232, shl(2, agency__cache))
+                    let agency__epoch := iso(agency__cache, 2, 232)
 
                     // ensure that the agency flag is "SWAP" (0x03)
                     if iszero(eq(shr(254, agency__cache), 0x03)) {
@@ -310,18 +325,18 @@ abstract contract NuggftV1Swap is INuggftV1Swap, NuggftV1ItemSwap {
                     case 1 {
                         // accumulate and send value at once at end
                         // to save on gas for most common use case
-                        acc := add(acc, shr(186, shl(26, offer__cache)))
+                        acc := add(acc, iso(offer__cache, 26, 186))
                     }
                     default {
                         // ensure swap is no longer active
                         // the offer can only be trustlessly finalized if a swap is over as the state is final
-                        if gt(active, shr(232, shl(2, offer__cache))) {
+                        if gt(active, iso(offer__cache, 2, 232)) {
                             mstore8(0x0, 0x68)
                             revert(0x00, 0x01)
                         }
 
                         // parse offer value from cache
-                        let amt := shr(186, shl(26, offer__cache))
+                        let amt := iso(offer__cache, 26, 186)
 
                         // send offer value * LOSS to offerer
                         if iszero(call(gas(), offerer, mul(amt, LOSS), 0, 0, 0, 0)) {
@@ -349,12 +364,13 @@ abstract contract NuggftV1Swap is INuggftV1Swap, NuggftV1ItemSwap {
 
     /// @inheritdoc INuggftV1Swap
     function sell(uint160 tokenId, uint96 floor) external override {
-        // ensure the user
-        // require(isOwner(msg.sender, tokenId), hex'2A');
-
         require(floor >= eps(), hex'2B');
 
         assembly {
+            function iso(val, left, right) -> b {
+                b := shr(right, shl(left, val))
+            }
+
             let mptr := mload(0x40)
 
             mstore(mptr, tokenId)

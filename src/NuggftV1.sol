@@ -146,17 +146,10 @@ contract NuggftV1 is IERC721Metadata, NuggftV1Loan {
         emit Mint(tokenId, uint96(msg.value));
     }
 
-    // modifier haha() {
-    //     uint256 price = gasleft();
 
-    //     _;
-    //     uint256 price2 = gasleft();
-    //     // console.log(price, price2, price - price2);
-    //     assert(price < 90000 && price - price2 < 58000);
-    // }
 
     /// @inheritdoc INuggftV1Token
-    function mint(uint160 tokenId) public payable override {
+    function mint(uint160 tokenId) public payable override  {
         require(tokenId <= UNTRUSTED_MINT_TOKENS + TRUSTED_MINT_TOKENS && tokenId >= TRUSTED_MINT_TOKENS, 'G:1');
 
         addStakedShareFromMsgValue__dirty();
