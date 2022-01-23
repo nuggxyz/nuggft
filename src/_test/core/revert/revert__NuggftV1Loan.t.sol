@@ -80,7 +80,7 @@ contract revert__NuggftV1Loan is NuggftV1Test {
     function test__revert__NuggftV1Loan__0x31__liquidate__successAsSelf() public {
         uint160 tokenId = scenario_frank_has_a_loaned_token();
 
-        uint96 value = nuggft.valueForLiquidate(tokenId);
+        uint96 value = nuggft.vfl(lib.sarr160(tokenId))[0];
 
         forge.vm.startPrank(users.frank);
         {
@@ -92,7 +92,7 @@ contract revert__NuggftV1Loan is NuggftV1Test {
     function test__revert__NuggftV1Loan__0x31__liquidate__successAsSelfExpired() public {
         uint160 tokenId = scenario_frank_has_a_loaned_token_that_has_expired();
 
-        uint96 value = nuggft.valueForLiquidate(tokenId);
+        uint96 value = nuggft.vfl(lib.sarr160(tokenId))[0];
 
         forge.vm.startPrank(users.frank);
         {
@@ -104,7 +104,7 @@ contract revert__NuggftV1Loan is NuggftV1Test {
     function test__revert__NuggftV1Loan__0x31__liquidate__failAsNotAgentNotExpired() public {
         uint160 tokenId = scenario_frank_has_a_loaned_token();
 
-        uint96 value = nuggft.valueForLiquidate(tokenId);
+        uint96 value = nuggft.vfl(lib.sarr160(tokenId))[0];
 
         // forge.vm.startPrank(users.frank);
         // {
@@ -123,7 +123,7 @@ contract revert__NuggftV1Loan is NuggftV1Test {
     function test__revert__NuggftV1Loan__0x31__liquidate__successAsNotAgentExpired() public {
         uint160 tokenId = scenario_frank_has_a_loaned_token_that_has_expired();
 
-        uint96 value = nuggft.valueForLiquidate(tokenId);
+        uint96 value = nuggft.vfl(lib.sarr160(tokenId))[0];
 
         // forge.vm.startPrank(users.frank);
         // {
@@ -145,7 +145,7 @@ contract revert__NuggftV1Loan is NuggftV1Test {
     function test__revert__NuggftV1Loan__0x32__liquidate__successLiquidateExact() public {
         uint160 tokenId = scenario_frank_has_a_loaned_token();
 
-        uint96 value = nuggft.valueForLiquidate(tokenId);
+        uint96 value = nuggft.vfl(lib.sarr160(tokenId))[0];
 
         forge.vm.startPrank(users.frank);
         {
@@ -157,7 +157,7 @@ contract revert__NuggftV1Loan is NuggftV1Test {
     function test__revert__NuggftV1Loan__0x32__liquidate__successLiquidateWeiHigher() public {
         uint160 tokenId = scenario_frank_has_a_loaned_token();
 
-        uint96 value = nuggft.valueForLiquidate(tokenId);
+        uint96 value = nuggft.vfl(lib.sarr160(tokenId))[0];
 
         forge.vm.startPrank(users.frank);
         {
@@ -169,7 +169,7 @@ contract revert__NuggftV1Loan is NuggftV1Test {
     function test__revert__NuggftV1Loan__0x32__liquidate__failLiquidateWeiLower() public {
         uint160 tokenId = scenario_frank_has_a_loaned_token();
 
-        uint96 value = nuggft.valueForLiquidate(tokenId);
+        uint96 value = nuggft.vfl(lib.sarr160(tokenId))[0];
 
         forge.vm.startPrank(users.frank);
         {
@@ -182,7 +182,7 @@ contract revert__NuggftV1Loan is NuggftV1Test {
     function test__revert__NuggftV1Loan__0x32__liquidate__successLiquidateWayHigher() public {
         uint160 tokenId = scenario_frank_has_a_loaned_token();
 
-        uint96 value = nuggft.valueForLiquidate(tokenId);
+        uint96 value = nuggft.vfl(lib.sarr160(tokenId))[0];
 
         forge.vm.startPrank(users.frank);
         {
@@ -194,7 +194,7 @@ contract revert__NuggftV1Loan is NuggftV1Test {
     function test__revert__NuggftV1Loan__0x32__liquidate__failLiquidateWayLower() public {
         uint160 tokenId = scenario_frank_has_a_loaned_token();
 
-        uint96 value = nuggft.valueForLiquidate(tokenId);
+        uint96 value = nuggft.vfl(lib.sarr160(tokenId))[0];
 
         forge.vm.startPrank(users.frank);
         {
@@ -323,7 +323,7 @@ contract revert__NuggftV1Loan is NuggftV1Test {
     // function test__revert__NuggftV1Loan__0x34__loanInfo__failDoesNotExistAfterLiquidate() public {
     //     uint160 tokenId = scenario_frank_has_a_loaned_token();
 
-    //     uint96 value = nuggft.valueForLiquidate(tokenId);
+    //     uint96 value = nuggft.vfl(lib.sarr160(tokenId))[0];
 
     //     forge.vm.startPrank(users.frank);
     //     {

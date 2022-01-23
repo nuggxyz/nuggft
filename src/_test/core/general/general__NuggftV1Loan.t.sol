@@ -37,7 +37,7 @@ contract general__NuggftV1Loan is NuggftV1Test {
 
         forge.vm.roll(block.number + 100);
 
-        nuggft.rebalance{value: nuggft.valueForRebalance(LOAN_TOKENID) * 1000}(list);
+        nuggft.rebalance{value: nuggft.vfr(lib.sarr160(LOAN_TOKENID))[0] * 1000}(list);
     }
 
     function test__general__NuggftV1Loan__rebalance() public {
@@ -62,7 +62,8 @@ contract general__NuggftV1Loan is NuggftV1Test {
         forge.vm.roll(block.number + 100);
 
         for (uint160 i = 0; i < NUM; i++) {
-            nuggft.rebalance{value: nuggft.valueForRebalance(LOAN_TOKENID + i)}(lib.sarr160(LOAN_TOKENID + i));
+
+            nuggft.rebalance{value: nuggft.vfr(lib.sarr160(LOAN_TOKENID + i))[0]}(lib.sarr160(LOAN_TOKENID + i));
         }
     }
 }

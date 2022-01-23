@@ -88,12 +88,10 @@ abstract contract NuggftV1Stake is INuggftV1Stake, NuggftV1Proof {
 
     /// @notice handles the adding of shares - ensures enough eth is being added
     /// @dev this is the only way to add shares - the logic here ensures that "ethPerShare" can never decrease
-    function addStakedShareFromMsgValue() internal {
-        uint256 cache;
-
+    function addStakedShareFromMsgValue__dirty() internal {
         assembly {
             // load stake to callstack
-            cache := sload(stake.slot)
+            let cache := sload(stake.slot)
 
             let shrs := shr(192, cache)
 
@@ -119,33 +117,43 @@ abstract contract NuggftV1Stake is INuggftV1Stake, NuggftV1Proof {
             // add fee of overpay to fee
             fee := add(div(mul(overpay, PROTOCOL_FEE_BPS), 10000), fee)
 
-            // combine the shares, eth, and protocol fee and add to stake cashe
-            // cache = cache + [shares: 1 | eth: (value - fee) | fee: fee]
+            // update stake
+            // =======================
+            // stake = {
+            //     shares  = prev + 1
+            //     eth     = prev + (msg.value - fee)
+            //     proto   = prev + fee
+            // }
+            // =======================
             cache := add(cache, or(shl(192, 1), or(shl(96, sub(callvalue(), fee)), fee)))
 
             sstore(stake.slot, cache)
-        }
 
-        emit Stake(bytes32(cache));
+            // emit current stake state as event
+            let ptr := mload(0x40)
+            mstore(ptr, cache)
+            log1(ptr, 0x32, STAKE)
+        }
     }
 
     /// @notice handles isolated staking of eth
     /// @dev supply of eth goes up while supply of shares stays constant - increasing "minSharePrice"
     /// @param value the amount of eth being staked - must be some portion of msg.value
-    function addStakedEth(uint96 value) internal {
-        uint256 cache;
-
+    function addStakedEth__dirty(uint96 value) internal {
         assembly {
-            cache := sload(stake.slot)
+            let cache := sload(stake.slot)
 
             let pro := div(mul(value, PROTOCOL_FEE_BPS), 10000)
 
             cache := add(cache, or(shl(96, sub(value, pro)), pro))
 
             sstore(stake.slot, cache)
-        }
 
-        emit Stake(bytes32(cache));
+            let ptr := mload(0x40)
+
+            mstore(ptr, cache)
+            log1(ptr, 0x32, STAKE)
+        }
     }
 
     // @test manual

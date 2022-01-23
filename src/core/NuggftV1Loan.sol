@@ -21,43 +21,65 @@ abstract contract NuggftV1Loan is INuggftV1Loan, NuggftV1Swap {
 
     /// @inheritdoc INuggftV1Loan
     function loan(uint160 tokenId) external override {
-        uint96 value = eps();
+        uint96 amt = eps();
+
         uint256 active = epoch();
 
-        // cache = NuggftV1AgentType.create(epoch(), msg.sender, eps(), NuggftV1AgentType.Flag.LOAN);
-
         assembly {
-            let ptr := mload(0x40)
-            mstore(ptr, tokenId)
-            mstore(add(ptr, 0x20), agency.slot)
+            let mptr := mload(0x40)
 
-            let loc := keccak256(ptr, 0x40)
+            // calculate agency.slot storeage ptr
+            mstore(mptr, tokenId)
+            mstore(add(mptr, 0x20), agency.slot)
+            let agency__sptr := keccak256(mptr, 0x40)
 
-            let agency__cache := sload(loc)
+            // load agency value from storage
+            let agency__cache := sload(agency__sptr)
 
-            // require(isOwner(msg.sender, tokenId), hex'30');
-            let a := iszero(eq(shr(96, shl(96, agency__cache)), caller()))
-            let b := iszero(eq(shr(254, agency__cache), 0x03))
-            if or(a, b) {
-                mstore(0x00, 0x30)
-                revert(31, 0x01)
+            // ensure the caller is the agent
+            if iszero(eq(shr(96, shl(96, agency__cache)), caller())) {
+                mstore8(0x0, 0x2A)
+                revert(0x00, 0x01)
             }
 
-            value := div(value, LOSS)
+            // ensure the agent is the owner
+            if iszero(eq(shr(254, agency__cache), 0x1)) {
+                mstore8(0x0, 0x2C)
+                revert(0x00, 0x01)
+            }
 
-            agency__cache := or(caller(), or(shl(160, value), or(shl(230, active), shl(254, 0x2))))
+            // compress amt into 70 bits
+            amt := div(amt, LOSS)
 
-            sstore(loc, agency__cache)
+            // update agency to reflect the loan
+            // ==========================
+            // agency[tokenId] = {
+            //     flag  = LOAN(0x02)
+            //     epoch = active
+            //     eth   = eps / .1 gwei
+            //     addr  = agent
+            // }
+            // =========================
+            agency__cache := xor(caller(), xor(shl(160, amt), xor(shl(230, active), shl(254, 0x2))))
 
-            value := mul(value, LOSS)
+            // decompress amt back to eth
+            // amt becomes a floored to .1 gwei version of eps()
+            // ensures amt stored in agency and eth sent to caller are the same
+            amt := mul(amt, LOSS)
 
-            if iszero(call(gas(), caller(), value, 0, 0, 0, 0)) {
-                mstore(0x00, 0x01)
+            // store updated agency
+            // done before external call to prevent reentrancy
+            sstore(agency__sptr, agency__cache)
+
+            // send eth
+            if iszero(call(gas(), caller(), amt, 0, 0, 0, 0)) {
+                mstore(0x00, 0x01) // ERR:0x01
                 revert(0x1F, 0x01)
             }
 
-            mstore(ptr, agency__cache)
-            log2(ptr, 0x20, LOAN, tokenId)
+            // log2 with "Loan(uint160,bytes32)" topic
+            mstore(mptr, agency__cache)
+            log2(mptr, 0x20, LOAN, tokenId)
         }
     }
 
@@ -77,7 +99,7 @@ abstract contract NuggftV1Loan is INuggftV1Loan, NuggftV1Swap {
 
             let loaner := shr(96, shl(96, agency__cache))
 
-            // ensure that the agency flag is "SWAP" (0x01)
+            // ensure that the agency flag is LOAN
             if iszero(eq(shr(254, agency__cache), 0x02)) {
                 mstore8(0x0, 0x33)
                 revert(0x00, 0x01)
@@ -89,7 +111,7 @@ abstract contract NuggftV1Loan is INuggftV1Loan, NuggftV1Swap {
                     log4(0x00, 0x00, TRANSFER, loaner, caller(), tokenId)
                 }
                 default {
-                    mstore8(0x0, 0x31)
+                    mstore8(0x0, 0x31) // ERR:0x31
                     revert(0x00, 0x01)
                 }
             }
@@ -97,31 +119,43 @@ abstract contract NuggftV1Loan is INuggftV1Loan, NuggftV1Swap {
 
         uint96 val = uint96(((agency__cache << 26) >> 186) * LOSS);
 
-        (uint96 fee, uint96 earned) = calc(val, eps());
+        (uint96 fee, uint96 earn) = calc(val, eps());
 
         unchecked {
-            uint96 debt = val + fee;
+            uint96 debt_ = val + fee;
 
-            earned += uint96(msg.value);
+            earn += uint96(msg.value);
 
-            require(debt <= earned, hex'32');
+            require(debt_ <= earn, hex'32');
 
-            earned -= debt;
+            earn -= debt_;
         }
 
-        addStakedEth(fee);
+        addStakedEth__dirty(fee);
 
         assembly {
-            //
-            agency__cache := or(caller(), shl(254, 0x3))
+            // update agency to return ownership of the token
+            // ==========================
+            // agency[tokenId] = {
+            //     flag  = OWN(0x01)
+            //     epoch = 0
+            //     eth   = 0
+            //     addr  = msg.sender
+            // }
+            // =========================
+            agency__cache := or(caller(), shl(254, 0x01))
 
+            // store updated agency
+            // done before external call to prevent reentrancy
             sstore(agency__slot, agency__cache)
 
-            if iszero(call(gas(), caller(), earned, 0, 0, 0, 0)) {
+            // send eth
+            if iszero(call(gas(), caller(), earn, 0, 0, 0, 0)) {
                 mstore(0x00, 0x01)
                 revert(0x1F, 0x01)
             }
 
+            // log2 with "Liquidate(uint160,bytes32)" topic
             mstore(0x00, agency__cache)
             log2(0x00, 0x32, LIQUIDATE, tokenId)
         }
@@ -132,8 +166,6 @@ abstract contract NuggftV1Loan is INuggftV1Loan, NuggftV1Swap {
         uint256 active = epoch();
 
         assembly {
-            let acc := callvalue()
-
             let len := calldataload(sub(tokenIds.offset, 0x20))
 
             let ptr := mload(0x40)
@@ -145,6 +177,8 @@ abstract contract NuggftV1Loan is INuggftV1Loan, NuggftV1Swap {
             let activeEps := div(shr(160, shl(64, stake__cache)), shrs)
 
             mstore(add(ptr, 0x20), agency.slot)
+
+            let acc := callvalue()
 
             for {
                 let i := 0
@@ -173,25 +207,25 @@ abstract contract NuggftV1Loan is INuggftV1Loan, NuggftV1Swap {
 
                 // CALC
 
-                let earned := 0
+                let earn := 0
 
                 let fee := sub(activeEps, principal)
 
                 let checkFee := div(principal, REBALANCE_FEE_BPS)
 
                 if gt(fee, checkFee) {
-                    earned := sub(fee, checkFee)
+                    earn := sub(fee, checkFee)
                     fee := checkFee
                 }
 
-                earned := add(earned, acc)
+                earn := add(earn, acc)
 
-                if lt(earned, fee) {
+                if lt(earn, fee) {
                     mstore8(0x0, 0x3a) // ERR:0x3a
                     revert(0x00, 0x01)
                 }
 
-                acc := sub(earned, fee)
+                acc := sub(earn, fee)
 
                 mstore(add(add(ptr, 0x60), mul(i, 0xA0)), shr(96, shl(96, agency__cache)))
             }
@@ -213,6 +247,15 @@ abstract contract NuggftV1Loan is INuggftV1Loan, NuggftV1Swap {
 
                 let account := mload(add(add(ptr, 0x60), mul(i, 0xA0)))
 
+                // update agency to return ownership of the token
+                // ==========================
+                // agency[tokenId] = {
+                //     flag  = LOAN(0x02)
+                //     epoch = 0
+                //     eth   = 0
+                //     addr  = msg.sender
+                // }
+                // =========================
                 let agency__cache := or(shl(254, 0x2), or(shl(230, active), or(shl(160, afterEth), account)))
 
                 sstore(keccak256(ptr, 0x40), agency__cache)
@@ -231,56 +274,13 @@ abstract contract NuggftV1Loan is INuggftV1Loan, NuggftV1Swap {
         }
     }
 
-    // /// @inheritdoc INuggftV1Loan
-    // function multirebalance(uint160[] memory tokenIds) external payable override {
-    //     uint96 acc = uint96(msg.value);
-    //     uint96 accFee = 0;
-
-    //     uint96 _eps = eps();
-
-    //     for (uint256 i = 0; i < tokenIds.length; i++) {
-    //         uint256 cache = agency[tokenIds[i]];
-
-    //         // make sure this nugg is loaned
-    //         require(cache.flag() == NuggftV1AgentType.Flag.LOAN, hex'33');
-
-    //         require(msg.sender == cache.account(), hex'39');
-
-    //         (uint96 fee, uint96 payment) = calc(cache.eth(), _eps);
-
-    //         unchecked {
-    //             payment += acc;
-
-    //             // make sure there is enough value to cover the fee
-    //             require(fee <= payment, hex'3a');
-
-    //             payment -= fee;
-
-    //             accFee += fee;
-
-    //             acc = payment;
-    //         }
-
-    //         emit Rebalance(tokenIds[i], bytes32(cache));
-    //     }
-
-    //     addStakedEth(accFee);
-
-    //     uint256 common = NuggftV1AgentType.create(epoch(), msg.sender, eps(), NuggftV1AgentType.Flag.LOAN);
-
-    //     for (uint256 i = 0; i < tokenIds.length; i++) agency[tokenIds[i]] = common;
-
-    //     // we transfer overearned to the owner
-    //     TransferLib.give(msg.sender, acc);
-    // }
-
     function calc(uint96 principal, uint96 activeEps)
         internal
         pure
         returns (
             // uint96 debt,
             uint96 fee,
-            uint96 earned
+            uint96 earn
         )
     {
         // principal can never be below activeEps
@@ -292,142 +292,83 @@ abstract contract NuggftV1Loan is INuggftV1Loan, NuggftV1Swap {
             let checkFee := div(principal, REBALANCE_FEE_BPS)
 
             if gt(fee, checkFee) {
-                earned := sub(fee, checkFee)
+                earn := sub(fee, checkFee)
                 fee := checkFee
             }
         }
     }
 
-    function loaned(uint160 tokenId) external view returns (bool res) {
-        return agency[tokenId].flag() == NuggftV1AgentType.Flag.LOAN;
-    }
-
     /// @inheritdoc INuggftV1Loan
-    function valueForLiquidate(uint160 tokenId) external view returns (uint96 res) {
-        uint256 cache = agency[tokenId];
-        (uint96 fee, uint96 payment) = calc(cache.eth(), eps());
-        res = cache.eth() + fee - payment;
-    }
-
-    /// @inheritdoc INuggftV1Loan
-    function valueForRebalance(uint160 tokenId) external view returns (uint96 res) {
-        uint256 cache = agency[tokenId];
-        (uint96 fee, uint96 payment) = calc(cache.eth(), eps());
-        if (fee > payment) return fee - payment;
-    }
-
-    /// @inheritdoc INuggftV1Loan
-    function loanInfo(uint160 tokenId)
-        external
+    function debt(uint160 tokenId)
+        public
         view
-        override
         returns (
             bool isLoaned,
-            uint96 debt,
+            address account,
+            uint96 prin,
             uint96 fee,
-            uint96 earned,
-            uint24 insolventEpoch
+            uint96 earn,
+            uint24 expire
         )
     {
-        uint256 cache = agency[tokenId];
+        uint96 activeEps = eps();
 
-        isLoaned = cache.flag() == NuggftV1AgentType.Flag.LOAN;
+        assembly {
+            let mptr := mload(0x40)
 
-        insolventEpoch = cache.epoch() + LIQUIDATION_PERIOD;
+            mstore(mptr, tokenId)
+            mstore(add(mptr, 0x20), agency.slot)
 
-        (fee, earned) = calc(cache.eth(), eps());
+            let agency__cache := sload(keccak256(mptr, 0x40))
 
-        debt = cache.eth() + fee;
+            if iszero(eq(shr(254, agency__cache), 0x02)) {
+                return(0x00, 0x00)
+            }
+
+            isLoaned := 0x01
+
+            expire := add(shr(230, agency__cache), LIQUIDATION_PERIOD)
+
+            account := agency__cache
+
+            prin := mul(shr(186, shl(26, agency__cache)), LOSS)
+
+            earn := 0
+
+            fee := sub(activeEps, prin)
+
+            let checkFee := div(prin, REBALANCE_FEE_BPS)
+
+            if gt(fee, checkFee) {
+                earn := sub(fee, checkFee)
+                fee := checkFee
+            }
+        }
+    }
+
+    /// @inheritdoc INuggftV1Loan
+    function vfr(uint160[] calldata tokenIds) external view returns (uint96[] memory vals) {
+        vals = new uint96[](tokenIds.length);
+        for (uint256 i = 0; i < vals.length; i++) {
+            (bool ok, , , uint96 fee, uint96 earn, ) = debt(tokenIds[i]);
+
+            if (!ok) continue;
+
+            if (ok && fee > earn) {
+                vals[i] = fee - earn;
+            }
+        }
+    }
+
+    /// @inheritdoc INuggftV1Loan
+    function vfl(uint160[] calldata tokenIds) external view returns (uint96[] memory vals) {
+        vals = new uint96[](tokenIds.length);
+        for (uint256 i = 0; i < vals.length; i++) {
+            (bool ok, , uint96 prin, uint96 fee, uint96 earn, ) = debt(tokenIds[i]);
+
+            if (ok && (prin = prin + fee) > earn) {
+                vals[i] = prin - earn;
+            }
+        }
     }
 }
-
-// }
-
-// (uint96 fee, uint96 earned) = calc(principal, activeEps);
-
-// unchecked {
-//     earned += uint96(msg.value);
-
-//     // make sure there is enough value to cover the fee
-//     require(fee <= earned, hex'3a');
-
-//     earned -= fee;
-// }
-
-// assembly {
-
-// /// @inheritdoc INuggftV1Loan
-// function rebalance(uint160 tokenId) external payable override {
-//     uint256 active = epoch();
-
-//     assembly {
-//         let ptr := mload(0x40)
-
-//         let stake__cache := sload(stake.slot)
-
-//         let shrs := shr(192, stake__cache)
-
-//         let activeEps := div(shr(160, shl(64, stake__cache)), shrs)
-
-//         mstore(ptr, tokenId)
-//         mstore(add(ptr, 0x20), agency.slot)
-//         let agency__slo := keccak256(ptr, 0x40)
-
-//         let agency__cache := sload(agency__slo)
-
-//         // make sure this nugg is loaned
-//         if iszero(eq(shr(254, agency__cache), 0x02)) {
-//             mstore8(0x0, 0x33)
-//             revert(0x00, 0x01)
-//         }
-
-//         let principal := mul(shr(186, shl(26, agency__cache)), LOSS)
-
-//         // CALC
-
-//         let earned := 0
-
-//         let fee := sub(activeEps, principal)
-
-//         let checkFee := div(principal, REBALANCE_FEE_BPS)
-
-//         if gt(fee, checkFee) {
-//             earned := sub(fee, checkFee)
-//             fee := checkFee
-//         }
-
-//         earned := add(earned, callvalue())
-
-//         if lt(earned, fee) {
-//             mstore8(0x0, 0x3a) // ERR:0x3a
-//             revert(0x00, 0x01)
-//         }
-
-//         earned := sub(earned, fee)
-
-//         let pro := div(mul(fee, PROTOCOL_FEE_BPS), 10000)
-
-//         stake__cache := add(stake__cache, or(shl(96, sub(fee, pro)), pro))
-
-//         sstore(stake.slot, stake__cache)
-
-//         let afterEth := div(shr(160, shl(64, stake__cache)), mul(shrs, LOSS))
-
-//         let account := shr(96, shl(96, agency__cache))
-
-//         agency__cache := or(shl(254, 0x2), or(shl(230, active), or(shl(160, afterEth), account)))
-
-//         sstore(agency__slo, agency__cache)
-
-//         if iszero(call(gas(), account, earned, 0, 0, 0, 0)) {
-//             mstore(0x00, 0x65)
-//             revert(0x1F, 0x01)
-//         }
-
-//         mstore(0x00, stake__cache)
-//         log1(0x00, 0x32, STAKE)
-
-//         mstore(0x00, agency__cache)
-//         log2(0x00, 0x32, REBALANCE, tokenId)
-//     }
-// }

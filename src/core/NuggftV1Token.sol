@@ -19,8 +19,6 @@ abstract contract NuggftV1Token is INuggftV1Token, NuggftV1Epoch {
 
     using CastLib for uint256;
 
-    bytes32 constant TRANSFER_HASH = 0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef;
-
     uint32 constant TRUSTED_MINT_TOKENS = 500;
     uint32 constant UNTRUSTED_MINT_TOKENS = 10000;
 
@@ -44,7 +42,7 @@ abstract contract NuggftV1Token is INuggftV1Token, NuggftV1Epoch {
     function ownerOf(uint256 tokenId) external view override returns (address res) {
         uint256 cache = agency[tokenId];
         require(cache != 0, hex'40');
-        if (cache >> 254 == 0x01 && (cache << 2) >> 232 != 0) {
+        if (cache >> 254 == 0x03 && (cache << 2) >> 232 != 0) {
             return address(this);
         }
         return cache.account();
@@ -97,10 +95,30 @@ abstract contract NuggftV1Token is INuggftV1Token, NuggftV1Epoch {
                                 internal
     ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━*/
 
-    function _mintTo(address to, uint160 tokenId) internal {
-        agency[tokenId] = NuggftV1AgentType.create(0, to, 0, NuggftV1AgentType.Flag.OWN);
+    function mint__dirty(address to, uint160 tokenId) internal {
+        assembly {
+            let mptr := mload(0x40)
 
-        emit Transfer(address(0), to, tokenId);
+            mstore(mptr, tokenId)
+            mstore(add(mptr, 0x20), agency.slot)
+
+            let agency__sptr := keccak256(mptr, 0x40)
+
+            // update agency to reflect the new leader
+            // =======================
+            // agency[tokenId] = {
+            //     flag  = OWN(0x01)
+            //     epoch = 0
+            //     eth   = 0
+            //     addr  = to
+            // }
+            // =======================
+            let agency__cache := or(shl(254, 0x01), to)
+
+            sstore(agency__sptr, agency__cache)
+
+            log4(0x00, 0x00, TRANSFER, 0, to, tokenId)
+        }
     }
 
     /*━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -113,11 +131,18 @@ abstract contract NuggftV1Token is INuggftV1Token, NuggftV1Epoch {
 
     function isOwner(address sender, uint160 tokenId) internal view returns (bool res) {
         uint256 cache = agency[tokenId];
-        return cache.account() == sender && cache.flag() == NuggftV1AgentType.Flag.OWN;
+        return cache.account() == sender && uint8(cache.flag()) == 0x01;
     }
 
     function isAgent(address sender, uint160 tokenId) internal view returns (bool res) {
         uint256 cache = agency[tokenId];
-        return cache.account() == sender && (cache.flag() == NuggftV1AgentType.Flag.OWN || cache.flag() == NuggftV1AgentType.Flag.LOAN);
+
+        if (uint160(cache) == uint160(sender)) {
+            if (
+                uint8(cache.flag()) == 0x01 || //
+                uint8(cache.flag()) == 0x02 ||
+                (uint8(cache.flag()) == 0x03 && ((cache >> 230) & 0xffffff) == 0)
+            ) return true;
+        }
     }
 }

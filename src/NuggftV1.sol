@@ -137,11 +137,11 @@ contract NuggftV1 is IERC721Metadata, NuggftV1Loan {
     function trustedMint(uint160 tokenId, address to) external payable override requiresTrust {
         require(tokenId < TRUSTED_MINT_TOKENS && tokenId != 0, 'G:1');
 
-        addStakedShareFromMsgValue();
+        addStakedShareFromMsgValue__dirty();
 
         setProof(tokenId);
 
-        _mintTo(to, tokenId);
+        mint__dirty(to, tokenId);
 
         emit Mint(tokenId, uint96(msg.value));
     }
@@ -159,11 +159,11 @@ contract NuggftV1 is IERC721Metadata, NuggftV1Loan {
     function mint(uint160 tokenId) public payable override {
         require(tokenId <= UNTRUSTED_MINT_TOKENS + TRUSTED_MINT_TOKENS && tokenId >= TRUSTED_MINT_TOKENS, 'G:1');
 
-        addStakedShareFromMsgValue();
+        addStakedShareFromMsgValue__dirty();
 
         setProof(tokenId);
 
-        _mintTo(msg.sender, tokenId);
+        mint__dirty(msg.sender, tokenId);
 
         emit Mint(tokenId, uint96(msg.value));
     }

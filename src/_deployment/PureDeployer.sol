@@ -79,6 +79,8 @@ contract PureDeployer {
            ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
         // DSEmit.startMeasuringGas('B');
 
+        // dotnugg = new DotnuggV1()
+
         assembly {
             dotnugg := create2(0x0, add(dotnuggCode, 0x20), mload(dotnuggCode), dotnuggSalt)
         }

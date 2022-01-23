@@ -54,7 +54,7 @@ abstract contract NuggftV1ItemSwap is INuggftV1ItemSwap, NuggftV1Stake {
             // we do not know how much to give them when they call "claim" otherwise
 
             // ensure that the agency flag is "SWAP" (0x01)
-            if iszero(eq(shr(254, agency__cache), 0x01)) {
+            if iszero(eq(shr(254, agency__cache), 0x03)) {
                 mstore8(0x0, 0x24) // ERR:0x24
                 revert(0x00, 0x01)
             }
@@ -133,7 +133,7 @@ abstract contract NuggftV1ItemSwap is INuggftV1ItemSwap, NuggftV1Stake {
             sstore(agency__slo, agency__cache)
         }
 
-        addStakedEth(uint96(last));
+        addStakedEth__dirty(uint96(last));
 
         emit OfferItem(encItemId(sellerTokenId, itemId), bytes32(agency__cache));
     }
@@ -238,7 +238,7 @@ abstract contract NuggftV1ItemSwap is INuggftV1ItemSwap, NuggftV1Stake {
 
         assembly {
             // updatedAgency = [ flag: SWAP | epoch: 0 | eth: floor/10**8 | addr: tokenId ]
-            updatedAgency := or(shl(254, 0x1), or(shl(230, 0), or(shl(160, div(floor, LOSS)), tokenId)))
+            updatedAgency := or(shl(254, 0x03), or(shl(230, 0), or(shl(160, div(floor, LOSS)), tokenId)))
         }
 
         itemAgency[encItemId(tokenId, itemId)] = updatedAgency;
