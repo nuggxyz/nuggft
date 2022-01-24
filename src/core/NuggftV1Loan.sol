@@ -239,6 +239,8 @@ abstract contract NuggftV1Loan is INuggftV1Loan, NuggftV1Swap {
                 // get a tokenId from calldata and store it to mem pos 0x00
                 mstore(mptr, calldataload(add(tokenIds.offset, mul(i, 0x20))))
 
+                let agency__sptr := keccak256(mptr, 0x40)
+
                 //
                 let agency__cache := sload(keccak256(mptr, 0x40))
 
@@ -289,6 +291,12 @@ abstract contract NuggftV1Loan is INuggftV1Loan, NuggftV1Swap {
                 accFee := add(accFee, fee)
 
                 mstore(add(add(mptr, 0x60), mul(i, 0xA0)), iso(agency__cache, 96, 96))
+
+                // set the agency temporarily to 1 to avoid reentrancy
+                // reentrancy here referes to a tokenId being passed multiple times in the calldata array
+                // the only value that actually matters here is the "flag", but since it is reset below
+                // ... we can just set it to one
+                sstore(agency__sptr, 0x01)
             }
 
             let pro := div(accFee, PROTOCOL_FEE_BPS)
