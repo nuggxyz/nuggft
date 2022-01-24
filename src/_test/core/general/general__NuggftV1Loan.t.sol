@@ -27,7 +27,7 @@ contract general__NuggftV1Loan is NuggftV1Test {
 
         for (uint160 i = 0; i < NUM; i++) {
             nuggft.mint{value: nuggft.msp()}(LOAN_TOKENID + i);
-            nuggft.loan(LOAN_TOKENID + i);
+            nuggft.loan(lib.sarr160(LOAN_TOKENID + i));
             list[i] = LOAN_TOKENID + i;
         }
 
@@ -51,7 +51,7 @@ contract general__NuggftV1Loan is NuggftV1Test {
 
         for (uint160 i = 0; i < NUM; i++) {
             nuggft.mint{value: nuggft.msp()}(LOAN_TOKENID + i);
-            nuggft.loan(LOAN_TOKENID + i);
+            nuggft.loan(lib.sarr160(LOAN_TOKENID + i));
             list[i] = LOAN_TOKENID + i;
         }
 

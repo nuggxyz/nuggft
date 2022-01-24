@@ -25,7 +25,7 @@ contract revert__NuggftV1Loan is NuggftV1Test {
         forge.vm.startPrank(users.frank);
         {
             // nuggft.approve(_nuggft, tokenId);
-            nuggft.loan(tokenId);
+            nuggft.loan(lib.sarr160(tokenId));
         }
         forge.vm.stopPrank();
     }
@@ -42,7 +42,7 @@ contract revert__NuggftV1Loan is NuggftV1Test {
         forge.vm.startPrank(users.dennis);
         {
             forge.vm.expectRevert(hex'2A');
-            nuggft.loan(tokenId);
+            nuggft.loan(lib.sarr160(tokenId));
         }
         forge.vm.stopPrank();
     }
@@ -52,7 +52,7 @@ contract revert__NuggftV1Loan is NuggftV1Test {
 
         forge.vm.startPrank(users.frank);
         {
-            nuggft.loan(tokenId);
+            nuggft.loan(lib.sarr160(tokenId));
         }
         forge.vm.stopPrank();
     }
@@ -64,13 +64,13 @@ contract revert__NuggftV1Loan is NuggftV1Test {
 
         nuggft.mint{value: 1 ether}(LOAN_TOKENID);
 
-        nuggft.loan(LOAN_TOKENID);
+        nuggft.loan(lib.sarr160(LOAN_TOKENID));
 
         nuggft.mint{value: 1 ether}(LOAN_TOKENID + 1);
 
         forge.vm.expectRevert(hex'2C');
 
-        nuggft.loan(LOAN_TOKENID);
+        nuggft.loan(lib.sarr160(LOAN_TOKENID));
     }
 
     /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━

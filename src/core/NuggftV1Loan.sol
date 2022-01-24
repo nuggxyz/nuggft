@@ -8,7 +8,7 @@ import {NuggftV1Swap} from './NuggftV1Swap.sol';
 
 abstract contract NuggftV1Loan is INuggftV1Loan, NuggftV1Swap {
     /// @inheritdoc INuggftV1Loan
-    function loan(uint160 tokenId) external override {
+    function loan(uint160[] calldata tokenIds) external override {
         uint96 amt = eps();
 
         uint256 active = epoch();
@@ -18,58 +18,70 @@ abstract contract NuggftV1Loan is INuggftV1Loan, NuggftV1Swap {
                 b := shr(right, shl(left, val))
             }
 
+            // load the length of the calldata array
+            let len := calldataload(sub(tokenIds.offset, 0x20))
+
             let mptr := mload(0x40)
 
             // calculate agency.slot storeage ptr
-            mstore(mptr, tokenId)
             mstore(add(mptr, 0x20), agency.slot)
-            let agency__sptr := keccak256(mptr, 0x40)
 
-            // load agency value from storage
-            let agency__cache := sload(agency__sptr)
+            for {
+                let i := 0
+            } lt(i, len) {
+                i := add(i, 0x1)
+            } {
+                // get a tokenId from calldata and store it to mem pos 0x00
+                mstore(mptr, calldataload(add(tokenIds.offset, mul(i, 0x20))))
 
-            // ensure the caller is the agent
-            if iszero(eq(iso(agency__cache, 96, 96), caller())) {
-                mstore8(0x0, Error__NotAgent__0x2A)
-                revert(0x00, 0x01)
+                let agency__sptr := keccak256(mptr, 0x40)
+
+                // load agency value from storage
+                let agency__cache := sload(agency__sptr)
+
+                // ensure the caller is the agent
+                if iszero(eq(iso(agency__cache, 96, 96), caller())) {
+                    mstore8(0x0, Error__NotAgent__0x2A)
+                    revert(0x00, 0x01)
+                }
+
+                // ensure the agent is the owner
+                if iszero(eq(shr(254, agency__cache), 0x1)) {
+                    mstore8(0x0, Error__NotOwner__0x2C)
+                    revert(0x00, 0x01)
+                }
+
+                // compress amt into 70 bits
+                amt := div(amt, LOSS)
+
+                // update agency to reflect the loan
+                // ==== agency[tokenId] ====
+                //  flag  = LOAN(0x02)
+                //  epoch = active
+                //  eth   = eps / .1 gwei
+                //  addr  = agent
+                // =========================
+                agency__cache := xor(caller(), xor(shl(160, amt), xor(shl(230, active), shl(254, 0x2))))
+
+                // decompress amt back to eth
+                // amt becomes a floored to .1 gwei version of eps()
+                // ensures amt stored in agency and eth sent to caller are the same
+                amt := mul(amt, LOSS)
+
+                // store updated agency
+                // done before external call to prevent reentrancy
+                sstore(agency__sptr, agency__cache)
+
+                // send eth
+                if iszero(call(gas(), caller(), amt, 0, 0, 0, 0)) {
+                    mstore(0x00, Error__SendEthFailureToCaller__0x92)
+                    revert(0x1F, 0x01)
+                }
+
+                // log2 with "Loan(uint160,bytes32)" topic
+                mstore(mptr, agency__cache)
+                log2(mptr, 0x20, Event__Loan, mload(mptr))
             }
-
-            // ensure the agent is the owner
-            if iszero(eq(shr(254, agency__cache), 0x1)) {
-                mstore8(0x0, Error__NotOwner__0x2C)
-                revert(0x00, 0x01)
-            }
-
-            // compress amt into 70 bits
-            amt := div(amt, LOSS)
-
-            // update agency to reflect the loan
-            // ==== agency[tokenId] ====
-            //  flag  = LOAN(0x02)
-            //  epoch = active
-            //  eth   = eps / .1 gwei
-            //  addr  = agent
-            // =========================
-            agency__cache := xor(caller(), xor(shl(160, amt), xor(shl(230, active), shl(254, 0x2))))
-
-            // decompress amt back to eth
-            // amt becomes a floored to .1 gwei version of eps()
-            // ensures amt stored in agency and eth sent to caller are the same
-            amt := mul(amt, LOSS)
-
-            // store updated agency
-            // done before external call to prevent reentrancy
-            sstore(agency__sptr, agency__cache)
-
-            // send eth
-            if iszero(call(gas(), caller(), amt, 0, 0, 0, 0)) {
-                mstore(0x00, Error__SendEthFailureToCaller__0x92)
-                revert(0x1F, 0x01)
-            }
-
-            // log2 with "Loan(uint160,bytes32)" topic
-            mstore(mptr, agency__cache)
-            log2(mptr, 0x20, Event__Loan, tokenId)
         }
     }
 

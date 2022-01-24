@@ -468,7 +468,7 @@ contract NuggftV1Test is ForgeTest {
         // nuggft.approve(_nuggft, tokenId);
 
         forge.vm.prank(users.frank);
-        nuggft.loan(tokenId);
+        nuggft.loan(lib.sarr160(tokenId));
     }
 
     function scenario_frank_has_a_loaned_token_that_has_expired() public payable returns (uint160 tokenId) {
@@ -619,6 +619,74 @@ contract NuggftV1Test is ForgeTest {
         nuggft.offerItem{value: floor + 1 ether}(charliesTokenId, tokenId, itemId);
 
         forge.vm.roll(2000);
+    }
+
+    /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+                                encodeWithSelector
+       ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+
+    function mintAs(
+        uint160 tokenId,
+        address user,
+        uint96 value
+    ) internal {
+        forge.vm.deal(user, user.balance + value);
+        forge.vm.prank(user);
+        nuggft.mint{value: value}(tokenId);
+    }
+
+    function offerAs(
+        uint160 tokenId,
+        address user,
+        uint96 value
+    ) internal {
+        forge.vm.deal(user, user.balance + value);
+        forge.vm.prank(user);
+        nuggft.offer{value: value}(tokenId);
+    }
+
+    function sellAs(
+        uint160 tokenId,
+        address user,
+        uint96 value
+    ) internal {
+        forge.vm.prank(user);
+        nuggft.sell(tokenId, value);
+    }
+
+    function claimAs(uint160 tokenId, address user) internal {
+        forge.vm.prank(user);
+        nuggft.claim(lib.sarr160(tokenId), lib.sarrAddress(user));
+    }
+
+    function rebalanceAs(
+        uint160 tokenId,
+        address user,
+        uint96 value
+    ) internal {
+        forge.vm.deal(user, user.balance + value);
+        forge.vm.prank(user);
+        nuggft.rebalance(lib.sarr160(tokenId));
+    }
+
+    function loanAs(
+        uint160 tokenId,
+        address user,
+        uint96 value
+    ) internal {
+        forge.vm.deal(user, user.balance + value);
+        forge.vm.prank(user);
+        nuggft.loan(lib.sarr160(tokenId));
+    }
+
+    function liquidateAs(
+        uint160 tokenId,
+        address user,
+        uint96 value
+    ) internal {
+        forge.vm.deal(user, user.balance + value);
+        forge.vm.prank(user);
+        nuggft.liquidate{value: value}(tokenId);
     }
 
     /*━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
