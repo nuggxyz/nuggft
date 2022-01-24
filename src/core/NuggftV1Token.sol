@@ -117,7 +117,7 @@ abstract contract NuggftV1Token is INuggftV1Token, NuggftV1Epoch {
 
             sstore(agency__sptr, agency__cache)
 
-            log4(0x00, 0x00, TRANSFER, 0, to, tokenId)
+            log4(0x00, 0x00, Event__Transfer, 0, to, tokenId)
         }
     }
 
