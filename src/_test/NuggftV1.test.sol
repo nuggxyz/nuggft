@@ -39,6 +39,10 @@ contract RiggedNuggft is NuggftV1 {
     function external__stake() external view returns (uint256 res) {
         return stake;
     }
+
+    function external__toStartBlock(uint24 _epoch) public view returns (uint256 res) {
+        return toStartBlock(_epoch, genesis);
+    }
 }
 
 library SafeCast {
@@ -114,6 +118,16 @@ contract NuggftV1Test is ForgeTest {
         forge.vm.startPrank(0x9B0E2b16F57648C7bAF28EDD7772a815Af266E77);
         nuggft.setIsTrusted(users.safe, true);
         forge.vm.stopPrank();
+    }
+
+    function reset__system() public {
+        reset();
+        forge.vm.roll(14069560);
+    }
+
+    function jump(uint24 to) public {
+        uint256 startblock = nuggft.external__toStartBlock(to);
+        forge.vm.roll(startblock);
     }
 
     /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
