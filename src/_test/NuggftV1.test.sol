@@ -31,6 +31,14 @@ contract RiggedNuggft is NuggftV1 {
     function external__calculateSeed(uint24 epoch) external view returns (uint256 res) {
         return calculateSeed(epoch);
     }
+
+    function external__agency(uint160 tokenId) external view returns (uint256 res) {
+        return agency[tokenId];
+    }
+
+    function external__stake() external view returns (uint256 res) {
+        return stake;
+    }
 }
 
 library SafeCast {
@@ -163,13 +171,6 @@ contract NuggftV1Test is ForgeTest {
         assertEq(got, exp, 'balance did not change correctly');
     }
 
-    struct BalDiff {
-        address user;
-        uint256 expected;
-    }
-
-    BalDiff[] _baldiffarr;
-
     enum dir {
         down,
         up
@@ -232,6 +233,17 @@ contract NuggftV1Test is ForgeTest {
         );
     }
 
+    /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+                            expectBalanceChange
+       ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+
+    struct BalDiff {
+        address user;
+        uint256 expected;
+    }
+
+    BalDiff[] _baldiffarr;
+
     function expectBalChange(
         address user,
         uint96 exp,
@@ -243,6 +255,173 @@ contract NuggftV1Test is ForgeTest {
                 expected: (direction == dir.up ? user.balance + exp : user.balance - exp)
             })
         );
+    }
+
+    /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+                            expectBalanceChange
+       ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+
+    event StakeSnapshotTaken(bytes32 data, uint96 staked, uint96 protocol, uint96 shares, uint96 msp, uint96 eps);
+
+    struct StakeSnapshot {
+        uint256 data;
+        uint96 staked;
+        uint96 proto;
+        uint96 shares;
+        uint96 msp;
+        uint96 eps;
+    }
+
+    function stakeHelper() private returns (StakeSnapshot memory a) {
+        uint256 stake__cache = nuggft.external__stake();
+
+        a = StakeSnapshot({
+            data: stake__cache, //
+            staked: nuggft.staked(),
+            proto: nuggft.proto(),
+            shares: nuggft.shares(),
+            msp: nuggft.msp(),
+            eps: nuggft.eps()
+        });
+
+        emit StakeSnapshotTaken(bytes32(a.data), a.staked, a.proto, a.shares, a.msp, a.eps);
+    }
+
+    /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+                            expectBalanceChange
+       ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+
+    struct AgencySnapshot {
+        uint160 tokenId;
+        uint256 data;
+        uint8 flag;
+        uint24 epoch;
+        uint96 ethDecompressed;
+        uint72 ethCompressed;
+        address account;
+    }
+
+    mapping(uint160 => AgencySnapshot) agencySnapshots;
+
+    event AgencySnapshotTaken(uint160 tokenId, bytes32 data, uint8 flag, uint24 epoch, uint96 ethDecompressed, uint72 ethCompressed, address account);
+
+    function agencyHelper(uint160 tokenId) private returns (AgencySnapshot memory a) {
+        uint256 agency__cache = nuggft.external__agency(tokenId);
+
+        uint256 eth = (agency__cache >> 160) & ((1 << 70) - 1);
+
+        a = AgencySnapshot({
+            tokenId: tokenId,
+            data: agency__cache,
+            flag: uint8(agency__cache >> 254),
+            epoch: uint24(agency__cache >> 230),
+            ethDecompressed: uint96(eth * .1 gwei),
+            ethCompressed: uint72(eth),
+            account: address(uint160(agency__cache))
+        });
+
+        emit AgencySnapshotTaken(a.tokenId, bytes32(a.data), a.flag, a.epoch, a.ethDecompressed, a.ethCompressed, a.account);
+    }
+
+    function recordAgencySnapshot(uint160 tokenId) internal returns (AgencySnapshot memory a) {
+        a = agencyHelper(tokenId);
+
+        agencySnapshots[tokenId] = a;
+    }
+
+    function assertAgency(
+        uint160 tokenId,
+        uint8 flag,
+        uint24 epoch,
+        uint96 eth,
+        address account
+    ) internal {
+        AgencySnapshot memory a = agencyHelper(tokenId);
+
+        assertEq(a.flag, flag, 'assertAgency: flag');
+        assertEq(a.epoch, epoch, 'assertAgency: epoch');
+        assertEq(a.ethDecompressed, eth, 'assertAgency: eth');
+        assertEq(a.account, account, 'assertAgency: account');
+    }
+
+    function assertAgencyFlagChange(
+        uint160 tokenId,
+        uint8 from,
+        uint8 to
+    ) internal {
+        AgencySnapshot memory snap = agencySnapshots[tokenId];
+        AgencySnapshot memory curr = agencyHelper(tokenId);
+        assertEq(snap.flag, from, 'assertAgencyFlagChange: from');
+        assertEq(curr.flag, to, 'assertAgencyFlagChange: to');
+    }
+
+    function assertAgencyEpochChange(
+        uint160 tokenId,
+        uint24 from,
+        uint24 to
+    ) internal {
+        AgencySnapshot memory snap = agencySnapshots[tokenId];
+        AgencySnapshot memory curr = agencyHelper(tokenId);
+        assertEq(snap.epoch, from, 'assertAgencyEpochChange: from');
+        assertEq(curr.epoch, to, 'assertAgencyEpochChange: to');
+    }
+
+    function assertAgencyEthChange(
+        uint160 tokenId,
+        uint96 from,
+        uint96 to
+    ) internal {
+        AgencySnapshot memory snap = agencySnapshots[tokenId];
+        AgencySnapshot memory curr = agencyHelper(tokenId);
+        assertEq(snap.ethDecompressed, from, 'assertAgencyEthChange: from');
+        assertEq(curr.ethDecompressed, to, 'assertAgencyEthChange: to');
+    }
+
+    function assertAgencyAccountChange(
+        uint160 tokenId,
+        address from,
+        address to
+    ) internal {
+        AgencySnapshot memory snap = agencySnapshots[tokenId];
+        AgencySnapshot memory curr = agencyHelper(tokenId);
+        assertEq(snap.account, from, 'assertAgencyAccountChange: from');
+        assertEq(curr.account, to, 'assertAgencyAccountChange: to');
+    }
+
+    /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+                                encodeWithSelector
+       ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+
+    struct ExpectMintSnapshot {
+        uint160 tokenId;
+        address user;
+        uint96 value;
+        StakeSnapshot stake;
+        AgencySnapshot agency;
+    }
+
+    ExpectMintSnapshot expectMintSnapshot;
+
+    function startExpectMint(
+        uint160 tokenId,
+        address by,
+        uint96 amount
+    ) internal {
+        expectMintSnapshot = ExpectMintSnapshot(tokenId, by, amount, stakeHelper(), agencyHelper(tokenId));
+    }
+
+    /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+                                encodeWithSelector
+       ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+
+    function endExpectMint() internal {
+        ExpectMintSnapshot memory snap = expectMintSnapshot;
+        delete expectMintSnapshot;
+
+        StakeSnapshot memory stake = stakeHelper();
+        AgencySnapshot memory agency = agencyHelper(snap.tokenId);
+
+        assertEq(snap.stake.shares + 1, stake.shares, 'mint -> expect shares to increase by one');
     }
 
     function check() internal {

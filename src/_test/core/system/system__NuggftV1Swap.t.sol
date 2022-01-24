@@ -10,10 +10,4 @@ contract system__NuggftV1Swap is NuggftV1Test {
     function setUp() public {
         reset();
     }
-
-    /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-        [S:0] - offer - "msg.sender is operator for sender"
-       ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
 }
-
-// @todo - make sure eth ends up where we want it
