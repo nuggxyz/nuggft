@@ -1,11 +1,10 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity 0.8.9;
+pragma solidity 0.8.11;
 
 import '../../NuggftV1.test.sol';
 
 contract txgas__NuggftV1Stake is NuggftV1Test {
-
     function setUp() public {
         reset();
         // forge.vm.roll(21000);
@@ -25,5 +24,4 @@ contract txgas__NuggftV1Stake is NuggftV1Test {
     function test__txgas__NuggftV1Stake__addStakedEth() public {
         nuggft.mint{value: 100 ether}(1202);
     }
-
 }

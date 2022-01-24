@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity 0.8.9;
+pragma solidity 0.8.11;
 
 interface ITrust {
     event TrustUpdated(address indexed user, bool trust);

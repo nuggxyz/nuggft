@@ -1,6 +1,6 @@
 //SPDX-License-Identifier: MIT
 
-pragma solidity 0.8.9;
+pragma solidity 0.8.11;
 
 library error {
     bytes public constant assertionError = abi.encodeWithSignature('Panic(uint256)', 0x01);

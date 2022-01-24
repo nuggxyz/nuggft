@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity 0.8.9;
+pragma solidity 0.8.11;
 
 import {INuggftV1Migrator} from '../../interfaces/nuggftv1/INuggftV1Migrator.sol';
 

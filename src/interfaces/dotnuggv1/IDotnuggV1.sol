@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity 0.8.9;
+pragma solidity 0.8.11;
 
 import {IDotnuggV1Metadata as Metadata} from './IDotnuggV1Metadata.sol';
 import {IDotnuggV1File as File} from './IDotnuggV1File.sol';

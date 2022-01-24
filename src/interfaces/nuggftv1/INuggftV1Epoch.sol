@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity 0.8.9;
+pragma solidity 0.8.11;
 
 interface INuggftV1Epoch {
     /// @notice Explain to an end user what this does
