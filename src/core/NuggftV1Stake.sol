@@ -20,12 +20,6 @@ abstract contract NuggftV1Stake is INuggftV1Stake, NuggftV1Proof {
 
     uint256 internal stake;
 
-    uint96 constant PROTOCOL_FEE_BPS = 10;
-
-    /*━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-                                TRUSTED
-    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━*/
-
     /// @inheritdoc INuggftV1Stake
     function extractProtocolEth() external requiresTrust {
         uint256 cache = stake;
@@ -43,10 +37,6 @@ abstract contract NuggftV1Stake is INuggftV1Stake, NuggftV1Proof {
 
         emit MigratorV1Updated(_migrator);
     }
-
-    /*━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-                                VIEW
-    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━*/
 
     /// @inheritdoc INuggftV1Stake
     function eps() public view override returns (uint96 res) {
@@ -105,9 +95,8 @@ abstract contract NuggftV1Stake is INuggftV1Stake, NuggftV1Proof {
 
             // ensure value >= msp
             if gt(_msp, callvalue()) {
-                // ERRORx71
-                mstore(0x00, 0x71)
-                revert(31, 0x01)
+                mstore8(0x0, Error__ValueTooLow__0x71)
+                revert(0x00, 0x01)
             }
 
             // caculate value proveded over msp
@@ -132,7 +121,7 @@ abstract contract NuggftV1Stake is INuggftV1Stake, NuggftV1Proof {
             // emit current stake state as event
             let ptr := mload(0x40)
             mstore(ptr, cache)
-            log1(ptr, 0x32, STAKE)
+            log1(ptr, 0x32, Event__Stake)
         }
     }
 
@@ -152,7 +141,7 @@ abstract contract NuggftV1Stake is INuggftV1Stake, NuggftV1Proof {
             let ptr := mload(0x40)
 
             mstore(ptr, cache)
-            log1(ptr, 0x32, STAKE)
+            log1(ptr, 0x32, Event__Stake)
         }
     }
 

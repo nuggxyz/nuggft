@@ -28,7 +28,7 @@ abstract contract NuggftV1ItemSwap is INuggftV1ItemSwap, NuggftV1Stake {
         uint160 sellerTokenId,
         uint16 itemId
     ) external payable override {
-        require(isAgent(msg.sender, buyerTokenId), hex'26');
+        require(isAgent(msg.sender, buyerTokenId), hex'2A');
 
         uint256 id = encItemId(sellerTokenId, itemId);
 
@@ -55,7 +55,7 @@ abstract contract NuggftV1ItemSwap is INuggftV1ItemSwap, NuggftV1Stake {
 
             // ensure that the agency flag is "SWAP" (0x01)
             if iszero(eq(shr(254, agency__cache), 0x03)) {
-                mstore8(0x0, 0x24) // ERR:0x24
+                mstore8(0x0, Error__NotSwapping__0x24)
                 revert(0x00, 0x01)
             }
 
@@ -80,7 +80,7 @@ abstract contract NuggftV1ItemSwap is INuggftV1ItemSwap, NuggftV1Stake {
                 // 1. forces user to claim previous swap before acting on this one
                 // 2. prevents owner from offering on their own swap before someone else has
                 if lt(shr(232, shl(2, offer__cache)), active) {
-                    mstore8(0x0, 0x0F) // ERR:0x0F
+                    mstore8(0x0, Error__InvalidEpoch__0x0F)
                     revert(0x00, 0x01)
                 }
             }
@@ -101,7 +101,7 @@ abstract contract NuggftV1ItemSwap is INuggftV1ItemSwap, NuggftV1Stake {
                 let agency__epoch := shr(232, shl(2, agency__cache))
 
                 if lt(agency__epoch, active) {
-                    mstore8(0x0, 0x2F) // ERR:0x2F
+                    mstore8(0x0, Error__ExpiredEpoch__0x2F)
                     revert(0x00, 0x01)
                 }
 
@@ -112,7 +112,7 @@ abstract contract NuggftV1ItemSwap is INuggftV1ItemSwap, NuggftV1Stake {
             next := add(shr(186, shl(26, offer__cache)), next)
 
             if gt(div(mul(last, 10200), 10000), next) {
-                mstore8(0x0, 0x72)
+                mstore8(0x0, Error__IncrementTooLow__0x72)
                 revert(0x00, 0x01)
             }
 
@@ -204,8 +204,8 @@ abstract contract NuggftV1ItemSwap is INuggftV1ItemSwap, NuggftV1Stake {
                 return(0, 0)
             }
             if iszero(call(gas(), caller(), acc, 0, 0, 0, 0)) {
-                mstore(0, 0x01)
-                revert(0x1F, 0x01)
+                mstore8(0x0, Error__SendEthFailureToCaller__0x92)
+                revert(0x00, 0x01)
             }
         }
     }
@@ -220,7 +220,7 @@ abstract contract NuggftV1ItemSwap is INuggftV1ItemSwap, NuggftV1Stake {
         uint16 itemId,
         uint96 floor
     ) external override {
-        require(isAgent(msg.sender, tokenId), hex'2C');
+        require(isAgent(msg.sender, tokenId), hex'2A');
 
         // will revert if they do not have the item
         removeItem(tokenId, itemId);

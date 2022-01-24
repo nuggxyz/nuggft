@@ -30,13 +30,13 @@ abstract contract NuggftV1Loan is INuggftV1Loan, NuggftV1Swap {
 
             // ensure the caller is the agent
             if iszero(eq(iso(agency__cache, 96, 96), caller())) {
-                mstore8(0x0, Error__NotAgent)
+                mstore8(0x0, Error__NotAgent__0x2A)
                 revert(0x00, 0x01)
             }
 
             // ensure the agent is the owner
             if iszero(eq(shr(254, agency__cache), 0x1)) {
-                mstore8(0x0, Error__NotOwner)
+                mstore8(0x0, Error__NotOwner__0x2C)
                 revert(0x00, 0x01)
             }
 
@@ -44,13 +44,11 @@ abstract contract NuggftV1Loan is INuggftV1Loan, NuggftV1Swap {
             amt := div(amt, LOSS)
 
             // update agency to reflect the loan
-            // ==========================
-            // agency[tokenId] = {
-            //     flag  = LOAN(0x02)
-            //     epoch = active
-            //     eth   = eps / .1 gwei
-            //     addr  = agent
-            // }
+            // ==== agency[tokenId] ====
+            //  flag  = LOAN(0x02)
+            //  epoch = active
+            //  eth   = eps / .1 gwei
+            //  addr  = agent
             // =========================
             agency__cache := xor(caller(), xor(shl(160, amt), xor(shl(230, active), shl(254, 0x2))))
 
@@ -65,13 +63,13 @@ abstract contract NuggftV1Loan is INuggftV1Loan, NuggftV1Swap {
 
             // send eth
             if iszero(call(gas(), caller(), amt, 0, 0, 0, 0)) {
-                mstore(0x00, 0x01) // ERR:0x01
+                mstore(0x00, Error__SendEthFailureToCaller__0x92)
                 revert(0x1F, 0x01)
             }
 
             // log2 with "Loan(uint160,bytes32)" topic
             mstore(mptr, agency__cache)
-            log2(mptr, 0x20, LOAN, tokenId)
+            log2(mptr, 0x20, Event__Loan, tokenId)
         }
     }
 
@@ -106,17 +104,17 @@ abstract contract NuggftV1Loan is INuggftV1Loan, NuggftV1Swap {
 
             // ensure that the agency flag is LOAN
             if iszero(eq(shr(254, agency__cache), 0x02)) {
-                mstore8(0x0, 0x33)
+                mstore8(0x0, Error__NotLoaned__0x33)
                 revert(0x00, 0x01)
             }
 
             if iszero(eq(caller(), loaner)) {
                 switch lt(add(iso(agency__cache, 2, 232), LIQUIDATION_PERIOD), active)
                 case 1 {
-                    log4(0x00, 0x00, TRANSFER, loaner, caller(), tokenId)
+                    log4(0x00, 0x00, Event__Transfer, loaner, caller(), tokenId)
                 }
                 default {
-                    mstore8(0x0, 0x31) // ERR:0x31
+                    mstore8(0x0, Error__NotAuthorized__0x31)
                     revert(0x00, 0x01)
                 }
             }
@@ -139,7 +137,7 @@ abstract contract NuggftV1Loan is INuggftV1Loan, NuggftV1Swap {
             principal := add(principal, fee)
 
             if lt(earn, principal) {
-                mstore8(0x0, 0x32) // ERR:0x32
+                mstore8(0x0, Error__LiquidationPaymentTooLow__0x32)
                 revert(0x00, 0x01)
             }
 
@@ -168,13 +166,13 @@ abstract contract NuggftV1Loan is INuggftV1Loan, NuggftV1Swap {
 
             // send eth
             if iszero(call(gas(), caller(), earn, 0, 0, 0, 0)) {
-                mstore(0x00, 0x01)
-                revert(0x1F, 0x01)
+                mstore8(0x0, Error__SendEthFailureToCaller__0x92)
+                revert(0x00, 0x01)
             }
 
             // log2 with "Liquidate(uint160,bytes32)" topic
             mstore(0x00, agency__cache)
-            log2(0x00, 0x32, LIQUIDATE, tokenId)
+            log2(0x00, 0x32, Event__Liquidate, tokenId)
         }
     }
 
@@ -234,7 +232,7 @@ abstract contract NuggftV1Loan is INuggftV1Loan, NuggftV1Swap {
 
                 // make sure this token is loaned
                 if iszero(eq(shr(254, agency__cache), 0x02)) {
-                    mstore8(0x0, 0x33) // ERR:0x33
+                    mstore8(0x0, Error__NotLoaned__0x33)
                     revert(0x00, 0x01)
                 }
 
@@ -270,7 +268,7 @@ abstract contract NuggftV1Loan is INuggftV1Loan, NuggftV1Swap {
                 earn := add(earn, acc)
 
                 if lt(earn, fee) {
-                    mstore8(0x0, 0x3a) // ERR:0x3a
+                    mstore8(0x0, Error__RebalancePaymentTooLow__0x3A)
                     revert(0x00, 0x01)
                 }
 
@@ -312,18 +310,19 @@ abstract contract NuggftV1Loan is INuggftV1Loan, NuggftV1Swap {
                 sstore(keccak256(mptr, 0x40), agency__cache)
 
                 mstore(add(mptr, 0x40), agency__cache)
-                log2(add(mptr, 0x40), 0x32, REBALANCE, mload(mptr))
+
+                log2(add(mptr, 0x40), 0x32, Event__Rebalance, mload(mptr))
             }
 
             // ======================================================================
 
             // log1 with topic "Stake(bytes32)"
             mstore(mptr, stake__cache)
-            log1(mptr, 0x32, STAKE)
+            log1(mptr, 0x32, Event__Stake)
 
             // all eth is sent to caller
             if iszero(call(gas(), caller(), acc, 0, 0, 0, 0)) {
-                mstore8(0x0, 0x65) // ERR:0x65
+                mstore8(0x0, Error__SendEthFailureToCaller__0x92)
                 revert(0x00, 0x01)
             }
         }

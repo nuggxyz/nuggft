@@ -407,7 +407,7 @@ contract revert__NuggftV1Swap is NuggftV1Test {
 
         forge.vm.startPrank(users.mac);
         {
-            forge.vm.expectRevert(hex'26');
+            forge.vm.expectRevert(hex'2A');
             nuggft.offerItem{value: value}(charliesTokenId, tokenId, itemId);
         }
         forge.vm.stopPrank();
@@ -554,19 +554,6 @@ contract revert__NuggftV1Swap is NuggftV1Test {
     //     forge.vm.stopPrank();
     // }
 
-    function test__revert__NuggftV1Swap__0x2A__failAsNotOperator() public {
-        uint160 tokenId = scenario_dee_has_a_token_and_can_sell();
-
-        uint96 value = 2 ether;
-
-        forge.vm.startPrank(users.dennis);
-        {
-            forge.vm.expectRevert(hex'2A');
-            nuggft.sell(tokenId, value);
-        }
-        forge.vm.stopPrank();
-    }
-
     /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
         [S:B] - sell - "floor >= eps"
        ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
@@ -703,14 +690,14 @@ contract revert__NuggftV1Swap is NuggftV1Test {
     //     forge.vm.stopPrank();
     // }
 
-    function test__revert__NuggftV1Swap__0x2C__failAsNotOperator() public {
+    function test__revert__NuggftV1Swap__0x2A__failAsNotOperator() public {
         (uint160 tokenId, uint16 itemId, ) = scenario_dee_has_a_token_and_can_sell_an_item();
 
         uint96 value = 1 ether;
 
         forge.vm.startPrank(users.dennis);
         {
-            forge.vm.expectRevert(hex'2C');
+            forge.vm.expectRevert(hex'2A');
             nuggft.sellItem(tokenId, itemId, value);
         }
         forge.vm.stopPrank();
