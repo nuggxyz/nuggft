@@ -17,8 +17,8 @@ abstract contract NuggftV1Epoch is INuggftV1Epoch, NuggftV1Constants {
     bytes32 constant SELLITEM = 0x251e78527ba3c62fcb4405d22087f8ab0c434b97b46e2d7f020d112e76310000;
 
     constructor() {
-        genesis = block.number;
-        emit Genesis(block.number, INTERVAL, OFFSET);
+        genesis = (block.number / INTERVAL) * INTERVAL;
+        emit Genesis(genesis, INTERVAL, OFFSET);
     }
 
     /// @inheritdoc INuggftV1Epoch
