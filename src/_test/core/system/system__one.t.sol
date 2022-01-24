@@ -135,7 +135,7 @@ contract system__NuggftV1Swap is NuggftV1Test {
     }
 
     function test__system__frankMintsATokenFor100gwei() public {
-        uint96 value = 100 gwei;
+        uint96 value = 1000 gwei;
 
         uint160 tokenId = 500;
 

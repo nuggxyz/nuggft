@@ -20,7 +20,7 @@ contract logic__NuggftV1Loan is NuggftV1Test {
 
         nuggft.mint{value: 1 ether}(LOAN_TOKENID);
 
-        nuggft.loan(LOAN_TOKENID);
+        nuggft.loan(lib.sarr160(LOAN_TOKENID));
     }
 
     function test__stress__NuggftV1Loan__rebalance2() public {
@@ -71,7 +71,7 @@ contract logic__NuggftV1Loan is NuggftV1Test {
 
             nuggft.mint{value: nuggft.msp()}(i);
 
-            nuggft.loan(i);
+            nuggft.loan(lib.sarr160(i));
         }
 
         // uint96 frankStartBal = uint96(users.frank.balance);
@@ -107,7 +107,7 @@ contract logic__NuggftV1Loan is NuggftV1Test {
 
             nuggft.mint{value: a.balance}(i);
 
-            nuggft.loan(i);
+            nuggft.loan(lib.sarr160(i));
             forge.vm.stopPrank();
         }
 
