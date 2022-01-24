@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity 0.8.9;
+pragma solidity 0.8.11;
 
 contract InitCodeHash {
     function run(address nuggftv1, uint160 id)

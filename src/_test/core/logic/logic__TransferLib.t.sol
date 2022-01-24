@@ -1,4 +1,4 @@
-pragma solidity 0.8.9;
+pragma solidity 0.8.11;
 
 import '../../NuggftV1.test.sol';
 
@@ -24,15 +24,15 @@ contract logic__TransferLib__give is NuggftV1Test {
     }
 
     function test__logic__TransferLib__gas__give__a() public trackGas {
-        safe__give__a(address(users.charlie), 100 );
+        safe__give__a(address(users.charlie), 100);
     }
 
     function test__logic__TransferLib__gas__give__b() public trackGas {
-        safe__give__b(address(users.charlie), 100 );
+        safe__give__b(address(users.charlie), 100);
     }
 
     function test__logic__TransferLib__gas__give() public trackGas {
-        TransferLib.give(address(users.charlie), 100 );
+        TransferLib.give(address(users.charlie), 100);
     }
 
     function test__logic__TransferLib__gas__give__0() public trackGas {

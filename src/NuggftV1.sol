@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity 0.8.9;
+pragma solidity 0.8.11;
 // pragma experimental SMTChecker;
 
 import {IERC721, IERC165, IERC721Metadata} from './interfaces/IERC721.sol';
@@ -146,10 +146,8 @@ contract NuggftV1 is IERC721Metadata, NuggftV1Loan {
         emit Mint(tokenId, uint96(msg.value));
     }
 
-
-
     /// @inheritdoc INuggftV1Token
-    function mint(uint160 tokenId) public payable override  {
+    function mint(uint160 tokenId) public payable override {
         require(tokenId <= UNTRUSTED_MINT_TOKENS + TRUSTED_MINT_TOKENS && tokenId >= TRUSTED_MINT_TOKENS, 'G:1');
 
         addStakedShareFromMsgValue__dirty();

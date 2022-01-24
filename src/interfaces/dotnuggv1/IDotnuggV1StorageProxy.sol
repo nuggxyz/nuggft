@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity 0.8.9;
+pragma solidity 0.8.11;
 
 interface IDotnuggV1StorageProxy {
     function stored(uint8 feature) external view returns (uint8);

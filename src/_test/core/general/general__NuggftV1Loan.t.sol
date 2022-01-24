@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity 0.8.9;
+pragma solidity 0.8.11;
 
 import '../../NuggftV1.test.sol';
 
@@ -62,7 +62,6 @@ contract general__NuggftV1Loan is NuggftV1Test {
         forge.vm.roll(block.number + 100);
 
         for (uint160 i = 0; i < NUM; i++) {
-
             nuggft.rebalance{value: nuggft.vfr(lib.sarr160(LOAN_TOKENID + i))[0]}(lib.sarr160(LOAN_TOKENID + i));
         }
     }
