@@ -87,7 +87,7 @@ abstract contract NuggftV1Swap is INuggftV1Swap, NuggftV1ItemSwap {
             agency__sptr := keccak256(mptr, 0x40)
             agency__cache := sload(agency__sptr)
 
-            log1(0x00, 0x00, tokenId)
+            // log1(0x00, 0x00, tokenId)
         }
 
         // check to see if this nugg needs to be minted
@@ -297,13 +297,13 @@ abstract contract NuggftV1Swap is INuggftV1Swap, NuggftV1ItemSwap {
                 revert(0x00, 0x01)
             }
 
-            let pulls__sptr := or(shl(254, PULLS_SLOC), caller())
+            // let pulls__sptr := or(shl(254, PULLS_SLOC), caller())
 
             // value to keep track of value to send to caller
-            let acc := sload(pulls__sptr)
+            let acc := sload(or(shl(254, PULLS_SLOC), caller()))
 
             if iszero(iszero(acc)) {
-                sstore(pulls__sptr, 0)
+                sstore(or(shl(254, PULLS_SLOC), caller()), 0)
             }
 
             /*========= memory ============
@@ -315,6 +315,9 @@ abstract contract NuggftV1Swap is INuggftV1Swap, NuggftV1ItemSwap {
               --------------------------
               0x80: offerer                keccak = offers[tokenId][offerer].slot = "offer__sptr"
               0xA0: offers[tokenId].slot
+              --------------------------
+              0xC0: tokenId                keccak = itemOffers[itemId|sellingTokenId ].slot
+              0xF0: proof.slot
             ==============================*/
 
             let mptr := mload(0x40)
@@ -328,26 +331,51 @@ abstract contract NuggftV1Swap is INuggftV1Swap, NuggftV1ItemSwap {
             for {
                 let i := 0
                 // init the pointers at the first element in the calldata array
-                let tokenPtr := tokenIds.offset
-                let accntPtr := accounts.offset
+                let ptrOffset := 0
+                // let accntPtr := accounts.offset
             } lt(i, len) {
                 i := add(i, 1)
                 // increment the pointers to the next element in the calldata array
-                tokenPtr := add(tokenPtr, 0x20)
-                accntPtr := add(accntPtr, 0x20)
+                ptrOffset := add(ptrOffset, 0x20)
+                // accntPtr := add(accntPtr, 0x20)
             } {
                 // tokenIds[i]
-                let tokenId := calldataload(tokenPtr)
+                let tokenId := calldataload(add(tokenIds.offset, ptrOffset))
+
+                // accounts[i]
+                let offerer := calldataload(add(accounts.offset, ptrOffset))
+
+                let trusted_eoa := offerer
+
+                // let isItem := gt(tokenId, 0xffffff)
+
+                if gt(tokenId, 0xffffff) {
+                    // calculate agency.slot storeage ptr
+                    mstore(mptr, offerer)
+
+                    // let agency__sptr2 := keccak256(mptr, 0x40)
+
+                    // load agency value from storage
+                    // let agency__cache2 := sload(keccak256(mptr, 0x40))
+
+                    trusted_eoa := iso(sload(keccak256(mptr, 0x40)), 96, 96)
+
+                    // store common slot for agency in memory
+                    mstore(add(mptr, 0x20), itemAgency.slot)
+
+                    // store common slot for offers in memory
+                    mstore(add(mptr, 0x60), itemOffers.slot)
+
+                    // tokenId := and(tokenId, 0xffffffffff)
+                }
 
                 // calculate agency.slot storeage ptr
                 mstore(mptr, tokenId)
+
                 let agency__sptr := keccak256(mptr, 0x40)
 
                 // load agency value from storage
                 let agency__cache := sload(agency__sptr)
-
-                // accounts[i]
-                let offerer := calldataload(accntPtr)
 
                 // calculate offers.slot storage pointer
                 mstore(add(mptr, 0x40), tokenId)
@@ -377,17 +405,59 @@ abstract contract NuggftV1Swap is INuggftV1Swap, NuggftV1ItemSwap {
                         revert(0x00, 0x01)
                     }
 
-                    // update agency to reflect the new owner
-                    /*==== agency[tokenId] =====
-                      flag  = OWN
-                      epoch = 0
-                      eth   = 0
-                      addr  = offerer
-                    ===========================*/
-                    sstore(agency__sptr, or(offerer, shl(254, 0x01)))
+                    switch gt(tokenId, 0xffffff)
+                    case 1 {
+                        sstore(agency__sptr, 0)
 
-                    // transfer token to the new owner
-                    log4(0x00, 0x00, Event__Transfer, address(), offerer, tokenId)
+                        sstore(protocolItems.slot, sub(sload(protocolItems.slot), 1))
+
+                        // store common slot for agency in memory
+                        mstore(add(mptr, 0xC0), offerer)
+
+                        // store common slot for offers in memory
+                        mstore(add(mptr, 0xE0), proofs.slot)
+
+                        // let proof__sptr := keccak256(0xC0, 0x40)
+
+                        let proof := sload(keccak256(add(mptr, 0xC0), 0x40))
+                        if iszero(proof) {
+                            revert(0x00, 0x00)
+                        }
+                        let select := 0
+                        for {
+                            let j := 8
+                        } lt(j, 17) {
+                            j := add(j, 1)
+                        } {
+                            if eq(j, 16) {
+                                revert(0x0, 0x0)
+                            }
+                            log3(0x00, 0x00, j, proof, offerer)
+                            log3(0x00, 0x00, j, mload(add(mptr, 0xC0)), mload(add(mptr, 0xE0)))
+
+                            if iszero(and(shr(mul(j, 16), proof), 0xffff)) {
+                                let tmp := shr(24, tokenId)
+                                proof := xor(proof, shl(mul(j, 16), tmp))
+                                // select := 1
+                                j := 17
+                            }
+                        }
+                        log3(0x00, 0x00, 0x00, proof, offerer)
+                        sstore(keccak256(add(mptr, 0xC0), 0x40), proof)
+                    }
+                    default {
+                        // update agency to reflect the new owner
+                        /*==== agency[tokenId] =====
+                            flag  = OWN
+                            epoch = 0
+                            eth   = 0
+                            addr  = offerer
+                        ===========================*/
+                        sstore(agency__sptr, or(offerer, shl(254, 0x01)))
+
+                        // transfer token to the new owner
+                        log4(0x00, 0x00, Event__Transfer, address(), offerer, tokenId)
+                    }
                 }
                 default {
                     let offer__cache := sload(offer__sptr)
@@ -399,7 +469,7 @@ abstract contract NuggftV1Swap is INuggftV1Swap, NuggftV1ItemSwap {
                     }
 
                     // if the user who placed the offer is also msg.sender
-                    switch eq(caller(), offerer)
+                    switch eq(caller(), trusted_eoa)
                     case 1 {
                         // accumulate and send value at once at end
                         // to save on gas for most common use case
@@ -430,7 +500,19 @@ abstract contract NuggftV1Swap is INuggftV1Swap, NuggftV1ItemSwap {
                 // delete offer before we potentially send value
                 sstore(offer__sptr, 0)
 
-                log3(0x00, 0x00, Event__Claim, tokenId, offerer)
+                switch gt(tokenId, 0xffffff)
+                case 1 {
+                    log4(0x00, 0x00, Event__ClaimItem, and(tokenId, 0xffffff), shl(240, shr(24, tokenId)), offerer)
+
+                    // store common slot for agency in memory
+                    mstore(add(mptr, 0x20), agency.slot)
+
+                    // store common slot for offers in memory
+                    mstore(add(mptr, 0x60), offers.slot)
+                }
+                default {
+                    log3(0x00, 0x00, Event__Claim, tokenId, offerer)
+                }
             }
 
             // skip sending value if amount to send is 0

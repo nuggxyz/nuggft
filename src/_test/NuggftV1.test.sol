@@ -896,7 +896,7 @@ contract NuggftV1Test is ForgeTest {
 
         forge.vm.prank(users.charlie);
 
-        nuggft.offerItem{value: floor + 1 ether}(charliesTokenId, tokenId, itemId);
+        nuggft.offer{value: floor + 1 ether}(uint160((charliesTokenId << 40) | (uint256(itemId) << 24)) | tokenId);
 
         forge.vm.roll(2000);
     }
