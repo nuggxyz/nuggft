@@ -90,7 +90,6 @@ contract system__NuggftV1Swap is NuggftV1Test {
         }
 
         stakeHelper();
-        assert(false);
     }
 
     // 3165405880233807789653026790548718548040

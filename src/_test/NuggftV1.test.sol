@@ -460,11 +460,7 @@ contract NuggftV1Test is ForgeTest {
     }
 
     /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-                                encodeWithSelector
-       ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
-
-    /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-                                encodeWithSelector
+                                expectOfferSnapshot
        ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
 
     struct ExpectOfferSnapshot {
@@ -480,6 +476,60 @@ contract NuggftV1Test is ForgeTest {
     }
 
     ExpectOfferSnapshot expectOfferSnapshot;
+
+    function startExpectOffer(
+        uint160 tokenId,
+        address by,
+        uint96 amount
+    ) internal {
+        expectOfferSnapshot = ExpectOfferSnapshot(
+            tokenId,
+            by,
+            amount,
+            stakeHelper(),
+            agencyHelper(tokenId),
+            offerHelper(tokenId, by),
+            uint96(address(nuggft).balance),
+            uint96(by.balance),
+            address(0)
+        );
+
+        if (expectOfferSnapshot.agency.data != 0) {
+            expectOfferSnapshot.owner = nuggft.ownerOf(tokenId);
+        }
+    }
+
+    function endExpectOffer() internal {
+        ExpectOfferSnapshot memory snap = expectOfferSnapshot;
+        delete expectOfferSnapshot;
+
+        StakeSnapshot memory beforeStake = snap.stake;
+        AgencySnapshot memory beforeAgency = snap.agency;
+
+        StakeSnapshot memory afterStake = stakeHelper();
+        AgencySnapshot memory afterAgency = agencyHelper(snap.tokenId);
+
+        if (beforeAgency.data == 0) {
+            // MINT
+            assertEq(beforeStake.shares + 1, afterStake.shares, 'Offer:Mint -> expect shares to increase by one');
+        } else {
+            // NOT MINT
+            assertEq(beforeStake.shares, afterStake.shares, 'Offer:NotMint -> expect shares to stay the same');
+            if (beforeAgency.epoch == 0) {
+                // COMMIT
+            } else {
+                // CARRY
+            }
+        }
+
+        assertEq(afterAgency.ethDecompressed, snap.amount + snap.prevOffer.ethDecompressed, 'Offer -> expect agency eth to increaase by an amount');
+
+        assertEq(snap.user.balance, snap.userBalance - snap.amount, 'Offer -> expect user balance to decrease by aamount');
+    }
+
+    /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+                                expectClaimSnapshot
+       ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
     ExpectOfferSnapshot expectClaimSnapshot;
 
     function startExpectClaim(uint160 tokenId, address by) internal {
@@ -496,24 +546,6 @@ contract NuggftV1Test is ForgeTest {
         );
 
         assertEq(nuggft.ownerOf(tokenId), address(nuggft), 'startExpectClaim -> expect owner to be NuggftV1');
-    }
-
-    function startExpectOffer(
-        uint160 tokenId,
-        address by,
-        uint96 amount
-    ) internal {
-        expectOfferSnapshot = ExpectOfferSnapshot(
-            tokenId,
-            by,
-            amount,
-            stakeHelper(),
-            agencyHelper(tokenId),
-            offerHelper(tokenId, by),
-            uint96(address(nuggft).balance),
-            uint96(by.balance),
-            nuggft.ownerOf(tokenId)
-        );
     }
 
     function endExpectClaim() internal {
@@ -561,34 +593,6 @@ contract NuggftV1Test is ForgeTest {
 
         // check offer == 0
         assertEq(afterOffer.data, 0, 'endExpectClaim:nugg -> offer == 0');
-    }
-
-    function endExpectOffer() internal {
-        ExpectOfferSnapshot memory snap = expectOfferSnapshot;
-        delete expectOfferSnapshot;
-
-        StakeSnapshot memory beforeStake = snap.stake;
-        AgencySnapshot memory beforeAgency = snap.agency;
-
-        StakeSnapshot memory afterStake = stakeHelper();
-        AgencySnapshot memory afterAgency = agencyHelper(snap.tokenId);
-
-        if (beforeAgency.data == 0) {
-            // MINT
-            assertEq(beforeStake.shares + 1, afterStake.shares, 'Offer:Mint -> expect shares to increase by one');
-        } else {
-            // NOT MINT
-            assertEq(beforeStake.shares, afterStake.shares, 'Offer:NotMint -> expect shares to stay the same');
-            if (beforeAgency.epoch == 0) {
-                // COMMIT
-            } else {
-                // CARRY
-            }
-        }
-
-        assertEq(afterAgency.ethDecompressed, snap.amount + snap.prevOffer.ethDecompressed, 'Offer -> expect agency eth to increaase by an amount');
-
-        assertEq(snap.user.balance, snap.userBalance - snap.amount, 'Offer -> expect user balance to decrease by aamount');
     }
 
     /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
