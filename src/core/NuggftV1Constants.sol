@@ -29,7 +29,7 @@ abstract contract NuggftV1Constants {
     bytes32 constant Event__Liquidate = 0x7dc78d32e32a79dbb28ffc73e80d5c0d1961c893f5b437aa8328ab854f08e09f;
     bytes32 constant Event__Loan = 0x764dd32e4d33677f4bc9a37133c10ecef6409f7feb33af67a31d1fb01b392867;
     bytes32 constant Event__Claim = 0x938187ad30d2557f8eb68b094a2305a858ec4f65c86a957b4bc26d9c0a496fef;
-    bytes32 constant Event__ClaimItem = 0x7a0576b9edc37a53c7e05ae220b6a871cf584ae6724a63f704609baec1e72853;
+    bytes32 constant Event__ClaimItem = 0x9cdb8f349681fb33da8eae743ee1c7f93ab8fbeeded70db2ed922ac97cef1dff;
     bytes32 constant Event__Sell = 0x251e78527ba3c62fcb4405d22087f8ab0c434b97b46e2d7f020d112e763171b3;
     bytes32 constant Event__Offer = 0x82cc12214e0c6e2eaeafbb2aaf730e41d45e9cc2d0467fb2f0fcf709e9443886;
     bytes32 constant Event__Repayment = 0x82cc12214e0c6e2eaeafbb2aaf730e41d45e9cc2d0467fb2f0fcf709e9443886;

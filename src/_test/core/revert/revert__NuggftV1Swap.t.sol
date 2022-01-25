@@ -391,7 +391,8 @@ contract revert__NuggftV1Swap is NuggftV1Test {
     //     forge.vm.startPrank(users.mac);
     //     {
     //         forge.vm.expectRevert(hex'26');
-    //         nuggft.offerItem{value: value}(charliesTokenId, tokenId, itemId);
+    //          nuggft.offer{value: value}(uint160((charliesTokenId << 40) | (uint256(itemId) << 24) | tokenId));
+    // }
     //     }
     //     forge.vm.stopPrank();
     // }
@@ -408,7 +409,7 @@ contract revert__NuggftV1Swap is NuggftV1Test {
         forge.vm.startPrank(users.mac);
         {
             forge.vm.expectRevert(hex'2A');
-            nuggft.offerItem{value: value}(charliesTokenId, tokenId, itemId);
+            nuggft.offer{value: value}(uint160((charliesTokenId << 40) | (uint256(itemId) << 24) | tokenId));
         }
         forge.vm.stopPrank();
     }
@@ -428,7 +429,7 @@ contract revert__NuggftV1Swap is NuggftV1Test {
 
         forge.vm.startPrank(users.charlie);
         {
-            nuggft.offerItem{value: value}(charliesTokenId, tokenId, itemId);
+            nuggft.offer{value: value}(uint160((charliesTokenId << 40) | (uint256(itemId) << 24) | tokenId));
         }
         forge.vm.stopPrank();
     }
@@ -486,7 +487,7 @@ contract revert__NuggftV1Swap is NuggftV1Test {
 
         forge.vm.startPrank(users.charlie);
         {
-            nuggft.claimItem(lib.sarr160(charliesTokenId), lib.sarr160(tokenId), lib.sarr16(itemId));
+            nuggft.claim(lib.sarr160((uint160(itemId) << 24) | tokenId), lib.sarrAddress(address(charliesTokenId)));
         }
         forge.vm.stopPrank();
     }
@@ -511,11 +512,14 @@ contract revert__NuggftV1Swap is NuggftV1Test {
     function test__revert__NuggftV1Swap__0x29__failAsNotOperator() public {
         (uint160 charliesTokenId, uint160 tokenId, uint16 itemId) = scenario_dee_has_sold_an_item_and_charlie_can_claim();
 
+        nuggft.floop(charliesTokenId);
         forge.vm.startPrank(users.mac);
         {
-            forge.vm.expectRevert(hex'29');
-            nuggft.claimItem(lib.sarr160(charliesTokenId), lib.sarr160(tokenId), lib.sarr16(itemId));
+            // forge.vm.expectRevert(hex'29');
+            nuggft.claim(lib.sarr160((uint160(itemId) << 24) | tokenId), lib.sarrAddress(address(charliesTokenId)));
         }
+        nuggft.floop(charliesTokenId);
+
         forge.vm.stopPrank();
     }
 
