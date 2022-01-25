@@ -24,6 +24,8 @@ abstract contract NuggftV1Token is INuggftV1Token, NuggftV1Epoch {
 
     mapping(uint256 => uint256) agency;
 
+    mapping(address => uint96) pulls;
+
     // mapping(address => uint256) balances;
     mapping(uint256 => address) approvals;
     mapping(address => mapping(address => bool)) operatorApprovals;

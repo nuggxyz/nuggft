@@ -7,6 +7,8 @@ interface INuggftV1Swap {
     event Claim(uint160 indexed tokenId, address indexed account);
     event Sell(uint160 indexed tokenId, bytes32 agency);
 
+    event Repayment(address indexed account, uint96 amount);
+
     /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
                             STATE CHANGING
        ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
