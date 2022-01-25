@@ -23,6 +23,8 @@ interface INuggftV1Swap {
                             VIEW FUNCTIONS
     ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━*/
 
+    function pull(address user) external view returns (uint96 res);
+
     /// @notice calculates the minimum eth that must be sent with a offer call
     /// @dev returns 0 if no offer can be made for this oken
     /// @param tokenId -> the token to be offerd to
@@ -39,3 +41,8 @@ interface INuggftV1Swap {
             uint96 senderCurrentOffer
         );
 }
+
+//  ├─ [458] RiggedNuggft::staked()
+//     │   └─ ← 61951385498220000
+//     ├─ [452] RiggedNuggft::proto()
+//     │   └─ ←61951385498220000/ 2749575201780000

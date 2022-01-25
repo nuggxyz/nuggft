@@ -31,6 +31,10 @@ abstract contract NuggftV1Swap is INuggftV1Swap, NuggftV1ItemSwap {
 
             mptr := mload(0x40)
 
+            // if gt(tokenId, 0xffffff) {
+
+            // }
+
             /*========= memory ==========
               0x00: tokenId
               0x20: agency.slot
@@ -194,6 +198,16 @@ abstract contract NuggftV1Swap is INuggftV1Swap, NuggftV1ItemSwap {
     }
 
     /// @inheritdoc INuggftV1Swap
+    function pull(address user) external view override returns (uint96 res) {
+        assembly {
+            let pulls__sptr := or(shl(254, PULLS_SLOC), user)
+
+            // value to keep track of value to send to caller
+            res := mul(sload(pulls__sptr), LOSS)
+        }
+    }
+
+    /// @inheritdoc INuggftV1Swap
     function claim(uint160[] calldata tokenIds, address[] calldata accounts) external override {
         uint256 active = epoch();
 
@@ -213,7 +227,7 @@ abstract contract NuggftV1Swap is INuggftV1Swap, NuggftV1ItemSwap {
                 revert(0x00, 0x01)
             }
 
-            let pulls__sptr := or(shl(PULLS_SLOC, 254), caller())
+            let pulls__sptr := or(shl(254, PULLS_SLOC), caller())
 
             // value to keep track of value to send to caller
             let acc := sload(pulls__sptr)
@@ -332,7 +346,7 @@ abstract contract NuggftV1Swap is INuggftV1Swap, NuggftV1ItemSwap {
                         // parse offer value from cache
                         let amt := iso(offer__cache, 26, 186)
 
-                        let pulls__sptr2 := or(shl(PULLS_SLOC, 254), offerer)
+                        let pulls__sptr2 := or(shl(254, PULLS_SLOC), offerer)
 
                         sstore(pulls__sptr2, add(sload(pulls__sptr2), amt))
 
