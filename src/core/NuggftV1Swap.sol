@@ -23,7 +23,18 @@ abstract contract NuggftV1Swap is INuggftV1Swap, NuggftV1ItemSwap {
         uint256 active = epoch();
         uint256 mptr;
 
+        address sender;
+        uint256 offersSlot;
+
+        bool isItem;
+
         assembly {
+            function iso(val, left, right) -> b {
+                b := shr(right, shl(left, val))
+            }
+
+            isItem := gt(tokenId, 0xffffff)
+
             // NOTE: memory locations are referenced as offsets from the free memory pointer
 
             // store callvalue formatted in .1 gwei for caculation of total offer
@@ -31,19 +42,52 @@ abstract contract NuggftV1Swap is INuggftV1Swap, NuggftV1ItemSwap {
 
             mptr := mload(0x40)
 
-            // if gt(tokenId, 0xffffff) {
-
-            // }
-
             /*========= memory ==========
               0x00: tokenId
               0x20: agency.slot
             ===========================*/
             mstore(mptr, tokenId)
+
             mstore(add(mptr, 0x20), agency.slot)
+
+            sender := caller()
+
+            offersSlot := offers.slot
+
+            if isItem {
+                sender := shr(40, tokenId)
+
+                tokenId := and(tokenId, 0xffffffffff)
+
+                mstore(mptr, sender)
+
+                let buyerTokenAgency := sload(keccak256(mptr, 0x40))
+
+                mstore(mptr, tokenId)
+
+                // ensure the caller is the agent
+                if iszero(eq(iso(buyerTokenAgency, 96, 96), caller())) {
+                    mstore8(0x0, Error__NotAgent__0x2A)
+                    revert(0x00, 0x01)
+                }
+
+                let flag := shr(254, agency__cache)
+
+                // ensure the caller is really the agent
+                if and(eq(flag, 0x3), iszero(iszero(iso(buyerTokenAgency, 2, 232)))) {
+                    mstore8(0x0, Error__NotOwner__0x2C)
+                    revert(0x00, 0x01)
+                }
+
+                mstore(add(mptr, 0x20), itemAgency.slot)
+
+                offersSlot := itemOffers.slot
+            }
 
             agency__sptr := keccak256(mptr, 0x40)
             agency__cache := sload(agency__sptr)
+
+            log1(0x00, 0x00, tokenId)
         }
 
         // check to see if this nugg needs to be minted
@@ -101,7 +145,7 @@ abstract contract NuggftV1Swap is INuggftV1Swap, NuggftV1ItemSwap {
                   0x00: tokenId
                   0x20: offers.slot
                 ===========================*/
-            mstore(add(mptr, 0x20), offers.slot)
+            mstore(add(mptr, 0x20), offersSlot)
 
             /*========= memory ==========
                   0x00: tokenId
@@ -117,7 +161,7 @@ abstract contract NuggftV1Swap is INuggftV1Swap, NuggftV1ItemSwap {
               0x00: msg.sender
               0x20: offers[tokenId].slot
             ===========================*/
-            mstore(mptr, caller())
+            mstore(mptr, sender)
             let offer__sptr := keccak256(mptr, 0x40)
 
             // we assume offer__cache is same as agency__cache
@@ -125,7 +169,7 @@ abstract contract NuggftV1Swap is INuggftV1Swap, NuggftV1ItemSwap {
             let offer__cache := agency__cache
 
             // check to see if msg.sender is the leader
-            if iszero(eq(caller(), agency__addr)) {
+            if iszero(eq(sender, agency__addr)) {
                 // if not, we update offer__cache
                 offer__cache := sload(offer__sptr)
             }
@@ -151,9 +195,11 @@ abstract contract NuggftV1Swap is INuggftV1Swap, NuggftV1ItemSwap {
                 // update the epoch to begin auction
                 agency__cache := xor(agency__cache, shl(230, add(active, SALE_LEN)))
 
-                // Event__Transfer the token to the contract for the remainder of sale
-                // the seller (agency__addr) approves this when they put the token up for sale
-                log4(0x00, 0x00, Event__Transfer, agency__addr, address(), tokenId)
+                if iszero(isItem) {
+                    // Event__Transfer the token to the contract for the remainder of sale
+                    // the seller (agency__addr) approves this when they put the token up for sale
+                    log4(0x00, 0x00, Event__Transfer, agency__addr, address(), tokenId)
+                }
             }
             default {
                 // [Offer:Carry]
@@ -199,7 +245,7 @@ abstract contract NuggftV1Swap is INuggftV1Swap, NuggftV1ItemSwap {
               eth   = new highest offer
               addr  = msg.sender
             ===========================*/
-            agency__cache := xor(add(agency__cache, shl(160, next)), caller())
+            agency__cache := xor(add(agency__cache, shl(160, next)), sender)
             sstore(agency__sptr, agency__cache)
             sstore(offer__sptr, agency__cache)
 
@@ -208,7 +254,13 @@ abstract contract NuggftV1Swap is INuggftV1Swap, NuggftV1ItemSwap {
             ===========================*/
             mstore(mptr, agency__cache)
 
-            log2(mptr, 0x20, Event__Offer, tokenId)
+            switch isItem
+            case 1 {
+                log3(mptr, 0x20, Event__OfferItem, and(tokenId, 0xffffff), shl(240, shr(24, tokenId)))
+            }
+            default {
+                log2(mptr, 0x20, Event__Offer, tokenId)
+            }
         }
 
         // add the increment * LOSS to staked eth

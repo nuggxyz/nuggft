@@ -291,6 +291,6 @@ abstract contract NuggftV1ItemSwap is INuggftV1ItemSwap, NuggftV1Stake {
     }
 
     function encItemId(uint160 tokenId, uint16 itemId) internal pure returns (uint176) {
-        return (uint176(itemId) << 160) | tokenId;
+        return (uint176(itemId) << 24) | tokenId;
     }
 }

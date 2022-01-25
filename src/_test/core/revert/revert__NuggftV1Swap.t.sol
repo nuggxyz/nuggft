@@ -368,7 +368,7 @@ contract revert__NuggftV1Swap is NuggftV1Test {
 
         forge.vm.startPrank(users.charlie);
         {
-            nuggft.offerItem{value: value}(charliesTokenId, tokenId, itemId);
+            nuggft.offer{value: value}(uint160((charliesTokenId << 40) | (uint256(itemId) << 24) | tokenId));
         }
         forge.vm.stopPrank();
     }
