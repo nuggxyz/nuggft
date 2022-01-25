@@ -288,7 +288,7 @@ abstract contract NuggftV1Loan is INuggftV1Loan, NuggftV1Swap {
 
                 let value := add(earn, acc)
 
-                if lt(earn, fee) {
+                if lt(value, fee) {
                     mstore8(0x0, Error__RebalancePaymentTooLow__0x3A)
                     revert(0x00, 0x01)
                 }
@@ -427,16 +427,16 @@ abstract contract NuggftV1Loan is INuggftV1Loan, NuggftV1Swap {
 
             prin := mul(shr(186, shl(26, agency__cache)), LOSS)
 
-            earn := 0
+            earn := sub(activeEps, prin)
 
-            fee := sub(activeEps, prin)
+            // fee := earn
 
-            let checkFee := div(prin, REBALANCE_FEE_BPS)
+            fee := div(prin, REBALANCE_FEE_BPS)
 
-            if gt(fee, checkFee) {
-                earn := sub(fee, checkFee)
-                fee := checkFee
-            }
+            // if gt(fee, checkFee) {
+            //     // earn := sub(fee, checkFee)
+            //     fee := checkFee
+            // }
         }
     }
 

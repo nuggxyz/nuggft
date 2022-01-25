@@ -8,8 +8,13 @@ import {NuggftV1Proof} from '../../../core/NuggftV1Proof.sol';
 contract system__NuggftV1Swap is NuggftV1Test {
     using SafeCast for uint96;
 
+    address[] tmpUsers;
+    uint160[] tmpTokens;
+
     function setUp() public {
         reset__system();
+        delete tmpUsers;
+        delete tmpTokens;
     }
 
     function test__system__frankBidsOnATokenThenClaims() public {
@@ -27,7 +32,7 @@ contract system__NuggftV1Swap is NuggftV1Test {
     function test__system__zero__offerWar() public {
         jump(3000);
 
-        uint16 size = 50;
+        uint16 size = 2;
 
         address[] memory user__list = new address[](size);
 
@@ -49,7 +54,8 @@ contract system__NuggftV1Swap is NuggftV1Test {
         nuggft.epoch();
 
         for (uint256 i = 0; i < size; i++) {
-            startExpectClaim(3000, user__list[i]);
+            startExpectClaim(lib.sarr160(3000), lib.sarrAddress(user__list[i]), users.dennis);
+            forge.vm.prank(users.dennis);
             nuggft.claim(lib.sarr160(3000), lib.sarrAddress(user__list[i]));
             endExpectClaim();
         }
@@ -60,7 +66,7 @@ contract system__NuggftV1Swap is NuggftV1Test {
 
         nuggft.mint{value: 0.02 ether}(500);
 
-        uint16 size = 10;
+        uint16 size = 2;
 
         address[] memory user__list = new address[](size);
 
@@ -69,6 +75,8 @@ contract system__NuggftV1Swap is NuggftV1Test {
         }
         for (uint24 p = 0; p < size; p++) {
             for (uint256 i = 0; i < size; i++) {
+                tmpUsers.push(user__list[i]);
+                tmpTokens.push(3000 + p);
                 for (uint256 j = 0; j < size; j++) {
                     (, uint96 next, uint96 userCurrentOffer) = nuggft.check(user__list[j], 3000 + p);
                     forge.vm.deal(user__list[j], next - userCurrentOffer);
@@ -82,12 +90,19 @@ contract system__NuggftV1Swap is NuggftV1Test {
             jump(3000 + p + 1);
             nuggft.epoch();
 
-            for (uint256 i = 0; i < size; i++) {
-                startExpectClaim(3000 + p, user__list[i]);
-                nuggft.claim(lib.sarr160(3000 + p), lib.sarrAddress(user__list[i]));
-                endExpectClaim();
-            }
+            // for (uint256 i = 0; i < size; i++) {
+            //     startExpectClaim(3000 + p, user__list[i]);
+            //     endExpectClaim();
+            // }
         }
+
+        startExpectClaim(tmpTokens, tmpUsers, users.dennis);
+        forge.vm.prank(users.dennis);
+        nuggft.claim(tmpTokens, tmpUsers);
+        endExpectClaim();
+
+        // delete tmpTokens;
+        // delete tmpUsers;
 
         stakeHelper();
     }

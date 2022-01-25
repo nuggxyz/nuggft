@@ -113,7 +113,7 @@ contract logic__NuggftV1Loan is NuggftV1Test {
 
         emit log_named_uint('balance', address(nuggft).balance);
 
-        forge.vm.roll(block.number + 6000);
+        jump(5000);
 
         // uint96 frankStartBal = uint96(users.frank.balance);
 
@@ -127,8 +127,17 @@ contract logic__NuggftV1Loan is NuggftV1Test {
         // nuggft.offer{value: value}(tokenId);
 
         // uint96 valueforRebal = nuggft.valueForRebalance(LOAN_TOKENID);
+
+        uint96[] memory vals = nuggft.vfr(tokenIds);
+
+        uint96 tv = 0;
+
+        for (uint256 i = 0; i < vals.length; i++) {
+            tv += vals[i];
+        }
+        forge.vm.deal(users.frank, tv);
         forge.vm.startPrank(users.frank);
-        nuggft.rebalance(tokenIds);
+        nuggft.rebalance{value: tv}(tokenIds);
     }
 }
 //   990090000000000000

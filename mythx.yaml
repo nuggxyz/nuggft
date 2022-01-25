@@ -6,9 +6,9 @@ analyze:
     create-group: true
     group-name: My fancy analysis
     solc: 0.8.9
-    remappings:
-        - '@openzeppelin/=/my/path/node_modules/@openzeppelin/'
-        - '@nomiclabs=/my/path/node_modules/@nomiclabs/'
+    # remappings:
+    #     - '@openzeppelin/=/my/path/node_modules/@openzeppelin/'
+    #     - '@nomiclabs=/my/path/node_modules/@nomiclabs/'
     contracts:
         - Contract1
         - Contract2
