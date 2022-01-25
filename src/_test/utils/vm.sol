@@ -17,8 +17,17 @@ library lib {
         array[0] = a;
     }
 
+    function m160(uint160 a, uint16 amount) internal pure returns (uint160[] memory array) {
+        array = new uint160[](amount);
+
+        for (uint256 i = 0; i < amount; i++) {
+            array[i] = a;
+        }
+    }
+
     function sarr176(uint176 a) internal pure returns (uint176[] memory array) {
         array = new uint176[](1);
+
         array[0] = a;
     }
 

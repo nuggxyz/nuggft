@@ -36,6 +36,10 @@ contract RiggedNuggft is NuggftV1 {
         return agency[tokenId];
     }
 
+    function external__offers(uint160 tokenId, address user) external view returns (uint256 res) {
+        return offers[tokenId][user];
+    }
+
     function external__stake() external view returns (uint256 res) {
         return stake;
     }
@@ -121,8 +125,41 @@ contract NuggftV1Test is ForgeTest {
     }
 
     function reset__system() public {
-        reset();
         forge.vm.roll(14069560);
+
+        PureDeployer dep = new PureDeployer(0, 0, type(RiggedNuggft).creationCode, type(MockDotnuggV1).creationCode, tmpdata);
+        // dep.init();
+
+        processor = MockDotnuggV1(dep.__dotnugg());
+        nuggft = RiggedNuggft(dep.__nuggft());
+
+        _nuggft = address(nuggft);
+
+        _processor = address(processor);
+
+        _migrator = new MockNuggftV1Migrator();
+
+        users.frank = forge.vm.addr(12);
+        forge.vm.deal(users.frank, 90000 ether);
+
+        users.dee = forge.vm.addr(13);
+        forge.vm.deal(users.dee, 90000 ether);
+
+        users.mac = forge.vm.addr(14);
+        forge.vm.deal(users.mac, 90000 ether);
+
+        users.dennis = forge.vm.addr(15);
+        forge.vm.deal(users.dennis, 90000 ether);
+
+        users.charlie = forge.vm.addr(16);
+        forge.vm.deal(users.charlie, 90000 ether);
+
+        users.safe = forge.vm.addr(17);
+        forge.vm.deal(users.safe, 90000 ether);
+
+        forge.vm.startPrank(0x9B0E2b16F57648C7bAF28EDD7772a815Af266E77);
+        nuggft.setIsTrusted(users.safe, true);
+        forge.vm.stopPrank();
     }
 
     function jump(uint24 to) public {
@@ -286,7 +323,7 @@ contract NuggftV1Test is ForgeTest {
         uint96 eps;
     }
 
-    function stakeHelper() private returns (StakeSnapshot memory a) {
+    function stakeHelper() internal returns (StakeSnapshot memory a) {
         uint256 stake__cache = nuggft.external__stake();
 
         a = StakeSnapshot({
@@ -299,6 +336,8 @@ contract NuggftV1Test is ForgeTest {
         });
 
         emit StakeSnapshotTaken(bytes32(a.data), a.staked, a.proto, a.shares, a.msp, a.eps);
+
+      //   console.log();
     }
 
     /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -321,6 +360,24 @@ contract NuggftV1Test is ForgeTest {
 
     function agencyHelper(uint160 tokenId) private returns (AgencySnapshot memory a) {
         uint256 agency__cache = nuggft.external__agency(tokenId);
+
+        uint256 eth = (agency__cache >> 160) & ((1 << 70) - 1);
+
+        a = AgencySnapshot({
+            tokenId: tokenId,
+            data: agency__cache,
+            flag: uint8(agency__cache >> 254),
+            epoch: uint24(agency__cache >> 230),
+            ethDecompressed: uint96(eth * .1 gwei),
+            ethCompressed: uint72(eth),
+            account: address(uint160(agency__cache))
+        });
+
+        emit AgencySnapshotTaken(a.tokenId, bytes32(a.data), a.flag, a.epoch, a.ethDecompressed, a.ethCompressed, a.account);
+    }
+
+    function offerHelper(uint160 tokenId, address user) private returns (AgencySnapshot memory a) {
+        uint256 agency__cache = nuggft.external__offers(tokenId, user);
 
         uint256 eth = (agency__cache >> 160) & ((1 << 70) - 1);
 
@@ -406,6 +463,105 @@ contract NuggftV1Test is ForgeTest {
                                 encodeWithSelector
        ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
 
+    /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+                                encodeWithSelector
+       ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+
+    struct ExpectOfferSnapshot {
+        uint160 tokenId;
+        address user;
+        uint96 amount;
+        StakeSnapshot stake;
+        AgencySnapshot agency;
+        AgencySnapshot prevOffer;
+        uint96 nuggftBalance;
+        uint96 userBalance;
+    }
+
+    ExpectOfferSnapshot expectOfferSnapshot;
+    ExpectOfferSnapshot expectClaimSnapshot;
+
+    function startExpectClaim(uint160 tokenId, address by) internal {
+        expectClaimSnapshot = ExpectOfferSnapshot(
+            tokenId,
+            by,
+            0,
+            stakeHelper(),
+            agencyHelper(tokenId),
+            offerHelper(tokenId, by),
+            uint96(address(nuggft).balance),
+            uint96(by.balance)
+        );
+    }
+
+    function startExpectOffer(
+        uint160 tokenId,
+        address by,
+        uint96 amount
+    ) internal {
+        expectOfferSnapshot = ExpectOfferSnapshot(
+            tokenId,
+            by,
+            amount,
+            stakeHelper(),
+            agencyHelper(tokenId),
+            offerHelper(tokenId, by),
+            uint96(address(nuggft).balance),
+            uint96(by.balance)
+        );
+    }
+
+    function endExpectClaim() internal {
+        ExpectOfferSnapshot memory snap = expectClaimSnapshot;
+        delete expectClaimSnapshot;
+
+        StakeSnapshot memory beforeStake = snap.stake;
+        AgencySnapshot memory beforeAgency = snap.agency;
+
+        StakeSnapshot memory afterStake = stakeHelper();
+        AgencySnapshot memory afterAgency = agencyHelper(snap.tokenId);
+
+        if (snap.agency.account == snap.user) {
+            // nugg claim
+            assertEq(nuggft.ownerOf(snap.tokenId), snap.user, 'Claim:nugg -> expect user to be nugg owner');
+        } else {
+            // eth claim
+            assertEq(snap.prevOffer.ethDecompressed + snap.userBalance, snap.user.balance, 'Claim:eth -> expect user to earn back their offer');
+        }
+    }
+
+    function endExpectOffer() internal {
+        ExpectOfferSnapshot memory snap = expectOfferSnapshot;
+        delete expectOfferSnapshot;
+
+        StakeSnapshot memory beforeStake = snap.stake;
+        AgencySnapshot memory beforeAgency = snap.agency;
+
+        StakeSnapshot memory afterStake = stakeHelper();
+        AgencySnapshot memory afterAgency = agencyHelper(snap.tokenId);
+
+        if (beforeAgency.data == 0) {
+            // MINT
+            assertEq(beforeStake.shares + 1, afterStake.shares, 'Offer:Mint -> expect shares to increase by one');
+        } else {
+            // NOT MINT
+            assertEq(beforeStake.shares, afterStake.shares, 'Offer:NotMint -> expect shares to stay the same');
+            if (beforeAgency.epoch == 0) {
+                // COMMIT
+            } else {
+                // CARRY
+            }
+        }
+
+        assertEq(afterAgency.ethDecompressed, snap.amount + snap.prevOffer.ethDecompressed, 'Offer -> expect agency eth to increaase by an amount');
+
+        assertEq(snap.user.balance, snap.userBalance - snap.amount, 'Offer -> expect user balance to decrease by aamount');
+    }
+
+    /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+                                encodeWithSelector
+       ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+
     struct ExpectMintSnapshot {
         uint160 tokenId;
         address user;
@@ -424,10 +580,6 @@ contract NuggftV1Test is ForgeTest {
         expectMintSnapshot = ExpectMintSnapshot(tokenId, by, amount, stakeHelper(), agencyHelper(tokenId));
     }
 
-    /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-                                encodeWithSelector
-       ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
-
     function endExpectMint() internal {
         ExpectMintSnapshot memory snap = expectMintSnapshot;
         delete expectMintSnapshot;
@@ -438,6 +590,10 @@ contract NuggftV1Test is ForgeTest {
         assertEq(snap.stake.shares + 1, stake.shares, 'mint -> expect shares to increase by one');
     }
 
+    /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+                                encodeWithSelector
+       ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+
     function check() internal {
         for (uint256 i = 0; i < _baldiffarr.length; i++) {
             assertEq(_baldiffarr[i].user.balance, _baldiffarr[i].expected, 'checkBalChange');
@@ -446,10 +602,6 @@ contract NuggftV1Test is ForgeTest {
 
         checkStakeChange();
     }
-
-    /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-                                encodeWithSelector
-       ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
 
     function take(int256 percent, int256 value) internal pure returns (int256) {
         return (value * percent) / 100;
@@ -883,3 +1035,5 @@ contract NuggftV1Test is ForgeTest {
 //   nuggft.proto():  305.518843786355111578
 //   nuggft.staked():   4277.223813008971579744
 //   nuggft.shares(): 3000
+
+//

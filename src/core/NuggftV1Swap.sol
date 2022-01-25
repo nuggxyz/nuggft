@@ -103,6 +103,7 @@ abstract contract NuggftV1Swap is INuggftV1Swap, NuggftV1ItemSwap {
                     mstore(mptr, caller())
                     offer__cache := sload(keccak256(mptr, 0x40))
                 }
+                log1(0x00, 0x00, 0x05)
 
                 // check to see if user has offered by checking if cache != 0
                 if iszero(iszero(offer__cache)) {
@@ -115,6 +116,7 @@ abstract contract NuggftV1Swap is INuggftV1Swap, NuggftV1ItemSwap {
                         revert(0x00, 0x01)
                     }
                 }
+                log1(0x00, 0x00, 0x04)
 
                 // check to see if the swap's epoch is 0
                 switch iszero(agency__epoch)
@@ -138,22 +140,25 @@ abstract contract NuggftV1Swap is INuggftV1Swap, NuggftV1ItemSwap {
                         revert(0x00, 0x01)
                     }
                 }
-
+                log1(0x00, 0x00, 0x01)
                 // parse last offer value
                 last := iso(agency__cache, 26, 186)
 
                 // parse and caculate next offer value
                 next := add(iso(offer__cache, 26, 186), next)
+                log1(0x00, 0x00, 0x02)
 
                 // ensure next offer includes at least a 2% increment
                 if gt(div(mul(last, 10200), 10000), next) {
                     mstore8(0x0, Error__IncrementTooLow__0x72)
                     revert(0x00, 0x01)
                 }
+                log1(0x00, 0x00, 0x03)
 
                 // convert next into the increment
                 // saving local variables
                 next := sub(next, last)
+                log1(0x00, 0x00, 0x04)
 
                 // convert last into increment * LOSS for staking
                 // saving local variables
@@ -326,7 +331,7 @@ abstract contract NuggftV1Swap is INuggftV1Swap, NuggftV1ItemSwap {
                     default {
                         // ensure swap is no longer active
                         // the offer can only be trustlessly finalized if a swap is over as the state is final
-                        if gt(active, iso(offer__cache, 2, 232)) {
+                        if iszero(gt(active, iso(offer__cache, 2, 232))) {
                             mstore8(0x0, Error__ClaimTooEarly__0x68)
                             revert(0x00, 0x01)
                         }

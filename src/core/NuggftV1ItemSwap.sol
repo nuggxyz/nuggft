@@ -243,7 +243,7 @@ abstract contract NuggftV1ItemSwap is INuggftV1ItemSwap, NuggftV1Stake {
 
         itemAgency[encItemId(tokenId, itemId)] = updatedAgency;
 
-        emit SellItem(tokenId, bytes32(updatedAgency));
+        emit SellItem(encItemId(tokenId, itemId), bytes32(updatedAgency));
     }
 
     /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━

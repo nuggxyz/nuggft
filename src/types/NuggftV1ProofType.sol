@@ -86,7 +86,7 @@ library NuggftV1ProofType {
         state >>= 3;
 
         do {
-            if (state & 11 == itemId) return index;
+            if (state & 0x7ff == itemId) return index;
             index++;
         } while ((state >>= 11) != 0);
 
@@ -101,8 +101,9 @@ library NuggftV1ProofType {
         uint8 index2
     ) internal pure returns (uint256 res) {
         uint256 tmp = getIndex(state, index1);
-        res = setIndex(state, index1, getIndex(state, index2));
-        res = setIndex(state, index2, tmp);
+        uint256 tmp2 = getIndex(state, index2);
+        res = setIndex(state, index1, tmp2);
+        res = setIndex(res, index2, tmp);
     }
 
     function getIndex(uint256 state, uint8 index) internal pure returns (uint16 res) {
