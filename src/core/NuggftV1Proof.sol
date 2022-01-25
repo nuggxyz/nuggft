@@ -52,6 +52,17 @@ abstract contract NuggftV1Proof is INuggftV1Proof, NuggftV1Dotnugg {
         else return 0;
     }
 
+    function floop(uint160 tokenId) public view returns (uint16[] memory arr) {
+        arr = new uint16[](26);
+        uint256 proof = proofs[tokenId];
+      //   arr[0] = uint16(proof & 0x7);
+        proof >>= 3;
+        for (uint256 i = 0; i < 25; i++) {
+            arr[i] = uint16(proof) & 0x7ff;
+            proof >>= 11;
+        }
+    }
+
     /// @inheritdoc INuggftV1Proof
     function proofToDotnuggMetadata(uint160 tokenId)
         public
