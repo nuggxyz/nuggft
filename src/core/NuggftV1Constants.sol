@@ -46,6 +46,7 @@ abstract contract NuggftV1Constants {
     uint8 constant Error__NotLoaned__0x33 = 0x33;
     uint8 constant Error__InvalidEpoch__0x0F = 0x0F;
     uint8 constant Error__ExpiredEpoch__0x2F = 0x2F;
+    uint8 constant Error__NoOfferToClaim__0x2E = 0x2E;
     uint8 constant Error__WinningClaimTooEarly__0x67 = 0x67;
     uint8 constant Error__ClaimTooEarly__0x68 = 0x68;
     uint8 constant Error__NotAuthorized__0x31 = 0x31;

@@ -167,6 +167,21 @@ contract NuggftV1Test is ForgeTest {
         forge.vm.roll(startblock);
     }
 
+    function encItemId(
+        uint160 buyerTokenId,
+        uint160 tokenId,
+        uint16 itemId
+    ) internal pure returns (uint160) {
+        return uint160((buyerTokenId << 40) | (uint256(itemId) << 24)) | tokenId;
+    }
+
+    function encItemIdClaim(
+        uint160 tokenId,
+        uint16 itemId
+    ) internal pure returns (uint160) {
+        return uint160(uint256(itemId) << 24) | tokenId;
+    }
+
     /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
                                 eth modifiers
        ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */

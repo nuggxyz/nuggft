@@ -29,33 +29,28 @@ contract system__NuggftV1Swap is NuggftV1Test {
         forge.vm.stopPrank();
     }
 
-    function test__system__zero__offerWar() public {
-        // jump(3000);
-        // uint16 size = 2;
-        // address[] memory user__list = new address[](size);
-        // for (uint256 i = 0; i < size; i++) {
-        //     user__list[i] = forge.vm.addr(i + 6);
-        // }
-        // for (uint256 i = 0; i < size; i++) {
-        //     for (uint256 j = 0; j < size; j++) {
-        //         uint96 amount = nuggft.msp();
-        //         startExpectOffer(3000, user__list[j], amount);
-        //         forge.vm.prank(user__list[j]);
-        //         nuggft.offer{value: amount}(3000);
-        //         endExpectOffer();
-        //     }
-        // }
-        // jump(3001);
-        // nuggft.epoch();
-        // for (uint256 i = 0; i < size; i++) {
-        //     startExpectClaim(lib.sarr160(3000), lib.sarrAddress(user__list[i]), users.dennis);
-        //     forge.vm.prank(users.dennis);
-        //     nuggft.claim(lib.sarr160(3000), lib.sarrAddress(user__list[i]));
-        //     endExpectClaim();
-        // }
+    function test__system__nuggFactory() public {
+        uint16 nugg__size = 100;
+        uint256 user__count = 0;
+
+        for (uint16 i = 0; i < nugg__size; i++) {
+            tmpTokens.push(3000 + i);
+            jump(uint24(tmpTokens[i]));
+            for (; user__count < i * 10; user__count++) {
+                tmpUsers.push(forge.vm.addr(user__count + 100));
+                (, uint96 next, uint96 userCurrentOffer) = nuggft.check(tmpUsers[user__count], tmpTokens[i]);
+                forge.vm.deal(tmpUsers[user__count], next - userCurrentOffer);
+                startExpectOffer(tmpTokens[i], tmpUsers[user__count], next - userCurrentOffer);
+                forge.vm.prank(tmpUsers[user__count]);
+                nuggft.offer{value: next - userCurrentOffer}(tmpTokens[i]);
+                endExpectOffer();
+            }
+        }
+
+        //TODO DANNY check claims
     }
 
-    function test__system__value__offerWar() public {
+    function test__system__offerWar() public {
         jump(3000);
 
         nuggft.mint{value: 0.02 ether}(500);
@@ -101,38 +96,85 @@ contract system__NuggftV1Swap is NuggftV1Test {
         stakeHelper();
     }
 
+    function test__revert__0x2E__system__offerWarClaimTwice() public {
+        test__system__offerWar();
+        forge.vm.expectRevert(hex'2E');
+        forge.vm.prank(tmpUsers[1]);
+        nuggft.claim(tmpTokens, tmpUsers);
+    }
+
+    function test__revert__0x24__system__claim__twice__frank() public {
+        forge.vm.startPrank(users.frank);
+        jump(4000);
+        nuggft.offer{value: 0.2 gwei}(4000);
+        jump(4001);
+        nuggft.claim(lib.sarr160(4000), lib.sarrAddress(users.frank));
+        forge.vm.expectRevert(hex'24');
+        nuggft.claim(lib.sarr160(4000), lib.sarrAddress(users.frank));
+        forge.vm.stopPrank();
+    }
+
+    function test__revert__0x67__system__claim__early__frank() public {
+        forge.vm.startPrank(users.frank);
+        jump(4000);
+        nuggft.offer{value: 0.2 gwei}(4000);
+        forge.vm.expectRevert(hex'67');
+        nuggft.claim(lib.sarr160(4000), lib.sarrAddress(users.frank));
+        forge.vm.stopPrank();
+    }
+
     // 3165405880233807789653026790548718548040
     // 79228162514264337593543950336
 
-    function test__system__item__sell__frank() public {
+    function test__system__item__sell__frank() public returns (uint16) {
         forge.vm.startPrank(users.frank);
-        nuggft.mint{value: 0.2 ether}(500);
+        nuggft.mint{value: 0.2 gwei}(500);
 
         (, uint8[] memory ids, , , , ) = nuggft.proofToDotnuggMetadata(500);
 
         uint16 itemId = ids[1] | (1 << 8);
 
-        nuggft.floop(500);
-        nuggft.sellItem(500, itemId, 0.1 ether);
-        nuggft.floop(500);
-        nuggft.rotate(500, 1, 8);
-        nuggft.floop(500);
+        // nuggft.floop(500);
+        nuggft.sellItem(500, itemId, 0.01 gwei);
+        // nuggft.floop(500);
+        // nuggft.rotate(500, 1, 8);
+        // nuggft.floop(500);
 
-        nuggft.proofToDotnuggMetadata(500);
+        // nuggft.proofToDotnuggMetadata(500);
 
         forge.vm.stopPrank();
+        return itemId;
     }
 
-    // function test__system__item__sell__frank() public {
-    //     forge.vm.startPrank(users.frank);
-    //     nuggft.mint{value: 0.2 ether}(500);
+    function test__system__item__offerWar__frankSale() public {
+        uint16 itemId = test__system__item__sell__frank();
+        jump(3000);
+        uint16 size = 20;
+        uint256 money = 0.01 gwei;
 
-    //     (, uint8[] memory ids, , , , ) = nuggft.proofToDotnuggMetadata(500);
+        for (uint256 i = 0; i < size; i++) {
+            tmpUsers.push(forge.vm.addr(i + 100));
+            tmpTokens.push(uint160(501 + i));
+            uint256 value = nuggft.msp();
+            forge.vm.deal(tmpUsers[i], 100 ether);
+            forge.vm.startPrank(tmpUsers[i]);
+            nuggft.mint{value: value}(tmpTokens[i]);
+            uint160 arguments = encItemId(tmpTokens[i], 500, itemId);
+            nuggft.offer{value: money}(arguments);
+            forge.vm.stopPrank();
+            money += 0.0001 gwei;
+        }
+        jump(3001);
 
-    //     uint16 itemId = ids[1] | (1 << 8);
+        // uint160[] memory tkn = uint160[](size);
 
-    //     nuggft.sellItem(500, itemId, 0.1 ether);
+        // for (uint16 i = 0; i<size; i++) {
 
-    //     forge.vm.stopPrank();
-    // }
+        // }
+
+        forge.vm.prank(tmpUsers[size - 1]);
+        nuggft.claim(lib.m160(encItemIdClaim(500, itemId), size), abi.decode(abi.encode(tmpTokens),(address[])));
+    }
 }
+// 198018000000000000
+// 200000000000000000
