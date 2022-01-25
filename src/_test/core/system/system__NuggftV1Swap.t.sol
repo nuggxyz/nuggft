@@ -30,35 +30,29 @@ contract system__NuggftV1Swap is NuggftV1Test {
     }
 
     function test__system__zero__offerWar() public {
-        jump(3000);
-
-        uint16 size = 2;
-
-        address[] memory user__list = new address[](size);
-
-        for (uint256 i = 0; i < size; i++) {
-            user__list[i] = forge.vm.addr(i + 6);
-        }
-
-        for (uint256 i = 0; i < size; i++) {
-            for (uint256 j = 0; j < size; j++) {
-                uint96 amount = nuggft.msp();
-                startExpectOffer(3000, user__list[j], amount);
-                forge.vm.prank(user__list[j]);
-                nuggft.offer{value: amount}(3000);
-                endExpectOffer();
-            }
-        }
-
-        jump(3001);
-        nuggft.epoch();
-
-        for (uint256 i = 0; i < size; i++) {
-            startExpectClaim(lib.sarr160(3000), lib.sarrAddress(user__list[i]), users.dennis);
-            forge.vm.prank(users.dennis);
-            nuggft.claim(lib.sarr160(3000), lib.sarrAddress(user__list[i]));
-            endExpectClaim();
-        }
+        // jump(3000);
+        // uint16 size = 2;
+        // address[] memory user__list = new address[](size);
+        // for (uint256 i = 0; i < size; i++) {
+        //     user__list[i] = forge.vm.addr(i + 6);
+        // }
+        // for (uint256 i = 0; i < size; i++) {
+        //     for (uint256 j = 0; j < size; j++) {
+        //         uint96 amount = nuggft.msp();
+        //         startExpectOffer(3000, user__list[j], amount);
+        //         forge.vm.prank(user__list[j]);
+        //         nuggft.offer{value: amount}(3000);
+        //         endExpectOffer();
+        //     }
+        // }
+        // jump(3001);
+        // nuggft.epoch();
+        // for (uint256 i = 0; i < size; i++) {
+        //     startExpectClaim(lib.sarr160(3000), lib.sarrAddress(user__list[i]), users.dennis);
+        //     forge.vm.prank(users.dennis);
+        //     nuggft.claim(lib.sarr160(3000), lib.sarrAddress(user__list[i]));
+        //     endExpectClaim();
+        // }
     }
 
     function test__system__value__offerWar() public {

@@ -498,7 +498,11 @@ contract NuggftV1Test is ForgeTest {
             by
         );
 
+        emit log_named_int('a', 333);
+
         if (expectOfferSnapshot.agency.data != 0) {
+            emit log_named_int('a', 444);
+
             expectOfferSnapshot.owner = nuggft.ownerOf(tokenId);
         }
     }
@@ -621,9 +625,6 @@ contract NuggftV1Test is ForgeTest {
                     claimbaldiffs[address(nuggft)] += 0;
                     claimbaldiffs[snap.sender] += 0;
                     claimbaldiffs[snap.user] += 0;
-
-                    emit log_named_int('a', snap.prevOffer.ethDecompressed.safeInt());
-                    emit log_named_int('b', claimpulldiffs[snap.user]);
 
                     claimpulldiffs[snap.user] += snap.prevOffer.ethDecompressed.safeInt();
 

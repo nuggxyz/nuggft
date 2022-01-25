@@ -61,124 +61,138 @@ abstract contract NuggftV1Swap is INuggftV1Swap, NuggftV1ItemSwap {
                 agency__cache := xor(shl(254, 0x03), shl(230, active))
 
                 log4(0x00, 0x00, Event__Transfer, 0, address(), tokenId)
-            }
-        } else {
-            uint256 last;
 
-            assembly {
-                function iso(val, left, right) -> b {
-                    b := shr(right, shl(left, val))
-                }
+                // update agency to reflect the new leader
 
-                // ensure that the agency flag is "SWAP" (0x03)
-                if iszero(eq(shr(254, agency__cache), 0x03)) {
-                    mstore8(0x0, Error__NotSwapping__0x24)
-                    revert(0x00, 0x01)
-                }
+                /*==== agency[tokenId] =====
+                flag  = SWAP
+                epoch = active or active + 1
+                eth   = new highest offer
+                addr  = msg.sender
+                ===========================*/
+                agency__cache := xor(add(agency__cache, shl(160, next)), caller())
+                sstore(agency__sptr, agency__cache)
 
                 /*========= memory ==========
+                0x00: agency__cache
+                ===========================*/
+                mstore(mptr, agency__cache)
+
+                log2(mptr, 0x20, Event__Offer, tokenId)
+
+                return(0x0, 0x00)
+            }
+        }
+
+        uint256 last;
+
+        assembly {
+            function iso(val, left, right) -> b {
+                b := shr(right, shl(left, val))
+            }
+
+            // ensure that the agency flag is "SWAP" (0x03)
+            if iszero(eq(shr(254, agency__cache), 0x03)) {
+                mstore8(0x0, Error__NotSwapping__0x24)
+                revert(0x00, 0x01)
+            }
+
+            /*========= memory ==========
                   0x00: tokenId
                   0x20: offers.slot
                 ===========================*/
-                mstore(add(mptr, 0x20), offers.slot)
+            mstore(add(mptr, 0x20), offers.slot)
 
-                /*========= memory ==========
+            /*========= memory ==========
                   0x00: tokenId
                   0x20: offers[tokenId].slot
                 ===========================*/
-                mstore(add(mptr, 0x20), keccak256(mptr, 0x40))
+            mstore(add(mptr, 0x20), keccak256(mptr, 0x40))
 
-                let agency__addr := iso(agency__cache, 96, 96)
+            let agency__addr := iso(agency__cache, 96, 96)
 
-                let agency__epoch := iso(agency__cache, 2, 232)
+            let agency__epoch := iso(agency__cache, 2, 232)
 
-                // we assume offer__cache is same as agency__cache
-                // this will only be the case for the leader
-                let offer__cache := agency__cache
+            /*========= memory ==========
+              0x00: msg.sender
+              0x20: offers[tokenId].slot
+            ===========================*/
+            mstore(mptr, caller())
+            let offer__sptr := keccak256(mptr, 0x40)
 
-                // check to see if msg.sender is the leader
-                if iszero(eq(caller(), agency__addr)) {
-                    // if not, we update offer__cache
+            // we assume offer__cache is same as agency__cache
+            // this will only be the case for the leader
+            let offer__cache := agency__cache
 
-                    /*========= memory ==========
-                      0x00: msg.sender
-                      0x20: offers[tokenId].slot
-                    ===========================*/
-                    mstore(mptr, caller())
-                    offer__cache := sload(keccak256(mptr, 0x40))
-                }
-
-                // check to see if user has offered by checking if cache != 0
-                if iszero(iszero(offer__cache)) {
-                    // check to see if the epoch from offer__cache has expired
-                    // this accomplishes two important goals:
-                    // 1. forces user to claim previous swap before acting on this one
-                    // 2. prevents owner from offering on their own swap before someone else has
-                    if lt(iso(offer__cache, 2, 232), active) {
-                        mstore8(0x0, Error__InvalidEpoch__0x0F)
-                        revert(0x00, 0x01)
-                    }
-                }
-
-                // check to see if the swap's epoch is 0
-                switch iszero(agency__epoch)
-                case 1 {
-                    // [Offer:Commit]
-
-                    // if so, we know this swap has not yet been offered on
-                    // update the epoch to begin auction
-                    agency__cache := xor(agency__cache, shl(230, add(active, SALE_LEN)))
-
-                    // Event__Transfer the token to the contract for the remainder of sale
-                    // the seller (agency__addr) approves this when they put the token up for sale
-                    log4(0x00, 0x00, Event__Transfer, agency__addr, address(), tokenId)
-                }
-                default {
-                    // [Offer:Carry]
-
-                    // otherwise we validate the epoch to ensure the swap is still active
-                    if lt(agency__epoch, active) {
-                        mstore8(0x0, Error__ExpiredEpoch__0x2F)
-                        revert(0x00, 0x01)
-                    }
-                }
-                // parse last offer value
-                last := iso(agency__cache, 26, 186)
-
-                // parse and caculate next offer value
-                next := add(iso(offer__cache, 26, 186), next)
-
-                // ensure next offer includes at least a 2% increment
-                if gt(div(mul(last, 10200), 10000), next) {
-                    mstore8(0x0, Error__IncrementTooLow__0x72)
-                    revert(0x00, 0x01)
-                }
-
-                // convert next into the increment
-                next := sub(next, last)
-
-                // convert last into increment * LOSS for staking
-                last := mul(next, LOSS)
-
-                // record agency so we know how much to repay previous leader
-                /*========= memory ==========
-                  0x00: prev leader
-                  0x20: offers[tokenId].slot
-                ===========================*/
-                mstore(mptr, iso(agency__cache, 96, 96))
-                sstore(keccak256(mptr, 0x40), agency__cache)
-
-                // clear previous leader from agency cache
-                agency__cache := shl(160, shr(160, agency__cache))
+            // check to see if msg.sender is the leader
+            if iszero(eq(caller(), agency__addr)) {
+                // if not, we update offer__cache
+                offer__cache := sload(offer__sptr)
             }
 
-            // add the increment * LOSS to staked eth
-            addStakedEth__dirty(uint96(last));
-        }
+            // check to see if user has offered by checking if cache != 0
+            if iszero(iszero(offer__cache)) {
+                // check to see if the epoch from offer__cache has expired
+                // this accomplishes two important goals:
+                // 1. forces user to claim previous swap before acting on this one
+                // 2. prevents owner from offering on their own swap before someone else has
+                if lt(iso(offer__cache, 2, 232), active) {
+                    mstore8(0x0, Error__InvalidEpoch__0x0F)
+                    revert(0x00, 0x01)
+                }
+            }
 
-        assembly {
+            // check to see if the swap's epoch is 0
+            switch iszero(agency__epoch)
+            case 1 {
+                // [Offer:Commit]
+
+                // if so, we know this swap has not yet been offered on
+                // update the epoch to begin auction
+                agency__cache := xor(agency__cache, shl(230, add(active, SALE_LEN)))
+
+                // Event__Transfer the token to the contract for the remainder of sale
+                // the seller (agency__addr) approves this when they put the token up for sale
+                log4(0x00, 0x00, Event__Transfer, agency__addr, address(), tokenId)
+            }
+            default {
+                // [Offer:Carry]
+
+                // otherwise we validate the epoch to ensure the swap is still active
+                if lt(agency__epoch, active) {
+                    mstore8(0x0, Error__ExpiredEpoch__0x2F)
+                    revert(0x00, 0x01)
+                }
+            }
+            // parse last offer value
+            last := iso(agency__cache, 26, 186)
+
+            // parse and caculate next offer value
+            next := add(iso(offer__cache, 26, 186), next)
+
+            // ensure next offer includes at least a 2% increment
+            if gt(div(mul(last, 10200), 10000), next) {
+                mstore8(0x0, Error__IncrementTooLow__0x72)
+                revert(0x00, 0x01)
+            }
+
+            // convert next into the increment
+            next := sub(next, last)
+
+            // convert last into increment * LOSS for staking
+            last := mul(next, LOSS)
+
+            /*========= memory ==========
+              0x00: prev leader
+              0x20: offers[tokenId].slot
+            ===========================*/
+            mstore(mptr, agency__addr)
+            sstore(keccak256(mptr, 0x40), agency__cache)
+
+            // clear previous leader from agency cache
+            agency__cache := shl(160, shr(160, agency__cache))
+
             // update agency to reflect the new leader
-
             /*==== agency[tokenId] =====
               flag  = SWAP
               epoch = active or active + 1
@@ -187,6 +201,7 @@ abstract contract NuggftV1Swap is INuggftV1Swap, NuggftV1ItemSwap {
             ===========================*/
             agency__cache := xor(add(agency__cache, shl(160, next)), caller())
             sstore(agency__sptr, agency__cache)
+            sstore(offer__sptr, agency__cache)
 
             /*========= memory ==========
               0x00: agency__cache
@@ -195,6 +210,9 @@ abstract contract NuggftV1Swap is INuggftV1Swap, NuggftV1ItemSwap {
 
             log2(mptr, 0x20, Event__Offer, tokenId)
         }
+
+        // add the increment * LOSS to staked eth
+        addStakedEth__dirty(uint96(last));
     }
 
     /// @inheritdoc INuggftV1Swap
@@ -400,6 +418,24 @@ abstract contract NuggftV1Swap is INuggftV1Swap, NuggftV1ItemSwap {
 
             let agency__cache := sload(agency__sptr)
 
+            /*========= memory ==========
+                  0x00: tokenId
+                  0x20: offers.slot
+                ===========================*/
+            mstore(add(mptr, 0x20), offers.slot)
+
+            /*========= memory ==========
+                  0x00: tokenId
+                  0x20: offers[tokenId].slot
+                ===========================*/
+            mstore(add(mptr, 0x20), keccak256(mptr, 0x40))
+            /*========= memory ==========
+              0x00: msg.sender
+              0x20: offers[tokenId].slot
+            ===========================*/
+            mstore(mptr, caller())
+            let offer__sptr := keccak256(mptr, 0x40)
+
             // ensure the caller is the agent
             if iszero(eq(shr(96, shl(96, agency__cache)), caller())) {
                 mstore8(0x0, Error__NotAgent__0x2A)
@@ -423,6 +459,7 @@ abstract contract NuggftV1Swap is INuggftV1Swap, NuggftV1ItemSwap {
             agency__cache := add(agency__cache, xor(shl(254, 0x02), shl(160, div(floor, LOSS))))
 
             sstore(agency__sptr, agency__cache)
+            sstore(offer__sptr, agency__cache)
 
             // log2 with 'Sell(uint160,bytes32)' topic
             mstore(mptr, agency__cache)

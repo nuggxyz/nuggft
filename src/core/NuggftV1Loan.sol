@@ -79,8 +79,8 @@ abstract contract NuggftV1Loan is INuggftV1Loan, NuggftV1Swap {
                 }
 
                 // log2 with "Loan(uint160,bytes32)" topic
-                mstore(mptr, agency__cache)
-                log2(mptr, 0x20, Event__Loan, mload(mptr))
+                mstore(add(mptr, 0x20), agency__cache)
+                log2(add(mptr, 0x20), 0x20, Event__Loan, mload(mptr))
             }
         }
     }
@@ -131,29 +131,29 @@ abstract contract NuggftV1Loan is INuggftV1Loan, NuggftV1Swap {
                 }
             }
 
-            let earn := 0
-
+            // parse agency for principal, converting it back to eth
+            // represents the value that has been sent to the user for this loan
             let principal := mul(iso(agency__cache, 26, 186), LOSS)
 
-            let fee := sub(activeEps, principal)
+            // the amount of value earned by this token since last rebalance
+            // must be computed because fee needs to be paid
+            // increase in earnings per share since last rebalance
+            let earn := sub(activeEps, principal)
 
-            let checkFee := div(principal, REBALANCE_FEE_BPS)
+            // the maximum fee that can be levied
+            // let fee := earn
 
-            if gt(fee, checkFee) {
-                earn := sub(fee, checkFee)
-                fee := checkFee
-            }
+            // true fee
+            let fee := add(div(principal, REBALANCE_FEE_BPS), principal)
 
-            earn := add(earn, callvalue())
+            let value := add(earn, callvalue())
 
-            principal := add(principal, fee)
-
-            if lt(earn, principal) {
+            if lt(value, fee) {
                 mstore8(0x0, Error__LiquidationPaymentTooLow__0x32)
                 revert(0x00, 0x01)
             }
 
-            earn := sub(earn, principal)
+            earn := sub(value, fee)
 
             let pro := div(fee, PROTOCOL_FEE_BPS)
 
@@ -276,35 +276,12 @@ abstract contract NuggftV1Loan is INuggftV1Loan, NuggftV1Swap {
                 // true fee
                 let fee := div(principal, REBALANCE_FEE_BPS)
 
-                // check if the max fee is greater than the true fee
-                // if true, we know a couple things:
-                // 1. The user has earned some amount greater than the fee, we must repay them
-                // 2.
-                // NEE
-                // if gt(fee, checkFee) {
-                //     // earn := sub(fee, checkFee)
-                //     fee := checkFee
-                // }
-
                 let value := add(earn, acc)
 
                 if lt(value, fee) {
                     mstore8(0x0, Error__RebalancePaymentTooLow__0x3A)
                     revert(0x00, 0x01)
                 }
-
-                // // check if loan is expired or the caller is the agent
-                // switch or(expired, eq(caller(), agency__addr))
-                // case 1 {
-                //     // if it is, we send all the value to the caller at the end
-                //     acc := sub(value, fee)
-                // }
-                // default {
-                //     earn := sub(earn, fee)
-                //     // otherwise, we add earned amount to pulls
-                //     let pulls__sptr := or(shl(PULLS_SLOC, 254), agency__addr)
-                //     sstore(pulls__sptr, add(sload(pulls__sptr), earn))
-                // }
 
                 accFee := add(accFee, fee)
 
