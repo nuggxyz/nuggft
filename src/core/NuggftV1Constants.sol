@@ -33,7 +33,7 @@ abstract contract NuggftV1Constants {
     bytes32 constant Event__Sell = 0x251e78527ba3c62fcb4405d22087f8ab0c434b97b46e2d7f020d112e763171b3;
     bytes32 constant Event__Offer = 0x82cc12214e0c6e2eaeafbb2aaf730e41d45e9cc2d0467fb2f0fcf709e9443886;
     bytes32 constant Event__Repayment = 0x82cc12214e0c6e2eaeafbb2aaf730e41d45e9cc2d0467fb2f0fcf709e9443886;
-
+    bytes32 constant Event__OfferItem = 0xece1c1f9e5c92bf1d13cc47d0a5d490cbbc4be21c8d492368d4b8a8aba35e41d;
     // errors
     uint8 constant Error__SendEthFailureToOther__0x91 = 0x91;
     uint8 constant Error__SendEthFailureToCaller__0x92 = 0x92;
