@@ -151,11 +151,9 @@ abstract contract NuggftV1Swap is INuggftV1Swap, NuggftV1ItemSwap {
                 }
 
                 // convert next into the increment
-                // saving local variables
                 next := sub(next, last)
 
                 // convert last into increment * LOSS for staking
-                // saving local variables
                 last := mul(next, LOSS)
 
                 // record agency so we know how much to repay previous leader
@@ -215,8 +213,14 @@ abstract contract NuggftV1Swap is INuggftV1Swap, NuggftV1ItemSwap {
                 revert(0x00, 0x01)
             }
 
+            let pulls__sptr := or(shl(PULLS_SLOC, 254), caller())
+
             // value to keep track of value to send to caller
-            let acc := 0
+            let acc := sload(pulls__sptr)
+
+            if iszero(iszero(acc)) {
+                sstore(pulls__sptr, 0)
+            }
 
             /*========= memory ============
               0x00: tokenId                keccak = agency[tokenId].slot = "agency__sptr"
@@ -289,9 +293,6 @@ abstract contract NuggftV1Swap is INuggftV1Swap, NuggftV1ItemSwap {
                         revert(0x00, 0x01)
                     }
 
-                    // delete offer
-                    sstore(offer__sptr, 0)
-
                     // update agency to reflect the new owner
                     /*==== agency[tokenId] =====
                       flag  = OWN
@@ -301,6 +302,7 @@ abstract contract NuggftV1Swap is INuggftV1Swap, NuggftV1ItemSwap {
                     ===========================*/
                     sstore(agency__sptr, or(offerer, shl(254, 0x01)))
 
+                    // transfer token to the new owner
                     log4(0x00, 0x00, Event__Transfer, address(), offerer, tokenId)
                 }
                 default {
@@ -311,9 +313,6 @@ abstract contract NuggftV1Swap is INuggftV1Swap, NuggftV1ItemSwap {
                         mstore8(0x0, 0x2E)
                         revert(0x00, 0x01)
                     }
-
-                    // delete offer before we potentially send value
-                    sstore(offer__sptr, 0)
 
                     // if the user who placed the offer is also msg.sender
                     switch eq(caller(), offerer)
@@ -333,13 +332,19 @@ abstract contract NuggftV1Swap is INuggftV1Swap, NuggftV1ItemSwap {
                         // parse offer value from cache
                         let amt := iso(offer__cache, 26, 186)
 
-                        // send offer value * LOSS to offerer
-                        if iszero(call(gas(), offerer, mul(amt, LOSS), 0, 0, 0, 0)) {
-                            mstore8(0x0, Error__SendEthFailureToOther__0x91)
-                            revert(0x00, 0x01)
-                        }
+                        let pulls__sptr2 := or(shl(PULLS_SLOC, 254), offerer)
+
+                        sstore(pulls__sptr2, add(sload(pulls__sptr2), amt))
+
+                        // if iszero(call(gas(), offerer, mul(amt, LOSS), 0, 0, 0, 0)) {
+                        //     mstore8(0x0, Error__SendEthFailureToOther__0x91)
+                        //     revert(0x00, 0x01)
+                        // }
                     }
                 }
+
+                // delete offer before we potentially send value
+                sstore(offer__sptr, 0)
 
                 log3(0x00, 0x00, Event__Claim, tokenId, offerer)
             }
@@ -349,11 +354,17 @@ abstract contract NuggftV1Swap is INuggftV1Swap, NuggftV1ItemSwap {
                 return(0, 0)
             }
 
+            acc := mul(acc, LOSS)
+
+            mstore(0x00, acc)
+
             // send accumulated value * LOSS to msg.sender
-            if iszero(call(gas(), caller(), mul(acc, LOSS), 0, 0, 0, 0)) {
+            if iszero(call(gas(), caller(), acc, 0, 0, 0, 0)) {
                 mstore8(0x0, Error__SendEthFailureToCaller__0x92)
                 revert(0x00, 0x01)
             }
+
+            log2(0x00, 0x40, Event__Claim, caller())
         }
     }
 

@@ -244,15 +244,18 @@ abstract contract NuggftV1Loan is INuggftV1Loan, NuggftV1Swap {
                 //
                 let agency__cache := sload(keccak256(mptr, 0x40))
 
+                let agency__addr := iso(agency__cache, 96, 96)
+
                 // make sure this token is loaned
                 if iszero(eq(shr(254, agency__cache), 0x02)) {
                     mstore8(0x0, Error__NotLoaned__0x33)
                     revert(0x00, 0x01)
                 }
 
-                // if loan is expired, allow anyone to rebalance
-                if gt(iso(agency__cache, 2, 232), active) {
-                    if iszero(eq(caller(), iso(agency__cache, 96, 96))) {
+                // is the caller different from the agent?
+                if iszero(eq(caller(), agency__addr)) {
+                    // if so: ensure the loan is expired
+                    if iszero(lt(add(iso(agency__cache, 2, 232), LIQUIDATION_PERIOD), active)) {
                         mstore8(0x0, 0x3B) // ERR:0x3B
                         revert(0x00, 0x01)
                     }
@@ -264,38 +267,55 @@ abstract contract NuggftV1Loan is INuggftV1Loan, NuggftV1Swap {
 
                 // the amount of value earned by this token since last rebalance
                 // must be computed because fee needs to be paid
-                let earn := 0
-
                 // increase in earnings per share since last rebalance
+                let earn := sub(activeEps, principal)
+
                 // the maximum fee that can be levied
-                let fee := sub(activeEps, principal)
+                // let fee := earn
 
                 // true fee
-                let checkFee := div(principal, REBALANCE_FEE_BPS)
+                let fee := div(principal, REBALANCE_FEE_BPS)
 
-                // check if fee is
-                if gt(fee, checkFee) {
-                    earn := sub(fee, checkFee)
-                    fee := checkFee
-                }
+                // check if the max fee is greater than the true fee
+                // if true, we know a couple things:
+                // 1. The user has earned some amount greater than the fee, we must repay them
+                // 2.
+                // NEE
+                // if gt(fee, checkFee) {
+                //     // earn := sub(fee, checkFee)
+                //     fee := checkFee
+                // }
 
-                earn := add(earn, acc)
+                let value := add(earn, acc)
 
                 if lt(earn, fee) {
                     mstore8(0x0, Error__RebalancePaymentTooLow__0x3A)
                     revert(0x00, 0x01)
                 }
 
-                acc := sub(earn, fee)
+                // // check if loan is expired or the caller is the agent
+                // switch or(expired, eq(caller(), agency__addr))
+                // case 1 {
+                //     // if it is, we send all the value to the caller at the end
+                //     acc := sub(value, fee)
+                // }
+                // default {
+                //     earn := sub(earn, fee)
+                //     // otherwise, we add earned amount to pulls
+                //     let pulls__sptr := or(shl(PULLS_SLOC, 254), agency__addr)
+                //     sstore(pulls__sptr, add(sload(pulls__sptr), earn))
+                // }
 
                 accFee := add(accFee, fee)
 
-                mstore(add(add(mptr, 0x60), mul(i, 0xA0)), iso(agency__cache, 96, 96))
+                acc := sub(value, fee)
+
+                mstore(add(add(mptr, 0x60), mul(i, 0xA0)), agency__addr)
 
                 // set the agency temporarily to 1 to avoid reentrancy
                 // reentrancy here referes to a tokenId being passed multiple times in the calldata array
                 // the only value that actually matters here is the "flag", but since it is reset below
-                // ... we can just set it to one
+                // ... we can just set the entire agency to 1
                 sstore(agency__sptr, 0x01)
             }
 
@@ -340,7 +360,7 @@ abstract contract NuggftV1Loan is INuggftV1Loan, NuggftV1Swap {
             mstore(mptr, stake__cache)
             log1(mptr, 0x32, Event__Stake)
 
-            // all eth is sent to caller
+            // accumulated eth is sent to caller
             if iszero(call(gas(), caller(), acc, 0, 0, 0, 0)) {
                 mstore8(0x0, Error__SendEthFailureToCaller__0x92)
                 revert(0x00, 0x01)
@@ -420,6 +440,7 @@ abstract contract NuggftV1Loan is INuggftV1Loan, NuggftV1Swap {
         }
     }
 
+    /// @notice vfr: "Value For Rebalance"
     /// @inheritdoc INuggftV1Loan
     function vfr(uint160[] calldata tokenIds) external view returns (uint96[] memory vals) {
         vals = new uint96[](tokenIds.length);
@@ -434,6 +455,7 @@ abstract contract NuggftV1Loan is INuggftV1Loan, NuggftV1Swap {
         }
     }
 
+    /// @notice vfl: "Value For Liquidate"
     /// @inheritdoc INuggftV1Loan
     function vfl(uint160[] calldata tokenIds) external view returns (uint96[] memory vals) {
         vals = new uint96[](tokenIds.length);
