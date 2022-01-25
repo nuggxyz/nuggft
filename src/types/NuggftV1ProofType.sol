@@ -44,7 +44,6 @@ library NuggftV1ProofType {
     //     xOverrides = ShiftLib.getArray(state, 128);
     //     yOverrides = ShiftLib.getArray(state, 192);
     // }
-
     /// @notice sets an item to the extra array
     /// @dev extra array must be empty at the feature positon being added to
     /// @param state -> the uint256 proof state
@@ -52,16 +51,11 @@ library NuggftV1ProofType {
     /// @return res -> the modifed uint256 proof state
     // function pushToExtra(uint256 state, uint16 itemId) internal pure returns (uint256 res) {
     //     uint8[] memory arr = ShiftLib.getArray(state, 64);
-
     //     (uint8 feat, uint8 pos) = parseItemId(itemId);
-
     //     require(arr[feat] == 0, 'P:D');
-
     //     arr[feat] = pos;
-
     //     res = ShiftLib.setArray(state, 64, arr);
     // }
-
     /// / @notice removes an item from the extra array
     // / @dev extra array must NOT be empty at the feature positon being removed
     // / @dev the extra array must have that specific feature in that postion
@@ -70,54 +64,12 @@ library NuggftV1ProofType {
     // / @return res -> the modifed uint256 proof state
     // function pullFromExtra(uint256 state, uint16 itemId) internal pure returns (uint256 res) {
     //     uint8[] memory arr = ShiftLib.getArray(state, 64);
-
     //     (uint8 feat, uint8 pos) = parseItemId(itemId);
-
     //     require(feat != 0, 'P:F');
-
     //     require(arr[feat] == pos, 'P:E');
-
     //     arr[feat] = 0;
-
     //     res = ShiftLib.setArray(state, 64, arr);
     // }
-
-    function search(uint256 state, uint256 itemId) internal pure returns (uint8 index) {
-        state >>= 3;
-
-        do {
-            if (state & 0x7ff == itemId) return index;
-            index++;
-        } while ((state >>= 11) != 0);
-
-        require(index != 22, 'UNTESTED');
-
-        // if (index == 22) revert('UNTESTED');
-    }
-
-    function swapIndexs(
-        uint256 state,
-        uint8 index1,
-        uint8 index2
-    ) internal pure returns (uint256 res) {
-        uint256 tmp = getIndex(state, index1);
-        uint256 tmp2 = getIndex(state, index2);
-        res = setIndex(state, index1, tmp2);
-        res = setIndex(res, index2, tmp);
-    }
-
-    function getIndex(uint256 state, uint8 index) internal pure returns (uint16 res) {
-        res = uint16(ShiftLib.get(state, 11, 3 + 11 * index));
-    }
-
-    function setIndex(
-        uint256 state,
-        uint8 index,
-        uint256 id
-    ) internal pure returns (uint256 res) {
-        res = ShiftLib.set(state, 11, 3 + 11 * index, id);
-    }
-
     /// @notice updates the x and y override arrays
     /// @dev all must be set at once
     /// @param state -> the uint256 proof state
@@ -132,7 +84,6 @@ library NuggftV1ProofType {
     //     res = ShiftLib.setArray(state, 128, xOverrides);
     //     res = ShiftLib.setArray(res, 192, yOverrides);
     // }
-
     /// @notice clears the anchor overrides for a specific feature
     /// @dev this should be called each time an item is added or removed from a feature
     /// @param state -> the uint256 proof state
@@ -141,21 +92,9 @@ library NuggftV1ProofType {
     // function clearAnchorOverridesForFeature(uint256 state, uint8 feature) internal pure returns (uint256 res) {
     //     uint8[] memory x = ShiftLib.getArray(state, 128);
     //     uint8[] memory y = ShiftLib.getArray(state, 192);
-
     //     y[feature] = 0;
     //     x[feature] = 0;
-
     //     res = ShiftLib.setArray(state, 128, x);
     //     res = ShiftLib.setArray(res, 192, y);
     // }
-
-    /// @notice parses the external itemId into a feautre and position
-    /// @dev this follows dotnugg v1 specification
-    /// @param itemId -> the external itemId
-    /// @return feat -> the feautre of the item
-    /// @return pos -> the file storage position of the item
-    function parseItemId(uint16 itemId) internal pure returns (uint8 feat, uint8 pos) {
-        feat = uint8(itemId >> 8);
-        pos = uint8(itemId & 0xff);
-    }
 }

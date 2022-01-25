@@ -9,10 +9,6 @@ import {CastLib} from '../libraries/CastLib.sol';
 
 import {NuggftV1Dotnugg} from './NuggftV1Dotnugg.sol';
 
-import {NuggftV1ProofType} from '../types/NuggftV1ProofType.sol';
-
-import '../_test/utils/forge.sol';
-
 abstract contract NuggftV1Proof is INuggftV1Proof, NuggftV1Dotnugg {
     using CastLib for uint160;
     using CastLib for uint256;
@@ -37,7 +33,7 @@ abstract contract NuggftV1Proof is INuggftV1Proof, NuggftV1Dotnugg {
 
         uint256 working = proofOf(tokenId);
 
-        working = NuggftV1ProofType.swapIndexs(working, index0, index1);
+        working = swapIndexs(working, index0, index1);
 
         proofs[tokenId] = working;
     }
@@ -52,15 +48,53 @@ abstract contract NuggftV1Proof is INuggftV1Proof, NuggftV1Dotnugg {
         else return 0;
     }
 
-    function floop(uint160 tokenId) public view returns (uint16[] memory arr) {
-        arr = new uint16[](26);
+    function floop(uint160 tokenId) public view returns (bytes2[] memory arr) {
+        arr = new bytes2[](16);
         uint256 proof = proofs[tokenId];
-      //   arr[0] = uint16(proof & 0x7);
-        proof >>= 3;
-        for (uint256 i = 0; i < 25; i++) {
-            arr[i] = uint16(proof) & 0x7ff;
-            proof >>= 11;
+        uint256 max = 0;
+        for (uint256 i = 0; i < 16; i++) {
+            uint16 check = uint16(proof) & 0xfff;
+            proof >>= 16;
+            if (check != 0) {
+                arr[i] = bytes2(check);
+                max = i + 1;
+            }
         }
+    }
+
+    function search(uint256 state, uint256 itemId) internal pure returns (uint8 index) {
+        // skip the base
+
+        do {
+            if (state & 0xfff == itemId) return index;
+            index++;
+        } while ((state >>= 16) != 0);
+
+        revert('does not exist - UNTESTED');
+    }
+
+    function swapIndexs(
+        uint256 state,
+        uint8 index1,
+        uint8 index2
+    ) internal pure returns (uint256 res) {
+        require(index1 != 0 && index2 != 0 && index1 < 16 && index2 < 16);
+        uint256 tmp = getIndex(state, index1);
+        uint256 tmp2 = getIndex(state, index2);
+        res = setIndex(state, index1, tmp2);
+        res = setIndex(res, index2, tmp);
+    }
+
+    function getIndex(uint256 state, uint8 index) internal pure returns (uint16 res) {
+        res = uint16(ShiftLib.get(state, 16, 16 * index));
+    }
+
+    function setIndex(
+        uint256 state,
+        uint8 index,
+        uint256 id
+    ) internal pure returns (uint256 res) {
+        res = ShiftLib.set(state, 16, 16 * index, id);
     }
 
     /// @inheritdoc INuggftV1Proof
@@ -90,14 +124,14 @@ abstract contract NuggftV1Proof is INuggftV1Proof, NuggftV1Dotnugg {
         overys = new uint8[](8);
         styles = new string[](8);
 
-        defaultIds[0] = uint8(proof & 0x3);
+        // defaultIds[0] = uint8(proof & 0xf);
 
-        for (uint8 i = 0; i < 7; i++) {
-            uint16 item = NuggftV1ProofType.getIndex(proof, i);
+        for (uint8 i = 0; i < 8; i++) {
+            uint16 item = getIndex(proof, i);
 
             if (item == 0) continue;
 
-            (uint8 feature, uint8 pos) = NuggftV1ProofType.parseItemId(item);
+            (uint8 feature, uint8 pos) = parseItemId(item);
 
             if (defaultIds[feature] == 0) {
                 uint256 overrides = settings[tokenId].anchorOverrides[item];
@@ -121,7 +155,7 @@ abstract contract NuggftV1Proof is INuggftV1Proof, NuggftV1Dotnugg {
 
         uint256 working = proofOf(tokenId);
 
-        working = NuggftV1ProofType.setIndex(working, NuggftV1ProofType.search(working, 0), itemId);
+        working = setIndex(working, search(working, 0), itemId);
 
         proofs[tokenId] = working;
     }
@@ -131,9 +165,19 @@ abstract contract NuggftV1Proof is INuggftV1Proof, NuggftV1Dotnugg {
 
         uint256 working = proofOf(tokenId);
 
-        working = NuggftV1ProofType.setIndex(working, NuggftV1ProofType.search(working, itemId), 0);
+        working = setIndex(working, search(working, itemId), 0);
 
         proofs[tokenId] = working;
+    }
+
+    /// @notice parses the external itemId into a feautre and position
+    /// @dev this follows dotnugg v1 specification
+    /// @param itemId -> the external itemId
+    /// @return feat -> the feautre of the item
+    /// @return pos -> the file storage position of the item
+    function parseItemId(uint16 itemId) internal pure returns (uint8 feat, uint8 pos) {
+        feat = uint8(itemId >> 8);
+        pos = uint8(itemId & 0xff);
     }
 
     /*━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -217,29 +261,29 @@ abstract contract NuggftV1Proof is INuggftV1Proof, NuggftV1Dotnugg {
 
         res |= ((safeMod(seed & 0xff, _lengthOf(l, 0))) + 1);
 
-        res |= ((1 << 8) | (((((seed >>= 8) & 0xff) % _lengthOf(l, 1))) + 1)) << 3;
+        res |= ((1 << 8) | (((((seed >>= 8) & 0xff) % _lengthOf(l, 1))) + 1)) << (16 * 1);
 
-        res |= ((2 << 8) | (((((seed >>= 8) & 0xff) % _lengthOf(l, 2))) + 1)) << (14);
+        res |= ((2 << 8) | (((((seed >>= 8) & 0xff) % _lengthOf(l, 2))) + 1)) << (16 * 2);
 
         uint256 selA = ((seed >>= 8) & 0xff);
 
         selA = selA < 128 ? 3 : 4;
 
-        res |= ((selA << 8) | ((safeMod(((seed >>= 8) & 0xff), _lengthOf(l, uint8(selA)))) + 1)) << (3 + 22);
+        res |= ((selA << 8) | ((safeMod(((seed >>= 8) & 0xff), _lengthOf(l, uint8(selA)))) + 1)) << (16 * 3);
 
         uint256 selB = ((seed >>= 8) & 0xff);
 
         selB = selB < 30 ? 5 : selB < 55 ? 6 : selB < 75 ? 7 : 0;
 
         if (selB != 0) {
-            res |= ((selB << 8) | ((safeMod(((seed >>= 8) & 0xff), _lengthOf(l, uint8(selB)))) + 1)) << (3 + 33);
+            res |= ((selB << 8) | ((safeMod(((seed >>= 8) & 0xff), _lengthOf(l, uint8(selB)))) + 1)) << (16 * 4);
         }
 
         uint256 selC = ((seed >>= 8) & 0xff);
 
         selC = selC < 30 ? 5 : selC < 55 ? 6 : selC < 75 ? 7 : selC < 115 ? 4 : selC < 155 ? 3 : selC < 205 ? 2 : 1;
 
-        res |= ((selC << 8) | ((safeMod((seed >>= 8) & 0xff, _lengthOf(l, uint8(selC)))) + 1)) << (3 + 77);
+        res |= ((selC << 8) | ((safeMod((seed >>= 8) & 0xff, _lengthOf(l, uint8(selC)))) + 1)) << (16 * 8);
     }
 
     function safeMod(uint256 value, uint8 modder) internal pure returns (uint256) {
