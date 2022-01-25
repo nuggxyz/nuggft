@@ -337,7 +337,7 @@ contract NuggftV1Test is ForgeTest {
 
         emit StakeSnapshotTaken(bytes32(a.data), a.staked, a.proto, a.shares, a.msp, a.eps);
 
-      //   console.log();
+        //   console.log();
     }
 
     /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -476,6 +476,7 @@ contract NuggftV1Test is ForgeTest {
         AgencySnapshot prevOffer;
         uint96 nuggftBalance;
         uint96 userBalance;
+        address owner;
     }
 
     ExpectOfferSnapshot expectOfferSnapshot;
@@ -490,8 +491,11 @@ contract NuggftV1Test is ForgeTest {
             agencyHelper(tokenId),
             offerHelper(tokenId, by),
             uint96(address(nuggft).balance),
-            uint96(by.balance)
+            uint96(by.balance),
+            nuggft.ownerOf(tokenId)
         );
+
+        assertEq(nuggft.ownerOf(tokenId), address(nuggft), 'startExpectClaim -> expect owner to be NuggftV1');
     }
 
     function startExpectOffer(
@@ -507,7 +511,8 @@ contract NuggftV1Test is ForgeTest {
             agencyHelper(tokenId),
             offerHelper(tokenId, by),
             uint96(address(nuggft).balance),
-            uint96(by.balance)
+            uint96(by.balance),
+            nuggft.ownerOf(tokenId)
         );
     }
 
@@ -521,13 +526,41 @@ contract NuggftV1Test is ForgeTest {
         StakeSnapshot memory afterStake = stakeHelper();
         AgencySnapshot memory afterAgency = agencyHelper(snap.tokenId);
 
+        AgencySnapshot memory afterOffer = offerHelper(snap.tokenId, snap.user);
+
+        // nugg claim
         if (snap.agency.account == snap.user) {
-            // nugg claim
-            assertEq(nuggft.ownerOf(snap.tokenId), snap.user, 'Claim:nugg -> expect user to be nugg owner');
-        } else {
-            // eth claim
-            assertEq(snap.prevOffer.ethDecompressed + snap.userBalance, snap.user.balance, 'Claim:eth -> expect user to earn back their offer');
+            // check owner
+            assertEq(nuggft.ownerOf(snap.tokenId), snap.user, 'endExpectClaim:nugg -> expect user to be nugg owner');
+
+            // check nuggft value stays the same
+            assertEq(snap.nuggftBalance, address(nuggft).balance, 'endExpectClaim:nugg -> check nuggft value stays the same');
+
+            // check user value stays the same
+            assertEq(snap.userBalance, snap.user.balance, 'endExpectClaim:nugg -> check user value stays the same');
         }
+        // eth claim
+        else {
+            assertEq(nuggft.ownerOf(snap.tokenId), address(nuggft), 'Claim:nugg -> expect user to be nugg owner');
+
+            assertEq(snap.prevOffer.ethDecompressed + snap.userBalance, snap.user.balance, 'Claim:eth -> expect user to earn back their offer');
+
+            // check nuggft value decreases
+            assertEq(
+                snap.nuggftBalance - snap.prevOffer.ethDecompressed,
+                address(nuggft).balance,
+                'endExpectClaim:nugg -> check nuggft value stays the decreases'
+            );
+
+            // check user value increases
+            assertEq(snap.userBalance + snap.prevOffer.ethDecompressed, snap.user.balance, 'endExpectClaim:nugg -> check user value stays the increases');
+
+            // check stake stays the same
+            assertEq(beforeStake.data, afterStake.data, 'endExpectClaim:nugg -> check stake stays the same');
+        }
+
+        // check offer == 0
+        assertEq(afterOffer.data, 0, 'endExpectClaim:nugg -> offer == 0');
     }
 
     function endExpectOffer() internal {
