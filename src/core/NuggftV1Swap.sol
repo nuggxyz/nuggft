@@ -464,7 +464,7 @@ abstract contract NuggftV1Swap is INuggftV1Swap, NuggftV1ItemSwap {
 
                     // ensure this user has an offer to claim
                     if iszero(offer__cache) {
-                        mstore8(0x0, 0x2E)
+                        mstore8(0x0, Error__NoOfferToClaim__0x2E)
                         revert(0x00, 0x01)
                     }
 
