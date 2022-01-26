@@ -35,21 +35,33 @@ contract system__NuggftV1Swap is NuggftV1Test {
         uint16 nugg__size = 100;
         uint256 user__count = 0;
 
+        nuggft.mint{value: 0.02 ether}(500);
+
         for (uint16 i = 0; i < nugg__size; i++) {
             tmpTokens.push(3000 + i);
             jump(uint24(tmpTokens[i]));
             for (; user__count < i * 10; user__count++) {
                 tmpUsers.push(forge.vm.addr(user__count + 100));
-                (, uint96 next, uint96 userCurrentOffer) = nuggft.check(tmpUsers[user__count], tmpTokens[i]);
-                forge.vm.deal(tmpUsers[user__count], next - userCurrentOffer);
-                startExpectOffer(tmpTokens[i], tmpUsers[user__count], next - userCurrentOffer);
+                uint96 money = nuggft.vfo(tmpUsers[user__count], tmpTokens[i]);
+                forge.vm.deal(tmpUsers[user__count], money);
+                startExpectOffer(tmpTokens[i], tmpUsers[user__count], money);
                 forge.vm.prank(tmpUsers[user__count]);
-                nuggft.offer{value: next - userCurrentOffer}(tmpTokens[i]);
+                nuggft.offer{value: money}(tmpTokens[i]);
                 endExpectOffer();
             }
         }
 
-        //TODO DANNY check claims
+        jump(3001 + nugg__size);
+        user__count = 0;
+
+        for (uint16 i = 0; i < nugg__size; i++) {
+            for (; user__count < i * 10; user__count++) {
+                // startExpectClaim(lib.sarr160(tmpTokens[i]), lib.sarrAddress(tmpUsers[user__count]), tmpUsers[user__count]);
+                forge.vm.prank(tmpUsers[user__count]);
+                nuggft.claim(lib.sarr160(tmpTokens[i]), lib.sarrAddress(tmpUsers[user__count]));
+                // endExpectClaim();
+            }
+        }
     }
 
     function test__system__offerWar() public {
@@ -83,11 +95,10 @@ contract system__NuggftV1Swap is NuggftV1Test {
         }
         // uint256 i = 1;
         for (uint256 i = 0; i < size; i++) {
-            nuggft.ownerOf(tmpTokens[i]);
-            startExpectClaim(lib.sarr160(tmpTokens[i]), lib.sarrAddress(tmpUsers[i]), tmpUsers[i]);
+            // startExpectClaim(lib.sarr160(tmpTokens[i]), lib.sarrAddress(tmpUsers[i]), tmpUsers[i]);
             forge.vm.prank(tmpUsers[i]);
             nuggft.claim(lib.sarr160(tmpTokens[i]), lib.sarrAddress(tmpUsers[i]));
-            endExpectClaim();
+            // endExpectClaim();
         }
 
         // forge.vm.prank(users.dennis);
@@ -100,11 +111,13 @@ contract system__NuggftV1Swap is NuggftV1Test {
         // stakeHelper();
     }
 
-    function test__system__revert__0x2E__offerWarClaimTwice() public {
+    function test__system__revert__0x24__offerWarClaimTwice() public {
         test__system__offerWar();
-        forge.vm.expectRevert(hex'2E');
+        // startExpectClaim(lib.sarr160(tmpTokens[i]), lib.sarrAddress(tmpUsers[i]), tmpUsers[i]);
+        forge.vm.expectRevert(hex'24');
         forge.vm.prank(tmpUsers[1]);
-        nuggft.claim(tmpTokens, tmpUsers);
+        nuggft.claim(lib.sarr160(tmpTokens[1]), lib.sarrAddress(tmpUsers[1]));
+        // endExpectClaim();
     }
 
     function test__system__revert__0x24__claim__twice__frank() public {
@@ -249,5 +262,3 @@ contract system__NuggftV1Swap is NuggftV1Test {
         nuggft.claim(tmpIds, tmpTokens);
     }
 }
-// 198018000000000000
-// 200000000000000000
