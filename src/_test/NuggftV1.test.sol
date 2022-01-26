@@ -589,7 +589,9 @@ contract NuggftV1Test is ForgeTest {
 
     function endExpectClaim() internal {
         address sender;
+        emit log_named_int('balls', 0);
         for (uint256 i = 0; i < expectClaimSnapshot.length; i++) {
+            emit log_named_int('balls', int256(i));
             ExpectOfferSnapshot memory snap = expectClaimSnapshot[i];
 
             sender = snap.sender;
@@ -649,6 +651,8 @@ contract NuggftV1Test is ForgeTest {
             // check offer == 0
             assertEq(afterOffer.data, 0, 'endExpectClaim:nugg -> offer == 0');
         }
+
+        emit log_named_int('OUT', 10);
 
         for (uint256 i = 0; i < expectClaimSnapshot.length; i++) {
             ExpectOfferSnapshot memory snap = expectClaimSnapshot[i];
