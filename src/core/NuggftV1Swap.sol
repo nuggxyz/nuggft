@@ -5,27 +5,16 @@ pragma solidity 0.8.11;
 import {INuggftV1Swap} from '../interfaces/nuggftv1/INuggftV1Swap.sol';
 import {INuggftV1ItemSwap} from '../interfaces/nuggftv1/INuggftV1ItemSwap.sol';
 
-import {NuggftV1ItemSwap} from './NuggftV1ItemSwap.sol';
-
 import {NuggftV1Stake} from './NuggftV1Stake.sol';
 
 /// @notice mechanism for trading of nuggs between users (and items between nuggs)
 /// @dev Explain to a developer any extra details
-abstract contract NuggftV1Swap is INuggftV1Swap, INuggftV1ItemSwap, NuggftV1Stake {
+abstract contract NuggftV1Swap is INuggftV1ItemSwap, INuggftV1Swap, NuggftV1Stake {
     mapping(uint160 => mapping(address => uint256)) offers;
     mapping(uint16 => uint256) protocolItems;
 
     mapping(uint176 => mapping(uint160 => uint256)) itemOffers;
     mapping(uint176 => uint256) itemAgency;
-
-    /// @inheritdoc INuggftV1ItemSwap
-    function offer(
-        uint160 buyingTokenId,
-        uint160 sellingTokenId,
-        uint16 itemId
-    ) external payable override {
-        offer((buyingTokenId << 40) | (uint160(itemId) << 24) | sellingTokenId);
-    }
 
     /// @inheritdoc INuggftV1Swap
     function offer(uint160 tokenId) public payable override {
@@ -291,28 +280,6 @@ abstract contract NuggftV1Swap is INuggftV1Swap, INuggftV1ItemSwap, NuggftV1Stak
         addStakedEth__dirty(uint96(last));
     }
 
-    function claim(uint160[] calldata sellingTokenItemIds, uint160[] calldata buyerTokenIds) public {
-        address[] calldata tmp;
-        assembly {
-            tmp.offset := buyerTokenIds.offset
-        }
-        claim(sellingTokenItemIds, tmp);
-    }
-
-    /// @inheritdoc INuggftV1Swap
-    function pull(address user) external view override returns (uint96 res) {
-        assembly {
-            let pulls__sptr := or(shl(254, PULLS_SLOC), user)
-
-            // value to keep track of value to send to caller
-            res := mul(sload(pulls__sptr), LOSS)
-        }
-    }
-
-    // function claim(uint160[] calldata tokenIds, uint160[] calldata accounts) external {
-    //     claim(tokenIds, abi.decode(abi.encode(accounts), (address[])));
-    // }
-
     /// @inheritdoc INuggftV1Swap
     function claim(uint160[] calldata tokenIds, address[] calldata accounts) public override {
         uint256 active = epoch();
@@ -539,15 +506,6 @@ abstract contract NuggftV1Swap is INuggftV1Swap, INuggftV1ItemSwap, NuggftV1Stak
         }
     }
 
-    /// @inheritdoc INuggftV1ItemSwap
-    function sell(
-        uint160 sellingTokenId,
-        uint16 itemId,
-        uint96 floor
-    ) external override {
-        sell((uint160(itemId) << 24) | sellingTokenId, floor);
-    }
-
     /// @inheritdoc INuggftV1Swap
     function sell(uint160 tokenId, uint96 floor) public override {
         require(floor >= eps(), hex'2B');
@@ -749,11 +707,38 @@ abstract contract NuggftV1Swap is INuggftV1Swap, INuggftV1ItemSwap, NuggftV1Stak
     }
 
     /// @inheritdoc INuggftV1ItemSwap
+    function offer(
+        uint160 buyingTokenId,
+        uint160 sellingTokenId,
+        uint16 itemId
+    ) external payable override {
+        offer((buyingTokenId << 40) | (uint160(itemId) << 24) | sellingTokenId);
+    }
+
+    /// @inheritdoc INuggftV1ItemSwap
+    function claim(uint160[] calldata sellingTokenItemIds, uint160[] calldata buyerTokenIds) public {
+        address[] calldata tmp;
+        assembly {
+            tmp.offset := buyerTokenIds.offset
+        }
+        claim(sellingTokenItemIds, tmp);
+    }
+
+    /// @inheritdoc INuggftV1ItemSwap
+    function sell(
+        uint160 sellingTokenId,
+        uint16 itemId,
+        uint96 floor
+    ) external override {
+        sell((uint160(itemId) << 24) | sellingTokenId, floor);
+    }
+
+    /// @inheritdoc INuggftV1ItemSwap
     function vfo(
         uint160 buyer,
         uint160 seller,
         uint16 itemId
-    ) public view returns (uint96 res) {
+    ) public view override returns (uint96 res) {
         (bool canOffer, uint96 nextSwapAmount, uint96 senderCurrentOffer) = check(buyer, seller, itemId);
 
         if (canOffer) {
@@ -761,7 +746,7 @@ abstract contract NuggftV1Swap is INuggftV1Swap, INuggftV1ItemSwap, NuggftV1Stak
         }
     }
 
-    // / @inheritdoc INuggftV1ItemSwap
+    /// @inheritdoc INuggftV1ItemSwap
     function check(
         uint160 buyer,
         uint160 seller,

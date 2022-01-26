@@ -3,17 +3,15 @@
 pragma solidity 0.8.11;
 
 interface INuggftV1Swap {
+    /// @notice Explain to an end user what this does
+    /// @dev Explain to a developer any extra details
+    /// @param tokenId (uint160)
+    /// @param agency  (bytes32) a parameter just like in doxygen (must be followed by parameter name)
     event Offer(uint160 indexed tokenId, bytes32 agency);
+
     event Claim(uint160 indexed tokenId, address indexed account);
+
     event Sell(uint160 indexed tokenId, bytes32 agency);
-
-    event Repayment(address indexed account, uint96 amount);
-
-    event OfferItem(uint160 indexed sellingTokenId, bytes2 indexed itemId, bytes32 agency);
-    event ClaimItem(uint160 indexed sellingTokenId, bytes2 indexed itemId, uint160 indexed buyerTokenId);
-    event SellItem(uint160 indexed sellingTokenId, bytes2 indexed itemId, bytes32 agency);
-
-    event TransferItem(uint256 indexed from, uint256 indexed to, bytes2 indexed id, bytes32 proof);
 
     /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
                             STATE CHANGING
@@ -28,8 +26,6 @@ interface INuggftV1Swap {
     /*━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
                             VIEW FUNCTIONS
     ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━*/
-
-    function pull(address user) external view returns (uint96 res);
 
     /// @notice calculates the minimum eth that must be sent with a offer call
     /// @dev returns 0 if no offer can be made for this oken
