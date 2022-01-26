@@ -487,7 +487,7 @@ contract revert__NuggftV1Swap is NuggftV1Test {
 
         forge.vm.startPrank(users.charlie);
         {
-            nuggft.claim(lib.sarr160((uint160(itemId) << 24) | tokenId), lib.sarrAddress(address(charliesTokenId)));
+            nuggft.claim(lib.sarr160((uint160(itemId) << 24) | tokenId), lib.sarr160(charliesTokenId));
         }
         forge.vm.stopPrank();
     }
