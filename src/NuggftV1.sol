@@ -151,6 +151,7 @@ contract NuggftV1 is IERC721Metadata, NuggftV1Loan {
 
         addStakedShareFromMsgValue__dirty();
 
+
         setProof(tokenId);
 
         mint__dirty(msg.sender, tokenId);
