@@ -13,8 +13,16 @@ import {NuggftV1Stake} from './NuggftV1Stake.sol';
 abstract contract NuggftV1Swap is INuggftV1Swap, NuggftV1ItemSwap {
     mapping(uint160 => mapping(address => uint256)) offers;
 
+    function offer(
+        uint160 buyingTokenId,
+        uint160 sellingTokenId,
+        uint16 itemId
+    ) external payable {
+        offer((buyingTokenId << 40) | (uint160(itemId) << 24) | sellingTokenId);
+    }
+
     /// @inheritdoc INuggftV1Swap
-    function offer(uint160 tokenId) external payable override {
+    function offer(uint160 tokenId) public payable override {
         uint256 agency__sptr;
 
         uint256 agency__cache;
@@ -33,12 +41,21 @@ abstract contract NuggftV1Swap is INuggftV1Swap, NuggftV1ItemSwap {
                 b := shr(right, shl(left, val))
             }
 
+            function req(check, code) {
+                if iszero(check) {
+                    mstore8(0x0, code)
+                    revert(0x00, 0x01)
+                }
+            }
+
             isItem := gt(tokenId, 0xffffff)
 
             // NOTE: memory locations are referenced as offsets from the free memory pointer
 
             // store callvalue formatted in .1 gwei for caculation of total offer
             next := div(callvalue(), LOSS)
+
+            req(next, Error__OfferLowerThanLOSS__0xF0)
 
             mptr := mload(0x40)
 
@@ -210,6 +227,7 @@ abstract contract NuggftV1Swap is INuggftV1Swap, NuggftV1ItemSwap {
                     revert(0x00, 0x01)
                 }
             }
+
             // parse last offer value
             last := iso(agency__cache, 26, 186)
 
@@ -221,7 +239,6 @@ abstract contract NuggftV1Swap is INuggftV1Swap, NuggftV1ItemSwap {
                 mstore8(0x0, Error__IncrementTooLow__0x72)
                 revert(0x00, 0x01)
             }
-
             // convert next into the increment
             next := sub(next, last)
 
@@ -277,8 +294,12 @@ abstract contract NuggftV1Swap is INuggftV1Swap, NuggftV1ItemSwap {
         }
     }
 
+    // function claim(uint160[] calldata tokenIds, uint160[] calldata accounts) external {
+    //     claim(tokenIds, abi.decode(abi.encode(accounts), (address[])));
+    // }
+
     /// @inheritdoc INuggftV1Swap
-    function claim(uint160[] calldata tokenIds, address[] calldata accounts) external override {
+    function claim(uint160[] calldata tokenIds, address[] calldata accounts) public override {
         uint256 active = epoch();
 
         assembly {
@@ -286,6 +307,13 @@ abstract contract NuggftV1Swap is INuggftV1Swap, NuggftV1ItemSwap {
 
             function iso(val, left, right) -> b {
                 b := shr(right, shl(left, val))
+            }
+
+            function req(check, code) {
+                if iszero(check) {
+                    mstore8(0x0, code)
+                    revert(0x00, 0x01)
+                }
             }
 
             // extract length of tokenIds array from calldata
@@ -296,8 +324,6 @@ abstract contract NuggftV1Swap is INuggftV1Swap, NuggftV1ItemSwap {
                 mstore8(0x0, Error__InvalidArrayLengths__0x99)
                 revert(0x00, 0x01)
             }
-
-            // let pulls__sptr := or(shl(254, PULLS_SLOC), caller())
 
             // value to keep track of value to send to caller
             let acc := sload(or(shl(254, PULLS_SLOC), caller()))
@@ -317,7 +343,7 @@ abstract contract NuggftV1Swap is INuggftV1Swap, NuggftV1ItemSwap {
               0xA0: offers[tokenId].slot
               --------------------------
               0xC0: tokenId                keccak = itemOffers[itemId|sellingTokenId ].slot
-              0xF0: proof.slot
+              0xE0: proof.slot
             ==============================*/
 
             let mptr := mload(0x40)
@@ -330,43 +356,33 @@ abstract contract NuggftV1Swap is INuggftV1Swap, NuggftV1ItemSwap {
 
             for {
                 let i := 0
-                // init the pointers at the first element in the calldata array
-                let ptrOffset := 0
-                // let accntPtr := accounts.offset
             } lt(i, len) {
                 i := add(i, 1)
-                // increment the pointers to the next element in the calldata array
-                ptrOffset := add(ptrOffset, 0x20)
-                // accntPtr := add(accntPtr, 0x20)
             } {
                 // tokenIds[i]
-                let tokenId := calldataload(add(tokenIds.offset, ptrOffset))
+                let tokenId := calldataload(add(tokenIds.offset, mul(i, 0x20)))
 
                 // accounts[i]
-                let offerer := calldataload(add(accounts.offset, ptrOffset))
+                let offerer := calldataload(add(accounts.offset, mul(i, 0x20)))
 
                 let trusted_eoa := offerer
 
-                // let isItem := gt(tokenId, 0xffffff)
+                let isItem := gt(tokenId, 0xffffff)
 
-                if gt(tokenId, 0xffffff) {
+                if isItem {
                     // calculate agency.slot storeage ptr
                     mstore(mptr, offerer)
 
-                    // let agency__sptr2 := keccak256(mptr, 0x40)
+                    let offerer__agency := sload(keccak256(mptr, 0x40))
 
-                    // load agency value from storage
-                    // let agency__cache2 := sload(keccak256(mptr, 0x40))
-
-                    trusted_eoa := iso(sload(keccak256(mptr, 0x40)), 96, 96)
+                    trusted_eoa := iso(offerer__agency, 96, 96)
+                    // req(eq(caller(), iso(offerer__agency, 96, 96)), 0x88)
 
                     // store common slot for agency in memory
                     mstore(add(mptr, 0x20), itemAgency.slot)
 
                     // store common slot for offers in memory
                     mstore(add(mptr, 0x60), itemOffers.slot)
-
-                    // tokenId := and(tokenId, 0xffffffffff)
                 }
 
                 // calculate agency.slot storeage ptr
@@ -405,7 +421,7 @@ abstract contract NuggftV1Swap is INuggftV1Swap, NuggftV1ItemSwap {
                         revert(0x00, 0x01)
                     }
 
-                    switch gt(tokenId, 0xffffff)
+                    switch isItem
                     case 1 {
                         sstore(agency__sptr, 0)
 
@@ -423,7 +439,6 @@ abstract contract NuggftV1Swap is INuggftV1Swap, NuggftV1ItemSwap {
                         if iszero(proof) {
                             revert(0x00, 0x00)
                         }
-                        let select := 0
                         for {
                             let j := 8
                         } lt(j, 17) {
@@ -432,18 +447,16 @@ abstract contract NuggftV1Swap is INuggftV1Swap, NuggftV1ItemSwap {
                             if eq(j, 16) {
                                 revert(0x0, 0x0)
                             }
-                            log3(0x00, 0x00, j, proof, offerer)
-                            log3(0x00, 0x00, j, mload(add(mptr, 0xC0)), mload(add(mptr, 0xE0)))
 
                             if iszero(and(shr(mul(j, 16), proof), 0xffff)) {
                                 let tmp := shr(24, tokenId)
                                 proof := xor(proof, shl(mul(j, 16), tmp))
-                                // select := 1
                                 j := 17
                             }
                         }
-                        log3(0x00, 0x00, 0x00, proof, offerer)
                         sstore(keccak256(add(mptr, 0xC0), 0x40), proof)
+
+                        log4(0x00, 0x00, Event__TransferItem, 0x00, offerer, shl(240, shr(24, tokenId)))
                     }
                     default {
                         // update agency to reflect the new owner
@@ -483,24 +496,16 @@ abstract contract NuggftV1Swap is INuggftV1Swap, NuggftV1ItemSwap {
                             revert(0x00, 0x01)
                         }
 
-                        // parse offer value from cache
-                        let amt := iso(offer__cache, 26, 186)
-
                         let pulls__sptr2 := or(shl(254, PULLS_SLOC), offerer)
 
-                        sstore(pulls__sptr2, add(sload(pulls__sptr2), amt))
-
-                        // if iszero(call(gas(), offerer, mul(amt, LOSS), 0, 0, 0, 0)) {
-                        //     mstore8(0x0, Error__SendEthFailureToOther__0x91)
-                        //     revert(0x00, 0x01)
-                        // }
+                        sstore(pulls__sptr2, add(sload(pulls__sptr2), iso(offer__cache, 26, 186)))
                     }
                 }
 
                 // delete offer before we potentially send value
                 sstore(offer__sptr, 0)
 
-                switch gt(tokenId, 0xffffff)
+                switch isItem
                 case 1 {
                     log4(0x00, 0x00, Event__ClaimItem, and(tokenId, 0xffffff), shl(240, shr(24, tokenId)), offerer)
 
@@ -530,7 +535,7 @@ abstract contract NuggftV1Swap is INuggftV1Swap, NuggftV1ItemSwap {
                 revert(0x00, 0x01)
             }
 
-            log2(0x00, 0x40, Event__Claim, caller())
+            log2(0x00, 0x40, Event__Repayment, caller())
         }
     }
 
@@ -601,9 +606,17 @@ abstract contract NuggftV1Swap is INuggftV1Swap, NuggftV1ItemSwap {
         }
     }
 
+    function vfo(address sender, uint160 tokenId) public view returns (uint96 res) {
+        (bool canOffer, uint96 nextSwapAmount, uint96 senderCurrentOffer) = check(sender, tokenId);
+
+        if (canOffer) {
+            return nextSwapAmount - senderCurrentOffer;
+        }
+    }
+
     // @inheritdoc INuggftV1Swap
     function check(address sender, uint160 tokenId)
-        external
+        public
         view
         override
         returns (
@@ -643,6 +656,56 @@ abstract contract NuggftV1Swap is INuggftV1Swap, NuggftV1ItemSwap {
 
         if (nextSwapAmount != 0) {
             nextSwapAmount = uint96((((nextSwapAmount / LOSS) * 10200) / 10000) * LOSS);
+        }
+    }
+
+    function vfo(
+        uint160 buyer,
+        uint160 seller,
+        uint16 itemId
+    ) public view returns (uint96 res) {
+        (bool canOffer, uint96 nextSwapAmount, uint96 senderCurrentOffer) = checkItemOffer(buyer, seller, itemId);
+
+        if (canOffer) {
+            return nextSwapAmount - senderCurrentOffer;
+        }
+    }
+
+    // / @inheritdoc INuggftV1ItemSwap
+    function checkItemOffer(
+        uint160 buyer,
+        uint160 seller,
+        uint16 itemId
+    )
+        public
+        view
+        override
+        returns (
+            bool canOffer,
+            uint96 nextSwapAmount,
+            uint96 senderCurrentOffer
+        )
+    {
+        canOffer = true;
+
+        uint176 sellerItemId = (uint176(itemId) << 24) | seller;
+
+        uint256 agency__cache = itemAgency[sellerItemId];
+
+        uint256 offerData = agency__cache;
+
+        if (buyer != uint160(agency__cache)) {
+            offerData = itemOffers[sellerItemId][buyer];
+        }
+
+        if (uint24(agency__cache >> 230) == 0 && offerData == agency__cache) canOffer = false;
+
+        senderCurrentOffer = uint96((offerData << 26) >> 186);
+
+        nextSwapAmount = uint96((agency__cache << 26) >> 186);
+
+        if (nextSwapAmount != 0) {
+            nextSwapAmount = uint96(nextSwapAmount * 102 * LOSS) / 100;
         }
     }
 }

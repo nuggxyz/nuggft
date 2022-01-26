@@ -32,8 +32,9 @@ abstract contract NuggftV1Constants {
     bytes32 constant Event__ClaimItem = 0x9cdb8f349681fb33da8eae743ee1c7f93ab8fbeeded70db2ed922ac97cef1dff;
     bytes32 constant Event__Sell = 0x251e78527ba3c62fcb4405d22087f8ab0c434b97b46e2d7f020d112e763171b3;
     bytes32 constant Event__Offer = 0x82cc12214e0c6e2eaeafbb2aaf730e41d45e9cc2d0467fb2f0fcf709e9443886;
-    bytes32 constant Event__Repayment = 0x82cc12214e0c6e2eaeafbb2aaf730e41d45e9cc2d0467fb2f0fcf709e9443886;
+    bytes32 constant Event__Repayment = 0xc928c04c08e9d5085139dee5b4b0a24f48d84c91f8f44caefaea39da6108fce3;
     bytes32 constant Event__OfferItem = 0xece1c1f9e5c92bf1d13cc47d0a5d490cbbc4be21c8d492368d4b8a8aba35e41d;
+    bytes32 constant Event__TransferItem = 0xd329ac0a1aec64017485e7b1685f2944e36b8a5b1e07ed1b515263f08c4896fd;
     // errors
     uint8 constant Error__SendEthFailureToOther__0x91 = 0x91;
     uint8 constant Error__SendEthFailureToCaller__0x92 = 0x92;
@@ -52,6 +53,7 @@ abstract contract NuggftV1Constants {
     uint8 constant Error__NotAuthorized__0x31 = 0x31;
     uint8 constant Error__LiquidationPaymentTooLow__0x32 = 0x32;
     uint8 constant Error__RebalancePaymentTooLow__0x3A = 0x3A;
+    uint8 constant Error__OfferLowerThanLOSS__0xF0 = 0xF0;
 
     // stake
     uint8 constant Error__ValueTooLow__0x71 = 0x71;

@@ -251,44 +251,42 @@ abstract contract NuggftV1ItemSwap is INuggftV1ItemSwap, NuggftV1Stake {
        ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
 
     // / @inheritdoc INuggftV1ItemSwap
-    function checkItemOffer(
-        uint160 buyer,
-        uint160 seller,
-        uint16 itemId
-    )
-        external
-        view
-        override
-        returns (
-            bool canOffer,
-            uint96 nextSwapAmount,
-            uint96 senderCurrentOffer
-        )
-    {
-        canOffer = true;
+    // function checkItemOffer(
+    //     uint160 buyer,
+    //     uint160 seller,
+    //     uint16 itemId
+    // )
+    //     external
+    //     view
+    //     override
+    //     returns (
+    //         bool canOffer,
+    //         uint96 nextSwapAmount,
+    //         uint96 senderCurrentOffer
+    //     )
+    // {
+    //     canOffer = true;
 
-        uint176 sellerItemId = (uint176(itemId) << 160) | seller;
+    //     uint176 sellerItemId = (uint176(itemId) << 160) | seller;
 
-        uint256 agency__cache = itemAgency[sellerItemId];
+    //     uint256 agency__cache = itemAgency[sellerItemId];
 
-        uint24 activeEpoch = epoch();
+    //     uint256 offerData = agency__cache;
 
-        uint256 offerData = agency__cache;
+    //     if (buyer != uint160(agency__cache)) {
+    //         offerData = itemOffers[sellerItemId][buyer];
+    //     }
 
-        if (buyer != uint160(agency__cache)) {
-            offerData = itemOffers[sellerItemId][buyer];
-        }
+    //     if (uint24(agency__cache >> 230) == 0 && offerData == agency__cache) canOffer = false;
 
-        if (uint24(agency__cache >> 230) == 0 && offerData == agency__cache) canOffer = false;
+    //     senderCurrentOffer = uint96((offerData << 26) >> 186);
 
-        senderCurrentOffer = uint96((offerData << 26) >> 186);
+    //     nextSwapAmount = uint96((agency__cache << 26) >> 186);
 
-        nextSwapAmount = uint96((agency__cache << 26) >> 186);
-
-        if (nextSwapAmount != 0) {
-            nextSwapAmount = uint96(nextSwapAmount * 102 * LOSS) / 100;
-        }
-    }
+    //     if (nextSwapAmount != 0) {
+    //         nextSwapAmount = uint96(nextSwapAmount * 102 * LOSS) / 100;
+    //     }
+    // }
 
     function encItemId(uint160 tokenId, uint16 itemId) internal pure returns (uint176) {
         return (uint176(itemId) << 24) | tokenId;
