@@ -3,6 +3,7 @@
 pragma solidity 0.8.11;
 
 import {INuggftV1Swap} from '../interfaces/nuggftv1/INuggftV1Swap.sol';
+import {INuggftV1ItemSwap} from '../interfaces/nuggftv1/INuggftV1ItemSwap.sol';
 
 import {NuggftV1ItemSwap} from './NuggftV1ItemSwap.sol';
 
@@ -10,14 +11,19 @@ import {NuggftV1Stake} from './NuggftV1Stake.sol';
 
 /// @notice mechanism for trading of nuggs between users (and items between nuggs)
 /// @dev Explain to a developer any extra details
-abstract contract NuggftV1Swap is INuggftV1Swap, NuggftV1ItemSwap {
+abstract contract NuggftV1Swap is INuggftV1Swap, INuggftV1ItemSwap, NuggftV1Stake {
     mapping(uint160 => mapping(address => uint256)) offers;
+    mapping(uint16 => uint256) protocolItems;
 
+    mapping(uint176 => mapping(uint160 => uint256)) itemOffers;
+    mapping(uint176 => uint256) itemAgency;
+
+    /// @inheritdoc INuggftV1ItemSwap
     function offer(
         uint160 buyingTokenId,
         uint160 sellingTokenId,
         uint16 itemId
-    ) external payable {
+    ) external payable override {
         offer((buyingTokenId << 40) | (uint160(itemId) << 24) | sellingTokenId);
     }
 
@@ -41,8 +47,8 @@ abstract contract NuggftV1Swap is INuggftV1Swap, NuggftV1ItemSwap {
                 b := shr(right, shl(left, val))
             }
 
-            function req(check, code) {
-                if iszero(check) {
+            function req(val, code) {
+                if iszero(val) {
                     mstore8(0x0, code)
                     revert(0x00, 0x01)
                 }
@@ -478,7 +484,8 @@ abstract contract NuggftV1Swap is INuggftV1Swap, NuggftV1ItemSwap {
                 }
                 default {
                     if iszero(eq(caller(), trusted_eoa)) {
-                        mstore8(0x0, 0x88)
+                        // mstore(0x0, Error__Untrusted__0x88)
+                        mstore8(0x00, Error__Untrusted__0x88)
                         revert(0x00, 0x01)
                     }
 
@@ -526,11 +533,12 @@ abstract contract NuggftV1Swap is INuggftV1Swap, NuggftV1ItemSwap {
         }
     }
 
+    /// @inheritdoc INuggftV1ItemSwap
     function sell(
         uint160 sellingTokenId,
         uint16 itemId,
         uint96 floor
-    ) external payable {
+    ) external override {
         sell((uint160(itemId) << 24) | sellingTokenId, floor);
     }
 
@@ -682,7 +690,8 @@ abstract contract NuggftV1Swap is INuggftV1Swap, NuggftV1ItemSwap {
         }
     }
 
-    function vfo(address sender, uint160 tokenId) public view returns (uint96 res) {
+    /// @inheritdoc INuggftV1Swap
+    function vfo(address sender, uint160 tokenId) public view override returns (uint96 res) {
         (bool canOffer, uint96 nextSwapAmount, uint96 senderCurrentOffer) = check(sender, tokenId);
 
         if (canOffer) {
@@ -735,12 +744,13 @@ abstract contract NuggftV1Swap is INuggftV1Swap, NuggftV1ItemSwap {
         }
     }
 
+    /// @inheritdoc INuggftV1ItemSwap
     function vfo(
         uint160 buyer,
         uint160 seller,
         uint16 itemId
     ) public view returns (uint96 res) {
-        (bool canOffer, uint96 nextSwapAmount, uint96 senderCurrentOffer) = checkItemOffer(buyer, seller, itemId);
+        (bool canOffer, uint96 nextSwapAmount, uint96 senderCurrentOffer) = check(buyer, seller, itemId);
 
         if (canOffer) {
             return nextSwapAmount - senderCurrentOffer;
@@ -748,7 +758,7 @@ abstract contract NuggftV1Swap is INuggftV1Swap, NuggftV1ItemSwap {
     }
 
     // / @inheritdoc INuggftV1ItemSwap
-    function checkItemOffer(
+    function check(
         uint160 buyer,
         uint160 seller,
         uint16 itemId

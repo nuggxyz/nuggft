@@ -46,6 +46,8 @@ interface INuggftV1Swap {
             uint96 nextOfferAmount,
             uint96 senderCurrentOffer
         );
+
+    function vfo(address sender, uint160 tokenId) external view returns (uint96 res);
 }
 
 //  ├─ [458] RiggedNuggft::staked()
