@@ -135,7 +135,8 @@ contract system__NuggftV1Swap is NuggftV1Test {
         uint16 itemId = ids[1] | (1 << 8);
 
         // nuggft.floop(500);
-        nuggft.sellItem(500, itemId, 50 gwei);
+        nuggft.sell(500, itemId, 50 gwei);
+
         // nuggft.floop(500);
         // nuggft.rotate(500, 1, 8);
         // nuggft.floop(500);

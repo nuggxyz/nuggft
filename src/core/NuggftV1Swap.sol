@@ -63,7 +63,6 @@ abstract contract NuggftV1Swap is INuggftV1Swap, NuggftV1ItemSwap {
               0x00: tokenId
               0x20: agency.slot
             ===========================*/
-            mstore(mptr, tokenId)
 
             mstore(add(mptr, 0x20), agency.slot)
 
@@ -80,7 +79,7 @@ abstract contract NuggftV1Swap is INuggftV1Swap, NuggftV1ItemSwap {
 
                 let buyerTokenAgency := sload(keccak256(mptr, 0x40))
 
-                mstore(mptr, tokenId)
+                // mstore(mptr, tokenId)
 
                 // ensure the caller is the agent
                 if iszero(eq(iso(buyerTokenAgency, 96, 96), caller())) {
@@ -88,7 +87,7 @@ abstract contract NuggftV1Swap is INuggftV1Swap, NuggftV1ItemSwap {
                     revert(0x00, 0x01)
                 }
 
-                let flag := shr(254, agency__cache)
+                let flag := shr(254, buyerTokenAgency)
 
                 // ensure the caller is really the agent
                 if and(eq(flag, 0x3), iszero(iszero(iso(buyerTokenAgency, 2, 232)))) {
@@ -100,6 +99,8 @@ abstract contract NuggftV1Swap is INuggftV1Swap, NuggftV1ItemSwap {
 
                 offersSlot := itemOffers.slot
             }
+
+            mstore(mptr, tokenId)
 
             agency__sptr := keccak256(mptr, 0x40)
             agency__cache := sload(agency__sptr)
@@ -431,7 +432,9 @@ abstract contract NuggftV1Swap is INuggftV1Swap, NuggftV1ItemSwap {
                         // store common slot for offers in memory
                         mstore(add(mptr, 0xa0), proofs.slot)
 
-                        let proof := sload(keccak256(add(mptr, 0x80), 0x40))
+                        let proof__sptr := keccak256(add(mptr, 0x80), 0x40)
+
+                        let proof := sload(proof__sptr)
 
                         if iszero(proof) {
                             revert(0x00, 0x00)
@@ -453,9 +456,11 @@ abstract contract NuggftV1Swap is INuggftV1Swap, NuggftV1ItemSwap {
                             }
                         }
 
-                        sstore(keccak256(add(mptr, 0xC0), 0x40), proof)
+                        sstore(proof__sptr, proof)
 
-                        log4(0x00, 0x00, Event__TransferItem, 0x00, offerer, shl(240, shr(24, tokenId)))
+                        mstore(add(mptr, 0xa0), proof)
+
+                        log4(add(mptr, 0xa0), 0x20, Event__TransferItem, 0x00, offerer, shl(240, shr(24, tokenId)))
                     }
                     default {
                         // update agency to reflect the new owner
@@ -521,8 +526,16 @@ abstract contract NuggftV1Swap is INuggftV1Swap, NuggftV1ItemSwap {
         }
     }
 
+    function sell(
+        uint160 sellingTokenId,
+        uint16 itemId,
+        uint96 floor
+    ) external payable {
+        sell((uint160(itemId) << 24) | sellingTokenId, floor);
+    }
+
     /// @inheritdoc INuggftV1Swap
-    function sell(uint160 tokenId, uint96 floor) external override {
+    function sell(uint160 tokenId, uint96 floor) public override {
         require(floor >= eps(), hex'2B');
 
         assembly {
@@ -532,59 +545,140 @@ abstract contract NuggftV1Swap is INuggftV1Swap, NuggftV1ItemSwap {
 
             let mptr := mload(0x40)
 
-            mstore(mptr, tokenId)
             mstore(add(mptr, 0x20), agency.slot)
+
+            let sender := caller()
+
+            let isItem := gt(tokenId, 0xffffff)
+
+            if isItem {
+                sender := and(tokenId, 0xffffff)
+
+                tokenId := and(tokenId, 0xffffffffff)
+
+                mstore(mptr, sender)
+
+                let buyerTokenAgency := sload(keccak256(mptr, 0x40))
+
+                // ensure the caller is the agent
+                if iszero(eq(iso(buyerTokenAgency, 96, 96), caller())) {
+                    mstore8(0x0, Error__NotAgent__0x2A)
+                    revert(0x00, 0x01)
+                }
+
+                let flag := shr(254, buyerTokenAgency)
+
+                // ensure the caller is really the agent
+                if and(eq(flag, 0x3), iszero(iszero(iso(buyerTokenAgency, 2, 232)))) {
+                    mstore8(0x0, Error__NotOwner__0x2C)
+                    revert(0x00, 0x01)
+                }
+
+                mstore(add(mptr, 0x20), itemAgency.slot)
+
+                // mstore(mptr, tokenId)
+            }
+
+            mstore(mptr, tokenId)
 
             let agency__sptr := keccak256(mptr, 0x40)
 
             let agency__cache := sload(agency__sptr)
 
-            /*========= memory ==========
-                  0x00: tokenId
-                  0x20: offers.slot
-                ===========================*/
-            mstore(add(mptr, 0x20), offers.slot)
-
-            /*========= memory ==========
-                  0x00: tokenId
-                  0x20: offers[tokenId].slot
-                ===========================*/
-            mstore(add(mptr, 0x20), keccak256(mptr, 0x40))
-            /*========= memory ==========
-              0x00: msg.sender
-              0x20: offers[tokenId].slot
-            ===========================*/
-            mstore(mptr, caller())
-            let offer__sptr := keccak256(mptr, 0x40)
-
-            // ensure the caller is the agent
-            if iszero(eq(shr(96, shl(96, agency__cache)), caller())) {
-                mstore8(0x0, Error__NotAgent__0x2A)
-                revert(0x00, 0x01)
-            }
-
-            // ensure the agent is the owner
-            if iszero(eq(shr(254, agency__cache), 0x1)) {
-                mstore8(0x0, Error__NotOwner__0x2C)
-                revert(0x00, 0x01)
-            }
-
             // update agency to reflect the new sale
 
-            /*==== agency[tokenId] =====
+            switch isItem
+            case 1 {
+                if iszero(iszero(agency__cache)) {
+                    mstore8(0x00, 0x09)
+                    revert(0x00, 0x01)
+                }
+
+                mstore(mptr, sender)
+
+                // store common slot for offers in memory
+                mstore(add(mptr, 0x20), proofs.slot)
+
+                let proof__sptr := keccak256(mptr, 0x40)
+
+                let proof := sload(proof__sptr)
+
+                if iszero(proof) {
+                    mstore8(0x00, 0x33)
+                    revert(0x00, 0x01)
+                }
+
+                let id := shr(24, tokenId)
+
+                let j := 1
+
+                for {
+
+                } lt(j, 16) {
+                    j := add(j, 1)
+                } {
+                    if eq(and(shr(mul(j, 16), proof), 0xffff), id) {
+                        proof := and(proof, not(shl(mul(j, 16), 0xffff)))
+                        break
+                    }
+                }
+
+                if eq(j, 16) {
+                    mstore8(0x00, 0x34)
+                    revert(0x00, 0x01)
+                }
+
+                sstore(protocolItems.slot, add(sload(protocolItems.slot), 1))
+
+                sstore(proof__sptr, proof)
+
+                mstore(mptr, proof)
+
+                log4(mptr, 0x20, Event__TransferItem, tokenId, 0x00, shl(240, shr(24, tokenId)))
+
+                /*==== agency[tokenId] =====
               flag  = SWAP(0x03)
               epoch = 0
               eth   = seller decided floor / .1 gwei
               addr  = seller
             ==========================*/
-            agency__cache := add(agency__cache, xor(shl(254, 0x02), shl(160, div(floor, LOSS))))
+                agency__cache := xor(xor(shl(254, 0x03), shl(160, div(floor, LOSS))), sender)
 
-            sstore(agency__sptr, agency__cache)
-            sstore(offer__sptr, agency__cache)
+                sstore(agency__sptr, agency__cache)
 
-            // log2 with 'Sell(uint160,bytes32)' topic
-            mstore(mptr, agency__cache)
-            log2(mptr, 0x20, Event__Sell, tokenId)
+                // log2 with 'Sell(uint160,bytes32)' topic
+                mstore(mptr, agency__cache)
+
+                log3(mptr, 0x20, Event__SellItem, and(tokenId, 0xffffff), shl(240, shr(24, tokenId)))
+            }
+            default {
+                // ensure the caller is the agent
+                if iszero(eq(shr(96, shl(96, agency__cache)), caller())) {
+                    mstore8(0x0, Error__NotAgent__0x2A)
+                    revert(0x00, 0x01)
+                }
+
+                // ensure the agent is the owner
+                if iszero(eq(shr(254, agency__cache), 0x1)) {
+                    mstore8(0x0, Error__NotOwner__0x2C)
+                    revert(0x00, 0x01)
+                }
+                /*==== agency[tokenId] =====
+              flag  = SWAP(0x03)
+              epoch = 0
+              eth   = seller decided floor / .1 gwei
+              addr  = seller
+            ==========================*/
+                agency__cache := add(agency__cache, xor(shl(254, 0x02), shl(160, div(floor, LOSS))))
+
+                sstore(agency__sptr, agency__cache)
+                // sstore(offer__sptr, agency__cache)
+
+                // log2 with 'Sell(uint160,bytes32)' topic
+                mstore(mptr, agency__cache)
+
+                log2(mptr, 0x20, Event__Sell, tokenId)
+            }
         }
     }
 
