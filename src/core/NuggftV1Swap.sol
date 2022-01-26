@@ -291,6 +291,14 @@ abstract contract NuggftV1Swap is INuggftV1Swap, INuggftV1ItemSwap, NuggftV1Stak
         addStakedEth__dirty(uint96(last));
     }
 
+    function claim(uint160[] calldata sellingTokenItemIds, uint160[] calldata buyerTokenIds) public {
+        address[] calldata tmp;
+        assembly {
+            tmp.offset := buyerTokenIds.offset
+        }
+        claim(sellingTokenItemIds, tmp);
+    }
+
     /// @inheritdoc INuggftV1Swap
     function pull(address user) external view override returns (uint96 res) {
         assembly {
@@ -528,8 +536,6 @@ abstract contract NuggftV1Swap is INuggftV1Swap, INuggftV1ItemSwap, NuggftV1Stak
                 mstore8(0x0, Error__SendEthFailureToCaller__0x92)
                 revert(0x00, 0x01)
             }
-
-            // log2(0x00, 0x40, Event__Repayment, caller())
         }
     }
 
@@ -583,8 +589,6 @@ abstract contract NuggftV1Swap is INuggftV1Swap, INuggftV1ItemSwap, NuggftV1Stak
                 }
 
                 mstore(add(mptr, 0x20), itemAgency.slot)
-
-                // mstore(mptr, tokenId)
             }
 
             mstore(mptr, tokenId)
