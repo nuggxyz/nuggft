@@ -485,7 +485,6 @@ contract NuggftV1Test is ForgeTest {
         uint96 nuggftBalance;
         uint96 userBalance;
         address owner;
-        uint96 ownerPull;
         address sender;
     }
 
@@ -506,7 +505,6 @@ contract NuggftV1Test is ForgeTest {
             uint96(address(nuggft).balance),
             uint96(by.balance),
             address(0),
-            nuggft.pull(by),
             by
         );
 
@@ -570,14 +568,11 @@ contract NuggftV1Test is ForgeTest {
                     uint96(address(nuggft).balance),
                     uint96(offerers[i].balance),
                     nuggft.ownerOf(tokenIds[i]),
-                    nuggft.pull(offerers[i]),
                     sender
                 )
             );
 
             claimbaldiffs[offerers[i]] = uint96(offerers[i].balance).safeInt();
-
-            claimpulldiffs[offerers[i]] = nuggft.pull(offerers[i]).safeInt();
 
             claimownershipdiff[tokenIds[i]] = address(nuggft);
 
@@ -586,12 +581,9 @@ contract NuggftV1Test is ForgeTest {
 
         claimbaldiffs[address(nuggft)] = uint96(address(nuggft).balance).safeInt();
         claimbaldiffs[sender] = uint96(sender.balance).safeInt();
-        claimpulldiffs[address(nuggft)] = nuggft.pull(address(nuggft)).safeInt();
-        claimpulldiffs[sender] = nuggft.pull(sender).safeInt();
     }
 
     mapping(address => int192) claimbaldiffs;
-    mapping(address => int192) claimpulldiffs;
 
     mapping(uint160 => address) claimownershipdiff;
 
@@ -629,18 +621,11 @@ contract NuggftV1Test is ForgeTest {
                     // repayment
                     claimbaldiffs[address(nuggft)] -= snap.prevOffer.ethDecompressed.safeInt();
                     claimbaldiffs[snap.user] += snap.prevOffer.ethDecompressed.safeInt();
-
-                    claimpulldiffs[address(nuggft)] += 0;
-                    claimpulldiffs[snap.user] += 0;
                 } else {
                     // non-repayment
                     claimbaldiffs[address(nuggft)] += 0;
                     claimbaldiffs[snap.sender] += 0;
                     claimbaldiffs[snap.user] += 0;
-
-                    claimpulldiffs[snap.user] += snap.prevOffer.ethDecompressed.safeInt();
-
-                    emit log_named_int('c', claimpulldiffs[snap.user]);
                 }
 
                 // assertEq(nuggft.ownerOf(snap.tokenId), address(nuggft), 'Claim:nugg -> expect user to be nugg owner');
@@ -672,14 +657,9 @@ contract NuggftV1Test is ForgeTest {
             assertEq(nuggft.ownerOf(snap.tokenId), claimownershipdiff[snap.tokenId], 'endExpectClaim:DIFFS -> nugg owner no expected');
 
             assertEq(int256(snap.user.balance), claimbaldiffs[snap.user], 'endExpectClaim:DIFFS -> offerer balance not expected');
-
-            assertEq(nuggft.pull(snap.user).safeInt(), claimpulldiffs[snap.user], 'endExpectClaim:DIFFS -> offerer pull not expected');
         }
 
-        claimbaldiffs[sender] += claimpulldiffs[sender];
-
         assertEq(claimbaldiffs[sender], int256(sender.balance), 'endExpectClaim:DIFFS -> sender balance not expected');
-        assertEq(nuggft.pull(sender), 0, 'endExpectClaim:DIFFS -> sender pull not expected');
 
         assertEq(claimbaldiffs[address(nuggft)], int256(address(nuggft).balance), 'endExpectClaim:DIFFS -> NuggftV1 balance not expected');
     }

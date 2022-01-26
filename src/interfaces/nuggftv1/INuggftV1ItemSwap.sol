@@ -3,6 +3,14 @@
 pragma solidity 0.8.11;
 
 interface INuggftV1ItemSwap {
+    event OfferItem(uint160 indexed sellingTokenId, bytes2 indexed itemId, bytes32 agency);
+
+    event ClaimItem(uint160 indexed sellingTokenId, bytes2 indexed itemId, uint160 indexed buyerTokenId);
+
+    event SellItem(uint160 indexed sellingTokenId, bytes2 indexed itemId, bytes32 agency);
+
+    event TransferItem(uint256 indexed from, uint256 indexed to, bytes2 indexed id, bytes32 proof);
+
     /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
                             STATE CHANGING
        ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
@@ -13,11 +21,7 @@ interface INuggftV1ItemSwap {
         uint16 itemId
     ) external payable;
 
-    // function claimItem(
-    //     uint160[] calldata buyerTokenIds,
-    //     uint160[] calldata sellerTokenIds,
-    //     uint16[] calldata itemIds
-    // ) external;
+    function claim(uint160[] calldata sellingTokenItemIds, uint160[] calldata buyerTokenIds) external;
 
     function sell(
         uint160 sellerTokenId,
