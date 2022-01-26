@@ -186,7 +186,7 @@ contract system__NuggftV1Swap is NuggftV1Test {
         uint256 money = 1000 gwei;
 
         for (uint256 i = 0; i < size; i++) {
-            tmpUsers.push(forge.vm.addr(i + 100));
+            tmpUsers.push(forge.vm.addr(100));
             tmpTokens.push(uint160(501 + i));
             uint256 value = nuggft.msp();
             money = nuggft.vfo(tmpTokens[i], 500, itemId);
