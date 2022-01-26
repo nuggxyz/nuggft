@@ -135,7 +135,7 @@ contract system__NuggftV1Swap is NuggftV1Test {
         uint16 itemId = ids[1] | (1 << 8);
 
         // nuggft.floop(500);
-        nuggft.sellItem(500, itemId, 0.01 gwei);
+        nuggft.sellItem(500, itemId, 50 gwei);
         // nuggft.floop(500);
         // nuggft.rotate(500, 1, 8);
         // nuggft.floop(500);
@@ -164,7 +164,7 @@ contract system__NuggftV1Swap is NuggftV1Test {
             forge.vm.stopPrank();
             money += 0.0001 gwei;
         }
-        jump(3001);
+        jump(3002);
 
         // uint160[] memory tkn = uint160[](size);
 
@@ -172,8 +172,43 @@ contract system__NuggftV1Swap is NuggftV1Test {
 
         // }
 
-        forge.vm.prank(tmpUsers[size - 1]);
-        nuggft.claim(lib.m160(encItemIdClaim(500, itemId), size), abi.decode(abi.encode(tmpTokens),(address[])));
+        forge.vm.prank(tmpUsers[size - 2]);
+        nuggft.claim(lib.m160(encItemIdClaim(500, itemId), size), abi.decode(abi.encode(tmpTokens), (address[])));
+    }
+
+    function test__system__item__offerWar__frankSale__holy__fuck() public {
+        uint16 itemId = test__system__item__sell__frank();
+        jump(3000);
+
+        // nuggft.mint{value: 200 gwei}(509);
+
+        uint16 size = 20;
+        uint256 money = 1000 gwei;
+
+        for (uint256 i = 0; i < size; i++) {
+            tmpUsers.push(forge.vm.addr(i + 100));
+            tmpTokens.push(uint160(501 + i));
+            uint256 value = nuggft.msp();
+            money = nuggft.vfo(tmpTokens[i], 500, itemId);
+
+            forge.vm.deal(tmpUsers[i], 100 ether);
+            forge.vm.startPrank(tmpUsers[i]);
+            nuggft.mint{value: value}(tmpTokens[i]);
+            // uint160 arguments = encItemId(tmpTokens[i], 500, itemId);
+            nuggft.offer{value: money}(tmpTokens[i], 500, itemId);
+            forge.vm.stopPrank();
+            money += 10 gwei;
+        }
+        jump(3002);
+
+        // uint160[] memory tkn = uint160[](size);
+
+        // for (uint16 i = 0; i<size; i++) {
+
+        // }
+
+        forge.vm.prank(tmpUsers[size - 3]);
+        nuggft.claim(lib.m160(encItemIdClaim(500, itemId), size), abi.decode(abi.encode(tmpTokens), (address[])));
     }
 }
 // 198018000000000000

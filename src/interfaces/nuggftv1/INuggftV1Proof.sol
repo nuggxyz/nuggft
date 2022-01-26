@@ -6,6 +6,7 @@ interface INuggftV1Proof {
     /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
                              STATE CHANGING
        ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+    event TransferItem(uint256 indexed from, uint256 indexed to, bytes2 indexed id);
 
     function rotate(
         uint160 tokenId,
