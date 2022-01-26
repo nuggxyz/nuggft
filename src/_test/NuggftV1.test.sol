@@ -175,10 +175,7 @@ contract NuggftV1Test is ForgeTest {
         return uint160((buyerTokenId << 40) | (uint256(itemId) << 24)) | tokenId;
     }
 
-    function encItemIdClaim(
-        uint160 tokenId,
-        uint16 itemId
-    ) internal pure returns (uint160) {
+    function encItemIdClaim(uint160 tokenId, uint16 itemId) internal pure returns (uint160) {
         return uint160(uint256(itemId) << 24) | tokenId;
     }
 
@@ -891,7 +888,7 @@ contract NuggftV1Test is ForgeTest {
 
         forge.vm.prank(users.dee);
 
-        nuggft.sellItem(tokenId, itemId, floor);
+        nuggft.sell(tokenId, itemId, floor);
     }
 
     function scenario_dee_has_sold_an_item_and_charlie_can_claim()

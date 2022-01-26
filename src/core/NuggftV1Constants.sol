@@ -36,12 +36,14 @@ abstract contract NuggftV1Constants {
     bytes32 constant Event__Repayment = 0xc928c04c08e9d5085139dee5b4b0a24f48d84c91f8f44caefaea39da6108fce3;
     bytes32 constant Event__OfferItem = 0xece1c1f9e5c92bf1d13cc47d0a5d490cbbc4be21c8d492368d4b8a8aba35e41d;
     bytes32 constant Event__TransferItem = 0x31cf2357b228de5e7b21be4ee816920a4eabd32196b782ad557ba4a0f5c20af1;
+
     // errors
     uint8 constant Error__SendEthFailureToOther__0x91 = 0x91;
     uint8 constant Error__SendEthFailureToCaller__0x92 = 0x92;
     uint8 constant Error__InvalidArrayLengths__0x99 = 0x99;
     uint8 constant Error__NotAgent__0x2A = 0x2A;
     uint8 constant Error__NotOwner__0x2C = 0x2C;
+    uint8 constant Error__Untrusted__0x88 = 0x88;
 
     // swap
     uint8 constant Error__NotSwapping__0x24 = 0x24;
