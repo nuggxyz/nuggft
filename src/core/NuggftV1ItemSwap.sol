@@ -135,7 +135,7 @@ abstract contract NuggftV1ItemSwap is INuggftV1ItemSwap, NuggftV1Stake {
 
         addStakedEth__dirty(uint96(last));
 
-        emit OfferItem(sellerTokenId, bytes2(itemId), bytes32(agency__cache));
+        // emit OfferItem(sellerTokenId, bytes2(itemId), bytes32(agency__cache));
     }
 
     /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -196,7 +196,7 @@ abstract contract NuggftV1ItemSwap is INuggftV1ItemSwap, NuggftV1Stake {
                 }
             }
 
-            emit ClaimItem(sellerTokenIds[i], bytes2(itemIds[i]), buyerTokenId);
+            // emit ClaimItem(sellerTokenIds[i], bytes2(itemIds[i]), buyerTokenId);
         }
 
         assembly {
@@ -243,7 +243,7 @@ abstract contract NuggftV1ItemSwap is INuggftV1ItemSwap, NuggftV1Stake {
 
         itemAgency[encItemId(tokenId, itemId)] = updatedAgency;
 
-        emit SellItem(tokenId, bytes2(itemId), bytes32(updatedAgency));
+        // emit SellItem(tokenId, bytes2(itemId), bytes32(updatedAgency));
     }
 
     /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━

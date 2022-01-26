@@ -9,6 +9,12 @@ interface INuggftV1Swap {
 
     event Repayment(address indexed account, uint96 amount);
 
+    event OfferItem(uint160 indexed sellingTokenId, bytes2 indexed itemId, bytes32 agency);
+    event ClaimItem(uint160 indexed sellingTokenId, bytes2 indexed itemId, uint160 indexed buyerTokenId);
+    event SellItem(uint160 indexed sellingTokenId, bytes2 indexed itemId, bytes32 agency);
+
+    event TransferItem(uint256 indexed from, uint256 indexed to, bytes2 indexed id, bytes32 proof);
+
     /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
                             STATE CHANGING
        ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
