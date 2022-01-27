@@ -10,7 +10,7 @@ import {MockNuggftV1Migrator} from './mock/MockNuggftV1Migrator.sol';
 
 import {NuggftV1} from '../NuggftV1.sol';
 import {PureDeployer} from '../_deployment/PureDeployer.sol';
-
+import {expectClaim} from './expect/claim.sol';
 import './utils/forge.sol';
 
 contract RiggedNuggft is NuggftV1 {
@@ -63,7 +63,7 @@ library SafeCast {
     }
 }
 
-contract NuggftV1Test is ForgeTest {
+contract NuggftV1Test is ForgeTest, expectClaim {
     using SafeCast for uint96;
     using SafeCast for uint256;
     using SafeCast for uint64;
@@ -72,7 +72,11 @@ contract NuggftV1Test is ForgeTest {
 
     MockNuggftV1Migrator public _migrator;
 
-    RiggedNuggft public nuggft;
+    RiggedNuggft internal nuggft;
+
+    function __nuggft__ref() internal view override returns (RiggedNuggft) {
+        return nuggft;
+    }
 
     address public _nuggft;
     address public _processor;

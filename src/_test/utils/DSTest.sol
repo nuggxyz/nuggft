@@ -32,6 +32,29 @@ contract DSTest is ogDSTest {
         assertTrue(!data);
     }
 
+    function assertBalance(
+        address user,
+        int192 expectedBalance,
+        string memory str
+    ) internal virtual {
+        if (expectedBalance < 0) {
+            emit log('Error: assertBalance - expectedBalance < 0');
+            emit log(str);
+            emit log_named_address('user: ', user);
+            emit log_named_int('  Expected', expectedBalance);
+            fail();
+        }
+        if (user.balance != uint256(int256(expectedBalance))) {
+            emit log('Error: assertBalance - user.balance != expectedBalance');
+            emit log(str);
+
+            emit log_named_address('user: ', user);
+            emit log_named_int('  Expected', expectedBalance);
+            emit log_named_uint('    Actual', user.balance);
+            fail();
+        }
+    }
+
     function assertBytesEq(bytes memory a, bytes memory b) internal virtual {
         if (keccak256(a) != keccak256(b)) {
             emit log('Error: a == b not satisfied [bytes]');

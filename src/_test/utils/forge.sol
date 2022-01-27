@@ -8,6 +8,7 @@ import './store.sol';
 import './DSTest.sol';
 import './gas.sol';
 import './vm.sol';
+import './cast.sol';
 
 abstract contract ForgeTest is DSTest, GasTracker {
     modifier prank(address user, uint256 value) {
