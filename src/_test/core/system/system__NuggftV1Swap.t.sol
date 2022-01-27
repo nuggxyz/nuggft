@@ -95,10 +95,10 @@ contract system__NuggftV1Swap is NuggftV1Test {
         }
         // uint256 i = 1;
         for (uint256 i = 0; i < size; i++) {
-            // startExpectClaim(lib.sarr160(tmpTokens[i]), lib.sarrAddress(tmpUsers[i]), tmpUsers[i]);
+            bytes memory dat = startExpectClaim(lib.sarr160(tmpTokens[i]), lib.sarrAddress(tmpUsers[i]), tmpUsers[i]);
             forge.vm.prank(tmpUsers[i]);
             nuggft.claim(lib.sarr160(tmpTokens[i]), lib.sarrAddress(tmpUsers[i]));
-            // endExpectClaim();
+            endExpectClaim(dat);
         }
 
         // forge.vm.prank(users.dennis);
