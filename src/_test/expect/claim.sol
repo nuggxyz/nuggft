@@ -2,13 +2,9 @@
 
 pragma solidity 0.8.11;
 
-import '../utils/forge.sol';
+import './base.sol';
 
-import {RiggedNuggft} from '../NuggftV1.test.sol';
-
-abstract contract expectClaim is DSTest {
-    function __nuggft__ref() internal virtual returns (RiggedNuggft);
-
+abstract contract expectClaim is expectBase {
     function startExpectClaim(
         uint160[] memory tokenIds,
         uint160[] memory offerers,
@@ -21,17 +17,17 @@ abstract contract expectClaim is DSTest {
         startExpectClaim(tokenIds, a, sender);
     }
 
-    struct Snapshot {
-        SnapshotEnv env;
-        SnapshotData data;
+    struct expectClaim__Snapshot {
+        expectClaim__SnapshotEnv env;
+        expectClaim__SnapshotData data;
     }
 
-    struct SnapshotData {
+    struct expectClaim__SnapshotData {
         uint256 agency;
         uint256 offer;
     }
 
-    struct SnapshotEnv {
+    struct expectClaim__SnapshotEnv {
         uint160 id;
         bool isItem;
         bool winner;
@@ -39,13 +35,13 @@ abstract contract expectClaim is DSTest {
         bool reclaim;
     }
 
-    struct RunBalances {
+    struct expectClaim__RunBalances {
         address account;
         int192 change;
     }
 
-    struct Run {
-        Snapshot[] snapshots;
+    struct expectClaim__Run {
+        expectClaim__Snapshot[] snapshots;
         address sender;
         int192 expectedSenderBalance;
         int192 expectedNuggftBalance;
@@ -58,16 +54,16 @@ abstract contract expectClaim is DSTest {
     ) internal returns (bytes memory) {
         require(tokenIds.length == offerers.length, 'EXPECT-CLAIM:START:ArrayLengthNotSame');
 
-        Run memory run;
+        expectClaim__Run memory run;
 
         run.sender = sender;
-        run.snapshots = new Snapshot[](tokenIds.length);
+        run.snapshots = new expectClaim__Snapshot[](tokenIds.length);
         run.expectedSenderBalance = cast.i192(run.sender.balance);
         run.expectedNuggftBalance = cast.i192(address(__nuggft__ref()).balance);
 
         for (uint256 i = 0; i < tokenIds.length; i++) {
-            SnapshotEnv memory env;
-            SnapshotData memory pre;
+            expectClaim__SnapshotEnv memory env;
+            expectClaim__SnapshotData memory pre;
 
             env.id = tokenIds[i];
             env.isItem = env.id > 0xffffff;
@@ -103,12 +99,12 @@ abstract contract expectClaim is DSTest {
     }
 
     function stopExpectClaim(bytes memory input) internal {
-        Run memory run = abi.decode(input, (Run));
+        expectClaim__Run memory run = abi.decode(input, (expectClaim__Run));
 
         for (uint256 i = 0; i < run.snapshots.length; i++) {
-            SnapshotEnv memory env = run.snapshots[i].env;
-            SnapshotData memory pre = run.snapshots[i].data;
-            SnapshotData memory post;
+            expectClaim__SnapshotEnv memory env = run.snapshots[i].env;
+            expectClaim__SnapshotData memory pre = run.snapshots[i].data;
+            expectClaim__SnapshotData memory post;
 
             if (env.isItem) {
                 post.agency = __nuggft__ref().external__itemAgency(env.id);
@@ -135,7 +131,7 @@ abstract contract expectClaim is DSTest {
         uint160 tokenId,
         uint16 itemId,
         string memory str
-    ) internal {
+    ) private {
         uint256 proof = __nuggft__ref().proofOf(tokenId);
 
         (bool hasItem, ) = proofSearch(proof, itemId);
@@ -147,7 +143,7 @@ abstract contract expectClaim is DSTest {
         uint160 tokenId,
         uint16 itemId,
         string memory str
-    ) internal {
+    ) private {
         uint256 proof = __nuggft__ref().proofOf(tokenId);
 
         (bool hasItem, ) = proofSearch(proof, itemId);
@@ -156,10 +152,10 @@ abstract contract expectClaim is DSTest {
     }
 
     function preSingleClaimChecks(
-        Run memory run,
-        SnapshotEnv memory env,
-        SnapshotData memory pre
-    ) internal {
+        expectClaim__Run memory run,
+        expectClaim__SnapshotEnv memory env,
+        expectClaim__SnapshotData memory pre
+    ) private {
         // ASSERT:CLAIM_0x01: externally is the nugg owned by the contract?
 
         if (env.isItem) {
@@ -200,11 +196,11 @@ abstract contract expectClaim is DSTest {
     }
 
     function postSingleClaimChecks(
-        Run memory run,
-        SnapshotEnv memory env,
-        SnapshotData memory pre,
-        SnapshotData memory post
-    ) internal {
+        expectClaim__Run memory run,
+        expectClaim__SnapshotEnv memory env,
+        expectClaim__SnapshotData memory pre,
+        expectClaim__SnapshotData memory post
+    ) private {
         // ASSERT:CLAIM_0x06: is the post offer == 0?
         assertEq(post.offer, 0, 'ASSERT:CLAIM_0x06: is the post offer == 0?');
 
@@ -249,12 +245,12 @@ abstract contract expectClaim is DSTest {
         }
     }
 
-    function preRunChecks(Run memory run) internal {
+    function preRunChecks(expectClaim__Run memory run) private {
         // ASSERT:CLAIM_0x0C: what should the balances be before any call on claim?
         // ASSERT:CLAIM_0x0C: maybe here we just check to see that the data is ok?
     }
 
-    function postRunChecks(Run memory run) internal {
+    function postRunChecks(expectClaim__Run memory run) private {
         // ASSERT:CLAIM_0x0D: is the sender balance correct?
         assertBalance(run.sender, run.expectedSenderBalance, 'ASSERT:CLAIM_0x0D');
 

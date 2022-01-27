@@ -10,7 +10,7 @@ import {MockNuggftV1Migrator} from './mock/MockNuggftV1Migrator.sol';
 
 import {NuggftV1} from '../NuggftV1.sol';
 import {PureDeployer} from '../_deployment/PureDeployer.sol';
-import {expectClaim} from './expect/claim.sol';
+import {expectAll} from './expect/all.sol';
 import './utils/forge.sol';
 
 contract RiggedNuggft is NuggftV1 {
@@ -63,7 +63,7 @@ library SafeCast {
     }
 }
 
-contract NuggftV1Test is ForgeTest, expectClaim {
+contract NuggftV1Test is ForgeTest, expectAll {
     using SafeCast for uint96;
     using SafeCast for uint256;
     using SafeCast for uint64;
@@ -523,78 +523,78 @@ contract NuggftV1Test is ForgeTest, expectClaim {
                                 expectOfferSnapshot
        ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
 
-    struct ExpectOfferSnapshot {
-        uint160 tokenId;
-        address user;
-        uint96 amount;
-        StakeSnapshot stake;
-        AgencySnapshot agency;
-        AgencySnapshot prevOffer;
-        uint96 nuggftBalance;
-        uint96 userBalance;
-        address owner;
-        address sender;
-    }
+    // struct ExpectOfferSnapshot {
+    //     uint160 tokenId;
+    //     address user;
+    //     uint96 amount;
+    //     StakeSnapshot stake;
+    //     AgencySnapshot agency;
+    //     AgencySnapshot prevOffer;
+    //     uint96 nuggftBalance;
+    //     uint96 userBalance;
+    //     address owner;
+    //     address sender;
+    // }
 
-    ExpectOfferSnapshot expectOfferSnapshot;
+    // ExpectOfferSnapshot expectOfferSnapshot;
 
-    function startExpectOffer(
-        uint160 tokenId,
-        address by,
-        uint96 amount
-    ) internal {
-        expectOfferSnapshot = ExpectOfferSnapshot(
-            tokenId,
-            by,
-            amount,
-            stakeHelper(),
-            agencyHelper(tokenId),
-            offerHelper(tokenId, by),
-            uint96(address(nuggft).balance),
-            uint96(by.balance),
-            address(0),
-            by
-        );
+    // function startExpectOffer(
+    //     uint160 tokenId,
+    //     address by,
+    //     uint96 amount
+    // ) internal {
+    //     expectOfferSnapshot = ExpectOfferSnapshot(
+    //         tokenId,
+    //         by,
+    //         amount,
+    //         stakeHelper(),
+    //         agencyHelper(tokenId),
+    //         offerHelper(tokenId, by),
+    //         uint96(address(nuggft).balance),
+    //         uint96(by.balance),
+    //         address(0),
+    //         by
+    //     );
 
-        emit log_named_int('a', 333);
+    //     emit log_named_int('a', 333);
 
-        if (expectOfferSnapshot.agency.data != 0) {
-            emit log_named_int('a', 444);
+    //     if (expectOfferSnapshot.agency.data != 0) {
+    //         emit log_named_int('a', 444);
 
-            expectOfferSnapshot.owner = nuggft.ownerOf(tokenId);
-        }
-    }
+    //         expectOfferSnapshot.owner = nuggft.ownerOf(tokenId);
+    //     }
+    // }
 
-    function endExpectOffer() internal {
-        ExpectOfferSnapshot memory snap = expectOfferSnapshot;
-        delete expectOfferSnapshot;
+    // function endExpectOffer() internal {
+    //     ExpectOfferSnapshot memory snap = expectOfferSnapshot;
+    //     delete expectOfferSnapshot;
 
-        StakeSnapshot memory beforeStake = snap.stake;
-        AgencySnapshot memory beforeAgency = snap.agency;
+    //     StakeSnapshot memory beforeStake = snap.stake;
+    //     AgencySnapshot memory beforeAgency = snap.agency;
 
-        StakeSnapshot memory afterStake = stakeHelper();
-        AgencySnapshot memory afterAgency = agencyHelper(snap.tokenId);
+    //     StakeSnapshot memory afterStake = stakeHelper();
+    //     AgencySnapshot memory afterAgency = agencyHelper(snap.tokenId);
 
-        if (beforeAgency.data == 0) {
-            // MINT
-            assertEq(beforeStake.shares + 1, afterStake.shares, 'Offer:Mint -> expect shares to increase by one');
-        } else {
-            // NOT MINT
-            assertEq(beforeStake.shares, afterStake.shares, 'Offer:NotMint -> expect shares to stay the same');
-            if (beforeAgency.epoch == 0) {
-                // COMMIT
-            } else {
-                // CARRY
-            }
-        }
+    //     if (beforeAgency.data == 0) {
+    //         // MINT
+    //         assertEq(beforeStake.shares + 1, afterStake.shares, 'Offer:Mint -> expect shares to increase by one');
+    //     } else {
+    //         // NOT MINT
+    //         assertEq(beforeStake.shares, afterStake.shares, 'Offer:NotMint -> expect shares to stay the same');
+    //         if (beforeAgency.epoch == 0) {
+    //             // COMMIT
+    //         } else {
+    //             // CARRY
+    //         }
+    //     }
 
-        assertEq(afterAgency.ethDecompressed, snap.amount + snap.prevOffer.ethDecompressed, 'Offer -> expect agency eth to increaase by an amount');
+    //     assertEq(afterAgency.ethDecompressed, snap.amount + snap.prevOffer.ethDecompressed, 'Offer -> expect agency eth to increaase by an amount');
 
-        assertEq(snap.user.balance, snap.userBalance - snap.amount, 'Offer -> expect user balance to decrease by aamount');
-    }
+    //     assertEq(snap.user.balance, snap.userBalance - snap.amount, 'Offer -> expect user balance to decrease by aamount');
+    // }
 
     /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-                                expectClaimSnapshot
+                                expectAllSnapshot
        ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
 
     /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
