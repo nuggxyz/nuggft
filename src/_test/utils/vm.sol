@@ -49,6 +49,14 @@ library lib {
         array[0] = a;
     }
 
+    function mAddress(address a, uint16 amount) internal pure returns (address[] memory array) {
+        array = new address[](amount);
+
+        for (uint256 i = 0; i < amount; i++) {
+            array[i] = a;
+        }
+    }
+
     function take(int256 percent, int256 value) internal pure returns (int256) {
         return (value * percent) / 100;
     }
