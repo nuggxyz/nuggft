@@ -5,61 +5,59 @@ pragma solidity 0.8.11;
 import '../utils/forge.sol';
 
 import {expectBase} from './base.sol';
-import {expectStake} from './stake.sol';
 
-abstract contract expectOffer is expectBase, expectStake {
-    struct expectOffer__Snapshot {
-        expectOffer__SnapshotEnv env;
-        expectOffer__SnapshotData data;
+abstract contract expectSell is expectBase {
+    struct expectSell__Snapshot {
+        expectSell__SnapshotEnv env;
+        expectSell__SnapshotData data;
     }
 
-    struct expectOffer__SnapshotData {
+    struct expectSell__SnapshotData {
         uint256 agency;
         uint256 offer;
     }
 
-    struct expectOffer__SnapshotEnv {
+    struct expectSell__SnapshotEnv {
         uint160 id;
         bool isItem;
         address buyer;
-        uint96 value;
+        uint96 floor;
     }
 
-    struct expectOffer__Run {
-        expectOffer__Snapshot snapshot;
+    struct expectSell__Run {
+        expectSell__Snapshot snapshot;
         address sender;
         int192 expectedSenderBalance;
         int192 expectedNuggftBalance;
     }
 
-    function startExpectOffer(
-        uint160 buyingTokenId,
+    function startExpectSell(
         uint160 sellingTokenId,
         uint16 itemId,
-        address sender,
-        uint96 value
+        uint96 floor,
+        address sender
     ) internal {
-        startExpectOffer((buyingTokenId << 40) | (uint160(itemId) << 24) | sellingTokenId, sender, value);
+        startExpectSell((uint160(itemId) << 24) | sellingTokenId, floor, sender);
     }
 
-    function startExpectOffer(
+    function startExpectSell(
         uint160 tokenId,
-        address sender,
-        uint96 value
+        uint96 floor,
+        address sender
     ) internal returns (bytes memory) {
-        expectOffer__Run memory run;
+        expectSell__Run memory run;
 
         run.sender = sender;
 
         run.expectedSenderBalance = cast.i192(run.sender.balance);
         run.expectedNuggftBalance = cast.i192(address(__nuggft__ref()).balance);
 
-        expectOffer__SnapshotEnv memory env;
-        expectOffer__SnapshotData memory pre;
+        expectSell__SnapshotEnv memory env;
+        expectSell__SnapshotData memory pre;
 
         env.id = tokenId;
         env.isItem = env.id > 0xffffff;
-        env.value = value;
+        env.floor = floor;
         if (env.isItem) {
             env.buyer = address(tokenId >> 40);
 
@@ -77,19 +75,19 @@ abstract contract expectOffer is expectBase, expectStake {
         run.snapshot.env = env;
         run.snapshot.data = pre;
 
-        preOfferChecks(run, env, pre);
+        preSellChecks(run, env, pre);
 
         preRunChecks(run);
 
         return abi.encode(run);
     }
 
-    function stopExpectOffer(bytes memory input) internal {
-        expectOffer__Run memory run = abi.decode(input, (expectOffer__Run));
+    function stopExpectSell(bytes memory input) internal {
+        expectSell__Run memory run = abi.decode(input, (expectSell__Run));
 
-        expectOffer__SnapshotEnv memory env = run.snapshot.env;
-        expectOffer__SnapshotData memory pre = run.snapshot.data;
-        expectOffer__SnapshotData memory post;
+        expectSell__SnapshotEnv memory env = run.snapshot.env;
+        expectSell__SnapshotData memory pre = run.snapshot.data;
+        expectSell__SnapshotData memory post;
 
         if (env.isItem) {
             post.agency = __nuggft__ref().external__itemAgency(env.id);
@@ -99,38 +97,38 @@ abstract contract expectOffer is expectBase, expectStake {
             post.offer = __nuggft__ref().external__offers(env.id, env.buyer);
         }
 
-        postOfferChecks(run, env, pre, post);
+        postSellChecks(run, env, pre, post);
 
         postRunChecks(run);
     }
 
-    function preOfferChecks(
-        expectOffer__Run memory run,
-        expectOffer__SnapshotEnv memory env,
-        expectOffer__SnapshotData memory pre
+    function preSellChecks(
+        expectSell__Run memory run,
+        expectSell__SnapshotEnv memory env,
+        expectSell__SnapshotData memory pre
     ) private {
         if (env.isItem) {} else {}
     }
 
-    function postOfferChecks(
-        expectOffer__Run memory run,
-        expectOffer__SnapshotEnv memory env,
-        expectOffer__SnapshotData memory pre,
-        expectOffer__SnapshotData memory post
+    function postSellChecks(
+        expectSell__Run memory run,
+        expectSell__SnapshotEnv memory env,
+        expectSell__SnapshotData memory pre,
+        expectSell__SnapshotData memory post
     ) private {
         // BALANCE CHANGE: sender balance should go up by the amount of the offer, __nuggft__ref's should go down
-        run.expectedSenderBalance -= cast.i192(env.value);
-        run.expectedNuggftBalance += cast.i192(env.value);
+        run.expectedSenderBalance -= cast.i192(env.floor);
+        run.expectedNuggftBalance += cast.i192(env.floor);
 
         if (env.isItem) {} else {}
     }
 
-    function preRunChecks(expectOffer__Run memory run) private {
+    function preRunChecks(expectSell__Run memory run) private {
         // ASSERT:OFFER_0x0C: what should the balances be before any call on claim?
         // ASSERT:OFFER_0x0C: maybe here we just check to see that the data is ok?
     }
 
-    function postRunChecks(expectOffer__Run memory run) private {
+    function postRunChecks(expectSell__Run memory run) private {
         // ASSERT:OFFER_0x0D: is the sender balance correct?
         assertBalance(run.sender, run.expectedSenderBalance, 'ASSERT:OFFER_0x0D');
 

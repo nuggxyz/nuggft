@@ -56,6 +56,10 @@ library lib {
             array[i] = a;
         }
     }
+
+    function take(int256 percent, int256 value) internal pure returns (int256) {
+        return (value * percent) / 100;
+    }
 }
 
 interface Vm {
