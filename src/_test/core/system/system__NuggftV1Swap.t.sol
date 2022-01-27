@@ -55,8 +55,7 @@ contract system__NuggftV1Swap is NuggftV1Test {
         forge.vm.stopPrank();
     }
 
-    function test__system__frankBidsOnAnItemThenClaims() public {
-        //dee buys a nugg and sells an item
+    function fragment__deeSellsAnItem() public {
         uint96 value = 1 gwei;
         forge.vm.startPrank(users.dee);
         {
@@ -70,15 +69,26 @@ contract system__NuggftV1Swap is NuggftV1Test {
             nuggft.sell(500, sellingItemId, value);
         }
         forge.vm.stopPrank();
+    }
+
+    function fragment__userMints(address user, uint24 token) public {
+        forge.vm.startPrank(user);
+        startExpectMint(token, users.frank, nuggft.msp());
+        nuggft.mint{value: nuggft.msp()}(token);
+        endExpectMint();
+        forge.vm.stopPrank();
+    }
+
+    function test__system__frankBidsOnAnItemThenClaims() public {
+        fragment__deeSellsAnItem();
+
+        uint96 value = 1 gwei;
 
         jump(3000);
 
+        fragment__userMints(users.frank, 501);
         forge.vm.startPrank(users.frank);
         {
-            startExpectMint(501, users.frank, nuggft.msp());
-            nuggft.mint{value: nuggft.msp()}(501);
-            endExpectMint();
-
             //bytes memory odat = startExpectOffer(3000, users.frank, value);
             nuggft.offer{value: value}(501, 500, sellingItemId);
             // stopExpectOffer(odat);
@@ -86,6 +96,82 @@ contract system__NuggftV1Swap is NuggftV1Test {
             bytes memory dat = startExpectClaim(lib.sarr160(encItemIdClaim(500, sellingItemId)), lib.sarrAddress(address(501)), users.frank);
             nuggft.claim(lib.sarr160(encItemIdClaim(500, sellingItemId)), lib.sarr160(501));
             stopExpectClaim(dat);
+        }
+        forge.vm.stopPrank();
+    }
+
+    function test__system__frankMulticlaimWinningItemAndNuggs() public {
+        fragment__deeSellsAnItem();
+        fragment__userMints(users.frank, 501);
+
+        forge.vm.startPrank(users.frank);
+        {
+            for (uint16 i = 0; i < 100; i++) {
+                jump(3000 + i);
+                tmpTokens.push(3000 + i);
+                uint96 value = nuggft.msp();
+                bytes memory data = startExpectOffer(tmpTokens[i], users.frank, value);
+                nuggft.offer{value: value}(tmpTokens[i]);
+                stopExpectOffer(data);
+            }
+
+            bytes memory itemData = startExpectOffer(encItemId(501, 500, sellingItemId), users.frank, 1 gwei);
+            nuggft.offer{value: 1 gwei}(encItemId(501, 500, sellingItemId));
+            stopExpectOffer(itemData);
+
+            tmpTokens.push(encItemIdClaim(500, sellingItemId));
+
+            jump(uint24(3050 + tmpTokens.length));
+
+            tmpUsers = lib.mAddress(users.frank, uint16(tmpTokens.length - 1));
+            tmpUsers.push(address(501));
+
+            bytes memory data = startExpectClaim(tmpTokens, tmpUsers, users.frank);
+            nuggft.claim(tmpTokens, tmpUsers);
+            stopExpectClaim(data);
+        }
+        forge.vm.stopPrank();
+    }
+
+    function test__system__frankMulticlaimLosingItemAndNuggs() public {
+        fragment__deeSellsAnItem();
+        fragment__userMints(users.frank, 501);
+        fragment__userMints(users.dennis, 502);
+
+        forge.vm.startPrank(users.frank);
+        {
+            for (uint16 i = 0; i < 100; i++) {
+                jump(3000 + i);
+                tmpTokens.push(3000 + i);
+                uint96 value = nuggft.msp();
+                bytes memory data = startExpectOffer(tmpTokens[i], users.frank, value);
+                nuggft.offer{value: value}(tmpTokens[i]);
+                stopExpectOffer(data);
+
+                uint96 dennisIsABastardMan = nuggft.vfo(users.dennis, tmpTokens[i]);
+                forge.vm.prank(users.dennis);
+                nuggft.offer{value: dennisIsABastardMan}(tmpTokens[i]);
+            }
+
+            bytes memory itemData = startExpectOffer(encItemId(501, 500, sellingItemId), users.frank, 1 gwei);
+            nuggft.offer{value: 1 gwei}(encItemId(501, 500, sellingItemId));
+            stopExpectOffer(itemData);
+
+            bytes memory dennisData = startExpectOffer(encItemId(502, 500, sellingItemId), users.dennis, 1.1 gwei);
+            forge.vm.prank(users.dennis);
+            nuggft.offer{value: 1.1 gwei}(encItemId(502, 500, sellingItemId));
+            stopExpectOffer(dennisData);
+
+            tmpTokens.push(encItemIdClaim(500, sellingItemId));
+
+            jump(uint24(3050 + tmpTokens.length));
+
+            tmpUsers = lib.mAddress(users.frank, uint16(tmpTokens.length - 1));
+            tmpUsers.push(address(501));
+
+            bytes memory data = startExpectClaim(tmpTokens, tmpUsers, users.frank);
+            nuggft.claim(tmpTokens, tmpUsers);
+            stopExpectClaim(data);
         }
         forge.vm.stopPrank();
     }

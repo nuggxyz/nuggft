@@ -174,7 +174,7 @@ abstract contract expectClaim is expectBase {
                 // @note BEFORE a losing item claim
 
                 // ASSERT:CLAIM_0x03: is the sender the offerer?
-                assertEq(run.sender, address(uint160(pre.offer)), 'ASSERT:CLAIM_0x03: the offerer SHOULD be the sender');
+                assertEq(env.buyer, address(uint160(pre.offer)), 'ASSERT:CLAIM_0x03: the offerer SHOULD be the sender');
             }
         } else {
             if (env.winner) {
