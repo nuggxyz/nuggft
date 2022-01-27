@@ -4,13 +4,13 @@ pragma solidity 0.8.11;
 
 import '../../NuggftV1.test.sol';
 import {NuggftV1Proof} from '../../../core/NuggftV1Proof.sol';
+import {fragments} from './fragments.t.sol';
 
-contract system__NuggftV1Swap is NuggftV1Test {
+contract system__NuggftV1Swap is NuggftV1Test, fragments {
     using SafeCast for uint96;
 
     address[] tmpUsers;
     uint160[] tmpTokens;
-    uint16 sellingItemId;
 
     function setUp() public {
         reset__system();
@@ -55,38 +55,14 @@ contract system__NuggftV1Swap is NuggftV1Test {
         forge.vm.stopPrank();
     }
 
-    function fragment__deeSellsAnItem() public {
-        uint96 value = 1 gwei;
-        forge.vm.startPrank(users.dee);
-        {
-            startExpectMint(500, users.frank, value);
-            nuggft.mint{value: value}(500);
-            endExpectMint();
-
-            (, uint8[] memory ids, , , , ) = nuggft.proofToDotnuggMetadata(500);
-            sellingItemId = ids[1] | (1 << 8);
-
-            nuggft.sell(500, sellingItemId, value);
-        }
-        forge.vm.stopPrank();
-    }
-
-    function fragment__userMints(address user, uint24 token) public {
-        forge.vm.startPrank(user);
-        startExpectMint(token, users.frank, nuggft.msp());
-        nuggft.mint{value: nuggft.msp()}(token);
-        endExpectMint();
-        forge.vm.stopPrank();
-    }
-
     function test__system__frankBidsOnAnItemThenClaims() public {
-        fragment__deeSellsAnItem();
+        deeSellsAnItem();
 
         uint96 value = 1 gwei;
 
         jump(3000);
 
-        fragment__userMints(users.frank, 501);
+        userMints(users.frank, 501);
         forge.vm.startPrank(users.frank);
         {
             //bytes memory odat = startExpectOffer(3000, users.frank, value);
@@ -101,8 +77,8 @@ contract system__NuggftV1Swap is NuggftV1Test {
     }
 
     function test__system__frankMulticlaimWinningItemAndNuggs() public {
-        fragment__deeSellsAnItem();
-        fragment__userMints(users.frank, 501);
+        deeSellsAnItem();
+        userMints(users.frank, 501);
 
         forge.vm.startPrank(users.frank);
         {
@@ -134,9 +110,9 @@ contract system__NuggftV1Swap is NuggftV1Test {
     }
 
     function test__system__frankMulticlaimLosingItemAndNuggs() public {
-        fragment__deeSellsAnItem();
-        fragment__userMints(users.frank, 501);
-        fragment__userMints(users.dennis, 502);
+        deeSellsAnItem();
+        userMints(users.frank, 501);
+        userMints(users.dennis, 502);
 
         forge.vm.startPrank(users.frank);
         {
