@@ -18,7 +18,7 @@ contract system__NuggftV1Swap_test is NuggftV1Test {
     }
 
     function test__system__frankMintsATokenForFree() public {
-        expect.stake().start(0, 1, true);
+        // expect.stake().start(0, 1, true);
         expect.balance().start(users.frank, 0, false);
         expect.balance().start(address(nuggft), 0, true);
 
@@ -28,12 +28,12 @@ contract system__NuggftV1Swap_test is NuggftV1Test {
         }
         forge.vm.stopPrank();
 
-        expect.stake().stop();
+        // expect.stake().stop();
         expect.balance().stop();
     }
 
     function test__system__frankMintsATokenFuzz(uint96 value) public {
-        expect.stake().start(value, 1, true);
+        // expect.stake().start(value, 1, true);
 
         forge.vm.deal(users.frank, value);
 
@@ -46,7 +46,7 @@ contract system__NuggftV1Swap_test is NuggftV1Test {
         }
         forge.vm.stopPrank();
 
-        expect.stake().stop();
+        // expect.stake().stop();
         expect.balance().stop();
     }
 
@@ -114,7 +114,7 @@ contract system__NuggftV1Swap_test is NuggftV1Test {
 
         emit log_uint(0);
 
-        expect.stake().start(value, 1, true);
+        // expect.stake().start(value, 1, true);
 
         emit log_uint(1);
 
@@ -136,7 +136,7 @@ contract system__NuggftV1Swap_test is NuggftV1Test {
 
         emit log_uint(4);
 
-        expect.stake().stop();
+        // expect.stake().stop();
         expect.balance().stop();
     }
 
@@ -145,7 +145,7 @@ contract system__NuggftV1Swap_test is NuggftV1Test {
 
         uint160 tokenId = 500;
 
-        expect.stake().start(value, 1, true);
+        // expect.stake().start(value, 1, true);
         expect.balance().start(users.frank, value, false);
         expect.balance().start(address(nuggft), value, true);
 
@@ -157,7 +157,7 @@ contract system__NuggftV1Swap_test is NuggftV1Test {
         }
         forge.vm.stopPrank();
 
-        expect.stake().stop();
+        // expect.stake().stop();
         expect.balance().stop();
     }
 }
