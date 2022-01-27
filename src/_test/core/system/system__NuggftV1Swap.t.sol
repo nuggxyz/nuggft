@@ -55,40 +55,40 @@ contract system__NuggftV1Swap is NuggftV1Test {
         forge.vm.stopPrank();
     }
 
-    // function test__system__frankBidsOnAnItemThenClaims() public {
-    //     //dee buys a nugg and sells an item
-    //     uint96 value = 1 gwei;
-    //     forge.vm.startPrank(users.dee);
-    //     {
-    //         startExpectMint(500, users.frank, value);
-    //         nuggft.mint{value: value}(500);
-    //         endExpectMint();
+    function test__system__frankBidsOnAnItemThenClaims() public {
+        //dee buys a nugg and sells an item
+        uint96 value = 1 gwei;
+        forge.vm.startPrank(users.dee);
+        {
+            startExpectMint(500, users.frank, value);
+            nuggft.mint{value: value}(500);
+            endExpectMint();
 
-    //         (, uint8[] memory ids, , , , ) = nuggft.proofToDotnuggMetadata(500);
-    //         sellingItemId = ids[1] | (1 << 8);
+            (, uint8[] memory ids, , , , ) = nuggft.proofToDotnuggMetadata(500);
+            sellingItemId = ids[1] | (1 << 8);
 
-    //         nuggft.sell(500, sellingItemId, value);
-    //     }
-    //     forge.vm.stopPrank();
+            nuggft.sell(500, sellingItemId, value);
+        }
+        forge.vm.stopPrank();
 
-    //     jump(3000);
+        jump(3000);
 
-    //     forge.vm.startPrank(users.frank);
-    //     {
-    //         startExpectMint(501, users.frank, nuggft.msp());
-    //         nuggft.mint{value: nuggft.msp()}(501);
-    //         endExpectMint();
+        forge.vm.startPrank(users.frank);
+        {
+            startExpectMint(501, users.frank, nuggft.msp());
+            nuggft.mint{value: nuggft.msp()}(501);
+            endExpectMint();
 
-    //         // startExpectOffer(3000, users.frank, value);
-    //         nuggft.offer{value: value}(501, 500, sellingItemId);
-    //         // endExpectOffer();
-    //         jump(3002);
-    //         // bytes memory dat = startExpectClaim(lib.sarr160(encItemIdClaim(500, sellingItemId)), lib.sarrAddress(uint160(501)), users.frank);
-    //         nuggft.claim(lib.sarr160(3000), lib.sarrAddress(users.frank));
-    //         // stopExpectClaim(dat);
-    //     }
-    //     forge.vm.stopPrank();
-    // }
+            // startExpectOffer(3000, users.frank, value);
+            nuggft.offer{value: value}(501, 500, sellingItemId);
+            // endExpectOffer();
+            jump(3002);
+            bytes memory dat = startExpectClaim(lib.sarr160(encItemIdClaim(500, sellingItemId)), lib.sarrAddress(address(501)), users.frank);
+            nuggft.claim(lib.sarr160(encItemIdClaim(500, sellingItemId)), lib.sarr160(501));
+            stopExpectClaim(dat);
+        }
+        forge.vm.stopPrank();
+    }
 
     function test__system__nuggFactory() public {
         uint16 nugg__size = 100;
