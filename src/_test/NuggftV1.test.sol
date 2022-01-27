@@ -10,7 +10,9 @@ import {MockNuggftV1Migrator} from './mock/MockNuggftV1Migrator.sol';
 
 import {NuggftV1} from '../NuggftV1.sol';
 import {PureDeployer} from '../_deployment/PureDeployer.sol';
-import {expectAll} from './expect/all.sol';
+
+import {Expect} from './expect/Expect.sol';
+
 import './utils/forge.sol';
 
 contract RiggedNuggft is NuggftV1 {
@@ -63,7 +65,7 @@ library SafeCast {
     }
 }
 
-contract NuggftV1Test is ForgeTest, expectAll {
+contract NuggftV1Test is ForgeTest {
     using SafeCast for uint96;
     using SafeCast for uint256;
     using SafeCast for uint64;
@@ -74,9 +76,7 @@ contract NuggftV1Test is ForgeTest, expectAll {
 
     RiggedNuggft internal nuggft;
 
-    function __nuggft__ref() internal view override returns (RiggedNuggft) {
-        return nuggft;
-    }
+    constructor() {}
 
     address public _nuggft;
     address public _processor;
@@ -93,6 +93,8 @@ contract NuggftV1Test is ForgeTest, expectAll {
 
     Users public users;
 
+    Expect expect;
+
     address internal dub6ix = 0x9B0E2b16F57648C7bAF28EDD7772a815Af266E77;
 
     // constructor() {}
@@ -106,6 +108,8 @@ contract NuggftV1Test is ForgeTest, expectAll {
 
         processor = MockDotnuggV1(dep.__dotnugg());
         nuggft = RiggedNuggft(dep.__nuggft());
+
+        expect = new Expect(nuggft);
 
         _nuggft = address(nuggft);
 
@@ -144,6 +148,8 @@ contract NuggftV1Test is ForgeTest, expectAll {
 
         processor = MockDotnuggV1(dep.__dotnugg());
         nuggft = RiggedNuggft(dep.__nuggft());
+
+        expect = new Expect(nuggft);
 
         _nuggft = address(nuggft);
 
@@ -195,49 +201,6 @@ contract NuggftV1Test is ForgeTest, expectAll {
                                 eth modifiers
        ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
 
-    // struct ChangeCheck {
-    //     int192 expected_stake_change;
-    //     int192 expected_share_change;
-    //     //
-    //     int192 before_staked;
-    //     int192 before_protocol;
-    //     int192 before_shares;
-    //     int192 before_msp;
-    //     int192 before_eps;
-    //     //
-    //     int192 after_staked;
-    //     int192 after_protocol;
-    //     int192 after_shares;
-    //     int192 after_msp;
-    //     int192 after_eps;
-    // }
-
-    // modifier changeInStaked(int192 change, int192 shareChange) {
-    //     ChangeCheck memory str;
-    //     str.before_staked = nuggft.staked().safeInt();
-    //     str.before_protocol = nuggft.proto().safeInt();
-    //     str.before_shares = nuggft.shares().safeInt();
-    //     str.before_msp = nuggft.msp().safeInt();
-
-    //     str.before_eps = nuggft.eps().safeInt();
-
-    //     assertEq(str.before_eps, str.before_shares > 0 ? str.before_staked / str.before_shares : int256(0), 'EPS is starting off with an incorrect value');
-
-    //     _;
-    //     str.after_staked = nuggft.staked().safeInt();
-    //     str.after_protocol = nuggft.proto().safeInt();
-    //     str.after_shares = nuggft.shares().safeInt();
-    //     str.after_msp = nuggft.msp().safeInt();
-
-    //     assertTrue(str.after_msp >= str.before_msp, 'msp is did not increase as expected');
-    //     assertEq(str.after_protocol - str.before_protocol, take(10, change), 'totalProtocol is not what is expected');
-    //     assertEq(str.after_staked - str.before_staked, change - take(10, change), 'staked change is not 90 percent of expected change');
-    //     assertEq(str.after_shares - str.before_shares, shareChange, 'shares difference is not what is expected');
-
-    //     str.after_eps = nuggft.eps().safeInt();
-    //     assertEq(str.after_eps, str.after_shares > 0 ? str.after_staked / str.after_shares : int256(0), 'EPS is not ending with correct value');
-    // }
-
     modifier baldiff(address user, int192 exp) {
         int192 got = int192(int256(uint256(address(nuggft).balance)));
         _;
@@ -256,16 +219,20 @@ contract NuggftV1Test is ForgeTest, expectAll {
     }
 
     BalDiff[] _baldiffarr;
+    enum Direction {
+        down,
+        up
+    }
 
     function expectBalChange(
         address user,
         uint96 exp,
-        dir direction
+        Direction direction
     ) internal {
         _baldiffarr.push(
             BalDiff({
                 user: user, //
-                expected: (direction == dir.up ? user.balance + exp : user.balance - exp)
+                expected: (direction == Direction.up ? user.balance + exp : user.balance - exp)
             })
         );
     }

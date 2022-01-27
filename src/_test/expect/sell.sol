@@ -4,9 +4,12 @@ pragma solidity 0.8.11;
 
 import '../utils/forge.sol';
 
-import {expectBase} from './base.sol';
+import './base.sol';
+import {RiggedNuggft} from '../NuggftV1.test.sol';
 
-abstract contract expectSell is expectBase {
+contract expectSell is base {
+    constructor(RiggedNuggft nuggft_) base(nuggft_) {}
+
     struct expectSell__Snapshot {
         expectSell__SnapshotEnv env;
         expectSell__SnapshotData data;
@@ -31,26 +34,34 @@ abstract contract expectSell is expectBase {
         int192 expectedNuggftBalance;
     }
 
-    function startExpectSell(
+    function clear() public {
+        delete execution;
+    }
+
+    bytes execution;
+
+    function start(
         uint160 sellingTokenId,
         uint16 itemId,
         uint96 floor,
         address sender
-    ) internal {
-        startExpectSell((uint160(itemId) << 24) | sellingTokenId, floor, sender);
+    ) public {
+        this.start((uint160(itemId) << 24) | sellingTokenId, floor, sender);
     }
 
-    function startExpectSell(
+    function start(
         uint160 tokenId,
         uint96 floor,
         address sender
-    ) internal returns (bytes memory) {
+    ) public {
+        require(execution.length == 0, 'EXPECT-SELL:START: execution already esists');
+
         expectSell__Run memory run;
 
         run.sender = sender;
 
         run.expectedSenderBalance = cast.i192(run.sender.balance);
-        run.expectedNuggftBalance = cast.i192(address(__nuggft__ref()).balance);
+        run.expectedNuggftBalance = cast.i192(address(nuggft).balance);
 
         expectSell__SnapshotEnv memory env;
         expectSell__SnapshotData memory pre;
@@ -61,13 +72,13 @@ abstract contract expectSell is expectBase {
         if (env.isItem) {
             env.buyer = address(tokenId >> 40);
 
-            pre.agency = __nuggft__ref().external__itemAgency(env.id);
-            pre.offer = __nuggft__ref().external__itemOffers(env.id, uint160(env.buyer));
+            pre.agency = nuggft.external__itemAgency(env.id);
+            pre.offer = nuggft.external__itemOffers(env.id, uint160(env.buyer));
         } else {
             env.buyer = sender;
 
-            pre.agency = __nuggft__ref().external__agency(env.id);
-            pre.offer = __nuggft__ref().external__offers(env.id, env.buyer);
+            pre.agency = nuggft.external__agency(env.id);
+            pre.offer = nuggft.external__offers(env.id, env.buyer);
         }
 
         if (pre.offer == 0) pre.offer = pre.agency;
@@ -79,27 +90,31 @@ abstract contract expectSell is expectBase {
 
         preRunChecks(run);
 
-        return abi.encode(run);
+        execution = abi.encode(run);
     }
 
-    function stopExpectSell(bytes memory input) internal {
-        expectSell__Run memory run = abi.decode(input, (expectSell__Run));
+    function stop() public {
+        require(execution.length > 0, 'EXPECT-SELL:STOP: execution does not exist');
+
+        expectSell__Run memory run = abi.decode(execution, (expectSell__Run));
 
         expectSell__SnapshotEnv memory env = run.snapshot.env;
         expectSell__SnapshotData memory pre = run.snapshot.data;
         expectSell__SnapshotData memory post;
 
         if (env.isItem) {
-            post.agency = __nuggft__ref().external__itemAgency(env.id);
-            post.offer = __nuggft__ref().external__itemOffers(env.id, uint160(env.buyer));
+            post.agency = nuggft.external__itemAgency(env.id);
+            post.offer = nuggft.external__itemOffers(env.id, uint160(env.buyer));
         } else {
-            post.agency = __nuggft__ref().external__agency(env.id);
-            post.offer = __nuggft__ref().external__offers(env.id, env.buyer);
+            post.agency = nuggft.external__agency(env.id);
+            post.offer = nuggft.external__offers(env.id, env.buyer);
         }
 
         postSellChecks(run, env, pre, post);
 
         postRunChecks(run);
+
+        this.clear();
     }
 
     function preSellChecks(
@@ -116,7 +131,7 @@ abstract contract expectSell is expectBase {
         expectSell__SnapshotData memory pre,
         expectSell__SnapshotData memory post
     ) private {
-        // BALANCE CHANGE: sender balance should go up by the amount of the offer, __nuggft__ref's should go down
+        // BALANCE CHANGE: sender balance should go up by the amount of the offer, nuggft's should go down
         run.expectedSenderBalance -= cast.i192(env.floor);
         run.expectedNuggftBalance += cast.i192(env.floor);
 
@@ -132,7 +147,7 @@ abstract contract expectSell is expectBase {
         // ASSERT:OFFER_0x0D: is the sender balance correct?
         assertBalance(run.sender, run.expectedSenderBalance, 'ASSERT:OFFER_0x0D');
 
-        // ASSERT:OFFER_0x0E: is the __nuggft__ref balance correct?
-        assertBalance(address(__nuggft__ref()), run.expectedNuggftBalance, 'ASSERT:OFFER_0x0E');
+        // ASSERT:OFFER_0x0E: is the nuggft balance correct?
+        assertBalance(address(nuggft), run.expectedNuggftBalance, 'ASSERT:OFFER_0x0E');
     }
 }

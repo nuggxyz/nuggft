@@ -4,21 +4,15 @@ pragma solidity 0.8.11;
 
 import '../utils/forge.sol';
 
-import {expectBase} from './base.sol';
+import './base.sol';
 
 import {expectStake} from './stake.sol';
 
-abstract contract expectClaim is expectBase, expectStake {
-    function startExpectClaim(
-        uint160[] memory tokenIds,
-        uint160[] memory offerers,
-        address sender
-    ) internal {
-        address[] memory a;
-        assembly {
-            a := offerers
-        }
-        startExpectClaim(tokenIds, a, sender);
+contract expectClaim is base {
+    expectStake stake;
+
+    constructor(RiggedNuggft nuggft_) base(nuggft_) {
+        stake = new expectStake(nuggft_);
     }
 
     struct expectClaim__Snapshot {
@@ -51,11 +45,31 @@ abstract contract expectClaim is expectBase, expectStake {
         int192 expectedNuggftBalance;
     }
 
-    function startExpectClaim(
+    bytes execution;
+
+    function clear() public {
+        delete execution;
+    }
+
+    function start(
+        uint160[] memory tokenIds,
+        uint160[] memory offerers,
+        address sender
+    ) public {
+        address[] memory a;
+        assembly {
+            a := offerers
+        }
+        this.start(tokenIds, a, sender);
+    }
+
+    function start(
         uint160[] memory tokenIds,
         address[] memory offerers,
         address sender
-    ) internal returns (bytes memory) {
+    ) public {
+        require(execution.length == 0, 'EXPECT-CLAIM:START: execution already esists');
+
         require(tokenIds.length == offerers.length, 'EXPECT-CLAIM:START:ArrayLengthNotSame');
 
         expectClaim__Run memory run;
@@ -63,7 +77,7 @@ abstract contract expectClaim is expectBase, expectStake {
         run.sender = sender;
         run.snapshots = new expectClaim__Snapshot[](tokenIds.length);
         run.expectedSenderBalance = cast.i192(run.sender.balance);
-        run.expectedNuggftBalance = cast.i192(address(__nuggft__ref()).balance);
+        run.expectedNuggftBalance = cast.i192(address(nuggft).balance);
 
         for (uint256 i = 0; i < tokenIds.length; i++) {
             expectClaim__SnapshotEnv memory env;
@@ -74,11 +88,11 @@ abstract contract expectClaim is expectBase, expectStake {
             env.buyer = offerers[i];
 
             if (env.isItem) {
-                pre.agency = __nuggft__ref().external__itemAgency(env.id);
-                pre.offer = __nuggft__ref().external__itemOffers(env.id, uint160(env.buyer));
+                pre.agency = nuggft.external__itemAgency(env.id);
+                pre.offer = nuggft.external__itemOffers(env.id, uint160(env.buyer));
             } else {
-                pre.agency = __nuggft__ref().external__agency(env.id);
-                pre.offer = __nuggft__ref().external__offers(env.id, env.buyer);
+                pre.agency = nuggft.external__agency(env.id);
+                pre.offer = nuggft.external__offers(env.id, env.buyer);
             }
 
             if (pre.offer == 0) pre.offer = pre.agency;
@@ -99,11 +113,13 @@ abstract contract expectClaim is expectBase, expectStake {
 
         preRunChecks(run);
 
-        return abi.encode(run);
+        execution = abi.encode(run);
     }
 
-    function stopExpectClaim(bytes memory input) internal {
-        expectClaim__Run memory run = abi.decode(input, (expectClaim__Run));
+    function stop() public {
+        require(execution.length > 0, 'EXPECT-CLAIM:STOP: execution does not esists');
+
+        expectClaim__Run memory run = abi.decode(execution, (expectClaim__Run));
 
         for (uint256 i = 0; i < run.snapshots.length; i++) {
             expectClaim__SnapshotEnv memory env = run.snapshots[i].env;
@@ -111,17 +127,19 @@ abstract contract expectClaim is expectBase, expectStake {
             expectClaim__SnapshotData memory post;
 
             if (env.isItem) {
-                post.agency = __nuggft__ref().external__itemAgency(env.id);
-                post.offer = __nuggft__ref().external__itemOffers(env.id, uint160(env.buyer));
+                post.agency = nuggft.external__itemAgency(env.id);
+                post.offer = nuggft.external__itemOffers(env.id, uint160(env.buyer));
             } else {
-                post.agency = __nuggft__ref().external__agency(env.id);
-                post.offer = __nuggft__ref().external__offers(env.id, env.buyer);
+                post.agency = nuggft.external__agency(env.id);
+                post.offer = nuggft.external__offers(env.id, env.buyer);
             }
 
             postSingleClaimChecks(run, env, pre, post);
         }
 
         postRunChecks(run);
+
+        this.clear();
     }
 
     function proofSearch(uint256 proof, uint16 itemId) internal pure returns (bool ok, uint8 index) {
@@ -136,7 +154,7 @@ abstract contract expectClaim is expectBase, expectStake {
         uint16 itemId,
         string memory str
     ) private {
-        uint256 proof = __nuggft__ref().proofOf(tokenId);
+        uint256 proof = nuggft.proofOf(tokenId);
 
         (bool hasItem, ) = proofSearch(proof, itemId);
 
@@ -148,7 +166,7 @@ abstract contract expectClaim is expectBase, expectStake {
         uint16 itemId,
         string memory str
     ) private {
-        uint256 proof = __nuggft__ref().proofOf(tokenId);
+        uint256 proof = nuggft.proofOf(tokenId);
 
         (bool hasItem, ) = proofSearch(proof, itemId);
 
@@ -164,7 +182,7 @@ abstract contract expectClaim is expectBase, expectStake {
 
         if (env.isItem) {
             if (env.winner) {
-                // -- __nuggft__ref's protocol items should be > 1 for the item
+                // -- nuggft's protocol items should be > 1 for the item
 
                 // ASSERT:CLAIM_0x02: is the item inside the selling nuggs proof?
                 assertProofNotContains(uint24(env.id), uint16(env.id >> 24), 'ASSERT:CLAIM_0x02: item SHOULD NOT be inside the selling nuggs proof');
@@ -209,7 +227,7 @@ abstract contract expectClaim is expectBase, expectStake {
         assertEq(post.offer, 0, 'ASSERT:CLAIM_0x06: is the post offer == 0?');
 
         if (!env.winner) {
-            // BALANCE CHANGE: sender balance should go up by the amount of the offer, __nuggft__ref's should go down
+            // BALANCE CHANGE: sender balance should go up by the amount of the offer, nuggft's should go down
             int192 amount = cast.i192(((pre.offer << 26) >> 186) * .1 gwei);
             run.expectedSenderBalance += amount;
             run.expectedNuggftBalance -= amount;
@@ -258,7 +276,7 @@ abstract contract expectClaim is expectBase, expectStake {
         // ASSERT:CLAIM_0x0D: is the sender balance correct?
         assertBalance(run.sender, run.expectedSenderBalance, 'ASSERT:CLAIM_0x0D');
 
-        // ASSERT:CLAIM_0x0E: is the __nuggft__ref balance correct?
-        assertBalance(address(__nuggft__ref()), run.expectedNuggftBalance, 'ASSERT:CLAIM_0x0E');
+        // ASSERT:CLAIM_0x0E: is the nuggft balance correct?
+        assertBalance(address(nuggft), run.expectedNuggftBalance, 'ASSERT:CLAIM_0x0E');
     }
 }

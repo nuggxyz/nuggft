@@ -24,13 +24,15 @@ contract system__NuggftV1Swap is NuggftV1Test {
         uint96 value = 1 gwei;
         forge.vm.startPrank(users.frank);
         {
-            bytes memory odat = startExpectOffer(3000, users.frank, value);
+            expect.offer().start(3000, users.frank, value);
             nuggft.offer{value: value}(3000);
-            stopExpectOffer(odat);
+            expect.offer().stop();
+
             jump(3001);
-            bytes memory dat = startExpectClaim(lib.sarr160(3000), lib.sarrAddress(users.frank), users.frank);
+
+            expect.claim().start(lib.sarr160(3000), lib.sarrAddress(users.frank), users.frank);
             nuggft.claim(lib.sarr160(3000), lib.sarrAddress(users.frank));
-            stopExpectClaim(dat);
+            expect.claim().stop();
         }
         forge.vm.stopPrank();
     }
@@ -48,9 +50,9 @@ contract system__NuggftV1Swap is NuggftV1Test {
 
             jump(3001);
 
-            bytes memory dat = startExpectClaim(lib.sarr160(500), lib.sarrAddress(users.frank), users.frank);
+            expect.claim().start(lib.sarr160(500), lib.sarrAddress(users.frank), users.frank);
             nuggft.claim(lib.sarr160(500), lib.sarrAddress(users.frank));
-            stopExpectClaim(dat);
+            expect.claim().stop();
         }
         forge.vm.stopPrank();
     }
@@ -79,13 +81,13 @@ contract system__NuggftV1Swap is NuggftV1Test {
             nuggft.mint{value: nuggft.msp()}(501);
             endExpectMint();
 
-            //bytes memory odat = startExpectOffer(3000, users.frank, value);
+            //expect.offer().start(3000, users.frank, value);
             nuggft.offer{value: value}(501, 500, sellingItemId);
-            // stopExpectOffer(odat);
+            // expect.offer().stop();
             jump(3002);
-            bytes memory dat = startExpectClaim(lib.sarr160(encItemIdClaim(500, sellingItemId)), lib.sarrAddress(address(501)), users.frank);
+            expect.claim().start(lib.sarr160(encItemIdClaim(500, sellingItemId)), lib.sarrAddress(address(501)), users.frank);
             nuggft.claim(lib.sarr160(encItemIdClaim(500, sellingItemId)), lib.sarr160(501));
-            stopExpectClaim(dat);
+            expect.claim().stop();
         }
         forge.vm.stopPrank();
     }
@@ -103,10 +105,10 @@ contract system__NuggftV1Swap is NuggftV1Test {
                 tmpUsers.push(forge.vm.addr(user__count + 100));
                 uint96 money = nuggft.vfo(tmpUsers[user__count], tmpTokens[i]);
                 forge.vm.deal(tmpUsers[user__count], money);
-                bytes memory odat = startExpectOffer(tmpTokens[i], tmpUsers[user__count], money);
+                expect.offer().start(tmpTokens[i], tmpUsers[user__count], money);
                 forge.vm.prank(tmpUsers[user__count]);
                 nuggft.offer{value: money}(tmpTokens[i]);
-                stopExpectOffer(odat);
+                expect.offer().stop();
             }
         }
 
@@ -115,10 +117,10 @@ contract system__NuggftV1Swap is NuggftV1Test {
 
         for (uint16 i = 0; i < nugg__size; i++) {
             for (; user__count < i * 10; user__count++) {
-                bytes memory dat = startExpectClaim(lib.sarr160(tmpTokens[i]), lib.sarrAddress(tmpUsers[user__count]), tmpUsers[user__count]);
+                expect.claim().start(lib.sarr160(tmpTokens[i]), lib.sarrAddress(tmpUsers[user__count]), tmpUsers[user__count]);
                 forge.vm.prank(tmpUsers[user__count]);
                 nuggft.claim(lib.sarr160(tmpTokens[i]), lib.sarrAddress(tmpUsers[user__count]));
-                stopExpectClaim(dat);
+                expect.claim().stop();
             }
         }
     }
@@ -142,10 +144,10 @@ contract system__NuggftV1Swap is NuggftV1Test {
                 for (uint256 j = 0; j < size; j++) {
                     uint96 money = nuggft.vfo(user__list[j], 3000 + p);
                     forge.vm.deal(user__list[j], money);
-                    bytes memory odat = startExpectOffer(3000 + p, user__list[j], money);
+                    expect.offer().start(3000 + p, user__list[j], money);
                     forge.vm.prank(user__list[j]);
                     nuggft.offer{value: money}(3000 + p);
-                    stopExpectOffer(odat);
+                    expect.offer().stop();
                 }
             }
 
@@ -154,10 +156,10 @@ contract system__NuggftV1Swap is NuggftV1Test {
         }
         // uint256 i = 1;
         for (uint256 i = 0; i < size; i++) {
-            bytes memory dat = startExpectClaim(lib.sarr160(tmpTokens[i]), lib.sarrAddress(tmpUsers[i]), tmpUsers[i]);
+            expect.claim().start(lib.sarr160(tmpTokens[i]), lib.sarrAddress(tmpUsers[i]), tmpUsers[i]);
             forge.vm.prank(tmpUsers[i]);
             nuggft.claim(lib.sarr160(tmpTokens[i]), lib.sarrAddress(tmpUsers[i]));
-            stopExpectClaim(dat);
+            expect.claim().stop();
         }
 
         // forge.vm.prank(users.dennis);
@@ -172,11 +174,11 @@ contract system__NuggftV1Swap is NuggftV1Test {
 
     function test__system__revert__0x24__offerWarClaimTwice() public {
         test__system__offerWar();
-        // bytes memory mem = startExpectClaim(lib.sarr160(tmpTokens[1]), lib.sarrAddress(tmpUsers[1]), tmpUsers[1]);
+        // bytes memory mem = expect.startExpectClaim(lib.sarr160(tmpTokens[1]), lib.sarrAddress(tmpUsers[1]), tmpUsers[1]);
         forge.vm.expectRevert(hex'24');
         forge.vm.prank(tmpUsers[1]);
         nuggft.claim(lib.sarr160(tmpTokens[1]), lib.sarrAddress(tmpUsers[1]));
-        // stopExpectClaim(mem);
+        // expect.claim().stop();
     }
 
     function test__system__revert__0x24__claim__twice__frank() public {
@@ -380,9 +382,9 @@ contract system__NuggftV1Swap is NuggftV1Test {
 
             money = nuggft.vfo(forge.vm.addr(100), 500);
 
-            bytes memory odat = startExpectOffer(500, tmpUsers[i], money);
+            expect.offer().start(500, tmpUsers[i], money);
             nuggft.offer{value: money}(500);
-            stopExpectOffer(odat);
+            expect.offer().stop();
 
             forge.vm.stopPrank();
             money += 10 gwei;

@@ -4,17 +4,15 @@ pragma solidity 0.8.11;
 
 import '../utils/forge.sol';
 
-import {expectBase} from './base.sol';
+import './base.sol';
 
-abstract contract expectStake is expectBase {
+contract expectStake is base {
+    constructor(RiggedNuggft nuggft_) base(nuggft_) {}
+
     struct expectStake__Run {
         int192 expected_stake_change;
         int192 expected_share_change;
         expectStake__Snapshot pre;
-    }
-    enum dir {
-        down,
-        up
     }
 
     struct expectStake__Snapshot {
@@ -25,39 +23,49 @@ abstract contract expectStake is expectBase {
         int192 eps;
     }
 
-    function startExpectStake(
+    bytes execution;
+
+    function clear() public {
+        delete execution;
+    }
+
+    function start(
         uint96 eth,
         uint64 shares,
-        dir direction
-    ) internal returns (bytes memory res) {
+        bool up
+    ) public {
+        require(execution.length == 0, 'EXPECT-STAKE:START: execution already exists');
+
         expectStake__Run memory run;
 
-        run.pre.staked = cast.i192(__nuggft__ref().staked());
-        run.pre.protocol = cast.i192(__nuggft__ref().proto());
-        run.pre.shares = cast.i192(__nuggft__ref().shares());
-        run.pre.msp = cast.i192(__nuggft__ref().msp());
-        run.pre.eps = cast.i192(__nuggft__ref().eps());
+        run.pre.staked = cast.i192(nuggft.staked());
+        run.pre.protocol = cast.i192(nuggft.proto());
+        run.pre.shares = cast.i192(nuggft.shares());
+        run.pre.msp = cast.i192(nuggft.msp());
+        run.pre.eps = cast.i192(nuggft.eps());
 
         assertEq(run.pre.eps, run.pre.shares > 0 ? run.pre.staked / run.pre.shares : int256(0), 'EPS is starting off with an incorrect value');
 
-        run.expected_stake_change = cast.i192(eth) * (direction == dir.up ? int8(1) : int8(-1));
-        run.expected_share_change = cast.i192(shares) * (direction == dir.up ? int8(1) : int8(-1));
+        run.expected_stake_change = cast.i192(eth) * (up ? int8(1) : int8(-1));
+        run.expected_share_change = cast.i192(shares) * (up ? int8(1) : int8(-1));
 
-        return abi.encode(run);
+        execution = abi.encode(run);
     }
 
-    function stopExpectStake(bytes memory input) internal {
-        expectStake__Run memory run = abi.decode(input, (expectStake__Run));
+    function stop() public {
+        require(execution.length > 0, 'EXPECT-STAKE:STOP: execution does not exist');
+
+        expectStake__Run memory run = abi.decode(execution, (expectStake__Run));
 
         expectStake__Snapshot memory pre = run.pre;
 
         expectStake__Snapshot memory post;
 
-        post.staked = cast.i192(__nuggft__ref().staked());
-        post.protocol = cast.i192(__nuggft__ref().proto());
-        post.shares = cast.i192(__nuggft__ref().shares());
-        post.msp = cast.i192(__nuggft__ref().msp());
-        post.eps = cast.i192(__nuggft__ref().eps());
+        post.staked = cast.i192(nuggft.staked());
+        post.protocol = cast.i192(nuggft.proto());
+        post.shares = cast.i192(nuggft.shares());
+        post.msp = cast.i192(nuggft.msp());
+        post.eps = cast.i192(nuggft.eps());
 
         assertTrue(post.msp >= pre.msp, 'msp is did not increase as expected');
         assertEq(post.protocol - pre.protocol, lib.take(10, run.expected_stake_change), 'totalProtocol is not what is expected');
@@ -68,7 +76,9 @@ abstract contract expectStake is expectBase {
         );
         assertEq(post.shares - pre.shares, run.expected_share_change, 'shares difference is not what is expected');
 
-        post.eps = cast.i192(__nuggft__ref().eps());
+        post.eps = cast.i192(nuggft.eps());
         assertEq(post.eps, post.shares > 0 ? post.staked / post.shares : int256(0), 'EPS is not ending with correct value');
+
+        this.clear();
     }
 }
