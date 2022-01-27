@@ -19,17 +19,76 @@ contract system__NuggftV1Swap is NuggftV1Test {
         delete sellingItemId;
     }
 
-    function test__system__frankBidsOnATokenThenClaims() public {
+    function test__system__frankBidsOnANuggThenClaims() public {
         jump(3000);
         uint96 value = 1 gwei;
         forge.vm.startPrank(users.frank);
         {
+            startExpectOffer(3000, users.frank, value);
             nuggft.offer{value: value}(3000);
+            endExpectOffer();
             jump(3001);
+            bytes memory dat = startExpectClaim(lib.sarr160(3000), lib.sarrAddress(users.frank), users.frank);
             nuggft.claim(lib.sarr160(3000), lib.sarrAddress(users.frank));
+            stopExpectClaim(dat);
         }
         forge.vm.stopPrank();
     }
+
+    function test__system__frankSellsANuggThenReclaims() public {
+        jump(3000);
+        uint96 value = 1 gwei;
+        forge.vm.startPrank(users.frank);
+        {
+            startExpectMint(500, users.frank, value);
+            nuggft.mint{value: value}(500);
+            endExpectMint();
+
+            nuggft.sell(500, 1 gwei);
+
+            jump(3001);
+
+            bytes memory dat = startExpectClaim(lib.sarr160(500), lib.sarrAddress(users.frank), users.frank);
+            nuggft.claim(lib.sarr160(500), lib.sarrAddress(users.frank));
+            stopExpectClaim(dat);
+        }
+        forge.vm.stopPrank();
+    }
+
+    // function test__system__frankBidsOnAnItemThenClaims() public {
+    //     //dee buys a nugg and sells an item
+    //     uint96 value = 1 gwei;
+    //     forge.vm.startPrank(users.dee);
+    //     {
+    //         startExpectMint(500, users.frank, value);
+    //         nuggft.mint{value: value}(500);
+    //         endExpectMint();
+
+    //         (, uint8[] memory ids, , , , ) = nuggft.proofToDotnuggMetadata(500);
+    //         sellingItemId = ids[1] | (1 << 8);
+
+    //         nuggft.sell(500, sellingItemId, value);
+    //     }
+    //     forge.vm.stopPrank();
+
+    //     jump(3000);
+
+    //     forge.vm.startPrank(users.frank);
+    //     {
+    //         startExpectMint(501, users.frank, nuggft.msp());
+    //         nuggft.mint{value: nuggft.msp()}(501);
+    //         endExpectMint();
+
+    //         // startExpectOffer(3000, users.frank, value);
+    //         nuggft.offer{value: value}(501, 500, sellingItemId);
+    //         // endExpectOffer();
+    //         jump(3002);
+    //         // bytes memory dat = startExpectClaim(lib.sarr160(encItemIdClaim(500, sellingItemId)), lib.sarrAddress(uint160(501)), users.frank);
+    //         nuggft.claim(lib.sarr160(3000), lib.sarrAddress(users.frank));
+    //         // stopExpectClaim(dat);
+    //     }
+    //     forge.vm.stopPrank();
+    // }
 
     function test__system__nuggFactory() public {
         uint16 nugg__size = 100;
@@ -56,10 +115,10 @@ contract system__NuggftV1Swap is NuggftV1Test {
 
         for (uint16 i = 0; i < nugg__size; i++) {
             for (; user__count < i * 10; user__count++) {
-                // startExpectClaim(lib.sarr160(tmpTokens[i]), lib.sarrAddress(tmpUsers[user__count]), tmpUsers[user__count]);
+                bytes memory dat = startExpectClaim(lib.sarr160(tmpTokens[i]), lib.sarrAddress(tmpUsers[user__count]), tmpUsers[user__count]);
                 forge.vm.prank(tmpUsers[user__count]);
                 nuggft.claim(lib.sarr160(tmpTokens[i]), lib.sarrAddress(tmpUsers[user__count]));
-                // endExpectClaim();
+                stopExpectClaim(dat);
             }
         }
     }
@@ -113,11 +172,11 @@ contract system__NuggftV1Swap is NuggftV1Test {
 
     function test__system__revert__0x24__offerWarClaimTwice() public {
         test__system__offerWar();
-        // startExpectClaim(lib.sarr160(tmpTokens[i]), lib.sarrAddress(tmpUsers[i]), tmpUsers[i]);
+        // bytes memory mem = startExpectClaim(lib.sarr160(tmpTokens[1]), lib.sarrAddress(tmpUsers[1]), tmpUsers[1]);
         forge.vm.expectRevert(hex'24');
         forge.vm.prank(tmpUsers[1]);
         nuggft.claim(lib.sarr160(tmpTokens[1]), lib.sarrAddress(tmpUsers[1]));
-        // endExpectClaim();
+        // stopExpectClaim(mem);
     }
 
     function test__system__revert__0x24__claim__twice__frank() public {

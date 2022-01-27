@@ -81,6 +81,8 @@ abstract contract expectClaim is DSTest {
                 pre.offer = __nuggft__ref().external__offers(env.id, env.buyer);
             }
 
+            if (pre.offer == 0) pre.offer = pre.agency;
+
             // NEED TO CHECK: what happens when someone who owns the nugg also has an offer ?
 
             env.winner = uint160(pre.agency) == (uint160(pre.offer));
