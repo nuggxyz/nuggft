@@ -2,9 +2,13 @@
 
 pragma solidity 0.8.11;
 
-import './base.sol';
+import '../utils/forge.sol';
 
-abstract contract expectClaim is expectBase {
+import {expectBase} from './base.sol';
+
+import {expectStake} from './stake.sol';
+
+abstract contract expectClaim is expectBase, expectStake {
     function startExpectClaim(
         uint160[] memory tokenIds,
         uint160[] memory offerers,
