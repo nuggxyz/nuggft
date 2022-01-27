@@ -39,17 +39,17 @@ contract revert__NuggftV1Swap is NuggftV1Test {
         uint96 value = 10**8;
         forge.vm.deal(users.frank, value);
 
-        expectBalChange(users.frank, value, dir.down);
-        expectBalChange(_nuggft, value, dir.up);
-        bytes memory sdat = startExpectStake(value, 1, dir.up);
+        expect.balance().start(users.frank, value, false);
+        expect.balance().start(_nuggft, value, true);
+        expect.stake().start(value, 1, true);
         forge.vm.startPrank(users.frank);
         {
             nuggft.offer{value: value}(tokenId);
         }
         forge.vm.stopPrank();
-        stopExpectStake(sdat);
+        expect.stake().stop();
 
-        check();
+        expect.balance().stop();
     }
 
     function test__revert__NuggftV1Swap__0x71__offer__successWithHigherMinOffer() public {
@@ -59,17 +59,16 @@ contract revert__NuggftV1Swap is NuggftV1Test {
 
         forge.vm.deal(users.frank, value);
 
-        expectBalChange(users.frank, value, dir.down);
-        expectBalChange(_nuggft, value, dir.up);
-        bytes memory sdat = startExpectStake(value, 1, dir.up);
+        expect.balance().start(users.frank, value, false);
+        expect.balance().start(_nuggft, value, true);
+        expect.stake().start(value, 1, true);
         forge.vm.startPrank(users.frank);
         {
             nuggft.offer{value: value}(tokenId);
         }
         forge.vm.stopPrank();
-        stopExpectStake(sdat);
-
-        check();
+        expect.stake().stop();
+        expect.balance().stop();
     }
 
     function test__revert__NuggftV1Swap__0xF0__offer__failWithOneWeiLessThanMin() public {
@@ -145,17 +144,17 @@ contract revert__NuggftV1Swap is NuggftV1Test {
 
         forge.vm.deal(users.frank, value);
 
-        expectBalChange(users.frank, value, dir.down);
-        expectBalChange(_nuggft, value, dir.up);
-        bytes memory sdat = startExpectStake(1 ether, 0, dir.up);
+        expect.balance().start(users.frank, value, false);
+        expect.balance().start(_nuggft, value, true);
+        expect.stake().start(1 ether, 0, true);
         forge.vm.startPrank(users.frank);
         {
             nuggft.offer{value: value}(tokenId);
         }
         forge.vm.stopPrank();
-        stopExpectStake(sdat);
+        expect.stake().stop();
 
-        check();
+        expect.balance().stop();
     }
 
     function test__revert__NuggftV1Swap__0x0F__successWithOwnerAfterSomeoneElseOffers() public {
@@ -168,10 +167,10 @@ contract revert__NuggftV1Swap is NuggftV1Test {
         forge.vm.deal(users.frank, value);
         forge.vm.deal(users.dee, value2);
 
-        expectBalChange(users.frank, value, dir.down);
-        expectBalChange(users.dee, value2, dir.down);
-        expectBalChange(_nuggft, value + value2, dir.up);
-        bytes memory sdat = startExpectStake(3 ether, 0, dir.up);
+        expect.balance().start(users.frank, value, false);
+        expect.balance().start(users.dee, value2, false);
+        expect.balance().start(_nuggft, value + value2, true);
+        expect.stake().start(3 ether, 0, true);
         forge.vm.startPrank(users.frank);
         {
             nuggft.offer{value: value}(tokenId);
@@ -183,9 +182,9 @@ contract revert__NuggftV1Swap is NuggftV1Test {
             nuggft.offer{value: value2}(tokenId);
         }
         forge.vm.stopPrank();
-        stopExpectStake(sdat);
+        expect.stake().stop();
 
-        check();
+        expect.balance().stop();
     }
 
     function test__revert__NuggftV1Swap__0x0F__failWithOwnerOnCommit() public {
@@ -213,17 +212,17 @@ contract revert__NuggftV1Swap is NuggftV1Test {
 
         forge.vm.deal(users.frank, value);
 
-        expectBalChange(users.frank, value, dir.down);
-        expectBalChange(_nuggft, value, dir.up);
-        bytes memory sdat = startExpectStake(1 ether, 0, dir.up);
+        expect.balance().start(users.frank, value, false);
+        expect.balance().start(_nuggft, value, true);
+        expect.stake().start(1 ether, 0, true);
         forge.vm.startPrank(users.frank);
         {
             nuggft.offer{value: value}(tokenId);
         }
         forge.vm.stopPrank();
-        stopExpectStake(sdat);
+        expect.stake().stop();
 
-        check();
+        expect.balance().stop();
     }
 
     // LOL - MASSIVE bug found with this test
@@ -712,7 +711,7 @@ contract revert__NuggftV1Swap is NuggftV1Test {
        ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
 
     /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-        [S:E] - checkClaimerIsWinnerOrLoser - "invalid offer"
+        [S:E] - expect.balance().stopClaimerIsWinnerOrLoser - "invalid offer"
        ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
 
     function test__revert__NuggftV1Swap__0x2E__successPrevSwapperCanClaimAfterNewSwapHasStarted() public {

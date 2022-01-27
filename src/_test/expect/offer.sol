@@ -4,10 +4,16 @@ pragma solidity 0.8.11;
 
 import '../utils/forge.sol';
 
-import {expectBase} from './base.sol';
-import {expectStake} from './stake.sol';
+import './base.sol';
+import './stake.sol';
 
-abstract contract expectOffer is expectBase, expectStake {
+contract expectOffer is base {
+    expectStake stake;
+
+    constructor(RiggedNuggft nuggft_) base(nuggft_) {
+        stake = new expectStake(nuggft_);
+    }
+
     struct expectOffer__Snapshot {
         expectOffer__SnapshotEnv env;
         expectOffer__SnapshotData data;
@@ -32,27 +38,35 @@ abstract contract expectOffer is expectBase, expectStake {
         int192 expectedNuggftBalance;
     }
 
-    function startExpectOffer(
+    function start(
         uint160 buyingTokenId,
         uint160 sellingTokenId,
         uint16 itemId,
         address sender,
         uint96 value
-    ) internal {
-        startExpectOffer((buyingTokenId << 40) | (uint160(itemId) << 24) | sellingTokenId, sender, value);
+    ) public {
+        this.start((buyingTokenId << 40) | (uint160(itemId) << 24) | sellingTokenId, sender, value);
     }
 
-    function startExpectOffer(
+    bytes execution;
+
+    function clear() public {
+        delete execution;
+    }
+
+    function start(
         uint160 tokenId,
         address sender,
         uint96 value
-    ) internal returns (bytes memory) {
+    ) public {
+        require(execution.length == 0, 'EXPECT-OFFER:START: execution already esists');
+
         expectOffer__Run memory run;
 
         run.sender = sender;
 
         run.expectedSenderBalance = cast.i192(run.sender.balance);
-        run.expectedNuggftBalance = cast.i192(address(__nuggft__ref()).balance);
+        run.expectedNuggftBalance = cast.i192(address(nuggft).balance);
 
         expectOffer__SnapshotEnv memory env;
         expectOffer__SnapshotData memory pre;
@@ -63,13 +77,13 @@ abstract contract expectOffer is expectBase, expectStake {
         if (env.isItem) {
             env.buyer = address(tokenId >> 40);
 
-            pre.agency = __nuggft__ref().external__itemAgency(env.id);
-            pre.offer = __nuggft__ref().external__itemOffers(env.id, uint160(env.buyer));
+            pre.agency = nuggft.external__itemAgency(env.id);
+            pre.offer = nuggft.external__itemOffers(env.id, uint160(env.buyer));
         } else {
             env.buyer = sender;
 
-            pre.agency = __nuggft__ref().external__agency(env.id);
-            pre.offer = __nuggft__ref().external__offers(env.id, env.buyer);
+            pre.agency = nuggft.external__agency(env.id);
+            pre.offer = nuggft.external__offers(env.id, env.buyer);
         }
 
         if (pre.offer == 0) pre.offer = pre.agency;
@@ -81,27 +95,31 @@ abstract contract expectOffer is expectBase, expectStake {
 
         preRunChecks(run);
 
-        return abi.encode(run);
+        execution = abi.encode(run);
     }
 
-    function stopExpectOffer(bytes memory input) internal {
-        expectOffer__Run memory run = abi.decode(input, (expectOffer__Run));
+    function stop() public {
+        require(execution.length > 0, 'EXPECT-OFFER:STOP: execution does not exist');
+
+        expectOffer__Run memory run = abi.decode(execution, (expectOffer__Run));
 
         expectOffer__SnapshotEnv memory env = run.snapshot.env;
         expectOffer__SnapshotData memory pre = run.snapshot.data;
         expectOffer__SnapshotData memory post;
 
         if (env.isItem) {
-            post.agency = __nuggft__ref().external__itemAgency(env.id);
-            post.offer = __nuggft__ref().external__itemOffers(env.id, uint160(env.buyer));
+            post.agency = nuggft.external__itemAgency(env.id);
+            post.offer = nuggft.external__itemOffers(env.id, uint160(env.buyer));
         } else {
-            post.agency = __nuggft__ref().external__agency(env.id);
-            post.offer = __nuggft__ref().external__offers(env.id, env.buyer);
+            post.agency = nuggft.external__agency(env.id);
+            post.offer = nuggft.external__offers(env.id, env.buyer);
         }
 
         postOfferChecks(run, env, pre, post);
 
         postRunChecks(run);
+
+        this.clear();
     }
 
     function preOfferChecks(
@@ -118,7 +136,7 @@ abstract contract expectOffer is expectBase, expectStake {
         expectOffer__SnapshotData memory pre,
         expectOffer__SnapshotData memory post
     ) private {
-        // BALANCE CHANGE: sender balance should go up by the amount of the offer, __nuggft__ref's should go down
+        // BALANCE CHANGE: sender balance should go up by the amount of the offer, nuggft's should go down
         run.expectedSenderBalance -= cast.i192(env.value);
         run.expectedNuggftBalance += cast.i192(env.value);
 
@@ -134,7 +152,7 @@ abstract contract expectOffer is expectBase, expectStake {
         // ASSERT:OFFER_0x0D: is the sender balance correct?
         assertBalance(run.sender, run.expectedSenderBalance, 'ASSERT:OFFER_0x0D');
 
-        // ASSERT:OFFER_0x0E: is the __nuggft__ref balance correct?
-        assertBalance(address(__nuggft__ref()), run.expectedNuggftBalance, 'ASSERT:OFFER_0x0E');
+        // ASSERT:OFFER_0x0E: is the nuggft balance correct?
+        assertBalance(address(nuggft), run.expectedNuggftBalance, 'ASSERT:OFFER_0x0E');
     }
 }
