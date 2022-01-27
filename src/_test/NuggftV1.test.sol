@@ -195,48 +195,48 @@ contract NuggftV1Test is ForgeTest, expectAll {
                                 eth modifiers
        ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
 
-    struct ChangeCheck {
-        int192 expected_stake_change;
-        int192 expected_share_change;
-        //
-        int192 before_staked;
-        int192 before_protocol;
-        int192 before_shares;
-        int192 before_msp;
-        int192 before_eps;
-        //
-        int192 after_staked;
-        int192 after_protocol;
-        int192 after_shares;
-        int192 after_msp;
-        int192 after_eps;
-    }
+    // struct ChangeCheck {
+    //     int192 expected_stake_change;
+    //     int192 expected_share_change;
+    //     //
+    //     int192 before_staked;
+    //     int192 before_protocol;
+    //     int192 before_shares;
+    //     int192 before_msp;
+    //     int192 before_eps;
+    //     //
+    //     int192 after_staked;
+    //     int192 after_protocol;
+    //     int192 after_shares;
+    //     int192 after_msp;
+    //     int192 after_eps;
+    // }
 
-    modifier changeInStaked(int192 change, int192 shareChange) {
-        ChangeCheck memory str;
-        str.before_staked = nuggft.staked().safeInt();
-        str.before_protocol = nuggft.proto().safeInt();
-        str.before_shares = nuggft.shares().safeInt();
-        str.before_msp = nuggft.msp().safeInt();
+    // modifier changeInStaked(int192 change, int192 shareChange) {
+    //     ChangeCheck memory str;
+    //     str.before_staked = nuggft.staked().safeInt();
+    //     str.before_protocol = nuggft.proto().safeInt();
+    //     str.before_shares = nuggft.shares().safeInt();
+    //     str.before_msp = nuggft.msp().safeInt();
 
-        str.before_eps = nuggft.eps().safeInt();
+    //     str.before_eps = nuggft.eps().safeInt();
 
-        assertEq(str.before_eps, str.before_shares > 0 ? str.before_staked / str.before_shares : int256(0), 'EPS is starting off with an incorrect value');
+    //     assertEq(str.before_eps, str.before_shares > 0 ? str.before_staked / str.before_shares : int256(0), 'EPS is starting off with an incorrect value');
 
-        _;
-        str.after_staked = nuggft.staked().safeInt();
-        str.after_protocol = nuggft.proto().safeInt();
-        str.after_shares = nuggft.shares().safeInt();
-        str.after_msp = nuggft.msp().safeInt();
+    //     _;
+    //     str.after_staked = nuggft.staked().safeInt();
+    //     str.after_protocol = nuggft.proto().safeInt();
+    //     str.after_shares = nuggft.shares().safeInt();
+    //     str.after_msp = nuggft.msp().safeInt();
 
-        assertTrue(str.after_msp >= str.before_msp, 'msp is did not increase as expected');
-        assertEq(str.after_protocol - str.before_protocol, take(10, change), 'totalProtocol is not what is expected');
-        assertEq(str.after_staked - str.before_staked, change - take(10, change), 'staked change is not 90 percent of expected change');
-        assertEq(str.after_shares - str.before_shares, shareChange, 'shares difference is not what is expected');
+    //     assertTrue(str.after_msp >= str.before_msp, 'msp is did not increase as expected');
+    //     assertEq(str.after_protocol - str.before_protocol, take(10, change), 'totalProtocol is not what is expected');
+    //     assertEq(str.after_staked - str.before_staked, change - take(10, change), 'staked change is not 90 percent of expected change');
+    //     assertEq(str.after_shares - str.before_shares, shareChange, 'shares difference is not what is expected');
 
-        str.after_eps = nuggft.eps().safeInt();
-        assertEq(str.after_eps, str.after_shares > 0 ? str.after_staked / str.after_shares : int256(0), 'EPS is not ending with correct value');
-    }
+    //     str.after_eps = nuggft.eps().safeInt();
+    //     assertEq(str.after_eps, str.after_shares > 0 ? str.after_staked / str.after_shares : int256(0), 'EPS is not ending with correct value');
+    // }
 
     modifier baldiff(address user, int192 exp) {
         int192 got = int192(int256(uint256(address(nuggft).balance)));
@@ -244,68 +244,6 @@ contract NuggftV1Test is ForgeTest, expectAll {
         got = int192(int256(uint256(address(nuggft).balance))) - got;
 
         assertEq(got, exp, 'balance did not change correctly');
-    }
-
-    enum dir {
-        down,
-        up
-    }
-
-    int192 expectedStakeEthChange;
-    int192 expectedStakeSharesChange;
-
-    ChangeCheck stakeChange;
-
-    function expectStakeChange(
-        uint96 eth,
-        uint64 shares,
-        dir direction
-    ) internal {
-        stakeChange.before_staked = nuggft.staked().safeInt();
-        stakeChange.before_protocol = nuggft.proto().safeInt();
-        stakeChange.before_shares = nuggft.shares().safeInt();
-        stakeChange.before_msp = nuggft.msp().safeInt();
-
-        stakeChange.before_eps = nuggft.eps().safeInt();
-
-        assertEq(
-            stakeChange.before_eps,
-            stakeChange.before_shares > 0 ? stakeChange.before_staked / stakeChange.before_shares : int256(0),
-            'EPS is starting off with an incorrect value'
-        );
-
-        stakeChange.expected_stake_change = eth.safeInt() * (direction == dir.up ? int8(1) : int8(-1));
-        stakeChange.expected_share_change = shares.safeInt() * (direction == dir.up ? int8(1) : int8(-1));
-
-        // expectedStakeEth = (direction == dir.up ? nuggft.staked() + eth : nuggft.staked() - eth);
-        // expectedStakeShares = (direction == dir.up ? nuggft.shares() + shares : nuggft.shares() - shares);
-    }
-
-    function checkStakeChange() internal {
-        stakeChange.after_staked = nuggft.staked().safeInt();
-        stakeChange.after_protocol = nuggft.proto().safeInt();
-        stakeChange.after_shares = nuggft.shares().safeInt();
-        stakeChange.after_msp = nuggft.msp().safeInt();
-
-        assertTrue(stakeChange.after_msp >= stakeChange.before_msp, 'msp is did not increase as expected');
-        assertEq(
-            stakeChange.after_protocol - stakeChange.before_protocol,
-            take(10, stakeChange.expected_stake_change),
-            'totalProtocol is not what is expected'
-        );
-        assertEq(
-            stakeChange.after_staked - stakeChange.before_staked,
-            stakeChange.expected_stake_change - take(10, stakeChange.expected_stake_change),
-            'staked change is not 90 percent of expected change'
-        );
-        assertEq(stakeChange.after_shares - stakeChange.before_shares, stakeChange.expected_share_change, 'shares difference is not what is expected');
-
-        stakeChange.after_eps = nuggft.eps().safeInt();
-        assertEq(
-            stakeChange.after_eps,
-            stakeChange.after_shares > 0 ? stakeChange.after_staked / stakeChange.after_shares : int256(0),
-            'EPS is not ending with correct value'
-        );
     }
 
     /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -639,7 +577,7 @@ contract NuggftV1Test is ForgeTest, expectAll {
             delete _baldiffarr[i];
         }
 
-        checkStakeChange();
+        // checkStakeChange();
     }
 
     function take(int256 percent, int256 value) internal pure returns (int256) {
