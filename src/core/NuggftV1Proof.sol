@@ -66,7 +66,7 @@ abstract contract NuggftV1Proof is INuggftV1Proof, NuggftV1Dotnugg {
         // skip the base
 
         do {
-            if (state & 0xfff == itemId) return index;
+            if (state & 0xffff == itemId) return index;
             index++;
         } while ((state >>= 16) != 0);
 

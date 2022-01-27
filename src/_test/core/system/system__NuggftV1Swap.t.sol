@@ -98,7 +98,7 @@ contract system__NuggftV1Swap is NuggftV1Test {
             bytes memory dat = startExpectClaim(lib.sarr160(tmpTokens[i]), lib.sarrAddress(tmpUsers[i]), tmpUsers[i]);
             forge.vm.prank(tmpUsers[i]);
             nuggft.claim(lib.sarr160(tmpTokens[i]), lib.sarrAddress(tmpUsers[i]));
-            endExpectClaim(dat);
+            stopExpectClaim(dat);
         }
 
         // forge.vm.prank(users.dennis);
