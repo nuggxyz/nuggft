@@ -9,12 +9,12 @@ import './base.sol';
 contract expectBalance is base {
     constructor(RiggedNuggft nuggft_) base(nuggft_) {}
 
-    struct expectBalance__Snapshot {
+    struct Snapshot {
         address user;
         int192 expectedBalance;
     }
 
-    expectBalance__Snapshot[] snapshots;
+    Snapshot[] snapshots;
 
     function clear() public {
         delete snapshots;
@@ -28,7 +28,7 @@ contract expectBalance is base {
         delete snapshots;
 
         snapshots.push(
-            expectBalance__Snapshot({
+            Snapshot({
                 user: user, //
                 expectedBalance: cast.i192(up ? user.balance + value : user.balance - value)
             })

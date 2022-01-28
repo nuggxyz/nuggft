@@ -22,7 +22,7 @@ abstract contract NuggftV1Token is INuggftV1Token, NuggftV1Epoch {
     uint32 constant TRUSTED_MINT_TOKENS = 500;
     uint32 constant UNTRUSTED_MINT_TOKENS = 10000;
 
-    mapping(uint256 => uint256) agency;
+    mapping(uint256 => uint256) public agency;
 
     // mapping(address => uint256) balances;
     mapping(uint256 => address) approvals;
