@@ -85,7 +85,7 @@ abstract contract NuggftV1Stake is INuggftV1Stake, NuggftV1Proof {
 
             let shrs := shr(192, cache)
 
-            let _eps := div(and(shr(96, cache), sub(shl(96, 1), 1)), shrs)
+            let _eps := div(shr(160, shl(64, cache)), shrs)
 
             let fee := div(_eps, PROTOCOL_FEE_BPS)
 
@@ -105,6 +105,7 @@ abstract contract NuggftV1Stake is INuggftV1Stake, NuggftV1Proof {
 
             // add fee of overpay to fee
             fee := add(div(overpay, PROTOCOL_FEE_BPS), fee)
+            // fee := div(callvalue(), PROTOCOL_FEE_BPS)
 
             // update stake
             // =======================

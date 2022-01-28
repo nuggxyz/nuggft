@@ -35,7 +35,7 @@ library ds {
 
     function fail() internal {
         forge.vm.store(getDsTest(), SLOT_0, DS_TEST_SET_ON_FAIL);
-        revert();
+        // revert();
     }
 
     function fail(bytes32 err) internal {
