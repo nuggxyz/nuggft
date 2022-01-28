@@ -49,7 +49,7 @@ contract expectMint is base {
         if (txdata.str.length > 0) forge.vm.expectRevert(txdata.str);
         nuggft.mint{value: txdata.value}(tokenId);
         forge.vm.stopPrank();
-        this.stop();
+        txdata.str.length > 0 ? this.rollback() : this.stop();
     }
 
     function start(
