@@ -55,8 +55,10 @@ contract expectClaim is base {
         lib.txdata memory txdata
     ) public {
         this.start(tokenIds, offerers, txdata.from);
-        forge.vm.prank(txdata.from);
+        forge.vm.startPrank(txdata.from);
+        if (txdata.str.length > 0) forge.vm.expectRevert(txdata.str);
         nuggft.claim(tokenIds, offerers);
+        forge.vm.stopPrank();
         this.stop();
     }
 

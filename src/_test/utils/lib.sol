@@ -6,6 +6,7 @@ library lib {
     struct txdata {
         address from;
         uint96 value;
+        bytes str;
     }
 
     function addressOf(address addr, uint8 nonce) internal pure returns (address res) {

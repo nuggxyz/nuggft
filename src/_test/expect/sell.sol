@@ -46,8 +46,10 @@ contract expectSell is base {
         lib.txdata memory txdata
     ) public {
         this.start(tokenId, floor, txdata.from);
-        forge.vm.prank(txdata.from);
+        forge.vm.startPrank(txdata.from);
+        if (txdata.str.length > 0) forge.vm.expectRevert(txdata.str);
         nuggft.sell(tokenId, floor);
+        forge.vm.stopPrank();
         this.stop();
     }
 
@@ -58,8 +60,10 @@ contract expectSell is base {
         lib.txdata memory txdata
     ) public {
         this.start(sellingTokenId, itemId, floor, txdata.from);
-        forge.vm.prank(txdata.from);
+        forge.vm.startPrank(txdata.from);
+        if (txdata.str.length > 0) forge.vm.expectRevert(txdata.str);
         nuggft.sell(sellingTokenId, itemId, floor);
+        forge.vm.stopPrank();
         this.stop();
     }
 

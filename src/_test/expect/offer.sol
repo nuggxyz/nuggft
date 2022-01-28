@@ -47,8 +47,10 @@ contract expectOffer is base {
     function exec(uint160 tokenId, lib.txdata memory txdata) public {
         forge.vm.deal(txdata.from, txdata.from.balance + txdata.value);
         this.start(tokenId, txdata.from, txdata.value);
-        forge.vm.prank(txdata.from);
+        forge.vm.startPrank(txdata.from);
+        if (txdata.str.length > 0) forge.vm.expectRevert(txdata.str);
         nuggft.offer{value: txdata.value}(tokenId);
+        forge.vm.stopPrank();
         this.stop();
     }
 
@@ -60,8 +62,10 @@ contract expectOffer is base {
     ) public {
         forge.vm.deal(txdata.from, txdata.from.balance + txdata.value);
         this.start(buyingTokenId, sellingTokenId, itemId, txdata.from, txdata.value);
-        forge.vm.prank(txdata.from);
+        forge.vm.startPrank(txdata.from);
+        if (txdata.str.length > 0) forge.vm.expectRevert(txdata.str);
         nuggft.offer{value: txdata.value}(buyingTokenId, sellingTokenId, itemId);
+        forge.vm.stopPrank();
         this.stop();
     }
 
