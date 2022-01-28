@@ -9,13 +9,13 @@ import './base.sol';
 contract expectStake is base {
     constructor(RiggedNuggft nuggft_) base(nuggft_) {}
 
-    struct expectStake__Run {
+    struct Run {
         int192 expected_stake_change;
         int192 expected_share_change;
-        expectStake__Snapshot pre;
+        Snapshot pre;
     }
 
-    struct expectStake__Snapshot {
+    struct Snapshot {
         int192 staked;
         int192 protocol;
         int192 shares;
@@ -36,7 +36,7 @@ contract expectStake is base {
     ) public {
         require(execution.length == 0, 'EXPECT-STAKE:START: execution already exists');
 
-        expectStake__Run memory run;
+        Run memory run;
 
         run.pre.staked = cast.i192(nuggft.staked());
         run.pre.protocol = cast.i192(nuggft.proto());
@@ -55,11 +55,11 @@ contract expectStake is base {
     function stop() public {
         require(execution.length > 0, 'EXPECT-STAKE:STOP: execution does not exist');
 
-        expectStake__Run memory run = abi.decode(execution, (expectStake__Run));
+        Run memory run = abi.decode(execution, (Run));
 
-        expectStake__Snapshot memory pre = run.pre;
+        Snapshot memory pre = run.pre;
 
-        expectStake__Snapshot memory post;
+        Snapshot memory post;
 
         post.staked = cast.i192(nuggft.staked());
         post.protocol = cast.i192(nuggft.proto());

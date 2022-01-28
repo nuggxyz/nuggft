@@ -15,17 +15,17 @@ contract expectClaim is base {
         stake = new expectStake(nuggft_);
     }
 
-    struct expectClaim__Snapshot {
-        expectClaim__SnapshotEnv env;
-        expectClaim__SnapshotData data;
+    struct Snapshot {
+        SnapshotEnv env;
+        SnapshotData data;
     }
 
-    struct expectClaim__SnapshotData {
+    struct SnapshotData {
         uint256 agency;
         uint256 offer;
     }
 
-    struct expectClaim__SnapshotEnv {
+    struct SnapshotEnv {
         uint160 id;
         bool isItem;
         bool winner;
@@ -33,13 +33,13 @@ contract expectClaim is base {
         bool reclaim;
     }
 
-    struct expectClaim__RunBalances {
+    struct RunBalances {
         address account;
         int192 change;
     }
 
-    struct expectClaim__Run {
-        expectClaim__Snapshot[] snapshots;
+    struct Run {
+        Snapshot[] snapshots;
         address sender;
         int192 expectedSenderBalance;
         int192 expectedNuggftBalance;
@@ -72,27 +72,27 @@ contract expectClaim is base {
 
         require(tokenIds.length == offerers.length, 'EXPECT-CLAIM:START:ArrayLengthNotSame');
 
-        expectClaim__Run memory run;
+        Run memory run;
 
         run.sender = sender;
-        run.snapshots = new expectClaim__Snapshot[](tokenIds.length);
+        run.snapshots = new Snapshot[](tokenIds.length);
         run.expectedSenderBalance = cast.i192(run.sender.balance);
         run.expectedNuggftBalance = cast.i192(address(nuggft).balance);
 
         for (uint256 i = 0; i < tokenIds.length; i++) {
-            expectClaim__SnapshotEnv memory env;
-            expectClaim__SnapshotData memory pre;
+            SnapshotEnv memory env;
+            SnapshotData memory pre;
 
             env.id = tokenIds[i];
             env.isItem = env.id > 0xffffff;
             env.buyer = offerers[i];
 
             if (env.isItem) {
-                pre.agency = nuggft.external__itemAgency(env.id);
-                pre.offer = nuggft.external__itemOffers(env.id, uint160(env.buyer));
+                pre.agency = nuggft.itemAgency(env.id);
+                pre.offer = nuggft.itemOffers(env.id, uint160(env.buyer));
             } else {
-                pre.agency = nuggft.external__agency(env.id);
-                pre.offer = nuggft.external__offers(env.id, env.buyer);
+                pre.agency = nuggft.agency(env.id);
+                pre.offer = nuggft.offers(env.id, env.buyer);
             }
 
             if (pre.offer == 0) pre.offer = pre.agency;
@@ -111,6 +111,8 @@ contract expectClaim is base {
             preSingleClaimChecks(run, env, pre);
         }
 
+        stake.start(0, 0, true);
+
         preRunChecks(run);
 
         execution = abi.encode(run);
@@ -119,25 +121,27 @@ contract expectClaim is base {
     function stop() public {
         require(execution.length > 0, 'EXPECT-CLAIM:STOP: execution does not esists');
 
-        expectClaim__Run memory run = abi.decode(execution, (expectClaim__Run));
+        Run memory run = abi.decode(execution, (Run));
 
         for (uint256 i = 0; i < run.snapshots.length; i++) {
-            expectClaim__SnapshotEnv memory env = run.snapshots[i].env;
-            expectClaim__SnapshotData memory pre = run.snapshots[i].data;
-            expectClaim__SnapshotData memory post;
+            SnapshotEnv memory env = run.snapshots[i].env;
+            SnapshotData memory pre = run.snapshots[i].data;
+            SnapshotData memory post;
 
             if (env.isItem) {
-                post.agency = nuggft.external__itemAgency(env.id);
-                post.offer = nuggft.external__itemOffers(env.id, uint160(env.buyer));
+                post.agency = nuggft.itemAgency(env.id);
+                post.offer = nuggft.itemOffers(env.id, uint160(env.buyer));
             } else {
-                post.agency = nuggft.external__agency(env.id);
-                post.offer = nuggft.external__offers(env.id, env.buyer);
+                post.agency = nuggft.agency(env.id);
+                post.offer = nuggft.offers(env.id, env.buyer);
             }
 
             postSingleClaimChecks(run, env, pre, post);
         }
 
         postRunChecks(run);
+
+        stake.stop();
 
         this.clear();
     }
@@ -174,9 +178,9 @@ contract expectClaim is base {
     }
 
     function preSingleClaimChecks(
-        expectClaim__Run memory run,
-        expectClaim__SnapshotEnv memory env,
-        expectClaim__SnapshotData memory pre
+        Run memory run,
+        SnapshotEnv memory env,
+        SnapshotData memory pre
     ) private {
         // ASSERT:CLAIM_0x01: externally is the nugg owned by the contract?
 
@@ -218,10 +222,10 @@ contract expectClaim is base {
     }
 
     function postSingleClaimChecks(
-        expectClaim__Run memory run,
-        expectClaim__SnapshotEnv memory env,
-        expectClaim__SnapshotData memory pre,
-        expectClaim__SnapshotData memory post
+        Run memory run,
+        SnapshotEnv memory env,
+        SnapshotData memory pre,
+        SnapshotData memory post
     ) private {
         // ASSERT:CLAIM_0x06: is the post offer == 0?
         assertEq(post.offer, 0, 'ASSERT:CLAIM_0x06: is the post offer == 0?');
@@ -267,12 +271,12 @@ contract expectClaim is base {
         }
     }
 
-    function preRunChecks(expectClaim__Run memory run) private {
+    function preRunChecks(Run memory run) private {
         // ASSERT:CLAIM_0x0C: what should the balances be before any call on claim?
         // ASSERT:CLAIM_0x0C: maybe here we just check to see that the data is ok?
     }
 
-    function postRunChecks(expectClaim__Run memory run) private {
+    function postRunChecks(Run memory run) private {
         // ASSERT:CLAIM_0x0D: is the sender balance correct?
         assertBalance(run.sender, run.expectedSenderBalance, 'ASSERT:CLAIM_0x0D');
 

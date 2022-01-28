@@ -10,11 +10,11 @@ import {NuggftV1Stake} from './NuggftV1Stake.sol';
 /// @notice mechanism for trading of nuggs between users (and items between nuggs)
 /// @dev Explain to a developer any extra details
 abstract contract NuggftV1Swap is INuggftV1ItemSwap, INuggftV1Swap, NuggftV1Stake {
-    mapping(uint160 => mapping(address => uint256)) offers;
-    mapping(uint16 => uint256) protocolItems;
+    mapping(uint160 => mapping(address => uint256)) public offers;
+    mapping(uint16 => uint256) public protocolItems;
 
-    mapping(uint176 => mapping(uint160 => uint256)) itemOffers;
-    mapping(uint176 => uint256) itemAgency;
+    mapping(uint176 => mapping(uint160 => uint256)) public itemOffers;
+    mapping(uint176 => uint256) public itemAgency;
 
     /// @inheritdoc INuggftV1Swap
     function offer(uint160 tokenId) public payable override {
