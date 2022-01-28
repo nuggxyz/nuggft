@@ -40,6 +40,29 @@ contract expectSell is base {
 
     bytes execution;
 
+    function exec(
+        uint160 tokenId,
+        uint96 floor,
+        lib.txdata memory txdata
+    ) public {
+        this.start(tokenId, floor, txdata.from);
+        forge.vm.prank(txdata.from);
+        nuggft.sell(tokenId, floor);
+        this.stop();
+    }
+
+    function exec(
+        uint160 sellingTokenId,
+        uint16 itemId,
+        uint96 floor,
+        lib.txdata memory txdata
+    ) public {
+        this.start(sellingTokenId, itemId, floor, txdata.from);
+        forge.vm.prank(txdata.from);
+        nuggft.sell(sellingTokenId, itemId, floor);
+        this.stop();
+    }
+
     function start(
         uint160 sellingTokenId,
         uint16 itemId,
@@ -113,6 +136,29 @@ contract expectSell is base {
         postSellChecks(run, env, pre, post);
 
         postRunChecks(run);
+
+        this.clear();
+    }
+
+    function rollback() public {
+        require(execution.length > 0, 'EXPECT-SELL:ROLLBACK: execution does not exist');
+
+        Run memory run = abi.decode(execution, (Run));
+
+        SnapshotEnv memory env = run.snapshot.env;
+        SnapshotData memory pre = run.snapshot.data;
+        SnapshotData memory post;
+
+        if (env.isItem) {
+            post.agency = nuggft.external__itemAgency(env.id);
+            post.offer = nuggft.external__itemOffers(env.id, uint160(env.buyer));
+        } else {
+            post.agency = nuggft.external__agency(env.id);
+            post.offer = nuggft.external__offers(env.id, env.buyer);
+        }
+
+        ds.assertEq(pre.agency, post.agency, "EXPECT-SELL:ROLLBACK agency changed but shouldn't have");
+        ds.assertEq(pre.offer, post.offer, "EXPECT-SELL:ROLLBACK offer changed but shouldn't have");
 
         this.clear();
     }

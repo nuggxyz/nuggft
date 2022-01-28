@@ -6,7 +6,7 @@ import '../utils/forge.sol';
 
 import '../NuggftV1.test.sol';
 
-abstract contract base is DSTest {
+abstract contract base {
     RiggedNuggft nuggft;
 
     constructor(RiggedNuggft nuggft_) {

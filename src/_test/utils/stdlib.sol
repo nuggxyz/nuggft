@@ -1,29 +1,102 @@
-//SPDX-License-Identifier: MIT
-
+// SPDX-License-Identifier: Unlicense
 pragma solidity 0.8.11;
 
-import './forge.sol';
 import './vm.sol';
+import './ds.sol';
 
-struct StdStorage {
-    mapping(address => mapping(bytes4 => mapping(bytes32 => uint256))) slots;
-    mapping(address => mapping(bytes4 => mapping(bytes32 => bool))) finds;
-    bytes32[] _keys;
-    bytes4 _sig;
-    uint256 _depth;
-    address _target;
-    bytes32 _set;
+// Wrappers around Cheatcodes to avoid footguns
+library stdCheats {
+    // Skip forward or rewind time by the specified number of seconds
+    function skip(uint256 time) internal {
+        forge.vm.warp(block.timestamp + time);
+    }
+
+    function rewind(uint256 time) internal {
+        forge.vm.warp(block.timestamp - time);
+    }
+
+    // Setup a prank from an address that has some ether
+    function hoax(address who) internal {
+        forge.vm.deal(who, 1 << 128);
+        forge.vm.prank(who);
+    }
+
+    function hoax(address who, uint256 give) internal {
+        forge.vm.deal(who, give);
+        forge.vm.prank(who);
+    }
+
+    function hoax(address who, address origin) internal {
+        forge.vm.deal(who, 1 << 128);
+        forge.vm.prank(who, who);
+    }
+
+    function hoax(
+        address who,
+        address origin,
+        uint256 give
+    ) internal {
+        forge.vm.deal(who, give);
+        forge.vm.prank(who, who);
+    }
+
+    // Start perpetual prank from an address that has some ether
+    function startHoax(address who) internal {
+        forge.vm.deal(who, 1 << 128);
+        forge.vm.startPrank(who);
+    }
+
+    function startHoax(address who, uint256 give) internal {
+        forge.vm.deal(who, give);
+        forge.vm.startPrank(who);
+    }
+
+    // Start perpetual prank from an address that has some ether
+    // tx.origin is set to the origin parameter
+    function startHoax(address who, address origin) internal {
+        forge.vm.deal(who, 1 << 128);
+        forge.vm.startPrank(who, origin);
+    }
+
+    function startHoax(
+        address who,
+        address origin,
+        uint256 give
+    ) internal {
+        forge.vm.deal(who, give);
+        forge.vm.startPrank(who, origin);
+    }
 }
 
-library store {
+library stdError {
+    bytes internal constant assertionError = abi.encodeWithSignature('Panic(uint256)', 0x01);
+    bytes internal constant arithmeticError = abi.encodeWithSignature('Panic(uint256)', 0x11);
+    bytes internal constant divisionError = abi.encodeWithSignature('Panic(uint256)', 0x12);
+    bytes internal constant enumConversionError = abi.encodeWithSignature('Panic(uint256)', 0x21);
+    bytes internal constant encodeStorageError = abi.encodeWithSignature('Panic(uint256)', 0x22);
+    bytes internal constant popError = abi.encodeWithSignature('Panic(uint256)', 0x31);
+    bytes internal constant indexOOBError = abi.encodeWithSignature('Panic(uint256)', 0x32);
+    bytes internal constant memOverflowError = abi.encodeWithSignature('Panic(uint256)', 0x41);
+    bytes internal constant zeroVarError = abi.encodeWithSignature('Panic(uint256)', 0x51);
+}
+
+library stdStorage {
+    struct StdStorage {
+        mapping(address => mapping(bytes4 => mapping(bytes32 => uint256))) slots;
+        mapping(address => mapping(bytes4 => mapping(bytes32 => bool))) finds;
+        bytes32[] _keys;
+        bytes4 _sig;
+        uint256 _depth;
+        address _target;
+        bytes32 _set;
+    }
+
     error NotFound(bytes4);
     error NotStorage(bytes4);
     error PackedSlot(bytes32);
 
     event SlotFound(address who, bytes4 fsig, bytes32 keysHash, uint256 slot);
     event WARNING_UninitedSlot(address who, uint256 slot);
-
-    // Vm constant forge.vm = Vm(address(bytes20(uint160(uint256(keccak256('hevm cheat code'))))))
 
     function sigs(string memory sigStr) internal pure returns (bytes4) {
         return bytes4(keccak256(bytes(sigStr)));
@@ -50,6 +123,7 @@ library store {
         bytes32 fdat;
         {
             (, bytes memory rdat) = who.staticcall(cald);
+            ds.emit_log_bytes(rdat);
             fdat = bytesToBytes32(rdat, 32 * field_depth);
         }
 
@@ -174,7 +248,7 @@ library store {
         delete self._depth;
     }
 
-    function bytesToBytes32(bytes memory b, uint256 offset) public pure returns (bytes32) {
+    function bytesToBytes32(bytes memory b, uint256 offset) internal pure returns (bytes32) {
         bytes32 out;
 
         for (uint256 i = 0; i < 32; i++) {

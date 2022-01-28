@@ -7,12 +7,15 @@ import '../utils/forge.sol';
 import './base.sol';
 
 import {expectStake} from './stake.sol';
+import {expectBalance} from './balance.sol';
 
 contract expectClaim is base {
     expectStake stake;
+    expectBalance balance;
 
     constructor(RiggedNuggft nuggft_) base(nuggft_) {
         stake = new expectStake(nuggft_);
+        balance = new expectBalance(nuggft_);
     }
 
     struct Snapshot {
@@ -41,14 +44,36 @@ contract expectClaim is base {
     struct Run {
         Snapshot[] snapshots;
         address sender;
-        int192 expectedSenderBalance;
-        int192 expectedNuggftBalance;
+        uint96 expectedBalanceChange;
     }
 
     bytes execution;
 
+    function exec(
+        uint160[] memory tokenIds,
+        address[] memory offerers,
+        lib.txdata memory txdata
+    ) public {
+        this.start(tokenIds, offerers, txdata.from);
+        forge.vm.prank(txdata.from);
+        nuggft.claim(tokenIds, offerers);
+        this.stop();
+    }
+
     function clear() public {
         delete execution;
+    }
+
+    function exec(
+        uint160[] memory tokenIds,
+        uint160[] memory offerers,
+        lib.txdata memory txdata
+    ) public {
+        address[] memory a;
+        assembly {
+            a := offerers
+        }
+        this.exec(tokenIds, a, txdata);
     }
 
     function start(
@@ -76,8 +101,6 @@ contract expectClaim is base {
 
         run.sender = sender;
         run.snapshots = new Snapshot[](tokenIds.length);
-        run.expectedSenderBalance = cast.i192(run.sender.balance);
-        run.expectedNuggftBalance = cast.i192(address(nuggft).balance);
 
         for (uint256 i = 0; i < tokenIds.length; i++) {
             SnapshotEnv memory env;
@@ -113,6 +136,12 @@ contract expectClaim is base {
 
         stake.start(0, 0, true);
 
+        // ASSERT:CLAIM_0x0D: is the sender balance correct?
+        balance.start(run.sender, run.expectedBalanceChange, true);
+
+        // ASSERT:CLAIM_0x0E: is the nuggft balance correct?
+        balance.start(address(nuggft), run.expectedBalanceChange, false);
+
         preRunChecks(run);
 
         execution = abi.encode(run);
@@ -139,9 +168,36 @@ contract expectClaim is base {
             postSingleClaimChecks(run, env, pre, post);
         }
 
-        postRunChecks(run);
-
+        balance.stop();
         stake.stop();
+
+        this.clear();
+    }
+
+    function rollback() public {
+        require(execution.length > 0, 'EXPECT-CLAIM:ROLLBACK: execution does not esists');
+
+        Run memory run = abi.decode(execution, (Run));
+
+        for (uint256 i = 0; i < run.snapshots.length; i++) {
+            SnapshotEnv memory env = run.snapshots[i].env;
+            SnapshotData memory pre = run.snapshots[i].data;
+            SnapshotData memory post;
+
+            if (env.isItem) {
+                post.agency = nuggft.itemAgency(env.id);
+                post.offer = nuggft.itemOffers(env.id, uint160(env.buyer));
+            } else {
+                post.agency = nuggft.agency(env.id);
+                post.offer = nuggft.offers(env.id, env.buyer);
+            }
+
+            ds.assertEq(pre.agency, post.agency, "EXPECT-CLAIM:ROLLBACK agency changed but shouldn't have");
+            ds.assertEq(pre.offer, post.offer, "EXPECT-CLAIM:ROLLBACK offer changed but shouldn't have");
+        }
+
+        balance.rollback();
+        stake.rollback();
 
         this.clear();
     }
@@ -162,7 +218,7 @@ contract expectClaim is base {
 
         (bool hasItem, ) = proofSearch(proof, itemId);
 
-        assertTrue(hasItem, string(abi.encodePacked('assertProofContains FAILED: - ', str)));
+        ds.assertTrue(hasItem, string(abi.encodePacked('assertProofContains FAILED: - ', str)));
     }
 
     function assertProofNotContains(
@@ -174,7 +230,7 @@ contract expectClaim is base {
 
         (bool hasItem, ) = proofSearch(proof, itemId);
 
-        assertTrue(!hasItem, string(abi.encodePacked('assertProofNotContains FAILED: - ', str)));
+        ds.assertTrue(!hasItem, string(abi.encodePacked('assertProofNotContains FAILED: - ', str)));
     }
 
     function preSingleClaimChecks(
@@ -183,6 +239,12 @@ contract expectClaim is base {
         SnapshotData memory pre
     ) private {
         // ASSERT:CLAIM_0x01: externally is the nugg owned by the contract?
+
+        if (!env.winner) {
+            // BALANCE CHANGE: sender balance should go up by the amount of the offer, nuggft's should go down
+            uint96 amount = uint96(((pre.offer << 26) >> 186) * .1 gwei);
+            run.expectedBalanceChange += amount;
+        }
 
         if (env.isItem) {
             if (env.winner) {
@@ -200,12 +262,12 @@ contract expectClaim is base {
                 // @note BEFORE a losing item claim
 
                 // ASSERT:CLAIM_0x03: is the sender the offerer?
-                assertEq(env.buyer, address(uint160(pre.offer)), 'ASSERT:CLAIM_0x03: the offerer SHOULD be the sender');
+                ds.assertEq(env.buyer, address(uint160(pre.offer)), 'ASSERT:CLAIM_0x03: the offerer SHOULD be the sender');
             }
         } else {
             if (env.winner) {
                 // ASSERT:CLAIM_0x04: does the agency have a SWAP flag?
-                assertEq(pre.agency >> 254, 0x03, 'ASSERT:CLAIM_0x04: pre agency must have the SWAP - 0x03 - flag');
+                ds.assertEq(pre.agency >> 254, 0x03, 'ASSERT:CLAIM_0x04: pre agency must have the SWAP - 0x03 - flag');
 
                 if (env.reclaim) {
                     // @note BEFORE a winning nugg reclaim
@@ -216,7 +278,7 @@ contract expectClaim is base {
                 // @note BEFORE a losing nugg claim
 
                 // ASSERT:CLAIM_0x05: is the sender the offerer?
-                assertEq(run.sender, address(uint160(pre.offer)), 'ASSERT:CLAIM_0x05: is the offerer SHOULD be the sender?');
+                ds.assertEq(run.sender, address(uint160(pre.offer)), 'ASSERT:CLAIM_0x05: is the offerer SHOULD be the sender?');
             }
         }
     }
@@ -228,14 +290,7 @@ contract expectClaim is base {
         SnapshotData memory post
     ) private {
         // ASSERT:CLAIM_0x06: is the post offer == 0?
-        assertEq(post.offer, 0, 'ASSERT:CLAIM_0x06: is the post offer == 0?');
-
-        if (!env.winner) {
-            // BALANCE CHANGE: sender balance should go up by the amount of the offer, nuggft's should go down
-            int192 amount = cast.i192(((pre.offer << 26) >> 186) * .1 gwei);
-            run.expectedSenderBalance += amount;
-            run.expectedNuggftBalance -= amount;
-        }
+        ds.assertEq(post.offer, 0, 'ASSERT:CLAIM_0x06: is the post offer == 0?');
 
         if (env.isItem) {
             if (env.winner) {
@@ -245,7 +300,7 @@ contract expectClaim is base {
                     assertProofContains(uint160(env.buyer), uint16(env.id >> 24), "ASSERT:CLAIM_0x07: the item SHOULD be inside the winning nugg's proof");
 
                     // ASSERT:CLAIM_0x08: is the post agency == 0?
-                    assertEq(post.agency, 0, 'ASSERT:CLAIM_0x08: the agency SHOULD be 0 after the claim');
+                    ds.assertEq(post.agency, 0, 'ASSERT:CLAIM_0x08: the agency SHOULD be 0 after the claim');
                 }
             } else {
                 // ASSERT:CLAIM_0x09: AFTER a losing item claim
@@ -255,14 +310,14 @@ contract expectClaim is base {
                 if (env.reclaim) {} else {
                     // @note AFTER a winning nugg claim
                     // ASSERT:CLAIM_0x0A: does the post agency reflect the same user as the pre agency?
-                    assertEq(
+                    ds.assertEq(
                         address(uint160(post.agency)),
                         address(uint160(pre.agency)),
                         'ASSERT:CLAIM_0x0A: the pre agency user and the post agency user SHOULD be the same'
                     );
 
                     // ASSERT:CLAIM_0x0B: does the post agency have a OWN flag?
-                    assertEq(post.agency >> 254, 0x01, 'ASSERT:CLAIM_0x0B: post agency must have the OWN - 0x01 - flag');
+                    ds.assertEq(post.agency >> 254, 0x01, 'ASSERT:CLAIM_0x0B: post agency must have the OWN - 0x01 - flag');
                 }
             } else {
                 // @note AFTER a losing nugg claim
@@ -276,11 +331,5 @@ contract expectClaim is base {
         // ASSERT:CLAIM_0x0C: maybe here we just check to see that the data is ok?
     }
 
-    function postRunChecks(Run memory run) private {
-        // ASSERT:CLAIM_0x0D: is the sender balance correct?
-        assertBalance(run.sender, run.expectedSenderBalance, 'ASSERT:CLAIM_0x0D');
-
-        // ASSERT:CLAIM_0x0E: is the nuggft balance correct?
-        assertBalance(address(nuggft), run.expectedNuggftBalance, 'ASSERT:CLAIM_0x0E');
-    }
+    function postRunChecks(Run memory run) private {}
 }

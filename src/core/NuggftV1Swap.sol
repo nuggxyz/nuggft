@@ -50,7 +50,7 @@ abstract contract NuggftV1Swap is INuggftV1ItemSwap, INuggftV1Swap, NuggftV1Stak
             // store callvalue formatted in .1 gwei for caculation of total offer
             next := div(callvalue(), LOSS)
 
-            req(next, Error__OfferLowerThanLOSS__0xF0)
+            req(gt(next, 100), Error__OfferLowerThanLOSS__0xF0)
 
             mptr := mload(0x40)
 

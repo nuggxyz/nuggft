@@ -102,6 +102,7 @@ contract NuggftV1Test is ForgeTest {
     function reset() public {
         forge.vm.roll(1000);
         // bytes memory tmp = hex'000100';
+        ds.setDsTest(address(this));
 
         PureDeployer dep = new PureDeployer(0, 0, type(RiggedNuggft).creationCode, type(MockDotnuggV1).creationCode, tmpdata);
         // dep.init();
@@ -142,6 +143,7 @@ contract NuggftV1Test is ForgeTest {
 
     function reset__system() public {
         forge.vm.roll(14069560);
+        ds.setDsTest(address(this));
 
         PureDeployer dep = new PureDeployer(0, 0, type(RiggedNuggft).creationCode, type(MockDotnuggV1).creationCode, tmpdata);
         // dep.init();
@@ -506,33 +508,33 @@ contract NuggftV1Test is ForgeTest {
                                 encodeWithSelector
        ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
 
-    struct ExpectMintSnapshot {
-        uint160 tokenId;
-        address user;
-        uint96 value;
-        StakeSnapshot stake;
-        AgencySnapshot agency;
-    }
+    // struct ExpectMintSnapshot {
+    //     uint160 tokenId;
+    //     address user;
+    //     uint96 value;
+    //     StakeSnapshot stake;
+    //     AgencySnapshot agency;
+    // }
 
-    ExpectMintSnapshot expectMintSnapshot;
+    // ExpectMintSnapshot expectMintSnapshot;
 
-    function startExpectMint(
-        uint160 tokenId,
-        address by,
-        uint96 amount
-    ) internal {
-        expectMintSnapshot = ExpectMintSnapshot(tokenId, by, amount, stakeHelper(), agencyHelper(tokenId));
-    }
+    // function startExpectMint(
+    //     uint160 tokenId,
+    //     address by,
+    //     uint96 amount
+    // ) internal {
+    //     expectMintSnapshot = ExpectMintSnapshot(tokenId, by, amount, stakeHelper(), agencyHelper(tokenId));
+    // }
 
-    function endExpectMint() internal {
-        ExpectMintSnapshot memory snap = expectMintSnapshot;
-        delete expectMintSnapshot;
+    // function endExpectMint() internal {
+    //     ExpectMintSnapshot memory snap = expectMintSnapshot;
+    //     delete expectMintSnapshot;
 
-        StakeSnapshot memory stake = stakeHelper();
-        AgencySnapshot memory agency = agencyHelper(snap.tokenId);
+    //     StakeSnapshot memory stake = stakeHelper();
+    //     AgencySnapshot memory agency = agencyHelper(snap.tokenId);
 
-        assertEq(snap.stake.shares + 1, stake.shares, 'mint -> expect shares to increase by one');
-    }
+    //     assertEq(snap.stake.shares + 1, stake.shares, 'mint -> expect shares to increase by one');
+    // }
 
     /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
                                 encodeWithSelector

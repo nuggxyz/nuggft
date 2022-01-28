@@ -6,33 +6,26 @@ import '../../NuggftV1.test.sol';
 import {NuggftV1Proof} from '../../../core/NuggftV1Proof.sol';
 
 contract fragments is NuggftV1Test {
-    uint16 sellingItemId;
+    uint16 itemId;
 
     function userMints(address user, uint24 token) public {
-        forge.vm.startPrank(user);
-        uint96 value = 1 gwei;//nuggft.msp();
-        if (value < 1 gwei) {
-            value = 1 gwei;
+        uint96 value = 1 ether; //nuggft.msp();
+        if (value < 1 ether) {
+            value = 1 ether;
         }
-        startExpectMint(token, users.frank, value);
-        nuggft.mint{value: value}(token);
-        endExpectMint();
-        forge.vm.stopPrank();
+
+        expect.mint().exec(token, lib.txdata(user, value));
     }
 
     function deeSellsAnItem() public {
-        uint96 value = 1 gwei;
-        forge.vm.startPrank(users.dee);
-        {
-            startExpectMint(500, users.frank, value);
-            nuggft.mint{value: value}(500);
-            endExpectMint();
+        uint96 value = 1 ether;
 
-            (, uint8[] memory ids, , , , ) = nuggft.proofToDotnuggMetadata(500);
-            sellingItemId = ids[1] | (1 << 8);
+        expect.mint().exec(500, lib.txdata(users.dee, 0));
 
-            nuggft.sell(500, sellingItemId, value);
-        }
-        forge.vm.stopPrank();
+        (, uint8[] memory ids, , , , ) = nuggft.proofToDotnuggMetadata(500);
+
+        itemId = ids[1] | (1 << 8);
+
+        expect.sell().exec(500, itemId, value, lib.txdata(users.dee, 0));
     }
 }
