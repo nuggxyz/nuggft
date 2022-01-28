@@ -51,7 +51,7 @@ contract expectOffer is base {
         if (txdata.str.length > 0) forge.vm.expectRevert(txdata.str);
         nuggft.offer{value: txdata.value}(tokenId);
         forge.vm.stopPrank();
-        this.stop();
+        txdata.str.length > 0 ? this.rollback() : this.stop();
     }
 
     function exec(
@@ -66,7 +66,7 @@ contract expectOffer is base {
         if (txdata.str.length > 0) forge.vm.expectRevert(txdata.str);
         nuggft.offer{value: txdata.value}(buyingTokenId, sellingTokenId, itemId);
         forge.vm.stopPrank();
-        this.stop();
+        txdata.str.length > 0 ? this.rollback() : this.stop();
     }
 
     function start(
