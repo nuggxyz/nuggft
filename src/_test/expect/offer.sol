@@ -106,6 +106,8 @@ contract expectOffer is base {
         env.mintingNugg = env.id == env.epoch;
 
         if (env.isItem) {
+            env.id = tokenId & 0xffffffffff;
+
             env.buyer = address(tokenId >> 40);
             pre.agency = nuggft.itemAgency(env.id);
             pre.offer = nuggft.itemOffers(env.id, uint160(env.buyer));

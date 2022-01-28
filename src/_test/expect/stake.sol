@@ -13,6 +13,7 @@ contract expectStake is base {
         int192 expected_stake_change;
         int192 expected_share_change;
         Snapshot pre;
+        bool mint;
     }
 
     struct Snapshot {
@@ -49,6 +50,10 @@ contract expectStake is base {
         run.expected_stake_change = cast.i192(eth) * (up ? int8(1) : int8(-1));
         run.expected_share_change = cast.i192(shares) * (up ? int8(1) : int8(-1));
 
+        if (run.expected_share_change > 0) {
+            run.mint = true;
+        }
+
         execution = abi.encode(run);
     }
 
@@ -67,16 +72,22 @@ contract expectStake is base {
         post.msp = cast.i192(nuggft.msp());
         post.eps = cast.i192(nuggft.eps());
 
-        ds.assertTrue(post.msp >= pre.msp, 'msp is did not increase as expected');
-        ds.assertEq(post.protocol - pre.protocol, lib.take(10, run.expected_stake_change), 'totalProtocol is not what is expected');
-        ds.assertEq(
-            post.staked - pre.staked,
-            run.expected_stake_change - lib.take(10, run.expected_stake_change),
-            'staked change is not 90 percent of expected change'
-        );
-        ds.assertEq(post.shares - pre.shares, run.expected_share_change, 'shares difference is not what is expected');
+        ds.assertGe(post.msp, pre.msp, 'msp is did not increase as expected');
 
-        post.eps = cast.i192(nuggft.eps());
+        int256 expectedProto = lib.take(10, run.expected_stake_change);
+
+        if (run.mint) {
+            int192 fee = pre.eps / 10;
+            int192 overpay = run.expected_stake_change - pre.msp;
+            fee += overpay / 10;
+            expectedProto = fee;
+        }
+
+        int256 expectedStake = run.expected_stake_change - expectedProto;
+
+        ds.assertEq(post.protocol - pre.protocol, expectedProto, 'totalProtocol is not what is expected');
+        ds.assertEq(post.staked - pre.staked, expectedStake, 'staked change is not 90 percent of expected change');
+        ds.assertEq(post.shares - pre.shares, run.expected_share_change, 'shares difference is not what is expected');
         ds.assertEq(post.eps, post.shares > 0 ? post.staked / post.shares : int256(0), 'EPS is not ending with correct value');
 
         this.clear();
