@@ -34,6 +34,7 @@ contract expectOffer is base {
         uint96 value;
         bool mintingNugg;
         uint24 epoch;
+        uint96 increment;
     }
 
     struct Run {
@@ -41,6 +42,27 @@ contract expectOffer is base {
         address sender;
         int192 expectedSenderBalance;
         int192 expectedNuggftBalance;
+    }
+
+    function exec(uint160 tokenId, lib.txdata memory txdata) public {
+        forge.vm.deal(txdata.from, txdata.from.balance + txdata.value);
+        this.start(tokenId, txdata.from, txdata.value);
+        forge.vm.prank(txdata.from);
+        nuggft.offer{value: txdata.value}(tokenId);
+        this.stop();
+    }
+
+    function exec(
+        uint160 buyingTokenId,
+        uint160 sellingTokenId,
+        uint16 itemId,
+        lib.txdata memory txdata
+    ) public {
+        forge.vm.deal(txdata.from, txdata.from.balance + txdata.value);
+        this.start(buyingTokenId, sellingTokenId, itemId, txdata.from, txdata.value);
+        forge.vm.prank(txdata.from);
+        nuggft.offer{value: txdata.value}(buyingTokenId, sellingTokenId, itemId);
+        this.stop();
     }
 
     function start(
@@ -81,26 +103,32 @@ contract expectOffer is base {
 
         if (env.isItem) {
             env.buyer = address(tokenId >> 40);
-            pre.agency = nuggft.external__itemAgency(env.id);
-            pre.offer = nuggft.external__itemOffers(env.id, uint160(env.buyer));
+            pre.agency = nuggft.itemAgency(env.id);
+            pre.offer = nuggft.itemOffers(env.id, uint160(env.buyer));
         } else {
             env.buyer = sender;
-            pre.agency = nuggft.external__agency(env.id);
-            pre.offer = nuggft.external__offers(env.id, env.buyer);
+            pre.agency = nuggft.agency(env.id);
+            pre.offer = nuggft.offers(env.id, env.buyer);
         }
 
-        if (pre.offer == 0) pre.offer = pre.agency;
+        if (pre.offer == 0 && env.buyer == address(uint160(pre.agency))) pre.offer = pre.agency;
+
+        // ds.emit_log_uint((((pre.offer << 26) >> 186) * .1 gwei));
+        // ds.emit_log_uint((((pre.agency << 26) >> 186) * .1 gwei));
+        // ds.emit_log_uint(env.value);
+        // ds.emit_log_bytes32(bytes32(pre.agency));
+        // ds.emit_log_bytes32(bytes32(pre.offer));
+
+        env.increment = uint96((((pre.offer << 26) >> 186) * .1 gwei) + env.value - (((pre.agency << 26) >> 186) * .1 gwei));
 
         run.snapshot.env = env;
         run.snapshot.data = pre;
 
         preOfferChecks(run, env, pre);
 
-        preRunChecks(run);
-
         balance.start(run.sender, env.value, false);
         balance.start(address(nuggft), env.value, true);
-        stake.start(0, 0, true);
+        stake.start(env.increment, env.mintingNugg && pre.agency == 0 ? 1 : 0, true);
 
         execution = abi.encode(run);
     }
@@ -115,16 +143,43 @@ contract expectOffer is base {
         SnapshotData memory post;
 
         if (env.isItem) {
-            post.agency = nuggft.external__itemAgency(env.id);
-            post.offer = nuggft.external__itemOffers(env.id, uint160(env.buyer));
+            post.agency = nuggft.itemAgency(env.id);
+            post.offer = nuggft.itemOffers(env.id, uint160(env.buyer));
         } else {
-            post.agency = nuggft.external__agency(env.id);
-            post.offer = nuggft.external__offers(env.id, env.buyer);
+            post.agency = nuggft.agency(env.id);
+            post.offer = nuggft.offers(env.id, env.buyer);
         }
 
         postOfferChecks(run, env, pre, post);
 
-        postRunChecks(run);
+        balance.stop();
+        stake.stop();
+
+        this.clear();
+    }
+
+    function rollback() public {
+        require(execution.length > 0, 'EXPECT-OFFER:STOP: execution does not exist');
+
+        Run memory run = abi.decode(execution, (Run));
+
+        SnapshotEnv memory env = run.snapshot.env;
+        SnapshotData memory pre = run.snapshot.data;
+        SnapshotData memory post;
+
+        if (env.isItem) {
+            post.agency = nuggft.itemAgency(env.id);
+            post.offer = nuggft.itemOffers(env.id, uint160(env.buyer));
+        } else {
+            post.agency = nuggft.agency(env.id);
+            post.offer = nuggft.offers(env.id, env.buyer);
+        }
+
+        ds.assertEq(pre.agency, post.agency, "EXPECT-OFFER:ROLLBACK agency changed but shouldn't have");
+        ds.assertEq(pre.offer, post.offer, "EXPECT-OFFER:ROLLBACK offer changed but shouldn't have");
+
+        balance.rollback();
+        stake.rollback();
 
         this.clear();
     }
@@ -144,15 +199,5 @@ contract expectOffer is base {
         SnapshotData memory post
     ) private {
         if (env.isItem) {} else {}
-    }
-
-    function preRunChecks(Run memory run) private {
-        // ASSERT:OFFER_0x0C: what should the balances be before any call on claim?
-        // ASSERT:OFFER_0x0C: maybe here we just check to see that the data is ok?
-    }
-
-    function postRunChecks(Run memory run) private {
-        balance.stop();
-        stake.stop();
     }
 }

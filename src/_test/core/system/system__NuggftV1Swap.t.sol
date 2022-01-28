@@ -16,12 +16,12 @@ contract system__NuggftV1Swap is NuggftV1Test, fragments {
         reset__system();
         delete tmpUsers;
         delete tmpTokens;
-        delete sellingItemId;
+        delete itemId;
     }
 
     function test__system__frankBidsOnANuggThenClaims() public {
         jump(3000);
-        uint96 value = 1 gwei;
+        uint96 value = 1 ether;
         forge.vm.startPrank(users.frank);
         {
             expect.offer().start(3000, users.frank, value);
@@ -39,14 +39,14 @@ contract system__NuggftV1Swap is NuggftV1Test, fragments {
 
     function test__system__frankSellsANuggThenReclaims() public {
         jump(3000);
-        uint96 value = 1 gwei;
+        uint96 value = 1 ether;
         forge.vm.startPrank(users.frank);
         {
-            startExpectMint(500, users.frank, value);
+            expect.mint().start(500, users.frank, value);
             nuggft.mint{value: value}(500);
-            endExpectMint();
+            expect.mint().stop();
 
-            nuggft.sell(500, 1 gwei);
+            nuggft.sell(500, 1 ether);
 
             jump(3001);
 
@@ -60,7 +60,7 @@ contract system__NuggftV1Swap is NuggftV1Test, fragments {
     function test__system__frankBidsOnAnItemThenClaims() public {
         deeSellsAnItem();
 
-        uint96 value = 1 gwei;
+        uint96 value = 1 ether;
 
         jump(3000);
 
@@ -68,11 +68,11 @@ contract system__NuggftV1Swap is NuggftV1Test, fragments {
         forge.vm.startPrank(users.frank);
         {
             //bytes memory odat = startExpectOffer(3000, users.frank, value);
-            nuggft.offer{value: value}(501, 500, sellingItemId);
+            nuggft.offer{value: value}(501, 500, itemId);
             // expect.offer().stop();
             jump(3002);
-            expect.claim().start(lib.sarr160(encItemIdClaim(500, sellingItemId)), lib.sarrAddress(address(501)), users.frank);
-            nuggft.claim(lib.sarr160(encItemIdClaim(500, sellingItemId)), lib.sarr160(501));
+            expect.claim().start(lib.sarr160(encItemIdClaim(500, itemId)), lib.sarrAddress(address(501)), users.frank);
+            nuggft.claim(lib.sarr160(encItemIdClaim(500, itemId)), lib.sarr160(501));
             expect.claim().stop();
         }
         forge.vm.stopPrank();
@@ -93,11 +93,11 @@ contract system__NuggftV1Swap is NuggftV1Test, fragments {
                 expect.offer().stop();
             }
 
-            expect.offer().start(encItemId(501, 500, sellingItemId), users.frank, 1 gwei);
-            nuggft.offer{value: 1 gwei}(encItemId(501, 500, sellingItemId));
+            expect.offer().start(encItemId(501, 500, itemId), users.frank, 1 ether);
+            nuggft.offer{value: 1 ether}(encItemId(501, 500, itemId));
             expect.offer().stop();
 
-            tmpTokens.push(encItemIdClaim(500, sellingItemId));
+            tmpTokens.push(encItemIdClaim(500, itemId));
 
             jump(uint24(3050 + tmpTokens.length));
 
@@ -131,16 +131,16 @@ contract system__NuggftV1Swap is NuggftV1Test, fragments {
                 nuggft.offer{value: dennisIsABastardMan}(tmpTokens[i]);
             }
 
-            expect.offer().start(encItemId(501, 500, sellingItemId), users.frank, 1 gwei);
-            nuggft.offer{value: 1 gwei}(encItemId(501, 500, sellingItemId));
+            expect.offer().start(encItemId(501, 500, itemId), users.frank, 1 ether);
+            nuggft.offer{value: 1 ether}(encItemId(501, 500, itemId));
             expect.offer().stop();
 
-            expect.offer().start(encItemId(502, 500, sellingItemId), users.dennis, 1.1 gwei);
+            expect.offer().start(encItemId(502, 500, itemId), users.dennis, 1.1 ether);
             forge.vm.prank(users.dennis);
-            nuggft.offer{value: 1.1 gwei}(encItemId(502, 500, sellingItemId));
+            nuggft.offer{value: 1.1 ether}(encItemId(502, 500, itemId));
             expect.offer().stop();
 
-            tmpTokens.push(encItemIdClaim(500, sellingItemId));
+            tmpTokens.push(encItemIdClaim(500, itemId));
 
             jump(uint24(3050 + tmpTokens.length));
 
@@ -246,7 +246,7 @@ contract system__NuggftV1Swap is NuggftV1Test, fragments {
     function test__system__revert__0x24__claim__twice__frank() public {
         forge.vm.startPrank(users.frank);
         jump(4000);
-        nuggft.offer{value: 0.2 gwei}(4000);
+        nuggft.offer{value: 0.2 ether}(4000);
         jump(4001);
         nuggft.claim(lib.sarr160(4000), lib.sarrAddress(users.frank));
         forge.vm.expectRevert(hex'24');
@@ -257,7 +257,7 @@ contract system__NuggftV1Swap is NuggftV1Test, fragments {
     function test__system__revert__0x67__claim__early__frank() public {
         forge.vm.startPrank(users.frank);
         jump(4000);
-        nuggft.offer{value: 0.2 gwei}(4000);
+        nuggft.offer{value: 0.2 ether}(4000);
         forge.vm.expectRevert(hex'67');
         nuggft.claim(lib.sarr160(4000), lib.sarrAddress(users.frank));
         forge.vm.stopPrank();
@@ -268,15 +268,15 @@ contract system__NuggftV1Swap is NuggftV1Test, fragments {
 
     function test__system__item__sell__frank() public {
         forge.vm.startPrank(users.frank);
-        nuggft.mint{value: 0.2 gwei}(500);
+        nuggft.mint{value: 0.2 ether}(500);
 
         (, uint8[] memory ids, , , , ) = nuggft.proofToDotnuggMetadata(500);
 
-        sellingItemId = ids[1] | (1 << 8);
+        itemId = ids[1] | (1 << 8);
 
         // nuggft.floop(500);
-        nuggft.sell(500, sellingItemId, 50 gwei);
-        // nuggft.sell(500, 90 gwei);
+        nuggft.sell(500, itemId, 50 ether);
+        // nuggft.sell(500, 90 ether);
         // nuggft.floop(500);
         // nuggft.rotate(500, 1, 8);
         // nuggft.floop(500);
@@ -289,15 +289,15 @@ contract system__NuggftV1Swap is NuggftV1Test, fragments {
     function test__system__revert__0x0F__item__sellThenOffer__frank() public {
         // jump(3000);
         forge.vm.startPrank(users.frank);
-        nuggft.mint{value: 0.2 gwei}(500);
+        nuggft.mint{value: 0.2 ether}(500);
 
         (, uint8[] memory ids, , , , ) = nuggft.proofToDotnuggMetadata(500);
 
-        sellingItemId = ids[1] | (1 << 8);
+        itemId = ids[1] | (1 << 8);
 
-        nuggft.sell(500, sellingItemId, 50 gwei);
+        nuggft.sell(500, itemId, 50 ether);
         forge.vm.expectRevert(hex'0F');
-        nuggft.offer{value: 1 gwei}(500, 500, sellingItemId);
+        nuggft.offer{value: 1 ether}(500, 500, itemId);
 
         forge.vm.stopPrank();
     }
@@ -305,25 +305,25 @@ contract system__NuggftV1Swap is NuggftV1Test, fragments {
     function test__system__item__sellWaitThenOffer__frank() public {
         jump(3000);
         forge.vm.startPrank(users.frank);
-        nuggft.mint{value: 0.2 gwei}(500);
+        nuggft.mint{value: 0.2 ether}(500);
 
         (, uint8[] memory ids, , , , ) = nuggft.proofToDotnuggMetadata(500);
 
-        sellingItemId = ids[1] | (1 << 8);
+        itemId = ids[1] | (1 << 8);
 
         // nuggft.floop(500);
-        nuggft.sell(500, sellingItemId, 1 gwei);
+        nuggft.sell(500, itemId, 1 ether);
         // forge.vm.expectRevert(hex'0F');
         forge.vm.stopPrank();
 
         forge.vm.startPrank(users.dee);
         nuggft.mint{value: nuggft.msp()}(501);
-        nuggft.offer{value: 1.1 gwei}(501, 500, sellingItemId);
+        nuggft.offer{value: 1.1 ether}(501, 500, itemId);
         forge.vm.stopPrank();
 
         forge.vm.prank(users.frank);
-        nuggft.offer{value: 1.2 gwei}(500, 500, sellingItemId);
-        // nuggft.sell(500, 90 gwei);
+        nuggft.offer{value: 1.2 ether}(500, 500, itemId);
+        // nuggft.sell(500, 90 ether);
         // nuggft.floop(500);
         // nuggft.rotate(500, 1, 8);s
         // nuggft.floop(500);
@@ -333,39 +333,39 @@ contract system__NuggftV1Swap is NuggftV1Test, fragments {
 
     function test__system__item__sellTwo__frank() public {
         forge.vm.startPrank(users.frank);
-        nuggft.mint{value: 0.2 gwei}(500);
+        nuggft.mint{value: 0.2 ether}(500);
 
         (, uint8[] memory ids, , , , ) = nuggft.proofToDotnuggMetadata(500);
 
-        sellingItemId = ids[1] | (1 << 8);
+        itemId = ids[1] | (1 << 8);
 
-        nuggft.sell(500, sellingItemId, 50 gwei);
-        // nuggft.claim(lib.sarr160(encItemIdClaim(500, sellingItemId)), lib.sarr160(500));
+        nuggft.sell(500, itemId, 50 ether);
+        // nuggft.claim(lib.sarr160(encItemIdClaim(500, itemId)), lib.sarr160(500));
 
         nuggft.floop(500);
 
-        sellingItemId = ids[2] | (2 << 8);
+        itemId = ids[2] | (2 << 8);
 
-        nuggft.sell(500, sellingItemId, 50 gwei);
+        nuggft.sell(500, itemId, 50 ether);
 
         forge.vm.stopPrank();
     }
 
     function test__system__item__sellTwoClaimBack__frank() public {
         forge.vm.startPrank(users.frank);
-        nuggft.mint{value: 0.2 gwei}(500);
+        nuggft.mint{value: 0.2 ether}(500);
 
         (, uint8[] memory ids, , , , ) = nuggft.proofToDotnuggMetadata(500);
 
-        sellingItemId = ids[1] | (1 << 8);
-        nuggft.sell(500, sellingItemId, 50 gwei);
-        nuggft.claim(lib.sarr160(encItemIdClaim(500, sellingItemId)), lib.sarr160(500));
+        itemId = ids[1] | (1 << 8);
+        nuggft.sell(500, itemId, 50 ether);
+        nuggft.claim(lib.sarr160(encItemIdClaim(500, itemId)), lib.sarr160(500));
 
         nuggft.floop(500);
 
-        sellingItemId = ids[2] | (2 << 8);
-        nuggft.sell(500, sellingItemId, 50 gwei);
-        nuggft.claim(lib.sarr160(encItemIdClaim(500, sellingItemId)), lib.sarr160(500));
+        itemId = ids[2] | (2 << 8);
+        nuggft.sell(500, itemId, 50 ether);
+        nuggft.claim(lib.sarr160(encItemIdClaim(500, itemId)), lib.sarr160(500));
 
         forge.vm.stopPrank();
     }
@@ -381,7 +381,7 @@ contract system__NuggftV1Swap is NuggftV1Test, fragments {
             forge.vm.deal(tmpUsers[i], 100 ether);
             forge.vm.startPrank(tmpUsers[i]);
             nuggft.mint{value: nuggft.msp()}(tmpTokens[i]);
-            nuggft.offer{value: nuggft.vfo(tmpTokens[i], 500, sellingItemId)}(tmpTokens[i], 500, sellingItemId);
+            nuggft.offer{value: nuggft.vfo(tmpTokens[i], 500, itemId)}(tmpTokens[i], 500, itemId);
             forge.vm.stopPrank();
         }
     }
@@ -393,7 +393,7 @@ contract system__NuggftV1Swap is NuggftV1Test, fragments {
 
         for (uint16 i = 0; i < tmpTokens.length; i++) {
             forge.vm.prank(tmpUsers[i]);
-            nuggft.claim(lib.sarr160(encItemIdClaim(500, sellingItemId)), lib.sarr160(tmpTokens[i]));
+            nuggft.claim(lib.sarr160(encItemIdClaim(500, itemId)), lib.sarr160(tmpTokens[i]));
         }
     }
 
@@ -404,7 +404,7 @@ contract system__NuggftV1Swap is NuggftV1Test, fragments {
 
         forge.vm.expectRevert(hex'88');
         forge.vm.prank(tmpUsers[tmpUsers.length - 2]);
-        nuggft.claim(lib.m160(encItemIdClaim(500, sellingItemId), uint16(tmpUsers.length)), tmpTokens);
+        nuggft.claim(lib.m160(encItemIdClaim(500, itemId), uint16(tmpUsers.length)), tmpTokens);
     }
 
     function test__system__item__trustlessWinnerClaim__offerWar__frankSale() public {
@@ -413,66 +413,78 @@ contract system__NuggftV1Swap is NuggftV1Test, fragments {
         jump(3002);
 
         forge.vm.prank(tmpUsers[tmpUsers.length - 2]);
-        nuggft.claim(lib.sarr160(encItemIdClaim(500, sellingItemId)), lib.sarr160(tmpTokens[tmpUsers.length - 1]));
+        nuggft.claim(lib.sarr160(encItemIdClaim(500, itemId)), lib.sarr160(tmpTokens[tmpUsers.length - 1]));
     }
 
     uint160[] tmpIds;
 
-    function test__system__item__offerWar__ffrankSale__holy__fuck() public {
-        test__system__item__sell__frank();
-        forge.vm.prank(users.frank);
-        nuggft.sell(500, 90 gwei);
-        jump(3000);
+    // function test__system__item__offerWar__ffrankSale__holy__fuck() public {
+    //     test__system__item__sell__frank();
+    //     forge.vm.prank(users.frank);
+    //     nuggft.sell(500, .9 ether);
+    //     jump(3000);
 
-        // nuggft.mint{value: 200 gwei}(509);
+    //     // nuggft.mint{value: 200 ether}(509);
 
-        uint16 size = 20;
-        uint96 money = 1000 gwei;
+    //     uint16 size = 20;
+    //     uint96 money = .69696969 ether;
 
-        for (uint256 i = 0; i < size; i++) {
-            tmpUsers.push(forge.vm.addr(100));
-            tmpTokens.push(uint160(501 + i));
-            tmpIds.push(encItemIdClaim(500, sellingItemId));
-            uint256 value = nuggft.msp();
-            uint160 tkn = uint160(501 + i);
-            money = nuggft.vfo(tkn, 500, sellingItemId);
+    //     for (uint256 i = 0; i < size; i++) {
+    //         tmpUsers.push(forge.vm.addr(100));
+    //         tmpTokens.push(uint160(501 + i));
+    //         tmpIds.push(encItemIdClaim(500, itemId));
+    //         uint256 value = nuggft.msp();
+    //         uint160 tkn = uint160(501 + i);
+    //         money = nuggft.vfo(tkn, 500, itemId);
 
-            forge.vm.deal(tmpUsers[i], 100 ether);
-            forge.vm.startPrank(tmpUsers[i]);
-            nuggft.mint{value: value}(tkn);
-            nuggft.offer{value: money}(tkn, 500, sellingItemId);
+    //         forge.vm.startPrank(tmpUsers[i]);
+    //         {
+    //             forge.vm.deal(tmpUsers[i], tmpUsers[i].balance + value);
 
-            money = nuggft.vfo(forge.vm.addr(100), 500);
+    //             nuggft.mint{value: value}(tkn);
 
-            expect.offer().start(500, tmpUsers[i], money);
-            nuggft.offer{value: money}(500);
-            expect.offer().stop();
+    //             money = nuggft.vfo(forge.vm.addr(100), 500);
 
-            forge.vm.stopPrank();
-            money += 10 gwei;
-        }
+    //             forge.vm.deal(tmpUsers[i], tmpUsers[i].balance + money);
 
-        tmpUsers.push(forge.vm.addr(100));
-        tmpIds.push(500);
+    //             expect.offer().start(500, tmpUsers[i], money);
+    //             nuggft.offer{value: money}(tkn, 500, itemId);
+    //             expect.offer().stop();
 
-        tmpTokens.push(uint160(forge.vm.addr(100)));
+    //             money = nuggft.vfo(forge.vm.addr(100), 500);
 
-        jump(3002);
+    //             forge.vm.deal(tmpUsers[i], tmpUsers[i].balance + money);
 
-        // uint160[] memory tkn = uint160[](size);
+    //             expect.offer().start(500, tmpUsers[i], money);
+    //             nuggft.offer{value: money}(500);
+    //             expect.offer().stop();
+    //         }
+    //         forge.vm.stopPrank();
+    //         money += .42069696969 ether;
+    //     }
 
-        // for (uint16 i = 0; i<size; i++) {
+    //     tmpUsers.push(forge.vm.addr(100));
+    //     tmpIds.push(500);
 
-        // }
+    //     tmpTokens.push(uint160(forge.vm.addr(100)));
 
-        forge.vm.prank(tmpUsers[size - 3]);
-        nuggft.claim(tmpIds, tmpTokens);
-    }
+    //     jump(3002);
+
+    //     // uint160[] memory tkn = uint160[](size);
+
+    //     // for (uint16 i = 0; i<size; i++) {
+
+    //     // }
+
+    //     forge.vm.prank(tmpUsers[size - 3]);
+    //     expect.claim().start(tmpIds, tmpTokens, tmpUsers[size - 3]);
+    //     nuggft.claim(tmpIds, tmpTokens);
+    // }
 
     function test__system__item__initSaleThenSellNugg() public {
         test__system__item__sell__frank();
         forge.vm.prank(users.frank);
-        nuggft.sell(500, 90 gwei);
+        nuggft.sell(500, 90 ether);
         fragment__item__offerWar__ffrankSale__holy__fuck();
     }
 
@@ -494,23 +506,23 @@ contract system__NuggftV1Swap is NuggftV1Test, fragments {
         jump(3000);
 
         uint16 size = 20;
-        uint256 money = 1000 gwei;
+        uint256 money = 1000 ether;
 
         for (uint256 i = 0; i < size; i++) {
             tmpUsers.push(forge.vm.addr(100));
             tmpTokens.push(uint160(501 + i));
-            tmpIds.push(encItemIdClaim(500, sellingItemId));
+            tmpIds.push(encItemIdClaim(500, itemId));
             uint256 value = nuggft.msp();
             uint160 tkn = uint160(501 + i);
-            money = nuggft.vfo(tkn, 500, sellingItemId);
+            money = nuggft.vfo(tkn, 500, itemId);
 
             forge.vm.deal(tmpUsers[i], 100 ether);
             forge.vm.startPrank(tmpUsers[i]);
             nuggft.mint{value: value}(tkn);
-            nuggft.offer{value: money}(tkn, 500, sellingItemId);
+            nuggft.offer{value: money}(tkn, 500, itemId);
 
             forge.vm.stopPrank();
-            money += 10 gwei;
+            money += 10 ether;
         }
 
         jump(3002);

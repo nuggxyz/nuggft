@@ -33,10 +33,10 @@ contract revert__NuggftV1Swap is NuggftV1Test {
         [S:1] - offer - "msg.value >= minimum offer"
        ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
 
-    function test__revert__NuggftV1Swap__0x71__offer__successWithExactMinOffer() public {
+    function test__revert__NuggftV1Swap__0x71__offer__failWithExactMinOffer() public {
         uint160 tokenId = nuggft.epoch();
 
-        uint96 value = 10**8;
+        uint96 value = 10 gwei;
         forge.vm.deal(users.frank, value);
 
         expect.balance().start(users.frank, value, false);
@@ -44,18 +44,19 @@ contract revert__NuggftV1Swap is NuggftV1Test {
         expect.stake().start(value, 1, true);
         forge.vm.startPrank(users.frank);
         {
+            forge.vm.expectRevert(hex'F0');
             nuggft.offer{value: value}(tokenId);
         }
         forge.vm.stopPrank();
-        expect.stake().stop();
 
-        expect.balance().stop();
+        expect.stake().rollback();
+        expect.balance().rollback();
     }
 
     function test__revert__NuggftV1Swap__0x71__offer__successWithHigherMinOffer() public {
         uint160 tokenId = nuggft.epoch();
 
-        uint96 value = 10**8 + 1;
+        uint96 value = 10 gwei + .1 gwei;
 
         forge.vm.deal(users.frank, value);
 
@@ -66,6 +67,7 @@ contract revert__NuggftV1Swap is NuggftV1Test {
         {
             nuggft.offer{value: value}(tokenId);
         }
+
         forge.vm.stopPrank();
         expect.stake().stop();
         expect.balance().stop();
@@ -74,7 +76,7 @@ contract revert__NuggftV1Swap is NuggftV1Test {
     function test__revert__NuggftV1Swap__0xF0__offer__failWithOneWeiLessThanMin() public {
         uint160 tokenId = nuggft.epoch();
 
-        uint96 value = 10**8 - 1;
+        uint96 value = 10 gwei - .1 gwei;
 
         forge.vm.startPrank(users.frank);
         {
@@ -93,7 +95,7 @@ contract revert__NuggftV1Swap is NuggftV1Test {
             forge.vm.deal(users.frank, 1 ether);
             nuggft.mint{value: 1 ether}(500);
 
-            uint96 value = 10**8 - 1;
+            uint96 value = 10 gwei - 1;
 
             forge.vm.deal(users.frank, value);
             forge.vm.expectRevert(hex'F0');

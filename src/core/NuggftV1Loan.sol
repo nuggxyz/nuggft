@@ -161,6 +161,13 @@ abstract contract NuggftV1Loan is INuggftV1Loan, NuggftV1Swap {
 
             sstore(stake.slot, stake__cache)
 
+            let ptr := mload(0x40)
+            mstore(ptr, fee)
+            mstore(add(0x20, ptr), 0x00)
+
+            mstore(add(0x40, ptr), stake__cache)
+            log1(ptr, 0x60, Event__Stake)
+
             // update agency to return ownership of the token
             // ==========================
             // agency[tokenId] = {
@@ -333,9 +340,11 @@ abstract contract NuggftV1Loan is INuggftV1Loan, NuggftV1Swap {
 
             // ======================================================================
 
-            // log1 with topic "Stake(bytes32)"
-            mstore(mptr, stake__cache)
-            log1(mptr, 0x32, Event__Stake)
+            let ptr := mload(0x40)
+            mstore(ptr, accFee)
+            mstore(add(0x20, ptr), 0x00)
+            mstore(add(0x40, ptr), stake__cache)
+            log1(ptr, 0x60, Event__Stake)
 
             // accumulated eth is sent to caller
             if iszero(call(gas(), caller(), acc, 0, 0, 0, 0)) {

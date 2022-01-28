@@ -2,6 +2,8 @@
 
 pragma solidity 0.8.11;
 
+import './ds.sol';
+
 import {DSTest as ogDSTest} from '../../../lib/ds-test/src/test.sol';
 
 contract DSTest is ogDSTest {
@@ -9,6 +11,10 @@ contract DSTest is ogDSTest {
 
     bytes32 checkpointLabel;
     uint256 private checkpointGasLeft;
+
+    constructor() {
+        ds.setDsTest(address(this));
+    }
 
     function startMeasuringGas(bytes32 label) internal virtual {
         checkpointLabel = label;

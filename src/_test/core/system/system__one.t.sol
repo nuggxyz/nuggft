@@ -151,9 +151,9 @@ contract system__NuggftV1Swap_test is NuggftV1Test {
 
         forge.vm.startPrank(users.frank);
         {
-            startExpectMint(tokenId, users.frank, value);
+            expect.mint().start(tokenId, users.frank, value);
             nuggft.mint{value: value}(500);
-            endExpectMint();
+            expect.mint().stop();
         }
         forge.vm.stopPrank();
 
