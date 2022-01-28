@@ -22,29 +22,13 @@ contract revert__NuggftV1Loan is NuggftV1Test {
     function test__revert__NuggftV1Loan__0x2A__loan__successAsSelf() public {
         uint160 tokenId = scenario_frank_has_a_token_and_spent_50_eth();
 
-        forge.vm.startPrank(users.frank);
-        {
-            // nuggft.approve(_nuggft, tokenId);
-            nuggft.loan(lib.sarr160(tokenId));
-        }
-        forge.vm.stopPrank();
+        expect.loan().exec(lib.sarr160(tokenId), lib.txdata(users.frank, 0, ''));
     }
 
     function test__revert__NuggftV1Loan__0x2A__loan__failAsNotAgent() public {
         uint160 tokenId = scenario_frank_has_a_token_and_spent_50_eth();
 
-        // forge.vm.startPrank(users.frank);
-        // {
-        //     nuggft.approve(_nuggft, tokenId);
-        // }
-        // forge.vm.stopPrank();
-
-        forge.vm.startPrank(users.dennis);
-        {
-            forge.vm.expectRevert(hex'2A');
-            nuggft.loan(lib.sarr160(tokenId));
-        }
-        forge.vm.stopPrank();
+        expect.loan().exec(lib.sarr160(tokenId), lib.txdata(users.dennis, 0, hex'2A'));
     }
 
     function test__revert__NuggftV1Loan__N_1__loan__passAsSelfHasNotApprovedContract() public {

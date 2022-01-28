@@ -95,7 +95,7 @@ contract expectMint is base {
 
         post.agency = nuggft.agency(env.tokenId);
 
-        ds.assertEq(pre.agency, 0, 'EXPECT-MINT:STOP - agency should not be 0');
+        ds.assertGt(post.agency, 0, 'EXPECT-MINT:STOP - agency should not be 0');
 
         // @todo - any other checks we want here?
 
@@ -117,8 +117,8 @@ contract expectMint is base {
 
         ds.assertEq(post.agency, 0, 'EXPECT-MINT:ROLLBACK - agency should be 0');
 
-        stake.stop();
-        balance.stop();
+        stake.rollback();
+        balance.rollback();
 
         this.clear();
     }
