@@ -7,5 +7,7 @@ interface INuggftV1Epoch {
     /// @dev Explain to a developer any extra details
     event Genesis(uint256 blocknum, uint32 interval, uint24 offset);
 
+    function genesis() external view returns (uint256 res);
+
     function epoch() external view returns (uint24 res);
 }

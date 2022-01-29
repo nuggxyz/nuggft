@@ -21,7 +21,7 @@ contract RiggedNuggft is NuggftV1 {
     }
 
     function getBlockHash(uint256 blocknum) internal view override returns (bytes32 res) {
-        if (block.number >= blocknum && block.number - blocknum < 256) {
+        if (block.number > blocknum && block.number - blocknum < 256) {
             return keccak256(abi.encodePacked(blocknum));
         }
     }
