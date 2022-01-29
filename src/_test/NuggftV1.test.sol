@@ -57,6 +57,12 @@ contract RiggedNuggft is NuggftV1 {
     function external__toStartBlock(uint24 _epoch) public view returns (uint256 res) {
         return toStartBlock(_epoch, genesis);
     }
+
+    function external__agency__slot() public view returns (bytes32 res) {
+        assembly {
+            res := agency.slot
+        }
+    }
 }
 
 library SafeCast {
@@ -152,6 +158,8 @@ contract NuggftV1Test is ForgeTest {
         nuggft = RiggedNuggft(dep.__nuggft());
 
         expect = new Expect(nuggft);
+
+        // record.build(nuggft.external__agency__slot());
 
         _nuggft = address(nuggft);
 

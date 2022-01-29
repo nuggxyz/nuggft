@@ -106,6 +106,8 @@ contract system__NuggftV1Swap is NuggftV1Test, fragments {
         forge.vm.stopPrank();
     }
 
+    event log_array(uint160[] tmp);
+
     function test__system__frankMulticlaimLosingItemAndNuggs() public {
         deeSellsAnItem();
         userMints(users.frank, 501);
@@ -113,7 +115,7 @@ contract system__NuggftV1Swap is NuggftV1Test, fragments {
 
         forge.vm.startPrank(users.frank);
         {
-            for (uint16 i = 0; i < 5; i++) {
+            for (uint16 i = 0; i < 100; i++) {
                 jump(3000 + i);
                 tmpTokens.push(3000 + i);
                 uint96 value = nuggft.msp();
