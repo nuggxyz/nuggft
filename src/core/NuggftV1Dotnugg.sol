@@ -14,10 +14,10 @@ import {INuggftV1Dotnugg} from '../interfaces/nuggftv1/INuggftV1Dotnugg.sol';
 import {CastLib} from '../libraries/CastLib.sol';
 import {NuggftV1Token} from './NuggftV1Token.sol';
 
-import {Trust} from './Trust.sol';
+import {NuggftV1Trust} from './NuggftV1Trust.sol';
 
 /// @custom:testing test each function
-abstract contract NuggftV1Dotnugg is INuggftV1Dotnugg, NuggftV1Token, Trust {
+abstract contract NuggftV1Dotnugg is INuggftV1Dotnugg, NuggftV1Token, NuggftV1Trust {
     using CastLib for uint256;
     using CastLib for uint16;
 

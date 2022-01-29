@@ -2,9 +2,9 @@
 
 pragma solidity 0.8.11;
 
-import {ITrust} from '../interfaces/ITrust.sol';
+import {INuggftV1Trust} from '../interfaces/nuggftv1/INuggftV1Trust.sol';
 
-abstract contract Trust is ITrust {
+abstract contract NuggftV1Trust is INuggftV1Trust {
     event UserTrustUpdated(address indexed user, bool trusted);
 
     mapping(address => bool) public override isTrusted;

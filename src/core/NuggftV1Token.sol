@@ -45,7 +45,7 @@ abstract contract NuggftV1Token is INuggftV1Token, NuggftV1Epoch {
         if (cache >> 254 == 0x03 && (cache << 2) >> 232 != 0) {
             return address(this);
         }
-        return cache.account();
+        return address(uint160(cache));
     }
 
     /// @inheritdoc IERC721
@@ -105,13 +105,11 @@ abstract contract NuggftV1Token is INuggftV1Token, NuggftV1Epoch {
             let agency__sptr := keccak256(mptr, 0x40)
 
             // update agency to reflect the new leader
-            // =======================
-            // agency[tokenId] = {
+            // ====agency[tokenId]====
             //     flag  = OWN(0x01)
             //     epoch = 0
             //     eth   = 0
             //     addr  = to
-            // }
             // =======================
             let agency__cache := or(shl(254, 0x01), to)
 
@@ -131,7 +129,7 @@ abstract contract NuggftV1Token is INuggftV1Token, NuggftV1Epoch {
 
     function isOwner(address sender, uint160 tokenId) internal view returns (bool res) {
         uint256 cache = agency[tokenId];
-        return cache.account() == sender && uint8(cache.flag()) == 0x01;
+        return address(uint160(cache)) == sender && uint8(cache >> 254) == 0x01;
     }
 
     function isAgent(address sender, uint160 tokenId) internal view returns (bool res) {
@@ -139,9 +137,9 @@ abstract contract NuggftV1Token is INuggftV1Token, NuggftV1Epoch {
 
         if (uint160(cache) == uint160(sender)) {
             if (
-                uint8(cache.flag()) == 0x01 || //
-                uint8(cache.flag()) == 0x02 ||
-                (uint8(cache.flag()) == 0x03 && ((cache >> 230) & 0xffffff) == 0)
+                uint8(cache >> 254) == 0x01 || //
+                uint8(cache >> 254) == 0x02 ||
+                (uint8(cache >> 254) == 0x03 && ((cache >> 230) & 0xffffff) == 0)
             ) return true;
         }
     }

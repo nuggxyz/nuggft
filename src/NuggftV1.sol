@@ -6,7 +6,6 @@ import {IERC721, IERC165, IERC721Metadata} from './interfaces/IERC721.sol';
 
 import {NuggftV1Loan} from './core/NuggftV1Loan.sol';
 import {NuggftV1Dotnugg} from './core/NuggftV1Dotnugg.sol';
-import {Trust} from './core/Trust.sol';
 
 import {INuggftV1Migrator} from './interfaces/nuggftv1/INuggftV1Migrator.sol';
 import {IDotnuggV1Metadata} from './interfaces/dotnuggv1/IDotnuggV1Metadata.sol';
@@ -217,6 +216,6 @@ contract NuggftV1 is IERC721Metadata, NuggftV1Loan {
 
         stake = cache;
 
-        emit Stake(0, 0, bytes32(cache));
+        emit Stake(bytes32(cache));
     }
 }

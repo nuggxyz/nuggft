@@ -9,7 +9,18 @@ import {INuggftV1Dotnugg} from './INuggftV1Dotnugg.sol';
 import {INuggftV1Swap} from './INuggftV1Swap.sol';
 import {INuggftV1Loan} from './INuggftV1Loan.sol';
 import {INuggftV1Epoch} from './INuggftV1Epoch.sol';
+import {INuggftV1Trust} from './INuggftV1Trust.sol';
 
 import {IERC721Metadata} from '../IERC721.sol';
 
-interface INuggftV1 is IERC721Metadata, INuggftV1Token, INuggftV1Stake, INuggftV1Proof, INuggftV1Dotnugg, INuggftV1Swap, INuggftV1Loan, INuggftV1Epoch {}
+interface INuggftV1 is
+    IERC721Metadata,
+    INuggftV1Token,
+    INuggftV1Stake,
+    INuggftV1Proof,
+    INuggftV1Dotnugg,
+    INuggftV1Swap,
+    INuggftV1Loan,
+    INuggftV1Epoch,
+    INuggftV1Trust
+{}
