@@ -21,14 +21,14 @@ abstract contract NuggftV1Stake is INuggftV1Stake, NuggftV1Proof {
     uint256 internal stake;
 
     /// @inheritdoc INuggftV1Stake
-    function extractProtocolEth() external requiresTrust {
+    function extract() external requiresTrust {
         uint256 cache = stake;
 
         TransferLib.give(msg.sender, cache.proto());
 
         cache = cache.proto(0);
 
-        emit Stake(0, 0, bytes32(cache));
+        emit Stake(bytes32(cache));
     }
 
     /// @inheritdoc INuggftV1Stake
@@ -121,10 +121,10 @@ abstract contract NuggftV1Stake is INuggftV1Stake, NuggftV1Proof {
 
             // emit current stake state as event
             let ptr := mload(0x40)
-            mstore(ptr, callvalue())
-            mstore(add(0x20, ptr), 0x01)
-            mstore(add(0x40, ptr), cache)
-            log1(ptr, 0x60, Event__Stake)
+            // mstore(ptr, callvalue())
+            // mstore(add(0x20, ptr), 0x01)
+            mstore(ptr, cache)
+            log1(ptr, 0x20, Event__Stake)
         }
     }
 
@@ -142,10 +142,10 @@ abstract contract NuggftV1Stake is INuggftV1Stake, NuggftV1Proof {
             sstore(stake.slot, cache)
 
             let ptr := mload(0x40)
-            mstore(ptr, value)
-            mstore(add(0x20, ptr), 0x00)
-            mstore(add(0x40, ptr), cache)
-            log1(ptr, 0x60, Event__Stake)
+            // mstore(ptr, callvalue())
+            // mstore(add(0x20, ptr), 0x01)
+            mstore(ptr, cache)
+            log1(ptr, 0x20, Event__Stake)
         }
     }
 

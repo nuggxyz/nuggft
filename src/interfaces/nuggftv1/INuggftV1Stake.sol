@@ -7,11 +7,15 @@ interface INuggftV1Stake {
                                 EVENTS
        ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
 
-    event ProtocolEthExtracted(uint96 eth);
+    event Extract(uint96 eth);
+
     event MigratorV1Updated(address migrator);
+
     event MigrateV1Sent(address v2, uint160 tokenId, uint256 proof, address owner, uint96 eth);
+
     event Burn(uint160 tokenId, address owner, uint96 ethOwed);
-    event Stake(uint96 eth, uint64 shares, bytes32 cache);
+
+    event Stake(bytes32 cache);
 
     /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
                             STATE CHANGING
@@ -66,7 +70,7 @@ interface INuggftV1Stake {
 
     /// @notice sends the current protocolEth to the user and resets the value to zero
     /// @dev caller must be a trusted user
-    function extractProtocolEth() external;
+    function extract() external;
 
     /// @notice sets the migrator contract
     /// @dev caller must be a trusted user

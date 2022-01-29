@@ -13,9 +13,6 @@ abstract contract NuggftV1Epoch is INuggftV1Epoch, NuggftV1Constants {
     uint8 constant LOAN_FLAG = 0x2;
     uint8 constant OWN_FLAG = 0x01;
 
-    // unknown
-    bytes32 constant SELLITEM = 0x251e78527ba3c62fcb4405d22087f8ab0c434b97b46e2d7f020d112e76310000;
-
     constructor() {
         genesis = (block.number / INTERVAL) * INTERVAL;
         emit Genesis(genesis, INTERVAL, OFFSET);
