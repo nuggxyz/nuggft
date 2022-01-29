@@ -733,6 +733,8 @@ abstract contract NuggftV1Swap is INuggftV1ItemSwap, INuggftV1Swap, NuggftV1Stak
 
         if (nextSwapAmount != 0) {
             nextSwapAmount = uint96((((nextSwapAmount / LOSS) * 10200) / 10000) * LOSS);
+        } else {
+            nextSwapAmount = 100 gwei;
         }
     }
 
@@ -811,6 +813,8 @@ abstract contract NuggftV1Swap is INuggftV1ItemSwap, INuggftV1Swap, NuggftV1Stak
 
         if (nextSwapAmount != 0) {
             nextSwapAmount = uint96(nextSwapAmount * 102 * LOSS) / 100;
+        } else {
+            nextSwapAmount = 100 gwei;
         }
     }
 }

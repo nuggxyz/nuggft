@@ -127,6 +127,14 @@ contract DotnuggV1StorageProxy is IDotnuggV1StorageProxy {
         _;
     }
 
+     function pointers() public view override returns (address[][] memory res) {
+        uint168[][] memory arr = new uint168[][](8);
+        for (uint8 i = 0; i < 8; i++) {
+            arr[i] = sstore2Pointers[i];
+        }
+        return abi.decode(abi.encode(arr), (address[][]));
+    }
+
     constructor() {
         dotnuggv1 = msg.sender;
     }
