@@ -7,7 +7,7 @@ import {INuggftV1Epoch} from '../interfaces/nuggftv1/INuggftV1Epoch.sol';
 import {NuggftV1Constants} from './NuggftV1Constants.sol';
 
 abstract contract NuggftV1Epoch is INuggftV1Epoch, NuggftV1Constants {
-    uint256 public immutable genesis;
+    uint256 public immutable override genesis;
 
     uint8 constant SWAP_FLAG = 0x3;
     uint8 constant LOAN_FLAG = 0x2;
@@ -24,6 +24,14 @@ abstract contract NuggftV1Epoch is INuggftV1Epoch, NuggftV1Constants {
         res = toEpoch(block.number, genesis);
     }
 
+    function start(uint24 _epoch) public view returns (uint256 res) {
+        res = toStartBlock(_epoch, genesis);
+    }
+
+    function end(uint24 _epoch) public view returns (uint256 res) {
+        res = toEndBlock(_epoch, genesis);
+    }
+
     function calculateSeed() internal view returns (uint256 res, uint24 _epoch) {
         _epoch = epoch();
         res = calculateSeed(_epoch);
@@ -36,28 +44,30 @@ abstract contract NuggftV1Epoch is INuggftV1Epoch, NuggftV1Constants {
     /// @notice calculates a random-enough seed that will stay the
     function calculateSeed(uint24 _epoch) internal view returns (uint256 res) {
         uint256 startblock = toStartBlock(_epoch, genesis);
-        bytes32 bhash = getBlockHash(startblock - 2);
-        require(bhash != 0, hex'0E');
-        res = uint256(keccak256(abi.encodePacked(bhash, _epoch, address(this))));
+        unchecked {
+            bytes32 bhash = getBlockHash(startblock - INTERVAL_SUB);
+            require(bhash != 0, hex'0E');
+            res = uint256(keccak256(abi.encodePacked(bhash, _epoch, address(this))));
+        }
     }
 
     function getBlockHash(uint256 blocknum) internal view virtual returns (bytes32 res) {
         return blockhash(blocknum);
     }
 
-    function toStartBlock(uint24 _epoch, uint256 gen) internal pure returns (uint256 res) {
+    function toStartBlock(uint24 _epoch, uint256 gen) public pure returns (uint256 res) {
         assembly {
             res := add(mul(sub(_epoch, OFFSET), INTERVAL), gen)
         }
     }
 
-    function toEpoch(uint256 blocknum, uint256 gen) internal pure returns (uint24 res) {
+    function toEpoch(uint256 blocknum, uint256 gen) public pure returns (uint24 res) {
         assembly {
             res := add(div(sub(blocknum, gen), INTERVAL), OFFSET)
         }
     }
 
-    function toEndBlock(uint24 _epoch, uint256 gen) internal pure returns (uint256 res) {
+    function toEndBlock(uint24 _epoch, uint256 gen) public pure returns (uint256 res) {
         unchecked {
             res = toStartBlock(_epoch + 1, gen) - 1;
         }
