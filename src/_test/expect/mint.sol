@@ -12,9 +12,9 @@ contract expectMint is base {
     expectStake stake;
     expectBalance balance;
 
-    constructor(RiggedNuggft nuggft_) base(nuggft_) {
-        stake = new expectStake(nuggft_);
-        balance = new expectBalance(nuggft_);
+    constructor() {
+        stake = new expectStake();
+        balance = new expectBalance();
     }
 
     struct SnapshotData {
@@ -71,7 +71,7 @@ contract expectMint is base {
 
         pre.agency = nuggft.agency(env.tokenId);
 
-        ds.assertEq(pre.agency, 0, 'EXPECT-MINT:START - agency should be 0');
+        // ds.assertEq(pre.agency, 0, 'EXPECT-MINT:START - agency should be 0');
 
         balance.start(run.sender, env.value, false);
         balance.start(address(nuggft), env.value, true);

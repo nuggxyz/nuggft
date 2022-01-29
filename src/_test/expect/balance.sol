@@ -7,8 +7,6 @@ import '../utils/forge.sol';
 import './base.sol';
 
 contract expectBalance is base {
-    constructor(RiggedNuggft nuggft_) base(nuggft_) {}
-
     struct Snapshot {
         address user;
         int192 expected;

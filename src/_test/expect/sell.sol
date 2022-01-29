@@ -8,7 +8,7 @@ import './base.sol';
 import {RiggedNuggft} from '../NuggftV1.test.sol';
 
 contract expectSell is base {
-    constructor(RiggedNuggft nuggft_) base(nuggft_) {}
+    constructor() {}
 
     struct Snapshot {
         SnapshotEnv env;

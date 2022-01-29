@@ -12,9 +12,9 @@ contract expectLoan is base {
     expectStake stake;
     expectBalance balance;
 
-    constructor(RiggedNuggft nuggft_) base(nuggft_) {
-        stake = new expectStake(nuggft_);
-        balance = new expectBalance(nuggft_);
+    constructor() {
+        stake = new expectStake();
+        balance = new expectBalance();
     }
 
     struct Snapshot {

@@ -23,15 +23,16 @@ contract Expect {
     expectMint public mint;
     expectLoan public loan;
 
-    constructor(RiggedNuggft nuggft_) {
+    constructor(address nuggft_) {
         global.set('Expect', address(this));
+        global.set('RiggedNuggft', nuggft_);
 
-        claim = new expectClaim(nuggft_);
-        offer = new expectOffer(nuggft_);
-        balance = new expectBalance(nuggft_);
-        stake = new expectStake(nuggft_);
-        sell = new expectSell(nuggft_);
-        mint = new expectMint(nuggft_);
-        loan = new expectLoan(nuggft_);
+        claim = new expectClaim();
+        offer = new expectOffer();
+        balance = new expectBalance();
+        stake = new expectStake();
+        sell = new expectSell();
+        mint = new expectMint();
+        loan = new expectLoan();
     }
 }

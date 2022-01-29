@@ -7,8 +7,6 @@ import '../utils/forge.sol';
 import './base.sol';
 
 contract expectStake is base {
-    constructor(RiggedNuggft nuggft_) base(nuggft_) {}
-
     struct Run {
         int192 expected_stake_change;
         int192 expected_share_change;
