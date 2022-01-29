@@ -250,7 +250,7 @@ contract expectClaim is base {
 
         if (env.isItem) {
             if (env.winner) {
-                // -- nuggft's protocol items should be > 1 for the item
+                // @todo nuggft's protocol items should be > 1 for the item
 
                 // ASSERT:CLAIM_0x02: is the item inside the selling nuggs proof?
                 assertProofNotContains(uint24(env.id), uint16(env.id >> 24), 'ASSERT:CLAIM_0x02: item SHOULD NOT be inside the selling nuggs proof');
