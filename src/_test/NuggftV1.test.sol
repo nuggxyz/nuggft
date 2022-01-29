@@ -116,9 +116,9 @@ contract NuggftV1Test is ForgeTest {
         processor = MockDotnuggV1(dep.__dotnugg());
         nuggft = RiggedNuggft(dep.__nuggft());
 
-        expect = new Expect(nuggft);
-
         _nuggft = address(nuggft);
+
+        expect = new Expect(_nuggft);
 
         _processor = address(processor);
 
@@ -157,11 +157,11 @@ contract NuggftV1Test is ForgeTest {
         processor = MockDotnuggV1(dep.__dotnugg());
         nuggft = RiggedNuggft(dep.__nuggft());
 
-        expect = new Expect(nuggft);
-
         // record.build(nuggft.external__agency__slot());
 
         _nuggft = address(nuggft);
+
+        expect = new Expect(_nuggft);
 
         _processor = address(processor);
 
