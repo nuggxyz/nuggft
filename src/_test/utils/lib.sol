@@ -9,6 +9,25 @@ library lib {
         bytes str;
     }
 
+    function txd(address from) internal pure returns (txdata memory m) {
+        m.from = from;
+    }
+
+    function txd(address from, uint96 value) internal pure returns (txdata memory m) {
+        m.from = from;
+        m.value = value;
+    }
+
+    function txd(
+        address from,
+        uint96 value,
+        bytes memory s
+    ) internal pure returns (txdata memory m) {
+        m.from = from;
+        m.value = value;
+        m.str = s;
+    }
+
     function addressOf(address addr, uint8 nonce) internal pure returns (address res) {
         assembly {
             mstore(mload(0x40), shl(72, or(shl(176, 0xd6), or(shl(168, 0x94), or(shl(8, addr), nonce)))))
@@ -64,6 +83,12 @@ library lib {
 
         for (uint256 i = 0; i < amount; i++) {
             array[i] = a;
+        }
+    }
+
+    function asum(uint96[] memory input) internal pure returns (uint96 res) {
+        for (uint256 i = 0; i < input.length; i++) {
+            res += input[i];
         }
     }
 
