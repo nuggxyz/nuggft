@@ -107,7 +107,7 @@ contract expectLiquidate is base {
             balance.start(address(nuggft), change, true);
         }
 
-        stake.start(run.fee + run.principal, 0, true);
+        stake.start(run.fee, 0, true);
 
         execution = abi.encode(run);
     }
@@ -144,7 +144,7 @@ contract expectLiquidate is base {
 
         uint96 postEps = nuggft.eps();
 
-        uint256 preAgency =  run.agency;
+        uint256 preAgency = run.agency;
         uint256 postAgency = nuggft.agency(run.tokenId);
 
         ds.assertEq(postAgency, preAgency, 'EXPECT-LIQUIDATE:ROLLBACK - agency should be same');
