@@ -58,6 +58,11 @@ contract expectMint is base {
         return this;
     }
 
+    function g() public returns (expectMint) {
+        prepped.from = creator._globalFrom();
+        return this;
+    }
+
     function err(bytes memory b) public returns (expectMint) {
         prepped.err = b;
         return this;
@@ -69,8 +74,10 @@ contract expectMint is base {
         return this;
     }
 
-    function exec(uint160 tokenId) public {
+    function exec(uint160 tokenId) public payable {
         lib.txdata memory _prepped = prepped;
+        _prepped.value = uint96(msg.value);
+
         delete prepped;
         exec(tokenId, _prepped);
     }
