@@ -55,22 +55,24 @@ abstract contract NuggftV1Loan is INuggftV1Loan, NuggftV1Swap {
                 amt := div(amt, LOSS)
 
                 // update agency to reflect the loan
+
                 // ==== agency[tokenId] ====
                 //  flag  = LOAN(0x02)
                 //  epoch = active
                 //  eth   = eps / .1 gwei
                 //  addr  = agent
                 // =========================
+
                 agency__cache := xor(caller(), xor(shl(160, amt), xor(shl(230, active), shl(254, 0x2))))
+
+                // store updated agency
+                // done before external call to prevent reentrancy
+                sstore(agency__sptr, agency__cache)
 
                 // decompress amt back to eth
                 // amt becomes a floored to .1 gwei version of eps()
                 // ensures amt stored in agency and eth sent to caller are the same
                 amt := mul(amt, LOSS)
-
-                // store updated agency
-                // done before external call to prevent reentrancy
-                sstore(agency__sptr, agency__cache)
 
                 // send eth
                 if iszero(call(gas(), caller(), amt, 0, 0, 0, 0)) {
@@ -87,14 +89,15 @@ abstract contract NuggftV1Loan is INuggftV1Loan, NuggftV1Swap {
 
     /// @inheritdoc INuggftV1Loan
     function liquidate(uint160 tokenId) external payable override {
-        uint256 agency__slot;
-        uint256 agency__cache;
-
         uint256 active = epoch();
 
         assembly {
             function iso(val, left, right) -> b {
                 b := shr(right, shl(left, val))
+            }
+
+            function iso2(val, bits, offset) -> b {
+                b := shr(sub(256, bits), shl(sub(256, add(offset, bits)), val))
             }
 
             let stake__cache := sload(stake.slot)
@@ -105,12 +108,17 @@ abstract contract NuggftV1Loan is INuggftV1Loan, NuggftV1Swap {
 
             let mptr := mload(0x40)
 
+            // ========= memory ==========
+            //   0x00: tokenId
+            //   0x20: agency.slot
+            // ===========================
+
             mstore(mptr, tokenId)
             mstore(add(mptr, 0x20), agency.slot)
 
-            agency__slot := keccak256(mptr, 64)
+            let agency__sptr := keccak256(mptr, 64)
 
-            agency__cache := sload(agency__slot)
+            let agency__cache := sload(agency__sptr)
 
             let loaner := iso(agency__cache, 96, 96)
 
@@ -120,12 +128,19 @@ abstract contract NuggftV1Loan is INuggftV1Loan, NuggftV1Swap {
                 revert(0x00, 0x01)
             }
 
+            // check to see if msg.sender is the loaner
             if iszero(eq(caller(), loaner)) {
+                // "is the loan past due"
                 switch lt(add(iso(agency__cache, 2, 232), LIQUIDATION_PERIOD), active)
                 case 1 {
+                    // if the loan is past due, then the liquidator recieves the nugg
+                    // this transfer event is the only extra logic required here since the
+                    // ... agency is updated to reflect "caller()" as the owner at the end
                     log4(0x00, 0x00, Event__Transfer, loaner, caller(), tokenId)
                 }
                 default {
+                    // if not, then we revert.
+                    // only the "loaner" can liquidate unless the loan is past due
                     mstore8(0x0, Error__NotAuthorized__0x31)
                     revert(0x00, 0x01)
                 }
@@ -139,9 +154,6 @@ abstract contract NuggftV1Loan is INuggftV1Loan, NuggftV1Swap {
             // must be computed because fee needs to be paid
             // increase in earnings per share since last rebalance
             let earn := sub(activeEps, principal)
-
-            // the maximum fee that can be levied
-            // let fee := earn
 
             // true fee
             let fee := add(div(principal, REBALANCE_FEE_BPS), principal)
@@ -161,33 +173,44 @@ abstract contract NuggftV1Loan is INuggftV1Loan, NuggftV1Swap {
 
             sstore(stake.slot, stake__cache)
 
+            /////////////////////////////////////////////////////////////////////
+
             // update agency to return ownership of the token
-            // ==========================
-            // agency[tokenId] = {
+            // done before external call to prevent reentrancy
+
+            // ==== agency[tokenId] =====
             //     flag  = OWN(0x01)
             //     epoch = 0
             //     eth   = 0
             //     addr  = msg.sender
-            // }
             // =========================
+
             agency__cache := or(caller(), shl(254, 0x01))
 
-            // store updated agency
-            // done before external call to prevent reentrancy
-            sstore(agency__slot, agency__cache)
+            sstore(agency__sptr, agency__cache)
 
-            mstore(0x00, stake__cache)
-            log1(0x00, 0x20, Event__Stake)
+            /////////////////////////////////////////////////////////////////////
 
-            // log2 with "Liquidate(uint160,bytes32)" topic
-            mstore(0x00, agency__cache)
-            log2(0x00, 0x20, Event__Liquidate, tokenId)
-
-            // send eth
             if iszero(call(gas(), caller(), earn, 0, 0, 0, 0)) {
                 mstore8(0x0, Error__SendEthFailureToCaller__0x92)
                 revert(0x00, 0x01)
             }
+
+            /////////////////////////////////////////////////////////////////////
+
+            // ========== event ==========
+            // emit Stake(stake__cache)
+            // ===========================
+
+            mstore(0x00, stake__cache)
+            log1(0x00, 0x20, Event__Stake)
+
+            // ========== event ==========
+            // emit Liquidate(tokenId, agency__cache)
+            // ===========================
+
+            mstore(0x00, agency__cache)
+            log2(0x00, 0x20, Event__Liquidate, tokenId)
         }
     }
 
@@ -306,7 +329,6 @@ abstract contract NuggftV1Loan is INuggftV1Loan, NuggftV1Swap {
             sstore(stake.slot, stake__cache)
 
             let newPrincipal := div(iso(stake__cache, 64, 160), mul(shrs, LOSS))
-
             for {
                 let i := 0
             } lt(i, len) {
@@ -317,13 +339,11 @@ abstract contract NuggftV1Loan is INuggftV1Loan, NuggftV1Swap {
                 let account := mload(add(add(mptr, 0x60), mul(i, 0xA0)))
 
                 // update agency to reflect new principle and epoch
-                // ==========================
-                // agency[tokenId] = {
+                // ==== agency[tokenId] =====
                 //     flag  = LOAN(0x02)
                 //     epoch = active
                 //     eth   = eps
                 //     addr  = loaner
-                // }
                 // =========================
                 let agency__cache := or(shl(254, 0x2), or(shl(230, active), or(shl(160, newPrincipal), account)))
 
