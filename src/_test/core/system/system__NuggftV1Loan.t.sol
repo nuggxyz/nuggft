@@ -8,59 +8,56 @@ import {fragments} from './fragments.t.sol';
 
 contract system__NuggftV1Loan is NuggftV1Test, fragments {
     function setUp() public {
-        reset();
+        reset__system();
         forge.vm.roll(1000);
     }
 
     function test__system__loan__revert__0x2F__autoLiquidateCantRebalance() public {
-        userMints(users.frank, 500);
+        expect.mint().from(users.frank).value(1 ether).exec(500);
         jump(3000);
-        forge.vm.startPrank(users.frank);
-        {
-            nuggft.loan(lib.sarr160(500));
-            jump(4000);
-            uint96[] memory val = nuggft.vfr(lib.sarr160(500));
-            forge.vm.prank(users.mac);
-            forge.vm.expectRevert(hex'2F');
-            nuggft.rebalance{value: 1 ether}(lib.sarr160(500));
-        }
-        forge.vm.stopPrank();
+
+        expect.loan().from(users.frank).exec(lib.sarr160(500));
+
+        expect.rebalance().from(users.mac).value(nuggft.vfr(lib.sarr160(500))[0]).err(0x3B).exec(lib.sarr160(500));
+
+        jump(5000);
+
+        expect.rebalance().from(users.mac).value(nuggft.vfr(lib.sarr160(500))[0]).exec(lib.sarr160(500));
     }
 
     function test__system__loan__rebalanceFactory() public {
-        expect.mint().exec(
-            500,
-            lib.txd({
-                from: users.frank, //
-                value: 1 ether
-            })
-        );
+        expect.globalFrom(users.frank);
 
-        expect.loan().exec(
-            lib.sarr160(500),
-            lib.txd({
-                from: users.frank //
-            })
-        );
+        expect.mint().g().value(1 ether).exec(500);
+
+        expect.loan().g().exec(lib.sarr160(500));
 
         for (uint16 i = 0; i < 50; i++) {
             jump(3000 + i);
 
-            expect.rebalance().exec(
-                lib.sarr160(500),
-                lib.txd({
-                    from: users.frank, //
-                    value: lib.asum(nuggft.vfr(lib.sarr160(500)))
-                })
-            );
+            expect.rebalance().g().value(lib.asum(nuggft.vfr(lib.sarr160(500)))).exec(lib.sarr160(500));
 
-            expect.mint().exec(
-                501 + i,
-                lib.txd({
-                    from: users.frank, //
-                    value: nuggft.msp()
-                })
-            );
+            expect.mint().g().value(nuggft.msp()).exec(501 + i);
         }
+    }
+
+    function test__system__loan__nuggHeritage() public {
+        jump(3000);
+
+        expect.mint().from(users.frank).value(0.1 ether).exec(500);
+
+        expect.loan().from(users.frank).exec(lib.sarr160(500));
+
+        jump(4001);
+
+        expect.liquidate().from(users.mac).value(lib.asum(nuggft.vfl(lib.sarr160(500)))).exec(500);
+
+        expect.loan().from(users.mac).exec(lib.sarr160(500));
+
+        jump(5002);
+
+        expect.liquidate().from(users.charlie).value(lib.asum(nuggft.vfl(lib.sarr160(500)))).exec(500);
+
+        expect.loan().from(users.charlie).exec(lib.sarr160(500));
     }
 }
