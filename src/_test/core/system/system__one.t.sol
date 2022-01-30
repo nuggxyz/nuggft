@@ -17,6 +17,32 @@ contract system__NuggftV1Swap_test is NuggftV1Test {
         //
     }
 
+    function test__logic__NuggftV1Proof__rotate() public {
+        uint8[] memory lens = new uint8[](7);
+        lens[1] = 0x01;
+        lens[2] = 0x02;
+        lens[3] = 0x03;
+        lens[4] = 0x04;
+        lens[5] = 0x05;
+        lens[6] = 0x06;
+        lens[0] = 0x07;
+
+        uint8[] memory lens2 = new uint8[](7);
+        lens2[1] = 0x09;
+        lens2[2] = 0x0a;
+        lens2[3] = 0x0b;
+        lens2[4] = 0x0c;
+        lens2[5] = 0x0d;
+        lens2[6] = 0x0e;
+        lens2[0] = 0x0f;
+
+        expect.mint().from(users.frank).exec{value: 1 ether}(500);
+        nuggft.floop(500);
+        forge.vm.prank(users.frank);
+        nuggft.rotate(500, lens, lens2);
+        nuggft.floop(500);
+    }
+
     function test__system__frankMintsATokenForFree() public {
         // expect.stake().start(0, 1, true);
         expect.balance().start(users.frank, 0, false);

@@ -30,24 +30,20 @@ abstract contract NuggftV1Token is INuggftV1Token, NuggftV1Epoch {
 
     /// @inheritdoc IERC721
     function approve(address, uint256) external payable override {
-        assembly {
-            mstore(0x00, Error__Wut__0x69)
-            revert(0x00, 0x01)
-        }
+        _panic(Error__0x69__Wut);
     }
 
     /// @inheritdoc IERC721
     function setApprovalForAll(address, bool) external pure override {
-        assembly {
-            mstore(0x00, Error__Wut__0x69)
-            revert(0x00, 0x01)
-        }
+        _panic(Error__0x69__Wut);
     }
 
     /// @inheritdoc IERC721
     function ownerOf(uint256 tokenId) external view override returns (address res) {
         uint256 cache = agency[tokenId];
-        require(cache != 0, hex'40');
+
+        if (cache == 0) _panic(Error__0xEE__TokenDoesNotExist);
+
         if (cache >> 254 == 0x03 && (cache << 2) >> 232 != 0) {
             return address(this);
         }
@@ -77,10 +73,7 @@ abstract contract NuggftV1Token is INuggftV1Token, NuggftV1Epoch {
         address,
         uint256
     ) external payable override {
-        assembly {
-            mstore(0x00, Error__Wut__0x69)
-            revert(0x00, 0x01)
-        }
+        _panic(Error__0x69__Wut);
     }
 
     function safeTransferFrom(
@@ -88,10 +81,7 @@ abstract contract NuggftV1Token is INuggftV1Token, NuggftV1Epoch {
         address,
         uint256
     ) external payable override {
-        assembly {
-            mstore(0x00, Error__Wut__0x69)
-            revert(0x00, 0x01)
-        }
+        _panic(Error__0x69__Wut);
     }
 
     function safeTransferFrom(
@@ -100,10 +90,7 @@ abstract contract NuggftV1Token is INuggftV1Token, NuggftV1Epoch {
         uint256,
         bytes memory
     ) external payable override {
-        assembly {
-            mstore(0x00, Error__Wut__0x69)
-            revert(0x00, 0x01)
-        }
+        _panic(Error__0x69__Wut);
     }
 
     /*━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
