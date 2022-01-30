@@ -525,8 +525,6 @@ abstract contract NuggftV1Swap is INuggftV1ItemSwap, INuggftV1Swap, NuggftV1Stak
 
     /// @inheritdoc INuggftV1Swap
     function sell(uint160 tokenId, uint96 floor) public override {
-        require(floor >= eps(), hex'2B');
-
         assembly {
             function panic(code) {
                 mstore8(0, code)
@@ -643,12 +641,20 @@ abstract contract NuggftV1Swap is INuggftV1ItemSwap, INuggftV1Swap, NuggftV1Stak
             default {
                 // ensure the caller is the agent
                 if iszero(eq(shr(96, shl(96, agency__cache)), caller())) {
-                    panic(Error__NotAgent__0x2A)
+                    panic(0x99)
                 }
 
                 // ensure the agent is the owner
                 if iszero(eq(shr(254, agency__cache), 0x1)) {
                     panic(Error__NotOwner__0xE9)
+                }
+
+                let stake__cache := sload(stake.slot)
+
+                let activeEps := div(iso(stake__cache, 64, 160), shr(192, stake__cache))
+
+                if lt(floor, activeEps) {
+                    panic(Error__FloorTooLow__0x70)
                 }
 
                 // ==== agency[tokenId] =====
