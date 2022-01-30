@@ -35,6 +35,12 @@ contract expectClaim is base {
         return this;
     }
 
+    function err(bytes1 b) public returns (expectClaim) {
+        prepped.err = new bytes(1);
+        prepped.err[0] = b;
+        return this;
+    }
+
     function exec(uint160[] memory tokenIds, address[] memory offerers) public {
         lib.txdata memory _prepped = prepped;
         delete prepped;

@@ -44,7 +44,7 @@ contract revert__NuggftV1Loan is NuggftV1Test {
 
         expect.mint().from(users.frank).value(1 ether).exec(LOAN_TOKENID + 1);
 
-        expect.loan().from(users.frank).err(hex'2C').exec(lib.sarr160(LOAN_TOKENID));
+        expect.loan().from(users.frank).err(0x2C).exec(lib.sarr160(LOAN_TOKENID));
     }
 
     /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
