@@ -17,7 +17,7 @@ contract revert__NuggftV1Swap is NuggftV1Test {
         [S:0] - offer - "msg.sender is operator for sender"
        ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
 
-    function test__revert__NuggftV1Swap__0x0F__offer__successAsSelf() public {
+    function test__revert__NuggftV1Swap__0x99__offer__successAsSelf() public {
         uint160 tokenId = nuggft.epoch();
 
         uint96 value = 30 * 10**16;
@@ -45,7 +45,7 @@ contract revert__NuggftV1Swap is NuggftV1Test {
         expect.stake().start(value, 1, true);
         forge.vm.startPrank(users.frank);
         {
-            forge.vm.expectRevert(hex'F0');
+            forge.vm.expectRevert(hex'68');
             nuggft.offer{value: value}(tokenId);
         }
         forge.vm.stopPrank();
@@ -74,7 +74,7 @@ contract revert__NuggftV1Swap is NuggftV1Test {
         expect.balance().stop();
     }
 
-    function test__revert__NuggftV1Swap__0xF0__offer__failWithOneWeiLessThanMin() public {
+    function test__revert__NuggftV1Swap__0x68__offer__failWithOneWeiLessThanMin() public {
         uint160 tokenId = nuggft.epoch();
 
         uint96 value = 10 gwei - .1 gwei;
@@ -82,13 +82,13 @@ contract revert__NuggftV1Swap is NuggftV1Test {
         forge.vm.startPrank(users.frank);
         {
             forge.vm.deal(users.frank, value);
-            forge.vm.expectRevert(hex'F0');
+            forge.vm.expectRevert(hex'68');
             nuggft.offer{value: value}(tokenId);
         }
         forge.vm.stopPrank();
     }
 
-    function test__revert__NuggftV1Swap__0xF0__offer__failWithOneWeiLessThanMinAfterSomeValue() public {
+    function test__revert__NuggftV1Swap__0x68__offer__failWithOneWeiLessThanMinAfterSomeValue() public {
         uint160 tokenId = nuggft.epoch();
 
         forge.vm.startPrank(users.frank);
@@ -99,13 +99,13 @@ contract revert__NuggftV1Swap is NuggftV1Test {
             uint96 value = 10 gwei - 1;
 
             forge.vm.deal(users.frank, value);
-            forge.vm.expectRevert(hex'F0');
+            forge.vm.expectRevert(hex'68');
             nuggft.offer{value: value}(tokenId);
         }
         forge.vm.stopPrank();
     }
 
-    function test__revert__NuggftV1Swap__0xF0__offer__failWithZero() public {
+    function test__revert__NuggftV1Swap__0x68__offer__failWithZero() public {
         uint160 tokenId = nuggft.epoch();
 
         uint96 value = 0;
@@ -113,13 +113,13 @@ contract revert__NuggftV1Swap is NuggftV1Test {
         forge.vm.startPrank(users.frank);
         {
             forge.vm.deal(users.frank, value);
-            forge.vm.expectRevert(hex'F0');
+            forge.vm.expectRevert(hex'68');
             nuggft.offer{value: value}(tokenId);
         }
         forge.vm.stopPrank();
     }
 
-    function test__revert__NuggftV1Swap__0xF0__offer__failWithZeroAfterSomeValue() public {
+    function test__revert__NuggftV1Swap__0x68__offer__failWithZeroAfterSomeValue() public {
         uint160 tokenId = nuggft.epoch();
 
         forge.vm.startPrank(users.frank);
@@ -130,7 +130,7 @@ contract revert__NuggftV1Swap is NuggftV1Test {
             uint96 value = 0;
 
             forge.vm.deal(users.frank, value);
-            forge.vm.expectRevert(hex'F0');
+            forge.vm.expectRevert(hex'68');
             nuggft.offer{value: value}(tokenId);
         }
         forge.vm.stopPrank();
@@ -140,7 +140,7 @@ contract revert__NuggftV1Swap is NuggftV1Test {
         [S:3a] - offer - "if commiting, offerer should not be owner of sell"
        ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
 
-    function test__revert__NuggftV1Swap__0x0F__successWithNotOwner() public {
+    function test__revert__NuggftV1Swap__0x99__successWithNotOwner() public {
         (uint160 tokenId, uint96 floor) = scenario_dee_has_sold_a_token();
 
         uint96 value = floor + 1 ether;
@@ -160,7 +160,7 @@ contract revert__NuggftV1Swap is NuggftV1Test {
         expect.balance().stop();
     }
 
-    function test__revert__NuggftV1Swap__0x0F__successWithOwnerAfterSomeoneElseOffers() public {
+    function test__revert__NuggftV1Swap__0x99__successWithOwnerAfterSomeoneElseOffers() public {
         (uint160 tokenId, uint96 floor) = scenario_dee_has_sold_a_token();
 
         uint96 value = floor + 1 ether;
@@ -190,7 +190,7 @@ contract revert__NuggftV1Swap is NuggftV1Test {
         expect.balance().stop();
     }
 
-    function test__revert__NuggftV1Swap__0x0F__failWithOwnerOnCommit() public {
+    function test__revert__NuggftV1Swap__0x99__failWithOwnerOnCommit() public {
         (uint160 tokenId, uint96 floor) = scenario_dee_has_sold_a_token();
 
         uint96 value = floor + 1 ether * 2;
@@ -199,7 +199,7 @@ contract revert__NuggftV1Swap is NuggftV1Test {
 
         forge.vm.startPrank(users.dee);
         {
-            forge.vm.expectRevert(hex'0F');
+            forge.vm.expectRevert(hex'99');
             nuggft.offer{value: value}(tokenId);
         }
         forge.vm.stopPrank();
@@ -208,7 +208,7 @@ contract revert__NuggftV1Swap is NuggftV1Test {
     /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
         [S:3b] - offer - "if not minting, offerer must claim previous offers for the specific token"
        ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
-    function test__revert__NuggftV1Swap__0x0F__successWithUserWithNoPrevClaim() public {
+    function test__revert__NuggftV1Swap__0x99__successWithUserWithNoPrevClaim() public {
         (uint160 tokenId, uint96 floor) = scenario_mac_has_sold_a_token_dee_sold();
 
         uint96 value = floor + 1 ether;
@@ -229,7 +229,7 @@ contract revert__NuggftV1Swap is NuggftV1Test {
     }
 
     // LOL - MASSIVE bug found with this test
-    function test__revert__NuggftV1Swap__0x0F__successWithPrevClaimUserAfterClaiming() public {
+    function test__revert__NuggftV1Swap__0x99__successWithPrevClaimUserAfterClaiming() public {
         (uint160 tokenId, uint96 floor) = scenario_mac_has_sold_a_token_dee_sold();
 
         uint96 value = floor + 1 ether;
@@ -244,7 +244,7 @@ contract revert__NuggftV1Swap is NuggftV1Test {
         forge.vm.stopPrank();
     }
 
-    function test__revert__NuggftV1Swap__0x0F__failWtihUserWithPrevClaim() public {
+    function test__revert__NuggftV1Swap__0x99__failWtihUserWithPrevClaim() public {
         (uint160 tokenId, uint96 floor) = scenario_mac_has_sold_a_token_dee_sold();
 
         uint96 value = floor + 1 ether;
@@ -253,7 +253,7 @@ contract revert__NuggftV1Swap is NuggftV1Test {
 
         forge.vm.startPrank(users.dee);
         {
-            forge.vm.expectRevert(hex'0F');
+            forge.vm.expectRevert(hex'99');
             nuggft.offer{value: value}(tokenId);
         }
         forge.vm.stopPrank();
@@ -262,7 +262,7 @@ contract revert__NuggftV1Swap is NuggftV1Test {
     /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
         [S:4] - offer - "if not minting, sell data must exist"
        ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
-    function test__revert__NuggftV1Swap__0x24__failWithNoSwap() public {
+    function test__revert__NuggftV1Swap__0xA0__failWithNoSwap() public {
         uint160 tokenId = scenario_mac_has_claimed_a_token_dee_sold();
 
         uint96 value = 1 ether;
@@ -271,13 +271,13 @@ contract revert__NuggftV1Swap is NuggftV1Test {
 
         forge.vm.startPrank(users.frank);
         {
-            forge.vm.expectRevert(hex'24');
+            forge.vm.expectRevert(hex'A0');
             nuggft.offer{value: value}(tokenId);
         }
         forge.vm.stopPrank();
     }
 
-    function test__revert__NuggftV1Swap__0x24__failWithNonexistantToken() public {
+    function test__revert__NuggftV1Swap__0xA0__failWithNonexistantToken() public {
         uint160 tokenId = 50000;
 
         uint96 value = 1 ether;
@@ -286,13 +286,13 @@ contract revert__NuggftV1Swap is NuggftV1Test {
 
         forge.vm.startPrank(users.frank);
         {
-            forge.vm.expectRevert(hex'24');
+            forge.vm.expectRevert(hex'A0');
             nuggft.offer{value: value}(tokenId);
         }
         forge.vm.stopPrank();
     }
 
-    function test__revert__NuggftV1Swap__0x24__successWithSwap() public {
+    function test__revert__NuggftV1Swap__0xA0__successWithSwap() public {
         (uint160 tokenId, uint96 floor) = scenario_mac_has_sold_a_token_dee_sold();
 
         uint96 value = floor + 1 ether;
@@ -399,7 +399,7 @@ contract revert__NuggftV1Swap is NuggftV1Test {
     //     forge.vm.stopPrank();
     // }
 
-    function test__revert__NuggftV1Swap__0x2B__failAsNotOperator() public {
+    function test__revert__NuggftV1Swap__0xA2__failAsNotOperator() public {
         (uint160 tokenId, , uint16 itemId, uint96 floor) = scenario_dee_has_sold_an_item();
 
         uint160 charliesTokenId = scenario_charlie_has_a_token();
@@ -410,7 +410,7 @@ contract revert__NuggftV1Swap is NuggftV1Test {
 
         forge.vm.startPrank(users.mac);
         {
-            forge.vm.expectRevert(hex'2B');
+            forge.vm.expectRevert(hex'A2');
             nuggft.offer{value: value}(uint160((charliesTokenId << 40) | (uint256(itemId) << 24) | tokenId));
         }
         forge.vm.stopPrank();
@@ -420,7 +420,7 @@ contract revert__NuggftV1Swap is NuggftV1Test {
         [S:7] - offer - "offerer should not be owner of sell"
        ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
 
-    function test__revert__NuggftV1Swap__0x27__successWithNotOwner() public {
+    function test__revert__NuggftV1Swap__0x99__item__successWithNotOwner() public {
         (uint160 tokenId, , uint16 itemId, uint96 floor) = scenario_dee_has_sold_an_item();
 
         uint160 charliesTokenId = scenario_charlie_has_a_token();
@@ -436,7 +436,7 @@ contract revert__NuggftV1Swap is NuggftV1Test {
         forge.vm.stopPrank();
     }
 
-    function test__revert__NuggftV1Swap__0x27__successWithSameUserDifferentToken() public {
+    function test__revert__NuggftV1Swap__0x99__successWithSameUserDifferentToken() public {
         (uint160 tokenId, , uint16 itemId, uint96 floor) = scenario_dee_has_sold_an_item();
 
         uint160 tokenId2 = scenario_dee_has_a_token_2();
@@ -452,7 +452,7 @@ contract revert__NuggftV1Swap is NuggftV1Test {
         forge.vm.stopPrank();
     }
 
-    function test__revert__NuggftV1Swap__0x27__failWithUserAndOwningToken() public {
+    function test__revert__NuggftV1Swap__0x99__failWithUserAndOwningToken() public {
         (uint160 tokenId, , uint16 itemId, uint96 floor) = scenario_dee_has_sold_an_item();
 
         uint96 value = floor + 1 ether;
@@ -461,7 +461,7 @@ contract revert__NuggftV1Swap is NuggftV1Test {
 
         forge.vm.startPrank(users.dee);
         {
-            forge.vm.expectRevert(hex'0f');
+            forge.vm.expectRevert(hex'99');
             nuggft.offer{value: value}(tokenId, tokenId, itemId);
         }
         forge.vm.stopPrank();
@@ -529,7 +529,7 @@ contract revert__NuggftV1Swap is NuggftV1Test {
         [S:A] - sell - "msg.sender is operator for sender"
        ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
 
-    function test__revert__NuggftV1Swap__0x2A__successAsSelf() public {
+    function test__revert__NuggftV1Swap__0xA1__successAsSelf() public {
         uint160 tokenId = scenario_dee_has_a_token_and_can_sell();
 
         uint96 value = 2 ether;
@@ -541,7 +541,7 @@ contract revert__NuggftV1Swap is NuggftV1Test {
         forge.vm.stopPrank();
     }
 
-    // function test__revert__NuggftV1Swap__0x2A__failsAsOperator() public {
+    // function test__revert__NuggftV1Swap__0xA1__failsAsOperator() public {
     //     uint160 tokenId = scenario_dee_has_a_token_and_can_sell();
 
     //     uint96 value = 2 ether;
@@ -669,14 +669,14 @@ contract revert__NuggftV1Swap is NuggftV1Test {
     //     forge.vm.stopPrank();
     // }
 
-    function test__revert__NuggftV1Swap__0x2B__sell__item__failAsNotOperator() public {
+    function test__revert__NuggftV1Swap__0xA2__sell__item__failAsNotOperator() public {
         (uint160 tokenId, uint16 itemId, ) = scenario_dee_has_a_token_and_can_sell_an_item();
 
         uint96 value = 1 ether;
 
         forge.vm.startPrank(users.dennis);
         {
-            forge.vm.expectRevert(hex'2B');
+            forge.vm.expectRevert(hex'A2');
             nuggft.sell(tokenId, itemId, value);
         }
         forge.vm.stopPrank();
@@ -690,7 +690,7 @@ contract revert__NuggftV1Swap is NuggftV1Test {
         [S:E] - expect.balance().stopClaimerIsWinnerOrLoser - "invalid offer"
        ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
 
-    function test__revert__NuggftV1Swap__0x2E__successPrevSwapperCanClaimAfterNewSwapHasStarted() public {
+    function test__revert__NuggftV1Swap__0xA5__successPrevSwapperCanClaimAfterNewSwapHasStarted() public {
         (uint160 tokenId, uint96 floor) = scenario_mac_has_sold_a_token_dee_sold();
 
         forge.vm.startPrank(users.dee);
@@ -700,18 +700,18 @@ contract revert__NuggftV1Swap is NuggftV1Test {
         forge.vm.stopPrank();
     }
 
-    function test__revert__NuggftV1Swap__0x2E__failNoOffer() public {
+    function test__revert__NuggftV1Swap__0xA5__failNoOffer() public {
         uint160 tokenId = scenario_dee_has_sold_a_token_and_mac_can_claim();
 
         forge.vm.startPrank(users.charlie);
         {
-            forge.vm.expectRevert(hex'2E');
+            forge.vm.expectRevert(hex'A5');
             nuggft.claim(lib.sarr160(tokenId), lib.sarrAddress(users.charlie));
         }
         forge.vm.stopPrank();
     }
 
-    function test__revert__NuggftV1Swap__0x2E__successAsLeader() public {
+    function test__revert__NuggftV1Swap__0xA5__successAsLeader() public {
         uint160 tokenId = scenario_dee_has_sold_a_token_and_mac_can_claim();
 
         forge.vm.startPrank(users.mac);
@@ -721,7 +721,7 @@ contract revert__NuggftV1Swap is NuggftV1Test {
         forge.vm.stopPrank();
     }
 
-    function test__revert__NuggftV1Swap__0x2E__successAsOwner() public {
+    function test__revert__NuggftV1Swap__0xA5__successAsOwner() public {
         uint160 tokenId = scenario_dee_has_sold_a_token_and_mac_can_claim();
 
         forge.vm.startPrank(users.dee);
@@ -731,7 +731,7 @@ contract revert__NuggftV1Swap is NuggftV1Test {
         forge.vm.stopPrank();
     }
 
-    // function test__revert__NuggftV1Swap__0x2E__failAsOperator() public {
+    // function test__revert__NuggftV1Swap__0xA5__failAsOperator() public {
     //     uint160 tokenId = scenario_dee_has_sold_a_token_and_mac_can_claim();
 
     //     forge.vm.startPrank(users.mac);
@@ -742,7 +742,7 @@ contract revert__NuggftV1Swap is NuggftV1Test {
 
     //     forge.vm.startPrank(users.dennis);
     //     {
-    //         forge.vm.expectRevert(hex'2E');
+    //         forge.vm.expectRevert(hex'A5');
     //         nuggft.claim(lib.sarr160(tokenId));
     //     }
     //     forge.vm.stopPrank();
@@ -752,7 +752,7 @@ contract revert__NuggftV1Swap is NuggftV1Test {
         [S:F] - offer - "sell must be total"
        ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
 
-    function test__revert__NuggftV1Swap__0x2F__successOfferInActiveSwap() public {
+    function test__revert__NuggftV1Swap__0xA4__successOfferInActiveSwap() public {
         (uint160 tokenId, uint96 eth) = scenario_dee_has_sold_a_token_and_mac_has_offered();
 
         uint96 value = eth + 1 ether;
@@ -764,7 +764,7 @@ contract revert__NuggftV1Swap is NuggftV1Test {
         forge.vm.stopPrank();
     }
 
-    function test__revert__NuggftV1Swap__0x2F__failOfferInOldSwap() public {
+    function test__revert__NuggftV1Swap__0xA4__failOfferInOldSwap() public {
         (uint160 tokenId, uint96 eth) = scenario_dee_has_sold_a_token_and_mac_has_offered();
 
         forge.vm.roll(2000);
@@ -773,21 +773,21 @@ contract revert__NuggftV1Swap is NuggftV1Test {
 
         forge.vm.startPrank(users.charlie);
         {
-            forge.vm.expectRevert(hex'2F');
+            forge.vm.expectRevert(hex'A4');
 
             nuggft.offer{value: value}(tokenId);
         }
         forge.vm.stopPrank();
     }
 
-    function test__revert__NuggftV1Swap__0x2F__failOfferInFutureSwap() public {
+    function test__revert__NuggftV1Swap__0xA0__failOfferInFutureSwap() public {
         uint160 tokenId = 50000;
 
         uint96 value = 1 ether;
 
         forge.vm.startPrank(users.charlie);
         {
-            forge.vm.expectRevert(hex'24');
+            forge.vm.expectRevert(hex'A0');
             nuggft.offer{value: value}(tokenId);
         }
         forge.vm.stopPrank();
