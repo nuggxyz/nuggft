@@ -20,7 +20,7 @@ abstract contract NuggftV1Epoch is INuggftV1Epoch, NuggftV1Constants {
 
     /// @inheritdoc INuggftV1Epoch
     function epoch() public view override returns (uint24 res) {
-        require(block.number >= genesis, hex'03');
+        require(block.number >= genesis, 'YOU MADE A BAD ROOOLLLLLLLLLLL');
         res = toEpoch(block.number, genesis);
     }
 
@@ -48,7 +48,7 @@ abstract contract NuggftV1Epoch is INuggftV1Epoch, NuggftV1Constants {
             bytes32 bhash = getBlockHash(startblock - INTERVAL_SUB);
             require(bhash != 0, hex'0E');
             // if (bhash != 0) {
-            res = uint256(keccak256(abi.encodePacked(bhash, _epoch, address(this))));
+            res = uint256(keccak256(abi.encodePacked(bhash, _epoch)));
             // }
         }
     }

@@ -9,7 +9,6 @@ import {fragments} from './fragments.t.sol';
 contract system__NuggftV1Loan is NuggftV1Test, fragments {
     function setUp() public {
         reset__system();
-        forge.vm.roll(1000);
     }
 
     function test__system__loan__revert__0x2F__autoLiquidateCantRebalance() public {
@@ -18,7 +17,7 @@ contract system__NuggftV1Loan is NuggftV1Test, fragments {
 
         expect.loan().from(users.frank).exec(lib.sarr160(500));
 
-        expect.rebalance().from(users.mac).value(nuggft.vfr(lib.sarr160(500))[0]).err(0x3B).exec(lib.sarr160(500));
+        expect.rebalance().from(users.mac).value(nuggft.vfr(lib.sarr160(500))[0]).err(0x2F).exec(lib.sarr160(500));
 
         jump(5000);
 
@@ -31,7 +30,6 @@ contract system__NuggftV1Loan is NuggftV1Test, fragments {
         expect.mint().g().value(1 ether).exec(500);
 
         expect.loan().g().exec(lib.sarr160(500));
-
         for (uint16 i = 0; i < 50; i++) {
             jump(3000 + i);
 
