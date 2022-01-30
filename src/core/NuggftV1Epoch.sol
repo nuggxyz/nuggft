@@ -46,7 +46,7 @@ abstract contract NuggftV1Epoch is INuggftV1Epoch, NuggftV1Constants {
         uint256 startblock = toStartBlock(_epoch, genesis);
         unchecked {
             bytes32 bhash = getBlockHash(startblock - INTERVAL_SUB);
-            if (bhash == 0) _panic(Error__0x0E__BlockHashIsZero);
+            if (bhash == 0) _panic(Error__b__0x98__BlockHashIsZero);
             res = uint256(keccak256(abi.encodePacked(bhash, _epoch)));
         }
     }

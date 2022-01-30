@@ -11,13 +11,13 @@ contract system__NuggftV1Loan is NuggftV1Test, fragments {
         reset__system();
     }
 
-    function test__system__loan__revert__0x2F__autoLiquidateCantRebalance() public {
+    function test__system__loan__revert__0xA4__autoLiquidateCantRebalance() public {
         expect.mint().from(users.frank).value(1 ether).exec(500);
         jump(3000);
 
         expect.loan().from(users.frank).exec(lib.sarr160(500));
 
-        expect.rebalance().from(users.mac).value(nuggft.vfr(lib.sarr160(500))[0]).err(0x2F).exec(lib.sarr160(500));
+        expect.rebalance().from(users.mac).value(nuggft.vfr(lib.sarr160(500))[0]).err(0xA4).exec(lib.sarr160(500));
 
         jump(5000);
 
