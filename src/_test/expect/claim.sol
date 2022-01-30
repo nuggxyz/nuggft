@@ -18,6 +18,29 @@ contract expectClaim is base {
         balance = new expectBalance();
     }
 
+    lib.txdata prepped;
+
+    function from(address user) public returns (expectClaim) {
+        prepped.from = user;
+        return this;
+    }
+
+    function value(uint96 val) public returns (expectClaim) {
+        prepped.value = val;
+        return this;
+    }
+
+    function err(bytes memory b) public returns (expectClaim) {
+        prepped.err = b;
+        return this;
+    }
+
+    function exec(uint160[] memory tokenIds, address[] memory offerers) public {
+        lib.txdata memory _prepped = prepped;
+        delete prepped;
+        exec(tokenIds, offerers, _prepped);
+    }
+
     struct Snapshot {
         SnapshotEnv env;
         SnapshotData data;

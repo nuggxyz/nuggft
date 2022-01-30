@@ -5,10 +5,40 @@ pragma solidity 0.8.11;
 import '../utils/forge.sol';
 
 import './base.sol';
-import {RiggedNuggft} from '../NuggftV1.test.sol';
+import './stake.sol';
+import './balance.sol';
 
 contract expectSell is base {
-    constructor() {}
+    expectStake stake;
+    expectBalance balance;
+
+    constructor() {
+        stake = new expectStake();
+        balance = new expectBalance();
+    }
+
+    lib.txdata prepped;
+
+    function from(address user) public returns (expectSell) {
+        prepped.from = user;
+        return this;
+    }
+
+    function value(uint96 val) public returns (expectSell) {
+        prepped.value = val;
+        return this;
+    }
+
+    function err(bytes memory b) public returns (expectSell) {
+        prepped.err = b;
+        return this;
+    }
+
+    function exec(uint160 tokenId, uint96 floor) public {
+        lib.txdata memory _prepped = prepped;
+        delete prepped;
+        exec(tokenId, floor, _prepped);
+    }
 
     struct Snapshot {
         SnapshotEnv env;
@@ -113,9 +143,10 @@ contract expectSell is base {
         run.snapshot.env = env;
         run.snapshot.data = pre;
 
-        preSellChecks(run, env, pre);
+        balance.start(sender, 0, true);
+        balance.start(address(nuggft), 0, true);
 
-        preRunChecks(run);
+        stake.start(0, 0, true);
 
         execution = abi.encode(run);
     }
@@ -167,14 +198,6 @@ contract expectSell is base {
         this.clear();
     }
 
-    function preSellChecks(
-        Run memory run,
-        SnapshotEnv memory env,
-        SnapshotData memory pre
-    ) private {
-        if (env.isItem) {} else {}
-    }
-
     function postSellChecks(
         Run memory run,
         SnapshotEnv memory env,
@@ -183,8 +206,6 @@ contract expectSell is base {
     ) private {
         if (env.isItem) {} else {}
     }
-
-    function preRunChecks(Run memory run) private {}
 
     function postRunChecks(Run memory run) private {}
 }

@@ -17,6 +17,29 @@ contract expectLoan is base {
         balance = new expectBalance();
     }
 
+    lib.txdata prepped;
+
+    function from(address user) public returns (expectLoan) {
+        prepped.from = user;
+        return this;
+    }
+
+    function value(uint96 val) public returns (expectLoan) {
+        prepped.value = val;
+        return this;
+    }
+
+    function err(bytes memory b) public returns (expectLoan) {
+        prepped.err = b;
+        return this;
+    }
+
+    function exec(uint160[] memory tokenIds) public {
+        lib.txdata memory _prepped = prepped;
+        delete prepped;
+        exec(tokenIds, _prepped);
+    }
+
     struct Snapshot {
         uint256 agency;
     }
@@ -61,8 +84,6 @@ contract expectLoan is base {
 
             pre.agency = nuggft.agency(run.tokenId);
 
-            ds.assertGt(pre.agency, 0, 'EXPECT-LOAN:START - agency should not be 0');
-
             run.snapshots[i] = pre;
         }
 
@@ -85,6 +106,7 @@ contract expectLoan is base {
 
             post.agency = nuggft.agency(run.tokenId);
 
+            ds.assertGt(pre.agency, 0, 'EXPECT-LOAN:STOP - agency should not be 0');
             ds.assertEq(post.agency >> 254, 0x02, 'EXPECT-LOAN:STOP - agency flag should be LOAN - 0x02');
             ds.assertEq(nuggft.eps(), run.eps, 'EXPECT-LOAN:STOP - eps should not change');
         }
