@@ -12,6 +12,7 @@ import {expectSell} from './sell.sol';
 import {expectMint} from './mint.sol';
 import {expectLoan} from './loan.sol';
 import {expectRebalance} from './rebalance.sol';
+import {expectLiquidate} from './liquidate.sol';
 
 import {RiggedNuggft} from '../NuggftV1.test.sol';
 
@@ -24,6 +25,7 @@ contract Expect {
     expectMint public mint;
     expectLoan public loan;
     expectRebalance public rebalance;
+    expectLiquidate public liquidate;
 
     address public _globalFrom;
 
@@ -43,5 +45,6 @@ contract Expect {
         mint = new expectMint();
         loan = new expectLoan();
         rebalance = new expectRebalance();
+        liquidate = new expectLiquidate();
     }
 }
