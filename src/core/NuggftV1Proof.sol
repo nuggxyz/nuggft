@@ -26,8 +26,8 @@ abstract contract NuggftV1Proof is INuggftV1Proof, NuggftV1Dotnugg {
     /// @inheritdoc INuggftV1Proof
     function rotate(
         uint160 tokenId,
-        uint8 index0,
-        uint8 index1
+        uint8[] calldata index0s,
+        uint8[] calldata index1s
     ) external override {
         assembly {
             function iso(val, left, right) -> b {
@@ -46,22 +46,66 @@ abstract contract NuggftV1Proof is INuggftV1Proof, NuggftV1Dotnugg {
 
             // ensure the caller is the agent
             if iszero(eq(iso(buyerTokenAgency, 96, 96), caller())) {
-                panic(Error__NotItemAgent__0x2B)
+                panic(Error__0x2B__NotItemAgent)
             }
 
             let flag := shr(254, buyerTokenAgency)
 
             // ensure the caller is really the agent
             if and(eq(flag, 0x3), iszero(iszero(iso(buyerTokenAgency, 2, 232)))) {
-                panic(Error__NotItemAuthorizedAgent__0x2D)
+                panic(Error__0x2D__NotItemAuthorizedAgent)
             }
+
+            mstore(0x20, proofs.slot)
+
+            let proof__sptr := keccak256(0x00, 0x40)
+
+            let proof := sload(proof__sptr)
+
+            // extract length of tokenIds array from calldata
+            let len := calldataload(sub(index0s.offset, 0x20))
+
+            // ensure arrays the same length
+            if iszero(eq(len, calldataload(sub(index1s.offset, 0x20)))) {
+                panic(Error__0x99__InvalidArrayLengths)
+            }
+            mstore(0x00, proof)
+
+            for {
+                let i := 0
+            } lt(i, len) {
+                i := add(i, 1)
+            } {
+                // tokenIds[i]
+                let index0 := calldataload(add(index0s.offset, mul(i, 0x20)))
+
+                // accounts[i]
+                let index1 := calldataload(add(index1s.offset, mul(i, 0x20)))
+
+                if or(
+                    or(or(iszero(index0), iszero(index1)), iszero(gt(16, index0))), //
+                    iszero(gt(16, index1))
+                ) {
+                    panic(Error__0x73__InvalidProofIndex)
+                }
+
+                proof := mload(0x00)
+
+                let pos0 := mul(sub(0xf, index0), 0x2)
+                let pos1 := mul(sub(0xf, index1), 0x2)
+                let item0 := and(shr(mul(index0, 16), proof), 0xffff)
+                let item1 := and(shr(mul(index1, 16), proof), 0xffff)
+
+                // log4(0x00, 0x20, pos0, pos1, item0, item1)
+
+                mstore8(pos1, shr(8, item0))
+                mstore8(add(pos1, 1), item0)
+                mstore8(pos0, shr(8, item1))
+                mstore8(add(pos0, 1), item1)
+            }
+
+            sstore(proof__sptr, mload(0x00))
         }
-
-        uint256 working = proofOf(tokenId);
-
-        working = swapIndexs(working, index0, index1);
-
-        proofs[tokenId] = working;
     }
 
     /// @inheritdoc INuggftV1Proof
@@ -86,30 +130,6 @@ abstract contract NuggftV1Proof is INuggftV1Proof, NuggftV1Dotnugg {
                 max = i + 1;
             }
         }
-    }
-
-    function swapIndexs(
-        uint256 state,
-        uint8 index1,
-        uint8 index2
-    ) internal pure returns (uint256 res) {
-        require(index1 != 0 && index2 != 0 && index1 < 16 && index2 < 16);
-        uint256 tmp = getIndex(state, index1);
-        uint256 tmp2 = getIndex(state, index2);
-        res = setIndex(state, index1, tmp2);
-        res = setIndex(res, index2, tmp);
-    }
-
-    function getIndex(uint256 state, uint8 index) internal pure returns (uint16 res) {
-        res = uint16(ShiftLib.get(state, 16, 16 * index));
-    }
-
-    function setIndex(
-        uint256 state,
-        uint8 index,
-        uint256 id
-    ) internal pure returns (uint256 res) {
-        res = ShiftLib.set(state, 16, 16 * index, id);
     }
 
     /// @inheritdoc INuggftV1Proof
@@ -142,7 +162,14 @@ abstract contract NuggftV1Proof is INuggftV1Proof, NuggftV1Dotnugg {
         // defaultIds[0] = uint8(proof & 0xf);
 
         for (uint8 i = 0; i < 8; i++) {
-            uint16 item = getIndex(proof, i);
+            uint16 item;
+
+            // uint16 item = getIndex(proof, i);
+
+            assembly {
+                // solidity masks
+                item := shr(mul(i, 16), proof)
+            }
 
             if (item == 0) continue;
 
@@ -151,7 +178,7 @@ abstract contract NuggftV1Proof is INuggftV1Proof, NuggftV1Dotnugg {
             if (defaultIds[feature] == 0) {
                 uint256 overrides = settings[tokenId].anchorOverrides[item];
                 overys[feature] = uint8(overrides >> 6);
-                overxs[feature] = uint8(overrides & ShiftLib.mask(6));
+                overxs[feature] = uint8(overrides & 0xf7);
                 styles[feature] = settings[tokenId].styles[item];
 
                 defaultIds[feature] = pos;
@@ -192,7 +219,7 @@ abstract contract NuggftV1Proof is INuggftV1Proof, NuggftV1Dotnugg {
             mstore(0x20, agency.slot)
 
             if iszero(iszero(sload(keccak256(0x00, 0x40)))) {
-                mstore8(0x00, Error__TokenDoesNotExist__0xEE)
+                mstore8(0x00, Error__0xEE__TokenDoesNotExist)
                 revert(0x00, 0x01)
             }
 
