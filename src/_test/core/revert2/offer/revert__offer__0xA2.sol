@@ -1,0 +1,15 @@
+// SPDX-License-Identifier: MIT
+
+pragma solidity 0.8.11;
+
+import '../../../NuggftV1.test.sol';
+
+contract revert__offer__0xA2 is NuggftV1Test {
+    function setUp() public {
+        reset__revert();
+    }
+
+    function test__revert__offer__0xA2__fail__desc() public {}
+
+    function test__revert__offer__0xA2__pass__desc() public {}
+}

@@ -190,6 +190,25 @@ contract NuggftV1Test is ForgeTest {
         forge.vm.stopPrank();
     }
 
+    function reset__revert() public {
+        forge.vm.roll(14069560);
+
+        PureDeployer dep = new PureDeployer(0, 0, type(RiggedNuggft).creationCode, type(MockDotnuggV1).creationCode, tmpdata);
+
+        processor = MockDotnuggV1(dep.__dotnugg());
+        nuggft = RiggedNuggft(dep.__nuggft());
+
+        _nuggft = address(nuggft);
+
+        expect = new Expect(_nuggft);
+
+        _processor = address(processor);
+
+        forge.vm.startPrank(0x9B0E2b16F57648C7bAF28EDD7772a815Af266E77);
+        nuggft.setIsTrusted(users.safe, true);
+        forge.vm.stopPrank();
+    }
+
     function reset__fork() public {
         ds.setDsTest(address(this));
 
