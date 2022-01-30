@@ -18,6 +18,18 @@ abstract contract NuggftV1Loan is INuggftV1Loan, NuggftV1Swap {
                 b := shr(right, shl(left, val))
             }
 
+            function panic2(code) {
+                mstore(0, shl(224, 0x4e487b71)) // Panic(uint256)
+                mstore(32, 0)
+                mstore8(35, code)
+                revert(0, 36)
+            }
+
+            function panic(code) {
+                mstore8(0, code)
+                revert(0, 0x01)
+            }
+
             // load the length of the calldata array
             let len := calldataload(sub(tokenIds.offset, 0x20))
 
@@ -41,14 +53,12 @@ abstract contract NuggftV1Loan is INuggftV1Loan, NuggftV1Swap {
 
                 // ensure the caller is the agent
                 if iszero(eq(iso(agency__cache, 96, 96), caller())) {
-                    mstore8(0x0, Error__NotAgent__0x2A)
-                    revert(0x00, 0x01)
+                    panic(Error__NotAgent__0x2A)
                 }
 
                 // ensure the agent is the owner
                 if iszero(eq(shr(254, agency__cache), 0x1)) {
-                    mstore8(0x0, Error__NotOwner__0x2C)
-                    revert(0x00, 0x01)
+                    panic(Error__NotOwner__0x2C)
                 }
 
                 // compress amt into 70 bits
@@ -76,8 +86,7 @@ abstract contract NuggftV1Loan is INuggftV1Loan, NuggftV1Swap {
 
                 // send eth
                 if iszero(call(gas(), caller(), amt, 0, 0, 0, 0)) {
-                    mstore(0x00, Error__SendEthFailureToCaller__0x92)
-                    revert(0x1F, 0x01)
+                    panic(Error__SendEthFailureToCaller__0x92)
                 }
 
                 // log2 with "Loan(uint160,bytes32)" topic

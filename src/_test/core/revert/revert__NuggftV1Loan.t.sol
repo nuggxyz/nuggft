@@ -34,27 +34,17 @@ contract revert__NuggftV1Loan is NuggftV1Test {
     function test__revert__NuggftV1Loan__N_1__loan__passAsSelfHasNotApprovedContract() public {
         uint160 tokenId = scenario_frank_has_a_token_and_spent_50_eth();
 
-        forge.vm.startPrank(users.frank);
-        {
-            nuggft.loan(lib.sarr160(tokenId));
-        }
-        forge.vm.stopPrank();
+        expect.loan().exec(lib.sarr160(tokenId), lib.txdata(users.frank, 0, ''));
     }
 
     function test__revert__NuggftV1Loan__0x2C__loan__loanSameNuggTwice() public {
-        forge.vm.deal(users.frank, 10 ether);
+        expect.mint().from(users.frank).value(1 ether).exec(LOAN_TOKENID);
 
-        forge.vm.startPrank(users.frank);
+        expect.loan().from(users.frank).exec(lib.sarr160(LOAN_TOKENID));
 
-        nuggft.mint{value: 1 ether}(LOAN_TOKENID);
+        expect.mint().from(users.frank).value(1 ether).exec(LOAN_TOKENID + 1);
 
-        nuggft.loan(lib.sarr160(LOAN_TOKENID));
-
-        nuggft.mint{value: 1 ether}(LOAN_TOKENID + 1);
-
-        forge.vm.expectRevert(hex'2C');
-
-        nuggft.loan(lib.sarr160(LOAN_TOKENID));
+        expect.loan().from(users.frank).err(hex'2C').exec(lib.sarr160(LOAN_TOKENID));
     }
 
     /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━

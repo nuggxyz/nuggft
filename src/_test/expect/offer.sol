@@ -17,6 +17,29 @@ contract expectOffer is base {
         balance = new expectBalance();
     }
 
+    lib.txdata prepped;
+
+    function from(address user) public returns (expectOffer) {
+        prepped.from = user;
+        return this;
+    }
+
+    function value(uint96 val) public returns (expectOffer) {
+        prepped.value = val;
+        return this;
+    }
+
+    function err(bytes memory b) public returns (expectOffer) {
+        prepped.err = b;
+        return this;
+    }
+
+    function exec(uint160 tokenId) public {
+        lib.txdata memory _prepped = prepped;
+        delete prepped;
+        exec(tokenId, _prepped);
+    }
+
     struct Snapshot {
         SnapshotEnv env;
         SnapshotData data;
@@ -74,9 +97,9 @@ contract expectOffer is base {
         uint160 sellingTokenId,
         uint16 itemId,
         address sender,
-        uint96 value
+        uint96 val
     ) public {
-        this.start((buyingTokenId << 40) | (uint160(itemId) << 24) | sellingTokenId, sender, value);
+        this.start((buyingTokenId << 40) | (uint160(itemId) << 24) | sellingTokenId, sender, val);
     }
 
     bytes execution;
@@ -88,7 +111,7 @@ contract expectOffer is base {
     function start(
         uint160 tokenId,
         address sender,
-        uint96 value
+        uint96 val
     ) public {
         require(execution.length == 0, 'EXPECT-OFFER:START: execution already esists');
 
@@ -101,7 +124,7 @@ contract expectOffer is base {
 
         env.id = tokenId;
         env.isItem = env.id > 0xffffff;
-        env.value = value;
+        env.value = val;
         env.epoch = nuggft.epoch();
         env.mintingNugg = env.id == env.epoch;
 
@@ -119,18 +142,10 @@ contract expectOffer is base {
 
         if (pre.offer == 0 && env.buyer == address(uint160(pre.agency))) pre.offer = pre.agency;
 
-        // ds.emit_log_uint((((pre.offer << 26) >> 186) * .1 gwei));
-        // ds.emit_log_uint((((pre.agency << 26) >> 186) * .1 gwei));
-        // ds.emit_log_uint(env.value);
-        // ds.emit_log_bytes32(bytes32(pre.agency));
-        // ds.emit_log_bytes32(bytes32(pre.offer));
-
         env.increment = uint96((((pre.offer << 26) >> 186) * .1 gwei) + env.value - (((pre.agency << 26) >> 186) * .1 gwei));
 
         run.snapshot.env = env;
         run.snapshot.data = pre;
-
-        preOfferChecks(run, env, pre);
 
         balance.start(run.sender, env.value, false);
         balance.start(address(nuggft), env.value, true);
@@ -188,14 +203,6 @@ contract expectOffer is base {
         stake.rollback();
 
         this.clear();
-    }
-
-    function preOfferChecks(
-        Run memory run,
-        SnapshotEnv memory env,
-        SnapshotData memory pre
-    ) private {
-        if (env.isItem) {} else {}
     }
 
     function postOfferChecks(

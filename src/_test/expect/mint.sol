@@ -8,13 +8,17 @@ import './base.sol';
 import './stake.sol';
 import './balance.sol';
 
+import {Expect} from './Expect.sol';
+
 contract expectMint is base {
     expectStake stake;
     expectBalance balance;
+    Expect creator;
 
     constructor() {
         stake = new expectStake();
         balance = new expectBalance();
+        creator = Expect(msg.sender);
     }
 
     struct SnapshotData {
@@ -40,6 +44,29 @@ contract expectMint is base {
 
     function clear() public {
         delete execution;
+    }
+
+    lib.txdata prepped;
+
+    function from(address user) public returns (expectMint) {
+        prepped.from = user;
+        return this;
+    }
+
+    function value(uint96 val) public returns (expectMint) {
+        prepped.value = val;
+        return this;
+    }
+
+    function err(bytes memory b) public returns (expectMint) {
+        prepped.err = b;
+        return this;
+    }
+
+    function exec(uint160 tokenId) public {
+        lib.txdata memory _prepped = prepped;
+        delete prepped;
+        exec(tokenId, _prepped);
     }
 
     function exec(uint160 tokenId, lib.txdata memory txdata) public {

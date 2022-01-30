@@ -17,6 +17,29 @@ contract expectRebalance is base {
         balance = new expectBalance();
     }
 
+    lib.txdata prepped;
+
+    function from(address user) public returns (expectRebalance) {
+        prepped.from = user;
+        return this;
+    }
+
+    function value(uint96 val) public returns (expectRebalance) {
+        prepped.value = val;
+        return this;
+    }
+
+    function err(bytes memory b) public returns (expectRebalance) {
+        prepped.err = b;
+        return this;
+    }
+
+    function exec(uint160[] memory tokenIds) public {
+        lib.txdata memory _prepped = prepped;
+        delete prepped;
+        exec(tokenIds, _prepped);
+    }
+
     struct Snapshot {
         uint256 agency;
         uint96 fee;
@@ -65,9 +88,11 @@ contract expectRebalance is base {
 
             pre.agency = nuggft.agency(run.tokenId);
 
-            // ds.assertGt(pre.agency, 0, 'EXPECT-REBALANCE:START - agency should not be 0');
+            uint96 agency__eth = uint96((pre.agency << 26) >> 186) * .1 gwei;
 
-            (, , , pre.fee, pre.earned, ) = nuggft.debt(tokenIds[i]);
+            pre.fee = agency__eth / nuggft.REBALANCE_FEE_BPS();
+            pre.earned = run.eps - agency__eth;
+
             run.accFee += pre.fee;
             run.accEarned += pre.earned;
 
