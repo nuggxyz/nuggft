@@ -32,3 +32,5 @@ hardhat/artifacts
 hardhat/abis
 config.json
 stupid
+
+remappings.txt
