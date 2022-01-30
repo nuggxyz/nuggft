@@ -63,6 +63,7 @@ contract expectSell is base {
     struct SnapshotData {
         uint256 agency;
         uint256 offer;
+        uint256 trueoffer;
     }
 
     struct SnapshotEnv {
@@ -151,9 +152,10 @@ contract expectSell is base {
 
             pre.agency = nuggft.external__agency(env.id);
             pre.offer = nuggft.external__offers(env.id, env.buyer);
+            pre.trueoffer = pre.offer;
         }
 
-        if (pre.offer == 0) pre.offer = pre.agency;
+        if (pre.offer == 0 && env.buyer == address(uint160(pre.agency))) pre.offer = pre.agency;
 
         run.snapshot.env = env;
         run.snapshot.data = pre;
@@ -208,7 +210,7 @@ contract expectSell is base {
         }
 
         ds.assertEq(pre.agency, post.agency, "EXPECT-SELL:ROLLBACK agency changed but shouldn't have");
-        ds.assertEq(pre.offer, post.offer, "EXPECT-SELL:ROLLBACK offer changed but shouldn't have");
+        ds.assertEq(pre.trueoffer, post.offer, "EXPECT-SELL:ROLLBACK offer changed but shouldn't have");
 
         this.clear();
     }

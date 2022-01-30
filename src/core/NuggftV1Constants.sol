@@ -72,7 +72,7 @@ abstract contract NuggftV1Constants {
     uint8 constant Error__ProofDoesNotHaveItem__0x34 = 0x34;
 
     // stake
+    uint8 constant Error__FloorTooLow__0x70 = 0x70;
     uint8 constant Error__ValueTooLow__0x71 = 0x71;
     uint8 constant Error__IncrementTooLow__0x72 = 0x72;
-    uint8 constant Error__AlreadyForSale__0x2D = 0x2D;
 }
