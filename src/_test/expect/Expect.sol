@@ -11,6 +11,7 @@ import {expectStake} from './stake.sol';
 import {expectSell} from './sell.sol';
 import {expectMint} from './mint.sol';
 import {expectLoan} from './loan.sol';
+import {expectRebalance} from './rebalance.sol';
 
 import {RiggedNuggft} from '../NuggftV1.test.sol';
 
@@ -22,6 +23,7 @@ contract Expect {
     expectSell public sell;
     expectMint public mint;
     expectLoan public loan;
+    expectRebalance public rebalance;
 
     constructor(address nuggft_) {
         global.set('Expect', address(this));
@@ -34,5 +36,6 @@ contract Expect {
         sell = new expectSell();
         mint = new expectMint();
         loan = new expectLoan();
+        rebalance = new expectRebalance();
     }
 }

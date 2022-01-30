@@ -28,18 +28,39 @@ contract system__NuggftV1Loan is NuggftV1Test, fragments {
     }
 
     function test__system__loan__rebalanceFactory() public {
-        userMints(users.frank, 500);
+        expect.mint().exec(
+            500,
+            lib.txd({
+                from: users.frank, //
+                value: 1 ether
+            })
+        );
 
-        forge.vm.startPrank(users.frank);
-        {
-            nuggft.loan(lib.sarr160(500));
-            for (uint16 i = 0; i < 50; i++) {
-                jump(3000 + i);
-                uint96[] memory vals = nuggft.vfr(lib.sarr160(500));
-                nuggft.rebalance{value: vals[0]}(lib.sarr160(500));
-                userMints(users.frank, 501 + i);
-            }
+        expect.loan().exec(
+            lib.sarr160(500),
+            lib.txd({
+                from: users.frank //
+            })
+        );
+
+        for (uint16 i = 0; i < 50; i++) {
+            jump(3000 + i);
+
+            expect.rebalance().exec(
+                lib.sarr160(500),
+                lib.txd({
+                    from: users.frank, //
+                    value: lib.asum(nuggft.vfr(lib.sarr160(500)))
+                })
+            );
+
+            expect.mint().exec(
+                501 + i,
+                lib.txd({
+                    from: users.frank, //
+                    value: nuggft.msp()
+                })
+            );
         }
-        forge.vm.stopPrank();
     }
 }
