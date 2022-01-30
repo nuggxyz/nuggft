@@ -34,6 +34,12 @@ contract expectRebalance is base {
         return this;
     }
 
+    function err(bytes1 b) public returns (expectRebalance) {
+        prepped.err = new bytes(1);
+        prepped.err[0] = b;
+        return this;
+    }
+
     function exec(uint160[] memory tokenIds) public {
         lib.txdata memory _prepped = prepped;
         delete prepped;

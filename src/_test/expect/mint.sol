@@ -63,6 +63,12 @@ contract expectMint is base {
         return this;
     }
 
+    function err(bytes1 b) public returns (expectMint) {
+        prepped.err = new bytes(1);
+        prepped.err[0] = b;
+        return this;
+    }
+
     function exec(uint160 tokenId) public {
         lib.txdata memory _prepped = prepped;
         delete prepped;
