@@ -9,7 +9,6 @@ import {fragments} from './fragments.t.sol';
 contract system__NuggftV1Loan is NuggftV1Test, fragments {
     function setUp() public {
         reset__system();
-        forge.vm.roll(1000);
     }
 
     function test__system__loan__revert__0x2F__autoLiquidateCantRebalance() public {
@@ -26,6 +25,7 @@ contract system__NuggftV1Loan is NuggftV1Test, fragments {
     }
 
     function test__system__loan__rebalanceFactory() public {
+        // jump(3000);
         expect.globalFrom(users.frank);
 
         expect.mint().g().value(1 ether).exec(500);
@@ -33,7 +33,7 @@ contract system__NuggftV1Loan is NuggftV1Test, fragments {
         expect.loan().g().exec(lib.sarr160(500));
 
         for (uint16 i = 0; i < 50; i++) {
-            jump(3000 + i);
+            jump(3001 + i);
 
             expect.rebalance().g().value(lib.asum(nuggft.vfr(lib.sarr160(500)))).exec(lib.sarr160(500));
 
@@ -41,10 +41,28 @@ contract system__NuggftV1Loan is NuggftV1Test, fragments {
         }
     }
 
+    function test__system__loan__friendsRebalanceFactory() public {
+        jump(3000);
+
+        expect.mint().from(users.frank).value(1 ether).exec(500);
+
+        expect.loan().from(users.frank).exec(lib.sarr160(500));
+
+        jump(4001);
+
+        expect.rebalance().from(users.dee).value(lib.asum(nuggft.vfr(lib.sarr160(500)))).exec(lib.sarr160(500));
+
+        jump(5002);
+
+        expect.rebalance().from(users.mac).value(lib.asum(nuggft.vfr(lib.sarr160(500)))).exec(lib.sarr160(500));
+
+        expect.liquidate().from(users.frank).value(lib.asum(nuggft.vfl(lib.sarr160(500)))).exec(500);
+    }
+
     function test__system__loan__nuggHeritage() public {
         jump(3000);
 
-        expect.mint().from(users.frank).value(0.1 ether).exec(500);
+        expect.mint().from(users.frank).value(1 ether).exec(500);
 
         expect.loan().from(users.frank).exec(lib.sarr160(500));
 
