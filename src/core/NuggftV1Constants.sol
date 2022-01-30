@@ -11,8 +11,8 @@ abstract contract NuggftV1Constants {
     uint96 constant PROTOCOL_FEE_BPS = 10;
 
     // epoch
-    uint16 constant INTERVAL_SUB = 3;
-    uint16 constant INTERVAL = 256;
+    uint16 constant INTERVAL_SUB = 2;
+    uint16 constant INTERVAL = 69;
     uint24 constant OFFSET = 3000;
 
     // loan

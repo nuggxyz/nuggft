@@ -47,7 +47,9 @@ abstract contract NuggftV1Epoch is INuggftV1Epoch, NuggftV1Constants {
         unchecked {
             bytes32 bhash = getBlockHash(startblock - INTERVAL_SUB);
             require(bhash != 0, hex'0E');
+            // if (bhash != 0) {
             res = uint256(keccak256(abi.encodePacked(bhash, _epoch, address(this))));
+            // }
         }
     }
 
