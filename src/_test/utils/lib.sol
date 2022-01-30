@@ -73,6 +73,14 @@ library lib {
         }
     }
 
+    function m8(uint8 a, uint16 amount) internal pure returns (uint8[] memory array) {
+        array = new uint8[](amount);
+
+        for (uint256 i = 0; i < amount; i++) {
+            array[i] = a;
+        }
+    }
+
     function sarrAddress(address a) internal pure returns (address[] memory array) {
         array = new address[](1);
         array[0] = a;
