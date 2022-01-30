@@ -28,7 +28,7 @@ contract revert__NuggftV1Loan is NuggftV1Test {
     function test__revert__NuggftV1Loan__0x2A__loan__failAsNotAgent() public {
         uint160 tokenId = scenario_frank_has_a_token_and_spent_50_eth();
 
-        expect.loan().exec(lib.sarr160(tokenId), lib.txdata(users.dennis, 0, hex'2A'));
+        expect.loan().err(0x2A).from(users.dennis).exec(lib.sarr160(tokenId));
     }
 
     function test__revert__NuggftV1Loan__N_1__loan__passAsSelfHasNotApprovedContract() public {
@@ -38,13 +38,15 @@ contract revert__NuggftV1Loan is NuggftV1Test {
     }
 
     function test__revert__NuggftV1Loan__0x2C__loan__loanSameNuggTwice() public {
-        expect.mint().from(users.frank).value(1 ether).exec(LOAN_TOKENID);
+        expect.globalFrom(users.frank);
 
-        expect.loan().from(users.frank).exec(lib.sarr160(LOAN_TOKENID));
+        expect.mint().g().exec{value: 1 ether}(LOAN_TOKENID);
 
-        expect.mint().from(users.frank).value(1 ether).exec(LOAN_TOKENID + 1);
+        expect.loan().g().exec(lib.sarr160(LOAN_TOKENID));
 
-        expect.loan().from(users.frank).err(0x2C).exec(lib.sarr160(LOAN_TOKENID));
+        expect.mint().g().exec{value: 1 ether}(LOAN_TOKENID + 1);
+
+        expect.loan().g().err(0x2C).exec(lib.sarr160(LOAN_TOKENID));
     }
 
     /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━

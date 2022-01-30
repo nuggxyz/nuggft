@@ -7,14 +7,17 @@ import '../utils/forge.sol';
 import './base.sol';
 import './stake.sol';
 import './balance.sol';
+import {Expect} from './Expect.sol';
 
 contract expectLoan is base {
     expectStake stake;
     expectBalance balance;
+    Expect creator;
 
     constructor() {
         stake = new expectStake();
         balance = new expectBalance();
+        creator = Expect(msg.sender);
     }
 
     lib.txdata prepped;
@@ -24,10 +27,10 @@ contract expectLoan is base {
         return this;
     }
 
-    function value(uint96 val) public returns (expectLoan) {
-        prepped.value = val;
-        return this;
-    }
+    // function value(uint96 val) public returns (expectLoan) {
+    //     prepped.value = val;
+    //     return this;
+    // }
 
     function err(bytes memory b) public returns (expectLoan) {
         prepped.err = b;
@@ -42,8 +45,14 @@ contract expectLoan is base {
 
     function exec(uint160[] memory tokenIds) public {
         lib.txdata memory _prepped = prepped;
+
         delete prepped;
         exec(tokenIds, _prepped);
+    }
+
+    function g() public returns (expectLoan) {
+        prepped.from = creator._globalFrom();
+        return this;
     }
 
     struct Snapshot {

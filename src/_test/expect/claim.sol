@@ -8,14 +8,17 @@ import './base.sol';
 
 import {expectStake} from './stake.sol';
 import {expectBalance} from './balance.sol';
+import {Expect} from './Expect.sol';
 
 contract expectClaim is base {
     expectStake stake;
     expectBalance balance;
+    Expect creator;
 
     constructor() {
         stake = new expectStake();
         balance = new expectBalance();
+        creator = Expect(msg.sender);
     }
 
     lib.txdata prepped;
@@ -25,10 +28,10 @@ contract expectClaim is base {
         return this;
     }
 
-    function value(uint96 val) public returns (expectClaim) {
-        prepped.value = val;
-        return this;
-    }
+    // function value(uint96 val) public returns (expectClaim) {
+    //     prepped.value = val;
+    //     return this;
+    // }
 
     function err(bytes memory b) public returns (expectClaim) {
         prepped.err = b;
@@ -38,6 +41,11 @@ contract expectClaim is base {
     function err(bytes1 b) public returns (expectClaim) {
         prepped.err = new bytes(1);
         prepped.err[0] = b;
+        return this;
+    }
+
+    function g() public returns (expectClaim) {
+        prepped.from = creator._globalFrom();
         return this;
     }
 

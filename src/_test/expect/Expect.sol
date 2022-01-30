@@ -25,6 +25,12 @@ contract Expect {
     expectLoan public loan;
     expectRebalance public rebalance;
 
+    address public _globalFrom;
+
+    function globalFrom(address user) public {
+        _globalFrom = user;
+    }
+
     constructor(address nuggft_) {
         global.set('Expect', address(this));
         global.set('RiggedNuggft', nuggft_);
