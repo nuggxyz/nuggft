@@ -178,6 +178,8 @@ abstract contract NuggftV1Loan is INuggftV1Loan, NuggftV1Swap {
 
             earn := sub(value, fee)
 
+            fee := sub(fee, principal)
+
             let pro := div(fee, PROTOCOL_FEE_BPS)
 
             stake__cache := add(stake__cache, or(shl(96, sub(fee, pro)), pro))
