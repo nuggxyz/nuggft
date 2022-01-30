@@ -12,6 +12,8 @@ abstract contract NuggftV1Constants {
 
     // epoch
     uint16 constant INTERVAL_SUB = 2;
+    uint16 constant MINT_INTERVAL = 16;
+
     uint16 constant INTERVAL = 69;
     uint24 constant OFFSET = 3000;
 
@@ -43,21 +45,31 @@ abstract contract NuggftV1Constants {
     uint8 constant Error__SendEthFailureToCaller__0x92 = 0x92;
     uint8 constant Error__InvalidArrayLengths__0x99 = 0x99;
     uint8 constant Error__NotAgent__0x2A = 0x2A;
-    uint8 constant Error__NotOwner__0x2C = 0x2C;
+    uint8 constant Error__NotItemAgent__0x2B = 0x2B;
+    uint8 constant Error__NotAthorized__0x2C = 0x2C;
+    uint8 constant Error__NotItemAuthorizedAgent__0x2D = 0x2D;
+    uint8 constant Error__NotOwner__0xE9 = 0xE9;
+
     uint8 constant Error__Untrusted__0x88 = 0x88;
+    uint8 constant Error__Wut__0x69 = 0x69;
+    uint8 constant Error__TokenDoesNotExist__0xEE = 0xEE;
 
     // swap
     uint8 constant Error__NotSwapping__0x24 = 0x24;
     uint8 constant Error__NotLoaned__0x33 = 0x33;
     uint8 constant Error__InvalidEpoch__0x0F = 0x0F;
     uint8 constant Error__ExpiredEpoch__0x2F = 0x2F;
-    uint8 constant Error__NoOfferToClaim__0x2E = 0x2E;
+    uint8 constant Error__NoOffer__0x2E = 0x2E;
     uint8 constant Error__WinningClaimTooEarly__0x67 = 0x67;
     uint8 constant Error__ClaimTooEarly__0x68 = 0x68;
     uint8 constant Error__NotAuthorized__0x31 = 0x31;
     uint8 constant Error__LiquidationPaymentTooLow__0x32 = 0x32;
     uint8 constant Error__RebalancePaymentTooLow__0x3A = 0x3A;
     uint8 constant Error__OfferLowerThanLOSS__0xF0 = 0xF0;
+
+    uint8 constant Error__ProofHasNoFreeSlot__0xF9 = 0xF9;
+    uint8 constant Error__ItemAgencyAlreadySet__0x09 = 0x09;
+    uint8 constant Error__ProofDoesNotHaveItem__0x34 = 0x34;
 
     // stake
     uint8 constant Error__ValueTooLow__0x71 = 0x71;

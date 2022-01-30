@@ -36,11 +36,9 @@ abstract contract NuggftV1Swap is INuggftV1ItemSwap, INuggftV1Swap, NuggftV1Stak
                 b := shr(right, shl(left, val))
             }
 
-            function req(val, code) {
-                if iszero(val) {
-                    mstore8(0x0, code)
-                    revert(0x00, 0x01)
-                }
+            function panic(code) {
+                mstore8(0, code)
+                revert(0, 0x01)
             }
 
             isItem := gt(tokenId, 0xffffff)
@@ -50,7 +48,9 @@ abstract contract NuggftV1Swap is INuggftV1ItemSwap, INuggftV1Swap, NuggftV1Stak
             // store callvalue formatted in .1 gwei for caculation of total offer
             next := div(callvalue(), LOSS)
 
-            req(gt(next, 100), Error__OfferLowerThanLOSS__0xF0)
+            if iszero(gt(next, 100)) {
+                panic(Error__OfferLowerThanLOSS__0xF0)
+            }
 
             mptr := mload(0x40)
 
@@ -75,16 +75,14 @@ abstract contract NuggftV1Swap is INuggftV1ItemSwap, INuggftV1Swap, NuggftV1Stak
 
                 // ensure the caller is the agent
                 if iszero(eq(iso(buyerTokenAgency, 96, 96), caller())) {
-                    mstore8(0x0, Error__NotAgent__0x2A)
-                    revert(0x00, 0x01)
+                    panic(Error__NotItemAgent__0x2B)
                 }
 
                 let flag := shr(254, buyerTokenAgency)
 
                 // ensure the caller is really the agent
                 if and(eq(flag, 0x3), iszero(iszero(iso(buyerTokenAgency, 2, 232)))) {
-                    mstore8(0x0, Error__NotOwner__0x2C)
-                    revert(0x00, 0x01)
+                    panic(Error__NotItemAuthorizedAgent__0x2D)
                 }
 
                 mstore(add(mptr, 0x20), itemAgency.slot)
@@ -102,7 +100,7 @@ abstract contract NuggftV1Swap is INuggftV1ItemSwap, INuggftV1Swap, NuggftV1Stak
         if (active == tokenId && agency__cache == 0) {
             // [Offer:Mint]
 
-            setProofFromEpoch(tokenId);
+            proofs[tokenId] = initFromSeed(calculateSeed(uint24(active)));
 
             // no need to update free memory pointer because we no longer rely on it being empty
             addStakedShareFromMsgValue__dirty();
@@ -153,11 +151,14 @@ abstract contract NuggftV1Swap is INuggftV1ItemSwap, INuggftV1Swap, NuggftV1Stak
             function iso(val, left, right) -> b {
                 b := shr(right, shl(left, val))
             }
+            function panic(code) {
+                mstore8(0, code)
+                revert(0, 0x01)
+            }
 
             // ensure that the agency flag is "SWAP" (0x03)
             if iszero(eq(shr(254, agency__cache), 0x03)) {
-                mstore8(0x0, Error__NotSwapping__0x24)
-                revert(0x00, 0x01)
+                panic(Error__NotSwapping__0x24)
             }
 
             // ========= memory ==========
@@ -203,8 +204,7 @@ abstract contract NuggftV1Swap is INuggftV1ItemSwap, INuggftV1Swap, NuggftV1Stak
                 // 1. forces user to claim previous swap before acting on this one
                 // 2. prevents owner from offering on their own swap before someone else has
                 if lt(iso(offer__cache, 2, 232), active) {
-                    mstore8(0x0, Error__InvalidEpoch__0x0F)
-                    revert(0x00, 0x01)
+                    panic(Error__InvalidEpoch__0x0F)
                 }
             }
 
@@ -233,8 +233,7 @@ abstract contract NuggftV1Swap is INuggftV1ItemSwap, INuggftV1Swap, NuggftV1Stak
 
                 // otherwise we validate the epoch to ensure the swap is still active
                 if lt(agency__epoch, active) {
-                    mstore8(0x0, Error__ExpiredEpoch__0x2F)
-                    revert(0x00, 0x01)
+                    panic(Error__ExpiredEpoch__0x2F)
                 }
             }
 
@@ -246,8 +245,7 @@ abstract contract NuggftV1Swap is INuggftV1ItemSwap, INuggftV1Swap, NuggftV1Stak
 
             // ensure next offer includes at least a 2% increment
             if gt(div(mul(last, 10200), 10000), next) {
-                mstore8(0x0, Error__IncrementTooLow__0x72)
-                revert(0x00, 0x01)
+                panic(Error__IncrementTooLow__0x72)
             }
             // convert next into the increment
             next := sub(next, last)
@@ -320,6 +318,10 @@ abstract contract NuggftV1Swap is INuggftV1ItemSwap, INuggftV1Swap, NuggftV1Stak
         uint256 active = epoch();
 
         assembly {
+            function panic(code) {
+                mstore8(0, code)
+                revert(0, 0x01)
+            }
             // NOTE: memory locations are referenced as offsets from the free memory pointer
 
             function iso(val, left, right) -> b {
@@ -331,8 +333,7 @@ abstract contract NuggftV1Swap is INuggftV1ItemSwap, INuggftV1Swap, NuggftV1Stak
 
             // ensure arrays the same length
             if iszero(eq(len, calldataload(sub(accounts.offset, 0x20)))) {
-                mstore8(0x0, Error__InvalidArrayLengths__0x99)
-                revert(0x00, 0x01)
+                panic(Error__InvalidArrayLengths__0x99)
             }
 
             let acc := 0
@@ -420,16 +421,14 @@ abstract contract NuggftV1Swap is INuggftV1ItemSwap, INuggftV1Swap, NuggftV1Stak
 
                     // ensure that the agency flag is "SWAP" (0x03)
                     if iszero(eq(shr(254, agency__cache), 0x03)) {
-                        mstore8(0x0, Error__NotSwapping__0x24)
-                        revert(0x00, 0x01)
+                        panic(Error__NotSwapping__0x24)
                     }
 
                     // check to make sure the user is the seller or the swap is over
                     // we know a user is a seller if the epoch is still 0
                     // we know a swap is over if the active epoch is greater than the swaps epoch
                     if iszero(or(iszero(agency__epoch), gt(active, agency__epoch))) {
-                        mstore8(0x0, Error__WinningClaimTooEarly__0x67)
-                        revert(0x00, 0x01)
+                        panic(Error__WinningClaimTooEarly__0x67)
                     }
 
                     switch gt(tokenId, 0xffffff)
@@ -445,17 +444,13 @@ abstract contract NuggftV1Swap is INuggftV1ItemSwap, INuggftV1Swap, NuggftV1Stak
 
                         let proof := sload(proof__sptr)
 
-                        if iszero(proof) {
-                            revert(0x00, 0x00)
-                        }
-
                         for {
                             let j := 8
                         } lt(j, 17) {
                             j := add(j, 1)
                         } {
                             if eq(j, 16) {
-                                revert(0x0, 0x0)
+                                panic(Error__ProofHasNoFreeSlot__0xF9)
                             }
 
                             if iszero(and(shr(mul(j, 16), proof), 0xffff)) {
@@ -487,17 +482,14 @@ abstract contract NuggftV1Swap is INuggftV1ItemSwap, INuggftV1Swap, NuggftV1Stak
                 }
                 default {
                     if iszero(eq(caller(), trusted_eoa)) {
-                        // mstore(0x0, Error__Untrusted__0x88)
-                        mstore8(0x00, Error__Untrusted__0x88)
-                        revert(0x00, 0x01)
+                        panic(Error__Untrusted__0x88)
                     }
 
                     let offer__cache := sload(offer__sptr)
 
                     // ensure this user has an offer to claim
                     if iszero(offer__cache) {
-                        mstore8(0x0, Error__NoOfferToClaim__0x2E)
-                        revert(0x00, 0x01)
+                        panic(Error__NoOffer__0x2E)
                     }
 
                     // accumulate and send value at once at end
@@ -524,12 +516,9 @@ abstract contract NuggftV1Swap is INuggftV1ItemSwap, INuggftV1Swap, NuggftV1Stak
 
             acc := mul(acc, LOSS)
 
-            mstore(0x00, acc)
-
             // send accumulated value * LOSS to msg.sender
             if iszero(call(gas(), caller(), acc, 0, 0, 0, 0)) {
-                mstore8(0x0, Error__SendEthFailureToCaller__0x92)
-                revert(0x00, 0x01)
+                panic(Error__SendEthFailureToCaller__0x92)
             }
         }
     }
@@ -539,6 +528,11 @@ abstract contract NuggftV1Swap is INuggftV1ItemSwap, INuggftV1Swap, NuggftV1Stak
         require(floor >= eps(), hex'2B');
 
         assembly {
+            function panic(code) {
+                mstore8(0, code)
+                revert(0, 0x01)
+            }
+
             function iso(val, left, right) -> b {
                 b := shr(right, shl(left, val))
             }
@@ -562,16 +556,14 @@ abstract contract NuggftV1Swap is INuggftV1ItemSwap, INuggftV1Swap, NuggftV1Stak
 
                 // ensure the caller is the agent
                 if iszero(eq(iso(buyerTokenAgency, 96, 96), caller())) {
-                    mstore8(0x0, Error__NotAgent__0x2A)
-                    revert(0x00, 0x01)
+                    panic(Error__NotItemAgent__0x2B)
                 }
 
                 let flag := shr(254, buyerTokenAgency)
 
                 // ensure the caller is really the agent
                 if and(eq(flag, 0x3), iszero(iszero(iso(buyerTokenAgency, 2, 232)))) {
-                    mstore8(0x0, Error__NotOwner__0x2C)
-                    revert(0x00, 0x01)
+                    panic(Error__NotItemAuthorizedAgent__0x2D)
                 }
 
                 mstore(add(mptr, 0x20), itemAgency.slot)
@@ -588,8 +580,7 @@ abstract contract NuggftV1Swap is INuggftV1ItemSwap, INuggftV1Swap, NuggftV1Stak
             switch isItem
             case 1 {
                 if iszero(iszero(agency__cache)) {
-                    mstore8(0x00, 0x09)
-                    revert(0x00, 0x01)
+                    panic(Error__ItemAgencyAlreadySet__0x09)
                 }
 
                 mstore(mptr, sender)
@@ -601,13 +592,13 @@ abstract contract NuggftV1Swap is INuggftV1ItemSwap, INuggftV1Swap, NuggftV1Stak
 
                 let proof := sload(proof__sptr)
 
-                if iszero(proof) {
-                    mstore8(0x00, 0x33)
-                    revert(0x00, 0x01)
-                }
+                // if iszero(proof) {
+                //     mstore8(0x00, 0x33)
+                // }
 
                 let id := shr(24, tokenId)
 
+                // start at 1 to jump over the base
                 let j := 1
 
                 for {
@@ -622,8 +613,7 @@ abstract contract NuggftV1Swap is INuggftV1ItemSwap, INuggftV1Swap, NuggftV1Stak
                 }
 
                 if eq(j, 16) {
-                    mstore8(0x00, 0x34)
-                    revert(0x00, 0x01)
+                    panic(Error__ProofDoesNotHaveItem__0x34)
                 }
 
                 sstore(protocolItems.slot, add(sload(protocolItems.slot), 1))
@@ -653,14 +643,12 @@ abstract contract NuggftV1Swap is INuggftV1ItemSwap, INuggftV1Swap, NuggftV1Stak
             default {
                 // ensure the caller is the agent
                 if iszero(eq(shr(96, shl(96, agency__cache)), caller())) {
-                    mstore8(0x0, Error__NotAgent__0x2A)
-                    revert(0x00, 0x01)
+                    panic(Error__NotAgent__0x2A)
                 }
 
                 // ensure the agent is the owner
                 if iszero(eq(shr(254, agency__cache), 0x1)) {
-                    mstore8(0x0, Error__NotOwner__0x2C)
-                    revert(0x00, 0x01)
+                    panic(Error__NotOwner__0xE9)
                 }
 
                 // ==== agency[tokenId] =====

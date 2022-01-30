@@ -29,7 +29,33 @@ abstract contract NuggftV1Proof is INuggftV1Proof, NuggftV1Dotnugg {
         uint8 index0,
         uint8 index1
     ) external override {
-        require(isAgent(msg.sender, tokenId), hex'60');
+        assembly {
+            function iso(val, left, right) -> b {
+                b := shr(right, shl(left, val))
+            }
+
+            function panic(code) {
+                mstore8(0, code)
+                revert(0, 0x01)
+            }
+
+            let mptr := mload(0x40)
+            mstore(0x00, tokenId)
+            mstore(0x20, agency.slot)
+            let buyerTokenAgency := sload(keccak256(0x00, 0x40))
+
+            // ensure the caller is the agent
+            if iszero(eq(iso(buyerTokenAgency, 96, 96), caller())) {
+                panic(Error__NotItemAgent__0x2B)
+            }
+
+            let flag := shr(254, buyerTokenAgency)
+
+            // ensure the caller is really the agent
+            if and(eq(flag, 0x3), iszero(iszero(iso(buyerTokenAgency, 2, 232)))) {
+                panic(Error__NotItemAuthorizedAgent__0x2D)
+            }
+        }
 
         uint256 working = proofOf(tokenId);
 
@@ -39,7 +65,7 @@ abstract contract NuggftV1Proof is INuggftV1Proof, NuggftV1Dotnugg {
     }
 
     /// @inheritdoc INuggftV1Proof
-    function proofOf(uint160 tokenId) public view virtual override returns (uint256) {
+    function proofOf(uint160 tokenId) public view override returns (uint256) {
         if (proofs[tokenId] != 0) return proofs[tokenId];
 
         (uint256 seed, uint256 epoch, uint256 proof) = pendingProof();
@@ -60,17 +86,6 @@ abstract contract NuggftV1Proof is INuggftV1Proof, NuggftV1Dotnugg {
                 max = i + 1;
             }
         }
-    }
-
-    function search(uint256 state, uint256 itemId) internal pure returns (uint8 index) {
-        // skip the base
-
-        do {
-            if (state & 0xffff == itemId) return index;
-            index++;
-        } while ((state >>= 16) != 0);
-
-        revert('does not exist - UNTESTED');
     }
 
     function swapIndexs(
@@ -150,26 +165,6 @@ abstract contract NuggftV1Proof is INuggftV1Proof, NuggftV1Dotnugg {
                             SWAP MANAGEMENT
     ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━*/
 
-    function addItem(uint160 tokenId, uint16 itemId) internal {
-        require(isAgent(msg.sender, tokenId), "SHOULDN'T HAPPEN 1");
-
-        uint256 working = proofOf(tokenId);
-
-        working = setIndex(working, search(working, 0), itemId);
-
-        proofs[tokenId] = working;
-    }
-
-    function removeItem(uint160 tokenId, uint16 itemId) internal {
-        require(isAgent(msg.sender, tokenId), "SHOULDN'T HAPPEN 2");
-
-        uint256 working = proofOf(tokenId);
-
-        working = setIndex(working, search(working, itemId), 0);
-
-        proofs[tokenId] = working;
-    }
-
     /// @notice parses the external itemId into a feautre and position
     /// @dev this follows dotnugg v1 specification
     /// @param itemId -> the external itemId
@@ -185,23 +180,33 @@ abstract contract NuggftV1Proof is INuggftV1Proof, NuggftV1Dotnugg {
     ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━*/
 
     function setProof(uint160 tokenId) internal {
-        require(proofs[tokenId] == 0, 'P:5');
+        uint256 randomEnoughSeed;
 
-        uint256 randomEnoughSeed = uint256(keccak256(abi.encodePacked(hex'420690', tokenId, blockhash(block.number - 1))));
+        assembly {
+            mstore(0x00, tokenId)
 
-        uint256 res = initFromSeed(randomEnoughSeed & ShiftLib.mask(88));
+            // ========= memory ==========
+            //   0x00: tokenId
+            //   0x20: agency.slot
+            // ===========================
+            mstore(0x20, agency.slot)
 
-        proofs[tokenId] = res;
-    }
+            if iszero(iszero(sload(keccak256(0x00, 0x40)))) {
+                mstore8(0x00, Error__TokenDoesNotExist__0xEE)
+                revert(0x00, 0x01)
+            }
 
-    function setProofFromEpoch(uint160 tokenId) internal {
-        // require(proofs[tokenId] == 0, 'P:6');
+            // ========= memory ==========
+            //   0x00: tokenId
+            //   0x20: blockhash((blocknum / MINT_INTERVAL) * MINT_INTERVAL)
+            // ===========================
 
-        (, uint256 epoch, uint256 res) = pendingProof();
+            mstore(0x20, blockhash(mul(div(sub(number(), 1), MINT_INTERVAL), MINT_INTERVAL)))
 
-        require(epoch == tokenId, 'P:7');
+            randomEnoughSeed := keccak256(0x00, 0x40)
+        }
 
-        proofs[tokenId] = res;
+        proofs[tokenId] = initFromSeed(randomEnoughSeed);
     }
 
     // TODO TO BE TESTED

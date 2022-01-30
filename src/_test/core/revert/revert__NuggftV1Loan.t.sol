@@ -37,7 +37,7 @@ contract revert__NuggftV1Loan is NuggftV1Test {
         expect.loan().exec(lib.sarr160(tokenId), lib.txdata(users.frank, 0, ''));
     }
 
-    function test__revert__NuggftV1Loan__0x2C__loan__loanSameNuggTwice() public {
+    function test__revert__NuggftV1Loan__0xE9__loan__loanSameNuggTwice() public {
         expect.globalFrom(users.frank);
 
         expect.mint().g().exec{value: 1 ether}(LOAN_TOKENID);
@@ -46,7 +46,7 @@ contract revert__NuggftV1Loan is NuggftV1Test {
 
         expect.mint().g().exec{value: 1 ether}(LOAN_TOKENID + 1);
 
-        expect.loan().g().err(0x2C).exec(lib.sarr160(LOAN_TOKENID));
+        expect.loan().g().err(0xE9).exec(lib.sarr160(LOAN_TOKENID));
     }
 
     /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━

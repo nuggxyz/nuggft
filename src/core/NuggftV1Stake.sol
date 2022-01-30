@@ -120,11 +120,11 @@ abstract contract NuggftV1Stake is INuggftV1Stake, NuggftV1Proof {
             sstore(stake.slot, cache)
 
             // emit current stake state as event
-            let ptr := mload(0x40)
+            // let ptr := mload(0x40)
             // mstore(ptr, callvalue())
             // mstore(add(0x20, ptr), 0x01)
-            mstore(ptr, cache)
-            log1(ptr, 0x20, Event__Stake)
+            mstore(0x00, cache)
+            log1(0x00, 0x20, Event__Stake)
         }
     }
 
@@ -141,11 +141,11 @@ abstract contract NuggftV1Stake is INuggftV1Stake, NuggftV1Proof {
 
             sstore(stake.slot, cache)
 
-            let ptr := mload(0x40)
+            // let ptr := mload(0x40)
             // mstore(ptr, callvalue())
             // mstore(add(0x20, ptr), 0x01)
-            mstore(ptr, cache)
-            log1(ptr, 0x20, Event__Stake)
+            mstore(0x00, cache)
+            log1(0x00, 0x20, Event__Stake)
         }
     }
 
