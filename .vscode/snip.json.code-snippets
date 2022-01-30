@@ -65,5 +65,31 @@
             "                            $1",
             "   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */"
         ]
+    },
+    "nugg.xyz - test describer": {
+        "prefix": "nuggtest",
+        "scope": "solidity",
+        "body": [
+            "// SPDX-License-Identifier: UNLICENSED",
+            "",
+            "pragma solidity 0.8.11;",
+            "",
+            "import '../../../NuggftV1.test.sol';",
+            "",
+            "contract ${TM_FILENAME/(.*)\\..+$/$1/} is NuggftV1Test {",
+            "",
+            "\tfunction setUp() public {",
+            "\t\treset__revert();",
+            "\t}",
+            "",
+            "\tfunction test__${TM_FILENAME/(.*)\\..+$/$1/}__fail__desc() public {",
+            "\t\tassert(false); ",
+            "\t}",
+            "",
+            "\tfunction test__${TM_FILENAME/(.*)\\..+$/$1/}__pass__desc() public {",
+            "\t\tassert(false); ",
+            "\t}",
+            "}"
+        ]
     }
 }
