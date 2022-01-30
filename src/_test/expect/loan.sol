@@ -37,10 +37,10 @@ contract expectLoan is base {
     function exec(uint160[] memory tokenIds, lib.txdata memory txdata) public {
         this.start(tokenIds, txdata.from);
         forge.vm.startPrank(txdata.from);
-        if (txdata.str.length > 0) forge.vm.expectRevert(txdata.str);
+        if (txdata.err.length > 0) forge.vm.expectRevert(txdata.err);
         nuggft.loan(tokenIds);
         forge.vm.stopPrank();
-        txdata.str.length > 0 ? this.rollback() : this.stop();
+        txdata.err.length > 0 ? this.rollback() : this.stop();
     }
 
     function start(uint160[] memory tokenIds, address sender) public {

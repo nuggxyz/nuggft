@@ -48,10 +48,10 @@ contract expectOffer is base {
         forge.vm.deal(txdata.from, txdata.from.balance + txdata.value);
         this.start(tokenId, txdata.from, txdata.value);
         forge.vm.startPrank(txdata.from);
-        if (txdata.str.length > 0) forge.vm.expectRevert(txdata.str);
+        if (txdata.err.length > 0) forge.vm.expectRevert(txdata.err);
         nuggft.offer{value: txdata.value}(tokenId);
         forge.vm.stopPrank();
-        txdata.str.length > 0 ? this.rollback() : this.stop();
+        txdata.err.length > 0 ? this.rollback() : this.stop();
     }
 
     function exec(
@@ -63,10 +63,10 @@ contract expectOffer is base {
         forge.vm.deal(txdata.from, txdata.from.balance + txdata.value);
         this.start(buyingTokenId, sellingTokenId, itemId, txdata.from, txdata.value);
         forge.vm.startPrank(txdata.from);
-        if (txdata.str.length > 0) forge.vm.expectRevert(txdata.str);
+        if (txdata.err.length > 0) forge.vm.expectRevert(txdata.err);
         nuggft.offer{value: txdata.value}(buyingTokenId, sellingTokenId, itemId);
         forge.vm.stopPrank();
-        txdata.str.length > 0 ? this.rollback() : this.stop();
+        txdata.err.length > 0 ? this.rollback() : this.stop();
     }
 
     function start(

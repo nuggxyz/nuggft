@@ -6,7 +6,7 @@ library lib {
     struct txdata {
         address from;
         uint96 value;
-        bytes str;
+        bytes err;
     }
 
     function txd(address from) internal pure returns (txdata memory m) {
@@ -21,11 +21,11 @@ library lib {
     function txd(
         address from,
         uint96 value,
-        bytes memory s
+        bytes memory err
     ) internal pure returns (txdata memory m) {
         m.from = from;
         m.value = value;
-        m.str = s;
+        m.err = err;
     }
 
     function addressOf(address addr, uint8 nonce) internal pure returns (address res) {
