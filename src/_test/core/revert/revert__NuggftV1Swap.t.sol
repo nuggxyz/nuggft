@@ -9,6 +9,7 @@ contract revert__NuggftV1Swap is NuggftV1Test {
 
     function setUp() public {
         reset();
+
         forge.vm.roll(1000);
     }
 
@@ -398,7 +399,7 @@ contract revert__NuggftV1Swap is NuggftV1Test {
     //     forge.vm.stopPrank();
     // }
 
-    function test__revert__NuggftV1Swap__0x26__failAsNotOperator() public {
+    function test__revert__NuggftV1Swap__0x2B__failAsNotOperator() public {
         (uint160 tokenId, , uint16 itemId, uint96 floor) = scenario_dee_has_sold_an_item();
 
         uint160 charliesTokenId = scenario_charlie_has_a_token();
@@ -409,7 +410,7 @@ contract revert__NuggftV1Swap is NuggftV1Test {
 
         forge.vm.startPrank(users.mac);
         {
-            forge.vm.expectRevert(hex'2A');
+            forge.vm.expectRevert(hex'2B');
             nuggft.offer{value: value}(uint160((charliesTokenId << 40) | (uint256(itemId) << 24) | tokenId));
         }
         forge.vm.stopPrank();
@@ -695,14 +696,14 @@ contract revert__NuggftV1Swap is NuggftV1Test {
     //     forge.vm.stopPrank();
     // }
 
-    function test__revert__NuggftV1Swap__0x2A__failAsNotOperator() public {
+    function test__revert__NuggftV1Swap__0x2B__sell__item__failAsNotOperator() public {
         (uint160 tokenId, uint16 itemId, ) = scenario_dee_has_a_token_and_can_sell_an_item();
 
         uint96 value = 1 ether;
 
         forge.vm.startPrank(users.dennis);
         {
-            forge.vm.expectRevert(hex'2A');
+            forge.vm.expectRevert(hex'2B');
             nuggft.sell(tokenId, itemId, value);
         }
         forge.vm.stopPrank();

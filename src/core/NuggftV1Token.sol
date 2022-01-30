@@ -30,12 +30,18 @@ abstract contract NuggftV1Token is INuggftV1Token, NuggftV1Epoch {
 
     /// @inheritdoc IERC721
     function approve(address, uint256) external payable override {
-        revert(hex'69');
+        assembly {
+            mstore(0x00, Error__Wut__0x69)
+            revert(0x00, 0x01)
+        }
     }
 
     /// @inheritdoc IERC721
     function setApprovalForAll(address, bool) external pure override {
-        revert(hex'69');
+        assembly {
+            mstore(0x00, Error__Wut__0x69)
+            revert(0x00, 0x01)
+        }
     }
 
     /// @inheritdoc IERC721
@@ -71,7 +77,10 @@ abstract contract NuggftV1Token is INuggftV1Token, NuggftV1Epoch {
         address,
         uint256
     ) external payable override {
-        revert(hex'69');
+        assembly {
+            mstore(0x00, Error__Wut__0x69)
+            revert(0x00, 0x01)
+        }
     }
 
     function safeTransferFrom(
@@ -79,7 +88,10 @@ abstract contract NuggftV1Token is INuggftV1Token, NuggftV1Epoch {
         address,
         uint256
     ) external payable override {
-        revert(hex'69');
+        assembly {
+            mstore(0x00, Error__Wut__0x69)
+            revert(0x00, 0x01)
+        }
     }
 
     function safeTransferFrom(
@@ -88,7 +100,10 @@ abstract contract NuggftV1Token is INuggftV1Token, NuggftV1Epoch {
         uint256,
         bytes memory
     ) external payable override {
-        revert(hex'69');
+        assembly {
+            mstore(0x00, Error__Wut__0x69)
+            revert(0x00, 0x01)
+        }
     }
 
     /*━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -123,7 +138,7 @@ abstract contract NuggftV1Token is INuggftV1Token, NuggftV1Epoch {
                                 view
     ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━*/
 
-    function exists(uint160 tokenId) internal view virtual returns (bool) {
+    function exists(uint160 tokenId) internal view returns (bool) {
         return agency[tokenId] != 0;
     }
 

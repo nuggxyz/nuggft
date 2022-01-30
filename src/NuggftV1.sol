@@ -63,17 +63,19 @@ contract NuggftV1 is IERC721Metadata, NuggftV1Loan {
 
             sstore(dotnuggV1.slot, addr)
 
-            mstore(sig, hex'1aa3a008')
+            // mstore(sig, hex'1aa3a008')
 
-            ok := call(gas(), addr, 0, sig, 0x4, ptr, 32)
-            if iszero(ok) {
-                revert(sig, 0x4)
-            }
+            // ok := call(gas(), addr, 0, sig, 0x4, ptr, 32)
+            // if iszero(ok) {
+            //     revert(sig, 0x4)
+            // }
 
-            addr := mload(ptr)
+            // addr := mload(ptr)
 
-            sstore(dotnuggV1StorageProxy.slot, addr)
+            // sstore(dotnuggV1StorageProxy.slot, addr)
         }
+
+        dotnuggV1StorageProxy = dotnuggV1.register();
     }
 
     /// @inheritdoc IERC165

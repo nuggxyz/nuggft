@@ -12,7 +12,7 @@ contract system__NuggftV1Loan is NuggftV1Test, fragments {
         forge.vm.roll(1000);
     }
 
-    function test__system__loan__revert__0x3b__autoLiquidateCantRebalance() public {
+    function test__system__loan__revert__0x2F__autoLiquidateCantRebalance() public {
         userMints(users.frank, 500);
         jump(3000);
         forge.vm.startPrank(users.frank);
@@ -21,7 +21,7 @@ contract system__NuggftV1Loan is NuggftV1Test, fragments {
             jump(4000);
             uint96[] memory val = nuggft.vfr(lib.sarr160(500));
             forge.vm.prank(users.mac);
-            forge.vm.expectRevert(hex'3b');
+            forge.vm.expectRevert(hex'2F');
             nuggft.rebalance{value: 1 ether}(lib.sarr160(500));
         }
         forge.vm.stopPrank();

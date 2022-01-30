@@ -50,7 +50,7 @@ contract expectRebalance is base {
 
     function exec(uint160[] memory tokenIds) public payable {
         lib.txdata memory _prepped = prepped;
-        _prepped.value = uint96(msg.value);
+        _prepped.value += uint96(msg.value);
 
         delete prepped;
         exec(tokenIds, _prepped);
