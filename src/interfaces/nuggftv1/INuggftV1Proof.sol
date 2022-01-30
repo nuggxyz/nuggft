@@ -9,8 +9,8 @@ interface INuggftV1Proof {
 
     function rotate(
         uint160 tokenId,
-        uint8 index0,
-        uint8 index1
+        uint8[] calldata index0s,
+        uint8[] calldata index1s
     ) external;
 
     /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
