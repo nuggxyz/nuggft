@@ -28,6 +28,8 @@ contract expectMint is base {
     struct SnapshotEnv {
         uint160 tokenId;
         uint96 value;
+        uint96 eps;
+        uint96 msp;
     }
 
     struct Snapshot {
@@ -108,6 +110,8 @@ contract expectMint is base {
 
         env.tokenId = tokenId;
         env.value = value;
+        env.msp = nuggft.msp();
+        env.eps = nuggft.eps();
 
         pre.agency = nuggft.agency(env.tokenId);
 
@@ -136,6 +140,10 @@ contract expectMint is base {
         post.agency = nuggft.agency(env.tokenId);
 
         ds.assertGt(post.agency, 0, 'EXPECT-MINT:STOP - agency should not be 0');
+        if (env.eps != 0) {
+            ds.assertGt(nuggft.msp(), env.msp, 'EXPECT-MINT:STOP - msp should be greater than before');
+            ds.assertGt(nuggft.eps(), env.eps, 'EXPECT-MINT:STOP - eps should be greater than before');
+        }
 
         // @todo - any other checks we want here?
 

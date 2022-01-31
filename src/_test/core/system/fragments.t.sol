@@ -9,7 +9,7 @@ contract fragments is NuggftV1Test {
     uint16 itemId;
 
     function userMints(address user, uint24 token) public {
-        uint96 value = 1 ether; //nuggft.msp();
+        uint96 value = nuggft.msp();
         if (value < 1 ether) {
             value = 1 ether;
         }
