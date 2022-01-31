@@ -641,7 +641,7 @@ abstract contract NuggftV1Swap is INuggftV1ItemSwap, INuggftV1Swap, NuggftV1Stak
             default {
                 // ensure the caller is the agent
                 if iszero(eq(shr(96, shl(96, agency__cache)), caller())) {
-                    panic(0x99)
+                    panic(Error__e__0xA1__NotAgent)
                 }
 
                 // ensure the agent is the owner

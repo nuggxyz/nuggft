@@ -189,6 +189,9 @@ contract expectSell is base {
 
         postRunChecks(run);
 
+        stake.stop();
+        balance.stop();
+
         this.clear();
     }
 
@@ -211,6 +214,9 @@ contract expectSell is base {
 
         ds.assertEq(pre.agency, post.agency, "EXPECT-SELL:ROLLBACK agency changed but shouldn't have");
         ds.assertEq(pre.trueoffer, post.offer, "EXPECT-SELL:ROLLBACK offer changed but shouldn't have");
+
+        stake.rollback();
+        balance.rollback();
 
         this.clear();
     }
