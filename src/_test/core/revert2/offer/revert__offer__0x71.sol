@@ -10,10 +10,26 @@ contract revert__offer__0x71 is NuggftV1Test {
     }
 
     function test__revert__offer__0x71__fail__desc() public {
-        assert(false);
+        uint24 tokenId = 3000;
+
+        expect.mint().from(users.frank).value(1 ether).exec(500);
+
+        jump(tokenId);
+
+        uint96 msp = nuggft.msp();
+
+        expect.offer().from(users.frank).value(msp - 10 gwei).err(0x71).exec(tokenId);
     }
 
     function test__revert__offer__0x71__pass__desc() public {
-        assert(false);
+        uint24 tokenId = 3000;
+
+        expect.mint().from(users.frank).value(1 ether).exec(500);
+
+        jump(tokenId);
+
+        uint96 msp = nuggft.msp();
+
+        expect.offer().from(users.frank).value(msp).exec(tokenId);
     }
 }

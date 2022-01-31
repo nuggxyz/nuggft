@@ -10,10 +10,28 @@ contract revert__sell__0xA3 is NuggftV1Test {
     }
 
     function test__revert__sell__0xA3__fail__desc() public {
-        assert(false);
+        (uint160 tokenId, uint16 itemId, ) = scenario_dee_has_a_token_and_can_sell_an_item();
+
+        expect.sell().from(users.dee).exec(tokenId, 1.2 ether);
+
+        expect.offer().from(users.mac).value(1.3 ether).exec(tokenId);
+
+        expect.sell().err(0xA3).from(users.mac).exec(encItemIdClaim(tokenId, itemId), 2 ether);
     }
 
     function test__revert__sell__0xA3__pass__desc() public {
-        assert(false);
+        jump(3000);
+
+        (uint160 tokenId, uint16 itemId, ) = scenario_dee_has_a_token_and_can_sell_an_item();
+
+        expect.sell().from(users.dee).exec(tokenId, 1.2 ether);
+
+        expect.offer().from(users.mac).value(1.3 ether).exec(tokenId);
+
+        jump(3002);
+
+        expect.claim().from(users.mac).exec(lib.sarr160(tokenId), lib.sarrAddress(users.mac));
+
+        expect.sell().from(users.mac).exec(encItemIdClaim(tokenId, itemId), 2 ether);
     }
 }
