@@ -137,7 +137,7 @@ contract NuggftV1 is IERC721Metadata, NuggftV1Loan {
     function mint(uint160 tokenId) public payable override {
         assembly {
             if or(iszero(gt(add(TRUSTED_MINT_TOKENS, UNTRUSTED_MINT_TOKENS), tokenId)), lt(tokenId, TRUSTED_MINT_TOKENS)) {
-                mstore(0x00, Error__0x65__TokenNotMintable)
+                mstore(0x00, Error__A__0x65__TokenNotMintable)
                 revert(0x00, 0x01)
             }
         }
@@ -157,7 +157,7 @@ contract NuggftV1 is IERC721Metadata, NuggftV1Loan {
     function trustedMint(uint160 tokenId, address to) external payable override requiresTrust {
         assembly {
             if or(iszero(lt(tokenId, TRUSTED_MINT_TOKENS)), iszero(tokenId)) {
-                mstore(0x00, Error__0x66__TokenNotTrustMintable)
+                mstore(0x00, Error__B__0x66__TokenNotTrustMintable)
                 revert(0x00, 0x01)
             }
         }

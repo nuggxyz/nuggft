@@ -16,14 +16,14 @@ contract revert__NuggftV1Epoch is NuggftV1Test, NuggftV1Epoch {
         [E:0] - calculateSeed - "block hash does not exist"
        ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
 
-    function test__revert__NuggftV1Epoch__calculateSeed__0xE0__failNextEpoch() public {
+    function test__revert__NuggftV1Epoch__calculateSeed__0x98__failNextEpoch() public {
         uint24 epoch = nuggft.epoch();
 
-        forge.vm.expectRevert(hex'0E');
+        forge.vm.expectRevert(hex'98');
         nuggft.external__calculateSeed(epoch + 1);
     }
 
-    function test__revert__NuggftV1Epoch__calculateSeed__0xE0__succeedCurrentBlock() public view {
+    function test__revert__NuggftV1Epoch__calculateSeed__0x98__succeedCurrentBlock() public view {
         nuggft.external__calculateSeed();
     }
 }
