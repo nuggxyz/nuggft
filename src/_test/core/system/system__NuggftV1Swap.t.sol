@@ -19,6 +19,16 @@ contract system__NuggftV1Swap is NuggftV1Test, fragments {
         delete itemId;
     }
 
+    function test__system__frankMintsThenBurns() public {
+        jump(3000);
+
+        expect.mint().from(users.frank).value(1 ether).exec(500);
+        // if nothing else is in the pool then value goes to 0 and tests fail
+        expect.mint().from(users.frank).value(1 ether).exec(501);
+
+        expect.burn().from(users.frank).exec(500);
+    }
+
     function test__system__frankBidsOnANuggThenClaims() public {
         jump(3000);
         uint96 value = 1 ether;
@@ -64,7 +74,8 @@ contract system__NuggftV1Swap is NuggftV1Test, fragments {
 
         jump(3000);
 
-        userMints(users.frank, 501);
+        expect.mint().from(users.frank).value(1 ether).exec(501);
+
         forge.vm.startPrank(users.frank);
         {
             //bytes memory odat = startExpectOffer(3000, users.frank, value);

@@ -12,6 +12,7 @@ contract expectStake is base {
         int192 expected_share_change;
         Snapshot pre;
         bool mint;
+        bool burn;
     }
 
     struct Snapshot {
@@ -45,8 +46,10 @@ contract expectStake is base {
 
         ds.assertEq(run.pre.eps, run.pre.shares > 0 ? run.pre.staked / run.pre.shares : int256(0), 'EPS is starting off with an incorrect value');
 
-        run.expected_stake_change = cast.i192(eth) * (up ? int8(1) : int8(-1));
-        run.expected_share_change = cast.i192(shares) * (up ? int8(1) : int8(-1));
+        run.burn = !up;
+
+        run.expected_stake_change = cast.i192(eth) * (run.burn ? int8(-1) : int8(1));
+        run.expected_share_change = cast.i192(shares) * (run.burn ? int8(-1) : int8(1));
 
         if (run.expected_share_change > 0) {
             run.mint = true;
@@ -70,9 +73,14 @@ contract expectStake is base {
         post.msp = cast.i192(nuggft.msp());
         post.eps = cast.i192(nuggft.eps());
 
-        ds.assertGe(post.msp, pre.msp, 'msp is did not increase as expected');
+        int256 expectedProto = 0;
 
-        int256 expectedProto = lib.take(10, run.expected_stake_change);
+        if (run.burn) {
+            ds.assertLe(post.msp, pre.msp, 'msp should have decreased');
+        } else {
+            ds.assertGe(post.msp, pre.msp, 'msp is did not increase as expected');
+            expectedProto = lib.take(10, run.expected_stake_change);
+        }
 
         if (run.mint) {
             int192 fee = pre.eps / 10;

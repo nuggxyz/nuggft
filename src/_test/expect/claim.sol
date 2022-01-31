@@ -286,11 +286,10 @@ contract expectClaim is base {
         }
 
         if (env.isItem) {
+            // ASSERT:CLAIM_0x02: is the item inside the selling nuggs proof?
+            assertProofNotContains(uint24(env.id), uint16(env.id >> 24), 'ASSERT:CLAIM_0x02: item SHOULD NOT be inside the selling nuggs proof');
             if (env.winner) {
                 // @todo nuggft's protocol items should be > 1 for the item
-
-                // ASSERT:CLAIM_0x02: is the item inside the selling nuggs proof?
-                assertProofNotContains(uint24(env.id), uint16(env.id >> 24), 'ASSERT:CLAIM_0x02: item SHOULD NOT be inside the selling nuggs proof');
 
                 if (env.reclaim) {
                     // @note BEFORE a winning item reclaim
@@ -304,9 +303,9 @@ contract expectClaim is base {
                 ds.assertEq(env.buyer, address(uint160(pre.offer)), 'ASSERT:CLAIM_0x03: the offerer SHOULD be the sender');
             }
         } else {
+            ds.assertEq(pre.agency >> 254, 0x03, 'ASSERT:CLAIM_0x04: pre agency must have the SWAP - 0x03 - flag');
             if (env.winner) {
                 // ASSERT:CLAIM_0x04: does the agency have a SWAP flag?
-                ds.assertEq(pre.agency >> 254, 0x03, 'ASSERT:CLAIM_0x04: pre agency must have the SWAP - 0x03 - flag');
 
                 if (env.reclaim) {
                     // @note BEFORE a winning nugg reclaim
@@ -317,7 +316,7 @@ contract expectClaim is base {
                 // @note BEFORE a losing nugg claim
 
                 // ASSERT:CLAIM_0x05: is the sender the offerer?
-                ds.assertEq(run.sender, address(uint160(pre.offer)), 'ASSERT:CLAIM_0x05: is the offerer SHOULD be the sender?');
+                ds.assertEq(run.sender, address(uint160(pre.offer)), 'ASSERT:CLAIM_0x05: the offerer SHOULD be the sender');
             }
         }
     }
@@ -333,34 +332,37 @@ contract expectClaim is base {
 
         if (env.isItem) {
             if (env.winner) {
-                // @note AFTER a winning item claim
-                if (env.reclaim) {} else {
-                    // ASSERT:CLAIM_0x07: is the item inside the winning nugg's proof?
-                    assertProofContains(uint160(env.buyer), uint16(env.id >> 24), "ASSERT:CLAIM_0x07: the item SHOULD be inside the winning nugg's proof");
+                // @todo make sure post user balance = pre user balance
+                // ASSERT:CLAIM_0x07: is the item inside the winning nugg's proof?
+                assertProofContains(uint160(env.buyer), uint16(env.id >> 24), "ASSERT:CLAIM_0x07: the item SHOULD be inside the winning nugg's proof");
 
-                    // ASSERT:CLAIM_0x08: is the post agency == 0?
-                    ds.assertEq(post.agency, 0, 'ASSERT:CLAIM_0x08: the agency SHOULD be 0 after the claim');
+                // ASSERT:CLAIM_0x08: is the post agency == 0?
+                ds.assertEq(post.agency, 0, 'ASSERT:CLAIM_0x08: the agency SHOULD be 0 after the claim');
+                if (env.reclaim) {} else {
+                    // @note AFTER a winning item claim
                 }
             } else {
                 // ASSERT:CLAIM_0x09: AFTER a losing item claim
+                // @todo make sure post user balance = pre user balance + claimed
             }
         } else {
             if (env.winner) {
+                // @todo make sure post user balance = pre user balance
+                // ASSERT:CLAIM_0x0A: does the post agency reflect the same user as the pre agency?
+                ds.assertEq(
+                    address(uint160(post.agency)),
+                    address(uint160(pre.agency)),
+                    'ASSERT:CLAIM_0x0A: the pre agency user and the post agency user SHOULD be the same'
+                );
+
+                // ASSERT:CLAIM_0x0B: does the post agency have a OWN flag?
+                ds.assertEq(post.agency >> 254, 0x01, 'ASSERT:CLAIM_0x0B: post agency must have the OWN - 0x01 - flag');
                 if (env.reclaim) {} else {
                     // @note AFTER a winning nugg claim
-                    // ASSERT:CLAIM_0x0A: does the post agency reflect the same user as the pre agency?
-                    ds.assertEq(
-                        address(uint160(post.agency)),
-                        address(uint160(pre.agency)),
-                        'ASSERT:CLAIM_0x0A: the pre agency user and the post agency user SHOULD be the same'
-                    );
-
-                    // ASSERT:CLAIM_0x0B: does the post agency have a OWN flag?
-                    ds.assertEq(post.agency >> 254, 0x01, 'ASSERT:CLAIM_0x0B: post agency must have the OWN - 0x01 - flag');
                 }
             } else {
                 // @note AFTER a losing nugg claim
-                // make sure the nugg is owned by the contract
+                // @todo make sure post user balance = pre user balance + claimed
             }
         }
     }

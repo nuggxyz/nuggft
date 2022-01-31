@@ -64,6 +64,7 @@ contract expectLoan is base {
         address sender;
         uint160 tokenId;
         uint96 eps;
+        uint96 msp;
     }
 
     bytes execution;
@@ -91,6 +92,8 @@ contract expectLoan is base {
         run.sender = sender;
 
         run.eps = nuggft.eps();
+
+        run.msp = nuggft.msp();
 
         for (uint256 i = 0; i < tokenIds.length; i++) {
             Snapshot memory pre;
@@ -122,8 +125,10 @@ contract expectLoan is base {
             post.agency = nuggft.agency(run.tokenId);
 
             ds.assertGt(pre.agency, 0, 'EXPECT-LOAN:STOP - agency should not be 0');
+            ds.assertEq(address(uint160(post.agency)), run.sender, 'EXPECT-LOAN:STOP - sender should still be agent');
             ds.assertEq(post.agency >> 254, 0x02, 'EXPECT-LOAN:STOP - agency flag should be LOAN - 0x02');
             ds.assertEq(nuggft.eps(), run.eps, 'EXPECT-LOAN:STOP - eps should not change');
+            ds.assertEq(nuggft.msp(), run.msp, 'EXPECT-LOAN:STOP - msp should not change');
         }
 
         // @todo - any other checks we want here?

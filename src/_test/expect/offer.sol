@@ -74,6 +74,8 @@ contract expectOffer is base {
         bool mintingNugg;
         uint24 epoch;
         uint96 increment;
+        uint96 eps;
+        uint96 msp;
     }
 
     struct Run {
@@ -143,6 +145,8 @@ contract expectOffer is base {
         env.value = val;
         env.epoch = nuggft.epoch();
         env.mintingNugg = env.id == env.epoch;
+        env.eps = nuggft.eps();
+        env.msp = nuggft.msp();
 
         if (env.isItem) {
             env.id = tokenId & 0xffffffffff;
@@ -227,6 +231,9 @@ contract expectOffer is base {
         SnapshotData memory pre,
         SnapshotData memory post
     ) private {
+        ds.assertGt(nuggft.eps(), env.eps, "EXPECT-OFFER:STOP eps should be greater");
+        ds.assertGt(nuggft.msp(), env.msp, "EXPECT-OFFER:STOP msp should be greater");
+        // @todo sender should be highest offer
         if (env.isItem) {} else {}
     }
 }

@@ -25,6 +25,7 @@ contract expectLiquidate is base {
         address sender;
         uint160 tokenId;
         uint96 eps;
+        uint96 msp;
         uint96 principal;
         uint96 fee;
         uint96 earned;
@@ -90,6 +91,8 @@ contract expectLiquidate is base {
 
         run.eps = nuggft.eps();
 
+        run.msp = nuggft.msp();
+
         run.tokenId = tokenId;
 
         run.agency = nuggft.agency(run.tokenId);
@@ -142,14 +145,13 @@ contract expectLiquidate is base {
 
         Run memory run = abi.decode(execution, (Run));
 
-        uint96 postEps = nuggft.eps();
-
         uint256 preAgency = run.agency;
         uint256 postAgency = nuggft.agency(run.tokenId);
 
         ds.assertEq(postAgency, preAgency, 'EXPECT-LIQUIDATE:ROLLBACK - agency should be same');
 
-        ds.assertEq(postEps, run.eps, 'EXPECT-LIQUIDATE:ROLLBACK - eps should be the same');
+        ds.assertEq(nuggft.eps(), run.eps, 'EXPECT-LIQUIDATE:ROLLBACK - eps should be the same');
+        ds.assertEq(nuggft.msp(), run.msp, 'EXPECT-LIQUIDATE:ROLLBACK - msp should be the same');
 
         stake.rollback();
         balance.rollback();

@@ -221,7 +221,11 @@ contract expectSell is base {
         SnapshotData memory pre,
         SnapshotData memory post
     ) private {
-        if (env.isItem) {} else {}
+        if (env.isItem) {
+            ds.assertEq(address(uint160(post.agency)), address(env.id & 0xffffff), 'EXPECT-SELL:STOP owner should be contract');
+        } else {
+            ds.assertEq(run.sender, address(uint160(post.agency)), 'EXPECT-SELL:STOP owner should be sender');
+        }
     }
 
     function postRunChecks(Run memory run) private {}
