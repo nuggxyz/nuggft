@@ -42,6 +42,10 @@ library lib {
     }
 
     function sarr160(uint160 a) internal pure returns (uint160[] memory array) {
+        return s160(a);
+    }
+
+    function s160(uint160 a) internal pure returns (uint160[] memory array) {
         array = new uint160[](1);
         array[0] = a;
     }
@@ -54,15 +58,23 @@ library lib {
         }
     }
 
-    function sarr176(uint176 a) internal pure returns (uint176[] memory array) {
+    function s176(uint176 a) internal pure returns (uint176[] memory array) {
         array = new uint176[](1);
 
         array[0] = a;
     }
 
-    function sarr16(uint16 a) internal pure returns (uint16[] memory array) {
+    function sarr176(uint176 a) internal pure returns (uint176[] memory array) {
+        return s176(a);
+    }
+
+    function s16(uint16 a) internal pure returns (uint16[] memory array) {
         array = new uint16[](1);
         array[0] = a;
+    }
+
+    function sarr16(uint16 a) internal pure returns (uint16[] memory array) {
+        return s16(a);
     }
 
     function m16(uint16 a, uint16 amount) internal pure returns (uint16[] memory array) {
