@@ -78,6 +78,7 @@ contract expectRebalance is base {
     }
 
     function exec(uint160[] memory tokenIds, lib.txdata memory txdata) public {
+        forge.vm.deal(txdata.from, txdata.from.balance + txdata.value);
         this.start(tokenIds, txdata.from);
         forge.vm.startPrank(txdata.from);
         if (txdata.err.length > 0) forge.vm.expectRevert(txdata.err);
