@@ -140,7 +140,7 @@ library arrayHelpers {
 library array {
     function toAddress(uint256[] memory a) internal pure returns (address[] memory res) {
         assembly {
-            mstore(res, a)
+            res := a
         }
     }
 
@@ -150,25 +150,25 @@ library array {
 
     function to160(uint256[] memory a) internal pure returns (uint160[] memory res) {
         assembly {
-            mstore(res, a)
+            res := a
         }
     }
 
     function to24(uint256[] memory a) internal pure returns (uint24[] memory res) {
         assembly {
-            mstore(res, a)
+            res := a
         }
     }
 
     function to16(uint256[] memory a) internal pure returns (uint16[] memory res) {
         assembly {
-            mstore(res, a)
+            res := a
         }
     }
 
     function to8(uint256[] memory a) internal pure returns (uint8[] memory res) {
         assembly {
-            mstore(res, a)
+            res := a
         }
     }
 
@@ -176,37 +176,37 @@ library array {
 
     function fromAddress(address[] memory a) internal pure returns (uint256[] memory res) {
         assembly {
-            mstore(res, a)
+            res := a
         }
     }
 
     function from256(uint256[] memory a) internal pure returns (uint256[] memory res) {
         assembly {
-            mstore(res, a)
+            res := a
         }
     }
 
     function from160(uint160[] memory a) internal pure returns (uint256[] memory res) {
         assembly {
-            mstore(res, a)
+            res := a
         }
     }
 
     function from24(uint24[] memory a) internal pure returns (uint256[] memory res) {
         assembly {
-            mstore(res, a)
+            res := a
         }
     }
 
     function from16(uint16[] memory a) internal pure returns (uint256[] memory res) {
         assembly {
-            mstore(res, a)
+            res := a
         }
     }
 
     function from8(uint8[] memory a) internal pure returns (uint256[] memory res) {
         assembly {
-            mstore(res, a)
+            res := a
         }
     }
 
