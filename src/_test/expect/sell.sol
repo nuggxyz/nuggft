@@ -201,9 +201,6 @@ contract expectSell is base {
 
         postRunChecks(run);
 
-        stake.stop();
-        balance.stop();
-
         this.clear();
     }
 
