@@ -48,11 +48,20 @@ contract expectSell is base {
         return this;
     }
 
-    function exec(uint160 tokenId, uint96 floor) public payable {
+    function exec(uint160 tokenId, uint96 floor) public {
         lib.txdata memory _prepped = prepped;
-        _prepped.value = uint96(msg.value);
         delete prepped;
         exec(tokenId, floor, _prepped);
+    }
+
+    function exec(
+        uint160 tokenId,
+        uint16 itemId,
+        uint96 floor
+    ) public {
+        lib.txdata memory _prepped = prepped;
+        delete prepped;
+        exec(tokenId, itemId, floor, _prepped);
     }
 
     struct Snapshot {
@@ -187,10 +196,10 @@ contract expectSell is base {
 
         postSellChecks(run, env, pre, post);
 
-        postRunChecks(run);
-
         stake.stop();
         balance.stop();
+
+        postRunChecks(run);
 
         this.clear();
     }
