@@ -15,6 +15,8 @@ import {Expect} from './expect/Expect.sol';
 
 import './utils/forge.sol';
 
+import {NuggftV1AgentType} from '../types/NuggftV1AgentType.sol';
+
 contract RiggedNuggft is NuggftV1 {
     constructor() {
         // featureLengths = 0x0303030303030303;
