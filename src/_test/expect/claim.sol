@@ -63,6 +63,7 @@ contract expectClaim is base {
     struct SnapshotData {
         uint256 agency;
         uint256 offer;
+        uint256 trueoffer;
     }
 
     struct SnapshotEnv {
@@ -96,7 +97,7 @@ contract expectClaim is base {
         if (txdata.err.length > 0) forge.vm.expectRevert(txdata.err);
         nuggft.claim(tokenIds, offerers);
         forge.vm.stopPrank();
-        this.stop();
+        txdata.err.length > 0 ? this.rollback() : this.stop();
     }
 
     function clear() public {
@@ -156,6 +157,8 @@ contract expectClaim is base {
                 pre.agency = nuggft.agency(env.id);
                 pre.offer = nuggft.offers(env.id, env.buyer);
             }
+
+            pre.trueoffer = pre.offer;
 
             if (pre.offer == 0) pre.offer = pre.agency;
 
@@ -232,7 +235,7 @@ contract expectClaim is base {
             }
 
             ds.assertEq(pre.agency, post.agency, "EXPECT-CLAIM:ROLLBACK agency changed but shouldn't have");
-            ds.assertEq(pre.offer, post.offer, "EXPECT-CLAIM:ROLLBACK offer changed but shouldn't have");
+            ds.assertEq(pre.trueoffer, post.offer, "EXPECT-CLAIM:ROLLBACK offer changed but shouldn't have");
         }
 
         balance.rollback();
