@@ -10,10 +10,18 @@ contract revert__offer__0xA0 is NuggftV1Test {
     }
 
     function test__revert__offer__0xA0__fail__desc() public {
-        assert(false);
+        uint24 tokenId = 3000;
+
+        jump(tokenId + 1);
+
+        expect.offer().from(users.frank).value(1 ether).err(0xA0).exec(tokenId);
     }
 
     function test__revert__offer__0xA0__pass__desc() public {
-        assert(false);
+        uint24 tokenId = 3000;
+
+        jump(tokenId);
+
+        expect.offer().from(users.frank).value(1 ether).exec(tokenId);
     }
 }

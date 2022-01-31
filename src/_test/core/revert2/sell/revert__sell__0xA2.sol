@@ -10,10 +10,14 @@ contract revert__sell__0xA2 is NuggftV1Test {
     }
 
     function test__revert__sell__0xA2__fail__desc() public {
-        assert(false);
+        (uint160 tokenId, uint16 itemId, ) = scenario_dee_has_a_token_and_can_sell_an_item();
+
+        expect.sell().err(0xA2).from(users.mac).exec(encItemIdClaim(tokenId, itemId), 1 ether);
     }
 
     function test__revert__sell__0xA2__pass__desc() public {
-        assert(false);
+        (uint160 tokenId, uint16 itemId, ) = scenario_dee_has_a_token_and_can_sell_an_item();
+
+        expect.sell().from(users.dee).exec(encItemIdClaim(tokenId, itemId), 1 ether);
     }
 }
