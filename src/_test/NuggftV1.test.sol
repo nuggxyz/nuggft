@@ -63,6 +63,10 @@ contract RiggedNuggft is NuggftV1 {
             res := agency.slot
         }
     }
+
+    function external__LOSS() public view returns (uint256 res) {
+        res = LOSS;
+    }
 }
 
 library SafeCast {
