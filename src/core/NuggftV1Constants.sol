@@ -41,39 +41,37 @@ abstract contract NuggftV1Constants {
     bytes32 constant Event__TransferItem = 0x31cf2357b228de5e7b21be4ee816920a4eabd32196b782ad557ba4a0f5c20af1;
 
     // errors
-    uint8 constant Error__0x09__ItemAgencyAlreadySet = 0x09;
-    uint8 constant Error__0x0E__BlockHashIsZero = 0x0E;
-    uint8 constant Error__0x0F__InvalidEpoch = 0x0F;
-    uint8 constant Error__0x24__NotSwapping = 0x24;
-    uint8 constant Error__0x2A__NotAgent = 0x2A;
-    uint8 constant Error__0x2B__NotItemAgent = 0x2B;
-    uint8 constant Error__0x2C__NotAthorized = 0x2C;
-    uint8 constant Error__0x2D__NotItemAuthorizedAgent = 0x2D;
-    uint8 constant Error__0x2F__ExpiredEpoch = 0x2F;
-    uint8 constant Error__0x2E__NoOffer = 0x2E;
-    uint8 constant Error__0x31__NotAuthorized = 0x31;
-    uint8 constant Error__0x32__LiquidationPaymentTooLow = 0x32;
-    uint8 constant Error__0x33__NotLoaned = 0x33;
-    uint8 constant Error__0x34__ProofDoesNotHaveItem = 0x34;
-    uint8 constant Error__0x3A__RebalancePaymentTooLow = 0x3A;
-    uint8 constant Error__0x65__TokenNotMintable = 0x65;
-    uint8 constant Error__0x66__TokenNotTrustMintable = 0x66;
 
-    uint8 constant Error__0x67__WinningClaimTooEarly = 0x67;
-    uint8 constant Error__0x68__ClaimTooEarly = 0x68;
-    uint8 constant Error__0x69__Wut = 0x69;
-    uint8 constant Error__0x70__FloorTooLow = 0x70;
-    uint8 constant Error__0x71__ValueTooLow = 0x71;
-    uint8 constant Error__0x72__IncrementTooLow = 0x72;
-    uint8 constant Error__0x73__InvalidProofIndex = 0x73;
-    uint8 constant Error__0x88__Untrusted = 0x88;
-    uint8 constant Error__0x91__SendEthFailureToOther = 0x91;
-    uint8 constant Error__0x92__SendEthFailureToCaller = 0x92;
-    uint8 constant Error__0x99__InvalidArrayLengths = 0x99;
-    uint8 constant Error__0xE9__NotOwner = 0xE9;
-    uint8 constant Error__0xEE__TokenDoesNotExist = 0xEE;
-    uint8 constant Error__0xF0__OfferLowerThanLOSS = 0xF0;
-    uint8 constant Error__0xF9__ProofHasNoFreeSlot = 0xF9;
+    uint8 constant Error__A__0x65__TokenNotMintable = 0x65; // 0x65__TokenNotMintable
+    uint8 constant Error__B__0x66__TokenNotTrustMintable = 0x66; // 0x66__TokenNotTrustMintable
+    uint8 constant Error__C__0x67__WinningClaimTooEarly = 0x67; // 0x67__WinningClaimTooEarly
+    uint8 constant Error__D__0x68__OfferLowerThanLOSS = 0x68; // 0xF0__OfferLowerThanLOSS
+    uint8 constant Error__E__0x69__Wut = 0x69; // 0x69__Wut
+    uint8 constant Error__F__0x70__FloorTooLow = 0x70; // 0x70__FloorTooLow
+    uint8 constant Error__G__0x71__ValueTooLow = 0x71; // 0x71__ValueTooLow
+    uint8 constant Error__H__0x72__IncrementTooLow = 0x72; // 0x72__IncrementTooLow
+    uint8 constant Error__I__0x73__InvalidProofIndex = 0x73; // 0x73__InvalidProofIndex
+    uint8 constant Error__J__0x74__Untrusted = 0x74; // 0x88__Untrusted
+    uint8 constant Error__K__0x75__SendEthFailureToCaller = 0x75; // 0x92__SendEthFailureToCaller
+    uint8 constant Error__L__0x76__InvalidArrayLengths = 0x76; // 0x99__InvalidArrayLengths
+    uint8 constant Error__M__0x77__NotOwner = 0x77; // 0xE9__NotOwner
+    uint8 constant Error__N__0x78__TokenDoesNotExist = 0x78; // 0xEE__TokenDoesNotExist
+    uint8 constant Error__O__0x79__ProofHasNoFreeSlot = 0x79; // 0xF9__ProofHasNoFreeSlot
+
+    uint8 constant Error__a__0x97__ItemAgencyAlreadySet = 0x97; // Error__0x09__ItemAgencyAlreadySet
+    uint8 constant Error__b__0x98__BlockHashIsZero = 0x98; // 0x0E__BlockHashIsZero
+    uint8 constant Error__c__0x99__InvalidEpoch = 0x99; // 0x0F__InvalidEpoch
+    uint8 constant Error__d__0xA0__NotSwapping = 0xA0; //_0x24__NotSwapping
+    uint8 constant Error__e__0xA1__NotAgent = 0xA1; //0x2A__NotAgent
+    uint8 constant Error__f__0xA2__NotItemAgent = 0xA2; // 0x2B__NotItemAgent
+    uint8 constant Error__g__0xA3__NotItemAuthorizedAgent = 0xA3; // 0x2D__NotItemAuthorizedAgent
+    uint8 constant Error__h__0xA4__ExpiredEpoch = 0xA4; // 0x2F__ExpiredEpoch
+    uint8 constant Error__i__0xA5__NoOffer = 0xA5; // 0x2E__NoOffer
+    uint8 constant Error__j__0xA6__NotAuthorized = 0xA6; // 0x31__NotAuthorized
+    uint8 constant Error__k__0xA7__LiquidationPaymentTooLow = 0xA7; // 0x32__LiquidationPaymentTooLow
+    uint8 constant Error__l__0xA8__NotLoaned = 0xA8; // 0x33__NotLoaned
+    uint8 constant Error__m__0xA9__ProofDoesNotHaveItem = 0xA9; // 0x34__ProofDoesNotHaveItem
+    uint8 constant Error__o__0xAA__RebalancePaymentTooLow = 0xAA; // 0x3A__RebalancePaymentTooLow
 
     function _panic(uint8 code) internal pure {
         assembly {

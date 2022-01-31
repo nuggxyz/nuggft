@@ -53,12 +53,12 @@ abstract contract NuggftV1Loan is INuggftV1Loan, NuggftV1Swap {
 
                 // ensure the caller is the agent
                 if iszero(eq(iso(agency__cache, 96, 96), caller())) {
-                    panic(Error__0x2A__NotAgent)
+                    panic(Error__e__0xA1__NotAgent)
                 }
 
                 // ensure the agent is the owner
                 if iszero(eq(shr(254, agency__cache), 0x1)) {
-                    panic(Error__0xE9__NotOwner)
+                    panic(Error__M__0x77__NotOwner)
                 }
 
                 // compress amt into 70 bits
@@ -86,7 +86,7 @@ abstract contract NuggftV1Loan is INuggftV1Loan, NuggftV1Swap {
 
                 // send eth
                 if iszero(call(gas(), caller(), amt, 0, 0, 0, 0)) {
-                    panic(Error__0x92__SendEthFailureToCaller)
+                    panic(Error__K__0x75__SendEthFailureToCaller)
                 }
 
                 // log2 with "Loan(uint160,bytes32)" topic
@@ -138,7 +138,7 @@ abstract contract NuggftV1Loan is INuggftV1Loan, NuggftV1Swap {
 
             // ensure that the agency flag is LOAN
             if iszero(eq(shr(254, agency__cache), 0x02)) {
-                panic(Error__0x33__NotLoaned)
+                panic(Error__l__0xA8__NotLoaned)
             }
 
             // check to see if msg.sender is the loaner
@@ -154,7 +154,7 @@ abstract contract NuggftV1Loan is INuggftV1Loan, NuggftV1Swap {
                 default {
                     // if not, then we revert.
                     // only the "loaner" can liquidate unless the loan is past due
-                    panic(Error__0x31__NotAuthorized)
+                    panic(Error__j__0xA6__NotAuthorized)
                 }
             }
 
@@ -173,7 +173,7 @@ abstract contract NuggftV1Loan is INuggftV1Loan, NuggftV1Swap {
             let value := add(earn, callvalue())
 
             if lt(value, fee) {
-                panic(Error__0x32__LiquidationPaymentTooLow)
+                panic(Error__k__0xA7__LiquidationPaymentTooLow)
             }
 
             earn := sub(value, fee)
@@ -205,7 +205,7 @@ abstract contract NuggftV1Loan is INuggftV1Loan, NuggftV1Swap {
             /////////////////////////////////////////////////////////////////////
 
             if iszero(call(gas(), caller(), earn, 0, 0, 0, 0)) {
-                panic(Error__0x92__SendEthFailureToCaller)
+                panic(Error__K__0x75__SendEthFailureToCaller)
             }
 
             /////////////////////////////////////////////////////////////////////
@@ -291,14 +291,14 @@ abstract contract NuggftV1Loan is INuggftV1Loan, NuggftV1Swap {
 
                 // make sure this token is loaned
                 if iszero(eq(shr(254, agency__cache), 0x02)) {
-                    panic(Error__0x33__NotLoaned)
+                    panic(Error__l__0xA8__NotLoaned)
                 }
 
                 // is the caller different from the agent?
                 if iszero(eq(caller(), agency__addr)) {
                     // if so: ensure the loan is expired
                     if iszero(lt(add(iso(agency__cache, 2, 232), LIQUIDATION_PERIOD), active)) {
-                        panic(Error__0x2F__ExpiredEpoch) // ERR:0x3B
+                        panic(Error__h__0xA4__ExpiredEpoch) // ERR:0x3B
                     }
                 }
 
@@ -320,7 +320,7 @@ abstract contract NuggftV1Loan is INuggftV1Loan, NuggftV1Swap {
                 let value := add(earn, acc)
 
                 if lt(value, fee) {
-                    panic(Error__0x3A__RebalancePaymentTooLow)
+                    panic(Error__o__0xAA__RebalancePaymentTooLow)
                 }
 
                 accFee := add(accFee, fee)
@@ -375,7 +375,7 @@ abstract contract NuggftV1Loan is INuggftV1Loan, NuggftV1Swap {
 
             // accumulated eth is sent to caller
             if iszero(call(gas(), caller(), acc, 0, 0, 0, 0)) {
-                panic(Error__0x92__SendEthFailureToCaller)
+                panic(Error__K__0x75__SendEthFailureToCaller)
             }
         }
     }
