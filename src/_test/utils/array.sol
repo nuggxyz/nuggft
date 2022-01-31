@@ -3,7 +3,7 @@
 pragma solidity 0.8.11;
 
 library arrayHelpers {
-    function sum(uint256[] memory input) internal pure returns (uint256 res) {
+    function add(uint256[] memory input) internal pure returns (uint256 res) {
         for (uint256 i = 0; i < input.length; i++) {
             res += input[i];
         }
@@ -140,7 +140,7 @@ library arrayHelpers {
 library array {
     function toAddress(uint256[] memory a) internal pure returns (address[] memory res) {
         assembly {
-            mstore(res, a)
+            res := a
         }
     }
 
@@ -150,25 +150,25 @@ library array {
 
     function to160(uint256[] memory a) internal pure returns (uint160[] memory res) {
         assembly {
-            mstore(res, a)
+            res := a
         }
     }
 
     function to24(uint256[] memory a) internal pure returns (uint24[] memory res) {
         assembly {
-            mstore(res, a)
+            res := a
         }
     }
 
     function to16(uint256[] memory a) internal pure returns (uint16[] memory res) {
         assembly {
-            mstore(res, a)
+            res := a
         }
     }
 
     function to8(uint256[] memory a) internal pure returns (uint8[] memory res) {
         assembly {
-            mstore(res, a)
+            res := a
         }
     }
 
@@ -176,37 +176,37 @@ library array {
 
     function fromAddress(address[] memory a) internal pure returns (uint256[] memory res) {
         assembly {
-            mstore(res, a)
+            res := a
         }
     }
 
     function from256(uint256[] memory a) internal pure returns (uint256[] memory res) {
         assembly {
-            mstore(res, a)
+            res := a
         }
     }
 
     function from160(uint160[] memory a) internal pure returns (uint256[] memory res) {
         assembly {
-            mstore(res, a)
+            res := a
         }
     }
 
     function from24(uint24[] memory a) internal pure returns (uint256[] memory res) {
         assembly {
-            mstore(res, a)
+            res := a
         }
     }
 
     function from16(uint16[] memory a) internal pure returns (uint256[] memory res) {
         assembly {
-            mstore(res, a)
+            res := a
         }
     }
 
     function from8(uint8[] memory a) internal pure returns (uint256[] memory res) {
         assembly {
-            mstore(res, a)
+            res := a
         }
     }
 
@@ -260,6 +260,32 @@ library array {
 
     function s8(uint8 a) internal pure returns (uint8[] memory arr) {
         return to8(arrayHelpers.singleton(a));
+    }
+
+    ///////////////////////////////////////////////////////////////
+
+    function a256(uint256[] memory a) internal pure returns (uint256) {
+        return arrayHelpers.add(a);
+    }
+
+    function aAddress(address[] memory a) internal pure returns (address) {
+        return address(uint160(arrayHelpers.add(fromAddress(a))));
+    }
+
+    function a160(uint160[] memory a) internal pure returns (uint160) {
+        return uint160(arrayHelpers.add(from160(a)));
+    }
+
+    function a24(uint24[] memory a) internal pure returns (uint24) {
+        return uint24(arrayHelpers.add(from24(a)));
+    }
+
+    function a16(uint16[] memory a) internal pure returns (uint16) {
+        return uint16(arrayHelpers.add(from16(a)));
+    }
+
+    function a8(uint8[] memory a) internal pure returns (uint8) {
+        return uint8(arrayHelpers.add(from8(a)));
     }
 
     ///////////////////////////////////////////////////////////////
