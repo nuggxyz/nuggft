@@ -79,6 +79,4 @@ abstract contract NuggftV1Constants {
             revert(0, 0x01)
         }
     }
-
-    // stake
 }
