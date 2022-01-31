@@ -204,6 +204,18 @@ contract NuggftV1Test is ForgeTest {
 
         _processor = address(processor);
 
+        users.frank = forge.vm.addr(12);
+
+        users.dee = forge.vm.addr(13);
+
+        users.mac = forge.vm.addr(14);
+
+        users.dennis = forge.vm.addr(15);
+
+        users.charlie = forge.vm.addr(16);
+
+        users.safe = forge.vm.addr(17);
+
         forge.vm.startPrank(0x9B0E2b16F57648C7bAF28EDD7772a815Af266E77);
         nuggft.setIsTrusted(users.safe, true);
         forge.vm.stopPrank();
