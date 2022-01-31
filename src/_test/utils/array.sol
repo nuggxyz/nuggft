@@ -9,12 +9,9 @@ library arrayHelpers {
         }
     }
 
-    function singleton(uint256 a) internal pure returns (uint256[] memory) {
-        assembly {
-            mstore(0x00, 0x01)
-            mstore(0x20, a)
-            return(0x00, 0x40)
-        }
+    function singleton(uint256 a) internal pure returns (uint256[] memory res) {
+        res = new uint256[](1);
+        res[0] = a;
     }
 
     function repeat(uint256 a, uint16 amount) internal pure returns (uint256[] memory arr) {
