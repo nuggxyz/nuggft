@@ -4,7 +4,6 @@ pragma solidity 0.8.11;
 
 import {INuggftV1Proof} from '../interfaces/nuggftv1/INuggftV1Proof.sol';
 
-import {ShiftLib} from '../libraries/ShiftLib.sol';
 import {CastLib} from '../libraries/CastLib.sol';
 
 import {NuggftV1Dotnugg} from './NuggftV1Dotnugg.sol';

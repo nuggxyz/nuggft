@@ -48,6 +48,18 @@ contract expectOffer is base {
         return this;
     }
 
+    function exec(
+        uint160 buyingTokenId,
+        uint160 sellingTokenId,
+        uint16 itemId
+    ) public payable {
+        lib.txdata memory _prepped = prepped;
+        _prepped.value += uint96(msg.value);
+
+        delete prepped;
+        exec(buyingTokenId, sellingTokenId, itemId, _prepped);
+    }
+
     function exec(uint160 tokenId) public payable {
         lib.txdata memory _prepped = prepped;
         _prepped.value += uint96(msg.value);
@@ -231,8 +243,8 @@ contract expectOffer is base {
         SnapshotData memory pre,
         SnapshotData memory post
     ) private {
-        ds.assertGt(nuggft.eps(), env.eps, "EXPECT-OFFER:STOP eps should be greater");
-        ds.assertGt(nuggft.msp(), env.msp, "EXPECT-OFFER:STOP msp should be greater");
+        ds.assertGt(nuggft.eps(), env.eps, 'EXPECT-OFFER:STOP eps should be greater');
+        ds.assertGt(nuggft.msp(), env.msp, 'EXPECT-OFFER:STOP msp should be greater');
         // @todo sender should be highest offer
         if (env.isItem) {} else {}
     }

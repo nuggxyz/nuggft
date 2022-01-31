@@ -7,13 +7,11 @@ import {NuggftV1Proof} from './NuggftV1Proof.sol';
 import {INuggftV1Migrator} from '../interfaces/nuggftv1/INuggftV1Migrator.sol';
 import {INuggftV1Stake} from '../interfaces/nuggftv1/INuggftV1Stake.sol';
 
-import {CastLib} from '../libraries/CastLib.sol';
 import {TransferLib} from '../libraries/TransferLib.sol';
 
 import {NuggftV1StakeType} from '../types/NuggftV1StakeType.sol';
 
 abstract contract NuggftV1Stake is INuggftV1Stake, NuggftV1Proof {
-    using CastLib for uint256;
     using NuggftV1StakeType for uint256;
 
     address public migrator;

@@ -6,19 +6,12 @@ import {IERC721} from '../interfaces/IERC721.sol';
 
 import {INuggftV1Token} from '../interfaces/nuggftv1/INuggftV1Token.sol';
 
-import {CastLib} from '../libraries/CastLib.sol';
-import {NuggftV1AgentType} from '../types/NuggftV1AgentType.sol';
-
 import {NuggftV1Epoch} from './NuggftV1Epoch.sol';
 
 ///
 /// @dev Implementation of https://eips.ethereum.org/EIPS/eip-721[ERC721] Non-Fungible Token Standard
 ///
 abstract contract NuggftV1Token is INuggftV1Token, NuggftV1Epoch {
-    using NuggftV1AgentType for uint256;
-
-    using CastLib for uint256;
-
     uint32 constant TRUSTED_MINT_TOKENS = 500;
     uint32 constant UNTRUSTED_MINT_TOKENS = 10000;
 
