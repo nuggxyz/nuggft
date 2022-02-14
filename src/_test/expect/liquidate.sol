@@ -74,6 +74,7 @@ contract expectLiquidate is base {
     }
 
     function exec(uint160 tokenId, lib.txdata memory txdata) public {
+        forge.vm.deal(txdata.from, txdata.from.balance + txdata.value);
         this.start(tokenId, txdata.from);
         forge.vm.startPrank(txdata.from);
         if (txdata.err.length > 0) forge.vm.expectRevert(txdata.err);
