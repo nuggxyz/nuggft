@@ -2,24 +2,21 @@
 
 pragma solidity 0.8.11;
 
-import {IDotnuggV1Metadata} from '../interfaces/dotnuggv1/IDotnuggV1Metadata.sol';
-
-import {MockDotnuggV1} from './mock/MockDotnuggV1.sol';
+import './utils/forge.sol';
 
 import {MockNuggftV1Migrator} from './mock/MockNuggftV1Migrator.sol';
 
 import {NuggftV1} from '../NuggftV1.sol';
-import {PureDeployer} from '../_deployment/PureDeployer.sol';
 
 import {Expect} from './expect/Expect.sol';
-
-import './utils/forge.sol';
+import {DotnuggV1} from '@nuggxyz/dotnugg-v1-core/DotnuggV1.sol';
+import {IDotnuggV1Safe} from '@nuggxyz/dotnugg-v1-core/interfaces/IDotnuggV1Safe.sol';
 
 import {NuggftV1AgentType} from '../types/NuggftV1AgentType.sol';
 
 contract RiggedNuggft is NuggftV1 {
     constructor() {
-        // featureLengths = 0x0303030303030303;
+        featureLengths = 0x0303030303030303;
     }
 
     function getBlockHash(uint256 blocknum) internal view override returns (bytes32 res) {
@@ -82,7 +79,9 @@ contract NuggftV1Test is ForgeTest {
     using SafeCast for uint256;
     using SafeCast for uint64;
 
-    MockDotnuggV1 public processor;
+    DotnuggV1 public dotnugg;
+
+    IDotnuggV1Safe public proxy;
 
     MockNuggftV1Migrator public _migrator;
 
@@ -91,7 +90,7 @@ contract NuggftV1Test is ForgeTest {
     constructor() {}
 
     address public _nuggft;
-    address public _processor;
+    address public _dotnugg;
     address public _proxy;
 
     struct Users {
@@ -113,20 +112,19 @@ contract NuggftV1Test is ForgeTest {
 
     function reset() public {
         forge.vm.roll(1000);
-        // bytes memory tmp = hex'000100';
-        ds.setDsTest(address(this));
 
-        PureDeployer dep = new PureDeployer(0, 0, type(RiggedNuggft).creationCode, type(MockDotnuggV1).creationCode, tmpdata);
-        // dep.init();
+        // PureDeployer dep = new PureDeployer(0, 0, type(RiggedNuggft).creationCode, type(MockDotnuggV1).creationCode, tmpdata);
 
-        processor = MockDotnuggV1(dep.__dotnugg());
-        nuggft = RiggedNuggft(dep.__nuggft());
+        dotnugg = new DotnuggV1();
+        nuggft = new RiggedNuggft();
+
+        proxy = dotnugg.register();
 
         _nuggft = address(nuggft);
 
         expect = new Expect(_nuggft);
 
-        _processor = address(processor);
+        _dotnugg = address(dotnugg);
 
         _migrator = new MockNuggftV1Migrator();
 
@@ -157,11 +155,11 @@ contract NuggftV1Test is ForgeTest {
         forge.vm.roll(14069560);
         ds.setDsTest(address(this));
 
-        PureDeployer dep = new PureDeployer(0, 0, type(RiggedNuggft).creationCode, type(MockDotnuggV1).creationCode, tmpdata);
+        // PureDeployer dep = new PureDeployer(0, 0, type(RiggedNuggft).creationCode, type(MockDotnuggV1).creationCode, tmpdata);
         // dep.init();
 
-        processor = MockDotnuggV1(dep.__dotnugg());
-        nuggft = RiggedNuggft(dep.__nuggft());
+        dotnugg = new DotnuggV1();
+        nuggft = new RiggedNuggft();
 
         // record.build(nuggft.external__agency__slot());
 
@@ -169,7 +167,7 @@ contract NuggftV1Test is ForgeTest {
 
         expect = new Expect(_nuggft);
 
-        _processor = address(processor);
+        _dotnugg = address(dotnugg);
 
         _migrator = new MockNuggftV1Migrator();
 
@@ -199,16 +197,14 @@ contract NuggftV1Test is ForgeTest {
     function reset__revert() public {
         forge.vm.roll(14069560);
 
-        PureDeployer dep = new PureDeployer(0, 0, type(RiggedNuggft).creationCode, type(MockDotnuggV1).creationCode, tmpdata);
-
-        processor = MockDotnuggV1(dep.__dotnugg());
-        nuggft = RiggedNuggft(dep.__nuggft());
+        dotnugg = new DotnuggV1();
+        nuggft = new RiggedNuggft();
 
         _nuggft = address(nuggft);
 
         expect = new Expect(_nuggft);
 
-        _processor = address(processor);
+        _dotnugg = address(dotnugg);
 
         users.frank = forge.vm.addr(12);
 
@@ -230,11 +226,8 @@ contract NuggftV1Test is ForgeTest {
     function reset__fork() public {
         ds.setDsTest(address(this));
 
-        PureDeployer dep = new PureDeployer(0, 0, type(RiggedNuggft).creationCode, type(MockDotnuggV1).creationCode, tmpdata);
-        // dep.init();
-
-        processor = MockDotnuggV1(dep.__dotnugg());
-        nuggft = RiggedNuggft(dep.__nuggft());
+        dotnugg = new DotnuggV1();
+        nuggft = new RiggedNuggft();
 
         // record.build(nuggft.external__agency__slot());
 
@@ -242,7 +235,7 @@ contract NuggftV1Test is ForgeTest {
 
         expect = new Expect(_nuggft);
 
-        _processor = address(processor);
+        _dotnugg = address(dotnugg);
 
         _migrator = new MockNuggftV1Migrator();
 
@@ -756,26 +749,26 @@ contract NuggftV1Test is ForgeTest {
     {
         (tokenId) = scenario_dee_has_a_token();
 
-        IDotnuggV1Metadata.Memory memory m = nuggft.dotnuggV1ImplementerCallback(
-            tokenId
-            // IDotnuggV1Metadata.Memory({
-            //     implementer: _nuggft,
-            //     artifactId: tokenId,
-            //     ids: new uint8[](8),
-            //     xovers: new uint8[](8),
-            //     yovers: new uint8[](8),
-            //     version: 1,
-            //     labels: new string[](8),
-            //     jsonKeys: new string[](8),
-            //     jsonValues: new string[](8),
-            //     styles: new string[](8),
-            //     background: '',
-            //     data: ''
-            // })
-        );
+        // IDotnuggV1Metadata.Memory memory m = nuggft.dotnuggV1ImplementerCallback(
+        //     tokenId
+        //     // IDotnuggV1Metadata.Memory({
+        //     //     implementer: _nuggft,
+        //     //     artifactId: tokenId,
+        //     //     ids: new uint8[](8),
+        //     //     xovers: new uint8[](8),
+        //     //     yovers: new uint8[](8),
+        //     //     version: 1,
+        //     //     labels: new string[](8),
+        //     //     jsonKeys: new string[](8),
+        //     //     jsonValues: new string[](8),
+        //     //     styles: new string[](8),
+        //     //     background: '',
+        //     //     data: ''
+        //     // })
+        // );
 
         feature = 1;
-        itemId = m.ids[feature] | (uint16(feature) << 8);
+        itemId = uint16(nuggft.floop(tokenId)[1]) | (uint16(feature) << 8);
 
         // _nuggft.shouldPass(dee, rotate(tokenId, feature));
     }

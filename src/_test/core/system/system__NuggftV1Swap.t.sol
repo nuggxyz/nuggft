@@ -269,9 +269,7 @@ contract system__NuggftV1Swap is NuggftV1Test, fragments {
         forge.vm.startPrank(users.frank);
         nuggft.mint{value: 0.2 ether}(500);
 
-        (, uint8[] memory ids, , , , ) = nuggft.proofToDotnuggMetadata(500);
-
-        itemId = ids[1] | (1 << 8);
+        itemId = uint16(nuggft.floop(500)[1]);
 
         // nuggft.floop(500);
         nuggft.sell(500, itemId, 50 ether);
@@ -290,9 +288,7 @@ contract system__NuggftV1Swap is NuggftV1Test, fragments {
         forge.vm.startPrank(users.frank);
         nuggft.mint{value: 0.2 ether}(500);
 
-        (, uint8[] memory ids, , , , ) = nuggft.proofToDotnuggMetadata(500);
-
-        itemId = ids[1] | (1 << 8);
+        itemId = uint16(nuggft.floop(500)[1]);
 
         nuggft.sell(500, itemId, 50 ether);
         forge.vm.expectRevert(hex'99');
@@ -306,9 +302,7 @@ contract system__NuggftV1Swap is NuggftV1Test, fragments {
         forge.vm.startPrank(users.frank);
         nuggft.mint{value: 0.2 ether}(500);
 
-        (, uint8[] memory ids, , , , ) = nuggft.proofToDotnuggMetadata(500);
-
-        itemId = ids[1] | (1 << 8);
+        itemId = uint16(nuggft.floop(500)[1]);
 
         // nuggft.floop(500);
         nuggft.sell(500, itemId, 1 ether);
@@ -334,16 +328,12 @@ contract system__NuggftV1Swap is NuggftV1Test, fragments {
         forge.vm.startPrank(users.frank);
         nuggft.mint{value: 0.2 ether}(500);
 
-        (, uint8[] memory ids, , , , ) = nuggft.proofToDotnuggMetadata(500);
-
-        itemId = ids[1] | (1 << 8);
+        itemId = uint16(nuggft.floop(500)[1]);
 
         nuggft.sell(500, itemId, 50 ether);
         // nuggft.claim(lib.sarr160(encItemIdClaim(500, itemId)), lib.sarr160(500));
 
-        nuggft.floop(500);
-
-        itemId = ids[2] | (2 << 8);
+        itemId = uint16(nuggft.floop(500)[2]);
 
         nuggft.sell(500, itemId, 50 ether);
 
@@ -353,16 +343,14 @@ contract system__NuggftV1Swap is NuggftV1Test, fragments {
     function test__system__item__sellTwoClaimBack__frank() public {
         forge.vm.startPrank(users.frank);
         nuggft.mint{value: 0.2 ether}(500);
+        itemId = uint16(nuggft.floop(500)[1]);
 
-        (, uint8[] memory ids, , , , ) = nuggft.proofToDotnuggMetadata(500);
-
-        itemId = ids[1] | (1 << 8);
         nuggft.sell(500, itemId, 50 ether);
         nuggft.claim(lib.sarr160(encItemIdClaim(500, itemId)), lib.sarr160(500));
 
         nuggft.floop(500);
 
-        itemId = ids[2] | (2 << 8);
+        itemId = uint16(nuggft.floop(500)[2]);
         nuggft.sell(500, itemId, 50 ether);
         nuggft.claim(lib.sarr160(encItemIdClaim(500, itemId)), lib.sarr160(500));
 

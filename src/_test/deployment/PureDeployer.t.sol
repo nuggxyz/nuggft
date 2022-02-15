@@ -30,7 +30,7 @@ contract deployment__PureDeployer is NuggftV1Test {
 
         inputs[1] = "jq '.bin' ../dotnugg-core/out/DotnuggV1.sol/DotnuggV1.json --raw-output";
 
-        new PureDeployer(0, 0, __nuggft, __dotnugg, __nuggs);
+        // new PureDeployer(0, 0, __nuggft, __dotnugg, __nuggs);
     }
 
     bytes __nuggs =

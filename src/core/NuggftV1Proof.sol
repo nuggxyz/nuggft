@@ -9,18 +9,7 @@ import {CastLib} from '../libraries/CastLib.sol';
 import {NuggftV1Dotnugg} from './NuggftV1Dotnugg.sol';
 
 abstract contract NuggftV1Proof is INuggftV1Proof, NuggftV1Dotnugg {
-    using CastLib for uint160;
-    using CastLib for uint256;
-
-    /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-                                state
-       ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
-
     mapping(uint160 => uint256) proofs;
-
-    /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-                           external functions
-       ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
 
     /// @inheritdoc INuggftV1Proof
     function rotate(
@@ -129,62 +118,6 @@ abstract contract NuggftV1Proof is INuggftV1Proof, NuggftV1Dotnugg {
                 max = i + 1;
             }
         }
-    }
-
-    /// @inheritdoc INuggftV1Proof
-    function proofToDotnuggMetadata(uint160 tokenId)
-        public
-        view
-        virtual
-        override
-        returns (
-            uint256 proof,
-            uint8[] memory defaultIds,
-            uint8[] memory overxs,
-            uint8[] memory overys,
-            string[] memory styles,
-            string memory background
-        )
-    {
-        proof = proofOf(tokenId);
-
-        if (proof == 0) {
-            proof = initFromSeed(tryCalculateSeed(tokenId.to24()));
-            require(proof != 0, 'P:L');
-        }
-
-        defaultIds = new uint8[](8);
-        overxs = new uint8[](8);
-        overys = new uint8[](8);
-        styles = new string[](8);
-
-        // defaultIds[0] = uint8(proof & 0xf);
-
-        for (uint8 i = 0; i < 8; i++) {
-            uint16 item;
-
-            // uint16 item = getIndex(proof, i);
-
-            assembly {
-                // solidity masks
-                item := shr(mul(i, 16), proof)
-            }
-
-            if (item == 0) continue;
-
-            (uint8 feature, uint8 pos) = parseItemId(item);
-
-            if (defaultIds[feature] == 0) {
-                uint256 overrides = settings[tokenId].anchorOverrides[item];
-                overys[feature] = uint8(overrides >> 6);
-                overxs[feature] = uint8(overrides & 0xf7);
-                styles[feature] = settings[tokenId].styles[item];
-
-                defaultIds[feature] = pos;
-            }
-        }
-
-        background = settings[tokenId].background;
     }
 
     /*━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -319,7 +252,7 @@ abstract contract NuggftV1Proof is INuggftV1Proof, NuggftV1Dotnugg {
 
     function safeMod(uint256 value, uint8 modder) internal pure returns (uint256) {
         require(modder != 0, 'P:9');
-        return value.to8() % modder;
+        return uint8(value) % modder;
     }
 
     function pendingProof()

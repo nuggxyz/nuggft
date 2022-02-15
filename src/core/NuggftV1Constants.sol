@@ -1,7 +1,5 @@
 // SPDX-License-Identifier: MIT
 
-import '../_test/utils/forge.sol';
-
 pragma solidity 0.8.11;
 
 abstract contract NuggftV1Constants {

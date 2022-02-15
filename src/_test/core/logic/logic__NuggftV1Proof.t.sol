@@ -8,8 +8,6 @@ import {NuggftV1Proof} from '../../../core/NuggftV1Proof.sol';
 import {NuggftV1Token} from '../../../core/NuggftV1Token.sol';
 
 contract logic__NuggftV1Proof is NuggftV1Test, NuggftV1Proof {
-    function dotnuggV1ImplementerCallback(uint256 tokenId) public view override returns (IDotnuggV1Metadata.Memory memory data) {}
-
     function supportsInterface(bytes4 interfaceId) public view virtual override returns (bool) {}
 
     function trustedMint(uint160 tokenId, address to) external payable override requiresTrust {}
@@ -71,13 +69,13 @@ contract logic__NuggftV1Proof is NuggftV1Test, NuggftV1Proof {
 
             proofs[i] = res;
 
-            (, uint8[] memory ids, , , , ) = proofToDotnuggMetadata(i);
+            // (, uint8[] memory ids, , , , ) = proofToDotnuggMetadata(i);
 
-            for (uint256 j = 0; j < 8; j++) {
-                if (ids[j] != 0) {
-                    trickery[j] &= ShiftLib.imask(1, ids[j] - 1);
-                }
-            }
+            // for (uint256 j = 0; j < 8; j++) {
+            //     if (ids[j] != 0) {
+            //         trickery[j] &= ShiftLib.imask(1, ids[j] - 1);
+            //     }
+            // }
         }
 
         bool broken;

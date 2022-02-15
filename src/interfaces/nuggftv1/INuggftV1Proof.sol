@@ -18,16 +18,4 @@ interface INuggftV1Proof {
        ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
 
     function proofOf(uint160 tokenId) external view returns (uint256);
-
-    function proofToDotnuggMetadata(uint160 tokenId)
-        external
-        view
-        returns (
-            uint256 proof,
-            uint8[] memory defaultIds,
-            uint8[] memory overxs,
-            uint8[] memory overys,
-            string[] memory styles,
-            string memory background
-        );
 }

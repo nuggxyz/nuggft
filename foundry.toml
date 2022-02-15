@@ -2,8 +2,8 @@
 src = 'src'
 test = '_test'
 out = './out'
-libs = ['lib']
-remappings = ['dotnuggv1-core/=/Users/***REMOVED***/Developer/nugglabs/github/dotnugg-core/src/']
+libs = ['lib','../dotnugg-v1-core/src']
+remappings = ['@nuggxyz/dotnugg-v1-core=../dotnugg-v1-core/src']
 # libraries = ['../dotnugg-core']
 cache = true
 force = false
