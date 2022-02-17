@@ -760,10 +760,10 @@ contract NuggftV1Test is ForgeTest {
     {
         (tokenId) = scenario_dee_has_a_token();
 
-        uint16[] memory f = abi.decode(abi.encode(nuggft.floop(tokenId)), (uint16[]));
+        bytes2[] memory f = nuggft.floop(tokenId);
 
         feature = 1;
-        itemId = f[feature] | (uint16(feature) << 8);
+        itemId = uint16(f[feature]);
 
         // _nuggft.shouldPass(dee, rotate(tokenId, feature));
     }

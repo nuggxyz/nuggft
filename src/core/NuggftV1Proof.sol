@@ -7,6 +7,7 @@ import {INuggftV1Proof} from '../interfaces/nuggftv1/INuggftV1Proof.sol';
 import {CastLib} from '../libraries/CastLib.sol';
 
 import {NuggftV1Dotnugg} from './NuggftV1Dotnugg.sol';
+import '../_test/utils/forge.sol';
 
 abstract contract NuggftV1Proof is INuggftV1Proof, NuggftV1Dotnugg {
     using CastLib for uint160;
@@ -177,6 +178,8 @@ abstract contract NuggftV1Proof is INuggftV1Proof, NuggftV1Dotnugg {
         }
 
         proofs[tokenId] = initFromSeed(randomEnoughSeed);
+
+        ds.inject.log(proofs[tokenId]);
     }
 
     // TODO TO BE TESTED
@@ -185,9 +188,9 @@ abstract contract NuggftV1Proof is INuggftV1Proof, NuggftV1Dotnugg {
 
         res |= dotnuggV1Safe.randOf(0, seed);
 
-        res |= ((1 << 8) | dotnuggV1Safe.randOf(1, seed)) << (16 * 1);
+        res |= uint256((1 << 8) | dotnuggV1Safe.randOf(1, seed)) << (16 * 1);
 
-        res |= ((2 << 8) | dotnuggV1Safe.randOf(2, seed)) << (16 * 2);
+        res |= uint256((2 << 8) | dotnuggV1Safe.randOf(2, seed)) << (16 * 2);
 
         uint8 selA = uint8((seed >> 8) & 0xff);
         uint8 selB = uint8((seed >> 16) & 0xff);
@@ -197,13 +200,13 @@ abstract contract NuggftV1Proof is INuggftV1Proof, NuggftV1Dotnugg {
         selB = selB < 30 ? 5 : selB < 55 ? 6 : selB < 75 ? 7 : 0;
         selC = selC < 30 ? 5 : selC < 55 ? 6 : selC < 75 ? 7 : selC < 115 ? 4 : selC < 155 ? 3 : selC < 205 ? 2 : 1;
 
-        res |= ((selA << 8) | dotnuggV1Safe.randOf(selA, seed)) << (16 * 3);
+        res |= uint256((uint16(selA) << 8) | dotnuggV1Safe.randOf(selA, seed)) << (16 * 3);
 
         if (selB != 0) {
-            res |= ((selB << 8) | dotnuggV1Safe.randOf(selB, seed)) << (16 * 4);
+            res |= uint256((uint16(selB) << 8) | dotnuggV1Safe.randOf(selB, seed)) << (16 * 4);
         }
 
-        res |= ((selC << 8) | dotnuggV1Safe.randOf(selC, seed)) << (16 * 8);
+        res |= uint256((uint16(selC) << 8) | dotnuggV1Safe.randOf(selC, seed)) << (16 * 8);
     }
 
     function safeMod(uint256 value, uint8 modder) internal pure returns (uint256) {
