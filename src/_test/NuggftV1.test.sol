@@ -57,6 +57,7 @@ contract RiggedNuggft is NuggftV1 {
     }
 
     function external__toStartBlock(uint24 _epoch) public view returns (uint256 res) {
+        ds.inject.log(_epoch, genesis, block.number);
         return toStartBlock(_epoch, genesis);
     }
 
@@ -121,7 +122,7 @@ contract NuggftV1Test is ForgeTest {
         // dep.init();
 
         processor = DotnuggV1(dep.dotnugg());
-        nuggft = RiggedNuggft(address(dep.nuggft()));
+        nuggft = new RiggedNuggft(address(processor));
 
         _nuggft = address(nuggft);
 
@@ -163,7 +164,7 @@ contract NuggftV1Test is ForgeTest {
         // dep.init();
 
         processor = DotnuggV1(dep.dotnugg());
-        nuggft = RiggedNuggft(address(dep.nuggft()));
+        nuggft = new RiggedNuggft(address(processor));
         // record.build(nuggft.external__agency__slot());
 
         _nuggft = address(nuggft);
@@ -205,7 +206,7 @@ contract NuggftV1Test is ForgeTest {
         // dep.init();
 
         processor = DotnuggV1(dep.dotnugg());
-        nuggft = RiggedNuggft(address(dep.nuggft()));
+        nuggft = new RiggedNuggft(address(processor));
 
         _nuggft = address(nuggft);
 
@@ -237,7 +238,7 @@ contract NuggftV1Test is ForgeTest {
         // dep.init();
 
         processor = DotnuggV1(dep.dotnugg());
-        nuggft = RiggedNuggft(address(dep.nuggft()));
+        nuggft = new RiggedNuggft(address(processor));
 
         // record.build(nuggft.external__agency__slot());
 
