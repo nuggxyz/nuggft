@@ -206,7 +206,7 @@ abstract contract NuggftV1Proof is INuggftV1Proof, NuggftV1Dotnugg {
             res |= uint256((uint16(selB) << 8) | dotnuggV1Safe.randOf(selB, seed)) << (16 * 4);
         }
 
-        res |= uint256((uint16(selC) << 8) | dotnuggV1Safe.randOf(selC, seed)) << (16 * 8);
+        res |= uint256((uint16(selC) << 8) | dotnuggV1Safe.randOf(selC, seed >> 8)) << (16 * 8);
     }
 
     function safeMod(uint256 value, uint8 modder) internal pure returns (uint256) {
