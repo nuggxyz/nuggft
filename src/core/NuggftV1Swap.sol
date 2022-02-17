@@ -317,6 +317,14 @@ abstract contract NuggftV1Swap is INuggftV1ItemSwap, INuggftV1Swap, NuggftV1Stak
     function claim(uint160[] calldata tokenIds, address[] calldata accounts) public override {
         uint256 active = epoch();
 
+        // require(tokenIds.length == accounts.length, 'oops');
+
+        // uint256 acc;
+
+        // for (uint256 i = 0; i < tokenIds.length; i++) {
+
+        // }
+
         assembly {
             function panic(code) {
                 mstore8(0, code)
@@ -437,8 +445,10 @@ abstract contract NuggftV1Swap is INuggftV1ItemSwap, INuggftV1Swap, NuggftV1Stak
 
                         sstore(protocolItems.slot, sub(sload(protocolItems.slot), 1))
 
+                        let a := add(mptr, 0xa0)
+
                         // store common slot for offers in memory
-                        mstore(add(mptr, 0xa0), proofs.slot)
+                        mstore(a, proofs.slot)
 
                         let proof__sptr := keccak256(add(mptr, 0x80), 0x40)
 
@@ -462,9 +472,9 @@ abstract contract NuggftV1Swap is INuggftV1ItemSwap, INuggftV1Swap, NuggftV1Stak
 
                         sstore(proof__sptr, proof)
 
-                        mstore(add(mptr, 0xa0), proof)
+                        mstore(a, proof)
 
-                        log4(add(mptr, 0xa0), 0x20, Event__TransferItem, 0x00, offerer, shl(240, shr(24, tokenId)))
+                        log4(a, 0x20, Event__TransferItem, 0x00, offerer, shl(240, shr(24, tokenId)))
                     }
                     default {
                         // update agency to reflect the new owner

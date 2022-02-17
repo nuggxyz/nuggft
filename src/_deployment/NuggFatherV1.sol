@@ -4,7 +4,7 @@ pragma solidity 0.8.11;
 
 import {NuggftV1} from '../NuggftV1.sol';
 
-import {DotnuggV1} from 'dotnuggv1-core/DotnuggV1.sol';
+import {DotnuggV1} from '../../../dotnugg-v1-core/src/DotnuggV1.sol';
 
 import {IDotnuggV1StorageProxy} from '../interfaces/dotnuggv1/IDotnuggV1StorageProxy.sol';
 
