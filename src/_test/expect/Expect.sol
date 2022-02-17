@@ -36,18 +36,17 @@ contract Expect {
     }
 
     constructor(address nuggft_) {
-        global.set('Expect', address(this));
-        global.set('RiggedNuggft', nuggft_);
-
-        claim = new expectClaim();
-        offer = new expectOffer();
-        balance = new expectBalance();
-        stake = new expectStake();
-        sell = new expectSell();
-        mint = new expectMint();
-        loan = new expectLoan();
-        rebalance = new expectRebalance();
-        liquidate = new expectLiquidate();
-        burn = new expectBurn();
+        //     global.set('Expect', address(this));
+        //     global.set('RiggedNuggft', nuggft_);
+        //     claim = new expectClaim();
+        //     offer = new expectOffer();
+        //     balance = new expectBalance();
+        //     stake = new expectStake();
+        //     sell = new expectSell();
+        //     mint = new expectMint();
+        //     loan = new expectLoan();
+        //     rebalance = new expectRebalance();
+        //     liquidate = new expectLiquidate();
+        //     burn = new expectBurn();
     }
 }

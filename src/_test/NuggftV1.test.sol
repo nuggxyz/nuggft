@@ -9,15 +9,18 @@ import {MockNuggftV1Migrator} from './mock/MockNuggftV1Migrator.sol';
 import {NuggftV1} from '../NuggftV1.sol';
 
 import {Expect} from './expect/Expect.sol';
-import {DotnuggV1} from '@nuggxyz/dotnugg-v1-core/DotnuggV1.sol';
-import {IDotnuggV1Safe} from '@nuggxyz/dotnugg-v1-core/interfaces/IDotnuggV1Safe.sol';
+import {IDotnuggV1} from '../interfaces/dotnuggv1/IDotnuggV1.sol';
+
+import {IDotnuggV1Safe} from '../interfaces/dotnuggv1/IDotnuggV1Safe.sol';
 
 import {NuggftV1AgentType} from '../types/NuggftV1AgentType.sol';
 
 contract RiggedNuggft is NuggftV1 {
-    constructor() {
-        featureLengths = 0x0303030303030303;
-    }
+    // constructor() {
+    //     featureLengths = 0x0303030303030303;
+    // }
+
+    // constructor(IDotnuggV1 dotnugg) NuggftV1(dotnugg, abi.decode(data, (bytes[]))) {}
 
     function getBlockHash(uint256 blocknum) internal view override returns (bytes32 res) {
         if (block.number > blocknum && block.number - blocknum < 256) {
@@ -79,7 +82,7 @@ contract NuggftV1Test is ForgeTest {
     using SafeCast for uint256;
     using SafeCast for uint64;
 
-    DotnuggV1 public dotnugg;
+    IDotnuggV1 public dotnugg;
 
     IDotnuggV1Safe public proxy;
 
@@ -113,12 +116,15 @@ contract NuggftV1Test is ForgeTest {
     function reset() public {
         forge.vm.roll(1000);
 
+        // bytes memory dnd = dotnuggdata;
+        // assembly {
+        //     let res := create(0, dnd, mload(dnd))
+        //     sstore(dotnugg.slot, res)
+        // }
+
         // PureDeployer dep = new PureDeployer(0, 0, type(RiggedNuggft).creationCode, type(MockDotnuggV1).creationCode, tmpdata);
 
-        dotnugg = new DotnuggV1();
         nuggft = new RiggedNuggft();
-
-        proxy = dotnugg.register();
 
         _nuggft = address(nuggft);
 
@@ -158,7 +164,11 @@ contract NuggftV1Test is ForgeTest {
         // PureDeployer dep = new PureDeployer(0, 0, type(RiggedNuggft).creationCode, type(MockDotnuggV1).creationCode, tmpdata);
         // dep.init();
 
-        dotnugg = new DotnuggV1();
+        // bytes memory dnd = dotnuggdata;
+        // assembly {
+        //     let res := create(0, dnd, mload(dnd))
+        //     sstore(dotnugg.slot, res)
+        // }
         nuggft = new RiggedNuggft();
 
         // record.build(nuggft.external__agency__slot());
@@ -197,7 +207,11 @@ contract NuggftV1Test is ForgeTest {
     function reset__revert() public {
         forge.vm.roll(14069560);
 
-        dotnugg = new DotnuggV1();
+        // bytes memory dnd = dotnuggdata;
+        // assembly {
+        //     let res := create(0, dnd, mload(dnd))
+        //     sstore(dotnugg.slot, res)
+        // }
         nuggft = new RiggedNuggft();
 
         _nuggft = address(nuggft);
@@ -226,7 +240,11 @@ contract NuggftV1Test is ForgeTest {
     function reset__fork() public {
         ds.setDsTest(address(this));
 
-        dotnugg = new DotnuggV1();
+        // bytes memory dnd = dotnuggdata;
+        // assembly {
+        //     let res := create(0, dnd, mload(dnd))
+        //     sstore(dotnugg.slot, res)
+        // }
         nuggft = new RiggedNuggft();
 
         // record.build(nuggft.external__agency__slot());

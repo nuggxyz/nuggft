@@ -9,15 +9,15 @@ abstract contract NuggftV1Trust is INuggftV1Trust {
 
     mapping(address => bool) public override isTrusted;
 
-    constructor() {
-        address dub6ix = 0x9B0E2b16F57648C7bAF28EDD7772a815Af266E77;
+    // constructor() {
+    //     address dub6ix = 0x9B0E2b16F57648C7bAF28EDD7772a815Af266E77;
 
-        isTrusted[msg.sender] = true;
-        isTrusted[dub6ix] = true;
+    //     isTrusted[msg.sender] = true;
+    //     isTrusted[dub6ix] = true;
 
-        emit UserTrustUpdated(dub6ix, true);
-        emit UserTrustUpdated(msg.sender, true);
-    }
+    //     emit UserTrustUpdated(dub6ix, true);
+    //     emit UserTrustUpdated(msg.sender, true);
+    // }
 
     function setIsTrusted(address user, bool trusted) public virtual requiresTrust {
         isTrusted[user] = trusted;

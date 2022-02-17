@@ -2,25 +2,25 @@
 src = 'src'
 test = '_test'
 out = './out'
-libs = ['lib','../dotnugg-v1-core/src']
-remappings = ['@nuggxyz/dotnugg-v1-core=../dotnugg-v1-core/src']
-# libraries = ['../dotnugg-core']
-cache = true
+libs = ['lib']
+# remappings = ['@nuggxyz/dotnugg-v1-core=../dotnugg-v1-core/src']
+# libraries = ['../dotnugg-v1-core/src/']
+cache = false
 force = false
 evm_version = 'london'
 ## Sets the concrete solc version to use, this overrides the `auto_detect_solc` value
 solc_version = '0.8.11'
 auto_detect_solc = true
-optimizer = true
-optimizer_runs = 1000000
+optimizer = false
+optimizer_runs = 1
 verbosity = 0
 ignored_error_codes = []
-fuzz_runs = 1000
+fuzz_runs = 1
 ffi = true
 sender = '0x00a329c0648769a73afac7f9381e08fb43dbea72'
 tx_origin = '0x00a329c0648769a73afac7f9381e08fb43dbea72'
 initial_balance = '0xffffffffffffffffffffffff'
-block_number = 40000000
+block_number = 40000
 chain_id = 1
 gas_limit = 9223372036854775807
 gas_price = 0
@@ -28,6 +28,6 @@ block_base_fee_per_gas = 0
 block_coinbase = '0x0000000000000000000000000000000000000000'
 block_timestamp = 0
 block_difficulty = 0
-gas_reports = ["RiggedNuggft", "NuggftV1", "Expect"]
+# gas_reports = ["RiggedNuggft", "NuggftV1", "Expect"]
 
 

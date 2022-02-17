@@ -4,15 +4,10 @@ pragma solidity 0.8.11;
 
 import '../../NuggftV1.test.sol';
 import {ShiftLib} from '../../../libraries/ShiftLib.sol';
-import {NuggftV1Proof} from '../../../core/NuggftV1Proof.sol';
 import {NuggftV1Token} from '../../../core/NuggftV1Token.sol';
 
-contract logic__NuggftV1Proof is NuggftV1Test, NuggftV1Proof {
-    function supportsInterface(bytes4 interfaceId) public view virtual override returns (bool) {}
-
-    function trustedMint(uint160 tokenId, address to) external payable override requiresTrust {}
-
-    function mint(uint160 tokenId) public payable override {}
+contract logic__NuggftV1Proof is NuggftV1Test, RiggedNuggft {
+    // constructor() RiggedNuggft(dotnugg) {}
 
     function setUp() public {}
 

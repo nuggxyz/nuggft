@@ -18,509 +18,380 @@ abstract contract NuggftV1Swap is INuggftV1ItemSwap, INuggftV1Swap, NuggftV1Stak
 
     /// @inheritdoc INuggftV1Swap
     function offer(uint160 tokenId) public payable override {
-        uint256 agency__sptr;
-
-        uint256 agency__cache;
-        uint256 next;
-
-        uint256 active = epoch();
-        uint256 mptr;
-
-        address sender;
-        uint256 offersSlot;
-
-        bool isItem;
-
-        assembly {
-            function iso(val, left, right) -> b {
-                b := shr(right, shl(left, val))
-            }
-
-            function panic(code) {
-                mstore8(0, code)
-                revert(0, 0x01)
-            }
-
-            isItem := gt(tokenId, 0xffffff)
-
-            // NOTE: memory locations are referenced as offsets from the free memory pointer
-
-            // store callvalue formatted in .1 gwei for caculation of total offer
-            next := div(callvalue(), LOSS)
-
-            if iszero(gt(next, 100)) {
-                panic(Error__D__0x68__OfferLowerThanLOSS)
-            }
-
-            mptr := mload(0x40)
-
-            // ========= memory ==========
-            //   0x00: tokenId
-            //   0x20: agency.slot
-            // ===========================
-            mstore(add(mptr, 0x20), agency.slot)
-
-            sender := caller()
-
-            offersSlot := offers.slot
-
-            if isItem {
-                sender := shr(40, tokenId)
-
-                tokenId := and(tokenId, 0xffffffffff)
-
-                mstore(mptr, sender)
-
-                let buyerTokenAgency := sload(keccak256(mptr, 0x40))
-
-                // ensure the caller is the agent
-                if iszero(eq(iso(buyerTokenAgency, 96, 96), caller())) {
-                    panic(Error__f__0xA2__NotItemAgent)
-                }
-
-                let flag := shr(254, buyerTokenAgency)
-
-                // ensure the caller is really the agent
-                if and(eq(flag, 0x3), iszero(iszero(iso(buyerTokenAgency, 2, 232)))) {
-                    panic(Error__g__0xA3__NotItemAuthorizedAgent)
-                }
-
-                mstore(add(mptr, 0x20), itemAgency.slot)
-
-                offersSlot := itemOffers.slot
-            }
-
-            mstore(mptr, tokenId)
-
-            agency__sptr := keccak256(mptr, 0x40)
-            agency__cache := sload(agency__sptr)
-        }
-
-        // check to see if this nugg needs to be minted
-        if (active == tokenId && agency__cache == 0) {
-            // [Offer:Mint]
-
-            proofs[tokenId] = initFromSeed(calculateSeed(uint24(active)));
-
-            // no need to update free memory pointer because we no longer rely on it being empty
-            addStakedShareFromMsgValue__dirty();
-
-            assembly {
-                // init agency__cache with SWAP flag and active epoch
-                // other values handled at end of function
-                agency__cache := xor(shl(254, 0x03), shl(230, active))
-
-                // ========== event ==========
-                // emit Transfer(address(0), NuggftV1, tokenId)
-                // ===========================
-
-                log4(0x00, 0x00, Event__Transfer, 0, address(), tokenId)
-
-                // update agency to reflect the new leader
-
-                // ==== agency[tokenId] =====
-                // flag  = SWAP
-                // epoch = active or active + 1
-                // eth   = new highest offer
-                // addr  = msg.sender
-                // ===========================
-
-                agency__cache := xor(add(agency__cache, shl(160, next)), caller())
-
-                sstore(agency__sptr, agency__cache)
-
-                // ========= memory ==========
-                // 0x00: agency__cache
-                // ===========================
-
-                mstore(mptr, agency__cache)
-
-                // ========== event ==========
-                // emit Offer(tokenId, agency__cache)
-                // ===========================
-
-                log2(mptr, 0x20, Event__Offer, tokenId)
-
-                return(0x0, 0x00)
-            }
-        }
-
-        uint256 last;
-
-        assembly {
-            function iso(val, left, right) -> b {
-                b := shr(right, shl(left, val))
-            }
-            function panic(code) {
-                mstore8(0, code)
-                revert(0, 0x01)
-            }
-
-            // ensure that the agency flag is "SWAP" (0x03)
-            if iszero(eq(shr(254, agency__cache), 0x03)) {
-                panic(Error__d__0xA0__NotSwapping)
-            }
-
-            // ========= memory ==========
-            //   0x00: tokenId
-            //   0x20: offers.slot
-            // ===========================
-
-            mstore(add(mptr, 0x20), offersSlot)
-
-            // ========= memory ==========
-            //     0x00: tokenId
-            //     0x20: offers[tokenId].slot
-            // ===========================
-
-            mstore(add(mptr, 0x20), keccak256(mptr, 0x40))
-
-            let agency__addr := iso(agency__cache, 96, 96)
-
-            let agency__epoch := iso(agency__cache, 2, 232)
-
-            // ========= memory ==========
-            //   0x00: msg.sender
-            //   0x20: offers[tokenId].slot
-            // ===========================
-
-            mstore(mptr, sender)
-            let offer__sptr := keccak256(mptr, 0x40)
-
-            // we assume offer__cache is same as agency__cache
-            // this will only be the case for the leader
-            let offer__cache := agency__cache
-
-            // check to see if msg.sender is the leader
-            if iszero(eq(sender, agency__addr)) {
-                // if not, we update offer__cache
-                offer__cache := sload(offer__sptr)
-            }
-
-            // check to see if user has offered by checking if cache != 0
-            if iszero(iszero(offer__cache)) {
-                // check to see if the epoch from offer__cache has expired
-                // this accomplishes two important goals:
-                // 1. forces user to claim previous swap before acting on this one
-                // 2. prevents owner from offering on their own swap before someone else has
-                if lt(iso(offer__cache, 2, 232), active) {
-                    panic(Error__c__0x99__InvalidEpoch)
-                }
-            }
-
-            // check to see if the swap's epoch is 0
-            switch iszero(agency__epoch)
-            case 1 {
-                // [Offer:Commit]
-
-                // if so, we know this swap has not yet been offered on
-                // update the epoch to begin auction
-                agency__cache := xor(agency__cache, shl(230, add(active, SALE_LEN)))
-
-                if iszero(isItem) {
-                    // Event__Transfer the token to the contract for the remainder of sale
-                    // the seller (agency__addr) approves this when they put the token up for sale
-
-                    // ========== event ==========
-                    // emit Transfer(seller, NuggftV1, tokenId)
-                    // ===========================
-
-                    log4(0x00, 0x00, Event__Transfer, agency__addr, address(), tokenId)
-                }
-            }
-            default {
-                // [Offer:Carry]
-
-                // otherwise we validate the epoch to ensure the swap is still active
-                if lt(agency__epoch, active) {
-                    panic(Error__h__0xA4__ExpiredEpoch)
-                }
-            }
-
-            // parse last offer value
-            last := iso(agency__cache, 26, 186)
-
-            // parse and caculate next offer value
-            next := add(iso(offer__cache, 26, 186), next)
-
-            // ensure next offer includes at least a 2% increment
-            if gt(div(mul(last, 10200), 10000), next) {
-                panic(Error__H__0x72__IncrementTooLow)
-            }
-            // convert next into the increment
-            next := sub(next, last)
-
-            // convert last into increment * LOSS for staking
-            last := mul(next, LOSS)
-
-            /////////////////////////////////////////////////////////////////////
-
-            // ========= memory ==========
-            //   0x00: prev leader
-            //   0x20: offers[tokenId].slot
-            // ===========================
-
-            mstore(mptr, agency__addr)
-
-            sstore(keccak256(mptr, 0x40), agency__cache)
-
-            // clear previous leader from agency cache
-            agency__cache := shl(160, shr(160, agency__cache))
-
-            /////////////////////////////////////////////////////////////////////
-
-            // update agency to reflect the new leader
-
-            // ==== agency[tokenId] =====
-            //   flag  = SWAP
-            //   epoch = active or active + 1
-            //   eth   = new highest offer
-            //   addr  = msg.sender
-            // ===========================
-
-            agency__cache := xor(add(agency__cache, shl(160, next)), sender)
-
-            sstore(agency__sptr, agency__cache)
-
-            sstore(offer__sptr, agency__cache)
-
-            /////////////////////////////////////////////////////////////////////
-
-            // ========= memory ==========
-            //   0x00: agency__cache
-            // ===========================
-
-            mstore(mptr, agency__cache)
-
-            switch isItem
-            case 1 {
-                // ========== event ==========
-                // emit OfferItem(sellerTokenId, itemId, agency__cache)
-                // ===========================
-
-                log3(mptr, 0x20, Event__OfferItem, and(sender, 0xffffff), and(shr(24, tokenId), 0xffff))
-            }
-            default {
-                // ========== event ==========
-                // emit Offer(tokenId, agency__cache)
-                // ===========================
-
-                log2(mptr, 0x20, Event__Offer, tokenId)
-            }
-        }
-
-        // add the increment * LOSS to staked eth
-        addStakedEth__dirty(uint96(last));
+        // uint256 agency__sptr;
+        // uint256 agency__cache;
+        // uint256 next;
+        // uint256 active = epoch();
+        // uint256 mptr;
+        // address sender;
+        // uint256 offersSlot;
+        // bool isItem;
+        // assembly {
+        //     function iso(val, left, right) -> b {
+        //         b := shr(right, shl(left, val))
+        //     }
+        //     function panic(code) {
+        //         mstore8(0, code)
+        //         revert(0, 0x01)
+        //     }
+        //     isItem := gt(tokenId, 0xffffff)
+        //     // NOTE: memory locations are referenced as offsets from the free memory pointer
+        //     // store callvalue formatted in .1 gwei for caculation of total offer
+        //     next := div(callvalue(), LOSS)
+        //     if iszero(gt(next, 100)) {
+        //         panic(Error__D__0x68__OfferLowerThanLOSS)
+        //     }
+        //     mptr := mload(0x40)
+        //     // ========= memory ==========
+        //     //   0x00: tokenId
+        //     //   0x20: agency.slot
+        //     // ===========================
+        //     mstore(add(mptr, 0x20), agency.slot)
+        //     sender := caller()
+        //     offersSlot := offers.slot
+        //     if isItem {
+        //         sender := shr(40, tokenId)
+        //         tokenId := and(tokenId, 0xffffffffff)
+        //         mstore(mptr, sender)
+        //         let buyerTokenAgency := sload(keccak256(mptr, 0x40))
+        //         // ensure the caller is the agent
+        //         if iszero(eq(iso(buyerTokenAgency, 96, 96), caller())) {
+        //             panic(Error__f__0xA2__NotItemAgent)
+        //         }
+        //         let flag := shr(254, buyerTokenAgency)
+        //         // ensure the caller is really the agent
+        //         if and(eq(flag, 0x3), iszero(iszero(iso(buyerTokenAgency, 2, 232)))) {
+        //             panic(Error__g__0xA3__NotItemAuthorizedAgent)
+        //         }
+        //         mstore(add(mptr, 0x20), itemAgency.slot)
+        //         offersSlot := itemOffers.slot
+        //     }
+        //     mstore(mptr, tokenId)
+        //     agency__sptr := keccak256(mptr, 0x40)
+        //     agency__cache := sload(agency__sptr)
+        // }
+        // // check to see if this nugg needs to be minted
+        // if (active == tokenId && agency__cache == 0) {
+        //     // [Offer:Mint]
+        //     proofs[tokenId] = initFromSeed(calculateSeed(uint24(active)));
+        //     // no need to update free memory pointer because we no longer rely on it being empty
+        //     addStakedShareFromMsgValue__dirty();
+        //     assembly {
+        //         // init agency__cache with SWAP flag and active epoch
+        //         // other values handled at end of function
+        //         agency__cache := xor(shl(254, 0x03), shl(230, active))
+        //         // ========== event ==========
+        //         // emit Transfer(address(0), NuggftV1, tokenId)
+        //         // ===========================
+        //         log4(0x00, 0x00, Event__Transfer, 0, address(), tokenId)
+        //         // update agency to reflect the new leader
+        //         // ==== agency[tokenId] =====
+        //         // flag  = SWAP
+        //         // epoch = active or active + 1
+        //         // eth   = new highest offer
+        //         // addr  = msg.sender
+        //         // ===========================
+        //         agency__cache := xor(add(agency__cache, shl(160, next)), caller())
+        //         sstore(agency__sptr, agency__cache)
+        //         // ========= memory ==========
+        //         // 0x00: agency__cache
+        //         // ===========================
+        //         mstore(mptr, agency__cache)
+        //         // ========== event ==========
+        //         // emit Offer(tokenId, agency__cache)
+        //         // ===========================
+        //         log2(mptr, 0x20, Event__Offer, tokenId)
+        //         return(0x0, 0x00)
+        //     }
+        // }
+        // uint256 last;
+        // assembly {
+        //     function iso(val, left, right) -> b {
+        //         b := shr(right, shl(left, val))
+        //     }
+        //     function panic(code) {
+        //         mstore8(0, code)
+        //         revert(0, 0x01)
+        //     }
+        //     // ensure that the agency flag is "SWAP" (0x03)
+        //     if iszero(eq(shr(254, agency__cache), 0x03)) {
+        //         panic(Error__d__0xA0__NotSwapping)
+        //     }
+        //     // ========= memory ==========
+        //     //   0x00: tokenId
+        //     //   0x20: offers.slot
+        //     // ===========================
+        //     mstore(add(mptr, 0x20), offersSlot)
+        //     // ========= memory ==========
+        //     //     0x00: tokenId
+        //     //     0x20: offers[tokenId].slot
+        //     // ===========================
+        //     mstore(add(mptr, 0x20), keccak256(mptr, 0x40))
+        //     let agency__addr := iso(agency__cache, 96, 96)
+        //     let agency__epoch := iso(agency__cache, 2, 232)
+        //     // ========= memory ==========
+        //     //   0x00: msg.sender
+        //     //   0x20: offers[tokenId].slot
+        //     // ===========================
+        //     mstore(mptr, sender)
+        //     let offer__sptr := keccak256(mptr, 0x40)
+        //     // we assume offer__cache is same as agency__cache
+        //     // this will only be the case for the leader
+        //     let offer__cache := agency__cache
+        //     // check to see if msg.sender is the leader
+        //     if iszero(eq(sender, agency__addr)) {
+        //         // if not, we update offer__cache
+        //         offer__cache := sload(offer__sptr)
+        //     }
+        //     // check to see if user has offered by checking if cache != 0
+        //     if iszero(iszero(offer__cache)) {
+        //         // check to see if the epoch from offer__cache has expired
+        //         // this accomplishes two important goals:
+        //         // 1. forces user to claim previous swap before acting on this one
+        //         // 2. prevents owner from offering on their own swap before someone else has
+        //         if lt(iso(offer__cache, 2, 232), active) {
+        //             panic(Error__c__0x99__InvalidEpoch)
+        //         }
+        //     }
+        //     // check to see if the swap's epoch is 0
+        //     switch iszero(agency__epoch)
+        //     case 1 {
+        //         // [Offer:Commit]
+        //         // if so, we know this swap has not yet been offered on
+        //         // update the epoch to begin auction
+        //         agency__cache := xor(agency__cache, shl(230, add(active, SALE_LEN)))
+        //         if iszero(isItem) {
+        //             // Event__Transfer the token to the contract for the remainder of sale
+        //             // the seller (agency__addr) approves this when they put the token up for sale
+        //             // ========== event ==========
+        //             // emit Transfer(seller, NuggftV1, tokenId)
+        //             // ===========================
+        //             log4(0x00, 0x00, Event__Transfer, agency__addr, address(), tokenId)
+        //         }
+        //     }
+        //     default {
+        //         // [Offer:Carry]
+        //         // otherwise we validate the epoch to ensure the swap is still active
+        //         if lt(agency__epoch, active) {
+        //             panic(Error__h__0xA4__ExpiredEpoch)
+        //         }
+        //     }
+        //     // parse last offer value
+        //     last := iso(agency__cache, 26, 186)
+        //     // parse and caculate next offer value
+        //     next := add(iso(offer__cache, 26, 186), next)
+        //     // ensure next offer includes at least a 2% increment
+        //     if gt(div(mul(last, 10200), 10000), next) {
+        //         panic(Error__H__0x72__IncrementTooLow)
+        //     }
+        //     // convert next into the increment
+        //     next := sub(next, last)
+        //     // convert last into increment * LOSS for staking
+        //     last := mul(next, LOSS)
+        //     /////////////////////////////////////////////////////////////////////
+        //     // ========= memory ==========
+        //     //   0x00: prev leader
+        //     //   0x20: offers[tokenId].slot
+        //     // ===========================
+        //     mstore(mptr, agency__addr)
+        //     sstore(keccak256(mptr, 0x40), agency__cache)
+        //     // clear previous leader from agency cache
+        //     agency__cache := shl(160, shr(160, agency__cache))
+        //     /////////////////////////////////////////////////////////////////////
+        //     // update agency to reflect the new leader
+        //     // ==== agency[tokenId] =====
+        //     //   flag  = SWAP
+        //     //   epoch = active or active + 1
+        //     //   eth   = new highest offer
+        //     //   addr  = msg.sender
+        //     // ===========================
+        //     agency__cache := xor(add(agency__cache, shl(160, next)), sender)
+        //     sstore(agency__sptr, agency__cache)
+        //     sstore(offer__sptr, agency__cache)
+        //     /////////////////////////////////////////////////////////////////////
+        //     // ========= memory ==========
+        //     //   0x00: agency__cache
+        //     // ===========================
+        //     mstore(mptr, agency__cache)
+        //     switch isItem
+        //     case 1 {
+        //         // ========== event ==========
+        //         // emit OfferItem(sellerTokenId, itemId, agency__cache)
+        //         // ===========================
+        //         log3(mptr, 0x20, Event__OfferItem, and(sender, 0xffffff), and(shr(24, tokenId), 0xffff))
+        //     }
+        //     default {
+        //         // ========== event ==========
+        //         // emit Offer(tokenId, agency__cache)
+        //         // ===========================
+        //         log2(mptr, 0x20, Event__Offer, tokenId)
+        //     }
+        // }
+        // // add the increment * LOSS to staked eth
+        // addStakedEth__dirty(uint96(last));
     }
 
     /// @inheritdoc INuggftV1Swap
     function claim(uint160[] calldata tokenIds, address[] calldata accounts) public override {
-        uint256 active = epoch();
-
-        assembly {
-            function panic(code) {
-                mstore8(0, code)
-                revert(0, 0x01)
-            }
-            // NOTE: memory locations are referenced as offsets from the free memory pointer
-
-            function iso(val, left, right) -> b {
-                b := shr(right, shl(left, val))
-            }
-
-            // extract length of tokenIds array from calldata
-            let len := calldataload(sub(tokenIds.offset, 0x20))
-
-            // ensure arrays the same length
-            if iszero(eq(len, calldataload(sub(accounts.offset, 0x20)))) {
-                panic(Error__L__0x76__InvalidArrayLengths)
-            }
-
-            let acc := 0
-
-            /*========= memory ============
-              0x00: tokenId                keccak = agency[tokenId].slot = "agency__sptr"
-              0x20: agency.slot
-              --------------------------
-              0x40: tokenId                keccak = offers[tokenId].slot
-              0x60: offers.slot
-              --------------------------
-              0x80: offerer                keccak = offers[tokenId][offerer].slot = "offer__sptr"
-              0xA0: offers[tokenId].slot
-              --------------------------
-              0xC0: itemId|sellingTokenId  keccak = itemAgency[itemId|sellingTokenId].slot = "agency__sptr"
-              0xE0: itemAgency.slot
-              --------------------------
-              0x40: itemId|sellingTokenId  keccak = itemOffers[itemId|sellingTokenId].slot
-              0x60: itemOffers.slot
-            ==============================*/
-
-            let mptr := mload(0x40)
-
-            // store common slot for agency in memory
-            mstore(add(mptr, 0x20), agency.slot)
-
-            // store common slot for offers in memory
-            mstore(add(mptr, 0x60), offers.slot)
-
-            // store common slot for agency in memory
-            mstore(add(mptr, 0xE0), itemAgency.slot)
-
-            // store common slot for offers in memory
-            mstore(add(mptr, 0x120), itemOffers.slot)
-
-            for {
-                let i := 0
-            } lt(i, len) {
-                i := add(i, 1)
-            } {
-                // tokenIds[i]
-                let tokenId := calldataload(add(tokenIds.offset, mul(i, 0x20)))
-
-                // accounts[i]
-                let offerer := calldataload(add(accounts.offset, mul(i, 0x20)))
-
-                let trusted_eoa := offerer
-
-                // let isItem := gt(tokenId, 0xffffff)
-
-                let mptroffset := 0
-
-                if gt(tokenId, 0xffffff) {
-                    // calculate agency.slot storeage ptr
-                    mstore(mptr, offerer)
-
-                    let offerer__agency := sload(keccak256(mptr, 0x40))
-
-                    trusted_eoa := iso(offerer__agency, 96, 96)
-
-                    mptroffset := 0xC0
-                }
-
-                // calculate agency.slot storeage ptr
-                mstore(add(mptr, mptroffset), tokenId)
-
-                let agency__sptr := keccak256(add(mptr, mptroffset), 0x40)
-
-                // load agency value from storage
-                let agency__cache := sload(agency__sptr)
-
-                // calculate offers.slot storage pointer
-                mstore(add(add(mptr, mptroffset), 0x40), tokenId)
-                let offer__sptr := keccak256(add(add(mptr, mptroffset), 0x40), 0x40)
-
-                // calculate offers[tokenId].slot storage pointer
-                mstore(add(mptr, 0x80), offerer)
-                mstore(add(mptr, 0xa0), offer__sptr)
-                offer__sptr := keccak256(add(mptr, 0x80), 0x40)
-
-                // check if the offerer is the current agent
-                switch eq(offerer, iso(agency__cache, 96, 96))
-                case 1 {
-                    let agency__epoch := iso(agency__cache, 2, 232)
-
-                    // ensure that the agency flag is "SWAP" (0x03)
-                    if iszero(eq(shr(254, agency__cache), 0x03)) {
-                        panic(Error__d__0xA0__NotSwapping)
-                    }
-
-                    // check to make sure the user is the seller or the swap is over
-                    // we know a user is a seller if the epoch is still 0
-                    // we know a swap is over if the active epoch is greater than the swaps epoch
-                    if iszero(or(iszero(agency__epoch), gt(active, agency__epoch))) {
-                        panic(Error__C__0x67__WinningClaimTooEarly)
-                    }
-
-                    switch gt(tokenId, 0xffffff)
-                    case 1 {
-                        sstore(agency__sptr, 0)
-
-                        sstore(protocolItems.slot, sub(sload(protocolItems.slot), 1))
-
-                        // store common slot for offers in memory
-                        mstore(add(mptr, 0xa0), proofs.slot)
-
-                        let proof__sptr := keccak256(add(mptr, 0x80), 0x40)
-
-                        let proof := sload(proof__sptr)
-
-                        for {
-                            let j := 8
-                        } lt(j, 17) {
-                            j := add(j, 1)
-                        } {
-                            if eq(j, 16) {
-                                panic(Error__O__0x79__ProofHasNoFreeSlot)
-                            }
-
-                            if iszero(and(shr(mul(j, 16), proof), 0xffff)) {
-                                let tmp := shr(24, tokenId)
-                                proof := xor(proof, shl(mul(j, 16), tmp))
-                                j := 17
-                            }
-                        }
-
-                        sstore(proof__sptr, proof)
-
-                        mstore(add(mptr, 0xa0), proof)
-
-                        log4(add(mptr, 0xa0), 0x20, Event__TransferItem, 0x00, offerer, shl(240, shr(24, tokenId)))
-                    }
-                    default {
-                        // update agency to reflect the new owner
-                        /*==== agency[tokenId] =====
-                            flag  = OWN
-                            epoch = 0
-                            eth   = 0
-                            addr  = offerer
-                        ===========================*/
-                        sstore(agency__sptr, or(offerer, shl(254, 0x01)))
-
-                        // transfer token to the new owner
-                        log4(0x00, 0x00, Event__Transfer, address(), offerer, tokenId)
-                    }
-                }
-                default {
-                    if iszero(eq(caller(), trusted_eoa)) {
-                        panic(Error__J__0x74__Untrusted)
-                    }
-
-                    let offer__cache := sload(offer__sptr)
-
-                    // ensure this user has an offer to claim
-                    if iszero(offer__cache) {
-                        panic(Error__i__0xA5__NoOffer)
-                    }
-
-                    // accumulate and send value at once at end
-                    // to save on gas for most common use case
-                    acc := add(acc, iso(offer__cache, 26, 186))
-                }
-
-                // delete offer before we potentially send value
-                sstore(offer__sptr, 0)
-
-                switch gt(tokenId, 0xffffff)
-                case 1 {
-                    log4(0x00, 0x00, Event__ClaimItem, and(tokenId, 0xffffff), shl(240, shr(24, tokenId)), offerer)
-                }
-                default {
-                    log3(0x00, 0x00, Event__Claim, tokenId, offerer)
-                }
-            }
-
-            // skip sending value if amount to send is 0
-            if iszero(acc) {
-                return(0, 0)
-            }
-
-            acc := mul(acc, LOSS)
-
-            // send accumulated value * LOSS to msg.sender
-            if iszero(call(gas(), caller(), acc, 0, 0, 0, 0)) {
-                panic(Error__K__0x75__SendEthFailureToCaller)
-            }
-        }
+        // uint256 active = epoch();
+        // assembly {
+        //     function panic(code) {
+        //         mstore8(0, code)
+        //         revert(0, 0x01)
+        //     }
+        //     // NOTE: memory locations are referenced as offsets from the free memory pointer
+        //     function iso(val, left, right) -> b {
+        //         b := shr(right, shl(left, val))
+        //     }
+        //     // extract length of tokenIds array from calldata
+        //     let len := calldataload(sub(tokenIds.offset, 0x20))
+        //     // ensure arrays the same length
+        //     if iszero(eq(len, calldataload(sub(accounts.offset, 0x20)))) {
+        //         panic(Error__L__0x76__InvalidArrayLengths)
+        //     }
+        //     let acc := 0
+        //     /*========= memory ============
+        //       0x00: tokenId                keccak = agency[tokenId].slot = "agency__sptr"
+        //       0x20: agency.slot
+        //       --------------------------
+        //       0x40: tokenId                keccak = offers[tokenId].slot
+        //       0x60: offers.slot
+        //       --------------------------
+        //       0x80: offerer                keccak = offers[tokenId][offerer].slot = "offer__sptr"
+        //       0xA0: offers[tokenId].slot
+        //       --------------------------
+        //       0xC0: itemId|sellingTokenId  keccak = itemAgency[itemId|sellingTokenId].slot = "agency__sptr"
+        //       0xE0: itemAgency.slot
+        //       --------------------------
+        //       0x40: itemId|sellingTokenId  keccak = itemOffers[itemId|sellingTokenId].slot
+        //       0x60: itemOffers.slot
+        //     ==============================*/
+        //     let mptr := mload(0x40)
+        //     // store common slot for agency in memory
+        //     mstore(add(mptr, 0x20), agency.slot)
+        //     // store common slot for offers in memory
+        //     mstore(add(mptr, 0x60), offers.slot)
+        //     // store common slot for agency in memory
+        //     mstore(add(mptr, 0xE0), itemAgency.slot)
+        //     // store common slot for offers in memory
+        //     mstore(add(mptr, 0x120), itemOffers.slot)
+        //     for {
+        //         let i := 0
+        //     } lt(i, len) {
+        //         i := add(i, 1)
+        //     } {
+        //         // tokenIds[i]
+        //         let tokenId := calldataload(add(tokenIds.offset, mul(i, 0x20)))
+        //         // accounts[i]
+        //         let offerer := calldataload(add(accounts.offset, mul(i, 0x20)))
+        //         let trusted_eoa := offerer
+        //         // let isItem := gt(tokenId, 0xffffff)
+        //         let mptroffset := 0
+        //         if gt(tokenId, 0xffffff) {
+        //             // calculate agency.slot storeage ptr
+        //             mstore(mptr, offerer)
+        //             let offerer__agency := sload(keccak256(mptr, 0x40))
+        //             trusted_eoa := iso(offerer__agency, 96, 96)
+        //             mptroffset := 0xC0
+        //         }
+        //         // calculate agency.slot storeage ptr
+        //         mstore(add(mptr, mptroffset), tokenId)
+        //         let agency__sptr := keccak256(add(mptr, mptroffset), 0x40)
+        //         // load agency value from storage
+        //         let agency__cache := sload(agency__sptr)
+        //         // calculate offers.slot storage pointer
+        //         mstore(add(add(mptr, mptroffset), 0x40), tokenId)
+        //         let offer__sptr := keccak256(add(add(mptr, mptroffset), 0x40), 0x40)
+        //         // calculate offers[tokenId].slot storage pointer
+        //         mstore(add(mptr, 0x80), offerer)
+        //         mstore(add(mptr, 0xa0), offer__sptr)
+        //         offer__sptr := keccak256(add(mptr, 0x80), 0x40)
+        //         // check if the offerer is the current agent
+        //         switch eq(offerer, iso(agency__cache, 96, 96))
+        //         case 1 {
+        //             let agency__epoch := iso(agency__cache, 2, 232)
+        //             // ensure that the agency flag is "SWAP" (0x03)
+        //             if iszero(eq(shr(254, agency__cache), 0x03)) {
+        //                 panic(Error__d__0xA0__NotSwapping)
+        //             }
+        //             // check to make sure the user is the seller or the swap is over
+        //             // we know a user is a seller if the epoch is still 0
+        //             // we know a swap is over if the active epoch is greater than the swaps epoch
+        //             if iszero(or(iszero(agency__epoch), gt(active, agency__epoch))) {
+        //                 panic(Error__C__0x67__WinningClaimTooEarly)
+        //             }
+        //             switch gt(tokenId, 0xffffff)
+        //             case 1 {
+        //                 sstore(agency__sptr, 0)
+        //                 sstore(protocolItems.slot, sub(sload(protocolItems.slot), 1))
+        //                 // store common slot for offers in memory
+        //                 mstore(add(mptr, 0xa0), proofs.slot)
+        //                 let proof__sptr := keccak256(add(mptr, 0x80), 0x40)
+        //                 let proof := sload(proof__sptr)
+        //                 for {
+        //                     let j := 8
+        //                 } lt(j, 17) {
+        //                     j := add(j, 1)
+        //                 } {
+        //                     if eq(j, 16) {
+        //                         panic(Error__O__0x79__ProofHasNoFreeSlot)
+        //                     }
+        //                     if iszero(and(shr(mul(j, 16), proof), 0xffff)) {
+        //                         let tmp := shr(24, tokenId)
+        //                         proof := xor(proof, shl(mul(j, 16), tmp))
+        //                         j := 17
+        //                     }
+        //                 }
+        //                 sstore(proof__sptr, proof)
+        //                 mstore(add(mptr, 0xa0), proof)
+        //                 log4(add(mptr, 0xa0), 0x20, Event__TransferItem, 0x00, offerer, shl(240, shr(24, tokenId)))
+        //             }
+        //             default {
+        //                 // update agency to reflect the new owner
+        //                 /*==== agency[tokenId] =====
+        //                     flag  = OWN
+        //                     epoch = 0
+        //                     eth   = 0
+        //                     addr  = offerer
+        //                 ===========================*/
+        //                 sstore(agency__sptr, or(offerer, shl(254, 0x01)))
+        //                 // transfer token to the new owner
+        //                 log4(0x00, 0x00, Event__Transfer, address(), offerer, tokenId)
+        //             }
+        //         }
+        //         default {
+        //             if iszero(eq(caller(), trusted_eoa)) {
+        //                 panic(Error__J__0x74__Untrusted)
+        //             }
+        //             let offer__cache := sload(offer__sptr)
+        //             // ensure this user has an offer to claim
+        //             if iszero(offer__cache) {
+        //                 panic(Error__i__0xA5__NoOffer)
+        //             }
+        //             // accumulate and send value at once at end
+        //             // to save on gas for most common use case
+        //             acc := add(acc, iso(offer__cache, 26, 186))
+        //         }
+        //         // delete offer before we potentially send value
+        //         sstore(offer__sptr, 0)
+        //         switch gt(tokenId, 0xffffff)
+        //         case 1 {
+        //             log4(0x00, 0x00, Event__ClaimItem, and(tokenId, 0xffffff), shl(240, shr(24, tokenId)), offerer)
+        //         }
+        //         default {
+        //             log3(0x00, 0x00, Event__Claim, tokenId, offerer)
+        //         }
+        //     }
+        //     // skip sending value if amount to send is 0
+        //     if iszero(acc) {
+        //         return(0, 0)
+        //     }
+        //     acc := mul(acc, LOSS)
+        //     // send accumulated value * LOSS to msg.sender
+        //     if iszero(call(gas(), caller(), acc, 0, 0, 0, 0)) {
+        //         panic(Error__K__0x75__SendEthFailureToCaller)
+        //     }
+        // }
     }
 
     /// @inheritdoc INuggftV1Swap

@@ -13,7 +13,7 @@ contract DSTest is ogDSTest {
     uint256 private checkpointGasLeft;
 
     constructor() {
-        ds.setDsTest(address(this));
+        // ds.setDsTest(address(this));
     }
 
     function startMeasuringGas(bytes32 label) internal virtual {

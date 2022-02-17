@@ -9,7 +9,7 @@ import '../NuggftV1.test.sol';
 abstract contract base {
     RiggedNuggft nuggft;
 
-    constructor() {
-        nuggft = RiggedNuggft(global.getAddressSafe('RiggedNuggft'));
-    }
+    // constructor() {
+    //     nuggft = RiggedNuggft(global.getAddressSafe('RiggedNuggft'));
+    // }
 }

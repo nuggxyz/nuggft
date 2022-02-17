@@ -27,7 +27,7 @@ abstract contract NuggftV1Proof is INuggftV1Proof, NuggftV1Dotnugg {
                 revert(0, 0x01)
             }
 
-            let mptr := mload(0x40)
+            // let mptr := mload(0x40)
             mstore(0x00, tokenId)
             mstore(0x20, agency.slot)
             let buyerTokenAgency := sload(keccak256(0x00, 0x40))
@@ -172,82 +172,27 @@ abstract contract NuggftV1Proof is INuggftV1Proof, NuggftV1Dotnugg {
     function initFromSeed(uint256 seed) internal view returns (uint256 res) {
         require(seed != 0, 'P:8');
 
-        uint256 l = featureLengths;
+        res |= safe.randOf(0, seed);
 
-        // assembly {
-        //     function seeder(dat, feat) -> b {
-        //         b := and(shr(mul(feat, 8), dat), 0xff)
-        //     }
+        res |= ((1 << 8) | safe.randOf(1, seed)) << (16 * 1);
 
-        //     function id(feat) -> b {
-        //         b := shl(0x8, feat)
-        //     }
+        res |= ((2 << 8) | safe.randOf(2, seed)) << (16 * 2);
 
-        //     function build(s, dat, feat) -> b {
-        //         b := and(shr(mul(feat, 8), dat), 0xff)
-        //         if iszero(b) {
-        //             revert(0, 0)
-        //         }
-        //         b := add(0x1, mod(seeder(s, feat), b))
-
-        //         b := or(id(feat), b)
-
-        //         b := shl(add(mul(gt(feat, 0), 3), mul(0xb, feat)), b)
-        //     }
-
-        //     let dats := featureLengths.slot
-
-        //     res := or(res, build(seed, l, 0))
-
-        //     res := or(res, build(seed, l, 1))
-
-        //     res := or(res, build(seed, l, 2))
-
-        //     let p1 := seeder(seed, 16)
-        //     let p2 := seeder(seed, 17)
-
-        //     switch lt(p1, 128)
-        //     case 1 {
-        //         res := or(res, build(seed, l, 3))
-        //     }
-        //     default {
-        //         res := or(res, build(seed, l, 5))
-        //     }
-
-        //     if lt(p1, 128) {
-
-        //     }
-
-        //     // let ptr := mload(0x40)
-
-        //     // mstore(ptr, sload(featureLengths.slot))
-        // }
-
-        res |= ((safeMod(seed & 0xff, _lengthOf(l, 0))) + 1);
-
-        res |= ((1 << 8) | (((((seed >>= 8) & 0xff) % _lengthOf(l, 1))) + 1)) << (16 * 1);
-
-        res |= ((2 << 8) | (((((seed >>= 8) & 0xff) % _lengthOf(l, 2))) + 1)) << (16 * 2);
-
-        uint256 selA = ((seed >>= 8) & 0xff);
+        uint8 selA = uint8((seed >> 8) & 0xff);
+        uint8 selB = uint8((seed >> 16) & 0xff);
+        uint8 selC = uint8((seed >> 24) & 0xff);
 
         selA = selA < 128 ? 3 : 4;
-
-        res |= ((selA << 8) | ((safeMod(((seed >>= 8) & 0xff), _lengthOf(l, uint8(selA)))) + 1)) << (16 * 3);
-
-        uint256 selB = ((seed >>= 8) & 0xff);
-
         selB = selB < 30 ? 5 : selB < 55 ? 6 : selB < 75 ? 7 : 0;
-
-        if (selB != 0) {
-            res |= ((selB << 8) | ((safeMod(((seed >>= 8) & 0xff), _lengthOf(l, uint8(selB)))) + 1)) << (16 * 4);
-        }
-
-        uint256 selC = ((seed >>= 8) & 0xff);
-
         selC = selC < 30 ? 5 : selC < 55 ? 6 : selC < 75 ? 7 : selC < 115 ? 4 : selC < 155 ? 3 : selC < 205 ? 2 : 1;
 
-        res |= ((selC << 8) | ((safeMod((seed >>= 8) & 0xff, _lengthOf(l, uint8(selC)))) + 1)) << (16 * 8);
+        res |= ((selA << 8) | safe.randOf(selA, seed)) << (16 * 3);
+
+        if (selB != 0) {
+            res |= ((selB << 8) | safe.randOf(selB, seed)) << (16 * 4);
+        }
+
+        res |= ((selC << 8) | safe.randOf(selC, seed)) << (16 * 8);
     }
 
     function safeMod(uint256 value, uint8 modder) internal pure returns (uint256) {

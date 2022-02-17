@@ -2,29 +2,36 @@
 
 pragma solidity 0.8.11;
 
-import {IDotnuggV1Safe} from '@nuggxyz/dotnugg-v1-core/interfaces/IDotnuggV1Safe.sol';
-import {DotnuggV1} from '@nuggxyz/dotnugg-v1-core/DotnuggV1.sol';
-// import '@nuggxyz/dotnugg-v1-core/DotnuggV1Safe.sol';
-// import '@nuggxyz/dotnugg-v1-core/DotnuggV1Resolver.sol';
-// import '@nuggxyz/dotnugg-v1-core/core/DotnuggV1Storage.sol';
-// import '@nuggxyz/dotnugg-v1-core/core/DotnuggV1MiddleOut.sol';
-// import '@nuggxyz/dotnugg-v1-core/core/DotnuggV1Svg.sol';
-// import '@nuggxyz/dotnugg-v1-core/core/DotnuggV1Storage.sol';
-// import '@nuggxyz/dotnugg-v1-core/core/DotnuggV1Storage.sol';
+import {IDotnuggV1Safe} from '../interfaces/dotnuggv1/IDotnuggV1Safe.sol';
+// import {DotnuggV1} from '../interfaces/dotnuggv1/ol';
+// import '../interfaces/dotnuggv1/fe.sol';
+// import '../interfaces/dotnuggv1/solver.sol';
+// import '../interfaces/dotnuggv1/gV1Storage.sol';
+// import '../interfaces/dotnuggv1/gV1MiddleOut.sol';
+// import '../interfaces/dotnuggv1/gV1Svg.sol';
+// import '../interfaces/dotnuggv1/gV1Storage.sol';
+// import '../interfaces/dotnuggv1/gV1Storage.sol';
+import {NuggftV1} from '../NuggftV1.sol';
+import {IDotnuggV1Resolver} from '../interfaces/dotnuggv1/IDotnuggV1Resolver.sol';
+import {IDotnuggV1} from '../interfaces/dotnuggv1/IDotnuggV1.sol';
 
-import {IDotnuggV1Resolver} from '@nuggxyz/dotnugg-v1-core/interfaces/IDotnuggV1Resolver.sol';
-
-import {data} from '../_data/a.data.sol';
+// import {data} from '../_data/a.data.sol';
+// import {data as dotnuggdata} from '../_data/dotnugg.data.sol';
 
 contract NuggftV1Deployer {
-    DotnuggV1 immutable dotnuggv1;
-    IDotnuggV1Safe immutable safe;
+    IDotnuggV1 dotnuggv1;
+    NuggftV1 nuggftv1;
 
-    constructor() {
-        dotnuggv1 = new DotnuggV1();
+    // IDotnuggV1Safe immutable safe;
 
-        safe = dotnuggv1.register();
+    // constructor() {
+    //     // dotnuggv1 = new DotnuggV1();
 
-        safe.write(abi.decode(data, (bytes[])));
-    }
+    //     bytes memory dnd = dotnuggdata;
+    //     assembly {
+    //         let res := create(0, dnd, mload(dnd))
+    //         sstore(dotnuggv1.slot, res)
+    //     }
+    //     nuggftv1 = new NuggftV1(dotnuggv1, abi.decode(data, (bytes[])));
+    // }
 }

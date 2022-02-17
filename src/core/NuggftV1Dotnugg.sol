@@ -2,9 +2,7 @@
 
 pragma solidity 0.8.11;
 
-import {IDotnuggV1Safe} from '@nuggxyz/dotnugg-v1-core/interfaces/IDotnuggV1Safe.sol';
-import {IDotnuggV1} from '@nuggxyz/dotnugg-v1-core/interfaces/IDotnuggV1.sol';
-import {IDotnuggV1Resolver} from '@nuggxyz/dotnugg-v1-core/interfaces/IDotnuggV1Resolver.sol';
+import {IDotnuggV1Safe} from '../interfaces/dotnuggv1/IDotnuggV1Safe.sol';
 
 import {INuggftV1Dotnugg} from '../interfaces/nuggftv1/INuggftV1Dotnugg.sol';
 
@@ -12,13 +10,16 @@ import {NuggftV1Token} from './NuggftV1Token.sol';
 
 import {NuggftV1Trust} from './NuggftV1Trust.sol';
 
-import {data} from '../_data/a.data.sol';
+// import {data} from '../_data/a.data.sol';
 
 /// @custom:testing test each function
 abstract contract NuggftV1Dotnugg is INuggftV1Dotnugg, NuggftV1Token, NuggftV1Trust {
     uint256 internal featureLengths;
+    IDotnuggV1Safe public safe;
 
-    constructor() {}
+    // constructor(IDotnuggV1 dotnugg, bytes[] memory input) {
+    //     // safe = dotnugg.register(input);
+    // }
 
     function lengthOf(uint8 feature) external view returns (uint8) {
         return _lengthOf(featureLengths, feature);

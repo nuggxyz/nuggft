@@ -9,7 +9,8 @@ import {NuggftV1Dotnugg} from './core/NuggftV1Dotnugg.sol';
 
 import {INuggftV1Migrator} from './interfaces/nuggftv1/INuggftV1Migrator.sol';
 
-import {IDotnuggV1} from '@nuggxyz/dotnugg-v1-core/interfaces/IDotnuggV1.sol';
+import {IDotnuggV1Safe} from './interfaces/dotnuggv1/IDotnuggV1Safe.sol';
+import {IDotnuggV1} from './interfaces/dotnuggv1/IDotnuggV1.sol';
 
 import {INuggftV1Token} from './interfaces/nuggftv1/INuggftV1Token.sol';
 import {INuggftV1Stake} from './interfaces/nuggftv1/INuggftV1Stake.sol';
@@ -39,7 +40,7 @@ contract NuggftV1 is IERC721Metadata, NuggftV1Loan {
 
     using NuggftV1StakeType for uint256;
 
-    constructor() {}
+    // constructor(IDotnuggV1 dotnugg, bytes[] memory input) NuggftV1Dotnugg(dotnugg, input) {}
 
     /// @inheritdoc IERC165
     function supportsInterface(bytes4 interfaceId) public view virtual override returns (bool) {
