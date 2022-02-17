@@ -12,7 +12,6 @@ contract logic__NuggftV1Loan is NuggftV1Test, NuggftV1Loan {
     /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
                                   overrides
        ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
-    function dotnuggV1ImplementerCallback(uint256 tokenId) public view override returns (IDotnuggV1Metadata.Memory memory data) {}
 
     function supportsInterface(bytes4 interfaceId) public view virtual override returns (bool) {}
 

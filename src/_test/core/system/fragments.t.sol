@@ -22,9 +22,9 @@ contract fragments is NuggftV1Test {
 
         expect.mint().exec(500, lib.txdata(users.dee, 0, ''));
 
-        (, uint8[] memory ids, , , , ) = nuggft.proofToDotnuggMetadata(500);
+        uint16[] memory f = abi.decode(abi.encode(nuggft.floop(500)), (uint16[]));
 
-        itemId = ids[1] | (1 << 8);
+        itemId = f[1] | (1 << 8);
 
         expect.sell().exec(500, itemId, value, lib.txdata(users.dee, 0, ''));
     }

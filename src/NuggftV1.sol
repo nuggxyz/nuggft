@@ -8,9 +8,9 @@ import {NuggftV1Loan} from './core/NuggftV1Loan.sol';
 import {NuggftV1Dotnugg} from './core/NuggftV1Dotnugg.sol';
 
 import {INuggftV1Migrator} from './interfaces/nuggftv1/INuggftV1Migrator.sol';
-import {IDotnuggV1Metadata} from './interfaces/dotnuggv1/IDotnuggV1Metadata.sol';
-import {IDotnuggV1Implementer} from './interfaces/dotnuggv1/IDotnuggV1Implementer.sol';
-import {IDotnuggV1} from './interfaces/dotnuggv1/IDotnuggV1.sol';
+
+import {IDotnuggV1} from './interfaces/dotnugg/IDotnuggV1.sol';
+import {IDotnuggV1Safe} from './interfaces/dotnugg/IDotnuggV1Safe.sol';
 
 import {INuggftV1Token} from './interfaces/nuggftv1/INuggftV1Token.sol';
 import {INuggftV1Stake} from './interfaces/nuggftv1/INuggftV1Stake.sol';
@@ -40,51 +40,13 @@ contract NuggftV1 is IERC721Metadata, NuggftV1Loan {
 
     using NuggftV1StakeType for uint256;
 
-    constructor() {
-        assembly {
-            let addr := mload(0x40)
-
-            mstore(addr, shl(72, or(shl(176, 0xd6), or(shl(168, 0x94), or(shl(8, caller()), 0x02)))))
-
-            addr := keccak256(addr, 23)
-
-            let sig := mload(0x40)
-
-            mstore(sig, hex'8e3b3a6b')
-
-            let ptr := mload(0x40)
-
-            let ok := staticcall(gas(), addr, sig, 0x4, ptr, 32)
-            if iszero(ok) {
-                revert(sig, 0x4)
-            }
-
-            addr := mload(ptr)
-
-            sstore(dotnuggV1.slot, addr)
-
-            // mstore(sig, hex'1aa3a008')
-
-            // ok := call(gas(), addr, 0, sig, 0x4, ptr, 32)
-            // if iszero(ok) {
-            //     revert(sig, 0x4)
-            // }
-
-            // addr := mload(ptr)
-
-            // sstore(dotnuggV1StorageProxy.slot, addr)
-        }
-
-        dotnuggV1StorageProxy = dotnuggV1.register();
+    constructor(address dotnugg, bytes[] memory nuggs) {
+        dotnuggV1Safe = IDotnuggV1(dotnugg).register(nuggs);
     }
 
     /// @inheritdoc IERC165
     function supportsInterface(bytes4 interfaceId) public view virtual override returns (bool) {
-        return
-            interfaceId == type(IDotnuggV1Implementer).interfaceId ||
-            interfaceId == type(IERC721).interfaceId ||
-            interfaceId == type(IERC721Metadata).interfaceId ||
-            interfaceId == type(IERC165).interfaceId;
+        return interfaceId == type(IERC721).interfaceId || interfaceId == type(IERC721Metadata).interfaceId || interfaceId == type(IERC165).interfaceId;
     }
 
     function name() public pure override returns (string memory) {
@@ -99,39 +61,39 @@ contract NuggftV1 is IERC721Metadata, NuggftV1Loan {
     function tokenURI(uint256 tokenId) public view virtual override returns (string memory res) {
         uint160 safeTokenId = tokenId.to160();
 
-        res = dotnuggV1.dat(address(this), tokenId, dotnuggV1ResolverOf(safeTokenId), symbol(), name(), true, '');
+        // res = dotnuggV1.dat(address(this), tokenId, dotnuggV1ResolverOf(safeTokenId), symbol(), name(), true, '');
     }
 
     /*━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
                                 CORE
     ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━*/
 
-    function dotnuggV1ImplementerCallback(uint256 tokenId) public view override returns (IDotnuggV1Metadata.Memory memory data) {
-        (
-            ,
-            data.ids, //
-            data.xovers,
-            data.yovers,
-            data.styles,
-            data.background
-        ) = proofToDotnuggMetadata(tokenId.to160());
+    // function dotnuggV1ImplementerCallback(uint256 tokenId) public view override returns (IDotnuggV1Metadata.Memory memory data) {
+    //     (
+    //         ,
+    //         data.ids, //
+    //         data.xovers,
+    //         data.yovers,
+    //         data.styles,
+    //         data.background
+    //     ) = proofToDotnuggMetadata(tokenId.to160());
 
-        data.labels = new string[](8);
-        data.version = 1;
-        data.artifactId = tokenId;
-        data.implementer = address(this);
+    //     data.labels = new string[](8);
+    //     data.version = 1;
+    //     data.artifactId = tokenId;
+    //     data.implementer = address(this);
 
-        data.labels[0] = 'BASE';
-        data.labels[1] = 'EYES';
-        data.labels[2] = 'MOUTH';
-        data.labels[3] = 'HAIR';
-        data.labels[4] = 'HAT';
-        data.labels[5] = 'BACK';
-        data.labels[6] = 'NECK';
-        data.labels[7] = 'HOLD';
+    //     data.labels[0] = 'BASE';
+    //     data.labels[1] = 'EYES';
+    //     data.labels[2] = 'MOUTH';
+    //     data.labels[3] = 'HAIR';
+    //     data.labels[4] = 'HAT';
+    //     data.labels[5] = 'BACK';
+    //     data.labels[6] = 'NECK';
+    //     data.labels[7] = 'HOLD';
 
-        return data;
-    }
+    //     return data;
+    // }
 
     /// @inheritdoc INuggftV1Token
     function mint(uint160 tokenId) public payable override {
@@ -217,7 +179,7 @@ contract NuggftV1 is IERC721Metadata, NuggftV1Loan {
         // delete swaps[tokenId];
         // delete loans[tokenId];
         delete proofs[tokenId];
-        delete resolvers[tokenId];
+        // delete resolvers[tokenId];
 
         emit Transfer(msg.sender, address(0), tokenId);
 

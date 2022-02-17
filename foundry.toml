@@ -2,7 +2,7 @@
 src = 'src'
 test = '_test'
 out = './out'
-libs = ['lib']
+libs = ['lib', '../dotnugg-v1-core']
 
 cache = true
 force = false
