@@ -269,9 +269,9 @@ contract system__NuggftV1Swap is NuggftV1Test, fragments {
         forge.vm.startPrank(users.frank);
         nuggft.mint{value: 0.2 ether}(500);
 
-        uint16[] memory f = abi.decode(abi.encode(nuggft.floop(500)), (uint16[]));
+        bytes2[] memory f = nuggft.floop(500);
 
-        itemId = f[1] | (1 << 8);
+        itemId = uint16(f[1]);
 
         // nuggft.floop(500);
         nuggft.sell(500, itemId, 50 ether);
@@ -290,9 +290,9 @@ contract system__NuggftV1Swap is NuggftV1Test, fragments {
         forge.vm.startPrank(users.frank);
         nuggft.mint{value: 0.2 ether}(500);
 
-        uint16[] memory f = abi.decode(abi.encode(nuggft.floop(500)), (uint16[]));
+        bytes2[] memory f = nuggft.floop(500);
 
-        itemId = f[1];
+        itemId = uint16(f[1]);
 
         nuggft.sell(500, itemId, 50 ether);
         forge.vm.expectRevert(hex'99');
@@ -306,9 +306,9 @@ contract system__NuggftV1Swap is NuggftV1Test, fragments {
         forge.vm.startPrank(users.frank);
         nuggft.mint{value: 0.2 ether}(500);
 
-        uint16[] memory f = abi.decode(abi.encode(nuggft.floop(500)), (uint16[]));
+        bytes2[] memory f = nuggft.floop(500);
 
-        itemId = f[1];
+        itemId = uint16(f[1]);
 
         // nuggft.floop(500);
         nuggft.sell(500, itemId, 1 ether);
@@ -334,16 +334,16 @@ contract system__NuggftV1Swap is NuggftV1Test, fragments {
         forge.vm.startPrank(users.frank);
         nuggft.mint{value: 0.2 ether}(500);
 
-        uint16[] memory f = abi.decode(abi.encode(nuggft.floop(500)), (uint16[]));
+        bytes2[] memory f = nuggft.floop(500);
 
-        itemId = f[1];
+        itemId = uint16(f[1]);
 
         nuggft.sell(500, itemId, 50 ether);
         // nuggft.claim(lib.sarr160(encItemIdClaim(500, itemId)), lib.sarr160(500));
 
         nuggft.floop(500);
 
-        itemId = f[2];
+        itemId = uint16(f[2]);
 
         nuggft.sell(500, itemId, 50 ether);
 
@@ -354,15 +354,15 @@ contract system__NuggftV1Swap is NuggftV1Test, fragments {
         forge.vm.startPrank(users.frank);
         nuggft.mint{value: 0.2 ether}(500);
 
-        uint16[] memory f = abi.decode(abi.encode(nuggft.floop(500)), (uint16[]));
+        bytes2[] memory f = nuggft.floop(500);
 
-        itemId = f[1];
+        itemId = uint16(f[1]);
         nuggft.sell(500, itemId, 50 ether);
         nuggft.claim(lib.sarr160(encItemIdClaim(500, itemId)), lib.sarr160(500));
 
         nuggft.floop(500);
 
-        itemId = f[2];
+        itemId = uint16(f[2]);
         nuggft.sell(500, itemId, 50 ether);
         nuggft.claim(lib.sarr160(encItemIdClaim(500, itemId)), lib.sarr160(500));
 
