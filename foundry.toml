@@ -3,7 +3,6 @@ src = 'src'
 test = '_test'
 out = './out'
 libs = ['lib', '../dotnugg-v1-core']
-
 cache = true
 force = false
 evm_version = 'london'
@@ -19,7 +18,7 @@ ffi = true
 sender = '0x00a329c0648769a73afac7f9381e08fb43dbea72'
 tx_origin = '0x00a329c0648769a73afac7f9381e08fb43dbea72'
 initial_balance = '0xffffffffffffffffffffffff'
-block_number = 40000000
+block_number = 4400000
 chain_id = 1
 gas_limit = 9223372036854775807
 gas_price = 0

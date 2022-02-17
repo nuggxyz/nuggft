@@ -37,7 +37,6 @@ import {NuggftV1ProofType} from './types/NuggftV1ProofType.sol';
 /// 2.
 contract NuggftV1 is IERC721Metadata, NuggftV1Loan {
     using CastLib for uint256;
-
     using NuggftV1StakeType for uint256;
 
     constructor(address dotnugg, bytes[] memory nuggs) {

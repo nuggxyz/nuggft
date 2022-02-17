@@ -19,11 +19,13 @@ import '../utils/vm.sol';
 import '../utils/stdlib.sol';
 import './global.sol';
 import './cast.sol';
+import './injector.sol';
 
 library ds {
     bytes32 constant DS_TEST_SET_ON_FAIL = 0x0000000000000000000000000000000000000000000000000000000000000101;
 
     bytes32 constant SLOT_0 = 0x0000000000000000000000000000000000000000000000000000000000000000;
+    Injector constant inject = Injector(0x1212121212121212212121211121211212123dde);
 
     function getDsTest() private returns (address a) {
         a = global.getAddressSafe('DsTest');
@@ -31,6 +33,7 @@ library ds {
 
     function setDsTest(address addr) internal {
         global.set('DsTest', addr);
+        forge.vm.etch(address(inject), address(new Injector()).code);
     }
 
     function fail() internal {
