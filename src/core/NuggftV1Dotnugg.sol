@@ -6,9 +6,6 @@ import {IDotnuggV1Safe} from '../interfaces/dotnugg/IDotnuggV1Safe.sol';
 
 import {IDotnuggV1} from '../interfaces/dotnugg/IDotnuggV1.sol';
 
-import {ShiftLib} from '../libraries/ShiftLib.sol';
-import {INuggftV1Dotnugg} from '../interfaces/nuggftv1/INuggftV1Dotnugg.sol';
-import {CastLib} from '../libraries/CastLib.sol';
 import {NuggftV1Token} from './NuggftV1Token.sol';
 
 import {NuggftV1Trust} from './NuggftV1Trust.sol';

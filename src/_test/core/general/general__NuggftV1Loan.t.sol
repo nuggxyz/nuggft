@@ -4,7 +4,7 @@ pragma solidity 0.8.12;
 
 import '../../NuggftV1.test.sol';
 
-import {ShiftLib} from '../../../libraries/ShiftLib.sol';
+import {ShiftLib} from '../../helpers/ShiftLib.sol';
 import {NuggftV1Loan} from '../../../core/NuggftV1Loan.sol';
 import {NuggftV1Token} from '../../../core/NuggftV1Token.sol';
 

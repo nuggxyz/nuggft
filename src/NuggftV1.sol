@@ -17,19 +17,9 @@ import {INuggftV1Stake} from './interfaces/nuggftv1/INuggftV1Stake.sol';
 
 import {INuggftV1} from './interfaces/nuggftv1/INuggftV1.sol';
 
-import {TransferLib} from './libraries/TransferLib.sol';
-import {CastLib} from './libraries/CastLib.sol';
-import {ShiftLib} from './libraries/ShiftLib.sol';
-
-import {NuggftV1StakeType} from './types/NuggftV1StakeType.sol';
-import {NuggftV1ProofType} from './types/NuggftV1ProofType.sol';
-
 /// @title NuggftV1
 /// @author nugg.xyz - danny7even & dub6ix
 contract NuggftV1 is IERC721Metadata, NuggftV1Loan {
-    using CastLib for uint256;
-    using NuggftV1StakeType for uint256;
-
     constructor(address dotnugg, bytes[] memory nuggs) NuggftV1Dotnugg(dotnugg, nuggs) {}
 
     /// @inheritdoc IERC165
@@ -50,8 +40,7 @@ contract NuggftV1 is IERC721Metadata, NuggftV1Loan {
 
     /// @inheritdoc IERC721Metadata
     function tokenURI(uint256 tokenId) public view virtual override returns (string memory res) {
-        uint160 safeTokenId = tokenId.to160();
-
+        // uint160 safeTokenId = uint160(tokenId);
         // res = dotnuggV1.dat(address(this), tokenId, dotnuggV1ResolverOf(safeTokenId), symbol(), name(), true, '');
     }
 
@@ -103,7 +92,7 @@ contract NuggftV1 is IERC721Metadata, NuggftV1Loan {
     function burn(uint160 tokenId) external {
         uint96 ethOwed = subStakedShare(tokenId);
 
-        TransferLib.give(msg.sender, ethOwed);
+        payable(msg.sender).transfer(ethOwed);
 
         emit Burn(tokenId, msg.sender, ethOwed);
     }
@@ -143,11 +132,11 @@ contract NuggftV1 is IERC721Metadata, NuggftV1Loan {
         ethOwed = calculateEthPerShare(cache);
 
         /// TODO - test migration
-        assert(cache.shares() >= 1);
-        assert(cache.staked() >= ethOwed);
+        // assert(cache.shares() >= 1);
+        // assert(cache.staked() >= ethOwed);
 
-        cache = cache.subShares(1);
-        cache = cache.subStaked(ethOwed);
+        cache -= 1 << 160;
+        cache -= ethOwed << 96;
 
         stake = cache;
 

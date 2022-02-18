@@ -4,16 +4,11 @@ pragma solidity 0.8.12;
 
 import {INuggftV1Proof} from '../interfaces/nuggftv1/INuggftV1Proof.sol';
 
-import {CastLib} from '../libraries/CastLib.sol';
 import {DotnuggV1Lib} from '../libraries/DotnuggV1Lib.sol';
 
 import {NuggftV1Dotnugg} from './NuggftV1Dotnugg.sol';
-import '../_test/utils/forge.sol';
 
 abstract contract NuggftV1Proof is INuggftV1Proof, NuggftV1Dotnugg {
-    using CastLib for uint160;
-    using CastLib for uint256;
-
     mapping(uint160 => uint256) proofs;
 
     /// @inheritdoc INuggftV1Proof
@@ -160,8 +155,6 @@ abstract contract NuggftV1Proof is INuggftV1Proof, NuggftV1Dotnugg {
         }
 
         proofs[tokenId] = initFromSeed(randomEnoughSeed);
-
-        ds.inject.log(proofs[tokenId]);
     }
 
     // TODO TO BE TESTED

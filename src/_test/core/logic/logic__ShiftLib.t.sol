@@ -2,7 +2,7 @@ pragma solidity 0.8.12;
 
 import '../../NuggftV1.test.sol';
 
-import {ShiftLib} from '../../../libraries/ShiftLib.sol';
+import {ShiftLib} from '../../helpers/ShiftLib.sol';
 
 contract logic__ShiftLib__mask is NuggftV1Test {
     function mask__safe__a(uint8 bits) public pure returns (uint256) {

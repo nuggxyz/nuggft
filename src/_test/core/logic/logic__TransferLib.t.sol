@@ -2,7 +2,7 @@ pragma solidity 0.8.12;
 
 import '../../NuggftV1.test.sol';
 
-import {TransferLib} from '../../../libraries/TransferLib.sol';
+import {TransferLib} from '../../helpers/TransferLib.sol';
 
 contract logic__TransferLib__give is NuggftV1Test {
     function safe__give__a(address recipient, uint256 amount) internal {
