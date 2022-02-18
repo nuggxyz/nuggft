@@ -17,6 +17,7 @@ module.exports = {
                 //  singleQuote: false,
                 bracketSpacing: false,
                 explicitTypes: 'always',
+                compiler: '0.8.12',
             },
         },
     ],

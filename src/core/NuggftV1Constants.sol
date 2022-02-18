@@ -2,7 +2,7 @@
 
 import '../_test/utils/forge.sol';
 
-pragma solidity 0.8.11;
+pragma solidity 0.8.12;
 
 abstract contract NuggftV1Constants {
     uint256 constant LOSS = .1 gwei;
