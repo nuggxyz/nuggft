@@ -24,28 +24,20 @@ import {ShiftLib} from './libraries/ShiftLib.sol';
 import {NuggftV1StakeType} from './types/NuggftV1StakeType.sol';
 import {NuggftV1ProofType} from './types/NuggftV1ProofType.sol';
 
-/// @title NuggFT V1
+/// @title NuggftV1
 /// @author nugg.xyz - danny7even & dub6ix
-/// @notice Explain to an end user what this does
-/// @dev Explain to a developer any extra details
-/// @dev the words "share" and "nugg" are used interchangably throughout
-
-/// deviations from ERC721 standard:
-/// 1. no verificaiton the receiver is a ERC721Reciever - on top of this being a gross waste of gas,
-/// the way the swapping logic works makes this only worth calling when a user places an offer - and
-/// we did not want to call "onERC721Recieved" when no token was being sent.
-/// 2.
 contract NuggftV1 is IERC721Metadata, NuggftV1Loan {
     using CastLib for uint256;
     using NuggftV1StakeType for uint256;
 
-    constructor(address dotnugg, bytes[] memory nuggs) {
-        dotnuggV1Safe = IDotnuggV1(dotnugg).register(nuggs);
-    }
+    constructor(address dotnugg, bytes[] memory nuggs) NuggftV1Dotnugg(dotnugg, nuggs) {}
 
     /// @inheritdoc IERC165
     function supportsInterface(bytes4 interfaceId) public view virtual override returns (bool) {
-        return interfaceId == type(IERC721).interfaceId || interfaceId == type(IERC721Metadata).interfaceId || interfaceId == type(IERC165).interfaceId;
+        return
+            interfaceId == type(IERC721).interfaceId || //
+            interfaceId == type(IERC721Metadata).interfaceId ||
+            interfaceId == type(IERC165).interfaceId;
     }
 
     function name() public pure override returns (string memory) {
@@ -62,37 +54,6 @@ contract NuggftV1 is IERC721Metadata, NuggftV1Loan {
 
         // res = dotnuggV1.dat(address(this), tokenId, dotnuggV1ResolverOf(safeTokenId), symbol(), name(), true, '');
     }
-
-    /*━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-                                CORE
-    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━*/
-
-    // function dotnuggV1ImplementerCallback(uint256 tokenId) public view override returns (IDotnuggV1Metadata.Memory memory data) {
-    //     (
-    //         ,
-    //         data.ids, //
-    //         data.xovers,
-    //         data.yovers,
-    //         data.styles,
-    //         data.background
-    //     ) = proofToDotnuggMetadata(tokenId.to160());
-
-    //     data.labels = new string[](8);
-    //     data.version = 1;
-    //     data.artifactId = tokenId;
-    //     data.implementer = address(this);
-
-    //     data.labels[0] = 'BASE';
-    //     data.labels[1] = 'EYES';
-    //     data.labels[2] = 'MOUTH';
-    //     data.labels[3] = 'HAIR';
-    //     data.labels[4] = 'HAT';
-    //     data.labels[5] = 'BACK';
-    //     data.labels[6] = 'NECK';
-    //     data.labels[7] = 'HOLD';
-
-    //     return data;
-    // }
 
     /// @inheritdoc INuggftV1Token
     function mint(uint160 tokenId) public payable override {
@@ -172,13 +133,10 @@ contract NuggftV1 is IERC721Metadata, NuggftV1Loan {
 
         uint256 cache = stake;
 
-        // hanles all logic not related to staking the nugg
+        // handles all logic not related to staking the nugg
         delete agency[tokenId];
 
-        // delete swaps[tokenId];
-        // delete loans[tokenId];
         delete proofs[tokenId];
-        // delete resolvers[tokenId];
 
         emit Transfer(msg.sender, address(0), tokenId);
 

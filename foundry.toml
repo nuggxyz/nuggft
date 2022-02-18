@@ -2,15 +2,15 @@
 src = 'src'
 test = '_test'
 out = './out'
-libs = ['lib', '../dotnugg-v1-core']
-cache = true
+libs = ['lib', '../dotnugg-v1-core/src']
+# cache = false
 force = false
 evm_version = 'london'
 ## Sets the concrete solc version to use, this overrides the `auto_detect_solc` value
 solc_version = '0.8.11'
 auto_detect_solc = true
-optimizer = false
-optimizer_runs = 1
+optimizer = true
+optimizer_runs = 1000000
 verbosity = 0
 ignored_error_codes = []
 fuzz_runs = 1

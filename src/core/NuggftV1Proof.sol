@@ -5,6 +5,7 @@ pragma solidity 0.8.11;
 import {INuggftV1Proof} from '../interfaces/nuggftv1/INuggftV1Proof.sol';
 
 import {CastLib} from '../libraries/CastLib.sol';
+import {DotnuggV1Lib} from '../libraries/DotnuggV1Lib.sol';
 
 import {NuggftV1Dotnugg} from './NuggftV1Dotnugg.sol';
 import '../_test/utils/forge.sol';
@@ -13,15 +14,7 @@ abstract contract NuggftV1Proof is INuggftV1Proof, NuggftV1Dotnugg {
     using CastLib for uint160;
     using CastLib for uint256;
 
-    /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-                                state
-       ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
-
     mapping(uint160 => uint256) proofs;
-
-    /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-                           external functions
-       ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
 
     /// @inheritdoc INuggftV1Proof
     function rotate(
@@ -39,7 +32,6 @@ abstract contract NuggftV1Proof is INuggftV1Proof, NuggftV1Dotnugg {
                 revert(0, 0x01)
             }
 
-            let mptr := mload(0x40)
             mstore(0x00, tokenId)
             mstore(0x20, agency.slot)
             let buyerTokenAgency := sload(keccak256(0x00, 0x40))
@@ -96,8 +88,6 @@ abstract contract NuggftV1Proof is INuggftV1Proof, NuggftV1Dotnugg {
                 let item0 := and(shr(mul(index0, 16), proof), 0xffff)
                 let item1 := and(shr(mul(index1, 16), proof), 0xffff)
 
-                // log4(0x00, 0x20, pos0, pos1, item0, item1)
-
                 mstore8(pos1, shr(8, item0))
                 mstore8(add(pos1, 1), item0)
                 mstore8(pos0, shr(8, item1))
@@ -132,10 +122,6 @@ abstract contract NuggftV1Proof is INuggftV1Proof, NuggftV1Dotnugg {
         }
     }
 
-    /*━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-                            SWAP MANAGEMENT
-    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━*/
-
     /// @notice parses the external itemId into a feautre and position
     /// @dev this follows dotnugg v1 specification
     /// @param itemId -> the external itemId
@@ -145,10 +131,6 @@ abstract contract NuggftV1Proof is INuggftV1Proof, NuggftV1Dotnugg {
         feat = uint8(itemId >> 8);
         pos = uint8(itemId & 0xff);
     }
-
-    /*━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-                            INITIALIZATION
-    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━*/
 
     function setProof(uint160 tokenId) internal {
         uint256 randomEnoughSeed;
@@ -186,11 +168,11 @@ abstract contract NuggftV1Proof is INuggftV1Proof, NuggftV1Dotnugg {
     function initFromSeed(uint256 seed) internal view returns (uint256 res) {
         require(seed != 0, 'P:8');
 
-        res |= dotnuggV1Safe.randOf(0, seed);
+        res |= DotnuggV1Lib.search(address(dotnuggV1Safe), 0, seed);
 
-        res |= uint256((1 << 8) | dotnuggV1Safe.randOf(1, seed)) << (16 * 1);
+        res |= uint256((1 << 8) | DotnuggV1Lib.search(address(dotnuggV1Safe), 1, seed)) << (16 * 1);
 
-        res |= uint256((2 << 8) | dotnuggV1Safe.randOf(2, seed)) << (16 * 2);
+        res |= uint256((2 << 8) | DotnuggV1Lib.search(address(dotnuggV1Safe), 2, seed)) << (16 * 2);
 
         uint8 selA = uint8((seed >> 8) & 0xff);
         uint8 selB = uint8((seed >> 16) & 0xff);
@@ -200,18 +182,13 @@ abstract contract NuggftV1Proof is INuggftV1Proof, NuggftV1Dotnugg {
         selB = selB < 30 ? 5 : selB < 55 ? 6 : selB < 75 ? 7 : 0;
         selC = selC < 30 ? 5 : selC < 55 ? 6 : selC < 75 ? 7 : selC < 115 ? 4 : selC < 155 ? 3 : selC < 205 ? 2 : 1;
 
-        res |= uint256((uint16(selA) << 8) | dotnuggV1Safe.randOf(selA, seed)) << (16 * 3);
+        res |= uint256((uint16(selA) << 8) | DotnuggV1Lib.search(address(dotnuggV1Safe), selA, seed)) << (16 * 3);
 
         if (selB != 0) {
-            res |= uint256((uint16(selB) << 8) | dotnuggV1Safe.randOf(selB, seed)) << (16 * 4);
+            res |= uint256((uint16(selB) << 8) | DotnuggV1Lib.search(address(dotnuggV1Safe), selB, seed)) << (16 * 4);
         }
 
-        res |= uint256((uint16(selC) << 8) | dotnuggV1Safe.randOf(selC, seed >> 8)) << (16 * 8);
-    }
-
-    function safeMod(uint256 value, uint8 modder) internal pure returns (uint256) {
-        require(modder != 0, 'P:9');
-        return value.to8() % modder;
+        res |= uint256((uint16(selC) << 8) | DotnuggV1Lib.search(address(dotnuggV1Safe), selC, seed >> 8)) << (16 * 8);
     }
 
     function pendingProof()

@@ -11,6 +11,8 @@ contract Injector {
 
     function log() external view {}
 
+    function log(bytes32 input) external view {}
+
     function logInt(int256 p0) external view {}
 
     function logUint(uint256 p0) external view {}
