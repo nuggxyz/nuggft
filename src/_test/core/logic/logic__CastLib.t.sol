@@ -2,7 +2,7 @@ pragma solidity 0.8.12;
 
 import '../../NuggftV1.test.sol';
 
-import {CastLib} from '../../../libraries/CastLib.sol';
+import {CastLib} from '../../helpers/CastLib.sol';
 
 contract logic__CastLib__to24 is NuggftV1Test {
     function safe__to24__a(uint256 x) public pure returns (uint24 y) {

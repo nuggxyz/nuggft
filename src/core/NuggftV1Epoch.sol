@@ -9,10 +9,6 @@ import {NuggftV1Constants} from './NuggftV1Constants.sol';
 abstract contract NuggftV1Epoch is INuggftV1Epoch, NuggftV1Constants {
     uint256 public immutable override genesis;
 
-    uint8 constant SWAP_FLAG = 0x3;
-    uint8 constant LOAN_FLAG = 0x2;
-    uint8 constant OWN_FLAG = 0x01;
-
     constructor() {
         genesis = (block.number / INTERVAL) * INTERVAL;
         emit Genesis(genesis, INTERVAL, OFFSET);

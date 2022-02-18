@@ -11,10 +11,6 @@ interface INuggftV1ItemSwap {
 
     event TransferItem(uint256 indexed from, uint256 indexed to, bytes2 indexed id, bytes32 proof);
 
-    /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-                            STATE CHANGING
-       ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
-
     function offer(
         uint160 buyerTokenId,
         uint160 sellerTokenId,
@@ -28,10 +24,6 @@ interface INuggftV1ItemSwap {
         uint16 itemid,
         uint96 floor
     ) external;
-
-    /*━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-                            VIEW FUNCTIONS
-    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━*/
 
     /// @notice calculates the minimum eth that must be sent with a offer call
     /// @dev returns 0 if no offer can be made for this oken

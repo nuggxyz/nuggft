@@ -2,6 +2,8 @@
 
 pragma solidity 0.8.12;
 
+// prettier-ignore
+
 interface INuggftV1Swap {
     /// @notice Explain to an end user what this does
     /// @dev Explain to a developer any extra details
@@ -34,14 +36,8 @@ interface INuggftV1Swap {
     /// @return canOffer -> instead of reverting this function will return false
     /// @return nextOfferAmount -> the minimum value that must be sent with a offer call
     /// @return senderCurrentOffer ->
-    function check(address sender, uint160 tokenId)
-        external
-        view
-        returns (
-            bool canOffer,
-            uint96 nextOfferAmount,
-            uint96 senderCurrentOffer
-        );
+    function check(address sender, uint160 tokenId) external view 
+        returns (bool canOffer, uint96 nextOfferAmount, uint96 senderCurrentOffer);
 
     function vfo(address sender, uint160 tokenId) external view returns (uint96 res);
 }

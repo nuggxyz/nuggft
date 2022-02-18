@@ -2,7 +2,7 @@
 
 pragma solidity 0.8.12;
 
-import {ShiftLib} from '../libraries/ShiftLib.sol';
+import {ShiftLib} from './ShiftLib.sol';
 
 library NuggftV1StakeType {
     /// 96 protocol

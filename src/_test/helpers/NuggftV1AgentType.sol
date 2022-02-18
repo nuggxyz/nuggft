@@ -2,8 +2,8 @@
 
 pragma solidity 0.8.12;
 
-import {ShiftLib} from '../libraries/ShiftLib.sol';
-import {CastLib} from '../libraries/CastLib.sol';
+import {ShiftLib} from './ShiftLib.sol';
+import {CastLib} from './CastLib.sol';
 
 /// @notice Explain to an end user what this does
 /// @dev Explain to a developer any extra details

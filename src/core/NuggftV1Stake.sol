@@ -7,13 +7,7 @@ import {NuggftV1Proof} from './NuggftV1Proof.sol';
 import {INuggftV1Migrator} from '../interfaces/nuggftv1/INuggftV1Migrator.sol';
 import {INuggftV1Stake} from '../interfaces/nuggftv1/INuggftV1Stake.sol';
 
-import {TransferLib} from '../libraries/TransferLib.sol';
-
-import {NuggftV1StakeType} from '../types/NuggftV1StakeType.sol';
-
 abstract contract NuggftV1Stake is INuggftV1Stake, NuggftV1Proof {
-    using NuggftV1StakeType for uint256;
-
     address public migrator;
 
     uint256 internal stake;
@@ -22,9 +16,9 @@ abstract contract NuggftV1Stake is INuggftV1Stake, NuggftV1Proof {
     function extract() external requiresTrust {
         uint256 cache = stake;
 
-        TransferLib.give(msg.sender, cache.proto());
+        payable(msg.sender).transfer((cache << 160) >> 160);
 
-        cache = cache.proto(0);
+        cache = (cache >> 96) << 96;
 
         emit Stake(bytes32(cache));
     }
@@ -52,17 +46,17 @@ abstract contract NuggftV1Stake is INuggftV1Stake, NuggftV1Proof {
 
     // / @inheritdoc INuggftV1Stake
     function shares() public view override returns (uint64 res) {
-        res = stake.shares();
+        res = uint64(stake >> 192);
     }
 
     /// @inheritdoc INuggftV1Stake
     function staked() public view override returns (uint96 res) {
-        res = stake.staked();
+        res = uint96(stake >> 96);
     }
 
     /// @inheritdoc INuggftV1Stake
     function proto() public view override returns (uint96 res) {
-        res = stake.proto();
+        res = uint96(stake);
     }
 
     /// @inheritdoc INuggftV1Stake
