@@ -25,7 +25,9 @@ library ds {
     bytes32 constant DS_TEST_SET_ON_FAIL = 0x0000000000000000000000000000000000000000000000000000000000000101;
 
     bytes32 constant SLOT_0 = 0x0000000000000000000000000000000000000000000000000000000000000000;
-    Injector constant inject = Injector(0x1212121212121212212121211121211212123dde);
+    Injector constant inject = Injector(address(uint160(12345)));
+
+    bytes4 constant INJECT_LOG = 0xb60e72cc; //'log(string,uint256)'
 
     function getDsTest() private returns (address a) {
         a = global.getAddressSafe('DsTest');

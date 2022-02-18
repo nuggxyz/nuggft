@@ -8,32 +8,12 @@ import {ShiftLib} from '../../../libraries/ShiftLib.sol';
 import {NuggftV1Loan} from '../../../core/NuggftV1Loan.sol';
 import {NuggftV1Token} from '../../../core/NuggftV1Token.sol';
 
-contract logic__NuggftV1Loan is NuggftV1Test, NuggftV1Loan {
-    /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-                                  overrides
-       ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
-
-    function supportsInterface(bytes4 interfaceId) public view virtual override returns (bool) {}
-
-    function trustedMint(uint160 tokenId, address to) external payable override requiresTrust {}
-
-    function mint(uint160 tokenId) public payable override {}
-
-    function burn(uint160 tokenId) public override {}
-
-    function migrate(uint160 tokenId) public override {}
-
-    /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-                                tx gas
-       ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+contract logic__NuggftV1Loan is NuggftV1Test, RiggedNuggft {
+    constructor() RiggedNuggft(address(processor)) {}
 
     function test__logic__NuggftV1Loan__calc__tx__gas() public pure {
         calc(type(uint96).max, type(uint96).max);
     }
-
-    /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-                                   calc
-       ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
 
     function safe__calc__0(uint96 principal, uint96 activeEps) internal pure returns (uint96 fee, uint96 earned) {
         fee = activeEps - principal;

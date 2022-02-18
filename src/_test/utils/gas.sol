@@ -2,37 +2,38 @@
 
 pragma solidity 0.8.11;
 
-import './console.sol';
+import './ds.sol';
 
 library gas {
-    struct cp {
+    struct run {
         string label;
         uint256 left;
     }
 
-    function ptr() private pure returns (cp storage s) {
+    function ptr() private pure returns (run storage s) {
         assembly {
             s.slot := 0x432343243242342534
         }
     }
 
-    function start(string memory label) internal {
-        ptr().label = label;
-        ptr().left = gasleft();
+    function start(string memory label) internal view returns (run memory a) {
+        // ptr().runs[label] = 0x01;
+        // ptr().runs[label] = gasleft();
+
+        a.label = label;
+        a.left = gasleft();
+
+        // ptr().left = gasleft();
     }
 
-    function start() internal {
-        ptr().left = gasleft();
-    }
+    // function start() internal {
+    //     ptr().left = gasleft();
+    // }
 
-    function stop() internal view {
+    function stop(run memory b) internal view {
         uint256 checkpointGasLeft2 = gasleft();
 
-        string memory l1 = ptr().label;
-
-        string memory lab = (bytes(l1).length == 0) ? 'no label' : l1;
-
-        console.log(lab, ptr().left - checkpointGasLeft2);
+        ds.inject.log(b.label, b.left - checkpointGasLeft2);
     }
 }
 
@@ -48,7 +49,7 @@ contract GasTracker {
             a := sub(a, gas())
         }
 
-        console.log('gas used: ', a);
+        ds.inject.log('gas used: ', a);
     }
 
     modifier trackGas2(string memory mem) {
@@ -62,6 +63,6 @@ contract GasTracker {
             a := sub(a, gas())
         }
 
-        console.log(mem, a);
+        ds.inject.log(mem, a);
     }
 }
