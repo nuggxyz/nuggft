@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity 0.8.11;
+pragma solidity 0.8.12;
 
 interface INuggftV1ItemSwap {
     event OfferItem(uint160 indexed sellingTokenId, bytes2 indexed itemId, bytes32 agency);

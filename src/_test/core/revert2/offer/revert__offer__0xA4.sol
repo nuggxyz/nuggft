@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: UNLICENSED
 
-pragma solidity 0.8.11;
+pragma solidity 0.8.12;
 
 import '../../../NuggftV1.test.sol';
 
@@ -24,7 +24,7 @@ contract revert__offer__0xA4 is NuggftV1Test {
     }
 
     function test__revert__offer__0xA4__pass__desc() public {
-         jump(3000);
+        jump(3000);
 
         expect.mint().from(users.frank).value(.5 ether).exec(500);
 

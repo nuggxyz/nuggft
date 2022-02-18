@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity 0.8.11;
+pragma solidity 0.8.12;
 
 import {INuggftV1Trust} from '../interfaces/nuggftv1/INuggftV1Trust.sol';
 

@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity 0.8.11;
+pragma solidity 0.8.12;
 
 import '../../NuggftV1.test.sol';
 import {NuggftV1Proof} from '../../../core/NuggftV1Proof.sol';
