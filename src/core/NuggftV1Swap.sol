@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity 0.8.11;
+pragma solidity 0.8.12;
 
 import {INuggftV1Swap} from '../interfaces/nuggftv1/INuggftV1Swap.sol';
 import {INuggftV1ItemSwap} from '../interfaces/nuggftv1/INuggftV1ItemSwap.sol';
@@ -42,8 +42,6 @@ abstract contract NuggftV1Swap is INuggftV1ItemSwap, INuggftV1Swap, NuggftV1Stak
             }
 
             isItem := gt(tokenId, 0xffffff)
-
-            // NOTE: memory locations are referenced as offsets from the free memory pointer
 
             // store callvalue formatted in .1 gwei for caculation of total offer
             next := div(callvalue(), LOSS)
@@ -317,14 +315,6 @@ abstract contract NuggftV1Swap is INuggftV1ItemSwap, INuggftV1Swap, NuggftV1Stak
     function claim(uint160[] calldata tokenIds, address[] calldata accounts) public override {
         uint256 active = epoch();
 
-        // require(tokenIds.length == accounts.length, 'oops');
-
-        // uint256 acc;
-
-        // for (uint256 i = 0; i < tokenIds.length; i++) {
-
-        // }
-
         assembly {
             function panic(code) {
                 mstore8(0, code)
@@ -363,19 +353,17 @@ abstract contract NuggftV1Swap is INuggftV1ItemSwap, INuggftV1Swap, NuggftV1Stak
               0x60: itemOffers.slot
             ==============================*/
 
-            let mptr := mload(0x40)
-
             // store common slot for agency in memory
-            mstore(add(mptr, 0x20), agency.slot)
+            mstore(0x20, agency.slot)
 
             // store common slot for offers in memory
-            mstore(add(mptr, 0x60), offers.slot)
+            mstore(0x60, offers.slot)
 
             // store common slot for agency in memory
-            mstore(add(mptr, 0xE0), itemAgency.slot)
+            mstore(0xE0, itemAgency.slot)
 
             // store common slot for offers in memory
-            mstore(add(mptr, 0x120), itemOffers.slot)
+            mstore(0x120, itemOffers.slot)
 
             for {
                 let i := 0
@@ -390,15 +378,15 @@ abstract contract NuggftV1Swap is INuggftV1ItemSwap, INuggftV1Swap, NuggftV1Stak
 
                 let trusted_eoa := offerer
 
-                // let isItem := gt(tokenId, 0xffffff)
+                let isItem := gt(tokenId, 0xffffff)
 
                 let mptroffset := 0
 
-                if gt(tokenId, 0xffffff) {
+                if isItem {
                     // calculate agency.slot storeage ptr
-                    mstore(mptr, offerer)
+                    mstore(0x00, offerer)
 
-                    let offerer__agency := sload(keccak256(mptr, 0x40))
+                    let offerer__agency := sload(keccak256(0x00, 0x40))
 
                     trusted_eoa := iso(offerer__agency, 96, 96)
 
@@ -406,21 +394,21 @@ abstract contract NuggftV1Swap is INuggftV1ItemSwap, INuggftV1Swap, NuggftV1Stak
                 }
 
                 // calculate agency.slot storeage ptr
-                mstore(add(mptr, mptroffset), tokenId)
+                mstore(mptroffset, tokenId)
 
-                let agency__sptr := keccak256(add(mptr, mptroffset), 0x40)
+                let agency__sptr := keccak256(mptroffset, 0x40)
 
                 // load agency value from storage
                 let agency__cache := sload(agency__sptr)
 
                 // calculate offers.slot storage pointer
-                mstore(add(add(mptr, mptroffset), 0x40), tokenId)
-                let offer__sptr := keccak256(add(add(mptr, mptroffset), 0x40), 0x40)
+                mstore(add(mptroffset, 0x40), tokenId)
+                let offer__sptr := keccak256(add(mptroffset, 0x40), 0x40)
 
                 // calculate offers[tokenId].slot storage pointer
-                mstore(add(mptr, 0x80), offerer)
-                mstore(add(mptr, 0xa0), offer__sptr)
-                offer__sptr := keccak256(add(mptr, 0x80), 0x40)
+                mstore(0x80, offerer)
+                mstore(0xa0, offer__sptr)
+                offer__sptr := keccak256(0x80, 0x40)
 
                 // check if the offerer is the current agent
                 switch eq(offerer, iso(agency__cache, 96, 96))
@@ -439,29 +427,22 @@ abstract contract NuggftV1Swap is INuggftV1ItemSwap, INuggftV1Swap, NuggftV1Stak
                         panic(Error__C__0x67__WinningClaimTooEarly)
                     }
 
-                    switch gt(tokenId, 0xffffff)
+                    switch isItem
                     case 1 {
                         sstore(agency__sptr, 0)
 
                         sstore(protocolItems.slot, sub(sload(protocolItems.slot), 1))
 
-                        let a := add(mptr, 0xa0)
-
                         // store common slot for offers in memory
-                        mstore(a, proofs.slot)
+                        mstore(0xA0, proofs.slot)
 
-                        let proof__sptr := keccak256(add(mptr, 0x80), 0x40)
+                        let proof__sptr := keccak256(0x80, 0x40)
 
                         let proof := sload(proof__sptr)
 
-                        for {
-                            let j := 8
-                        } lt(j, 17) {
-                            j := add(j, 1)
-                        } {
-                            if eq(j, 16) {
-                                panic(Error__O__0x79__ProofHasNoFreeSlot)
-                            }
+                        // prettier-ignore
+                        for { let j := 8 } lt(j, 17) { j := add(j, 1) } {
+                            if eq(j, 16) { panic(Error__O__0x79__ProofHasNoFreeSlot) }
 
                             if iszero(and(shr(mul(j, 16), proof), 0xffff)) {
                                 let tmp := shr(24, tokenId)
@@ -472,9 +453,9 @@ abstract contract NuggftV1Swap is INuggftV1ItemSwap, INuggftV1Swap, NuggftV1Stak
 
                         sstore(proof__sptr, proof)
 
-                        mstore(a, proof)
+                        mstore(0xA0, proof)
 
-                        log4(a, 0x20, Event__TransferItem, 0x00, offerer, shl(240, shr(24, tokenId)))
+                        log4(0xA0, 0x20, Event__TransferItem, 0x00, offerer, shl(240, shr(24, tokenId)))
                     }
                     default {
                         // update agency to reflect the new owner
@@ -510,7 +491,7 @@ abstract contract NuggftV1Swap is INuggftV1ItemSwap, INuggftV1Swap, NuggftV1Stak
                 // delete offer before we potentially send value
                 sstore(offer__sptr, 0)
 
-                switch gt(tokenId, 0xffffff)
+                switch isItem
                 case 1 {
                     log4(0x00, 0x00, Event__ClaimItem, and(tokenId, 0xffffff), shl(240, shr(24, tokenId)), offerer)
                 }
@@ -600,20 +581,13 @@ abstract contract NuggftV1Swap is INuggftV1ItemSwap, INuggftV1Swap, NuggftV1Stak
 
                 let proof := sload(proof__sptr)
 
-                // if iszero(proof) {
-                //     mstore8(0x00, 0x33)
-                // }
-
                 let id := shr(24, tokenId)
 
                 // start at 1 to jump over the base
                 let j := 1
 
-                for {
-
-                } lt(j, 16) {
-                    j := add(j, 1)
-                } {
+                // prettier-ignore
+                for { } lt(j, 16) { j := add(j, 1) } {
                     if eq(and(shr(mul(j, 16), proof), 0xffff), id) {
                         proof := and(proof, not(shl(mul(j, 16), 0xffff)))
                         break
@@ -822,3 +796,16 @@ abstract contract NuggftV1Swap is INuggftV1ItemSwap, INuggftV1Swap, NuggftV1Stak
         }
     }
 }
+
+// Running 5 tests for revert__claim__0x74.json:revert__claim__0x74
+// [PASS] test__revert__claim__0x74__fail__item__nonWinningIncorrectSenderIncorrectArgIncorectUser() (gas: 141242)
+// [PASS] test__revert__claim__0x74__fail__item__userWithPendingWinningNuggClaim() (gas: 144922)
+// [PASS] test__revert__claim__0x74__fail__nugg__incorrectSenderCorrectArg() (gas: 144867)
+// [PASS] test__revert__claim__0x74__pass__item__nonWinningIncorrectSenderIncorrectArg() (gas: 156257)
+// [PASS] test__revert__claim__0x74__pass__nugg__correctSenderCorrectArg() (gas: 122200)
+// Running 5 tests for revert__claim__0x74.json:revert__claim__0x74
+// [PASS] test__revert__claim__0x74__fail__item__nonWinningIncorrectSenderIncorrectArgIncorectUser() (gas: 141221)
+// [PASS] test__revert__claim__0x74__fail__item__userWithPendingWinningNuggClaim() (gas: 144901)
+// [PASS] test__revert__claim__0x74__fail__nugg__incorrectSenderCorrectArg() (gas: 144846)
+// [PASS] test__revert__claim__0x74__pass__item__nonWinningIncorrectSenderIncorrectArg() (gas: 156234)
+// [PASS] test__revert__claim__0x74__pass__nugg__correctSenderCorrectArg() (gas: 122174)
