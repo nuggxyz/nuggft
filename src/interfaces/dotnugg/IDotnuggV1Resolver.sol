@@ -11,5 +11,7 @@ interface IDotnuggV1Resolver {
 
     function combo(uint256[] memory read, bool base64) external view returns (string memory data);
 
+    function base64(string memory input) external view returns (string memory data);
+
     function svg(uint256[] memory calculated, bool base64) external view returns (string memory data);
 }

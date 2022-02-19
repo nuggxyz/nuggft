@@ -14,6 +14,7 @@ import {IDotnuggV1Safe} from './interfaces/dotnugg/IDotnuggV1Safe.sol';
 
 import {INuggftV1Token} from './interfaces/nuggftv1/INuggftV1Token.sol';
 import {INuggftV1Stake} from './interfaces/nuggftv1/INuggftV1Stake.sol';
+import {INuggftV1Proof} from './interfaces/nuggftv1/INuggftV1Proof.sol';
 
 import {INuggftV1} from './interfaces/nuggftv1/INuggftV1.sol';
 
@@ -30,10 +31,12 @@ contract NuggftV1 is IERC721Metadata, NuggftV1Loan {
             interfaceId == type(IERC165).interfaceId;
     }
 
+    /// @inheritdoc IERC721Metadata
     function name() public pure override returns (string memory) {
         return 'Nugg Fungible Token V1';
     }
 
+    /// @inheritdoc IERC721Metadata
     function symbol() public pure override returns (string memory) {
         return 'NUGGFT';
     }
@@ -41,19 +44,42 @@ contract NuggftV1 is IERC721Metadata, NuggftV1Loan {
     /// @inheritdoc IERC721Metadata
     function tokenURI(uint256 tokenId) public view virtual override returns (string memory res) {
         // uint160 safeTokenId = uint160(tokenId);
+
+        uint8[8] memory vals;
+        uint256 proof = proofs[uint160(tokenId)];
+
+        for (uint256 i = 0; i < 8; i++) {
+            (uint8 feature, uint8 pos) = parseItemId(uint16(proof));
+            if (vals[feature] == 0) vals[feature] = pos;
+            proof >>= 16;
+        }
+
+        res = dotnuggV1Safe.exec(vals, true);
+
         // res = dotnuggV1.dat(address(this), tokenId, dotnuggV1ResolverOf(safeTokenId), symbol(), name(), true, '');
+    }
+
+    /// @inheritdoc INuggftV1Proof
+    function imageURI(uint256 tokenId) public view override returns (string memory res) {
+        uint8[8] memory vals;
+        uint256 proof = proofs[uint160(tokenId)];
+
+        for (uint256 i = 0; i < 8; i++) {
+            (uint8 feature, uint8 pos) = parseItemId(uint16(proof));
+            if (vals[feature] == 0) vals[feature] = pos;
+            proof >>= 16;
+        }
+
+        res = dotnuggV1Safe.exec(vals, true);
     }
 
     /// @inheritdoc INuggftV1Token
     function mint(uint160 tokenId) public payable override {
-        assembly {
-            if or(iszero(gt(add(TRUSTED_MINT_TOKENS, UNTRUSTED_MINT_TOKENS), tokenId)), lt(tokenId, TRUSTED_MINT_TOKENS)) {
-                mstore8(0x00, Error__A__0x65__TokenNotMintable)
-                revert(0x00, 0x01)
-            }
-        }
-
-        // (tokenId <= UNTRUSTED_MINT_TOKENS + TRUSTED_MINT_TOKENS && tokenId >= TRUSTED_MINT_TOKENS, 'G:1');
+        require(
+            tokenId <= UNTRUSTED_MINT_TOKENS + TRUSTED_MINT_TOKENS && //
+                tokenId >= TRUSTED_MINT_TOKENS,
+            hex'65'
+        );
 
         addStakedShareFromMsgValue();
 
@@ -62,14 +88,7 @@ contract NuggftV1 is IERC721Metadata, NuggftV1Loan {
 
     /// @inheritdoc INuggftV1Token
     function trustedMint(uint160 tokenId, address to) external payable override requiresTrust {
-        assembly {
-            if or(iszero(lt(tokenId, TRUSTED_MINT_TOKENS)), iszero(tokenId)) {
-                mstore8(0x00, Error__B__0x66__TokenNotTrustMintable)
-                revert(0x00, 0x01)
-            }
-        }
-
-        // (tokenId < TRUSTED_MINT_TOKENS && tokenId != 0, 'G:1');
+        require(tokenId < TRUSTED_MINT_TOKENS && tokenId != 0, hex'66');
 
         addStakedShareFromMsgValue();
 
@@ -159,7 +178,6 @@ contract NuggftV1 is IERC721Metadata, NuggftV1Loan {
 
         // handles all logic not related to staking the nugg
         delete agency[tokenId];
-
         delete proofs[tokenId];
 
         emit Transfer(msg.sender, address(0), tokenId);
