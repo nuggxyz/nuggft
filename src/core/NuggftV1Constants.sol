@@ -8,22 +8,21 @@ abstract contract NuggftV1Constants {
     uint256 constant LOSS = .1 gwei;
 
     // stake
-    uint96 constant PROTOCOL_FEE_BPS = 10;
+    uint96 constant PROTOCOL_FEE_BPS = 8;
 
     // epoch
     uint16 constant INTERVAL_SUB = 2;
-    uint16 constant MINT_INTERVAL = 16;
+    uint16 constant MINT_INTERVAL = 4;
 
     uint16 constant INTERVAL = 69;
     uint24 constant OFFSET = 3000;
 
     // loan
-    uint24 constant LIQUIDATION_PERIOD = 1000;
-    uint96 public constant REBALANCE_FEE_BPS = 100;
+    uint24 constant LIQUIDATION_PERIOD = 1024;
+    uint96 public constant REBALANCE_FEE_BPS = 128;
 
     // swap
     uint256 constant SALE_LEN = 1;
-    uint256 constant PULLS_SLOC = 0x99;
 
     // events
     bytes32 constant Event__Transfer = 0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef;
@@ -39,7 +38,7 @@ abstract contract NuggftV1Constants {
     bytes32 constant Event__Repayment = 0xc928c04c08e9d5085139dee5b4b0a24f48d84c91f8f44caefaea39da6108fce3;
     bytes32 constant Event__OfferItem = 0xece1c1f9e5c92bf1d13cc47d0a5d490cbbc4be21c8d492368d4b8a8aba35e41d;
     bytes32 constant Event__TransferItem = 0x31cf2357b228de5e7b21be4ee816920a4eabd32196b782ad557ba4a0f5c20af1;
-
+    bytes32 constant Event__Mint = 0x7c80a7f346b69f118a49fc9d825f66c511507d357166e827c04de87b5a3df4a2;
     // errors
 
     uint8 constant Error__A__0x65__TokenNotMintable = 0x65; // 0x65__TokenNotMintable
@@ -57,6 +56,7 @@ abstract contract NuggftV1Constants {
     uint8 constant Error__M__0x77__NotOwner = 0x77; // 0xE9__NotOwner
     uint8 constant Error__N__0x78__TokenDoesNotExist = 0x78; // 0xEE__TokenDoesNotExist
     uint8 constant Error__O__0x79__ProofHasNoFreeSlot = 0x79; // 0xF9__ProofHasNoFreeSlot
+    uint8 constant Error__P__0x80__TokenDoesExist = 0x80; // 0xF9__TokenDoesExist
 
     uint8 constant Error__a__0x97__ItemAgencyAlreadySet = 0x97; // Error__0x09__ItemAgencyAlreadySet
     uint8 constant Error__b__0x98__BlockHashIsZero = 0x98; // 0x0E__BlockHashIsZero

@@ -55,13 +55,9 @@ contract NuggftV1 is IERC721Metadata, NuggftV1Loan {
 
         // (tokenId <= UNTRUSTED_MINT_TOKENS + TRUSTED_MINT_TOKENS && tokenId >= TRUSTED_MINT_TOKENS, 'G:1');
 
-        addStakedShareFromMsgValue__dirty();
+        addStakedShareFromMsgValue();
 
-        setProof(tokenId);
-
-        mint__dirty(msg.sender, tokenId);
-
-        emit Mint(tokenId, uint96(msg.value));
+        mint(msg.sender, tokenId);
     }
 
     /// @inheritdoc INuggftV1Token
@@ -75,13 +71,52 @@ contract NuggftV1 is IERC721Metadata, NuggftV1Loan {
 
         // (tokenId < TRUSTED_MINT_TOKENS && tokenId != 0, 'G:1');
 
-        addStakedShareFromMsgValue__dirty();
+        addStakedShareFromMsgValue();
 
-        setProof(tokenId);
+        mint(to, tokenId);
+    }
 
-        mint__dirty(to, tokenId);
+    function mint(address to, uint160 tokenId) internal {
+        uint256 randomEnough;
 
-        emit Mint(tokenId, uint96(msg.value));
+        assembly {
+            mstore(0x00, tokenId)
+            mstore(0x20, agency.slot)
+
+            let agency__sptr := keccak256(0x00, 0x40)
+
+            if iszero(iszero(sload(agency__sptr))) {
+                mstore8(0x00, Error__P__0x80__TokenDoesExist)
+                revert(0x00, 0x01)
+            }
+
+            // ========= memory ==========
+            //   0x00: tokenId
+            //   0x20: blockhash(((blocknum - 2) / 16) * 16)
+            // ===========================
+            mstore(0x20, blockhash(shl(shr(sub(number(), 2), 4), 4)))
+
+            randomEnough := keccak256(0x00, 0x40)
+
+            // update agency to reflect the new leader
+            // ====agency[tokenId]====
+            //     flag  = OWN(0x01)
+            //     epoch = 0
+            //     eth   = 0
+            //     addr  = to
+            // =======================
+            let agency__cache := or(shl(254, 0x01), to)
+
+            sstore(agency__sptr, agency__cache)
+
+            log4(0x00, 0x00, Event__Transfer, 0, to, tokenId)
+
+            mstore(0x00, tokenId)
+            mstore(0x20, callvalue())
+            log1(0x00, 0x40, Event__Mint)
+        }
+
+        proofs[tokenId] = initFromSeed(randomEnough);
     }
 
     /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━

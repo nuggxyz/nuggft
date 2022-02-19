@@ -101,7 +101,7 @@ abstract contract NuggftV1Swap is INuggftV1ItemSwap, INuggftV1Swap, NuggftV1Stak
             proofs[tokenId] = initFromSeed(calculateSeed(uint24(active)));
 
             // no need to update free memory pointer because we no longer rely on it being empty
-            addStakedShareFromMsgValue__dirty();
+            addStakedShareFromMsgValue();
 
             assembly {
                 // init agency__cache with SWAP flag and active epoch
@@ -163,14 +163,12 @@ abstract contract NuggftV1Swap is INuggftV1ItemSwap, INuggftV1Swap, NuggftV1Stak
             //   0x00: tokenId
             //   0x20: offers.slot
             // ===========================
-
             mstore(add(mptr, 0x20), offersSlot)
 
             // ========= memory ==========
             //     0x00: tokenId
             //     0x20: offers[tokenId].slot
             // ===========================
-
             mstore(add(mptr, 0x20), keccak256(mptr, 0x40))
 
             let agency__addr := iso(agency__cache, 96, 96)
@@ -308,7 +306,7 @@ abstract contract NuggftV1Swap is INuggftV1ItemSwap, INuggftV1Swap, NuggftV1Stak
         }
 
         // add the increment * LOSS to staked eth
-        addStakedEth__dirty(uint96(last));
+        addStakedEth(uint96(last));
     }
 
     /// @inheritdoc INuggftV1Swap

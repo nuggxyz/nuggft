@@ -12,6 +12,40 @@ abstract contract NuggftV1Proof is INuggftV1Proof, NuggftV1Dotnugg {
     mapping(uint160 => uint256) proofs;
 
     /// @inheritdoc INuggftV1Proof
+    function proofOf(uint160 tokenId) public view override returns (uint256) {
+        if (proofs[tokenId] != 0) return proofs[tokenId];
+
+        (uint256 seed, uint24 epoch) = calculateSeed();
+
+        if (epoch == tokenId && seed != 0) return initFromSeed(seed);
+        else return 0;
+    }
+
+    function floop(uint160 tokenId) public view returns (bytes2[] memory arr) {
+        arr = new bytes2[](16);
+        uint256 proof = proofs[tokenId];
+        uint256 max = 0;
+        for (uint256 i = 0; i < 16; i++) {
+            uint16 check = uint16(proof) & 0xfff;
+            proof >>= 16;
+            if (check != 0) {
+                arr[i] = bytes2(check);
+                max = i + 1;
+            }
+        }
+    }
+
+    /// @notice parses the external itemId into a feautre and position
+    /// @dev this follows dotnugg v1 specification
+    /// @param itemId -> the external itemId
+    /// @return feat -> the feautre of the item
+    /// @return pos -> the file storage position of the item
+    function parseItemId(uint16 itemId) internal pure returns (uint8 feat, uint8 pos) {
+        feat = uint8(itemId >> 8);
+        pos = uint8(itemId & 0xff);
+    }
+
+    /// @inheritdoc INuggftV1Proof
     function rotate(
         uint160 tokenId,
         uint8[] calldata index0s,
@@ -93,40 +127,6 @@ abstract contract NuggftV1Proof is INuggftV1Proof, NuggftV1Dotnugg {
         }
     }
 
-    /// @inheritdoc INuggftV1Proof
-    function proofOf(uint160 tokenId) public view override returns (uint256) {
-        if (proofs[tokenId] != 0) return proofs[tokenId];
-
-        (uint256 seed, uint256 epoch, uint256 proof) = pendingProof();
-
-        if (epoch == tokenId && seed != 0) return proof;
-        else return 0;
-    }
-
-    function floop(uint160 tokenId) public view returns (bytes2[] memory arr) {
-        arr = new bytes2[](16);
-        uint256 proof = proofs[tokenId];
-        uint256 max = 0;
-        for (uint256 i = 0; i < 16; i++) {
-            uint16 check = uint16(proof) & 0xfff;
-            proof >>= 16;
-            if (check != 0) {
-                arr[i] = bytes2(check);
-                max = i + 1;
-            }
-        }
-    }
-
-    /// @notice parses the external itemId into a feautre and position
-    /// @dev this follows dotnugg v1 specification
-    /// @param itemId -> the external itemId
-    /// @return feat -> the feautre of the item
-    /// @return pos -> the file storage position of the item
-    function parseItemId(uint16 itemId) internal pure returns (uint8 feat, uint8 pos) {
-        feat = uint8(itemId >> 8);
-        pos = uint8(itemId & 0xff);
-    }
-
     function setProof(uint160 tokenId) internal {
         uint256 randomEnoughSeed;
 
@@ -161,12 +161,6 @@ abstract contract NuggftV1Proof is INuggftV1Proof, NuggftV1Dotnugg {
     function initFromSeed(uint256 seed) internal view returns (uint256 res) {
         require(seed != 0, 'P:8');
 
-        res |= DotnuggV1Lib.search(address(dotnuggV1Safe), 0, seed);
-
-        res |= uint256((1 << 8) | DotnuggV1Lib.search(address(dotnuggV1Safe), 1, seed)) << (16 * 1);
-
-        res |= uint256((2 << 8) | DotnuggV1Lib.search(address(dotnuggV1Safe), 2, seed)) << (16 * 2);
-
         uint8 selA = uint8((seed >> 8) & 0xff);
         uint8 selB = uint8((seed >> 16) & 0xff);
         uint8 selC = uint8((seed >> 24) & 0xff);
@@ -175,26 +169,12 @@ abstract contract NuggftV1Proof is INuggftV1Proof, NuggftV1Dotnugg {
         selB = selB < 30 ? 5 : selB < 55 ? 6 : selB < 75 ? 7 : 0;
         selC = selC < 30 ? 5 : selC < 55 ? 6 : selC < 75 ? 7 : selC < 115 ? 4 : selC < 155 ? 3 : selC < 205 ? 2 : 1;
 
-        res |= uint256((uint16(selA) << 8) | DotnuggV1Lib.search(address(dotnuggV1Safe), selA, seed)) << (16 * 3);
-
-        if (selB != 0) {
-            res |= uint256((uint16(selB) << 8) | DotnuggV1Lib.search(address(dotnuggV1Safe), selB, seed)) << (16 * 4);
-        }
-
-        res |= uint256((uint16(selC) << 8) | DotnuggV1Lib.search(address(dotnuggV1Safe), selC, seed >> 8)) << (16 * 8);
-    }
-
-    function pendingProof()
-        internal
-        view
-        returns (
-            uint256 seed,
-            uint256 epoch,
-            uint256 proof
-        )
-    {
-        (seed, epoch) = calculateSeed();
-
-        proof = initFromSeed(seed);
+        res |=
+            DotnuggV1Lib.search(address(dotnuggV1Safe), 0, seed) |
+            (uint256(0x0100 | DotnuggV1Lib.search(address(dotnuggV1Safe), 1, seed)) << (0x10)) |
+            (uint256(0x0200 | DotnuggV1Lib.search(address(dotnuggV1Safe), 2, seed)) << (0x20)) |
+            (uint256((uint16(selA) << 8) | DotnuggV1Lib.search(address(dotnuggV1Safe), selA, seed)) << (0x30)) |
+            (selB == 0 ? 0 : (uint256((uint16(selB) << 8) | DotnuggV1Lib.search(address(dotnuggV1Safe), selB, seed)) << (0x40))) |
+            (uint256((uint16(selC) << 8) | DotnuggV1Lib.search(address(dotnuggV1Safe), selC, seed >> 8)) << (0x80));
     }
 }
