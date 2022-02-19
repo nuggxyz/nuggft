@@ -4,11 +4,7 @@ pragma solidity 0.8.12;
 
 import '../../../NuggftV1.test.sol';
 
-contract revert__liquidate__0xA7 is NuggftV1Test {
-    function setUp() public {
-        reset__revert();
-    }
-
+abstract contract revert__liquidate__0xA7 is NuggftV1Test {
     function test__revert__liquidate__0xA7__fail__desc() public {
         expect.mint().from(users.frank).value(1 ether).exec(500);
 

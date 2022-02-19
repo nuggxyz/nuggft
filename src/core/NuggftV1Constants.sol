@@ -8,7 +8,7 @@ abstract contract NuggftV1Constants {
     uint256 constant LOSS = .1 gwei;
 
     // stake
-    uint96 constant PROTOCOL_FEE_BPS = 8;
+    uint96 constant PROTOCOL_FEE_BPS = 10;
 
     // epoch
     uint16 constant INTERVAL_SUB = 2;
@@ -19,7 +19,7 @@ abstract contract NuggftV1Constants {
 
     // loan
     uint24 constant LIQUIDATION_PERIOD = 1024;
-    uint96 public constant REBALANCE_FEE_BPS = 128;
+    uint96 public constant REBALANCE_FEE_BPS = 100;
 
     // swap
     uint256 constant SALE_LEN = 1;

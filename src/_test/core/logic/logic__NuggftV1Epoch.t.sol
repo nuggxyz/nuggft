@@ -4,14 +4,7 @@ pragma solidity 0.8.12;
 
 import '../../NuggftV1.test.sol';
 
-import {NuggftV1Epoch} from '../../../core/NuggftV1Epoch.sol';
-
-contract logic__NuggftV1Epoch is NuggftV1Test, NuggftV1Epoch {
-    // function test__setUp() public {
-    //     // reset();
-    //     // fvm.roll(13952818);
-    // }
-
+abstract contract logic__NuggftV1Epoch is NuggftV1Test {
     /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
         [pure] toEpoch
        ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
@@ -24,18 +17,18 @@ contract logic__NuggftV1Epoch is NuggftV1Test, NuggftV1Epoch {
         if (blocknum < gen) return;
 
         assertEq(
-            toEpoch(blocknum, gen), //
+            nuggft.external__toEpoch(blocknum, uint32(gen)), //
             safe__toEpoch(blocknum, gen),
             'toEpoch: real != safe'
         );
     }
 
     function test__logic__NuggftV1Epoch__toEpoch__gas() public view {
-        toEpoch(uint32(block.number), genesis);
+        nuggft.external__toEpoch(uint32(block.number), uint32(nuggft.genesis()));
     }
 
     function test__logic__NuggftV1Epoch__toEpoch__gas__safe() public view {
-        safe__toEpoch(uint32(block.number), genesis);
+        safe__toEpoch(uint32(block.number), nuggft.genesis());
     }
 
     /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -55,18 +48,18 @@ contract logic__NuggftV1Epoch is NuggftV1Test, NuggftV1Epoch {
         if (gen == 0) return;
         if (epoch == 0) return;
 
-        uint256 got = toStartBlock(epoch, gen);
+        uint256 got = nuggft.external__toStartBlock(epoch, gen);
         uint256 exp = safe__toStartBlock(epoch, gen);
 
         assertEq(got, exp, 'toStartBlock: real != safe');
     }
 
     function test__logic__NuggftV1Epoch__toStartBlock__gas() public view {
-        toStartBlock(OFFSET + 100, genesis);
+        nuggft.external__toStartBlock(OFFSET + 100, uint32(nuggft.genesis()));
     }
 
     function test__logic__NuggftV1Epoch__toStartBlock__gas__safe() public view {
-        safe__toStartBlock(OFFSET + 100, genesis);
+        safe__toStartBlock(OFFSET + 100, uint32(nuggft.genesis()));
     }
 
     /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -77,8 +70,8 @@ contract logic__NuggftV1Epoch is NuggftV1Test, NuggftV1Epoch {
         res = safe__toStartBlock(_epoch + 1, gen) - 1;
     }
 
-    function semisafe__toEndBlock(uint24 _epoch, uint256 gen) internal pure returns (uint256 res) {
-        res = toStartBlock(_epoch + 1, gen) - 1;
+    function semisafe__toEndBlock(uint24 _epoch, uint256 gen) internal view returns (uint256 res) {
+        res = nuggft.external__toStartBlock(_epoch + 1, uint32(gen)) - 1;
     }
 
     function test__logic__NuggftV1Epoch__toEndBlock__symbolic(uint32 _epoch, uint32 gen) public {
@@ -90,22 +83,22 @@ contract logic__NuggftV1Epoch is NuggftV1Test, NuggftV1Epoch {
         if (gen == 0) return;
         if (epoch == 0) return;
 
-        uint256 got = toEndBlock(epoch, gen);
+        uint256 got = nuggft.external__toEndBlock(epoch, gen);
         uint256 exp = safe__toEndBlock(epoch, gen);
 
         assertEq(got, exp, 'toEndBlock: real != safe');
     }
 
     function test__logic__NuggftV1Epoch__toEndBlock__gas() public view {
-        toEndBlock(OFFSET + 100, genesis);
+        nuggft.external__toEndBlock(OFFSET + 100, uint32(nuggft.genesis()));
     }
 
     function test__logic__NuggftV1Epoch__toEndBlock__gas__safe() public view {
-        safe__toEndBlock(OFFSET + 100, genesis);
+        safe__toEndBlock(OFFSET + 100, uint32(nuggft.genesis()));
     }
 
     function test__logic__NuggftV1Epoch__toEndBlock__gas__semisafe() public view {
-        semisafe__toEndBlock(OFFSET + 100, genesis);
+        semisafe__toEndBlock(OFFSET + 100, uint32(nuggft.genesis()));
     }
 
     /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━

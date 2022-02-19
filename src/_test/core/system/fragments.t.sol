@@ -5,7 +5,7 @@ pragma solidity 0.8.12;
 import '../../NuggftV1.test.sol';
 import {NuggftV1Proof} from '../../../core/NuggftV1Proof.sol';
 
-contract fragments is NuggftV1Test {
+abstract contract fragments is NuggftV1Test {
     uint16 itemId;
 
     function userMints(address user, uint24 token) public {

@@ -4,11 +4,7 @@ pragma solidity 0.8.12;
 
 import '../../../NuggftV1.test.sol';
 
-contract revert__mint__0x66 is NuggftV1Test {
-    function setUp() public {
-        reset__revert();
-    }
-
+abstract contract revert__mint__0x66 is NuggftV1Test {
     function test__revert__mint__0x66__fail__desc() public {
         forge.vm.startPrank(users.safe);
         {

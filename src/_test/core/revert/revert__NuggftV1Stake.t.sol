@@ -4,16 +4,7 @@ pragma solidity 0.8.12;
 
 import '../../NuggftV1.test.sol';
 
-contract revert__NuggftV1Stake is NuggftV1Test {
-    uint32 epoch;
-
-    function setUp() public {
-        reset();
-        forge.vm.roll(15000);
-
-        epoch = nuggft.epoch();
-    }
-
+abstract contract revert__NuggftV1Stake is NuggftV1Test {
     /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
             [T:1] - addStakedShareFromMsgValue - "value of tx too low"
        ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */

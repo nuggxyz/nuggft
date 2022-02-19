@@ -4,18 +4,8 @@ pragma solidity 0.8.12;
 
 import '../../NuggftV1.test.sol';
 
-contract system__NuggftV1Swap_test is NuggftV1Test {
+abstract contract system__one is NuggftV1Test {
     using SafeCast for uint96;
-
-    function setUp() public {
-        reset();
-
-        // mint 500 - 2999
-
-        // trusted mint 1-499
-
-        //
-    }
 
     function test__logic__NuggftV1Proof__rotate() public {
         expect.mint().from(users.frank).exec{value: 1 ether}(500);

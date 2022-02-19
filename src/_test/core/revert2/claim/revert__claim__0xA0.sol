@@ -4,11 +4,7 @@ pragma solidity 0.8.12;
 
 import '../../../NuggftV1.test.sol';
 
-contract revert__claim__0xA0 is NuggftV1Test {
-    function setUp() public {
-        reset__revert();
-    }
-
+abstract contract revert__claim__0xA0 is NuggftV1Test {
     // had to rig this one. the checks are too good
     function test__revert__claim__0xA0__fail__desc() public {
         expect.mint().from(users.frank).value(1 ether).exec(500);
