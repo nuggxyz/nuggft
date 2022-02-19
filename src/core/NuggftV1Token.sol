@@ -90,30 +90,6 @@ abstract contract NuggftV1Token is INuggftV1Token, NuggftV1Epoch {
                                 internal
     ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━*/
 
-    function mint__dirty(address to, uint160 tokenId) internal {
-        assembly {
-            let mptr := mload(0x40)
-
-            mstore(mptr, tokenId)
-            mstore(add(mptr, 0x20), agency.slot)
-
-            let agency__sptr := keccak256(mptr, 0x40)
-
-            // update agency to reflect the new leader
-            // ====agency[tokenId]====
-            //     flag  = OWN(0x01)
-            //     epoch = 0
-            //     eth   = 0
-            //     addr  = to
-            // =======================
-            let agency__cache := or(shl(254, 0x01), to)
-
-            sstore(agency__sptr, agency__cache)
-
-            log4(0x00, 0x00, Event__Transfer, 0, to, tokenId)
-        }
-    }
-
     /*━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
                                 view
     ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━*/

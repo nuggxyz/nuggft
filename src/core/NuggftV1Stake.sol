@@ -70,7 +70,7 @@ abstract contract NuggftV1Stake is INuggftV1Stake, NuggftV1Proof {
 
     /// @notice handles the adding of shares - ensures enough eth is being added
     /// @dev this is the only way to add shares - the logic here ensures that "ethPerShare" can never decrease
-    function addStakedShareFromMsgValue__dirty() internal {
+    function addStakedShareFromMsgValue() internal {
         assembly {
             // load stake to callstack
             let cache := sload(stake.slot)
@@ -123,7 +123,7 @@ abstract contract NuggftV1Stake is INuggftV1Stake, NuggftV1Proof {
     /// @notice handles isolated staking of eth
     /// @dev supply of eth goes up while supply of shares stays constant - increasing "minSharePrice"
     /// @param value the amount of eth being staked - must be some portion of msg.value
-    function addStakedEth__dirty(uint96 value) internal {
+    function addStakedEth(uint96 value) internal {
         assembly {
             let cache := sload(stake.slot)
 

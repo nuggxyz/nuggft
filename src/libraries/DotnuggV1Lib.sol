@@ -24,11 +24,10 @@ library DotnuggV1Lib {
             // memory:                                           length of file  =  XX
             // [0x00] 0x////////////////////////////////////////////////////////////XX
             // =======================================================================]
-
             // [======================================================================
             // solidity will mask "res" to be only a uint8
             res := mload(0x00)
-            // ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^]
+            // ⋀⋀⋀⋀⋀⋀⋀⋀⋀⋀⋀⋀⋀⋀⋀⋀⋀⋀⋀⋀⋀⋀⋀⋀⋀⋀⋀⋀⋀⋀⋀⋀⋀⋀⋀⋀⋀⋀⋀⋀⋀⋀⋀⋀⋀⋀⋀⋀⋀⋀⋀⋀⋀⋀⋀⋀⋀⋀⋀⋀⋀⋀⋀⋀
 
             // [======================================================================
             // we clear the scratch space we dirtied
@@ -44,6 +43,10 @@ library DotnuggV1Lib {
         uint8 feature,
         uint256 seed
     ) internal view returns (uint8 res) {
+        address loc = location(safe, feature);
+
+        uint256 high = size(loc);
+
         assembly {
             // we adjust the seed to be unique per feature and safe, yet still deterministic
 
@@ -64,15 +67,22 @@ library DotnuggV1Lib {
             // [0x00] 0x00000000000000000000000000000000000000000000000000000000000000
             // [0x20] 0x00000000000000000000000000000000000000000000000000000000000000
             // =======================================================================]
-        }
 
-        address loc = location(safe, feature);
+            // Get a pointer to some free memory.
+            let data := mload(0x40)
 
-        uint256 high = size(loc);
+            // Update the free memory pointer to prevent overriding our data.
+            // We use and(x, not(31)) as a cheaper equivalent to sub(x, mod(x, 32)).
+            // Adding 31 to len and running the result through the logic above ensures
+            // the memory pointer remains word-aligned, following the Solidity convention.
+            // mstore(0x40, add(data, and(add(add(high, 32), 31), not(31))))
 
-        bytes memory w = readBytecode(loc, DOTNUGG_RUNTIME_BYTE_LEN + 1, high * 2);
+            // Store the len of the data in the first 32 byte chunk of free memory.
+            mstore(data, high)
 
-        assembly {
+            // Copy the code into memory right after the 32 bytes we used to store the len.
+            extcodecopy(loc, add(data, 32), add(DOTNUGG_RUNTIME_BYTE_LEN, 1), mul(high, 2))
+
             // normalize seed to be <= type(uint16).max
             // if we did not want to use weights, we could just mod by "len" and have our final value
             seed := mod(seed, 0xffff)
@@ -86,14 +96,14 @@ library DotnuggV1Lib {
                 // mid = (low + high) / 2
                 let mid := shr(1, add(low, high))
 
+
                 // "is weights[mid] <= seed ?"
-                switch iszero(gt(and(mload(add(add(w, 0x2), shl(1, mid))), 0xffff), seed))
+                switch iszero(gt(and(mload(add(add(data, 0x2), shl(1, mid))), 0xffff), seed))
                 case 1 {
                     low := add(mid, 1)
                 }
                 default {
                      res := high
-
                      switch iszero(mid)
                      case 1  { break }
                      default { high := sub(mid, 1) }
@@ -102,8 +112,6 @@ library DotnuggV1Lib {
 
             res := add(res, 1)
         }
-
-        // ds.inject.log(feature, res);
     }
 
     function location(address registration, uint8 feature) internal pure returns (address res) {
