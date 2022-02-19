@@ -11,6 +11,8 @@ import {NuggftV1Token} from '../../../core/NuggftV1Token.sol';
 contract stress__NuggftV1Loan is NuggftV1Test {
     uint160 internal constant LOAN_TOKENID = 1499;
 
+    uint160 multiplier = 10;
+
     constructor() {
         reset();
 
@@ -26,7 +28,7 @@ contract stress__NuggftV1Loan is NuggftV1Test {
     function test__stress__NuggftV1Loan__rebalance2() public {
         forge.vm.deal(users.frank, 1000000000 ether);
 
-        for (uint256 i = 0; i < 1000; i++) {
+        for (uint256 i = 0; i < 10 * multiplier; i++) {
             uint96 frankStartBal = uint96(users.frank.balance);
 
             (, , , , , uint24 b_insolventEpoch) = nuggft.debt(LOAN_TOKENID);

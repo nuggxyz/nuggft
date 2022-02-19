@@ -4,7 +4,7 @@ pragma solidity 0.8.12;
 
 import '../../NuggftV1.test.sol';
 
-abstract contract txgas__NuggftV1Swap is NuggftV1Test {
+contract txgas__NuggftV1Swap is NuggftV1Test {
     uint160 internal constant MINT_TOKENID = 3004;
     uint160 internal constant COMMIT_TOKENID = 1498;
     uint160 internal constant CARRY_TOKENID = 1300;
