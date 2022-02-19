@@ -4,7 +4,7 @@ import '../../NuggftV1.test.sol';
 
 import {ShiftLib} from '../../helpers/ShiftLib.sol';
 
-contract logic__ShiftLib__mask is NuggftV1Test {
+abstract contract logic__ShiftLib is NuggftV1Test {
     function mask__safe__a(uint8 bits) public pure returns (uint256) {
         return (1 << bits) - 1;
     }
@@ -76,9 +76,7 @@ contract logic__ShiftLib__mask is NuggftV1Test {
         assertEq(ShiftLib.mask(255), 0x7fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff, '255');
         assertEq(ShiftLib.mask(), 0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff, '256');
     }
-}
 
-contract logic__ShiftLib__imask is NuggftV1Test {
     function imask__safe__a(uint8 bits, uint8 offset) public pure returns (uint256) {
         return ~(((1 << bits) - 1) << offset);
     }
@@ -145,9 +143,7 @@ contract logic__ShiftLib__imask is NuggftV1Test {
         assertEq(ShiftLib.imask(255, 252), 0x0fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff, '(255, 252)');
         assertEq(ShiftLib.imask(255, 255), 0x7fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff, '(255, 255)');
     }
-}
 
-contract logic__ShiftLib__get is NuggftV1Test {
     function get__safe__a(
         uint256 _store,
         uint8 bits,
@@ -180,9 +176,7 @@ contract logic__ShiftLib__get is NuggftV1Test {
 
         assertEq(a, real, 'A');
     }
-}
 
-contract logic__ShiftLib__set is NuggftV1Test {
     function set__safe__a(
         uint256 _store,
         uint8 bits,

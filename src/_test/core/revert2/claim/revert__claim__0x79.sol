@@ -4,11 +4,7 @@ pragma solidity 0.8.12;
 
 import '../../../NuggftV1.test.sol';
 
-contract revert__claim__0x79 is NuggftV1Test {
-    function setUp() public {
-        reset__revert();
-    }
-
+abstract contract revert__claim__0x79 is NuggftV1Test {
     function test__revert__claim__0x79__fail__desc() public {
         assert(false);
     }

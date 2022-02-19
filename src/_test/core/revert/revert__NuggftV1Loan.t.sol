@@ -4,16 +4,8 @@ pragma solidity 0.8.12;
 
 import '../../NuggftV1.test.sol';
 
-contract revert__NuggftV1Loan is NuggftV1Test {
+abstract contract revert__NuggftV1Loan is NuggftV1Test {
     uint160 internal constant LOAN_TOKENID = 700;
-    uint32 epoch;
-
-    function setUp() public {
-        reset();
-        forge.vm.roll(15000);
-
-        epoch = nuggft.epoch();
-    }
 
     /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
         hex[A1] - loan - "msg.sender is operator for sender"

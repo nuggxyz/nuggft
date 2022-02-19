@@ -4,11 +4,7 @@ pragma solidity 0.8.12;
 
 import '../../../NuggftV1.test.sol';
 
-contract revert__offer__0x71 is NuggftV1Test {
-    function setUp() public {
-        reset__revert();
-    }
-
+abstract contract revert__offer__0x71 is NuggftV1Test {
     function test__revert__offer__0x71__fail__desc() public {
         uint24 tokenId = 3000;
 

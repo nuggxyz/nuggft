@@ -8,7 +8,7 @@ import {ShiftLib} from '../../helpers/ShiftLib.sol';
 import {NuggftV1Loan} from '../../../core/NuggftV1Loan.sol';
 import {NuggftV1Token} from '../../../core/NuggftV1Token.sol';
 
-contract logic__NuggftV1Loan is NuggftV1Test {
+contract stress__NuggftV1Loan is NuggftV1Test {
     uint160 internal constant LOAN_TOKENID = 1499;
 
     constructor() {

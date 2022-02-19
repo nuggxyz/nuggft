@@ -4,11 +4,7 @@ pragma solidity 0.8.12;
 
 import '../../../NuggftV1.test.sol';
 
-contract revert__sell__0x97 is NuggftV1Test {
-    function setUp() public {
-        reset__revert();
-    }
-
+abstract contract revert__sell__0x97 is NuggftV1Test {
     function test__revert__sell__0x97__fail__desc() public {
         (uint160 tokenId, , uint16 itemId, uint96 floor) = scenario_dee_has_sold_an_item();
 

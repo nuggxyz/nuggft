@@ -4,7 +4,7 @@ import '../../NuggftV1.test.sol';
 
 import {CastLib} from '../../helpers/CastLib.sol';
 
-contract logic__CastLib__to24 is NuggftV1Test {
+abstract contract logic__CastLib is NuggftV1Test {
     function safe__to24__a(uint256 x) public pure returns (uint24 y) {
         require(x <= type(uint24).max);
         y = uint24(x);

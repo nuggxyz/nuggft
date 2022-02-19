@@ -4,11 +4,7 @@ pragma solidity 0.8.12;
 
 import '../../../NuggftV1.test.sol';
 
-contract revert__offer__0x99 is NuggftV1Test {
-    function setUp() public {
-        reset__revert();
-    }
-
+abstract contract revert__offer__0x99 is NuggftV1Test {
     function test__revert__offer__0x99__fail__desc__claimBeforeOffer() public {
         uint24 epoch = 3000;
 

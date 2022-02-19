@@ -4,14 +4,7 @@ pragma solidity 0.8.12;
 
 import '../../NuggftV1.test.sol';
 
-import {NuggftV1Epoch} from '../../../core/NuggftV1Epoch.sol';
-
-contract revert__NuggftV1Epoch is NuggftV1Test, NuggftV1Epoch {
-    function setUp() public {
-        reset();
-        forge.vm.roll(15000);
-    }
-
+abstract contract revert__NuggftV1Epoch is NuggftV1Test {
     /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
         [E:0] - calculateSeed - "block hash does not exist"
        ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
@@ -23,7 +16,7 @@ contract revert__NuggftV1Epoch is NuggftV1Test, NuggftV1Epoch {
         nuggft.external__calculateSeed(epoch + 1);
     }
 
-    function test__revert__NuggftV1Epoch__calculateSeed__0x98__succeedCurrentBlock() public view {
+    function test__revert__NuggftV1Epoch__calculateSeed__0x98__succeedCurrentBlock() public {
         nuggft.external__calculateSeed();
     }
 }
