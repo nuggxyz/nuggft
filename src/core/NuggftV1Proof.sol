@@ -170,11 +170,11 @@ abstract contract NuggftV1Proof is INuggftV1Proof, NuggftV1Dotnugg {
         selC = selC < 30 ? 5 : selC < 55 ? 6 : selC < 75 ? 7 : selC < 115 ? 4 : selC < 155 ? 3 : selC < 205 ? 2 : 1;
 
         res |=
-            DotnuggV1Lib.search(address(dotnuggV1Safe), 0, seed) |
-            (uint256(0x0100 | DotnuggV1Lib.search(address(dotnuggV1Safe), 1, seed)) << (0x10)) |
-            (uint256(0x0200 | DotnuggV1Lib.search(address(dotnuggV1Safe), 2, seed)) << (0x20)) |
-            (uint256((uint16(selA) << 8) | DotnuggV1Lib.search(address(dotnuggV1Safe), selA, seed)) << (0x30)) |
-            (selB == 0 ? 0 : (uint256((uint16(selB) << 8) | DotnuggV1Lib.search(address(dotnuggV1Safe), selB, seed)) << (0x40))) |
-            (uint256((uint16(selC) << 8) | DotnuggV1Lib.search(address(dotnuggV1Safe), selC, seed >> 8)) << (0x80));
+            DotnuggV1Lib.search(address(dotnuggV1), 0, seed) |
+            (uint256(0x0100 | DotnuggV1Lib.search(address(dotnuggV1), 1, seed)) << (0x10)) |
+            (uint256(0x0200 | DotnuggV1Lib.search(address(dotnuggV1), 2, seed)) << (0x20)) |
+            (uint256((uint16(selA) << 8) | DotnuggV1Lib.search(address(dotnuggV1), selA, seed)) << (0x30)) |
+            (selB == 0 ? 0 : (uint256((uint16(selB) << 8) | DotnuggV1Lib.search(address(dotnuggV1), selB, seed)) << (0x40))) |
+            (uint256((uint16(selC) << 8) | DotnuggV1Lib.search(address(dotnuggV1), selC, seed >> 8)) << (0x80));
     }
 }

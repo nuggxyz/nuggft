@@ -1,1 +1,2 @@
 ds-test/=lib/ds-test/src/
+dotnugg-v1-core=./../dotnugg-v1-core/src

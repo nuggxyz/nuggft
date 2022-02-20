@@ -81,11 +81,9 @@ contract Revert2 is
     function setUp() public {
         forge.vm.roll(14069560);
 
-        NuggFatherV1 dep = new NuggFatherV1(data);
-
         // dep.init();
 
-        processor = IDotnuggV1(dep.dotnugg());
+        processor = IDotnuggV1(address(new DotnuggV1()));
         nuggft = new RiggedNuggft(address(processor));
 
         _nuggft = address(nuggft);

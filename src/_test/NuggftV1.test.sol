@@ -14,11 +14,12 @@ import {Expect} from './expect/Expect.sol';
 import {data} from '../_data/nuggs.data.sol';
 
 import './utils/forge.sol';
+import {DotnuggV1} from '../../../dotnugg-v1-core/src/DotnuggV1.sol';
 
 import {NuggftV1AgentType} from './helpers/NuggftV1AgentType.sol';
 
 contract RiggedNuggft is NuggftV1 {
-    constructor(address dotnuggv1) NuggftV1(dotnuggv1, abi.decode(data, (bytes[]))) {
+    constructor(address dotnuggv1) NuggftV1(dotnuggv1) {
         // featureLengths = 0x0303030303030303;
     }
 
@@ -132,11 +133,9 @@ contract NuggftV1Test is ForgeTest, NuggftV1Constants {
         // bytes memory tmp = hex'000100';
         ds.setDsTest(address(this));
 
-        NuggFatherV1 dep = new NuggFatherV1(data);
-
         // dep.init();
 
-        processor = IDotnuggV1(dep.dotnugg());
+        processor = IDotnuggV1(address(new DotnuggV1()));
         nuggft = new RiggedNuggft(address(processor));
 
         _nuggft = address(nuggft);
