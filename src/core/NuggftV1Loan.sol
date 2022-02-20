@@ -18,13 +18,6 @@ abstract contract NuggftV1Loan is INuggftV1Loan, NuggftV1Swap {
                 b := shr(right, shl(left, val))
             }
 
-            // function panic2(code) {
-            //     mstore(0, shl(224, 0x4e487b71)) // Panic(uint256)
-            //     mstore(32, 0)
-            //     mstore8(35, code)
-            //     revert(0, 36)
-            // }
-
             function panic(code) {
                 mstore(0x00, Revert__Sig)
                 mstore(0x04, code)

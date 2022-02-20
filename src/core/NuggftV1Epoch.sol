@@ -11,7 +11,7 @@ abstract contract NuggftV1Epoch is INuggftV1Epoch, NuggftV1Constants {
 
     constructor() {
         genesis = (block.number / INTERVAL) * INTERVAL;
-        emit Genesis(genesis, INTERVAL, OFFSET);
+        emit Genesis(genesis, INTERVAL, OFFSET, INTERVAL_SUB);
     }
 
     /// @inheritdoc INuggftV1Epoch
@@ -42,7 +42,20 @@ abstract contract NuggftV1Epoch is INuggftV1Epoch, NuggftV1Constants {
         uint256 startblock = toStartBlock(_epoch, genesis);
         unchecked {
             bytes32 bhash = getBlockHash(startblock - INTERVAL_SUB);
-            if (bhash == 0) _panic(Error__0x98__BlockHashIsZero);
+            // if (bhash == 0) _panic(Error__0x98__BlockHashIsZero);
+
+            assembly {
+                mstore(0x00, bhash)
+                mstore(0x20, _epoch)
+                res := keccak256(0x00, 0x40)
+            }
+        }
+    }
+
+    /// @notice calculates a random-enough seed that will stay the
+    function cheat(uint256 startblock, uint24 _epoch) internal view returns (uint256 res) {
+        unchecked {
+            bytes32 bhash = getBlockHash(startblock - INTERVAL_SUB);
 
             assembly {
                 mstore(0x00, bhash)

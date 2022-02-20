@@ -49,13 +49,13 @@ contract NuggftV1 is IERC721Metadata, NuggftV1Loan {
         res = string(
             dotnuggV1.encodeJsonAsBase64(
                 abi.encodePacked(
-                    '{"name":"',         name(),
+                     '{"name":"',        name(),
                     '","description":"', symbol(),
                     '","image":"',       imageURI(tokenId),
                     '","properites":',   dotnuggV1.props(
-                        proofs[uint160(tokenId)],
-                        ['base', 'eyes', 'mouth', 'hair', 'hat', 'background', 'scarf', 'held']
-                    ),
+                            proofOf(uint160(tokenId)),
+                            ['base', 'eyes', 'mouth', 'hair', 'hat', 'background', 'scarf', 'held']
+                        ),
                     '}'
                 )
             )
@@ -64,7 +64,11 @@ contract NuggftV1 is IERC721Metadata, NuggftV1Loan {
 
     /// @inheritdoc INuggftV1Proof
     function imageURI(uint256 tokenId) public view override returns (string memory res) {
-        res = dotnuggV1.exec(proofs[uint160(tokenId)], true);
+        res = dotnuggV1.exec(proofOf(uint160(tokenId)), true);
+    }
+
+    function imageURICheat(uint256 startblock, uint24 _epoch) public view returns (string memory res) {
+        return dotnuggV1.exec(initFromSeed(cheat(startblock, _epoch)), true);
     }
 
     /// @inheritdoc INuggftV1Token
@@ -102,22 +106,30 @@ contract NuggftV1 is IERC721Metadata, NuggftV1Loan {
                 revert(0x00, 0x05)
             }
 
-            // ========= memory ==========
-            //   0x00: tokenId
-            //   0x20: blockhash(((blocknum - 2) / 16) * 16)
-            // ===========================
-            mstore(0x20, blockhash(shl(shr(sub(number(), 2), 4), 4)))
+            // prettier-ignore
+            mstore( // ====================================================
+                /* postion */ 0x20,
+                // the we div and mul by 16 here to make the value returned stay constant for 16 blocks
+                // this makes gas estimation more acurate as "initFromSeed" will change in gas useage
+                // + depending on the value returned here
+                /* value   */ blockhash(shl(shr(sub(number(), 2), 4), 4))
+            ) // ==========================================================
 
-            randomEnough := keccak256(0x00, 0x40)
+            // prettier-ignore
+            randomEnough := keccak256( // =================================
+                0x00, /* [ tokenId                               ]    0x20
+                0x20     [ blockhash(((blocknum - 2) / 16) * 16) ] */ 0x40
+            ) // ==========================================================
 
             // update agency to reflect the new leader
-            // ====agency[tokenId]====
-            //     flag  = OWN(0x01)
-            //     epoch = 0
-            //     eth   = 0
-            //     addr  = to
-            // =======================
-            let agency__cache := or(shl(254, 0x01), to)
+
+            // prettier-ignore
+            let agency__cache := or( // ===============
+            /* flag  */ shl(254, 0x01), // = OWN(0x01)
+            /* epoch */                 // = 0
+            /* eth   */                 // = 0
+            /* addr  */ to              // = new agent
+            ) // ===============
 
             sstore(agency__sptr, agency__cache)
 
@@ -128,7 +140,11 @@ contract NuggftV1 is IERC721Metadata, NuggftV1Loan {
             log1(0x00, 0x40, Event__Mint)
         }
 
-        proofs[tokenId] = initFromSeed(randomEnough);
+        uint256 proof = initFromSeed(randomEnough);
+
+        proofs[tokenId] = proof;
+
+        emit Rotate(tokenId, bytes32(proof));
     }
 
     /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━

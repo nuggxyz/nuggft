@@ -95,7 +95,11 @@ abstract contract NuggftV1Swap is INuggftV1ItemSwap, INuggftV1Swap, NuggftV1Stak
         if (active == tokenId && agency__cache == 0) {
             // [Offer:Mint]
 
-            proofs[tokenId] = initFromSeed(calculateSeed(uint24(active)));
+            uint256 proof = initFromSeed(calculateSeed(uint24(active)));
+
+            proofs[tokenId] = proof;
+
+            emit Rotate(tokenId, bytes32(proof));
 
             // no need to update free memory pointer because we no longer rely on it being empty
             addStakedShareFromMsgValue();
@@ -111,11 +115,11 @@ abstract contract NuggftV1Swap is INuggftV1ItemSwap, INuggftV1Swap, NuggftV1Stak
                 // update agency to reflect the new leader
 
                 // prettier-ignore
-                agency__cache := xor(xor(xor(
-                /* flag  */ shl(254, 0x03),    // = SWAP
-                /* epoch */ shl(230, active)), // = active
-                /* eth   */ shl(160, next)),   // = msg.value or "current highest offer"
-                /* addr  */ caller()           // = msg.sender
+                agency__cache := xor(xor(xor( // ===============
+                /* flag  */ shl(254,  0x03),    // = SWAP
+                /* epoch */ shl(230,  active)), // = active
+                /* eth   */ shl(160,  next)),   // = msg.value or "current highest offer"
+                /* addr     shl(0, */ caller()  // = msg.sender
                 ) // ===========================================
 
                 sstore(agency__sptr, agency__cache)
@@ -203,16 +207,17 @@ abstract contract NuggftV1Swap is INuggftV1ItemSwap, INuggftV1Swap, NuggftV1Stak
             // [Offer:Commit]
             // if so, we know this swap has not yet been offered on
             case 1 {
-                // ==== agency[tokenId] ========================
                 // update the epoch to begin auction
 
                 // prettier-ignore
-                agency__cache := xor(agency__cache,
+                agency__cache := xor( // =================================
+                /* start */ agency__cache,
+                // -------------------------------------------------------
                 /* flag  */                                  // = unchanged
                 /* epoch */  shl(230, add(active, SALE_LEN)) // = active + SALE_LEN
                 /* eth   */                                  // = unchanged
                 /* addr  */                                  // = unchanged
-                ) // ===========================================
+                ) // ======================================================
 
                 if iszero(isItem) {
                     // Event__Transfer the token to the contract for the remainder of sale
