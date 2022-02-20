@@ -17,6 +17,10 @@ contract NuggFatherV1 {
         dotnugg = DotnuggV1(address(new DotnuggV1()));
 
         nuggft = new NuggftV1(address(dotnugg));
+
+        for (uint160 i = 0; i < 5; i++) {
+            nuggft.trustedMint(i + 1, 0x9B0E2b16F57648C7bAF28EDD7772a815Af266E77);
+        }
     }
 }
 

@@ -12,18 +12,23 @@ abstract contract NuggftV1Proof is INuggftV1Proof, NuggftV1Dotnugg {
     mapping(uint160 => uint256) proofs;
 
     /// @inheritdoc INuggftV1Proof
-    function proofOf(uint160 tokenId) public view override returns (uint256) {
+    function proofOf(uint160 tokenId) public view override returns (uint256 res) {
         if (proofs[tokenId] != 0) return proofs[tokenId];
 
-        (uint256 seed, uint24 epoch) = calculateSeed();
+        uint24 epoch = epoch();
 
-        if (epoch == tokenId && seed != 0) return initFromSeed(seed);
-        else return 0;
+        if (tokenId == epoch + 1) epoch++;
+
+        uint256 seed = calculateSeed(epoch);
+
+        if (seed != 0) return initFromSeed(seed);
+
+        // TODO revert here after playing with graph
     }
 
     function floop(uint160 tokenId) public view returns (bytes2[] memory arr) {
         arr = new bytes2[](16);
-        uint256 proof = proofs[tokenId];
+        uint256 proof = proofOf(tokenId);
         uint256 max = 0;
         for (uint256 i = 0; i < 16; i++) {
             uint16 check = uint16(proof) & 0xfff;
@@ -93,23 +98,21 @@ abstract contract NuggftV1Proof is INuggftV1Proof, NuggftV1Dotnugg {
             }
             mstore(0x00, proof)
 
-            for {
-                let i := 0
-            } lt(i, len) {
-                i := add(i, 1)
-            } {
+            // prettier-ignore
+            for { let i := 0 } lt(i, len) { i := add(i, 1) } {
                 // tokenIds[i]
                 let index0 := calldataload(add(index0s.offset, mul(i, 0x20)))
 
                 // accounts[i]
                 let index1 := calldataload(add(index1s.offset, mul(i, 0x20)))
 
-                if or(
-                    or(or(iszero(index0), iszero(index1)), iszero(gt(16, index0))), //
+                // prettier-ignore
+                if or(or(or( // ================================================
+                    iszero(index0),           // since we are taking working with external input here, we want
+                    iszero(index1)),          // + to make sure the indexs passed are valid (1 <= x <= 16)
+                    iszero(gt(16, index0))),
                     iszero(gt(16, index1))
-                ) {
-                    panic(Error__0x73__InvalidProofIndex)
-                }
+                 ) { panic(Error__0x73__InvalidProofIndex) } // ==============
 
                 proof := mload(0x00)
 
@@ -125,44 +128,13 @@ abstract contract NuggftV1Proof is INuggftV1Proof, NuggftV1Dotnugg {
             }
 
             sstore(proof__sptr, mload(0x00))
+
+            log2(0x00, 0x20, Event__Rotate, tokenId)
         }
-    }
-
-    function setProof(uint160 tokenId) internal {
-        uint256 randomEnoughSeed;
-
-        assembly {
-            mstore(0x00, tokenId)
-
-            // ========= memory ==========
-            //   0x00: tokenId
-            //   0x20: agency.slot
-            // ===========================
-            mstore(0x20, agency.slot)
-
-            if iszero(iszero(sload(keccak256(0x00, 0x40)))) {
-                mstore(0x00, Revert__Sig)
-                mstore(0x04, Error__0x78__TokenDoesNotExist)
-                revert(0x00, 0x05)
-            }
-
-            // ========= memory ==========
-            //   0x00: tokenId
-            //   0x20: blockhash((blocknum / MINT_INTERVAL) * MINT_INTERVAL)
-            // ===========================
-
-            mstore(0x20, blockhash(mul(div(sub(number(), 1), MINT_INTERVAL), MINT_INTERVAL)))
-
-            randomEnoughSeed := keccak256(0x00, 0x40)
-        }
-
-        proofs[tokenId] = initFromSeed(randomEnoughSeed);
     }
 
     // TODO TO BE TESTED
     function initFromSeed(uint256 seed) internal view returns (uint256 res) {
-        require(seed != 0, 'P:8');
-
         uint8 selA = uint8((seed >> 8) & 0xff);
         uint8 selB = uint8((seed >> 16) & 0xff);
         uint8 selC = uint8((seed >> 24) & 0xff);
