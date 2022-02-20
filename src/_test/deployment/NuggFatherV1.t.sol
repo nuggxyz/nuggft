@@ -17,7 +17,7 @@ contract deployment__NuggFatherV1 is NuggftV1Test {
         payable(dub6ix).transfer(3 ether);
 
         forge.vm.startPrank(deployer);
-        // NuggFatherV1 father = new NuggFatherV1(0, 0, __nuggs);
+        // NuggFatherV1 father = new NuggFatherV1();
 
         forge.vm.stopPrank();
 

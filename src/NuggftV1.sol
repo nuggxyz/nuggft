@@ -18,10 +18,12 @@ import {INuggftV1Proof} from './interfaces/nuggftv1/INuggftV1Proof.sol';
 
 import {INuggftV1} from './interfaces/nuggftv1/INuggftV1.sol';
 
+import {data as nuggs} from './_data/nuggs.data.sol';
+
 /// @title NuggftV1
 /// @author nugg.xyz - danny7even & dub6ix
 contract NuggftV1 is IERC721Metadata, NuggftV1Loan {
-    constructor(address dotnugg, bytes[] memory nuggs) NuggftV1Dotnugg(dotnugg, nuggs) {}
+    constructor(address dotnugg) NuggftV1Dotnugg(dotnugg) {}
 
     /// @inheritdoc IERC165
     function supportsInterface(bytes4 interfaceId) public view virtual override returns (bool) {
@@ -43,34 +45,26 @@ contract NuggftV1 is IERC721Metadata, NuggftV1Loan {
 
     /// @inheritdoc IERC721Metadata
     function tokenURI(uint256 tokenId) public view virtual override returns (string memory res) {
-        // uint160 safeTokenId = uint160(tokenId);
-
-        uint8[8] memory vals;
-        uint256 proof = proofs[uint160(tokenId)];
-
-        for (uint256 i = 0; i < 8; i++) {
-            (uint8 feature, uint8 pos) = parseItemId(uint16(proof));
-            if (vals[feature] == 0) vals[feature] = pos;
-            proof >>= 16;
-        }
-
-        res = dotnuggV1Safe.exec(vals, true);
-
-        // res = dotnuggV1.dat(address(this), tokenId, dotnuggV1ResolverOf(safeTokenId), symbol(), name(), true, '');
+        // prettier-ignore
+        res = string(
+            dotnuggV1.encodeJsonAsBase64(
+                abi.encodePacked(
+                    '{"name":"',         name(),
+                    '","description":"', symbol(),
+                    '","image":"',       imageURI(tokenId),
+                    '","properites":',   dotnuggV1.props(
+                        proofs[uint160(tokenId)],
+                        ['base', 'eyes', 'mouth', 'hair', 'hat', 'background', 'scarf', 'held']
+                    ),
+                    '}'
+                )
+            )
+        );
     }
 
     /// @inheritdoc INuggftV1Proof
     function imageURI(uint256 tokenId) public view override returns (string memory res) {
-        uint8[8] memory vals;
-        uint256 proof = proofs[uint160(tokenId)];
-
-        for (uint256 i = 0; i < 8; i++) {
-            (uint8 feature, uint8 pos) = parseItemId(uint16(proof));
-            if (vals[feature] == 0) vals[feature] = pos;
-            proof >>= 16;
-        }
-
-        res = dotnuggV1Safe.exec(vals, true);
+        res = dotnuggV1.exec(proofs[uint160(tokenId)], true);
     }
 
     /// @inheritdoc INuggftV1Token
@@ -80,6 +74,13 @@ contract NuggftV1 is IERC721Metadata, NuggftV1Loan {
                 tokenId >= TRUSTED_MINT_TOKENS,
             hex'65'
         );
+        if (tokenId == 600) {
+            assembly {
+                mstore(0x00, Panic__Sig)
+                mstore(0x04, 0x65)
+                revert(0x00, 0x24)
+            }
+        }
 
         addStakedShareFromMsgValue();
 

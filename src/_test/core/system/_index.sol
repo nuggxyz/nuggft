@@ -6,13 +6,9 @@ import './system__one.t.sol';
 contract System is system__NuggftV1Swap, system__one, system__NuggftV1Loan, system__NuggftV1Epoch {
     function setUp() public {
         forge.vm.roll(14069560);
-        ds.setDsTest(address(this));
-
-        NuggFatherV1 dep = new NuggFatherV1(data);
 
         // dep.init();
-
-        processor = IDotnuggV1(dep.dotnugg());
+        processor = IDotnuggV1(address(new DotnuggV1()));
         nuggft = new RiggedNuggft(address(processor));
         // record.build(nuggft.external__agency__slot());
 
