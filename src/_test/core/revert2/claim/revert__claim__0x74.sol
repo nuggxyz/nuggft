@@ -4,7 +4,7 @@ pragma solidity 0.8.12;
 
 import '../../../NuggftV1.test.sol';
 
-/// Error__J__0x74__Untrusted
+/// Error__0x74__Untrusted
 /// desc: this error is thrown when the user is not someone that can receive funds for the user who owns them
 
 abstract contract revert__claim__0x74 is NuggftV1Test {

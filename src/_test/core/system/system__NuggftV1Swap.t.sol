@@ -236,7 +236,7 @@ abstract contract system__NuggftV1Swap is NuggftV1Test, fragments {
     function test__system__revert__0xA0__offerWarClaimTwice() public clean {
         test__system__offerWar();
         // bytes memory mem = expect.startExpectClaim(lib.sarr160(tmpTokens[1]), lib.sarrAddress(tmpUsers[1]), tmpUsers[1]);
-        forge.vm.expectRevert(hex'A0');
+        forge.vm.expectRevert(hex'7e863b48_A0');
         forge.vm.prank(tmpUsers[1]);
         nuggft.claim(lib.sarr160(tmpTokens[1]), lib.sarrAddress(tmpUsers[1]));
         // expect.claim().stop();
@@ -248,7 +248,7 @@ abstract contract system__NuggftV1Swap is NuggftV1Test, fragments {
         nuggft.offer{value: 0.2 ether}(4000);
         jump(4001);
         nuggft.claim(lib.sarr160(4000), lib.sarrAddress(users.frank));
-        forge.vm.expectRevert(hex'A0');
+        forge.vm.expectRevert(hex'7e863b48_A0');
         nuggft.claim(lib.sarr160(4000), lib.sarrAddress(users.frank));
         forge.vm.stopPrank();
     }
@@ -257,7 +257,7 @@ abstract contract system__NuggftV1Swap is NuggftV1Test, fragments {
         forge.vm.startPrank(users.frank);
         jump(4000);
         nuggft.offer{value: 0.2 ether}(4000);
-        forge.vm.expectRevert(hex'67');
+        forge.vm.expectRevert(hex'7e863b48_67');
         nuggft.claim(lib.sarr160(4000), lib.sarrAddress(users.frank));
         forge.vm.stopPrank();
     }
@@ -295,7 +295,7 @@ abstract contract system__NuggftV1Swap is NuggftV1Test, fragments {
         itemId = uint16(f[1]);
 
         nuggft.sell(500, itemId, 50 ether);
-        forge.vm.expectRevert(hex'99');
+        forge.vm.expectRevert(hex'7e863b48_99');
         nuggft.offer{value: 1 ether}(500, 500, itemId);
 
         forge.vm.stopPrank();
@@ -312,7 +312,7 @@ abstract contract system__NuggftV1Swap is NuggftV1Test, fragments {
 
         // nuggft.floop(500);
         nuggft.sell(500, itemId, 1 ether);
-        // forge.vm.expectRevert(hex'99');
+        // forge.vm.expectRevert(hex'7e863b48_99');
         forge.vm.stopPrank();
 
         forge.vm.startPrank(users.dee);
@@ -401,7 +401,7 @@ abstract contract system__NuggftV1Swap is NuggftV1Test, fragments {
 
         jump(3002);
 
-        forge.vm.expectRevert(hex'74');
+        forge.vm.expectRevert(hex'7e863b48_74');
         forge.vm.prank(tmpUsers[tmpUsers.length - 2]);
         nuggft.claim(lib.m160(encItemIdClaim(500, itemId), uint16(tmpUsers.length)), tmpTokens);
     }

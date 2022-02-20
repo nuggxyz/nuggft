@@ -11,7 +11,7 @@ abstract contract revert__liquidate__0xA8 is NuggftV1Test {
         // expec called debt() which performed this check earlier than desired
         forge.vm.deal(users.frank, 900 ether);
         forge.vm.prank(users.frank);
-        forge.vm.expectRevert(hex'A8');
+        forge.vm.expectRevert(hex'7e863b48_A8');
         nuggft.liquidate{value: 1 ether}(500);
     }
 

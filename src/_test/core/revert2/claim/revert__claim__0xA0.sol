@@ -10,7 +10,7 @@ abstract contract revert__claim__0xA0 is NuggftV1Test {
         expect.mint().from(users.frank).value(1 ether).exec(500);
 
         forge.vm.prank(users.frank);
-        forge.vm.expectRevert(hex'a0');
+        forge.vm.expectRevert(hex'7e863b48_a0');
         nuggft.claim(lib.sarr160(500), lib.sarrAddress(users.frank));
     }
 

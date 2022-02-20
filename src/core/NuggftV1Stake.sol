@@ -87,8 +87,9 @@ abstract contract NuggftV1Stake is INuggftV1Stake, NuggftV1Proof {
 
             // ensure value >= msp
             if gt(_msp, callvalue()) {
-                mstore8(0x0, Error__G__0x71__ValueTooLow)
-                revert(0x00, 0x01)
+                mstore(0x00, Revert__Sig)
+                mstore(0x04, Error__0x71__ValueTooLow)
+                revert(0x00, 0x05)
             }
 
             // caculate value proveded over msp

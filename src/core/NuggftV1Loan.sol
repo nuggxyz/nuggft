@@ -18,16 +18,17 @@ abstract contract NuggftV1Loan is INuggftV1Loan, NuggftV1Swap {
                 b := shr(right, shl(left, val))
             }
 
-            function panic2(code) {
-                mstore(0, shl(224, 0x4e487b71)) // Panic(uint256)
-                mstore(32, 0)
-                mstore8(35, code)
-                revert(0, 36)
-            }
+            // function panic2(code) {
+            //     mstore(0, shl(224, 0x4e487b71)) // Panic(uint256)
+            //     mstore(32, 0)
+            //     mstore8(35, code)
+            //     revert(0, 36)
+            // }
 
             function panic(code) {
-                mstore8(0, code)
-                revert(0, 0x01)
+                mstore(0x00, Revert__Sig)
+                mstore(0x04, code)
+                revert(0x00, 0x05)
             }
 
             // load the length of the calldata array
@@ -38,11 +39,8 @@ abstract contract NuggftV1Loan is INuggftV1Loan, NuggftV1Swap {
             // calculate agency.slot storeage ptr
             mstore(add(mptr, 0x20), agency.slot)
 
-            for {
-                let i := 0
-            } lt(i, len) {
-                i := add(i, 0x1)
-            } {
+            // prettier-ignore
+            for { let i := 0 } lt(i, len) { i := add(i, 0x1) } {
                 // get a tokenId from calldata and store it to mem pos 0x00
                 mstore(mptr, calldataload(add(tokenIds.offset, mul(i, 0x20))))
 
@@ -53,12 +51,12 @@ abstract contract NuggftV1Loan is INuggftV1Loan, NuggftV1Swap {
 
                 // ensure the caller is the agent
                 if iszero(eq(iso(agency__cache, 96, 96), caller())) {
-                    panic(Error__e__0xA1__NotAgent)
+                    panic(Error__0xA1__NotAgent)
                 }
 
                 // ensure the agent is the owner
                 if iszero(eq(shr(254, agency__cache), 0x1)) {
-                    panic(Error__M__0x77__NotOwner)
+                    panic(Error__0x77__NotOwner)
                 }
 
                 // compress amt into 70 bits
@@ -86,7 +84,7 @@ abstract contract NuggftV1Loan is INuggftV1Loan, NuggftV1Swap {
 
                 // send eth
                 if iszero(call(gas(), caller(), amt, 0, 0, 0, 0)) {
-                    panic(Error__K__0x75__SendEthFailureToCaller)
+                    panic(Error__0x75__SendEthFailureToCaller)
                 }
 
                 // log2 with "Loan(uint160,bytes32)" topic
@@ -110,8 +108,9 @@ abstract contract NuggftV1Loan is INuggftV1Loan, NuggftV1Swap {
             }
 
             function panic(code) {
-                mstore8(0, code)
-                revert(0, 0x01)
+                mstore(0x00, Revert__Sig)
+                mstore(0x04, code)
+                revert(0x00, 0x05)
             }
 
             let stake__cache := sload(stake.slot)
@@ -138,7 +137,7 @@ abstract contract NuggftV1Loan is INuggftV1Loan, NuggftV1Swap {
 
             // ensure that the agency flag is LOAN
             if iszero(eq(shr(254, agency__cache), 0x02)) {
-                panic(Error__l__0xA8__NotLoaned)
+                panic(Error__0xA8__NotLoaned)
             }
 
             // check to see if msg.sender is the loaner
@@ -154,7 +153,7 @@ abstract contract NuggftV1Loan is INuggftV1Loan, NuggftV1Swap {
                 default {
                     // if not, then we revert.
                     // only the "loaner" can liquidate unless the loan is past due
-                    panic(Error__j__0xA6__NotAuthorized)
+                    panic(Error__0xA6__NotAuthorized)
                 }
             }
 
@@ -173,7 +172,7 @@ abstract contract NuggftV1Loan is INuggftV1Loan, NuggftV1Swap {
             let value := add(earn, callvalue())
 
             if lt(value, fee) {
-                panic(Error__k__0xA7__LiquidationPaymentTooLow)
+                panic(Error__0xA7__LiquidationPaymentTooLow)
             }
 
             earn := sub(value, fee)
@@ -205,7 +204,7 @@ abstract contract NuggftV1Loan is INuggftV1Loan, NuggftV1Swap {
             /////////////////////////////////////////////////////////////////////
 
             if iszero(call(gas(), caller(), earn, 0, 0, 0, 0)) {
-                panic(Error__K__0x75__SendEthFailureToCaller)
+                panic(Error__0x75__SendEthFailureToCaller)
             }
 
             /////////////////////////////////////////////////////////////////////
@@ -236,8 +235,9 @@ abstract contract NuggftV1Loan is INuggftV1Loan, NuggftV1Swap {
             }
 
             function panic(code) {
-                mstore8(0, code)
-                revert(0, 0x01)
+                mstore(0x00, Revert__Sig)
+                mstore(0x04, code)
+                revert(0x00, 0x05)
             }
 
             // load the length of the calldata array
@@ -291,14 +291,14 @@ abstract contract NuggftV1Loan is INuggftV1Loan, NuggftV1Swap {
 
                 // make sure this token is loaned
                 if iszero(eq(shr(254, agency__cache), 0x02)) {
-                    panic(Error__l__0xA8__NotLoaned)
+                    panic(Error__0xA8__NotLoaned)
                 }
 
                 // is the caller different from the agent?
                 if iszero(eq(caller(), agency__addr)) {
                     // if so: ensure the loan is expired
                     if iszero(lt(add(iso(agency__cache, 2, 232), LIQUIDATION_PERIOD), active)) {
-                        panic(Error__h__0xA4__ExpiredEpoch) // ERR:0x3B
+                        panic(Error__0xA4__ExpiredEpoch) // ERR:0x3B
                     }
                 }
 
@@ -320,7 +320,7 @@ abstract contract NuggftV1Loan is INuggftV1Loan, NuggftV1Swap {
                 let value := add(earn, acc)
 
                 if lt(value, fee) {
-                    panic(Error__o__0xAA__RebalancePaymentTooLow)
+                    panic(Error__0xAA__RebalancePaymentTooLow)
                 }
 
                 accFee := add(accFee, fee)
@@ -343,11 +343,9 @@ abstract contract NuggftV1Loan is INuggftV1Loan, NuggftV1Swap {
             sstore(stake.slot, stake__cache)
 
             let newPrincipal := div(iso(stake__cache, 64, 160), mul(shrs, LOSS))
-            for {
-                let i := 0
-            } lt(i, len) {
-                i := add(i, 0x1)
-            } {
+
+            // prettier-ignore
+            for { let i := 0 } lt(i, len) { i := add(i, 0x1) } {
                 mstore(mptr, calldataload(add(tokenIds.offset, mul(i, 0x20))))
 
                 let account := mload(add(add(mptr, 0x60), mul(i, 0xA0)))
@@ -375,7 +373,7 @@ abstract contract NuggftV1Loan is INuggftV1Loan, NuggftV1Swap {
 
             // accumulated eth is sent to caller
             if iszero(call(gas(), caller(), acc, 0, 0, 0, 0)) {
-                panic(Error__K__0x75__SendEthFailureToCaller)
+                panic(Error__0x75__SendEthFailureToCaller)
             }
         }
     }

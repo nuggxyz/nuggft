@@ -69,18 +69,9 @@ contract NuggftV1 is IERC721Metadata, NuggftV1Loan {
 
     /// @inheritdoc INuggftV1Token
     function mint(uint160 tokenId) public payable override {
-        require(
-            tokenId <= UNTRUSTED_MINT_TOKENS + TRUSTED_MINT_TOKENS && //
-                tokenId >= TRUSTED_MINT_TOKENS,
-            hex'65'
-        );
-        if (tokenId == 600) {
-            assembly {
-                mstore(0x00, Panic__Sig)
-                mstore(0x04, 0x65)
-                revert(0x00, 0x24)
-            }
-        }
+        // prettier-ignore
+        if (!(tokenId <= UNTRUSTED_MINT_TOKENS + TRUSTED_MINT_TOKENS &&
+              tokenId >= TRUSTED_MINT_TOKENS)) _panic(Error__0x65__TokenNotMintable);
 
         addStakedShareFromMsgValue();
 
@@ -89,7 +80,7 @@ contract NuggftV1 is IERC721Metadata, NuggftV1Loan {
 
     /// @inheritdoc INuggftV1Token
     function trustedMint(uint160 tokenId, address to) external payable override requiresTrust {
-        require(tokenId < TRUSTED_MINT_TOKENS && tokenId != 0, hex'66');
+        if (!(tokenId < TRUSTED_MINT_TOKENS && tokenId != 0)) _panic(Error__0x66__TokenNotTrustMintable);
 
         addStakedShareFromMsgValue();
 
@@ -106,8 +97,9 @@ contract NuggftV1 is IERC721Metadata, NuggftV1Loan {
             let agency__sptr := keccak256(0x00, 0x40)
 
             if iszero(iszero(sload(agency__sptr))) {
-                mstore8(0x00, Error__P__0x80__TokenDoesExist)
-                revert(0x00, 0x01)
+                mstore(0x00, Revert__Sig)
+                mstore(0x04, Error__0x80__TokenDoesExist)
+                revert(0x00, 0x05)
             }
 
             // ========= memory ==========
@@ -154,7 +146,7 @@ contract NuggftV1 is IERC721Metadata, NuggftV1Loan {
 
     /// @inheritdoc INuggftV1Stake
     function migrate(uint160 tokenId) external {
-        require(migrator != address(0), hex'74');
+        if (migrator == address(0)) _panic(Error__0x81__MigratorNotSet);
 
         // stores the proof before deleting the nugg
         uint256 proof = proofOf(tokenId);
@@ -173,7 +165,7 @@ contract NuggftV1 is IERC721Metadata, NuggftV1Loan {
     /// @param tokenId the id of the nugg being unstaked
     /// @return ethOwed -> the amount of eth owed to the unstaking user - equivilent to "ethPerShare"
     function subStakedShare(uint160 tokenId) internal returns (uint96 ethOwed) {
-        require(isOwner(msg.sender, tokenId), hex'73');
+        if (!isOwner(msg.sender, tokenId)) _panic(Error__0x77__NotOwner);
 
         uint256 cache = stake;
 

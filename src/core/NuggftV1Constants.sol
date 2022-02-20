@@ -11,10 +11,10 @@ abstract contract NuggftV1Constants {
     uint96 constant PROTOCOL_FEE_BPS = 10;
 
     // epoch
-    uint16 constant INTERVAL_SUB = 2;
+    uint16 constant INTERVAL_SUB = 16;
     uint16 constant MINT_INTERVAL = 4;
 
-    uint16 constant INTERVAL = 69;
+    uint16 constant INTERVAL = 256;
     uint24 constant OFFSET = 3000;
 
     // loan
@@ -38,45 +38,114 @@ abstract contract NuggftV1Constants {
     bytes32 constant Event__Repayment = 0xc928c04c08e9d5085139dee5b4b0a24f48d84c91f8f44caefaea39da6108fce3;
     bytes32 constant Event__OfferItem = 0xece1c1f9e5c92bf1d13cc47d0a5d490cbbc4be21c8d492368d4b8a8aba35e41d;
     bytes32 constant Event__TransferItem = 0x31cf2357b228de5e7b21be4ee816920a4eabd32196b782ad557ba4a0f5c20af1;
-    bytes32 constant Event__Mint = 0x7c80a7f346b69f118a49fc9d825f66c511507d357166e827c04de87b5a3df4a2;
-    // errors
+    bytes32 constant Event__Mint = 0x7fa02ea2addb9a3ae24bb783f3817cbebd2aaa24af58c5eee6faf5b776797f95;
+    bytes32 constant Event__Rotate = 0x9a674c377cfb461eed8c85cebc9fc607ef62cecde152900174f519f861f90b57;
 
-    uint8 constant Error__A__0x65__TokenNotMintable = 0x65; // 0x65__TokenNotMintable
-    uint8 constant Error__B__0x66__TokenNotTrustMintable = 0x66; // 0x66__TokenNotTrustMintable
-    uint8 constant Error__C__0x67__WinningClaimTooEarly = 0x67; // 0x67__WinningClaimTooEarly
-    uint8 constant Error__D__0x68__OfferLowerThanLOSS = 0x68; // 0xF0__OfferLowerThanLOSS
-    uint8 constant Error__E__0x69__Wut = 0x69; // 0x69__Wut
-    uint8 constant Error__F__0x70__FloorTooLow = 0x70; // 0x70__FloorTooLow
-    uint8 constant Error__G__0x71__ValueTooLow = 0x71; // 0x71__ValueTooLow
-    uint8 constant Error__H__0x72__IncrementTooLow = 0x72; // 0x72__IncrementTooLow
-    uint8 constant Error__I__0x73__InvalidProofIndex = 0x73; // 0x73__InvalidProofIndex
-    uint8 constant Error__J__0x74__Untrusted = 0x74; // 0x88__Untrusted
-    uint8 constant Error__K__0x75__SendEthFailureToCaller = 0x75; // 0x92__SendEthFailureToCaller
-    uint8 constant Error__L__0x76__InvalidArrayLengths = 0x76; // 0x99__InvalidArrayLengths
-    uint8 constant Error__M__0x77__NotOwner = 0x77; // 0xE9__NotOwner
-    uint8 constant Error__N__0x78__TokenDoesNotExist = 0x78; // 0xEE__TokenDoesNotExist
-    uint8 constant Error__O__0x79__ProofHasNoFreeSlot = 0x79; // 0xF9__ProofHasNoFreeSlot
-    uint8 constant Error__P__0x80__TokenDoesExist = 0x80; // 0xF9__TokenDoesExist
+    // error Kill(bytes1);
 
-    uint8 constant Error__a__0x97__ItemAgencyAlreadySet = 0x97; // Error__0x09__ItemAgencyAlreadySet
-    uint8 constant Error__b__0x98__BlockHashIsZero = 0x98; // 0x0E__BlockHashIsZero
-    uint8 constant Error__c__0x99__InvalidEpoch = 0x99; // 0x0F__InvalidEpoch
-    uint8 constant Error__d__0xA0__NotSwapping = 0xA0; //_0x24__NotSwapping
-    uint8 constant Error__e__0xA1__NotAgent = 0xA1; //0x2A__NotAgent
-    uint8 constant Error__f__0xA2__NotItemAgent = 0xA2; // 0x2B__NotItemAgent
-    uint8 constant Error__g__0xA3__NotItemAuthorizedAgent = 0xA3; // 0x2D__NotItemAuthorizedAgent
-    uint8 constant Error__h__0xA4__ExpiredEpoch = 0xA4; // 0x2F__ExpiredEpoch
-    uint8 constant Error__i__0xA5__NoOffer = 0xA5; // 0x2E__NoOffer
-    uint8 constant Error__j__0xA6__NotAuthorized = 0xA6; // 0x31__NotAuthorized
-    uint8 constant Error__k__0xA7__LiquidationPaymentTooLow = 0xA7; // 0x32__LiquidationPaymentTooLow
-    uint8 constant Error__l__0xA8__NotLoaned = 0xA8; // 0x33__NotLoaned
-    uint8 constant Error__m__0xA9__ProofDoesNotHaveItem = 0xA9; // 0x34__ProofDoesNotHaveItem
-    uint8 constant Error__o__0xAA__RebalancePaymentTooLow = 0xAA; // 0x3A__RebalancePaymentTooLow
+    error Revert(bytes1);
 
-    function _panic(uint8 code) internal pure {
+    bytes4 constant Revert__Sig = 0x7e863b48;
+
+    bytes1 constant Error__0x65__TokenNotMintable = 0x65;
+    bytes1 constant Error__0x66__TokenNotTrustMintable = 0x66;
+    bytes1 constant Error__0x67__WinningClaimTooEarly = 0x67;
+    bytes1 constant Error__0x68__OfferLowerThanLOSS = 0x68;
+    bytes1 constant Error__0x69__Wut = 0x69;
+    bytes1 constant Error__0x70__FloorTooLow = 0x70;
+    bytes1 constant Error__0x71__ValueTooLow = 0x71;
+    bytes1 constant Error__0x72__IncrementTooLow = 0x72;
+    bytes1 constant Error__0x73__InvalidProofIndex = 0x73;
+    bytes1 constant Error__0x74__Untrusted = 0x74;
+    bytes1 constant Error__0x75__SendEthFailureToCaller = 0x75;
+    bytes1 constant Error__0x76__InvalidArrayLengths = 0x76;
+    bytes1 constant Error__0x77__NotOwner = 0x77;
+    bytes1 constant Error__0x78__TokenDoesNotExist = 0x78;
+    bytes1 constant Error__0x79__ProofHasNoFreeSlot = 0x79;
+    bytes1 constant Error__0x80__TokenDoesExist = 0x80;
+    bytes1 constant Error__0x81__MigratorNotSet = 0x81;
+    bytes1 constant Error__0x97__ItemAgencyAlreadySet = 0x97;
+    bytes1 constant Error__0x98__BlockHashIsZero = 0x98;
+    bytes1 constant Error__0x99__InvalidEpoch = 0x99;
+    bytes1 constant Error__0xA0__NotSwapping = 0xA0;
+    bytes1 constant Error__0xA1__NotAgent = 0xA1;
+    bytes1 constant Error__0xA2__NotItemAgent = 0xA2;
+    bytes1 constant Error__0xA3__NotItemAuthorizedAgent = 0xA3;
+    bytes1 constant Error__0xA4__ExpiredEpoch = 0xA4;
+    bytes1 constant Error__0xA5__NoOffer = 0xA5;
+    bytes1 constant Error__0xA6__NotAuthorized = 0xA6;
+    bytes1 constant Error__0xA7__LiquidationPaymentTooLow = 0xA7;
+    bytes1 constant Error__0xA8__NotLoaned = 0xA8;
+    bytes1 constant Error__0xA9__ProofDoesNotHaveItem = 0xA9;
+    bytes1 constant Error__0xAA__RebalancePaymentTooLow = 0xAA;
+
+    function _panic(bytes1 code) internal pure {
         assembly {
-            mstore8(0, code)
-            revert(0, 0x01)
+            mstore(0x00, Revert__Sig)
+            mstore(0x04, code)
+            revert(0x00, 0x5)
         }
     }
 }
+
+// bytes4 constant Error__TokenNotMintable = bytes4(abi.encodeWithSignature('TokenNotMintable()')); // 0x65__TokenNotMintable
+
+// bytes4 constant Error__TokenNotTrustMintable = bytes4(abi.encodeWithSignature('TokenNotTrustMintable()'));
+
+// bytes4 constant Error__WinningClaimTooEarly = bytes4(abi.encodeWithSignature('WinningClaimTooEarly()'));
+
+// bytes4 constant Error__OfferLowerThanLOSS = bytes4(abi.encodeWithSignature('OfferLowerThanLOSS()'));
+
+// bytes4 constant Error__Wut = bytes4(abi.encodeWithSignature('Wut()'));
+
+// bytes4 constant Error__FloorTooLow = bytes4(abi.encodeWithSignature('FloorTooLow()'));
+
+// bytes4 constant Error__ValueTooLow = bytes4(abi.encodeWithSignature('ValueTooLow()'));
+
+// bytes4 constant Error__IncrementTooLow = bytes4(abi.encodeWithSignature('IncrementTooLow()'));
+
+// bytes4 constant Error__InvalidProofIndex = bytes4(abi.encodeWithSignature('InvalidProofIndex()'));
+
+// bytes4 constant Error__Untrusted = bytes4(abi.encodeWithSignature('Untrusted()'));
+
+// bytes4 constant Error__SendEthFailureToCaller = bytes4(abi.encodeWithSignature('SendEthFailureToCaller()'));
+
+// bytes4 constant Error__InvalidArrayLengths = bytes4(abi.encodeWithSignature('InvalidArrayLengths()'));
+
+// bytes4 constant Error__NotOwner = bytes4(abi.encodeWithSignature('NotOwner()'));
+
+// bytes4 constant Error__TokenDoesNotExist = bytes4(abi.encodeWithSignature('TokenDoesNotExist()'));
+
+// bytes4 constant Error__ProofHasNoFreeSlot = bytes4(abi.encodeWithSignature('ProofHasNoFreeSlot()'));
+
+// bytes4 constant Error__TokenDoesExist = bytes4(abi.encodeWithSignature('TokenDoesExist()'));
+
+// bytes4 constant Error__0x66__TokenNotTrustMintable = 0x3c962da2;  error TokenNotTrustMintable__0x66();
+// bytes4 constant Error__0x67__WinningClaimTooEarly = 0x2a2cb709;    error WinningClaimTooEarly__0x67();
+// bytes4 constant Error__0x68__OfferLowerThanLOSS = 0xae038e3d;        error OfferLowerThanLOSS__0x68();
+// bytes4 constant Error__0x69__Wut = 0x163f6e5f;                                      error Wut__0x69();
+// bytes4 constant Error__0x70__FloorTooLow = 0x6c6781e4;                      error FloorTooLow__0x70();
+// bytes4 constant Error__0x71__ValueTooLow = 0xe64e0225;                      error ValueTooLow__0x71();
+// bytes4 constant Error__0x72__IncrementTooLow = 0xa4e7d094;              error IncrementTooLow__0x72();
+// bytes4 constant Error__0x73__InvalidProofIndex = 0x45f451ba;          error InvalidProofIndex__0x73();
+// bytes4 constant Error__0x74__Untrusted = 0xc79dea53;                          error Untrusted__0x74();
+// bytes4 constant Error__0x75__SendEthFailureToCaller = 0x2789ce21; error SendEthFailureToCaller__0x75();
+// bytes4 constant Error__0x76__InvalidArrayLengths = 0xb83c1b80;      error InvalidArrayLengths__0x76();
+// bytes4 constant Error__0x77__NotOwner = 0x71ebbd41;                            error NotOwner__0x77();
+// bytes4 constant Error__0x78__TokenDoesNotExist = 0x1b23da5c;          error TokenDoesNotExist__0x78();
+// bytes4 constant Error__0x79__ProofHasNoFreeSlot = 0x941a6f38;        error ProofHasNoFreeSlot__0x79();
+// bytes4 constant Error__0x80__TokenDoesExist = 0xec16a2aa;                error TokenDoesExist__0x80();
+// bytes4 constant Error__0x97__ItemAgencyAlreadySet = 0x2b5f209d;    error ItemAgencyAlreadySet__0x97();
+// bytes4 constant Error__0x98__BlockHashIsZero = 0x498b90eb;              error BlockHashIsZero__0x98();
+// bytes4 constant Error__0x99__InvalidEpoch = 0x72e1e2b1;                    error InvalidEpoch__0x99();
+// bytes4 constant Error__0xA0__NotSwapping = 0xbd282b32;                      error NotSwapping__0xA0();
+// bytes4 constant Error__0xA1__NotAgent = 0x5045c4a4;                            error NotAgent__0xA1();
+// bytes4 constant Error__0xA2__NotItemAgent = 0xd516fa17;                    error NotItemAgent__0xA2();
+// bytes4 constant Error__0xA3__NotItemAuthorizedAgent = 0x3c962da2; error NotItemAuthorizedAgent__0xA3();
+// bytes4 constant Error__0xA4__ExpiredEpoch = 0x3c962da2;                    error ExpiredEpoch__0xA4();
+// bytes4 constant Error__0xA5__NoOffer = 0x3c962da2;                              error NoOffer__0xA5();
+// bytes4 constant Error__0xA6__NotAuthorized = 0x3c962da2;                  error NotAuthorized__0xA6();
+// bytes4 constant Error__0xA7__LiquidationPaymentTooLow = 0x3c962da2; error LiquidationPaymentTooLow__0xA7();
+// bytes4 constant Error__0xA8__NotLoaned = 0x3c962da2;                          error NotLoaned__0xA8();
+// bytes4 constant Error__0xA9__ProofDoesNotHaveItem = 0x3c962da2;    error ProofDoesNotHaveItem__0xA9();
+// bytes4 constant Error__0xAA__RebalancePaymentTooLow = 0x3c962da2; error RebalancePaymentTooLow__0xAA();

@@ -8,10 +8,10 @@ abstract contract revert__mint__0x66 is NuggftV1Test {
     function test__revert__mint__0x66__fail__desc() public {
         forge.vm.startPrank(users.safe);
         {
-            forge.vm.expectRevert(hex'66');
+            forge.vm.expectRevert(hex'7e863b48_66');
             nuggft.trustedMint(500, users.frank);
 
-            forge.vm.expectRevert(hex'66');
+            forge.vm.expectRevert(hex'7e863b48_66');
             nuggft.trustedMint(0, users.frank);
         }
         forge.vm.stopPrank();

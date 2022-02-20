@@ -38,8 +38,7 @@ contract expectRebalance is base {
     }
 
     function err(bytes1 b) public returns (expectRebalance) {
-        prepped.err = new bytes(1);
-        prepped.err[0] = b;
+        prepped.err = abi.encodePacked(bytes4(0x7e863b48), b);
         return this;
     }
 

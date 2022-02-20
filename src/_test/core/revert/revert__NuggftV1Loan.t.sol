@@ -82,7 +82,7 @@ abstract contract revert__NuggftV1Loan is NuggftV1Test {
 
         forge.vm.startPrank(users.mac);
         {
-            forge.vm.expectRevert(hex'A6');
+            forge.vm.expectRevert(hex'7e863b48_A6');
             nuggft.liquidate{value: value}(tokenId);
         }
         forge.vm.stopPrank();
@@ -141,7 +141,7 @@ abstract contract revert__NuggftV1Loan is NuggftV1Test {
 
         forge.vm.startPrank(users.frank);
         {
-            forge.vm.expectRevert(hex'A7');
+            forge.vm.expectRevert(hex'7e863b48_A7');
             nuggft.liquidate{value: value - 1}(tokenId);
         }
         forge.vm.stopPrank();
@@ -166,10 +166,10 @@ abstract contract revert__NuggftV1Loan is NuggftV1Test {
 
         forge.vm.startPrank(users.frank);
         {
-            forge.vm.expectRevert(hex'A7');
+            forge.vm.expectRevert(hex'7e863b48_A7');
             nuggft.liquidate{value: 1}(tokenId);
 
-            forge.vm.expectRevert(hex'A7');
+            forge.vm.expectRevert(hex'7e863b48_A7');
             nuggft.liquidate{value: value / 2}(tokenId);
         }
         forge.vm.stopPrank();
@@ -179,7 +179,7 @@ abstract contract revert__NuggftV1Loan is NuggftV1Test {
         uint160 tokenId = scenario_frank_has_a_loaned_token();
 
         forge.vm.startPrank(users.frank);
-        forge.vm.expectRevert(hex'A7');
+        forge.vm.expectRevert(hex'7e863b48_A7');
         {
             nuggft.liquidate{value: 0}(tokenId);
         }
@@ -221,7 +221,7 @@ abstract contract revert__NuggftV1Loan is NuggftV1Test {
 
     //     forge.vm.startPrank(users.frank);
     //     {
-    //         forge.vm.expectRevert(hex'A8');
+    //         forge.vm.expectRevert(hex'7e863b48_A8');
     //         nuggft.rebalance{value: value - 1}(tokenId);
     //     }
     //     forge.vm.stopPrank();
@@ -246,7 +246,7 @@ abstract contract revert__NuggftV1Loan is NuggftV1Test {
 
     //     forge.vm.startPrank(users.frank);
     //     {
-    //         forge.vm.expectRevert(hex'A8');
+    //         forge.vm.expectRevert(hex'7e863b48_A8');
     //         nuggft.rebalance{value: value / 2}(tokenId);
     //     }
     //     forge.vm.stopPrank();
@@ -257,7 +257,7 @@ abstract contract revert__NuggftV1Loan is NuggftV1Test {
 
     //     forge.vm.startPrank(users.frank);
     //     {
-    //         forge.vm.expectRevert(hex'A8');
+    //         forge.vm.expectRevert(hex'7e863b48_A8');
     //         nuggft.rebalance(tokenId);
     //     }
     //     forge.vm.stopPrank();
@@ -272,7 +272,7 @@ abstract contract revert__NuggftV1Loan is NuggftV1Test {
 
     //     forge.vm.startPrank(users.frank);
     //     {
-    //         forge.vm.expectRevert(hex'A9');
+    //         forge.vm.expectRevert(hex'7e863b48_A9');
     //         nuggft.loanInfo(tokenId);
     //     }
     //     forge.vm.stopPrank();
@@ -299,7 +299,7 @@ abstract contract revert__NuggftV1Loan is NuggftV1Test {
 
     //         nuggft.liquidate{value: value}(tokenId);
 
-    //         forge.vm.expectRevert(hex'A9');
+    //         forge.vm.expectRevert(hex'7e863b48_A9');
     //         nuggft.loanInfo(tokenId);
     //     }
     //     forge.vm.stopPrank();
