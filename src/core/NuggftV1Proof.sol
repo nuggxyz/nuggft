@@ -57,8 +57,9 @@ abstract contract NuggftV1Proof is INuggftV1Proof, NuggftV1Dotnugg {
             }
 
             function panic(code) {
-                mstore8(0, code)
-                revert(0, 0x01)
+                mstore(0x00, Revert__Sig)
+                mstore(0x04, code)
+                revert(0x00, 0x05)
             }
 
             mstore(0x00, tokenId)
@@ -67,14 +68,14 @@ abstract contract NuggftV1Proof is INuggftV1Proof, NuggftV1Dotnugg {
 
             // ensure the caller is the agent
             if iszero(eq(iso(buyerTokenAgency, 96, 96), caller())) {
-                panic(Error__f__0xA2__NotItemAgent)
+                panic(Error__0xA2__NotItemAgent)
             }
 
             let flag := shr(254, buyerTokenAgency)
 
             // ensure the caller is really the agent
             if and(eq(flag, 0x3), iszero(iszero(iso(buyerTokenAgency, 2, 232)))) {
-                panic(Error__g__0xA3__NotItemAuthorizedAgent)
+                panic(Error__0xA3__NotItemAuthorizedAgent)
             }
 
             mstore(0x20, proofs.slot)
@@ -88,7 +89,7 @@ abstract contract NuggftV1Proof is INuggftV1Proof, NuggftV1Dotnugg {
 
             // ensure arrays the same length
             if iszero(eq(len, calldataload(sub(index1s.offset, 0x20)))) {
-                panic(Error__L__0x76__InvalidArrayLengths)
+                panic(Error__0x76__InvalidArrayLengths)
             }
             mstore(0x00, proof)
 
@@ -107,7 +108,7 @@ abstract contract NuggftV1Proof is INuggftV1Proof, NuggftV1Dotnugg {
                     or(or(iszero(index0), iszero(index1)), iszero(gt(16, index0))), //
                     iszero(gt(16, index1))
                 ) {
-                    panic(Error__I__0x73__InvalidProofIndex)
+                    panic(Error__0x73__InvalidProofIndex)
                 }
 
                 proof := mload(0x00)
@@ -140,8 +141,9 @@ abstract contract NuggftV1Proof is INuggftV1Proof, NuggftV1Dotnugg {
             mstore(0x20, agency.slot)
 
             if iszero(iszero(sload(keccak256(0x00, 0x40)))) {
-                mstore8(0x00, Error__N__0x78__TokenDoesNotExist)
-                revert(0x00, 0x01)
+                mstore(0x00, Revert__Sig)
+                mstore(0x04, Error__0x78__TokenDoesNotExist)
+                revert(0x00, 0x05)
             }
 
             // ========= memory ==========

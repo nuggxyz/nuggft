@@ -29,13 +29,7 @@ abstract contract revert__NuggftV1Stake is NuggftV1Test {
     function test__revert__NuggftV1Stake__0x71__mint__failWithValue() public {
         test__revert__NuggftV1Stake__0x71__mint__success();
 
-        forge.vm.startPrank(users.dennis);
-        {
-            uint96 tmp = nuggft.eps();
-            forge.vm.expectRevert(hex'71');
-            nuggft.mint{value: tmp - 1}(2909);
-        }
-        forge.vm.stopPrank();
+        expect.mint().err(0x71).from(users.dennis).exec{value: nuggft.eps() - 1}(2909);
     }
 
     function test__revert__NuggftV1Stake__0x71__mint__failWithZero() public {
@@ -74,7 +68,7 @@ abstract contract revert__NuggftV1Stake is NuggftV1Test {
 
             forge.vm.deal(users.safe, value);
 
-            forge.vm.expectRevert(hex'71');
+            forge.vm.expectRevert(hex'7e863b48_71');
             nuggft.trustedMint{value: value}(tokenId, users.dennis);
         }
         forge.vm.stopPrank();
@@ -91,12 +85,12 @@ abstract contract revert__NuggftV1Stake is NuggftV1Test {
     // burn
     // ─────────────
 
-    function test__revert__NuggftV1Stake__0x73__burn__failNotOwner() public {
+    function test__revert__NuggftV1Stake__0x77__burn__failNotOwner() public {
         uint160 tokenId = scenario_dee_has_a_token();
 
         forge.vm.startPrank(users.mac);
         {
-            forge.vm.expectRevert(hex'73');
+            forge.vm.expectRevert(hex'7e863b48_77');
             nuggft.burn(tokenId);
         }
         forge.vm.stopPrank();
@@ -107,7 +101,7 @@ abstract contract revert__NuggftV1Stake is NuggftV1Test {
 
     //     forge.vm.startPrank(users.dee);
     //     {
-    //         forge.vm.expectRevert(hex'73');
+    //         forge.vm.expectRevert(hex'7e863b48_73');
     //         nuggft.burn(tokenId);
     //     }
     //     forge.vm.stopPrank();
@@ -131,7 +125,7 @@ abstract contract revert__NuggftV1Stake is NuggftV1Test {
     //     {
     //         nuggft.approve(users.mac, tokenId);
 
-    //         forge.vm.expectRevert(hex'73');
+    //         forge.vm.expectRevert(hex'7e863b48_73');
     //         nuggft.burn(tokenId);
     //     }
     //     forge.vm.stopPrank();
@@ -150,7 +144,7 @@ abstract contract revert__NuggftV1Stake is NuggftV1Test {
 
     //     forge.vm.startPrank(users.dennis);
     //     {
-    //         forge.vm.expectRevert(hex'73');
+    //         forge.vm.expectRevert(hex'7e863b48_73');
     //         nuggft.burn(tokenId);
     //     }
     //     forge.vm.stopPrank();
@@ -169,7 +163,7 @@ abstract contract revert__NuggftV1Stake is NuggftV1Test {
 
     //     forge.vm.startPrank(users.mac);
     //     {
-    //         forge.vm.expectRevert(hex'73');
+    //         forge.vm.expectRevert(hex'7e863b48_73');
     //         nuggft.burn(tokenId);
     //     }
     //     forge.vm.stopPrank();
@@ -184,7 +178,7 @@ abstract contract revert__NuggftV1Stake is NuggftV1Test {
 
     //     forge.vm.startPrank(users.dee);
     //     {
-    //         forge.vm.expectRevert(hex'73');
+    //         forge.vm.expectRevert(hex'7e863b48_73');
     //         nuggft.migrate(tokenId);
     //     }
     //     forge.vm.stopPrank();
@@ -211,22 +205,22 @@ abstract contract revert__NuggftV1Stake is NuggftV1Test {
     // migrate
     // ────────────
 
-    function test__revert__NuggftV1Stake__0x74__migrate__fail() public {
+    function test__revert__NuggftV1Stake__0x81__migrate__fail() public {
         uint160 tokenId = scenario_dee_has_a_token();
 
-        // _nuggft.shouldFail(hex'74', dee, migrate(tokenId));
+        // _nuggft.shouldFail(hex'81', dee, migrate(tokenId));
 
         forge.vm.startPrank(users.dee);
         {
             // nuggft.approve(_nuggft, tokenId);
 
-            forge.vm.expectRevert(hex'74');
+            forge.vm.expectRevert(hex'7e863b48_81');
             nuggft.migrate(tokenId);
         }
         forge.vm.stopPrank();
     }
 
-    function test__revert__NuggftV1Stake__0x74__migrate__succeeds() public {
+    function test__revert__NuggftV1Stake__0x81__migrate__succeeds() public {
         uint160 tokenId = scenario_dee_has_a_token();
 
         forge.vm.startPrank(users.dee);
