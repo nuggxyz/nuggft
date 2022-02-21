@@ -3,10 +3,6 @@
 pragma solidity 0.8.12;
 
 interface INuggftV1Stake {
-    /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-                                EVENTS
-       ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
-
     event Extract(uint96 eth);
 
     event MigratorV1Updated(address migrator);
@@ -17,20 +13,12 @@ interface INuggftV1Stake {
 
     event Stake(bytes32 cache);
 
-    /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-                            STATE CHANGING
-       ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
-
     function migrate(uint160 tokenId) external;
 
     /// @notice burns a nugg from existance, dealing the eth worth of that share to the user
     /// @dev should only be called directly
     /// @param tokenId the id of the nugg being burned
     function burn(uint160 tokenId) external;
-
-    /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-                            VIEW FUNCTIONS
-       ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
 
     /// @notice returns the total "eps" held by the contract
     /// @dev this value not always equivilent to the "floor" price which can consist of perceived value.
