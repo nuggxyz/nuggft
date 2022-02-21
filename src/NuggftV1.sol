@@ -1,4 +1,4 @@
-// SPDX-License-Identifier: MIT
+// SPDX-License-Identifier: AGPL-3.0-or-later
 
 pragma solidity 0.8.12;
 
@@ -77,8 +77,6 @@ contract NuggftV1 is IERC721Metadata, NuggftV1Loan {
         if (!(tokenId <= UNTRUSTED_MINT_TOKENS + TRUSTED_MINT_TOKENS &&
               tokenId >= TRUSTED_MINT_TOKENS)) _panic(Error__0x65__TokenNotMintable);
 
-        addStakedShareFromMsgValue();
-
         mint(msg.sender, tokenId);
     }
 
@@ -86,13 +84,13 @@ contract NuggftV1 is IERC721Metadata, NuggftV1Loan {
     function trustedMint(uint160 tokenId, address to) external payable override requiresTrust {
         if (!(tokenId < TRUSTED_MINT_TOKENS && tokenId != 0)) _panic(Error__0x66__TokenNotTrustMintable);
 
-        addStakedShareFromMsgValue();
-
         mint(to, tokenId);
     }
 
     function mint(address to, uint160 tokenId) internal {
         uint256 randomEnough;
+
+        addStakedShareFromMsgValue();
 
         assembly {
             mstore(0x00, tokenId)
@@ -109,7 +107,7 @@ contract NuggftV1 is IERC721Metadata, NuggftV1Loan {
             // prettier-ignore
             mstore( // ====================================================
                 /* postion */ 0x20,
-                // the we div and mul by 16 here to make the value returned stay constant for 16 blocks
+                // we div and mul by 16 here to make the value returned stay constant for 16 blocks
                 // this makes gas estimation more acurate as "initFromSeed" will change in gas useage
                 // + depending on the value returned here
                 /* value   */ blockhash(shl(shr(sub(number(), 2), 4), 4))
@@ -124,12 +122,12 @@ contract NuggftV1 is IERC721Metadata, NuggftV1Loan {
             // update agency to reflect the new leader
 
             // prettier-ignore
-            let agency__cache := or( // ===============
+            let agency__cache := or( // ===================================
             /* flag  */ shl(254, 0x01), // = OWN(0x01)
             /* epoch */                 // = 0
             /* eth   */                 // = 0
             /* addr  */ to              // = new agent
-            ) // ===============
+            ) // ==========================================================
 
             sstore(agency__sptr, agency__cache)
 
