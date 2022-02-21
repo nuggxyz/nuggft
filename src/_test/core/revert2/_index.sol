@@ -83,7 +83,7 @@ contract Revert2 is
 
         // dep.init();
 
-        processor = IDotnuggV1(address(new DotnuggV1()));
+        processor = IDotnuggV1Safe(address(new DotnuggV1()));
         nuggft = new RiggedNuggft(address(processor));
 
         _nuggft = address(nuggft);

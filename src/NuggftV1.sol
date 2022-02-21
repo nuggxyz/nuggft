@@ -9,7 +9,6 @@ import {NuggftV1Dotnugg} from './core/NuggftV1Dotnugg.sol';
 
 import {INuggftV1Migrator} from './interfaces/nuggftv1/INuggftV1Migrator.sol';
 
-import {IDotnuggV1} from './interfaces/dotnugg/IDotnuggV1.sol';
 import {IDotnuggV1Safe} from './interfaces/dotnugg/IDotnuggV1Safe.sol';
 
 import {INuggftV1Token} from './interfaces/nuggftv1/INuggftV1Token.sol';

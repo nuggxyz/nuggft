@@ -1,7 +1,6 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
 pragma solidity 0.8.12;
-import '../_test/utils/forge.sol';
 
 library DotnuggV1Lib {
     uint8 constant DOTNUGG_HEADER_BYTE_LEN = 25;
@@ -13,7 +12,6 @@ library DotnuggV1Lib {
     bytes32 internal constant PROXY_INIT_CODE_HASH = keccak256(abi.encodePacked(PROXY_INIT_CODE));
 
     function size(address pointer) internal view returns (uint8 res) {
-        pointer.code[1];
         assembly {
             // [======================================================================
             // the amount of items inside a dotnugg file are stored at byte #1 (0 based index)
@@ -30,12 +28,12 @@ library DotnuggV1Lib {
             res := mload(0x00)
             // ⋀⋀⋀⋀⋀⋀⋀⋀⋀⋀⋀⋀⋀⋀⋀⋀⋀⋀⋀⋀⋀⋀⋀⋀⋀⋀⋀⋀⋀⋀⋀⋀⋀⋀⋀⋀⋀⋀⋀⋀⋀⋀⋀⋀⋀⋀⋀⋀⋀⋀⋀⋀⋀⋀⋀⋀⋀⋀⋀⋀⋀⋀⋀⋀
 
-            // [======================================================================
-            // we clear the scratch space we dirtied
-            mstore(0x00, 0x00)
-            // memory layout:
-            // [0x00] 0x00000000000000000000000000000000000000000000000000000000000000
-            // =======================================================================]
+            // // [======================================================================
+            // // we clear the scratch space we dirtied
+            // mstore(0x00, 0x00)
+            // // memory layout:
+            // // [0x00] 0x00000000000000000000000000000000000000000000000000000000000000
+            // // =======================================================================]
         }
     }
 
@@ -51,54 +49,45 @@ library DotnuggV1Lib {
         assembly {
             // we adjust the seed to be unique per feature and safe, yet still deterministic
 
-            // [======================================================================
+            // ===========================================================
             mstore(0x00, seed)
             mstore(0x20, or(shl(160, feature), safe))
 
-            // [0x00] 0x___________________________SEED_______________________________
-            // [0x20] 0x0000000000000__feature__|_______________address(safe)_________
-            // =======================================================================]
-
-            seed := keccak256(0x00, 0x40)
-
-            // [======================================================================
-            mstore(0x00, 0x00)
-            mstore(0x20, 0x00)
-
-            // [0x00] 0x00000000000000000000000000000000000000000000000000000000000000
-            // [0x20] 0x00000000000000000000000000000000000000000000000000000000000000
-            // =======================================================================]
+            // prettier-ignore
+            seed := keccak256( //-----------------------------------------
+                0x00, /* [ seed                                  ]    0x20
+                0x20     [ uint8(feature) | address(safe)        ] */ 0x40
+            ) // ==========================================================
 
             // Get a pointer to some free memory.
+            // no need update pointer becasue after this function, the loaded data is not longer needed
+            // + and solidity does not assume the free memory pointer points to "clean" data
             let data := mload(0x40)
 
-            // Update the free memory pointer to prevent overriding our data.
-            // We use and(x, not(31)) as a cheaper equivalent to sub(x, mod(x, 32)).
-            // Adding 31 to len and running the result through the logic above ensures
-            // the memory pointer remains word-aligned, following the Solidity convention.
-            // mstore(0x40, add(data, and(add(add(high, 32), 31), not(31))))
-
-            // Store the len of the data in the first 32 byte chunk of free memory.
-            mstore(data, high)
-
             // Copy the code into memory right after the 32 bytes we used to store the len.
-            extcodecopy(loc, add(data, 32), add(DOTNUGG_RUNTIME_BYTE_LEN, 1), mul(high, 2))
+            extcodecopy(loc, add(0x20, data), add(DOTNUGG_RUNTIME_BYTE_LEN, 1), mul(high, 2))
 
             // normalize seed to be <= type(uint16).max
             // if we did not want to use weights, we could just mod by "len" and have our final value
             seed := mod(seed, 0xffff)
 
+            // adjust high search value to be based on a 0 based index
             high := sub(high, 1)
-            let low := 0
+
+            // adjust data pointer to make mload return our uint16[] index easily
+            data := add(data, 0x2)
 
             // prettier-ignore
-            for { } iszero(gt(low, high)) { } {
+            for { let low := 0 } iszero(gt(low, high)) { } {
 
                 // mid = (low + high) / 2
                 let mid := shr(1, add(low, high))
 
-                // "is weights[mid] <= seed ?"
-                switch iszero(gt(and(mload(add(add(data, 0x2), shl(1, mid))), 0xffff), seed))
+                // prettier-ignore
+                switch iszero(gt(
+                    and(mload(add(data, shl(1, mid))), 0xffff),
+                   /* is weights[mid]  <= */ seed // ?
+                ))
                 case 1 {
                     low := add(mid, 1)
                 }
@@ -110,6 +99,7 @@ library DotnuggV1Lib {
                 }
             }
 
+            // re-adjust res to be based on 1 based index
             res := add(res, 1)
         }
     }

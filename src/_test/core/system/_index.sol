@@ -8,7 +8,7 @@ contract System is system__NuggftV1Swap, system__one, system__NuggftV1Loan, syst
         forge.vm.roll(14069560);
 
         // dep.init();
-        processor = IDotnuggV1(address(new DotnuggV1()));
+        processor = IDotnuggV1Safe(address(new DotnuggV1()));
         nuggft = new RiggedNuggft(address(processor));
         // record.build(nuggft.external__agency__slot());
 

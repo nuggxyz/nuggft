@@ -5,7 +5,7 @@ pragma solidity 0.8.12;
 import {MockNuggftV1Migrator} from './mock/MockNuggftV1Migrator.sol';
 
 import {NuggftV1} from '../NuggftV1.sol';
-import {IDotnuggV1} from '../interfaces/dotnugg/IDotnuggV1.sol';
+import {IDotnuggV1Safe} from '../interfaces/dotnugg/IDotnuggV1Safe.sol';
 import {NuggFatherV1} from '../_deployment/NuggFatherV1.sol';
 import {NuggftV1Constants} from '../core/NuggftV1Constants.sol';
 
@@ -99,7 +99,7 @@ contract NuggftV1Test is ForgeTest, NuggftV1Constants {
     using SafeCast for uint256;
     using SafeCast for uint64;
 
-    IDotnuggV1 public processor;
+    IDotnuggV1Safe public processor;
 
     MockNuggftV1Migrator public _migrator;
 
@@ -135,7 +135,7 @@ contract NuggftV1Test is ForgeTest, NuggftV1Constants {
 
         // dep.init();
 
-        processor = IDotnuggV1(address(new DotnuggV1()));
+        processor = IDotnuggV1Safe(address(new DotnuggV1()));
         nuggft = new RiggedNuggft(address(processor));
 
         _nuggft = address(nuggft);
@@ -175,7 +175,7 @@ contract NuggftV1Test is ForgeTest, NuggftV1Constants {
 
     //     // dep.init();
 
-    //     processor = IDotnuggV1(dep.dotnugg());
+    //     processor = IDotnuggV1Safe(dep.dotnugg());
     //     nuggft = new RiggedNuggft(address(processor));
 
     //     // record.build(nuggft.external__agency__slot());
