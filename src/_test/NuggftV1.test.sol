@@ -15,6 +15,7 @@ import {data} from '../_data/nuggs.data.sol';
 
 import './utils/forge.sol';
 import {DotnuggV1} from '../../../dotnugg-v1-core/src/DotnuggV1.sol';
+import {DotnuggV1Lib} from '../libraries/DotnuggV1Lib.sol';
 
 import {NuggftV1AgentType} from './helpers/NuggftV1AgentType.sol';
 
@@ -27,6 +28,10 @@ contract RiggedNuggft is NuggftV1 {
         if (block.number > blocknum && block.number - blocknum < 256) {
             return keccak256(abi.encodePacked(blocknum));
         }
+    }
+
+    function external__search(uint8 feature, uint256 seed) external view returns (uint8) {
+        return DotnuggV1Lib.search(address(dotnuggV1), feature, seed);
     }
 
     function external__calculateSeed() external view returns (uint256 res, uint24 _epoch) {

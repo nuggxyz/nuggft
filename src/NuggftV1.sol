@@ -3,18 +3,14 @@
 pragma solidity 0.8.12;
 
 import {IERC721, IERC165, IERC721Metadata} from './interfaces/IERC721.sol';
+import {INuggftV1Migrator} from './interfaces/nuggftv1/INuggftV1Migrator.sol';
+import {IDotnuggV1Safe} from './interfaces/dotnugg/IDotnuggV1Safe.sol';
+import {INuggftV1Stake} from './interfaces/nuggftv1/INuggftV1Stake.sol';
+import {INuggftV1Proof} from './interfaces/nuggftv1/INuggftV1Proof.sol';
+import {INuggftV1} from './interfaces/nuggftv1/INuggftV1.sol';
 
 import {NuggftV1Loan} from './core/NuggftV1Loan.sol';
 import {NuggftV1Proof} from './core/NuggftV1Proof.sol';
-
-import {INuggftV1Migrator} from './interfaces/nuggftv1/INuggftV1Migrator.sol';
-
-import {IDotnuggV1Safe} from './interfaces/dotnugg/IDotnuggV1Safe.sol';
-
-import {INuggftV1Stake} from './interfaces/nuggftv1/INuggftV1Stake.sol';
-import {INuggftV1Proof} from './interfaces/nuggftv1/INuggftV1Proof.sol';
-
-import {INuggftV1} from './interfaces/nuggftv1/INuggftV1.sol';
 
 import {data as nuggs} from './_data/nuggs.data.sol';
 
@@ -117,7 +113,11 @@ contract NuggftV1 is IERC721, IERC721Metadata, NuggftV1Loan {
             mstore(0x00, tokenId)
             mstore(0x20, agency.slot)
 
-            let agency__sptr := keccak256(0x00, 0x40)
+            // prettier-ignore
+            let agency__sptr := keccak256( // =================================
+                0x00, /* [ tokenId                               ]    0x20
+                0x20     [ agency.slot                           ] */ 0x40
+            ) // ==========================================================
 
             if iszero(iszero(sload(agency__sptr))) {
                 mstore(0x00, Revert__Sig)
@@ -156,7 +156,12 @@ contract NuggftV1 is IERC721, IERC721Metadata, NuggftV1Loan {
             mstore(0x00, tokenId)
             mstore(0x20, callvalue())
 
-            log1(0x00, 0x40, Event__Mint)
+            // prettier-ignore
+            log1( // =======================================================
+                /* param #1 */ 0x00, /* [ tokenId   ]    0x20
+                /* param #2    0x20     [ msg.value ] */ 0x40,
+                /* topic #1 */ Event__Mint
+            ) // ===========================================================
         }
 
         uint256 proof = initFromSeed(randomEnough);
