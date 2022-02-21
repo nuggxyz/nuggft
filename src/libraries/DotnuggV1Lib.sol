@@ -1,4 +1,4 @@
-// SPDX-License-Identifier: MIT
+// SPDX-License-Identifier: AGPL-3.0-or-later
 
 pragma solidity 0.8.12;
 import '../_test/utils/forge.sol';
@@ -13,6 +13,7 @@ library DotnuggV1Lib {
     bytes32 internal constant PROXY_INIT_CODE_HASH = keccak256(abi.encodePacked(PROXY_INIT_CODE));
 
     function size(address pointer) internal view returns (uint8 res) {
+        pointer.code[1];
         assembly {
             // [======================================================================
             // the amount of items inside a dotnugg file are stored at byte #1 (0 based index)
@@ -96,7 +97,6 @@ library DotnuggV1Lib {
                 // mid = (low + high) / 2
                 let mid := shr(1, add(low, high))
 
-
                 // "is weights[mid] <= seed ?"
                 switch iszero(gt(and(mload(add(add(data, 0x2), shl(1, mid))), 0xffff), seed))
                 case 1 {
@@ -114,7 +114,7 @@ library DotnuggV1Lib {
         }
     }
 
-    function location(address registration, uint8 feature) internal pure returns (address res) {
+    function location(address safe, uint8 feature) internal pure returns (address res) {
         bytes32 h = PROXY_INIT_CODE_HASH;
 
         assembly {
@@ -128,11 +128,11 @@ library DotnuggV1Lib {
 
             // [======================================================================
             mstore8(0x00, 0xff)
-            mstore(0x01, shl(96, registration))
+            mstore(0x01, shl(96, safe))
             mstore(0x15, feature)
             mstore(0x35, h)
 
-            // [0x00] 0xff>_____________registration______________>___________________
+            // [0x00] 0xff>_________________safe__________________>___________________
             // [0x20] 0x________________feature___________________>___________________
             // [0x40] 0x________________PROXY_INIT_CODE_HASH______////////////////////
             // =======================================================================]

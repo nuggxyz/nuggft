@@ -5,7 +5,7 @@
     "main": "index.js",
     "repository": "https://github.com/nuggxyz/dotnugg-core.git",
     "author": "dub6ix <dub6ix@nugg.xyz>",
-    "license": "MIT",
+    "license": "AGPL-3.0-or-later",
     "scripts": {
         "generate": "yarn --cwd ../dotnugg-sdk generate-uploader nuggft-art nuggft-core2"
     },

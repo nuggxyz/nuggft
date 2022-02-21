@@ -1,4 +1,4 @@
-// SPDX-License-Identifier: MIT
+// SPDX-License-Identifier: AGPL-3.0-or-later
 
 pragma solidity 0.8.12;
 
@@ -28,6 +28,7 @@ abstract contract NuggftV1Swap is INuggftV1ItemSwap, INuggftV1Swap, NuggftV1Stak
         uint256 offersSlot;
 
         bool isItem;
+        uint256 last;
 
         assembly {
             function iso(val, left, right) -> b {
@@ -139,8 +140,6 @@ abstract contract NuggftV1Swap is INuggftV1ItemSwap, INuggftV1Swap, NuggftV1Stak
                 return(0x0, 0x00)
             }
         }
-
-        uint256 last;
 
         assembly {
             function iso(val, left, right) -> b {

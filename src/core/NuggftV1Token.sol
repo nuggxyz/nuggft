@@ -1,4 +1,4 @@
-// SPDX-License-Identifier: MIT
+// SPDX-License-Identifier: AGPL-3.0-or-later
 
 pragma solidity 0.8.12;
 
@@ -16,10 +16,6 @@ abstract contract NuggftV1Token is INuggftV1Token, NuggftV1Epoch {
     uint32 constant UNTRUSTED_MINT_TOKENS = 10000;
 
     mapping(uint256 => uint256) public agency;
-
-    // mapping(address => uint256) balances;
-    mapping(uint256 => address) approvals;
-    mapping(address => mapping(address => bool)) operatorApprovals;
 
     /// @inheritdoc IERC721
     function approve(address, uint256) external payable override {
@@ -53,10 +49,6 @@ abstract contract NuggftV1Token is INuggftV1Token, NuggftV1Epoch {
         return false; //_isOperatorFor(operator, owner);
     }
 
-    /*━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-                                DISABLED
-    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━*/
-
     function balanceOf(address) external pure override returns (uint256) {
         return 0;
     }
@@ -85,14 +77,6 @@ abstract contract NuggftV1Token is INuggftV1Token, NuggftV1Epoch {
     ) external payable override {
         _panic(Error__0x69__Wut);
     }
-
-    /*━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-                                internal
-    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━*/
-
-    /*━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-                                view
-    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━*/
 
     function exists(uint160 tokenId) internal view returns (bool) {
         return agency[tokenId] != 0;
