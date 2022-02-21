@@ -6,7 +6,6 @@ import '../../NuggftV1.test.sol';
 
 import {ShiftLib} from '../../helpers/ShiftLib.sol';
 import {NuggftV1Loan} from '../../../core/NuggftV1Loan.sol';
-import {NuggftV1Token} from '../../../core/NuggftV1Token.sol';
 
 contract logic__NuggftV1Loan is NuggftV1Test {
     // function test__logic__NuggftV1Loan__calc__tx__gas() public view {

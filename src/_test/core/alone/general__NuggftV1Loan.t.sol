@@ -6,7 +6,6 @@ import '../../NuggftV1.test.sol';
 
 import {ShiftLib} from '../../helpers/ShiftLib.sol';
 import {NuggftV1Loan} from '../../../core/NuggftV1Loan.sol';
-import {NuggftV1Token} from '../../../core/NuggftV1Token.sol';
 
 contract general__NuggftV1Loan is NuggftV1Test {
     uint160 internal constant LOAN_TOKENID = 700;

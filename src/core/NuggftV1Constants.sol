@@ -5,6 +5,9 @@ import '../_test/utils/forge.sol';
 pragma solidity 0.8.12;
 
 abstract contract NuggftV1Constants {
+    uint32 constant TRUSTED_MINT_TOKENS = 500;
+    uint32 constant UNTRUSTED_MINT_TOKENS = 10000;
+
     uint256 constant LOSS = .1 gwei;
 
     // stake
