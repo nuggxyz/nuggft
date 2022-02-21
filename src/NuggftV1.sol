@@ -5,13 +5,12 @@ pragma solidity 0.8.12;
 import {IERC721, IERC165, IERC721Metadata} from './interfaces/IERC721.sol';
 
 import {NuggftV1Loan} from './core/NuggftV1Loan.sol';
-import {NuggftV1Dotnugg} from './core/NuggftV1Dotnugg.sol';
+import {NuggftV1Proof} from './core/NuggftV1Proof.sol';
 
 import {INuggftV1Migrator} from './interfaces/nuggftv1/INuggftV1Migrator.sol';
 
 import {IDotnuggV1Safe} from './interfaces/dotnugg/IDotnuggV1Safe.sol';
 
-import {INuggftV1Token} from './interfaces/nuggftv1/INuggftV1Token.sol';
 import {INuggftV1Stake} from './interfaces/nuggftv1/INuggftV1Stake.sol';
 import {INuggftV1Proof} from './interfaces/nuggftv1/INuggftV1Proof.sol';
 
@@ -21,8 +20,47 @@ import {data as nuggs} from './_data/nuggs.data.sol';
 
 /// @title NuggftV1
 /// @author nugg.xyz - danny7even & dub6ix
-contract NuggftV1 is IERC721Metadata, NuggftV1Loan {
-    constructor(address dotnugg) NuggftV1Dotnugg(dotnugg) {}
+contract NuggftV1 is IERC721, IERC721Metadata, NuggftV1Loan {
+    constructor(address dotnugg) NuggftV1Proof(dotnugg) {}
+
+    /// @inheritdoc INuggftV1Proof
+    function mint(uint160 tokenId) public payable override {
+        // prettier-ignore
+        if (!(tokenId <= UNTRUSTED_MINT_TOKENS + TRUSTED_MINT_TOKENS &&
+              tokenId >= TRUSTED_MINT_TOKENS)) _panic(Error__0x65__TokenNotMintable);
+
+        mint(msg.sender, tokenId);
+    }
+
+    /// @inheritdoc INuggftV1Proof
+    function trustedMint(uint160 tokenId, address to) external payable override requiresTrust {
+        if (!(tokenId < TRUSTED_MINT_TOKENS && tokenId != 0)) _panic(Error__0x66__TokenNotTrustMintable);
+
+        mint(to, tokenId);
+    }
+
+    /// @inheritdoc INuggftV1Stake
+    function burn(uint160 tokenId) external {
+        uint96 ethOwed = subStakedShare(tokenId);
+
+        payable(msg.sender).transfer(ethOwed);
+
+        emit Burn(tokenId, msg.sender, ethOwed);
+    }
+
+    /// @inheritdoc INuggftV1Stake
+    function migrate(uint160 tokenId) external {
+        if (migrator == address(0)) _panic(Error__0x81__MigratorNotSet);
+
+        // stores the proof before deleting the nugg
+        uint256 proof = proofOf(tokenId);
+
+        uint96 ethOwed = subStakedShare(tokenId);
+
+        INuggftV1Migrator(migrator).nuggftMigrateFromV1{value: ethOwed}(tokenId, proof, msg.sender);
+
+        emit MigrateV1Sent(migrator, tokenId, proof, msg.sender, ethOwed);
+    }
 
     /// @inheritdoc IERC165
     function supportsInterface(bytes4 interfaceId) public view virtual override returns (bool) {
@@ -70,22 +108,6 @@ contract NuggftV1 is IERC721Metadata, NuggftV1Loan {
         return dotnuggV1.exec(initFromSeed(cheat(startblock, _epoch)), true);
     }
 
-    /// @inheritdoc INuggftV1Token
-    function mint(uint160 tokenId) public payable override {
-        // prettier-ignore
-        if (!(tokenId <= UNTRUSTED_MINT_TOKENS + TRUSTED_MINT_TOKENS &&
-              tokenId >= TRUSTED_MINT_TOKENS)) _panic(Error__0x65__TokenNotMintable);
-
-        mint(msg.sender, tokenId);
-    }
-
-    /// @inheritdoc INuggftV1Token
-    function trustedMint(uint160 tokenId, address to) external payable override requiresTrust {
-        if (!(tokenId < TRUSTED_MINT_TOKENS && tokenId != 0)) _panic(Error__0x66__TokenNotTrustMintable);
-
-        mint(to, tokenId);
-    }
-
     function mint(address to, uint160 tokenId) internal {
         uint256 randomEnough;
 
@@ -118,14 +140,13 @@ contract NuggftV1 is IERC721Metadata, NuggftV1Loan {
                 0x20     [ blockhash(((blocknum - 2) / 16) * 16) ] */ 0x40
             ) // ==========================================================
 
-            // update agency to reflect the new leader
-
             // prettier-ignore
             let agency__cache := or( // ===================================
-            /* flag  */ shl(254, 0x01), // = OWN(0x01)
-            /* epoch */                 // = 0
-            /* eth   */                 // = 0
-            /* addr  */ to              // = new agent
+                // set agency to reflect the new agent
+                /* flag  */ shl(254, 0x01), // = OWN(0x01)
+                /* epoch */                 // = 0
+                /* eth   */                 // = 0
+                /* addr  */ to              // = new agent
             ) // ==========================================================
 
             sstore(agency__sptr, agency__cache)
@@ -134,6 +155,7 @@ contract NuggftV1 is IERC721Metadata, NuggftV1Loan {
 
             mstore(0x00, tokenId)
             mstore(0x20, callvalue())
+
             log1(0x00, 0x40, Event__Mint)
         }
 
@@ -147,29 +169,6 @@ contract NuggftV1 is IERC721Metadata, NuggftV1Loan {
     /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
                                 BURN/MIGRATE
        ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
-
-    /// @inheritdoc INuggftV1Stake
-    function burn(uint160 tokenId) external {
-        uint96 ethOwed = subStakedShare(tokenId);
-
-        payable(msg.sender).transfer(ethOwed);
-
-        emit Burn(tokenId, msg.sender, ethOwed);
-    }
-
-    /// @inheritdoc INuggftV1Stake
-    function migrate(uint160 tokenId) external {
-        if (migrator == address(0)) _panic(Error__0x81__MigratorNotSet);
-
-        // stores the proof before deleting the nugg
-        uint256 proof = proofOf(tokenId);
-
-        uint96 ethOwed = subStakedShare(tokenId);
-
-        INuggftV1Migrator(migrator).nuggftMigrateFromV1{value: ethOwed}(tokenId, proof, msg.sender);
-
-        emit MigrateV1Sent(migrator, tokenId, proof, msg.sender, ethOwed);
-    }
 
     /// @notice removes a staked share from the contract,
     /// @dev this is the only way to remove a share
@@ -190,15 +189,87 @@ contract NuggftV1 is IERC721Metadata, NuggftV1Loan {
 
         ethOwed = calculateEthPerShare(cache);
 
-        /// TODO - test migration
-        // assert(cache.shares() >= 1);
-        // assert(cache.staked() >= ethOwed);
-
         cache -= 1 << 160;
         cache -= ethOwed << 96;
 
         stake = cache;
 
         emit Stake(bytes32(cache));
+    }
+
+    /// @inheritdoc IERC721
+    function ownerOf(uint256 tokenId) external view override returns (address res) {
+        uint256 cache = agency[tokenId];
+
+        if (cache == 0) _panic(Error__0x78__TokenDoesNotExist);
+
+        if (cache >> 254 == 0x03 && (cache << 2) >> 232 != 0) {
+            return address(this);
+        }
+        return address(uint160(cache));
+    }
+
+    function exists(uint160 tokenId) internal view returns (bool) {
+        return agency[tokenId] != 0;
+    }
+
+    function isOwner(address sender, uint160 tokenId) internal view returns (bool res) {
+        uint256 cache = agency[tokenId];
+        return address(uint160(cache)) == sender && uint8(cache >> 254) == 0x01;
+    }
+
+    function isAgent(address sender, uint160 tokenId) internal view returns (bool res) {
+        uint256 cache = agency[tokenId];
+
+        if (uint160(cache) == uint160(sender)) {
+            if (
+                uint8(cache >> 254) == 0x01 || //
+                uint8(cache >> 254) == 0x02 ||
+                (uint8(cache >> 254) == 0x03 && ((cache >> 230) & 0xffffff) == 0)
+            ) return true;
+        }
+    }
+
+    /// @inheritdoc IERC721
+    function approve(address, uint256) external payable override {
+        _panic(Error__0x69__Wut);
+    }
+
+    /// @inheritdoc IERC721
+    function setApprovalForAll(address, bool) external pure override {
+        _panic(Error__0x69__Wut);
+    }
+
+    /// @inheritdoc IERC721
+    function getApproved(uint256) external pure override returns (address) {
+        return address(0);
+    }
+
+    /// @inheritdoc IERC721
+    function isApprovedForAll(address, address) external pure override returns (bool) {
+        return false;
+    }
+
+    /// @inheritdoc IERC721
+    function balanceOf(address) external pure override returns (uint256) {
+        return 0;
+    }
+
+    //prettier-ignore
+    /// @inheritdoc IERC721
+    function transferFrom(address, address, uint256) external payable override {
+        _panic(Error__0x69__Wut);
+    }
+
+    //prettier-ignore
+    /// @inheritdoc IERC721
+    function safeTransferFrom(address, address, uint256) external payable override {
+        _panic(Error__0x69__Wut);
+    }
+
+    //prettier-ignore
+    /// @inheritdoc IERC721
+    function safeTransferFrom(address, address, uint256, bytes memory) external payable override {
+        _panic(Error__0x69__Wut);
     }
 }

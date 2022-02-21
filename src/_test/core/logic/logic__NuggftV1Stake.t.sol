@@ -6,7 +6,6 @@ import '../../NuggftV1.test.sol';
 
 import {NuggftV1StakeType} from '../../helpers/NuggftV1StakeType.sol';
 import {NuggftV1Loan} from '../../../core/NuggftV1Loan.sol';
-import {NuggftV1Token} from '../../../core/NuggftV1Token.sol';
 
 abstract contract logic__NuggftV1Stake is NuggftV1Test {
     using NuggftV1StakeType for uint256;
