@@ -105,37 +105,34 @@ abstract contract NuggftV1Swap is INuggftV1ItemSwap, INuggftV1Swap, NuggftV1Stak
             // no need to update free memory pointer because we no longer rely on it being empty
             addStakedShareFromMsgValue();
 
+            // prettier-ignore
             assembly {
-                // ========== event ==========
-                // emit Transfer(address(0), NuggftV1, tokenId)
-                // ===========================
 
-                log4(0x00, 0x00, Event__Transfer, 0, address(), tokenId)
+                // save the updated agency
+                agency__cache := xor(xor(xor( // =============================
+                          /* addr     0       [ */ caller(), /* ] 160 */
+                    shl(  /* eth   */ 160, /* [ */ next      /* ] 230 */ )),
+                    shl(  /* epoch */ 230, /* [ */ active    /* ] 254 */ )),
+                    shl(  /* flag  */ 254, /* [ */ 0x03      /* ] 256 */ )
+                ) // ==========================================================
 
-                // ==== agency[tokenId] ========================
-                // update agency to reflect the new leader
+                // log the updated agency
+                mstore(0x00, agency__cache) // =================================
+                log2( // -------------------------------------------------------
+                    /* param #1 */ 0x00, /* [ agency[tokenId] ] */ 0x20,
+                    /* topic #1 */ Event__Offer,
+                    /* topic #2 */ tokenId
+                ) // ===========================================================
 
-                // prettier-ignore
-                agency__cache := xor(xor(xor( // ===============
-                /* flag  */ shl(254,  0x03),    // = SWAP
-                /* epoch */ shl(230,  active)), // = active
-                /* eth   */ shl(160,  next)),   // = msg.value or "current highest offer"
-                /* addr     shl(0, */ caller()  // = msg.sender
-                ) // ===========================================
+                log4( // =======================================================
+                    /* param #0:n/a  */ 0x00, /* [ n/a ] */  0x00,
+                    /* topic #1:sig  */ Event__Transfer,
+                    /* topic #2:from */ 0,
+                    /* topic #3:to   */ address(),
+                    /* topic #4:id   */ tokenId
+                ) // ===========================================================
 
                 sstore(agency__sptr, agency__cache)
-
-                // ========= memory ==========
-                // 0x00: agency__cache
-                // ===========================
-
-                mstore(0x00, agency__cache)
-
-                // ========== event ==========
-                // emit Offer(tokenId, agency__cache)
-                // ===========================
-
-                log2(0x00, 0x20, Event__Offer, tokenId)
 
                 return(0x0, 0x00)
             }
@@ -145,6 +142,7 @@ abstract contract NuggftV1Swap is INuggftV1ItemSwap, INuggftV1Swap, NuggftV1Stak
             function iso(val, left, right) -> b {
                 b := shr(right, shl(left, val))
             }
+
             function panic(code) {
                 mstore(0x00, Revert__Sig)
                 mstore(0x04, code)
@@ -210,12 +208,12 @@ abstract contract NuggftV1Swap is INuggftV1ItemSwap, INuggftV1Swap, NuggftV1Stak
 
                 // prettier-ignore
                 agency__cache := xor( // =================================
-                /* start */ agency__cache,
-                // -------------------------------------------------------
-                /* flag  */                                  // = unchanged
-                /* epoch */  shl(230, add(active, SALE_LEN)) // = active + SALE_LEN
-                /* eth   */                                  // = unchanged
-                /* addr  */                                  // = unchanged
+                    /* start */  agency__cache,
+                    // -------------------------------------------------------
+                    /* flag  */                                  // = unchanged
+                    /* epoch */  shl(230, add(active, SALE_LEN)) // = active + SALE_LEN
+                    /* eth   */                                  // = unchanged
+                    /* addr  */                                  // = unchanged
                 ) // ======================================================
 
                 if iszero(isItem) {
@@ -267,41 +265,38 @@ abstract contract NuggftV1Swap is INuggftV1ItemSwap, INuggftV1Swap, NuggftV1Stak
             // clear previous leader from agency cache
             agency__cache := shl(160, shr(160, agency__cache))
 
-            // ==== agency[tokenId] ========================
-            // update agency to reflect the new leader
-
             // prettier-ignore
-            agency__cache := xor(add(agency__cache,
-            /* flag  */                   // = SWAP
-            /* epoch */                   // = active or active + 1
-            /* eth   */ shl(160, next)),  // = new highest offer
-            /* addr  */ sender            // = msg.sender
-            ) // ===========================================
+            agency__cache := xor(add( // =======================================
+                /* start  */ agency__cache,
+                // -------------------------------------------------------------
+                /* flag  */                   // = SWAP
+                /* epoch */                   // = active or active + 1
+                /* eth   */ shl(160, next)),  // = new highest offer
+                /* addr  */ sender            // = msg.sender
+            ) // ===============================================================
 
             sstore(agency__sptr, agency__cache)
 
             sstore(offer__sptr, agency__cache)
 
-            // ========= memory ==========
-            //   0x00: agency__cache
-            // ===========================
-
             mstore(0x00, agency__cache)
 
+            // prettier-ignore
             switch isItem
             case 1 {
-                // ========== event ==========
-                // emit OfferItem(sellerTokenId, itemId, agency__cache)
-                // ===========================
-
-                log3(0x00, 0x20, Event__OfferItem, and(sender, 0xffffff), and(shr(24, tokenId), 0xffff))
+                log3( // =======================================================
+                    /* param #1 */ 0x00, /* [ itemAgency[tokenId][itemId] ] */  0x20,
+                    /* topic #1 */ Event__OfferItem,
+                    /* topic #2 */ and(sender, 0xffffff),
+                    /* topic #3 */ and(shr(24, tokenId), 0xffff)
+                ) // ===========================================================
             }
             default {
-                // ========== event ==========
-                // emit Offer(tokenId, agency__cache)
-                // ===========================
-
-                log2(0x00, 0x20, Event__Offer, tokenId)
+                log2( // =======================================================
+                    /* param #1 */ 0x00, /* [ agency[tokenId] ] */ 0x20,
+                    /* topic #1 */ Event__Offer,
+                    /* topic #2 */ tokenId
+                ) // ===========================================================
             }
         }
 

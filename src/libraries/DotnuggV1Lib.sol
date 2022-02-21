@@ -46,61 +46,79 @@ library DotnuggV1Lib {
 
         uint256 high = size(loc);
 
+        // prettier-ignore
         assembly {
+            // ===========================================================
+
             // we adjust the seed to be unique per feature and safe, yet still deterministic
 
-            // ===========================================================
             mstore(0x00, seed)
             mstore(0x20, or(shl(160, feature), safe))
 
-            // prettier-ignore
             seed := keccak256( //-----------------------------------------
                 0x00, /* [ seed                                  ]    0x20
                 0x20     [ uint8(feature) | address(safe)        ] */ 0x40
-            ) // ==========================================================
-
-            // Get a pointer to some free memory.
-            // no need update pointer becasue after this function, the loaded data is not longer needed
-            // + and solidity does not assume the free memory pointer points to "clean" data
-            let data := mload(0x40)
-
-            // Copy the code into memory right after the 32 bytes we used to store the len.
-            extcodecopy(loc, add(0x20, data), add(DOTNUGG_RUNTIME_BYTE_LEN, 1), mul(high, 2))
+            ) // ---------------------------------------------------------
 
             // normalize seed to be <= type(uint16).max
             // if we did not want to use weights, we could just mod by "len" and have our final value
             seed := mod(seed, 0xffff)
 
-            // adjust high search value to be based on a 0 based index
-            high := sub(high, 1)
+            // ===========================================================
 
-            // adjust data pointer to make mload return our uint16[] index easily
-            data := add(data, 0x2)
+            // Get a pointer to some free memory.
+            // no need update pointer becasue after this function, the loaded data is no longer needed
+            // + and solidity does not assume the free memory pointer points to "clean" data
+            let A := mload(0x40)
 
-            // prettier-ignore
-            for { let low := 0 } iszero(gt(low, high)) { } {
+            // Copy the code into memory right after the 32 bytes we used to store the len.
+            extcodecopy(loc, add(0x20, A), add(DOTNUGG_RUNTIME_BYTE_LEN, 1), mul(high, 2))
 
-                // mid = (low + high) / 2
-                let mid := shr(1, add(low, high))
+            // adjust data pointer to make mload return our uint16[] index easily using below funciton
+            A := add(A, 0x2)
 
-                // prettier-ignore
-                switch iszero(gt(
-                    and(mload(add(data, shl(1, mid))), 0xffff),
-                   /* is weights[mid]  <= */ seed // ?
-                ))
-                case 1 {
-                    low := add(mid, 1)
-                }
-                default {
-                     res := high
-                     switch iszero(mid)
-                     case 1  { break }
-                     default { high := sub(mid, 1) }
-                }
+            function index(arr, m) -> val {
+                val := and(mload(add(arr, shl(1, m))), 0xffff)
             }
 
-            // re-adjust res to be based on 1 based index
-            res := add(res, 1)
+            // ===========================================================
+
+            // each dotnuggv1 file includes a sorted weight list that we can use to convert "random" seeds into item numbers:
+
+            // lets say we have an file containing 4 itmes with these as their respective weights:
+            // [ 0.01  0.01  0.15  0.15 ]
+
+            // then on chain, an array like this is stored: (represented in decimal for the example)
+            // [ 2000  4000  7000  10000 ]
+
+            // assuming we can only pass a seed between 0 and 10000, we know that:
+            // - we have an 20% chance, of picking a number less than weight 1      -  0    < x < 2000
+            // - we have an 20% chance, of picking a number between weights 1 and 2 -  2000 < x < 4000
+            // - we have an 30% chance, of picking a number between weights 2 and 3 -  4000 < x < 7000
+            // - we have an 30% chance, of picking a number between weights 3 and 4 -  7000 < x < 10000
+
+            // now, all we need to do is pick a seed, say "6942" and search for which number it is between
+            // the higher of which will be the value we are looking for
+
+            // in our example, "6942" is between weights 2 and 3, so [res = 3]
+
+            // ===========================================================
+
+            // right most "successor" binary search
+            // https://en.wikipedia.org/wiki/Binary_search_algorithm#Procedure_for_finding_the_rightmost_element
+
+            let L := 0
+            let R := high
+
+            for { } lt(L, R) { } {
+                let m := shr(1, add(L, R)) // == (L + R) / 2
+                switch gt(index(A, m), seed)
+                case 1  { R := m         }
+                default { L := add(m, 1) }
+            }
+
+            // we add one to
+            res := add(R, 1)
         }
     }
 
@@ -344,11 +362,11 @@ library DotnuggV1LibSolidity {
 }
 
 // function inject(val) {
-//                 let a := mload(0x00)
-//                 let b := mload(0x20)
-//                 mstore(0x00, 0x27b7cf85)
-//                 mstore(0x20, val)
-//                 let r := staticcall(gas(), 0x12345, 0x1C, 0x24, 0x00, 0x00)
-//                 mstore(0x00, a)
-//                 mstore(0x00, b)
-//             }
+//     let a := mload(0x00)
+//     let b := mload(0x20)
+//     mstore(0x00, 0x27b7cf85)
+//     mstore(0x20, val)
+//     let r := staticcall(gas(), 0x12345, 0x1C, 0x24, 0x00, 0x00)
+//     mstore(0x00, a)
+//     mstore(0x00, b)
+// }
