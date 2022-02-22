@@ -14,8 +14,8 @@ abstract contract NuggftV1Loan is INuggftV1Loan, NuggftV1Swap {
         uint256 active = epoch();
 
         assembly {
-            function iso(val, left, right) -> b {
-                b := shr(right, shl(left, val))
+            function iso(x, L, R) -> b {
+                b := shr(R, shl(L, x))
             }
 
             function panic(code) {
@@ -75,9 +75,10 @@ abstract contract NuggftV1Loan is INuggftV1Loan, NuggftV1Swap {
                 // ensures amt stored in agency and eth sent to caller are the same
                 amt := mul(amt, LOSS)
 
-                // send eth
+                // send accumulated value * LOSS to msg.sender
                 if iszero(call(gas(), caller(), amt, 0, 0, 0, 0)) {
-                    panic(Error__0x75__SendEthFailureToCaller)
+                    // if someone really ends up here, just donate the eth
+                    sstore(stake.slot, add(sload(stake.slot), shl(96, amt)))
                 }
 
                 // log2 with "Loan(uint160,bytes32)" topic
@@ -92,8 +93,8 @@ abstract contract NuggftV1Loan is INuggftV1Loan, NuggftV1Swap {
         uint256 active = epoch();
 
         assembly {
-            function iso(val, left, right) -> b {
-                b := shr(right, shl(left, val))
+            function iso(x, L, R) -> b {
+                b := shr(R, shl(L, x))
             }
 
             function iso2(val, bits, offset) -> b {
@@ -196,9 +197,7 @@ abstract contract NuggftV1Loan is INuggftV1Loan, NuggftV1Swap {
 
             /////////////////////////////////////////////////////////////////////
 
-            if iszero(call(gas(), caller(), earn, 0, 0, 0, 0)) {
-                panic(Error__0x75__SendEthFailureToCaller)
-            }
+            pop(call(gas(), caller(), earn, 0, 0, 0, 0))
 
             /////////////////////////////////////////////////////////////////////
 
@@ -223,8 +222,8 @@ abstract contract NuggftV1Loan is INuggftV1Loan, NuggftV1Swap {
         uint256 active = epoch();
 
         assembly {
-            function iso(val, left, right) -> b {
-                b := shr(right, shl(left, val))
+            function iso(x, L, R) -> b {
+                b := shr(R, shl(L, x))
             }
 
             function panic(code) {
@@ -267,18 +266,15 @@ abstract contract NuggftV1Loan is INuggftV1Loan, NuggftV1Swap {
             // this is the amount to stake
             let accFee := 0
 
-            for {
-                let i := 0
-            } lt(i, len) {
-                i := add(i, 0x1)
-            } {
+            // prettier-ignore
+            for { let i := 0 } lt(i, len) { i := add(i, 0x1) } {
                 // get a tokenId from calldata and store it to mem pos 0x00
                 mstore(mptr, calldataload(add(tokenIds.offset, mul(i, 0x20))))
 
                 let agency__sptr := keccak256(mptr, 0x40)
 
                 //
-                let agency__cache := sload(keccak256(mptr, 0x40))
+                let agency__cache := sload(agency__sptr)
 
                 let agency__addr := iso(agency__cache, 96, 96)
 
@@ -290,6 +286,8 @@ abstract contract NuggftV1Loan is INuggftV1Loan, NuggftV1Swap {
                 // is the caller different from the agent?
                 if iszero(eq(caller(), agency__addr)) {
                     // if so: ensure the loan is expired
+                    // why? - only after a loan has expired are the "earnings" up for grabs.
+                    // otherwise only the loaner is entitled to them
                     if iszero(lt(add(iso(agency__cache, 2, 232), LIQUIDATION_PERIOD), active)) {
                         panic(Error__0xA4__ExpiredEpoch) // ERR:0x3B
                     }
@@ -364,9 +362,10 @@ abstract contract NuggftV1Loan is INuggftV1Loan, NuggftV1Swap {
             mstore(mptr, stake__cache)
             log1(mptr, 0x20, Event__Stake)
 
-            // accumulated eth is sent to caller
+            // send accumulated value * LOSS to msg.sender
             if iszero(call(gas(), caller(), acc, 0, 0, 0, 0)) {
-                panic(Error__0x75__SendEthFailureToCaller)
+                // if someone really ends up here, just donate the eth
+                sstore(stake.slot, add(sload(stake.slot), shl(96, acc)))
             }
         }
     }

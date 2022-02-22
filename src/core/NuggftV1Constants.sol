@@ -1,7 +1,5 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
-import '../_test/utils/forge.sol';
-
 pragma solidity 0.8.12;
 
 abstract contract NuggftV1Constants {
@@ -9,12 +7,12 @@ abstract contract NuggftV1Constants {
     uint32 constant UNTRUSTED_MINT_TOKENS = 10000;
 
     uint256 constant LOSS = .1 gwei;
-
+    uint8 constant HOT_PROOF_AMOUNT = 16;
     // stake
     uint96 constant PROTOCOL_FEE_BPS = 10;
 
     // epoch
-    uint8 constant INTERVAL_SUB = 16;
+    uint8 constant INTERVAL_SUB = 4;
     uint16 constant MINT_INTERVAL = 4;
 
     uint16 constant INTERVAL = 256;
@@ -43,8 +41,7 @@ abstract contract NuggftV1Constants {
     bytes32 constant Event__TransferItem = 0x31cf2357b228de5e7b21be4ee816920a4eabd32196b782ad557ba4a0f5c20af1;
     bytes32 constant Event__Mint = 0x7fa02ea2addb9a3ae24bb783f3817cbebd2aaa24af58c5eee6faf5b776797f95;
     bytes32 constant Event__Rotate = 0x9a674c377cfb461eed8c85cebc9fc607ef62cecde152900174f519f861f90b57;
-
-    // error Kill(bytes1);
+    bytes32 constant Event__OfferMint = 0x4ab47a8596088efecb0e4588e1fa409c1173c35ad3530cc3eee52dd1bbecf1b6;
 
     error Revert(bytes1);
 

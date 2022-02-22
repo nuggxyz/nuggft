@@ -97,7 +97,7 @@ library DotnuggV1Lib {
             // - we have an 30% chance, of picking a number between weights 2 and 3 -  4000 < x < 7000
             // - we have an 30% chance, of picking a number between weights 3 and 4 -  7000 < x < 10000
 
-            // now, all we need to do is pick a seed, say "6942" and search for which number it is between
+            // now, all we need to do is pick a seed, say "6942", and search for which number it is between
             // the higher of which will be the value we are looking for
 
             // in our example, "6942" is between weights 2 and 3, so [res = 3]

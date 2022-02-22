@@ -12,6 +12,8 @@ import {NuggftV1Trust} from './NuggftV1Trust.sol';
 
 abstract contract NuggftV1Proof is INuggftV1Proof, NuggftV1Epoch, NuggftV1Trust {
     mapping(uint160 => uint256) proofs;
+    mapping(uint8 => uint256) hotproof;
+
     mapping(uint256 => uint256) public agency;
 
     IDotnuggV1Safe public immutable dotnuggV1;
@@ -22,7 +24,13 @@ abstract contract NuggftV1Proof is INuggftV1Proof, NuggftV1Epoch, NuggftV1Trust 
 
     /// @inheritdoc INuggftV1Proof
     function proofOf(uint160 tokenId) public view override returns (uint256 res) {
-        if (proofs[tokenId] != 0) return proofs[tokenId];
+        if ((res = proofs[tokenId]) != 0) return res;
+
+        if ((res = hotproof[uint8(tokenId % HOT_PROOF_AMOUNT)]) != 0x10000) {
+            return res;
+        } else {
+            res = 0;
+        }
 
         uint24 epoch = epoch();
 
