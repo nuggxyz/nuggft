@@ -17,4 +17,6 @@ interface INuggftV1Proof {
     function proofOf(uint160 tokenId) external view returns (uint256);
 
     function imageURI(uint256 tokenId) external view returns (string memory res);
+
+    function itemURI(uint16 itemId) external view returns (string memory res);
 }

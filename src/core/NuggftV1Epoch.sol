@@ -37,7 +37,7 @@ abstract contract NuggftV1Epoch is INuggftV1Epoch, NuggftV1Constants {
         res = calculateSeed(_epoch);
     }
 
-    /// @notice calculates a random-enough seed that will stay the
+    /// @notice calculates a random-enough seed that will stay the same for INTERVAL number of blocks
     function calculateSeed(uint24 _epoch) internal view returns (uint256 res) {
         uint256 startblock = toStartBlock(_epoch, genesis);
         unchecked {
