@@ -772,8 +772,7 @@ abstract contract NuggftV1Swap is INuggftV1ItemSwap, INuggftV1Swap, NuggftV1Stak
                 }
                 default {
                     mstore(0x00, 0x00)
-                    mstore(0x20, 0x00)
-                    return(0x00, 0x40)
+                    return(0x00, 0x42)
                 }
             }
             default {
@@ -782,11 +781,11 @@ abstract contract NuggftV1Swap is INuggftV1ItemSwap, INuggftV1Swap, NuggftV1Stak
                 _nextSwapAmount := mul(juke(swapData, 26, 186), LOSS)
             }
 
-            if lt(_nextSwapAmount, 10000000) {
-                _nextSwapAmount := 10000000
+            if lt(_nextSwapAmount, 100000000000) {
+                _nextSwapAmount := 100000000000
             }
 
-            _nextSwapAmount := div(mul(_nextSwapAmount, 10200), 10000)
+            _nextSwapAmount := mul(div(mul(div(_nextSwapAmount, LOSS), 10200), 10000), LOSS)
 
             mstore(0x00, sub(_nextSwapAmount, _senderCurrentOffer))
             return(0x00, 0x20)
