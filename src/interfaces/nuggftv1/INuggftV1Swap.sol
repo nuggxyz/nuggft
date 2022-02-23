@@ -31,15 +31,15 @@ interface INuggftV1Swap {
                             VIEW FUNCTIONS
     ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━*/
 
-    /// @notice calculates the minimum eth that must be sent with a offer call
-    /// @dev returns 0 if no offer can be made for this oken
-    /// @param tokenId -> the token to be offerd to
-    /// @param sender -> the address of the user who will be delegating
-    /// @return canOffer -> instead of reverting this function will return false
-    /// @return nextOfferAmount -> the minimum value that must be sent with a offer call
-    /// @return senderCurrentOffer ->
-    function check(address sender, uint160 tokenId) external view
-        returns (bool canOffer, uint96 nextOfferAmount, uint96 senderCurrentOffer);
+    // / @notice calculates the minimum eth that must be sent with a offer call
+    // / @dev returns 0 if no offer can be made for this oken
+    // / @param tokenId -> the token to be offerd to
+    // / @param sender -> the address of the user who will be delegating
+    // / @return canOffer -> instead of reverting this function will return false
+    // / @return nextOfferAmount -> the minimum value that must be sent with a offer call
+    // / @return senderCurrentOffer ->
+    // function check(address sender, uint160 tokenId) external view
+    //     returns (bool canOffer, uint96 nextOfferAmount, uint96 senderCurrentOffer);
 
     function vfo(address sender, uint160 tokenId) external view returns (uint96 res);
 }

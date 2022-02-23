@@ -26,7 +26,7 @@ abstract contract NuggftV1Proof is INuggftV1Proof, NuggftV1Epoch, NuggftV1Trust 
     function proofOf(uint160 tokenId) public view override returns (uint256 res) {
         if ((res = proofs[tokenId]) != 0) return res;
 
-        if ((res = hotproof[uint8(tokenId % HOT_PROOF_AMOUNT)]) != 0x10000) {
+        if ((res = hotproof[uint8(tokenId % HOT_PROOF_AMOUNT)]) != 0x10000 && agency[tokenId] != 0) {
             return res;
         } else {
             res = 0;
@@ -74,7 +74,7 @@ abstract contract NuggftV1Proof is INuggftV1Proof, NuggftV1Epoch, NuggftV1Trust 
         uint8[] calldata index1s
     ) external override {
         assembly {
-            function iso(val, left, right) -> b {
+            function juke(val, left, right) -> b {
                 b := shr(right, shl(left, val))
             }
 
@@ -89,14 +89,14 @@ abstract contract NuggftV1Proof is INuggftV1Proof, NuggftV1Epoch, NuggftV1Trust 
             let buyerTokenAgency := sload(keccak256(0x00, 0x40))
 
             // ensure the caller is the agent
-            if iszero(eq(iso(buyerTokenAgency, 96, 96), caller())) {
+            if iszero(eq(juke(buyerTokenAgency, 96, 96), caller())) {
                 panic(Error__0xA2__NotItemAgent)
             }
 
             let flag := shr(254, buyerTokenAgency)
 
             // ensure the caller is really the agent
-            if and(eq(flag, 0x3), iszero(iszero(iso(buyerTokenAgency, 2, 232)))) {
+            if and(eq(flag, 0x3), iszero(iszero(juke(buyerTokenAgency, 2, 232)))) {
                 panic(Error__0xA3__NotItemAuthorizedAgent)
             }
 

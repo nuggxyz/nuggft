@@ -23,6 +23,6 @@ abstract contract revert__claim__0xA0 is NuggftV1Test {
 
         jump(tokenId + 1);
 
-        expect.claim().from(users.frank).exec(lib.sarr160(tokenId), lib.sarrAddress(users.frank));
+        expect.claim2().from(users.frank).exec(lib.sarr160(tokenId));
     }
 }

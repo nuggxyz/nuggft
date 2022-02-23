@@ -40,9 +40,7 @@ abstract contract system__NuggftV1Swap is NuggftV1Test, fragments {
 
             jump(3001);
 
-            expect.claim().start(lib.sarr160(3000), lib.sarrAddress(users.frank), users.frank);
-            nuggft.claim(lib.sarr160(3000), lib.sarrAddress(users.frank));
-            expect.claim().stop();
+            expect.claim2().exec(lib.sarr160(3000));
         }
         forge.vm.stopPrank();
     }
