@@ -45,9 +45,10 @@ abstract contract NuggftV1Epoch is INuggftV1Epoch, NuggftV1Constants {
             // if (bhash == 0) _panic(Error__0x98__BlockHashIsZero);
 
             assembly {
-                mstore(0x00, bhash)
-                mstore(0x20, _epoch)
-                res := keccak256(0x00, 0x40)
+                // mstore(0x00, bhash)
+                // mstore(0x20, _epoch)
+                // res := keccak256(0x00, 0x40)
+                res := bhash
             }
         }
     }

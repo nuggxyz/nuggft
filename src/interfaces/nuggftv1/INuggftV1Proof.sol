@@ -5,7 +5,7 @@ pragma solidity 0.8.12;
 interface INuggftV1Proof {
     event Rotate(uint160 indexed tokenId, bytes32 proof);
 
-    event Mint(uint160 tokenId, uint96 value);
+    event Mint(uint160 tokenId, uint96 value, bytes32 proof);
 
     function mint(uint160 tokenId) external payable;
 
@@ -19,4 +19,6 @@ interface INuggftV1Proof {
     function imageURI(uint256 tokenId) external view returns (string memory res);
 
     function itemURI(uint16 itemId) external view returns (string memory res);
+
+    function featureLength(uint8 itemId) external view returns (uint8 res);
 }
