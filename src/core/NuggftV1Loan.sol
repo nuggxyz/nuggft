@@ -14,14 +14,14 @@ abstract contract NuggftV1Loan is INuggftV1Loan, NuggftV1Swap {
         uint256 active = epoch();
 
         assembly {
-            function iso(x, L, R) -> b {
+            function juke(x, L, R) -> b {
                 b := shr(R, shl(L, x))
             }
 
             function panic(code) {
                 mstore(0x00, Revert__Sig)
-                mstore(0x04, code)
-                revert(0x00, 0x05)
+                mstore8(31, code)
+                revert(27, 0x5)
             }
 
             // load the length of the calldata array
@@ -43,7 +43,7 @@ abstract contract NuggftV1Loan is INuggftV1Loan, NuggftV1Swap {
                 let agency__cache := sload(agency__sptr)
 
                 // ensure the caller is the agent
-                if iszero(eq(iso(agency__cache, 96, 96), caller())) {
+                if iszero(eq(juke(agency__cache, 96, 96), caller())) {
                     panic(Error__0xA1__NotAgent)
                 }
 
@@ -93,7 +93,7 @@ abstract contract NuggftV1Loan is INuggftV1Loan, NuggftV1Swap {
         uint256 active = epoch();
 
         assembly {
-            function iso(x, L, R) -> b {
+            function juke(x, L, R) -> b {
                 b := shr(R, shl(L, x))
             }
 
@@ -103,15 +103,15 @@ abstract contract NuggftV1Loan is INuggftV1Loan, NuggftV1Swap {
 
             function panic(code) {
                 mstore(0x00, Revert__Sig)
-                mstore(0x04, code)
-                revert(0x00, 0x05)
+                mstore8(31, code)
+                revert(27, 0x5)
             }
 
             let stake__cache := sload(stake.slot)
 
             let shrs := shr(192, stake__cache)
 
-            let activeEps := div(iso(stake__cache, 64, 160), shrs)
+            let activeEps := div(juke(stake__cache, 64, 160), shrs)
 
             let mptr := mload(0x40)
 
@@ -127,7 +127,7 @@ abstract contract NuggftV1Loan is INuggftV1Loan, NuggftV1Swap {
 
             let agency__cache := sload(agency__sptr)
 
-            let loaner := iso(agency__cache, 96, 96)
+            let loaner := juke(agency__cache, 96, 96)
 
             // ensure that the agency flag is LOAN
             if iszero(eq(shr(254, agency__cache), 0x02)) {
@@ -137,7 +137,7 @@ abstract contract NuggftV1Loan is INuggftV1Loan, NuggftV1Swap {
             // check to see if msg.sender is the loaner
             if iszero(eq(caller(), loaner)) {
                 // "is the loan past due"
-                switch lt(add(iso(agency__cache, 2, 232), LIQUIDATION_PERIOD), active)
+                switch lt(add(juke(agency__cache, 2, 232), LIQUIDATION_PERIOD), active)
                 case 1 {
                     // if the loan is past due, then the liquidator recieves the nugg
                     // this transfer event is the only extra logic required here since the
@@ -153,7 +153,7 @@ abstract contract NuggftV1Loan is INuggftV1Loan, NuggftV1Swap {
 
             // parse agency for principal, converting it back to eth
             // represents the value that has been sent to the user for this loan
-            let principal := mul(iso(agency__cache, 26, 186), LOSS)
+            let principal := mul(juke(agency__cache, 26, 186), LOSS)
 
             // the amount of value earned by this token since last rebalance
             // must be computed because fee needs to be paid
@@ -222,14 +222,14 @@ abstract contract NuggftV1Loan is INuggftV1Loan, NuggftV1Swap {
         uint256 active = epoch();
 
         assembly {
-            function iso(x, L, R) -> b {
+            function juke(x, L, R) -> b {
                 b := shr(R, shl(L, x))
             }
 
             function panic(code) {
                 mstore(0x00, Revert__Sig)
-                mstore(0x04, code)
-                revert(0x00, 0x05)
+                mstore8(31, code)
+                revert(27, 0x5)
             }
 
             // load the length of the calldata array
@@ -239,7 +239,7 @@ abstract contract NuggftV1Loan is INuggftV1Loan, NuggftV1Swap {
 
             let shrs := shr(192, stake__cache)
 
-            let activeEps := div(iso(stake__cache, 64, 160), shrs)
+            let activeEps := div(juke(stake__cache, 64, 160), shrs)
 
             // ======================================================================
             // memory layout as offset from mptr:
@@ -276,7 +276,7 @@ abstract contract NuggftV1Loan is INuggftV1Loan, NuggftV1Swap {
                 //
                 let agency__cache := sload(agency__sptr)
 
-                let agency__addr := iso(agency__cache, 96, 96)
+                let agency__addr := juke(agency__cache, 96, 96)
 
                 // make sure this token is loaned
                 if iszero(eq(shr(254, agency__cache), 0x02)) {
@@ -288,14 +288,14 @@ abstract contract NuggftV1Loan is INuggftV1Loan, NuggftV1Swap {
                     // if so: ensure the loan is expired
                     // why? - only after a loan has expired are the "earnings" up for grabs.
                     // otherwise only the loaner is entitled to them
-                    if iszero(lt(add(iso(agency__cache, 2, 232), LIQUIDATION_PERIOD), active)) {
+                    if iszero(lt(add(juke(agency__cache, 2, 232), LIQUIDATION_PERIOD), active)) {
                         panic(Error__0xA4__ExpiredEpoch) // ERR:0x3B
                     }
                 }
 
                 // parse agency for principal, converting it back to eth
                 // represents the value that has been sent to the user for this loan
-                let principal := mul(iso(agency__cache, 26, 186), LOSS)
+                let principal := mul(juke(agency__cache, 26, 186), LOSS)
 
                 // the amount of value earned by this token since last rebalance
                 // must be computed because fee needs to be paid
@@ -333,7 +333,7 @@ abstract contract NuggftV1Loan is INuggftV1Loan, NuggftV1Swap {
 
             sstore(stake.slot, stake__cache)
 
-            let newPrincipal := div(iso(stake__cache, 64, 160), mul(shrs, LOSS))
+            let newPrincipal := div(juke(stake__cache, 64, 160), mul(shrs, LOSS))
 
             // prettier-ignore
             for { let i := 0 } lt(i, len) { i := add(i, 0x1) } {
