@@ -43,11 +43,11 @@ abstract contract system__NuggftV1Loan is NuggftV1Test, fragments {
 
         expect.loan().from(users.frank).exec(lib.sarr160(500));
 
-        jump(4001);
+        jump(4026);
 
         expect.rebalance().from(users.dee).value(lib.asum(nuggft.vfr(lib.sarr160(500)))).exec(lib.sarr160(500));
 
-        jump(5002);
+        jump(5052);
 
         expect.rebalance().from(users.mac).value(lib.asum(nuggft.vfr(lib.sarr160(500)))).exec(lib.sarr160(500));
 
@@ -61,13 +61,13 @@ abstract contract system__NuggftV1Loan is NuggftV1Test, fragments {
 
         expect.loan().from(users.frank).exec(lib.sarr160(500));
 
-        jump(4001);
+        jump(4026);
 
         expect.liquidate().from(users.mac).value(lib.asum(nuggft.vfl(lib.sarr160(500)))).exec(500);
 
         expect.loan().from(users.mac).exec(lib.sarr160(500));
 
-        jump(5002);
+        jump(5052);
 
         expect.liquidate().from(users.charlie).value(lib.asum(nuggft.vfl(lib.sarr160(500)))).exec(500);
 
