@@ -25,7 +25,7 @@ abstract contract revert__claim__0x67 is NuggftV1Test {
 
         jump(tokenId + 1);
 
-        expect.claim2().from(users.dee).exec(lib.sarr160(tokenId));
+        expect.claim().from(users.dee).exec(lib.sarr160(tokenId), lib.sarrAddress(users.dee));
     }
 
     function test__revert__claim__0x67__fail__mintingToken__winnerClaimingDuringMintEpoch() public revert__claim__0x67_setUp {
@@ -35,9 +35,7 @@ abstract contract revert__claim__0x67 is NuggftV1Test {
 
         expect.offer().g().exec{value: nuggft.msp()}(tokenId);
 
-        /// this would fail but to make minting cheaper we do not save the offer -  instead just does nothing
-
-        expect.claim2().g().exec(lib.sarr160(tokenId));
+        expect.claim().err(0x67).g().exec(lib.sarr160(tokenId), lib.sarrAddress(users.dee));
     }
 
     function test__revert__claim__0x67__fail__sellingToken__winnerClaimingDuringInitialEpoch() public revert__claim__0x67_setUp {
@@ -45,7 +43,7 @@ abstract contract revert__claim__0x67 is NuggftV1Test {
 
         expect.offer().g().exec{value: nuggft.vfo(users.dee, TOKEN_FOR_SALE)}(TOKEN_FOR_SALE);
 
-        expect.claim2().err(0x67).g().exec(lib.sarr160(TOKEN_FOR_SALE));
+        expect.claim().err(0x67).g().exec(lib.sarr160(TOKEN_FOR_SALE), lib.sarrAddress(users.dee));
     }
 
     function test__revert__claim__0x67__fail__sellingToken__winnerClaimingDuringFinalEpoch() public revert__claim__0x67_setUp {
@@ -57,7 +55,7 @@ abstract contract revert__claim__0x67 is NuggftV1Test {
 
         jump(finalEpoch);
 
-        expect.claim2().err(0x67).g().exec(lib.sarr160(TOKEN_FOR_SALE));
+        expect.claim().err(0x67).g().exec(lib.sarr160(TOKEN_FOR_SALE), lib.sarrAddress(users.dee));
     }
 
     function test__revert__claim__0x67__pass__sellingToken__winnerClaimingAfterSwapIsOver() public revert__claim__0x67_setUp {
@@ -69,6 +67,6 @@ abstract contract revert__claim__0x67 is NuggftV1Test {
 
         jump(finalEpoch + 1);
 
-        expect.claim2().g().exec(lib.sarr160(TOKEN_FOR_SALE));
+        expect.claim().g().exec(lib.sarr160(TOKEN_FOR_SALE), lib.sarrAddress(users.dee));
     }
 }

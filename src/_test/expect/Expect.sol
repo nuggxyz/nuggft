@@ -5,7 +5,6 @@ pragma solidity 0.8.12;
 import '../utils/forge.sol';
 
 import {expectClaim} from './claim.sol';
-import {expectClaim2} from './claim2.sol';
 
 import {expectOffer} from './offer.sol';
 import {expectBalance} from './balance.sol';
@@ -30,7 +29,6 @@ contract Expect {
     expectRebalance public rebalance;
     expectLiquidate public liquidate;
     expectBurn public burn;
-    expectClaim2 public claim2;
 
     address public _globalFrom;
 
@@ -41,7 +39,6 @@ contract Expect {
     constructor(address nuggft_) {
         global.set('Expect', address(this));
         global.set('RiggedNuggft', nuggft_);
-        claim2 = new expectClaim2();
         claim = new expectClaim();
         offer = new expectOffer();
         balance = new expectBalance();
