@@ -6,13 +6,14 @@ import {INuggftV1Swap} from '../interfaces/nuggftv1/INuggftV1Swap.sol';
 import {INuggftV1ItemSwap} from '../interfaces/nuggftv1/INuggftV1ItemSwap.sol';
 
 import {NuggftV1Stake} from './NuggftV1Stake.sol';
-import '../_test/utils/forge.sol';
+
+// import '../_test/utils/forge.sol';
 
 /// @notice mechanism for trading of nuggs between users (and items between nuggs)
 /// @dev Explain to a developer any extra details
 abstract contract NuggftV1Swap is INuggftV1ItemSwap, INuggftV1Swap, NuggftV1Stake {
     mapping(uint160 => mapping(address => uint256)) public offers;
-    mapping(uint16 => uint256) public protocolItems;
+    // mapping(uint16 => uint256) public protocolItems;
 
     mapping(uint176 => mapping(uint160 => uint256)) public itemOffers;
     mapping(uint176 => uint256) public itemAgency;
@@ -42,14 +43,14 @@ abstract contract NuggftV1Swap is INuggftV1ItemSwap, INuggftV1Swap, NuggftV1Stak
         // a = gas.start('B: begin');
 
         assembly {
-            function iso(val, left, right) -> b {
-                b := shr(right, shl(left, val))
+            function juke(x, L, R) -> b {
+                b := shr(R, shl(L, x))
             }
 
             function panic(code) {
                 mstore(0x00, Revert__Sig)
-                mstore(0x04, code)
-                revert(0x00, 0x05)
+                mstore8(31, code)
+                revert(27, 0x5)
             }
 
             // store callvalue formatted in .1 gwei for caculation of total offer
@@ -74,14 +75,14 @@ abstract contract NuggftV1Swap is INuggftV1ItemSwap, INuggftV1Swap, NuggftV1Stak
                 let buyerTokenAgency := sload(keccak256(0x00, 0x40))
 
                 // ensure the caller is the agent
-                if iszero(eq(iso(buyerTokenAgency, 96, 96), caller())) {
+                if iszero(eq(juke(buyerTokenAgency, 96, 96), caller())) {
                     panic(Error__0xA2__NotItemAgent)
                 }
 
                 let flag := shr(254, buyerTokenAgency)
 
                 // ensure the caller is really the agent
-                if and(eq(flag, 0x3), iszero(iszero(iso(buyerTokenAgency, 2, 232)))) {
+                if and(eq(flag, 0x3), iszero(iszero(juke(buyerTokenAgency, 2, 232)))) {
                     panic(Error__0xA3__NotItemAuthorizedAgent)
                 }
 
@@ -172,7 +173,7 @@ abstract contract NuggftV1Swap is INuggftV1ItemSwap, INuggftV1Swap, NuggftV1Stak
 
         // prettier-ignore
         assembly {
-            function iso(val, left, right) -> b {
+            function juke(val, left, right) -> b {
                 b := shr(right, shl(left, val))
             }
 
@@ -182,8 +183,8 @@ abstract contract NuggftV1Swap is INuggftV1ItemSwap, INuggftV1Swap, NuggftV1Stak
 
             function panic(code) {
                 mstore(0x00, Revert__Sig)
-                mstore(0x04, code)
-                revert(0x00, 0x05)
+                mstore8(31, code)
+                revert(27, 0x5)
             }
 
             // ensure that the agency flag is "SWAP" (0x03)
@@ -229,7 +230,7 @@ abstract contract NuggftV1Swap is INuggftV1ItemSwap, INuggftV1Swap, NuggftV1Stak
                 // this accomplishes two important goals:
                 // 1. forces user to claim previous swap before acting on this one
                 // 2. prevents owner from offering on their own swap before someone else has
-                if lt(iso(offer__cache, 2, 232), active) {
+                if lt(juke(offer__cache, 2, 232), active) {
                     panic(Error__0x99__InvalidEpoch)
                 }
             }
@@ -283,10 +284,10 @@ abstract contract NuggftV1Swap is INuggftV1ItemSwap, INuggftV1Swap, NuggftV1Stak
             /////////////////////////////////////////////////////////////////////
 
             // parse last offer value
-            last := iso(agency__cache, 26, 186)
+            last := juke(agency__cache, 26, 186)
 
             // parse and caculate next offer value
-            next := add(iso(offer__cache, 26, 186), next)
+            next := add(juke(offer__cache, 26, 186), next)
 
             // ensure next offer includes at least a 2% increment
             if gt(div(mul(last, 10200), 10000), next) {
@@ -362,12 +363,12 @@ abstract contract NuggftV1Swap is INuggftV1ItemSwap, INuggftV1Swap, NuggftV1Stak
         assembly {
             function panic(code) {
                 mstore(0x00, Revert__Sig)
-                mstore(0x04, code)
-                revert(0x00, 0x05)
+                mstore8(31, code)
+                revert(27, 0x5)
             }
 
-            function iso(val, left, right) -> b {
-                b := shr(right, shl(left, val))
+            function juke(x, L, R) -> b {
+                b := shr(R, shl(L, x))
             }
 
             // extract length of tokenIds array from calldata
@@ -440,7 +441,7 @@ abstract contract NuggftV1Swap is INuggftV1ItemSwap, INuggftV1Swap, NuggftV1Stak
 
                     let offerer__agency := sload(keccak256(0x00, 0x40))
 
-                    trusted := iso(offerer__agency, 96, 96)
+                    trusted := juke(offerer__agency, 96, 96)
 
                     mptroffset := 0xC0
                 }
@@ -465,9 +466,9 @@ abstract contract NuggftV1Swap is INuggftV1ItemSwap, INuggftV1Swap, NuggftV1Stak
                 mstore(0xA0, proofs.slot)
 
                 // check if the offerer is the current agent ()
-                switch eq(offerer, iso(agency__cache, 96, 96))
+                switch eq(offerer, juke(agency__cache, 96, 96))
                 case 1 {
-                    let agency__epoch := iso(agency__cache, 2, 232)
+                    let agency__epoch := juke(agency__cache, 2, 232)
 
                     // ensure that the agency flag is "SWAP" (0x03)
                     // importantly, this only needs to be done for "winning" claims,
@@ -487,10 +488,7 @@ abstract contract NuggftV1Swap is INuggftV1ItemSwap, INuggftV1Swap, NuggftV1Stak
                     case 1 {
                         sstore(agency__sptr, 0)
 
-                        sstore(protocolItems.slot, sub(sload(protocolItems.slot), 1))
-
-                        // store common slot for offers in memory
-                        // mstore(0xA0, proofs.slot)
+                        // sstore(protocolItems.slot, sub(sload(protocolItems.slot), 1))
 
                         let proof__sptr := keccak256(0x80, 0x40)
 
@@ -520,7 +518,6 @@ abstract contract NuggftV1Swap is INuggftV1ItemSwap, INuggftV1Swap, NuggftV1Stak
                         if iszero(sload(proof__sptr)) {
                             mstore(0xA0, hotproof.slot)
                             mstore(0x80, mod(tokenId, HOT_PROOF_AMOUNT))
-
                             let hotproof__sptr := keccak256(0x80, 0x40)
                             sstore(proof__sptr, sload(hotproof__sptr))
                             sstore(hotproof__sptr, 0x10000)
@@ -560,7 +557,7 @@ abstract contract NuggftV1Swap is INuggftV1ItemSwap, INuggftV1Swap, NuggftV1Stak
 
                     // accumulate and send value at once at end
                     // to save on gas for most common use case
-                    acc := add(acc, iso(offer__cache, 26, 186))
+                    acc := add(acc, juke(offer__cache, 26, 186))
                 }
 
                 // delete offer before we potentially send value
@@ -590,22 +587,752 @@ abstract contract NuggftV1Swap is INuggftV1ItemSwap, INuggftV1Swap, NuggftV1Stak
         }
     }
 
+    function claim2(uint160[] calldata offerIds) public {
+        uint256 active = epoch();
+
+        // prettier-ignore
+        assembly {
+            function panic(code) {
+                mstore(0x00, Revert__Sig)
+                mstore8(31, code)
+                revert(27, 0x5)
+            }
+
+            function juke(x, L, R) -> b {
+                b := shr(R, shl(L, x))
+            }
+
+            // extract length of tokenIds array from calldata
+            let len := calldataload(sub(offerIds.offset, 0x20))
+
+            let acc := 0
+
+            /*========= memory ============
+              0x00: tokenId
+              0x20: agency.slot
+              [keccak]: agency[tokenId].slot = "agency__sptr"
+              --------------------------
+              0x40: tokenId
+              0x60: offers.slot
+              [keccak]: offers[tokenId].slot = "offer__sptr"
+              --------------------------
+              0x80: offerer
+              0xA0: offers[tokenId].slot
+              [keccak]: itemOffers[tokenId][offerer].slot = "offer__sptr"
+              --------------------------
+              0xC0: itemId || sellingTokenId
+              0xE0: itemAgency.slot
+              [keccak]: itemAgency[itemId || sellingTokenId].slot = "agency__sptr"
+              --------------------------
+              0x100: itemId|sellingTokenId
+              0x120: itemOffers.slot
+              [keccak]: itemOffers[itemId||sellingTokenId].slot
+            ==============================*/
+
+            // store common slot for agency in memory
+            mstore(0x20, agency.slot)
+
+            // store common slot for offers in memory
+            mstore(0x60, offers.slot)
+
+            // store common slot for agency in memory
+            mstore(0xE0, itemAgency.slot)
+
+            // store common slot for offers in memory
+            mstore(0x120, itemOffers.slot)
+
+            // store common slot for proof in memory
+            mstore(0x160, proofs.slot)
+
+            for { let i := 0 } lt(i, len) { i := add(i, 1) } {
+                // tokenIds[i]
+                let offerId := calldataload(add(offerIds.offset, shl(5, i)))
+
+                // accounts[i]
+                let offerer := caller()
+
+                let trusted := offerer
+
+                let isItem := gt(offerId, 0xffffff)
+
+                let mptroffset := 0
+
+                if isItem {
+
+                    offerer := shr(40, offerId)
+
+                    if iszero(offerer) {
+                        panic(Error__0x78__TokenDoesNotExist)
+                    }
+
+                    // if this claim is for an item aucton we need to check the nugg that is
+                    // + claiming and set their owner as the "trusted"
+
+                    mstore(0x00, offerer)
+
+                    let offerer__agency := sload(keccak256(0x00, 0x40))
+
+                    trusted := eq(juke(offerer__agency, 96, 96), caller())
+
+                    mptroffset := 0xC0
+                }
+
+                // calculate agency.slot storeage ptr
+                mstore(mptroffset, offerId)
+
+                let agency__sptr := keccak256(mptroffset, 0x40)
+
+                // load agency value from storage
+                let agency__cache := sload(agency__sptr)
+
+                // calculate offers.slot storage pointer
+                mstore(add(mptroffset, 0x40), offerId)
+                let offer__sptr := keccak256(add(mptroffset, 0x40), 0x40)
+
+                let agency__epoch := juke(agency__cache, 2, 232)
+
+                let agent := juke(agency__cache, 96, 96)
+
+                mstore(0xa0, offer__sptr)
+
+                // check if the offerer is the current agent ()
+                if  and(eq(shr(254, agency__cache), 0x03), or(and(iszero(agency__epoch), iszero(eq(offerer, agent))), gt(active, agency__epoch))) {
+
+                    mstore(0x80, agent)
+
+                    sstore(keccak256(0x80, 0x40), 0)
+
+                    mstore(0xA0, proofs.slot)
+
+                    switch isItem
+                    case 1 {
+                        sstore(agency__sptr, 0)
+
+                        let proof__sptr := keccak256(0x80, 0x40)
+
+                        let proof := sload(proof__sptr)
+
+                        // prettier-ignore
+                        for { let j := 8 } lt(j, 17) { j := add(j, 1) } {
+                            if eq(j, 16) { panic(Error__0x79__ProofHasNoFreeSlot) }
+
+                            if iszero(and(shr(mul(j, 16), proof), 0xffff)) {
+                                let tmp := shr(24, offerId)
+                                proof := xor(proof, shl(mul(j, 16), tmp))
+                                break
+                            }
+                        }
+
+                        sstore(proof__sptr, proof)
+
+                        mstore(0xA0, proof)
+
+                        log4(0xA0, 0x20, Event__TransferItem, 0x00, agent, shl(240, shr(24, offerId)))
+
+                        log4(0x00, 0x00, Event__ClaimItem, and(offerId, 0xffffff), shl(240, shr(24, offerId)), agent)
+                    }
+                    default {
+
+                        let proof__sptr := keccak256(0x80, 0x40)
+
+                        if iszero(sload(proof__sptr)) {
+                            mstore(0xA0, hotproof.slot)
+                            mstore(0x80, mod(offerId, HOT_PROOF_AMOUNT))
+                            let hotproof__sptr := keccak256(0x80, 0x40)
+                            sstore(proof__sptr, sload(hotproof__sptr))
+                            sstore(hotproof__sptr, 0x10000)
+                        }
+
+                        // if either exists for this token, set the proof
+
+                        // save the updated agency
+                        sstore(agency__sptr, xor( // =============================
+                                /* addr     0       [ */ agent, /*  ] 160 */
+                                /* eth      160,    [    next         ] 230 */
+                                /* epoch    230,    [    active       ] 254 */
+                           shl( /* flag  */ 254, /* [ */ 0x01      /* ] 255 */ ))
+                        ) // ==========================================================
+
+                        // "transfer" token to the new owner
+                        log4( // =======================================================
+                            /* param #0:n/a  */ 0x00, /* [ n/a ] */  0x00,
+                            /* topic #1:sig  */ Event__Transfer,
+                            /* topic #2:from */ address(),
+                            /* topic #3:to   */ agent,
+                            /* topic #4:id   */ offerId
+                        ) // ===========================================================
+
+                        log3(0x00, 0x00, Event__Claim, offerId, offerer)
+                    }
+
+                }
+
+                // calculate offers[offerId].slot storage pointer
+                mstore(0x80, offerer)
+
+                offer__sptr := keccak256(0x80, 0x40)
+
+                let offer__cache := sload(offer__sptr)
+
+                // ensure this user has an offer to claim
+                if iszero(offer__cache) {
+                    continue
+                }
+
+                if and(isItem, iszero(trusted)) {
+                    panic(Error__0x74__Untrusted)
+                }
+
+                if eq(juke(offer__cache, 96, 96), agent) {
+                    panic(Error__0x67__WinningClaimTooEarly)
+                }
+
+                // delete offer before we potentially send value
+                sstore(offer__sptr, 0)
+
+                // accumulate and send value at once at end
+                // to save on gas for most common use case
+                acc := add(acc, juke(offer__cache, 26, 186))
+
+                switch isItem
+                case 1 {
+                    log4(0x00, 0x00, Event__ClaimItem, and(offerId, 0xffffff), shl(240, shr(24, offerId)), offerer)
+                }
+                default {
+                    log3(0x00, 0x00, Event__Claim, offerId, offerer)
+                }
+            }
+
+            // skip sending value if amount to send is 0
+            if iszero(acc) {
+                return(0, 0)
+            }
+
+            acc := mul(acc, LOSS)
+
+            // send accumulated value * LOSS to msg.sender
+            if iszero(call(gas(), caller(), acc, 0, 0, 0, 0)) {
+                // if someone really ends up here, just donate the eth
+                sstore(stake.slot, add(sload(stake.slot), shl(96, acc)))
+            }
+        }
+    }
+
+    // function claim2(uint160[] calldata tokenIds) public {
+    //     uint256 active = epoch();
+
+    //     assembly {
+    //         function panic(code) {
+    //             mstore(0x00, Revert__Sig)
+    //             mstore8(31, code)
+    //             revert(27, 0x5)
+    //         }
+
+    //         function juke(x, L, R) -> b {
+    //             b := shr(R, shl(L, x))
+    //         }
+
+    //         // extract length of tokenIds array from calldata
+    //         let len := calldataload(sub(tokenIds.offset, 0x20))
+
+    //         // // ensure arrays the same length
+    //         // if iszero(eq(len, calldataload(sub(accounts.offset, 0x20)))) {
+    //         //     panic(Error__0x76__InvalidArrayLengths)
+    //         // }
+
+    //         let acc := 0
+
+    //         /*========= memory ============
+    //           0x00: tokenId
+    //           0x20: agency.slot
+    //           [keccak]: agency[tokenId].slot = "agency__sptr"
+    //           --------------------------
+    //           0x40: tokenId
+    //           0x60: offers.slot
+    //           [keccak]: offers[tokenId].slot = "offer__sptr"
+    //           --------------------------
+    //           0x80: offerer
+    //           0xA0: offers[tokenId].slot
+    //           [keccak]: itemOffers[tokenId][offerer].slot = "offer__sptr"
+    //           --------------------------
+    //           0xC0: itemId || sellingTokenId
+    //           0xE0: itemAgency.slot
+    //           [keccak]: itemAgency[itemId || sellingTokenId].slot = "agency__sptr"
+    //           --------------------------
+    //           0x100: itemId|sellingTokenId
+    //           0x120: itemOffers.slot
+    //           [keccak]: itemOffers[itemId||sellingTokenId].slot
+    //         ==============================*/
+
+    //         // store common slot for agency in memory
+    //         mstore(0x20, agency.slot)
+
+    //         // store common slot for offers in memory
+    //         mstore(0x60, offers.slot)
+
+    //         // store common slot for agency in memory
+    //         mstore(0xE0, itemAgency.slot)
+
+    //         // store common slot for offers in memory
+    //         mstore(0x120, itemOffers.slot)
+
+    //         // store common slot for proof in memory
+    //         mstore(0x160, proofs.slot)
+
+    //         for {
+    //             let i := 0
+    //         } lt(i, len) {
+    //             i := add(i, 1)
+    //         } {
+    //             // tokenIds[i]
+    //             let tokenId := calldataload(add(tokenIds.offset, shl(5, i)))
+
+    //             let isItem := gt(tokenId, 0xffffff)
+
+    //             let mptroffset := 0
+
+    //             let sender := caller()
+
+    //             let trust := 0
+
+    //             if isItem {
+    //                 sender := shr(40, tokenId)
+
+    //                 mstore(0x00, sender)
+
+    //                 let offerer__agency := sload(keccak256(0x00, 0x40))
+
+    //                 trust := eq(caller(), juke(offerer__agency, 96, 96))
+
+    //                 tokenId := and(tokenId, 0xffffffffff)
+
+    //                 mptroffset := 0xC0
+    //             }
+
+    //             // calculate agency.slot storeage ptr
+    //             mstore(mptroffset, tokenId)
+
+    //             let agency__sptr := keccak256(mptroffset, 0x40)
+
+    //             // load agency value from storage
+    //             let agency__cache := sload(agency__sptr)
+
+    //             // if it is marked as a swap -
+    //             // -- and the user is the agent
+    //             // -- and the swap is over or not started
+    //             // then complete the trade
+
+    //             if eq(shr(254, agency__cache), 0x03) {
+    //                 let agency__epoch := juke(agency__cache, 2, 232)
+    //                 let agency__addr := juke(agency__cache, 96, 96)
+
+    //                 // calculate offers.slot storage pointer
+    //                 mstore(add(mptroffset, 0x40), tokenId)
+    //                 let offer__sptr := keccak256(add(mptroffset, 0x40), 0x40)
+
+    //                 // calculate offers[tokenId].slot storage pointer
+    //                 mstore(0x80, sender)
+    //                 mstore(0xa0, offer__sptr)
+    //                 offer__sptr := keccak256(0x80, 0x40)
+
+    //                 if or(iszero(agency__epoch), gt(active, agency__epoch)) {
+
+    //                     switch isItem
+    //                     case 1 {
+    //                         sstore(agency__sptr, 0)
+
+    //                         let proof__sptr := keccak256(0x80, 0x40)
+
+    //                         let proof := sload(proof__sptr)
+
+    //                         // prettier-ignore
+    //                         for { let j := 8 } lt(j, 17) { j := add(j, 1) } {
+    //                             if eq(j, 16) { panic(Error__0x79__ProofHasNoFreeSlot) }
+
+    //                             if iszero(and(shr(mul(j, 16), proof), 0xffff)) {
+    //                                 let tmp := shr(24, tokenId)
+    //                                 proof := xor(proof, shl(mul(j, 16), tmp))
+    //                                 break
+    //                             }
+    //                         }
+
+    //                         sstore(proof__sptr, proof)
+
+    //                         mstore(0xA0, proof)
+
+    //                         log4(0xA0, 0x20, Event__TransferItem, 0x00, agency__addr, shl(240, shr(24, tokenId)))
+    //                     }
+    //                     default {
+    //                         let proof__sptr := keccak256(0x80, 0x40)
+
+    //                         if iszero(sload(proof__sptr)) {
+    //                             mstore(0xA0, hotproof.slot)
+    //                             mstore(0x80, mod(tokenId, HOT_PROOF_AMOUNT))
+    //                             let hotproof__sptr := keccak256(0x80, 0x40)
+    //                             sstore(proof__sptr, sload(hotproof__sptr))
+    //                             sstore(hotproof__sptr, 0x10000)
+    //                         }
+
+    //                         // if either exists for this token, set the proof
+
+    //                         // save the updated agency
+    //                         sstore(
+    //                             agency__sptr,
+    //                             xor(
+    //                                 // =============================
+    //                                 /* addr     0       [ */
+    //                                 agency__addr, /*  ] 160 */
+    //                                 /* eth      160,    [    next         ] 230 */
+    //                                 /* epoch    230,    [    active       ] 254 */
+    //                                 shl(
+    //                                     /* flag  */
+    //                                     254,
+    //                                     /* [ */
+    //                                     0x01 /* ] 255 */
+    //                                 )
+    //                             )
+    //                         ) // ==========================================================
+
+    //                         // "transfer" token to the new owner
+    //                         log4(
+    //                             // =======================================================
+    //                             /* param #0:n/a  */
+    //                             0x00,
+    //                             /* [ n/a ] */
+    //                             0x00,
+    //                             /* topic #1:sig  */
+    //                             Event__Transfer,
+    //                             /* topic #2:from */
+    //                             address(),
+    //                             /* topic #3:to   */
+    //                             agency__addr,
+    //                             /* topic #4:id   */
+    //                             tokenId
+    //                         ) // ===========================================================
+    //                     }
+    //                 }
+    //             }
+
+    //             // calculate offers.slot storage pointer
+    //             mstore(add(mptroffset, 0x40), tokenId)
+    //             let offer__sptr := keccak256(add(mptroffset, 0x40), 0x40)
+
+    //             // calculate offers[tokenId].slot storage pointer
+    //             mstore(0x80, sender)
+    //             mstore(0xa0, offer__sptr)
+    //             offer__sptr := keccak256(0x80, 0x40)
+
+    //             let offer__cache := sload(offer__sptr)
+
+    //             // ensure this user has an offer to claim
+    //             if iszero(offer__cache) {
+    //                 continue
+    //             }
+
+    //             mstore(0xA0, proofs.slot)
+
+    //             if isItem {
+    //                 if iszero(trust) {
+    //                     panic(Error__0x74__Untrusted)
+    //                 }
+    //             }
+
+    //             // accumulate and send value at once at end
+    //             // to save on gas for most common use case
+    //             acc := add(acc, juke(offer__cache, 26, 186))
+
+    //             // delete offer before we potentially send value
+    //             sstore(offer__sptr, 0)
+
+    //             switch isItem
+    //             case 1 {
+    //                 log4(0x00, 0x00, Event__ClaimItem, and(tokenId, 0xffffff), shl(240, shr(24, tokenId)), sender)
+    //             }
+    //             default {
+    //                 log3(0x00, 0x00, Event__Claim, tokenId, sender)
+    //             }
+    //         }
+
+    //         // skip sending value if amount to send is 0
+    //         if iszero(acc) {
+    //             return(0, 0)
+    //         }
+
+    //         acc := mul(acc, LOSS)
+
+    //         // send accumulated value * LOSS to msg.sender
+    //         if iszero(call(gas(), caller(), acc, 0, 0, 0, 0)) {
+    //             // if someone really ends up here, just donate the eth
+    //             sstore(stake.slot, add(sload(stake.slot), shl(96, acc)))
+    //         }
+    //     }
+    // }
+
+    //     function claim3(uint64[] calldata offerIds) public {
+    //     uint256 active = epoch();
+
+    //     assembly {
+    //         function panic(code) {
+    //             mstore(0x00, Revert__Sig)
+    //             mstore8(31, code)
+    //             revert(27, 0x5)
+    //         }
+
+    //         function juke(x, L, R) -> b {
+    //             b := shr(R, shl(L, x))
+    //         }
+
+    //         // extract length of tokenIds array from calldata
+    //         let len := calldataload(sub(offerIds.offset, 0x20))
+
+    //         // // ensure arrays the same length
+    //         // if iszero(eq(len, calldataload(sub(accounts.offset, 0x20)))) {
+    //         //     panic(Error__0x76__InvalidArrayLengths)
+    //         // }
+
+    //         let acc := 0
+
+    //         /*========= memory ============
+    //           0x00: tokenId
+    //           0x20: agency.slot
+    //           [keccak]: agency[tokenId].slot = "agency__sptr"
+    //           --------------------------
+    //           0x40: tokenId
+    //           0x60: offers.slot
+    //           [keccak]: offers[tokenId].slot = "offer__sptr"
+    //           --------------------------
+    //           0x80: offerer
+    //           0xA0: offers[tokenId].slot
+    //           [keccak]: itemOffers[tokenId][offerer].slot = "offer__sptr"
+    //           --------------------------
+    //           0xC0: itemId || sellingTokenId
+    //           0xE0: itemAgency.slot
+    //           [keccak]: itemAgency[itemId || sellingTokenId].slot = "agency__sptr"
+    //           --------------------------
+    //           0x100: itemId|sellingTokenId
+    //           0x120: itemOffers.slot
+    //           [keccak]: itemOffers[itemId||sellingTokenId].slot
+    //         ==============================*/
+
+    //         // store common slot for agency in memory
+    //         mstore(0x20, agency.slot)
+
+    //         // store common slot for offers in memory
+    //         mstore(0x60, offers.slot)
+
+    //         // // store common slot for agency in memory
+    //         // mstore(0xE0, itemAgency.slot)
+
+    //         // // store common slot for offers in memory
+    //         // mstore(0x120, itemOffers.slot)
+
+    //         // store common slot for proof in memory
+    //         mstore(0x160, proofs.slot)
+
+    //         for {
+    //             let i := 0
+    //         } lt(i, len) {
+    //             i := add(i, 1)
+    //         } {
+    //             // tokenIds[i]
+    //             let offerId := calldataload(add(offerIds.offset, shl(5, i)))
+
+    //             let isItem := gt(offerId, 0xffffff)
+
+    //             let sender := caller()
+
+    //             let trust := 0
+
+    //             if isItem {
+    //                 // sender := shr(40, offerId)
+
+    //                 // mstore(0x00, sender)
+
+    //                 // let offerer__agency := sload(keccak256(0x00, 0x40))
+
+    //                 // trust := eq(caller(), juke(offerer__agency, 96, 96))
+
+    //                 // offerId := and(offerId, 0xffffffffff)
+    //             }
+
+    //             // calculate agency.slot storeage ptr
+    //             mstore(0x00, offerId)
+
+    //             let agency__sptr := keccak256(0x00, 0x40)
+
+    //             // load agency value from storage
+    //             let agency__cache := sload(agency__sptr)
+
+    //             // if it is marked as a swap -
+    //             // -- and the user is the agent
+    //             // -- and the swap is over or not started
+    //             // then complete the trade
+
+    //             if eq(shr(254, agency__cache), 0x03) {
+    //                 let agency__epoch := juke(agency__cache, 2, 232)
+    //                 let agency__addr := juke(agency__cache, 96, 96)
+
+    //                 mstore(0x40, offerId)
+    //                 mstore(0x40, keccak256(0x40, 0x40))
+    //                 let offer__sptr := keccak256(0x40, 0x40)
+
+    //                 // calculate offers.slot storage pointer
+    //                 mstore(add(mptroffset, 0x40), tokenId)
+
+    //                 // calculate offers[tokenId].slot storage pointer
+    //                 mstore(0x80, sender)
+    //                 mstore(0xa0, offer__sptr)
+    //                 offer__sptr := keccak256(0x80, 0x40)
+
+    //                 if or(iszero(agency__epoch), gt(active, agency__epoch)) {
+
+    //                     switch isItem
+    //                     case 1 {
+    //                         sstore(agency__sptr, 0)
+
+    //                         let proof__sptr := keccak256(0x80, 0x40)
+
+    //                         let proof := sload(proof__sptr)
+
+    //                         // prettier-ignore
+    //                         for { let j := 8 } lt(j, 17) { j := add(j, 1) } {
+    //                             if eq(j, 16) { panic(Error__0x79__ProofHasNoFreeSlot) }
+
+    //                             if iszero(and(shr(mul(j, 16), proof), 0xffff)) {
+    //                                 let tmp := shr(24, tokenId)
+    //                                 proof := xor(proof, shl(mul(j, 16), tmp))
+    //                                 break
+    //                             }
+    //                         }
+
+    //                         sstore(proof__sptr, proof)
+
+    //                         mstore(0xA0, proof)
+
+    //                         log4(0xA0, 0x20, Event__TransferItem, 0x00, agency__addr, shl(240, shr(24, tokenId)))
+    //                     }
+    //                     default {
+    //                         let proof__sptr := keccak256(0x80, 0x40)
+
+    //                         if iszero(sload(proof__sptr)) {
+    //                             mstore(0xA0, hotproof.slot)
+    //                             mstore(0x80, mod(tokenId, HOT_PROOF_AMOUNT))
+    //                             let hotproof__sptr := keccak256(0x80, 0x40)
+    //                             sstore(proof__sptr, sload(hotproof__sptr))
+    //                             sstore(hotproof__sptr, 0x10000)
+    //                         }
+
+    //                         // if either exists for this token, set the proof
+
+    //                         // save the updated agency
+    //                         sstore(
+    //                             agency__sptr,
+    //                             xor(
+    //                                 // =============================
+    //                                 /* addr     0       [ */
+    //                                 agency__addr, /*  ] 160 */
+    //                                 /* eth      160,    [    next         ] 230 */
+    //                                 /* epoch    230,    [    active       ] 254 */
+    //                                 shl(
+    //                                     /* flag  */
+    //                                     254,
+    //                                     /* [ */
+    //                                     0x01 /* ] 255 */
+    //                                 )
+    //                             )
+    //                         ) // ==========================================================
+
+    //                         // "transfer" token to the new owner
+    //                         log4(
+    //                             // =======================================================
+    //                             /* param #0:n/a  */
+    //                             0x00,
+    //                             /* [ n/a ] */
+    //                             0x00,
+    //                             /* topic #1:sig  */
+    //                             Event__Transfer,
+    //                             /* topic #2:from */
+    //                             address(),
+    //                             /* topic #3:to   */
+    //                             agency__addr,
+    //                             /* topic #4:id   */
+    //                             tokenId
+    //                         ) // ===========================================================
+    //                     }
+    //                 }
+    //             }
+
+    //             // calculate offers.slot storage pointer
+    //             mstore(add(mptroffset, 0x40), tokenId)
+    //             let offer__sptr := keccak256(add(mptroffset, 0x40), 0x40)
+
+    //             // calculate offers[tokenId].slot storage pointer
+    //             mstore(0x80, sender)
+    //             mstore(0xa0, offer__sptr)
+    //             offer__sptr := keccak256(0x80, 0x40)
+
+    //             let offer__cache := sload(offer__sptr)
+
+    //             // ensure this user has an offer to claim
+    //             if iszero(offer__cache) {
+    //                 continue
+    //             }
+
+    //             mstore(0xA0, proofs.slot)
+
+    //             if isItem {
+    //                 if iszero(trust) {
+    //                     panic(Error__0x74__Untrusted)
+    //                 }
+    //             }
+
+    //             // accumulate and send value at once at end
+    //             // to save on gas for most common use case
+    //             acc := add(acc, juke(offer__cache, 26, 186))
+
+    //             // delete offer before we potentially send value
+    //             sstore(offer__sptr, 0)
+
+    //             switch isItem
+    //             case 1 {
+    //                 log4(0x00, 0x00, Event__ClaimItem, and(tokenId, 0xffffff), shl(240, shr(24, tokenId)), sender)
+    //             }
+    //             default {
+    //                 log3(0x00, 0x00, Event__Claim, tokenId, sender)
+    //             }
+    //         }
+
+    //         // skip sending value if amount to send is 0
+    //         if iszero(acc) {
+    //             return(0, 0)
+    //         }
+
+    //         acc := mul(acc, LOSS)
+
+    //         // send accumulated value * LOSS to msg.sender
+    //         if iszero(call(gas(), caller(), acc, 0, 0, 0, 0)) {
+    //             // if someone really ends up here, just donate the eth
+    //             sstore(stake.slot, add(sload(stake.slot), shl(96, acc)))
+    //         }
+    //     }
+    // }
+
     /// @inheritdoc INuggftV1Swap
     function sell(uint160 tokenId, uint96 floor) public override {
         assembly {
             function panic(code) {
                 mstore(0x00, Revert__Sig)
-                mstore(0x04, code)
-                revert(0x00, 0x05)
+                mstore8(31, code)
+                revert(27, 0x5)
             }
 
-            function iso(x, L, R) -> b {
+            function juke(x, L, R) -> b {
                 b := shr(R, shl(L, x))
             }
 
             let mptr := mload(0x40)
 
-            mstore(add(mptr, 0x20), agency.slot)
+            mstore(0x20, agency.slot)
 
             let sender := caller()
 
@@ -616,28 +1343,28 @@ abstract contract NuggftV1Swap is INuggftV1ItemSwap, INuggftV1Swap, NuggftV1Stak
 
                 tokenId := and(tokenId, 0xffffffffff)
 
-                mstore(mptr, sender)
+                mstore(0x00, sender)
 
-                let buyerTokenAgency := sload(keccak256(mptr, 0x40))
+                let buyerTokenAgency := sload(keccak256(0x00, 0x40))
 
                 // ensure the caller is the agent
-                if iszero(eq(iso(buyerTokenAgency, 96, 96), caller())) {
+                if iszero(eq(juke(buyerTokenAgency, 96, 96), caller())) {
                     panic(Error__0xA2__NotItemAgent)
                 }
 
                 let flag := shr(254, buyerTokenAgency)
 
                 // ensure the caller is really the agent
-                if and(eq(flag, 0x3), iszero(iszero(iso(buyerTokenAgency, 2, 232)))) {
+                if and(eq(flag, 0x3), iszero(iszero(juke(buyerTokenAgency, 2, 232)))) {
                     panic(Error__0xA3__NotItemAuthorizedAgent)
                 }
 
-                mstore(add(mptr, 0x20), itemAgency.slot)
+                mstore(0x20, itemAgency.slot)
             }
 
-            mstore(mptr, tokenId)
+            mstore(0x00, tokenId)
 
-            let agency__sptr := keccak256(mptr, 0x40)
+            let agency__sptr := keccak256(0x00, 0x40)
 
             let agency__cache := sload(agency__sptr)
 
@@ -649,12 +1376,12 @@ abstract contract NuggftV1Swap is INuggftV1ItemSwap, INuggftV1Swap, NuggftV1Stak
                     panic(Error__0x97__ItemAgencyAlreadySet)
                 }
 
-                mstore(mptr, sender)
+                mstore(0x00, sender)
 
                 // store common slot for offers in memory
-                mstore(add(mptr, 0x20), proofs.slot)
+                mstore(0x20, proofs.slot)
 
-                let proof__sptr := keccak256(mptr, 0x40)
+                let proof__sptr := keccak256(0x00, 0x40)
 
                 let proof := sload(proof__sptr)
 
@@ -675,13 +1402,13 @@ abstract contract NuggftV1Swap is INuggftV1ItemSwap, INuggftV1Swap, NuggftV1Stak
                     panic(Error__0xA9__ProofDoesNotHaveItem)
                 }
 
-                sstore(protocolItems.slot, add(sload(protocolItems.slot), 1))
+                // sstore(protocolItems.slot, add(sload(protocolItems.slot), 1))
 
                 sstore(proof__sptr, proof)
 
-                mstore(mptr, proof)
+                mstore(0x00, proof)
 
-                log4(mptr, 0x20, Event__TransferItem, tokenId, 0x00, shl(240, shr(24, tokenId)))
+                log4(0x00, 0x20, Event__TransferItem, tokenId, 0x00, shl(240, shr(24, tokenId)))
 
                 // ==== agency[tokenId] =====
                 //   flag  = SWAP(0x03)
@@ -695,9 +1422,9 @@ abstract contract NuggftV1Swap is INuggftV1ItemSwap, INuggftV1Swap, NuggftV1Stak
                 sstore(agency__sptr, agency__cache)
 
                 // log2 with 'Sell(uint160,bytes32)' topic
-                mstore(mptr, agency__cache)
+                mstore(0x00, agency__cache)
 
-                log3(mptr, 0x20, Event__SellItem, and(tokenId, 0xffffff), shl(240, shr(24, tokenId)))
+                log3(0x00, 0x20, Event__SellItem, and(tokenId, 0xffffff), shl(240, shr(24, tokenId)))
             }
             default {
                 // ensure the caller is the agent
@@ -712,7 +1439,7 @@ abstract contract NuggftV1Swap is INuggftV1ItemSwap, INuggftV1Swap, NuggftV1Stak
 
                 let stake__cache := sload(stake.slot)
 
-                let activeEps := div(iso(stake__cache, 64, 160), shr(192, stake__cache))
+                let activeEps := div(juke(stake__cache, 64, 160), shr(192, stake__cache))
 
                 if lt(floor, activeEps) {
                     panic(Error__0x70__FloorTooLow)
@@ -730,66 +1457,69 @@ abstract contract NuggftV1Swap is INuggftV1ItemSwap, INuggftV1Swap, NuggftV1Stak
                 sstore(agency__sptr, agency__cache)
 
                 // log2 with 'Sell(uint160,bytes32)' topic
-                mstore(mptr, agency__cache)
+                mstore(0x00, agency__cache)
 
-                log2(mptr, 0x20, Event__Sell, tokenId)
+                log2(0x00, 0x20, Event__Sell, tokenId)
             }
-        }
-    }
-
-    /// @inheritdoc INuggftV1Swap
-    function vfo(address sender, uint160 tokenId) public view override returns (uint96 res) {
-        (bool canOffer, uint96 nextSwapAmount, uint96 senderCurrentOffer) = check(sender, tokenId);
-
-        if (canOffer) {
-            return nextSwapAmount - senderCurrentOffer;
         }
     }
 
     // @inheritdoc INuggftV1Swap
-    function check(address sender, uint160 tokenId)
-        public
-        view
-        override
-        returns (
-            bool canOffer,
-            uint96 nextSwapAmount,
-            uint96 senderCurrentOffer
-        )
-    {
-        canOffer = true;
+    function vfo(address sender, uint160 tokenId) public view override returns (uint96) {
+        // canOffer = true;
 
-        uint256 swapData = agency[tokenId];
         uint24 activeEpoch = epoch();
 
-        uint256 offerData;
+        uint96 _msp = msp();
 
-        if (uint160(sender) == uint160(swapData)) {
-            offerData = swapData;
-        } else {
-            offerData = offers[tokenId][sender];
-        }
+        assembly {
+            let _nextSwapAmount := 0
+            let _senderCurrentOffer := 0
 
-        if (swapData == 0) {
-            if (activeEpoch == tokenId) {
-                // swap is minting
-                nextSwapAmount = msp();
-            } else {
-                // swap does not exist
-                return (false, 0, 0);
+            function juke(x, L, R) -> b {
+                b := shr(R, shl(L, x))
             }
-        } else {
-            if ((swapData >> 230) & 0xffffff == 0 && offerData == swapData) canOffer = false;
 
-            senderCurrentOffer = uint96(((offerData << 26) >> 186) * LOSS);
+            mstore(0x00, tokenId)
+            mstore(0x20, agency.slot)
 
-            nextSwapAmount = uint96(((swapData << 26) >> 186) * LOSS);
-        }
+            let swapData := sload(keccak256(0x00, 0x40))
 
-        if (nextSwapAmount != 0) {
-            nextSwapAmount = uint96((((nextSwapAmount / LOSS) * 10200) / 10000) * LOSS);
-        } else {
-            nextSwapAmount = 100 gwei;
+            let offerData := swapData
+
+            if iszero(eq(juke(swapData, 96, 96), sender)) {
+                mstore(0x20, offers.slot)
+                mstore(0x20, keccak256(0x00, 0x40))
+                mstore(0x00, sender)
+                offerData := sload(keccak256(0x00, 0x40))
+            }
+
+            switch iszero(swapData)
+            case 1 {
+                switch eq(tokenId, activeEpoch)
+                case 1 {
+                    _nextSwapAmount := _msp
+                }
+                default {
+                    mstore(0x00, 0x00)
+                    mstore(0x20, 0x00)
+                    return(0x00, 0x40)
+                }
+            }
+            default {
+                _senderCurrentOffer := mul(juke(offerData, 26, 186), LOSS)
+
+                _nextSwapAmount := mul(juke(swapData, 26, 186), LOSS)
+            }
+
+            if lt(_nextSwapAmount, 10000000) {
+                _nextSwapAmount := 10000000
+            }
+
+            _nextSwapAmount := div(mul(_nextSwapAmount, 10200), 10000)
+
+            mstore(0x00, sub(_nextSwapAmount, _senderCurrentOffer))
+            return(0x00, 0x20)
         }
     }
 
@@ -873,16 +1603,3 @@ abstract contract NuggftV1Swap is INuggftV1ItemSwap, INuggftV1Swap, NuggftV1Stak
         }
     }
 }
-
-// Running 5 tests for revert__claim__0x74.json:revert__claim__0x74
-// [PASS] test__revert__claim__0x74__fail__item__nonWinningIncorrectSenderIncorrectArgIncorectUser() (gas: 141242)
-// [PASS] test__revert__claim__0x74__fail__item__userWithPendingWinningNuggClaim() (gas: 144922)
-// [PASS] test__revert__claim__0x74__fail__nugg__incorrectSenderCorrectArg() (gas: 144867)
-// [PASS] test__revert__claim__0x74__pass__item__nonWinningIncorrectSenderIncorrectArg() (gas: 156257)
-// [PASS] test__revert__claim__0x74__pass__nugg__correctSenderCorrectArg() (gas: 122200)
-// Running 5 tests for revert__claim__0x74.json:revert__claim__0x74
-// [PASS] test__revert__claim__0x74__fail__item__nonWinningIncorrectSenderIncorrectArgIncorectUser() (gas: 141221)
-// [PASS] test__revert__claim__0x74__fail__item__userWithPendingWinningNuggClaim() (gas: 144901)
-// [PASS] test__revert__claim__0x74__fail__nugg__incorrectSenderCorrectArg() (gas: 144846)
-// [PASS] test__revert__claim__0x74__pass__item__nonWinningIncorrectSenderIncorrectArg() (gas: 156234)
-// [PASS] test__revert__claim__0x74__pass__nugg__correctSenderCorrectArg() (gas: 122174)

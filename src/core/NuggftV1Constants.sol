@@ -12,7 +12,7 @@ abstract contract NuggftV1Constants {
     uint96 constant PROTOCOL_FEE_BPS = 10;
 
     // epoch
-    uint8 constant INTERVAL_SUB = 4;
+    uint8 constant INTERVAL_SUB = 8;
     uint16 constant MINT_INTERVAL = 4;
 
     uint16 constant INTERVAL = 256;
@@ -45,45 +45,45 @@ abstract contract NuggftV1Constants {
 
     error Revert(bytes1);
 
-    bytes4 constant Revert__Sig = 0x7e863b48;
+    uint40 constant Revert__Sig = 0x7e863b4800;
 
-    bytes1 constant Error__0x65__TokenNotMintable = 0x65;
-    bytes1 constant Error__0x66__TokenNotTrustMintable = 0x66;
-    bytes1 constant Error__0x67__WinningClaimTooEarly = 0x67;
-    bytes1 constant Error__0x68__OfferLowerThanLOSS = 0x68;
-    bytes1 constant Error__0x69__Wut = 0x69;
-    bytes1 constant Error__0x70__FloorTooLow = 0x70;
-    bytes1 constant Error__0x71__ValueTooLow = 0x71;
-    bytes1 constant Error__0x72__IncrementTooLow = 0x72;
-    bytes1 constant Error__0x73__InvalidProofIndex = 0x73;
-    bytes1 constant Error__0x74__Untrusted = 0x74;
-    bytes1 constant Error__0x75__SendEthFailureToCaller = 0x75;
-    bytes1 constant Error__0x76__InvalidArrayLengths = 0x76;
-    bytes1 constant Error__0x77__NotOwner = 0x77;
-    bytes1 constant Error__0x78__TokenDoesNotExist = 0x78;
-    bytes1 constant Error__0x79__ProofHasNoFreeSlot = 0x79;
-    bytes1 constant Error__0x80__TokenDoesExist = 0x80;
-    bytes1 constant Error__0x81__MigratorNotSet = 0x81;
-    bytes1 constant Error__0x97__ItemAgencyAlreadySet = 0x97;
-    bytes1 constant Error__0x98__BlockHashIsZero = 0x98;
-    bytes1 constant Error__0x99__InvalidEpoch = 0x99;
-    bytes1 constant Error__0xA0__NotSwapping = 0xA0;
-    bytes1 constant Error__0xA1__NotAgent = 0xA1;
-    bytes1 constant Error__0xA2__NotItemAgent = 0xA2;
-    bytes1 constant Error__0xA3__NotItemAuthorizedAgent = 0xA3;
-    bytes1 constant Error__0xA4__ExpiredEpoch = 0xA4;
-    bytes1 constant Error__0xA5__NoOffer = 0xA5;
-    bytes1 constant Error__0xA6__NotAuthorized = 0xA6;
-    bytes1 constant Error__0xA7__LiquidationPaymentTooLow = 0xA7;
-    bytes1 constant Error__0xA8__NotLoaned = 0xA8;
-    bytes1 constant Error__0xA9__ProofDoesNotHaveItem = 0xA9;
-    bytes1 constant Error__0xAA__RebalancePaymentTooLow = 0xAA;
+    uint8 constant Error__0x65__TokenNotMintable = 0x65;
+    uint8 constant Error__0x66__TokenNotTrustMintable = 0x66;
+    uint8 constant Error__0x67__WinningClaimTooEarly = 0x67;
+    uint8 constant Error__0x68__OfferLowerThanLOSS = 0x68;
+    uint8 constant Error__0x69__Wut = 0x69;
+    uint8 constant Error__0x70__FloorTooLow = 0x70;
+    uint8 constant Error__0x71__ValueTooLow = 0x71;
+    uint8 constant Error__0x72__IncrementTooLow = 0x72;
+    uint8 constant Error__0x73__InvalidProofIndex = 0x73;
+    uint8 constant Error__0x74__Untrusted = 0x74;
+    uint8 constant Error__0x75__SendEthFailureToCaller = 0x75;
+    uint8 constant Error__0x76__InvalidArrayLengths = 0x76;
+    uint8 constant Error__0x77__NotOwner = 0x77;
+    uint8 constant Error__0x78__TokenDoesNotExist = 0x78;
+    uint8 constant Error__0x79__ProofHasNoFreeSlot = 0x79;
+    uint8 constant Error__0x80__TokenDoesExist = 0x80;
+    uint8 constant Error__0x81__MigratorNotSet = 0x81;
+    uint8 constant Error__0x97__ItemAgencyAlreadySet = 0x97;
+    uint8 constant Error__0x98__BlockHashIsZero = 0x98;
+    uint8 constant Error__0x99__InvalidEpoch = 0x99;
+    uint8 constant Error__0xA0__NotSwapping = 0xA0;
+    uint8 constant Error__0xA1__NotAgent = 0xA1;
+    uint8 constant Error__0xA2__NotItemAgent = 0xA2;
+    uint8 constant Error__0xA3__NotItemAuthorizedAgent = 0xA3;
+    uint8 constant Error__0xA4__ExpiredEpoch = 0xA4;
+    uint8 constant Error__0xA5__NoOffer = 0xA5;
+    uint8 constant Error__0xA6__NotAuthorized = 0xA6;
+    uint8 constant Error__0xA7__LiquidationPaymentTooLow = 0xA7;
+    uint8 constant Error__0xA8__NotLoaned = 0xA8;
+    uint8 constant Error__0xA9__ProofDoesNotHaveItem = 0xA9;
+    uint8 constant Error__0xAA__RebalancePaymentTooLow = 0xAA;
 
-    function _panic(bytes1 code) internal pure {
+    function _panic(uint8 code) internal pure {
         assembly {
             mstore(0x00, Revert__Sig)
-            mstore(0x04, code)
-            revert(0x00, 0x5)
+            mstore8(31, code)
+            revert(27, 0x5)
         }
     }
 }

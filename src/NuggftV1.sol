@@ -58,76 +58,28 @@ contract NuggftV1 is IERC721, IERC721Metadata, NuggftV1Loan {
         emit MigrateV1Sent(migrator, tokenId, proof, msg.sender, ethOwed);
     }
 
-    /// @inheritdoc IERC165
-    function supportsInterface(bytes4 interfaceId) public view virtual override returns (bool) {
-        return
-            interfaceId == type(IERC721).interfaceId || //
-            interfaceId == type(IERC721Metadata).interfaceId ||
-            interfaceId == type(IERC165).interfaceId;
-    }
-
-    /// @inheritdoc IERC721Metadata
-    function name() public pure override returns (string memory) {
-        return 'Nugg Fungible Token V1';
-    }
-
-    /// @inheritdoc IERC721Metadata
-    function symbol() public pure override returns (string memory) {
-        return 'NUGGFT';
-    }
-
-    /// @inheritdoc IERC721Metadata
-    function tokenURI(uint256 tokenId) public view virtual override returns (string memory res) {
-        // prettier-ignore
-        res = string(
-            dotnuggV1.encodeJsonAsBase64(
-                abi.encodePacked(
-                     '{"name":"',        name(),
-                    '","description":"', symbol(),
-                    '","image":"',       imageURI(tokenId),
-                    '","properites":',   dotnuggV1.props(
-                            proofOf(uint160(tokenId)),
-                            ['base', 'eyes', 'mouth', 'hair', 'hat', 'background', 'scarf', 'held']
-                        ),
-                    '}'
-                )
-            )
-        );
-    }
-
-    /// @inheritdoc INuggftV1Proof
-    function imageURI(uint256 tokenId) public view override returns (string memory res) {
-        res = dotnuggV1.exec(proofOf(uint160(tokenId)), true);
-    }
-
-    /// @inheritdoc INuggftV1Proof
-    function itemURI(uint16 itemId) public view override returns (string memory res) {
-        res = dotnuggV1.exec(uint8(itemId >> 8), uint8(itemId), true);
-    }
-
-    function imageURICheat(uint256 startblock, uint24 _epoch) public view returns (string memory res) {
-        return dotnuggV1.exec(initFromSeed(cheat(startblock, _epoch)), true);
-    }
-
     function mint(address to, uint160 tokenId) internal {
         uint256 randomEnough;
 
         addStakedShareFromMsgValue();
 
+        // prettier-ignore
         assembly {
             mstore(0x00, tokenId)
             mstore(0x20, agency.slot)
 
-            // prettier-ignore
-            let agency__sptr := keccak256( // =================================
+            // ============================================================
+            // agency__sptr is the storage value that solidity would compute
+            // + if you used "agency[tokenId]"
+            let agency__sptr := keccak256( // =============================
                 0x00, /* [ tokenId                               ]    0x20
                 0x20     [ agency.slot                           ] */ 0x40
             ) // ==========================================================
 
             if iszero(iszero(sload(agency__sptr))) {
                 mstore(0x00, Revert__Sig)
-                mstore(0x04, Error__0x80__TokenDoesExist)
-                revert(0x00, 0x05)
+                mstore8(31, Error__0x80__TokenDoesExist)
+                revert(27, 0x5)
             }
 
             // prettier-ignore
@@ -164,7 +116,8 @@ contract NuggftV1 is IERC721, IERC721Metadata, NuggftV1Loan {
             // prettier-ignore
             log1( // =======================================================
                 /* param #1 */ 0x00, /* [ tokenId   ]    0x20
-                /* param #2    0x20     [ msg.value ] */ 0x40,
+                /* param #2    0x20     [ msg.value ]    0x40,
+                   param #2    0x40     [ proof     ] */ 0x60,
                 /* topic #1 */ Event__Mint
             ) // ===========================================================
         }
@@ -173,12 +126,8 @@ contract NuggftV1 is IERC721, IERC721Metadata, NuggftV1Loan {
 
         proofs[tokenId] = proof;
 
-        emit Rotate(tokenId, bytes32(proof));
+        emit Mint(tokenId, uint96(msg.value), bytes32(proof));
     }
-
-    /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-                                BURN/MIGRATE
-       ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
 
     /// @notice removes a staked share from the contract,
     /// @dev this is the only way to remove a share
@@ -195,16 +144,70 @@ contract NuggftV1 is IERC721, IERC721Metadata, NuggftV1Loan {
         delete agency[tokenId];
         delete proofs[tokenId];
 
-        emit Transfer(msg.sender, address(0), tokenId);
-
         ethOwed = calculateEthPerShare(cache);
 
-        cache -= 1 << 160;
-        cache -= ethOwed << 96;
+        cache -= 1 << 192;
+        cache -= uint256(ethOwed) << 96;
 
         stake = cache;
 
         emit Stake(bytes32(cache));
+        emit Transfer(msg.sender, address(0), tokenId);
+    }
+
+    /// @inheritdoc IERC165
+    function supportsInterface(bytes4 interfaceId) public view virtual override returns (bool) {
+        return
+            interfaceId == type(IERC721).interfaceId || //
+            interfaceId == type(IERC721Metadata).interfaceId ||
+            interfaceId == type(IERC165).interfaceId;
+    }
+
+    /// @inheritdoc IERC721Metadata
+    function name() public pure override returns (string memory) {
+        return 'Nugg Fungible Token V1';
+    }
+
+    /// @inheritdoc IERC721Metadata
+    function symbol() public pure override returns (string memory) {
+        return 'NUGGFT';
+    }
+
+    /// @inheritdoc IERC721Metadata
+    function tokenURI(uint256 tokenId) public view virtual override returns (string memory res) {
+        // prettier-ignore
+        res = string(
+            dotnuggV1.encodeJsonAsBase64(
+                abi.encodePacked(
+                     '{"name":"',         name(),
+                    '","description":"',  symbol(),
+                    '","image":"',        imageURI(tokenId),
+                    '","properites":',    dotnuggV1.props(proofOf(uint160(tokenId)),
+                                ['base', 'eyes', 'mouth', 'hair', 'hat', 'background', 'scarf', 'held']
+                            ),
+                    '}'
+                )
+            )
+        );
+    }
+
+    /// @inheritdoc INuggftV1Proof
+    function imageURI(uint256 tokenId) public view override returns (string memory res) {
+        res = dotnuggV1.exec(proofOf(uint160(tokenId)), true);
+    }
+
+    /// @inheritdoc INuggftV1Proof
+    function itemURI(uint16 itemId) public view override returns (string memory res) {
+        res = dotnuggV1.exec(uint8(itemId >> 8), uint8(itemId), true);
+    }
+
+    /// @inheritdoc INuggftV1Proof
+    function featureLength(uint8 feature) public view override returns (uint8 res) {
+        res = dotnuggV1.lengthOf(feature);
+    }
+
+    function imageURICheat(uint256 startblock, uint24 _epoch) public view returns (string memory res) {
+        return dotnuggV1.exec(initFromSeed(cheat(startblock, _epoch)), true);
     }
 
     /// @inheritdoc IERC721

@@ -33,9 +33,8 @@ contract stress__NuggftV1Loan is NuggftV1Test {
             (, , , , , uint24 b_insolventEpoch) = nuggft.debt(LOAN_TOKENID);
 
             uint160 tokenId = nuggft.epoch();
-            (, uint96 nextSwapAmount, uint96 senderCurrentOffer) = nuggft.check(users.frank, tokenId);
 
-            uint96 value = nextSwapAmount - senderCurrentOffer;
+            uint96 value = nuggft.vfo(users.frank, tokenId);
             forge.vm.startPrank(users.frank);
             nuggft.offer{value: value}(tokenId);
 
@@ -80,9 +79,8 @@ contract stress__NuggftV1Loan is NuggftV1Test {
         // (, , , , uint24 b_insolventEpoch) = nuggft.loanInfo(LOAN_TOKENID);
 
         uint160 tokenId = nuggft.epoch();
-        (, uint96 nextSwapAmount, uint96 senderCurrentOffer) = nuggft.check(users.frank, tokenId);
 
-        uint96 value = nextSwapAmount - senderCurrentOffer;
+        uint96 value = nuggft.vfo(users.frank, tokenId);
         // forge.vm.startPrank(users.frank);
         nuggft.offer{value: value}(tokenId);
 
