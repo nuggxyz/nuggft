@@ -26,7 +26,7 @@ abstract contract revert__rebalance__0xA4 is NuggftV1Test {
 
         expect.mint().from(users.frank).value(2 ether).exec(501);
 
-        jump(4001);
+        jump(4026); // liquidation period is 1024 epochs
 
         expect.rebalance().from(users.mac).value(nuggft.vfr(lib.sarr160(500))[0]).exec(lib.sarr160(500));
     }

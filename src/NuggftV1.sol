@@ -199,8 +199,8 @@ contract NuggftV1 is IERC721, IERC721Metadata, NuggftV1Loan {
 
         ethOwed = calculateEthPerShare(cache);
 
-        cache -= 1 << 160;
-        cache -= ethOwed << 96;
+        cache -= 1 << 192;
+        cache -= uint256(ethOwed) << 96;
 
         stake = cache;
 
