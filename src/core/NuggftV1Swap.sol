@@ -2,10 +2,10 @@
 
 pragma solidity 0.8.12;
 
-import {INuggftV1Swap} from '../interfaces/nuggftv1/INuggftV1Swap.sol';
-import {INuggftV1ItemSwap} from '../interfaces/nuggftv1/INuggftV1ItemSwap.sol';
+import {INuggftV1Swap} from "../interfaces/nuggftv1/INuggftV1Swap.sol";
+import {INuggftV1ItemSwap} from "../interfaces/nuggftv1/INuggftV1ItemSwap.sol";
 
-import {NuggftV1Stake} from './NuggftV1Stake.sol';
+import {NuggftV1Stake} from "./NuggftV1Stake.sol";
 
 // import '../_test/utils/forge.sol';
 
@@ -735,17 +735,30 @@ abstract contract NuggftV1Swap is INuggftV1ItemSwap, INuggftV1Swap, NuggftV1Stak
     }
 
     // @inheritdoc INuggftV1Swap
-    function vfo(address sender, uint160 tokenId) public view override returns (uint96) {
-        // canOffer = true;
+    function vfo(address sender, uint160 tokenId) public view override returns (uint96 res) {
+        (bool canOffer, uint96 next, uint96 current) = check(sender, tokenId);
+
+        if (canOffer) res = next - current;
+    }
+
+    // @inheritdoc INuggftV1Swap
+    function check(address sender, uint160 tokenId)
+        public
+        view
+        override
+        returns (
+            bool canOffer,
+            uint96 next,
+            uint96 current
+        )
+    {
+        canOffer = true;
 
         uint24 activeEpoch = epoch();
 
         uint96 _msp = msp();
 
         assembly {
-            let _nextSwapAmount := 0
-            let _senderCurrentOffer := 0
-
             function juke(x, L, R) -> b {
                 b := shr(R, shl(L, x))
             }
@@ -757,7 +770,9 @@ abstract contract NuggftV1Swap is INuggftV1ItemSwap, INuggftV1Swap, NuggftV1Stak
 
             let offerData := swapData
 
-            if iszero(eq(juke(swapData, 96, 96), sender)) {
+            let isLeader := eq(juke(swapData, 96, 96), sender)
+
+            if iszero(isLeader) {
                 mstore(0x20, offers.slot)
                 mstore(0x20, keccak256(0x00, 0x40))
                 mstore(0x00, sender)
@@ -768,27 +783,30 @@ abstract contract NuggftV1Swap is INuggftV1ItemSwap, INuggftV1Swap, NuggftV1Stak
             case 1 {
                 switch eq(tokenId, activeEpoch)
                 case 1 {
-                    _nextSwapAmount := _msp
+                    next := _msp
                 }
                 default {
                     mstore(0x00, 0x00)
-                    return(0x00, 0x42)
+                    mstore(0x20, 0x00)
+                    mstore(0x40, 0x00)
+                    return(0x00, 0x60)
                 }
             }
             default {
-                _senderCurrentOffer := mul(juke(offerData, 26, 186), LOSS)
+                if and(isLeader, iszero(juke(swapData, 2, 232))) {
+                    canOffer := 0
+                }
 
-                _nextSwapAmount := mul(juke(swapData, 26, 186), LOSS)
+                current := mul(juke(offerData, 26, 186), LOSS)
+
+                next := mul(juke(swapData, 26, 186), LOSS)
             }
 
-            if lt(_nextSwapAmount, 100000000000) {
-                _nextSwapAmount := 100000000000
+            if lt(next, 100000000000) {
+                next := 100000000000
             }
 
-            _nextSwapAmount := mul(div(mul(div(_nextSwapAmount, LOSS), 10200), 10000), LOSS)
-
-            mstore(0x00, sub(_nextSwapAmount, _senderCurrentOffer))
-            return(0x00, 0x20)
+            next := mul(div(mul(div(next, LOSS), 10200), 10000), LOSS)
         }
     }
 

@@ -15,8 +15,8 @@
 
 pragma solidity 0.8.12;
 
-import '../utils/vm.sol';
-import '../utils/stdlib.sol';
+import './vm.sol';
+import './stdlib.sol';
 import './global.sol';
 import './cast.sol';
 import './injector.sol';

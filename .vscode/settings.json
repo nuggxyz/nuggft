@@ -1,5 +1,10 @@
 {
-    "eslint.validate": ["javascript", "javascriptreact", "typescript", "typescriptreact"],
+    "eslint.validate": [
+        "javascript",
+        "javascriptreact",
+        "typescript",
+        "typescriptreact"
+    ],
     "editor.codeActionsOnSave": {
         "source.fixAll.eslint": true
     },
@@ -47,5 +52,10 @@
     "[dotenv]": {
         "editor.defaultFormatter": "foxundermoon.shell-format"
     },
-    "search.exclude": { "lib": true }
+    "search.exclude": {
+        "lib": true
+    },
+    "[shellscript]": {
+        "editor.defaultFormatter": "foxundermoon.shell-format"
+    }
 }
