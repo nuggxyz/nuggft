@@ -1,0 +1,15 @@
+{
+    "overrides": [
+        {
+            "files": "*.sol",
+            "options": {
+                "printWidth": 160,
+                "tabWidth": 4,
+                "useTabs": false,
+                "bracketSpacing": false,
+                "explicitTypes": "always",
+                "compiler": "0.8.12"
+            }
+        }
+    ]
+}

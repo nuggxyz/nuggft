@@ -2,30 +2,32 @@
 
 pragma solidity 0.8.12;
 
-import '../NuggftV1.test.sol';
+import "../NuggftV1.test.sol";
 
-import '../../_deployment/NuggFatherV1.sol';
+import "../../_deployment/NuggFatherV1.sol";
 
 contract deployment__NuggFatherV1 is NuggftV1Test {
     function test__deployment__NuggFatherV1__constructor__1() public {
-        address deployer = 0x27b6E7032F3800389D963DDba80CEB6f7815a4FC;
         address dub6ix = 0x9B0E2b16F57648C7bAF28EDD7772a815Af266E77;
 
         forge.vm.deal(address(this), 6 ether);
 
-        payable(deployer).transfer(3 ether);
         payable(dub6ix).transfer(3 ether);
 
-        forge.vm.startPrank(deployer);
-        // NuggFatherV1 father = new NuggFatherV1();
-
+        forge.vm.startPrank(dub6ix);
+        NuggFatherV1 father = new NuggFatherV1();
         forge.vm.stopPrank();
 
-        forge.vm.startPrank(dub6ix);
-        // NuggftV1 nuggft = father.nuggft();
+        for (uint160 i = 1; i < 10; i++) {
+            // father.nuggft().floop(i);
 
-        // Expect e = new Expect(address(nuggft));
+            // uint8[8] memory list = father.dotnugg().decodeProofCore(father.nuggft().proofOf(i));
 
-        // father.mint{value: 1 ether}(5);
+            // for (uint8 i = 0; i < 8; i++) {
+            //     father.dotnugg().svg(father.dotnugg().calc(father.dotnugg().read(i, list[i])));
+            // }
+
+            ds.emit_log_string((father.nuggft().imageURI(i)));
+        }
     }
 }

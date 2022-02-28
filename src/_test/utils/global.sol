@@ -2,7 +2,7 @@
 
 pragma solidity 0.8.12;
 
-import '../utils/vm.sol';
+import './vm.sol';
 
 library global {
     address constant GLOBAL_ADDRESS_PTR = 0xDDdDddDdDdddDDddDDddDDDDdDdDDdDDdDDDDDDd;
