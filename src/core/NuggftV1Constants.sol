@@ -15,7 +15,7 @@ abstract contract NuggftV1Constants {
     uint8 constant INTERVAL_SUB = 8;
     uint16 constant MINT_INTERVAL = 4;
 
-    uint16 constant INTERVAL = 256;
+    uint16 constant INTERVAL = 32;
     uint24 constant OFFSET = 3000;
 
     // loan
@@ -78,6 +78,8 @@ abstract contract NuggftV1Constants {
     uint8 constant Error__0xA8__NotLoaned = 0xA8;
     uint8 constant Error__0xA9__ProofDoesNotHaveItem = 0xA9;
     uint8 constant Error__0xAA__RebalancePaymentTooLow = 0xAA;
+    uint8 constant Error__0xAB__NotLiveItemSwap = 0xAB;
+    uint8 constant Error__0xAB__MustFinalizeOtherItemSwap = 0xAC;
 
     function _panic(uint8 code) internal pure {
         assembly {
