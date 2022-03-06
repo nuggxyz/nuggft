@@ -18,7 +18,7 @@ abstract contract NuggftV1Swap is INuggftV1ItemSwap, INuggftV1Swap, NuggftV1Stak
     mapping(uint176 => mapping(uint160 => uint256)) public itemOffers;
     mapping(uint176 => uint256) public itemAgency;
 
-    // uint256 hotproof = 1;
+    mapping(uint256 => bool) public currentItemSwap;
 
     constructor() {
         for (uint8 i = 0; i < HOT_PROOF_AMOUNT; i++) hotproof[i] = 0x10000;
@@ -101,18 +101,13 @@ abstract contract NuggftV1Swap is INuggftV1ItemSwap, INuggftV1Swap, NuggftV1Stak
             agency__sptr := keccak256(0x00, 0x40)
             agency__cache := sload(agency__sptr)
         }
-        // gas.stop(a);
 
         // check to see if this nugg needs to be minted
         if (active == tokenId && agency__cache == 0) {
             // [Offer:Mint]
-            // a = gas.start('1: initFromSeed');
 
             uint256 proof = initFromSeed(calculateSeed(uint24(active)));
-            // gas.stop(a);
 
-            // a = gas.start('2: sstore(proof)');
-            // ds.inject.logBytes32(bytes32(hotproof[uint8(tokenId % 32)]));
             uint256 hotproof__cache = hotproof[uint8(tokenId % 32)];
 
             // if hot slot 1 is open, save there
@@ -121,16 +116,10 @@ abstract contract NuggftV1Swap is INuggftV1ItemSwap, INuggftV1Swap, NuggftV1Stak
             } else {
                 proofs[tokenId] = proof;
             }
-            // ds.inject.logBytes32(bytes32(hotproof[uint8(tokenId % 32)]));
 
             // otherwise this
-            // gas.stop(a);
 
-            // a = gas.start('3: addStakedShareFromMsgValue');
             addStakedShareFromMsgValue();
-            // gas.stop(a);
-
-            // a = gas.start('4: assembly');
 
             // prettier-ignore
             assembly {
@@ -164,9 +153,7 @@ abstract contract NuggftV1Swap is INuggftV1ItemSwap, INuggftV1Swap, NuggftV1Stak
 
                 sstore(agency__sptr, agency__cache)
 
-                // return(0x0, 0x00)
             }
-            // gas.stop(a);
 
             return;
         }
@@ -196,6 +183,7 @@ abstract contract NuggftV1Swap is INuggftV1ItemSwap, INuggftV1Swap, NuggftV1Stak
 
             mstore(0x20, offersSlot)
 
+
             mstore(0x20, keccak256( // =================================
                 0x00, /* [ tokenId                 ]    0x20
                 0x20     [ offers[X].slot          ] */ 0x40
@@ -203,7 +191,7 @@ abstract contract NuggftV1Swap is INuggftV1ItemSwap, INuggftV1Swap, NuggftV1Stak
 
             mstore(0x00, sender)
 
-            let offer__sptr := keccak256( // ===========================
+             offersSlot := keccak256( // ===========================
                 0x00, /* [ msg.sender              ]    0x20
                 0x20     [ offers[X].slot          ] */ 0x40
             )// ========================================================
@@ -221,7 +209,7 @@ abstract contract NuggftV1Swap is INuggftV1ItemSwap, INuggftV1Swap, NuggftV1Stak
             // check to see if msg.sender is the leader
             if iszero(eq(sender, agency__addr)) {
                 // if not, we update offer__cache
-                offer__cache := sload(offer__sptr)
+                offer__cache := sload(offersSlot)
             }
 
             // check to see if user has offered by checking if cache != 0
@@ -240,10 +228,8 @@ abstract contract NuggftV1Swap is INuggftV1ItemSwap, INuggftV1Swap, NuggftV1Stak
             // check to see if the swap's epoch is 0, make required updates
 
             switch iszero(agency__epoch)
-
+            // if so, we know this swap has not yet been offered on
             case 1 { // [Offer:Commit]
-
-                // if so, we know this swap has not yet been offered on
 
                 // update the epoch to begin auction
                 agency__cache := xor( // =====================================
@@ -255,7 +241,24 @@ abstract contract NuggftV1Swap is INuggftV1ItemSwap, INuggftV1Swap, NuggftV1Stak
                         /* flag     254,    [                             ] 255 */
                 ) // ==========================================================
 
-                if iszero(isItem) {
+                switch isItem
+                case 1 {
+                    // check to make sure there is not a swap
+
+                    mstore(0x00, xor(and(tokenId, 0xffff000000), add(active, SALE_LEN)))
+                    mstore(0x20, currentItemSwap.slot)
+
+                    let kek := keccak256(0x00, 0x40)
+
+                    // if not 0
+                    if iszero(iszero(sload(kek))) {
+                        panic(Error__0xAB__MustFinalizeOtherItemSwap)
+                    }
+
+                    sstore(kek, 1)
+
+                }
+                default {
                     // Event__Transfer the token to the contract for the remainder of sale
                     // the seller (agency__addr) approves this when they put the token up for sale
 
@@ -268,15 +271,11 @@ abstract contract NuggftV1Swap is INuggftV1ItemSwap, INuggftV1Swap, NuggftV1Stak
                     ) // ===========================================================
                 }
             }
-
-
             default { // [Offer:Carry]
-
                 // otherwise we validate the epoch to ensure the swap is still active
                 // baisically, "is the auction's epoch in the past?"
-                // - if yes, we revert
-
                 if lt(agency__epoch, active) {
+                    // - if yes, we revert
                     panic(Error__0xA4__ExpiredEpoch)
                 }
             }
@@ -329,7 +328,7 @@ abstract contract NuggftV1Swap is INuggftV1ItemSwap, INuggftV1Swap, NuggftV1Stak
 
             sstore(agency__sptr, agency__cache)
 
-            sstore(offer__sptr, agency__cache)
+            sstore(offersSlot, agency__cache)
 
             mstore(0x00, agency__cache)
 
@@ -338,8 +337,8 @@ abstract contract NuggftV1Swap is INuggftV1ItemSwap, INuggftV1Swap, NuggftV1Stak
                 log3( // =======================================================
                     /* param #1:agency   */ 0x00, /* [ itemAgency[tokenId][itemId] ] */  0x20,
                     /* topic #1:sig      */ Event__OfferItem,
-                    /* topic #2:sellerId */ and(sender, 0xffffff),
-                    /* topic #3:buyerId  */ and(shr(24, tokenId), 0xffff)
+                    /* topic #2:buyerId */  and(tokenId, 0xffffff),
+                    /* topic #3:buyerId  */ shl(240, and(shr(24, tokenId), 0xffff))
                 ) // ===========================================================
             }
             default {
