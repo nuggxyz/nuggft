@@ -2,13 +2,13 @@
 
 pragma solidity 0.8.12;
 
-import '../utils/forge.sol';
+import "../utils/forge.sol";
 
-import './base.sol';
+import "./base.sol";
 
-import {expectStake} from './stake.sol';
-import {expectBalance} from './balance.sol';
-import {Expect} from './Expect.sol';
+import {expectStake} from "./stake.sol";
+import {expectBalance} from "./balance.sol";
+import {Expect} from "./Expect.sol";
 
 contract expectClaim is base {
     expectStake stake;
@@ -132,9 +132,9 @@ contract expectClaim is base {
         address[] memory offerers,
         address sender
     ) public {
-        require(execution.length == 0, 'EXPECT-CLAIM:START: execution already esists');
+        require(execution.length == 0, "EXPECT-CLAIM:START: execution already esists");
 
-        require(tokenIds.length == offerers.length, 'EXPECT-CLAIM:START:ArrayLengthNotSame');
+        // require(tokenIds.length == offerers.length, 'EXPECT-CLAIM:START:ArrayLengthNotSame');
 
         Run memory run;
 
@@ -189,7 +189,7 @@ contract expectClaim is base {
     }
 
     function stop() public {
-        require(execution.length > 0, 'EXPECT-CLAIM:STOP: execution does not esists');
+        require(execution.length > 0, "EXPECT-CLAIM:STOP: execution does not esists");
 
         Run memory run = abi.decode(execution, (Run));
 
@@ -216,7 +216,7 @@ contract expectClaim is base {
     }
 
     function rollback() public {
-        require(execution.length > 0, 'EXPECT-CLAIM:ROLLBACK: execution does not esists');
+        require(execution.length > 0, "EXPECT-CLAIM:ROLLBACK: execution does not esists");
 
         Run memory run = abi.decode(execution, (Run));
 
@@ -259,7 +259,7 @@ contract expectClaim is base {
 
         (bool hasItem, ) = proofSearch(proof, itemId);
 
-        ds.assertTrue(hasItem, string(abi.encodePacked('assertProofContains FAILED: - ', str)));
+        ds.assertTrue(hasItem, string(abi.encodePacked("assertProofContains FAILED: - ", str)));
     }
 
     function assertProofNotContains(
@@ -271,7 +271,7 @@ contract expectClaim is base {
 
         (bool hasItem, ) = proofSearch(proof, itemId);
 
-        ds.assertTrue(!hasItem, string(abi.encodePacked('assertProofNotContains FAILED: - ', str)));
+        ds.assertTrue(!hasItem, string(abi.encodePacked("assertProofNotContains FAILED: - ", str)));
     }
 
     function preSingleClaimChecks(
@@ -289,7 +289,7 @@ contract expectClaim is base {
 
         if (env.isItem) {
             // ASSERT:CLAIM_0x02: is the item inside the selling nuggs proof?
-            assertProofNotContains(uint24(env.id), uint16(env.id >> 24), 'ASSERT:CLAIM_0x02: item SHOULD NOT be inside the selling nuggs proof');
+            assertProofNotContains(uint24(env.id), uint16(env.id >> 24), "ASSERT:CLAIM_0x02: item SHOULD NOT be inside the selling nuggs proof");
             if (env.winner) {
                 // @todo nuggft's protocol items should be > 1 for the item
 
@@ -302,10 +302,10 @@ contract expectClaim is base {
                 // @note BEFORE a losing item claim
 
                 // ASSERT:CLAIM_0x03: is the sender the offerer?
-                ds.assertEq(env.buyer, address(uint160(pre.offer)), 'ASSERT:CLAIM_0x03: the offerer SHOULD be the sender');
+                ds.assertEq(env.buyer, address(uint160(pre.offer)), "ASSERT:CLAIM_0x03: the offerer SHOULD be the sender");
             }
         } else {
-            ds.assertEq(pre.agency >> 254, 0x03, 'ASSERT:CLAIM_0x04: pre agency must have the SWAP - 0x03 - flag');
+            ds.assertEq(pre.agency >> 254, 0x03, "ASSERT:CLAIM_0x04: pre agency must have the SWAP - 0x03 - flag");
             if (env.winner) {
                 // ASSERT:CLAIM_0x04: does the agency have a SWAP flag?
 
@@ -318,7 +318,7 @@ contract expectClaim is base {
                 // @note BEFORE a losing nugg claim
 
                 // ASSERT:CLAIM_0x05: is the sender the offerer?
-                ds.assertEq(run.sender, address(uint160(pre.offer)), 'ASSERT:CLAIM_0x05: the offerer SHOULD be the sender');
+                ds.assertEq(run.sender, address(uint160(pre.offer)), "ASSERT:CLAIM_0x05: the offerer SHOULD be the sender");
             }
         }
     }
@@ -330,7 +330,7 @@ contract expectClaim is base {
         SnapshotData memory post
     ) private {
         // ASSERT:CLAIM_0x06: is the post offer == 0?
-        ds.assertEq(post.offer, 0, 'ASSERT:CLAIM_0x06: is the post offer == 0?');
+        ds.assertEq(post.offer, 0, "ASSERT:CLAIM_0x06: is the post offer == 0?");
 
         if (env.isItem) {
             if (env.winner) {
@@ -339,7 +339,7 @@ contract expectClaim is base {
                 assertProofContains(uint160(env.buyer), uint16(env.id >> 24), "ASSERT:CLAIM_0x07: the item SHOULD be inside the winning nugg's proof");
 
                 // ASSERT:CLAIM_0x08: is the post agency == 0?
-                ds.assertEq(post.agency, 0, 'ASSERT:CLAIM_0x08: the agency SHOULD be 0 after the claim');
+                ds.assertEq(post.agency, 0, "ASSERT:CLAIM_0x08: the agency SHOULD be 0 after the claim");
                 if (env.reclaim) {} else {
                     // @note AFTER a winning item claim
                 }
@@ -354,11 +354,11 @@ contract expectClaim is base {
                 ds.assertEq(
                     address(uint160(post.agency)),
                     address(uint160(pre.agency)),
-                    'ASSERT:CLAIM_0x0A: the pre agency user and the post agency user SHOULD be the same'
+                    "ASSERT:CLAIM_0x0A: the pre agency user and the post agency user SHOULD be the same"
                 );
 
                 // ASSERT:CLAIM_0x0B: does the post agency have a OWN flag?
-                ds.assertEq(post.agency >> 254, 0x01, 'ASSERT:CLAIM_0x0B: post agency must have the OWN - 0x01 - flag');
+                ds.assertEq(post.agency >> 254, 0x01, "ASSERT:CLAIM_0x0B: post agency must have the OWN - 0x01 - flag");
                 if (env.reclaim) {} else {
                     // @note AFTER a winning nugg claim
                 }
