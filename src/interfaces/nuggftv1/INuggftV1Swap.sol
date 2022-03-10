@@ -9,9 +9,9 @@ interface INuggftV1Swap {
     /// @dev Explain to a developer any extra details
     /// @param tokenId (uint160)
     /// @param agency  (bytes32) a parameter just like in doxygen (must be followed by parameter name)
-    event Offer(uint160 indexed tokenId, bytes32 agency);
+    event Offer(uint160 indexed tokenId, bytes32 agency, bytes32 stake);
 
-    event OfferMint(uint160 indexed tokenId, bytes32 agency, bytes32 proof);
+    event OfferMint(uint160 indexed tokenId, bytes32 agency, bytes32 proof, bytes32 stake);
 
     event Claim(uint160 indexed tokenId, address indexed account);
 

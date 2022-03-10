@@ -3,7 +3,7 @@
 pragma solidity 0.8.12;
 
 interface INuggftV1ItemSwap {
-    event OfferItem(uint160 indexed sellingTokenId, bytes2 indexed itemId, bytes32 agency);
+    event OfferItem(uint160 indexed sellingTokenId, bytes2 indexed itemId, bytes32 agency, bytes32 stake);
 
     event ClaimItem(uint160 indexed sellingTokenId, bytes2 indexed itemId, uint160 indexed buyerTokenId);
 

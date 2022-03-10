@@ -13,34 +13,25 @@ import {NuggftV1Stake} from "./NuggftV1Stake.sol";
 /// @dev Explain to a developer any extra details
 abstract contract NuggftV1Swap is INuggftV1ItemSwap, INuggftV1Swap, NuggftV1Stake {
     mapping(uint160 => mapping(address => uint256)) public offers;
-    // mapping(uint16 => uint256) public protocolItems;
-
     mapping(uint176 => mapping(uint160 => uint256)) public itemOffers;
     mapping(uint176 => uint256) public itemAgency;
-
     mapping(uint256 => bool) public currentItemSwap;
 
     constructor() {
-        for (uint8 i = 0; i < HOT_PROOF_AMOUNT; i++) hotproof[i] = 0x10000;
+        for (uint8 i = 0; i < HOT_PROOF_AMOUNT; i++) hotproof[i] = HOT_PROOF_EMPTY;
     }
 
     /// @inheritdoc INuggftV1Swap
     function offer(uint160 tokenId) public payable override {
-        // gas.run memory a = gas.start('A: begin');
-
         uint256 agency__sptr;
         uint256 agency__cache;
 
-        uint256 next;
         uint256 active = epoch();
 
         address sender;
         uint256 offersSlot;
 
         bool isItem;
-        uint256 last;
-        // gas.stop(a);
-        // a = gas.start('B: begin');
 
         assembly {
             function juke(x, L, R) -> b {
@@ -51,13 +42,6 @@ abstract contract NuggftV1Swap is INuggftV1ItemSwap, INuggftV1Swap, NuggftV1Stak
                 mstore(0x00, Revert__Sig)
                 mstore8(31, code)
                 revert(27, 0x5)
-            }
-
-            // store callvalue formatted in .1 gwei for caculation of total offer
-            next := div(callvalue(), LOSS)
-
-            if iszero(gt(next, 100)) {
-                panic(Error__0x68__OfferLowerThanLOSS)
             }
 
             mstore(0x20, agency.slot)
@@ -108,39 +92,38 @@ abstract contract NuggftV1Swap is INuggftV1ItemSwap, INuggftV1Swap, NuggftV1Stak
 
             uint256 proof = initFromSeed(calculateSeed(uint24(active)));
 
-            uint256 hotproof__cache = hotproof[uint8(tokenId % 32)];
+            uint256 hotproof__cache = hotproof[uint8(tokenId % HOT_PROOF_AMOUNT)];
 
             // if hot slot 1 is open, save there
-            if ((hotproof__cache & 0xffff) == 0) {
+            if (hotproof__cache == 10000) {
                 hotproof[uint8(tokenId % HOT_PROOF_AMOUNT)] = proof;
             } else {
                 proofs[tokenId] = proof;
             }
 
             // otherwise this
-
             addStakedShareFromMsgValue();
 
             // prettier-ignore
             assembly {
-
                 // save the updated agency
                 agency__cache := xor(xor(xor( // =============================
-                          /* addr     0       [ */ caller(), /* ] 160 */
-                    shl(  /* eth   */ 160, /* [ */ next      /* ] 230 */ )),
-                    shl(  /* epoch */ 230, /* [ */ active    /* ] 254 */ )),
-                    shl(  /* flag  */ 254, /* [ */ 0x03      /* ] 255 */ )
+                          /* addr     0       [ */ caller(),              /* ] 160 */
+                    shl(  /* eth   */ 160, /* [ */ div(callvalue(), LOSS) /* ] 230 */ )),
+                    shl(  /* epoch */ 230, /* [ */ active                 /* ] 254 */ )),
+                    shl(  /* flag  */ 254, /* [ */ 0x03                   /* ] 255 */ )
                 ) // ==========================================================
 
                 // log the updated agency
-                mstore(0x00, agency__cache) // =================================
-                mstore(0x20, proof) // =================================
+                mstore(0x00, agency__cache)
+                mstore(0x20, proof)
 
                 log2( // -------------------------------------------------------
-                    /* param #1:agency  */ 0x00, /* [ agency[tokenId] ]    0x20,
-                       param #1:proof      0x20,    [ proof[tokenId]  ] */ 0x40,
-                    /* topic #1:sig     */ Event__OfferMint,
-                    /* topic #2:tokenId */ tokenId
+                    /* param #1: agency  */ 0x00, /* [ agency[tokenId]    ]     0x20,
+                       param #2: proof      0x20,    [ proof[tokenId]     ]     0x40,
+                       param #3: proof      0x40,    [ stake              ]  */ 0x60,
+                    /* topic #1: sig     */ Event__OfferMint,
+                    /* topic #2: tokenId */ tokenId
                 ) // ===========================================================
 
                 log4( // =======================================================
@@ -160,8 +143,8 @@ abstract contract NuggftV1Swap is INuggftV1ItemSwap, INuggftV1Swap, NuggftV1Stak
 
         // prettier-ignore
         assembly {
-            function juke(val, left, right) -> b {
-                b := shr(right, shl(left, val))
+            function juke(x, L, R) -> b {
+                b := shr(R, shl(L, x))
             }
 
             function mask(val, shift, size) -> b {
@@ -252,7 +235,7 @@ abstract contract NuggftV1Swap is INuggftV1ItemSwap, INuggftV1Swap, NuggftV1Stak
 
                     // if not 0
                     if iszero(iszero(sload(kek))) {
-                        panic(Error__0xAB__MustFinalizeOtherItemSwap)
+                        panic(Error__0xAC__MustFinalizeOtherItemSwap)
                     }
 
                     sstore(kek, 1)
@@ -283,13 +266,20 @@ abstract contract NuggftV1Swap is INuggftV1ItemSwap, INuggftV1Swap, NuggftV1Stak
             /////////////////////////////////////////////////////////////////////
 
             // parse last offer value
-            last := juke(agency__cache, 26, 186)
+           let last := juke(agency__cache, 26, 186)
+
+            // store callvalue formatted in .1 gwei for caculation of total offer
+            let next := div(callvalue(), LOSS)
 
             // parse and caculate next offer value
             next := add(juke(offer__cache, 26, 186), next)
 
+            if iszero(gt(next, 100)) {
+                panic(Error__0x68__OfferLowerThanLOSS)
+            }
+
             // ensure next offer includes at least a 2% increment
-            if gt(div(mul(last, 10200), 10000), next) {
+            if gt(div(mul(last, INCREMENT_BPS), BASE_BPS), next) {
                 panic(Error__0x72__IncrementTooLow)
             }
             // convert next into the increment
@@ -332,26 +322,34 @@ abstract contract NuggftV1Swap is INuggftV1ItemSwap, INuggftV1Swap, NuggftV1Stak
 
             mstore(0x00, agency__cache)
 
+
+            next := div(last, PROTOCOL_FEE_BPS)
+            last := add(sload(stake.slot), or(shl(96, sub(last, next)), next))
+            sstore(stake.slot, last)
+            mstore(0x20, last)
+
             switch isItem
             case 1 {
                 log3( // =======================================================
-                    /* param #1:agency   */ 0x00, /* [ itemAgency[tokenId][itemId] ] */  0x20,
+                    /* param #1:agency   */ 0x00, /* [ itemAgency[tokenId][itemId] ]     0x20
+                       param #2:stake       0x20     [ stake                       ] */  0x40,
                     /* topic #1:sig      */ Event__OfferItem,
-                    /* topic #2:buyerId */  and(tokenId, 0xffffff),
+                    /* topic #2:buyerId  */ and(tokenId, 0xffffff),
                     /* topic #3:buyerId  */ shl(240, and(shr(24, tokenId), 0xffff))
                 ) // ===========================================================
             }
             default {
                 log2( // =======================================================
-                    /* param #1:agency  */ 0x00, /* [ agency[tokenId] ] */ 0x20,
+                    /* param #1:agency  */ 0x00, /* [ agency[tokenId]  ]     0x20
+                       param #2:stake      0x20     [ stake            ] */  0x40,
                     /* topic #1:sig     */ Event__Offer,
                     /* topic #2:tokenId */ tokenId
                 ) // ===========================================================
             }
-        }
 
-        // add the increment * LOSS to staked eth
-        addStakedEth(uint96(last));
+            // add the increment * LOSS to staked eth
+
+        }
     }
 
     /// @inheritdoc INuggftV1Swap
@@ -519,7 +517,7 @@ abstract contract NuggftV1Swap is INuggftV1ItemSwap, INuggftV1Swap, NuggftV1Stak
                             mstore(0x80, mod(tokenId, HOT_PROOF_AMOUNT))
                             let hotproof__sptr := keccak256(0x80, 0x40)
                             sstore(proof__sptr, sload(hotproof__sptr))
-                            sstore(hotproof__sptr, 0x10000)
+                            sstore(hotproof__sptr, HOT_PROOF_EMPTY)
                         }
 
                         // if either exists for this token, set the proof
@@ -581,7 +579,13 @@ abstract contract NuggftV1Swap is INuggftV1ItemSwap, INuggftV1Swap, NuggftV1Stak
             // send accumulated value * LOSS to msg.sender
             if iszero(call(gas(), caller(), acc, 0, 0, 0, 0)) {
                 // if someone really ends up here, just donate the eth
-                sstore(stake.slot, add(sload(stake.slot), shl(96, acc)))
+                let cache := add(sload(stake.slot), shl(96, acc))
+
+                sstore(stake.slot, cache)
+
+                mstore(0x00, cache)
+
+                log1(0x00, 0x20, Event__Stake)
             }
         }
     }
@@ -671,13 +675,11 @@ abstract contract NuggftV1Swap is INuggftV1ItemSwap, INuggftV1Swap, NuggftV1Stak
                     panic(Error__0xA9__ProofDoesNotHaveItem)
                 }
 
-                // sstore(protocolItems.slot, add(sload(protocolItems.slot), 1))
-
                 sstore(proof__sptr, proof)
 
                 mstore(0x00, proof)
 
-                log4(0x00, 0x20, Event__TransferItem, tokenId, 0x00, shl(240, shr(24, tokenId)))
+                log4(0x00, 0x20, Event__TransferItem, and(tokenId, 0xffffff), 0x00, shl(240, shr(24, tokenId)))
 
                 // ==== agency[tokenId] =====
                 //   flag  = SWAP(0x03)
@@ -805,7 +807,7 @@ abstract contract NuggftV1Swap is INuggftV1ItemSwap, INuggftV1Swap, NuggftV1Stak
                 next := 100000000000
             }
 
-            next := mul(div(mul(div(next, LOSS), 10200), 10000), LOSS)
+            next := mul(div(mul(div(next, LOSS), INCREMENT_BPS), BASE_BPS), LOSS)
         }
     }
 
@@ -883,7 +885,7 @@ abstract contract NuggftV1Swap is INuggftV1ItemSwap, INuggftV1Swap, NuggftV1Stak
         nextSwapAmount = uint96((agency__cache << 26) >> 186);
 
         if (nextSwapAmount != 0) {
-            nextSwapAmount = uint96(nextSwapAmount * 102 * LOSS) / 100;
+            nextSwapAmount = uint96(nextSwapAmount * INCREMENT_BPS * LOSS) / BASE_BPS;
         } else {
             nextSwapAmount = 100 gwei;
         }

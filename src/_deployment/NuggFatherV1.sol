@@ -21,8 +21,8 @@ contract NuggFatherV1 {
             nuggft.trustedMint(5 + i + 1, 0x4E503501C5DEDCF0607D1E1272Bb4b3c1204CC71);
         }
 
-        for (uint160 i = 2420; i < 2450; i++) {
-            nuggft.mint(i);
+        for (uint160 i = 150; i < 200; i++) {
+            nuggft.trustedMint(i, address(this));
 
             bytes2[] memory f = nuggft.floop(i);
 
@@ -38,5 +38,17 @@ contract NuggFatherV1 {
 
             nuggft.sell(i, itemId, 696969 gwei);
         }
+    }
+
+    uint160 index = 5000;
+
+    function mint(uint160 amount) external payable {
+        for (uint160 i = index; i < index + amount && i < 10000; i++) {
+            nuggft.mint{value: nuggft.msp()}(uint160(i));
+        }
+
+        index += amount;
+
+        payable(msg.sender).transfer(address(this).balance);
     }
 }

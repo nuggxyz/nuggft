@@ -5,18 +5,23 @@ pragma solidity 0.8.12;
 abstract contract NuggftV1Constants {
     uint32 constant TRUSTED_MINT_TOKENS = 500;
     uint32 constant UNTRUSTED_MINT_TOKENS = 10000;
+    uint24 constant OFFSET = 3000;
 
-    uint256 constant LOSS = .1 gwei;
+    uint256 constant HOT_PROOF_EMPTY = 0x10000;
+
+    uint96 constant LOSS = .1 gwei;
     uint8 constant HOT_PROOF_AMOUNT = 16;
     // stake
     uint96 constant PROTOCOL_FEE_BPS = 10;
 
     // epoch
-    uint8 constant INTERVAL_SUB = 8;
+    uint8 constant INTERVAL_SUB = 16;
     uint16 constant MINT_INTERVAL = 4;
 
     uint16 constant INTERVAL = 32;
-    uint24 constant OFFSET = 3000;
+
+    uint96 constant BASE_BPS = 10000;
+    uint96 constant INCREMENT_BPS = 10500;
 
     // loan
     uint24 constant LIQUIDATION_PERIOD = 1024;
@@ -35,13 +40,13 @@ abstract contract NuggftV1Constants {
     bytes32 constant Event__ClaimItem = 0x9cdb8f349681fb33da8eae743ee1c7f93ab8fbeeded70db2ed922ac97cef1dff;
     bytes32 constant Event__Sell = 0x251e78527ba3c62fcb4405d22087f8ab0c434b97b46e2d7f020d112e763171b3;
     bytes32 constant Event__SellItem = 0x91326786da537fd0b77dd15cd4ab14aa79e51ebb26c238b77abc403ad5ad61ef;
-    bytes32 constant Event__Offer = 0x82cc12214e0c6e2eaeafbb2aaf730e41d45e9cc2d0467fb2f0fcf709e9443886;
+    bytes32 constant Event__Offer = 0x5ea112c29e91e483ca0a2d50575f1c12f798c209459d7076b157f41bb876690d;
     bytes32 constant Event__Repayment = 0xc928c04c08e9d5085139dee5b4b0a24f48d84c91f8f44caefaea39da6108fce3;
-    bytes32 constant Event__OfferItem = 0xece1c1f9e5c92bf1d13cc47d0a5d490cbbc4be21c8d492368d4b8a8aba35e41d;
+    bytes32 constant Event__OfferItem = 0x02f51ae25c6b015c4e1f70d3544a23873078cd2287637831e8e4d1bd0bc5e301;
     bytes32 constant Event__TransferItem = 0x31cf2357b228de5e7b21be4ee816920a4eabd32196b782ad557ba4a0f5c20af1;
-    bytes32 constant Event__Mint = 0x7fa02ea2addb9a3ae24bb783f3817cbebd2aaa24af58c5eee6faf5b776797f95;
+    bytes32 constant Event__Mint = 0xfdc739aeffe371d3b0a40ab7a821110186f26bcd760adaff661c9a6a369c2ba7;
     bytes32 constant Event__Rotate = 0x9a674c377cfb461eed8c85cebc9fc607ef62cecde152900174f519f861f90b57;
-    bytes32 constant Event__OfferMint = 0x4ab47a8596088efecb0e4588e1fa409c1173c35ad3530cc3eee52dd1bbecf1b6;
+    bytes32 constant Event__OfferMint = 0x12651006c2efed8cb6941478698d827149f5d535c122b0c3cf88b92a54395a27;
 
     error Revert(bytes1);
 
@@ -79,7 +84,8 @@ abstract contract NuggftV1Constants {
     uint8 constant Error__0xA9__ProofDoesNotHaveItem = 0xA9;
     uint8 constant Error__0xAA__RebalancePaymentTooLow = 0xAA;
     uint8 constant Error__0xAB__NotLiveItemSwap = 0xAB;
-    uint8 constant Error__0xAB__MustFinalizeOtherItemSwap = 0xAC;
+    uint8 constant Error__0xAC__MustFinalizeOtherItemSwap = 0xAC;
+    uint8 constant Error__0xAD__InvalidZeroProof = 0xAD;
 
     function _panic(uint8 code) internal pure {
         assembly {

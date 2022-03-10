@@ -2,13 +2,13 @@
 
 pragma solidity 0.8.12;
 
-import {INuggftV1Proof} from '../interfaces/nuggftv1/INuggftV1Proof.sol';
-import {IDotnuggV1Safe} from '../interfaces/dotnugg/IDotnuggV1Safe.sol';
+import {INuggftV1Proof} from "../interfaces/nuggftv1/INuggftV1Proof.sol";
+import {IDotnuggV1Safe} from "../interfaces/dotnugg/IDotnuggV1Safe.sol";
 
-import {DotnuggV1Lib} from '../libraries/DotnuggV1Lib.sol';
+import {DotnuggV1Lib} from "../libraries/DotnuggV1Lib.sol";
 
-import {NuggftV1Epoch} from './NuggftV1Epoch.sol';
-import {NuggftV1Trust} from './NuggftV1Trust.sol';
+import {NuggftV1Epoch} from "./NuggftV1Epoch.sol";
+import {NuggftV1Trust} from "./NuggftV1Trust.sol";
 
 abstract contract NuggftV1Proof is INuggftV1Proof, NuggftV1Epoch, NuggftV1Trust {
     mapping(uint160 => uint256) proofs;
@@ -26,7 +26,7 @@ abstract contract NuggftV1Proof is INuggftV1Proof, NuggftV1Epoch, NuggftV1Trust 
     function proofOf(uint160 tokenId) public view override returns (uint256 res) {
         if ((res = proofs[tokenId]) != 0) return res;
 
-        if ((res = hotproof[uint8(tokenId % HOT_PROOF_AMOUNT)]) != 0x10000 && agency[tokenId] != 0) {
+        if ((res = hotproof[uint8(tokenId % HOT_PROOF_AMOUNT)]) != HOT_PROOF_EMPTY && agency[tokenId] != 0) {
             return res;
         } else {
             res = 0;
@@ -40,7 +40,7 @@ abstract contract NuggftV1Proof is INuggftV1Proof, NuggftV1Epoch, NuggftV1Trust 
 
         if (seed != 0) return initFromSeed(seed);
 
-        // TODO revert here after playing with graph
+        _panic(Error__0xAD__InvalidZeroProof);
     }
 
     function floop(uint160 tokenId) public view returns (bytes2[] memory arr) {
@@ -74,14 +74,14 @@ abstract contract NuggftV1Proof is INuggftV1Proof, NuggftV1Epoch, NuggftV1Trust 
         uint8[] calldata index1s
     ) external override {
         assembly {
-            function juke(val, left, right) -> b {
-                b := shr(right, shl(left, val))
+            function juke(x, L, R) -> b {
+                b := shr(R, shl(L, x))
             }
 
             function panic(code) {
                 mstore(0x00, Revert__Sig)
-                mstore(0x04, code)
-                revert(0x00, 0x05)
+                mstore8(31, code)
+                revert(27, 0x5)
             }
 
             mstore(0x00, tokenId)
