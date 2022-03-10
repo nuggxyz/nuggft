@@ -2,21 +2,22 @@
 
 pragma solidity 0.8.12;
 
-import '../utils/forge.sol';
+import "../utils/forge.sol";
 
-import {expectClaim} from './claim.sol';
+import {expectClaim} from "./claim.sol";
 
-import {expectOffer} from './offer.sol';
-import {expectBalance} from './balance.sol';
-import {expectStake} from './stake.sol';
-import {expectSell} from './sell.sol';
-import {expectMint} from './mint.sol';
-import {expectLoan} from './loan.sol';
-import {expectRebalance} from './rebalance.sol';
-import {expectLiquidate} from './liquidate.sol';
-import {expectBurn} from './burn.sol';
+import {expectOffer} from "./offer.sol";
+import {expectBalance} from "./balance.sol";
+import {expectStake} from "./stake.sol";
+import {expectSell} from "./sell.sol";
+import {expectMint} from "./mint.sol";
+import {expectLoan} from "./loan.sol";
+import {expectRebalance} from "./rebalance.sol";
+import {expectLiquidate} from "./liquidate.sol";
+import {expectBurn} from "./burn.sol";
+import {expectDonate} from "./donate.sol";
 
-import {RiggedNuggft} from '../NuggftV1.test.sol';
+import {RiggedNuggft} from "../NuggftV1.test.sol";
 
 contract Expect {
     expectClaim public claim;
@@ -29,6 +30,7 @@ contract Expect {
     expectRebalance public rebalance;
     expectLiquidate public liquidate;
     expectBurn public burn;
+    expectDonate public donate;
 
     address public _globalFrom;
 
@@ -37,8 +39,8 @@ contract Expect {
     }
 
     constructor(address nuggft_) {
-        global.set('Expect', address(this));
-        global.set('RiggedNuggft', nuggft_);
+        global.set("Expect", address(this));
+        global.set("RiggedNuggft", nuggft_);
         claim = new expectClaim();
         offer = new expectOffer();
         balance = new expectBalance();
@@ -46,6 +48,8 @@ contract Expect {
         sell = new expectSell();
         mint = new expectMint();
         loan = new expectLoan();
+        donate = new expectDonate();
+
         rebalance = new expectRebalance();
         liquidate = new expectLiquidate();
         burn = new expectBurn();

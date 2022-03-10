@@ -5,7 +5,7 @@ pragma solidity 0.8.12;
 abstract contract NuggftV1Constants {
     uint32 constant TRUSTED_MINT_TOKENS = 500;
     uint32 constant UNTRUSTED_MINT_TOKENS = 10000;
-    uint24 constant OFFSET = 3000;
+    uint256 constant OFFSET = 3000;
 
     uint256 constant HOT_PROOF_EMPTY = 0x10000;
 
@@ -18,7 +18,7 @@ abstract contract NuggftV1Constants {
     uint8 constant INTERVAL_SUB = 16;
     uint16 constant MINT_INTERVAL = 4;
 
-    uint16 constant INTERVAL = 32;
+    uint256 constant INTERVAL = 32;
 
     uint96 constant BASE_BPS = 10000;
     uint96 constant INCREMENT_BPS = 10500;

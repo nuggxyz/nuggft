@@ -2,12 +2,12 @@
 
 pragma solidity 0.8.12;
 
-import '../utils/forge.sol';
+import "../utils/forge.sol";
 
-import './base.sol';
-import './stake.sol';
-import './balance.sol';
-import {Expect} from './Expect.sol';
+import "./base.sol";
+import "./stake.sol";
+import "./balance.sol";
+import {Expect} from "./Expect.sol";
 
 contract expectRebalance is base {
     expectStake stake;
@@ -68,6 +68,7 @@ contract expectRebalance is base {
         uint96 eps;
         uint96 accFee;
         uint96 accEarned;
+        bool shouldDonate;
     }
 
     bytes execution;
@@ -87,7 +88,7 @@ contract expectRebalance is base {
     }
 
     function start(uint160[] memory tokenIds, address sender) public {
-        require(execution.length == 0, 'EXPECT-REBALANCE:START: execution already esists');
+        require(execution.length == 0, "EXPECT-REBALANCE:START: execution already esists");
 
         Run memory run;
 
@@ -96,6 +97,8 @@ contract expectRebalance is base {
         run.sender = sender;
 
         run.eps = nuggft.eps();
+
+        run.shouldDonate = run.sender == ds.noFallback;
 
         for (uint256 i = 0; i < tokenIds.length; i++) {
             Snapshot memory pre;
@@ -115,24 +118,30 @@ contract expectRebalance is base {
             run.snapshots[i] = pre;
         }
 
+        uint96 change;
+
         if (run.accEarned >= run.accFee) {
             // if more was earned than the fee
-            uint96 change = run.accEarned - run.accFee;
+            change = run.shouldDonate ? 0 : run.accEarned - run.accFee;
             balance.start(run.sender, change, true);
             balance.start(address(nuggft), change, false);
         } else {
-            uint96 change = run.accFee - run.accEarned;
+            change = run.accFee - run.accEarned;
             balance.start(run.sender, change, false);
             balance.start(address(nuggft), change, true);
         }
 
-        stake.start(run.accFee, 0, true);
+        if (run.shouldDonate) {
+            stake.start(run.accEarned, 0, true);
+        } else {
+            stake.start(run.accFee, 0, true);
+        }
 
         execution = abi.encode(run);
     }
 
     function stop() public {
-        require(execution.length > 0, 'EXPECT-REBALANCE:STOP: execution does not exist');
+        require(execution.length > 0, "EXPECT-REBALANCE:STOP: execution does not exist");
 
         Run memory run = abi.decode(execution, (Run));
 
@@ -144,14 +153,18 @@ contract expectRebalance is base {
 
             post.agency = nuggft.agency(run.tokenId);
 
-            ds.assertEq(post.agency >> 254, 0x02, 'EXPECT-REBALANCE:STOP - agency flag should be LOAN - 0x02');
+            ds.assertEq(post.agency >> 254, 0x02, "EXPECT-REBALANCE:STOP - agency flag should be LOAN - 0x02");
 
-            ds.assertEq(address(uint160(post.agency)), address(uint160(pre.agency)), 'EXPECT-REBALANCE:STOP - agent should stay the same');
+            ds.assertEq(address(uint160(post.agency)), address(uint160(pre.agency)), "EXPECT-REBALANCE:STOP - agent should stay the same");
 
-            ds.assertEq(uint96((post.agency << 26) >> 186), postEps / .1 gwei, 'EXPECT-REBALANCE:STOP - principal should be same as post EPS');
+            if (run.shouldDonate) {
+                ds.assertLe(uint96((post.agency << 26) >> 186), postEps / .1 gwei, "EXPECT-REBALANCE:STOP - principal should be lte post EPS");
+            } else {
+                ds.assertEq(uint96((post.agency << 26) >> 186), postEps / .1 gwei, "EXPECT-REBALANCE:STOP - principal should be same as post EPS");
+            }
         }
 
-        ds.assertGt(postEps, run.eps, 'EXPECT-REBALANCE:STOP - eps should be geater than before');
+        ds.assertGt(postEps, run.eps, "EXPECT-REBALANCE:STOP - eps should be geater than before");
 
         // @todo - any other checks we want here?
 
@@ -162,7 +175,7 @@ contract expectRebalance is base {
     }
 
     function rollback() public {
-        require(execution.length > 0, 'EXPECT-REBALANCE:ROLLBACK: execution does not exist');
+        require(execution.length > 0, "EXPECT-REBALANCE:ROLLBACK: execution does not exist");
 
         Run memory run = abi.decode(execution, (Run));
 
@@ -174,10 +187,10 @@ contract expectRebalance is base {
 
             post.agency = nuggft.agency(run.tokenId);
 
-            ds.assertEq(post.agency, pre.agency, 'EXPECT-REBALANCE:ROLLBACK - agency should be same');
+            ds.assertEq(post.agency, pre.agency, "EXPECT-REBALANCE:ROLLBACK - agency should be same");
         }
 
-        ds.assertEq(postEps, run.eps, 'EXPECT-REBALANCE:ROLLBACK - eps should be the same');
+        ds.assertEq(postEps, run.eps, "EXPECT-REBALANCE:ROLLBACK - eps should be the same");
 
         stake.rollback();
         balance.rollback();

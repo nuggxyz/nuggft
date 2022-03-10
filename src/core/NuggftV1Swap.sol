@@ -579,7 +579,9 @@ abstract contract NuggftV1Swap is INuggftV1ItemSwap, INuggftV1Swap, NuggftV1Stak
             // send accumulated value * LOSS to msg.sender
             if iszero(call(gas(), caller(), acc, 0, 0, 0, 0)) {
                 // if someone really ends up here, just donate the eth
-                let cache := add(sload(stake.slot), shl(96, acc))
+                let pro := div(acc, PROTOCOL_FEE_BPS)
+
+                let cache := add(sload(stake.slot), or(shl(96, sub(acc, pro)), pro))
 
                 sstore(stake.slot, cache)
 

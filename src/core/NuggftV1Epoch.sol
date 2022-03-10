@@ -11,7 +11,7 @@ abstract contract NuggftV1Epoch is INuggftV1Epoch, NuggftV1Constants {
 
     constructor() {
         genesis = (block.number / INTERVAL) * INTERVAL;
-        emit Genesis(genesis, INTERVAL, OFFSET, INTERVAL_SUB);
+        emit Genesis(genesis, uint16(INTERVAL), uint16(OFFSET), INTERVAL_SUB);
     }
 
     /// @inheritdoc INuggftV1Epoch

@@ -10,7 +10,7 @@ import {INuggftV1Stake} from "../interfaces/nuggftv1/INuggftV1Stake.sol";
 abstract contract NuggftV1Stake is INuggftV1Stake, NuggftV1Proof {
     address public migrator;
 
-    uint256 internal stake;
+    uint256 public stake;
 
     /// @inheritdoc INuggftV1Stake
     function extract() external requiresTrust {
