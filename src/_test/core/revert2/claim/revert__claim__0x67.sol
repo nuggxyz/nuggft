@@ -2,7 +2,7 @@
 
 pragma solidity 0.8.12;
 
-import '../../../NuggftV1.test.sol';
+import "../../../NuggftV1.test.sol";
 
 abstract contract revert__claim__0x67 is NuggftV1Test {
     using NuggftV1AgentType for uint256;
