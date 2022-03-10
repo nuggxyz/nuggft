@@ -2,21 +2,27 @@
 
 pragma solidity 0.8.12;
 
-import '../utils/forge.sol';
+import "../utils/forge.sol";
 
-import './base.sol';
-import './stake.sol';
-import './balance.sol';
-import {Expect} from './Expect.sol';
+import "./base.sol";
+import "./stake.sol";
+import "./balance.sol";
+import "./donate.sol";
+
+import {Expect} from "./Expect.sol";
 
 contract expectLoan is base {
     expectStake stake;
     expectBalance balance;
+    // expectDonate donate;
+
     Expect creator;
 
     constructor() {
         stake = new expectStake();
         balance = new expectBalance();
+        // donate = new expectDonate();
+
         creator = Expect(msg.sender);
     }
 
@@ -64,6 +70,7 @@ contract expectLoan is base {
         uint160 tokenId;
         uint96 eps;
         uint96 msp;
+        bool shouldDonate;
     }
 
     bytes execution;
@@ -82,7 +89,7 @@ contract expectLoan is base {
     }
 
     function start(uint160[] memory tokenIds, address sender) public {
-        require(execution.length == 0, 'EXPECT-LOAN:START: execution already esists');
+        require(execution.length == 0, "EXPECT-LOAN:START: execution already esists");
 
         Run memory run;
 
@@ -94,6 +101,8 @@ contract expectLoan is base {
 
         run.msp = nuggft.msp();
 
+        run.shouldDonate = ds.noFallback == run.sender;
+
         for (uint256 i = 0; i < tokenIds.length; i++) {
             Snapshot memory pre;
 
@@ -104,16 +113,23 @@ contract expectLoan is base {
             run.snapshots[i] = pre;
         }
 
-        balance.start(run.sender, run.eps * uint96(tokenIds.length), true);
-        balance.start(address(nuggft), run.eps * uint96(tokenIds.length), false);
+        uint96 expectedReward = run.eps * uint96(tokenIds.length);
 
-        stake.start(0, 0, true);
+        if (!run.shouldDonate) {
+            stake.start(0, 0, true);
+            balance.start(run.sender, expectedReward, true);
+            balance.start(address(nuggft), expectedReward, false);
+        } else {
+            stake.start(expectedReward, 0, true);
+            balance.start(run.sender, 0, true);
+            balance.start(address(nuggft), 0, true);
+        }
 
         execution = abi.encode(run);
     }
 
     function stop() public {
-        require(execution.length > 0, 'EXPECT-LOAN:STOP: execution does not exist');
+        require(execution.length > 0, "EXPECT-LOAN:STOP: execution does not exist");
 
         Run memory run = abi.decode(execution, (Run));
 
@@ -123,11 +139,14 @@ contract expectLoan is base {
 
             post.agency = nuggft.agency(run.tokenId);
 
-            ds.assertGt(pre.agency, 0, 'EXPECT-LOAN:STOP - agency should not be 0');
-            ds.assertEq(address(uint160(post.agency)), run.sender, 'EXPECT-LOAN:STOP - sender should still be agent');
-            ds.assertEq(post.agency >> 254, 0x02, 'EXPECT-LOAN:STOP - agency flag should be LOAN - 0x02');
-            ds.assertEq(nuggft.eps(), run.eps, 'EXPECT-LOAN:STOP - eps should not change');
-            ds.assertEq(nuggft.msp(), run.msp, 'EXPECT-LOAN:STOP - msp should not change');
+            ds.assertGt(pre.agency, 0, "EXPECT-LOAN:STOP - agency should not be 0");
+            ds.assertEq(address(uint160(post.agency)), run.sender, "EXPECT-LOAN:STOP - sender should still be agent");
+            ds.assertEq(post.agency >> 254, 0x02, "EXPECT-LOAN:STOP - agency flag should be LOAN - 0x02");
+
+            if (!run.shouldDonate) {
+                ds.assertEq(nuggft.eps(), run.eps, "EXPECT-LOAN:STOP - eps should not change");
+                ds.assertEq(nuggft.msp(), run.msp, "EXPECT-LOAN:STOP - msp should not change");
+            }
         }
 
         // @todo - any other checks we want here?
@@ -139,7 +158,7 @@ contract expectLoan is base {
     }
 
     function rollback() public {
-        require(execution.length > 0, 'EXPECT-LOAN:ROLLBACK: execution does not exist');
+        require(execution.length > 0, "EXPECT-LOAN:ROLLBACK: execution does not exist");
 
         Run memory run = abi.decode(execution, (Run));
 
@@ -149,7 +168,7 @@ contract expectLoan is base {
 
             post.agency = nuggft.agency(run.tokenId);
 
-            ds.assertEq(post.agency, pre.agency, 'EXPECT-LOAN:ROLLBACK - agency should be same');
+            ds.assertEq(post.agency, pre.agency, "EXPECT-LOAN:ROLLBACK - agency should be same");
         }
 
         stake.rollback();

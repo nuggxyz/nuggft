@@ -78,7 +78,9 @@ abstract contract NuggftV1Loan is INuggftV1Loan, NuggftV1Swap {
                 // send accumulated value * LOSS to msg.sender
                 if iszero(call(gas(), caller(), amt, 0, 0, 0, 0)) {
                     // if someone really ends up here, just donate the eth
-                    let cache := add(sload(stake.slot), shl(96, amt))
+                    let pro := div(amt, PROTOCOL_FEE_BPS)
+
+                    let cache := add(sload(stake.slot), or(shl(96, sub(amt, pro)), pro))
 
                     sstore(stake.slot, cache)
 
@@ -203,13 +205,11 @@ abstract contract NuggftV1Loan is INuggftV1Loan, NuggftV1Swap {
             // send accumulated value * LOSS to msg.sender
             if iszero(call(gas(), caller(), earn, 0, 0, 0, 0)) {
                 // if someone really ends up here, just donate the eth
-                let cache := add(sload(stake.slot), shl(96, earn))
+                pro := div(earn, PROTOCOL_FEE_BPS)
 
-                sstore(stake.slot, cache)
+                stake__cache := add(stake__cache, or(shl(96, sub(earn, pro)), pro))
 
-                mstore(0x00, cache)
-
-                log1(0x00, 0x20, Event__Stake)
+                sstore(stake.slot, stake__cache)
             }
 
             /////////////////////////////////////////////////////////////////////
@@ -370,20 +370,18 @@ abstract contract NuggftV1Loan is INuggftV1Loan, NuggftV1Swap {
 
             // ======================================================================
 
-            mstore(0x00, stake__cache)
-            log1(0x00, 0x20, Event__Stake)
-
             // send accumulated value * LOSS to msg.sender
             if iszero(call(gas(), caller(), acc, 0, 0, 0, 0)) {
                 // if someone really ends up here, just donate the eth
-                let cache := add(sload(stake.slot), shl(96, acc))
+                pro := div(acc, PROTOCOL_FEE_BPS)
 
-                sstore(stake.slot, cache)
+                stake__cache := add(stake__cache, or(shl(96, sub(acc, pro)), pro))
 
-                mstore(0x00, cache)
-
-                log1(0x00, 0x20, Event__Stake)
+                sstore(stake.slot, stake__cache)
             }
+
+            mstore(0x00, stake__cache)
+            log1(0x00, 0x20, Event__Stake)
         }
     }
 

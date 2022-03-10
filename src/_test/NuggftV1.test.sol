@@ -2,22 +2,22 @@
 
 pragma solidity 0.8.12;
 
-import {MockNuggftV1Migrator} from './mock/MockNuggftV1Migrator.sol';
+import {MockNuggftV1Migrator} from "./mock/MockNuggftV1Migrator.sol";
 
-import {NuggftV1} from '../NuggftV1.sol';
-import {IDotnuggV1Safe} from '../interfaces/dotnugg/IDotnuggV1Safe.sol';
-import {NuggFatherV1} from '../_deployment/NuggFatherV1.sol';
-import {NuggftV1Constants} from '../core/NuggftV1Constants.sol';
+import {NuggftV1} from "../NuggftV1.sol";
+import {IDotnuggV1Safe} from "../interfaces/dotnugg/IDotnuggV1Safe.sol";
+import {NuggFatherV1} from "../_deployment/NuggFatherV1.sol";
+import {NuggftV1Constants} from "../core/NuggftV1Constants.sol";
 
-import {Expect} from './expect/Expect.sol';
+import {Expect} from "./expect/Expect.sol";
 
-import {data} from '../_data/nuggs.data.sol';
+import {data} from "../_data/nuggs.data.sol";
 
-import './utils/forge.sol';
-import {DotnuggV1} from '../../../dotnugg-v1-core/src/DotnuggV1.sol';
-import {DotnuggV1Lib} from '../libraries/DotnuggV1Lib.sol';
+import "./utils/forge.sol";
+import {DotnuggV1} from "../../../dotnugg-v1-core/src/DotnuggV1.sol";
+import {DotnuggV1Lib} from "../libraries/DotnuggV1Lib.sol";
 
-import {NuggftV1AgentType} from './helpers/NuggftV1AgentType.sol';
+import {NuggftV1AgentType} from "./helpers/NuggftV1AgentType.sol";
 
 contract RiggedNuggft is NuggftV1 {
     constructor(address dotnuggv1) NuggftV1(dotnuggv1) {
@@ -78,7 +78,7 @@ contract RiggedNuggft is NuggftV1 {
         return toEndBlock(_epoch, gen);
     }
 
-    function external__toEpoch(uint32 blocknum, uint32 gen) public view returns (uint256 res) {
+    function external__toEpoch(uint256 blocknum, uint256 gen) public view returns (uint256 res) {
         return toEpoch(blocknum, gen);
     }
 
@@ -242,7 +242,7 @@ contract NuggftV1Test is ForgeTest, NuggftV1Constants {
         _;
         got = int192(int256(uint256(address(nuggft).balance))) - got;
 
-        assertEq(got, exp, 'balance did not change correctly');
+        assertEq(got, exp, "balance did not change correctly");
     }
 
     /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -275,7 +275,7 @@ contract NuggftV1Test is ForgeTest, NuggftV1Constants {
 
     function check() internal {
         for (uint256 i = 0; i < _baldiffarr.length; i++) {
-            assertEq(_baldiffarr[i].user.balance, _baldiffarr[i].expected, 'checkBalChange');
+            assertEq(_baldiffarr[i].user.balance, _baldiffarr[i].expected, "checkBalChange");
             delete _baldiffarr[i];
         }
 

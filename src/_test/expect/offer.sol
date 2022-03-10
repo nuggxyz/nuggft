@@ -2,12 +2,12 @@
 
 pragma solidity 0.8.12;
 
-import '../utils/forge.sol';
+import "../utils/forge.sol";
 
-import './base.sol';
-import './stake.sol';
-import './balance.sol';
-import {Expect} from './Expect.sol';
+import "./base.sol";
+import "./stake.sol";
+import "./balance.sol";
+import {Expect} from "./Expect.sol";
 
 contract expectOffer is base {
     expectStake stake;
@@ -143,7 +143,7 @@ contract expectOffer is base {
         address sender,
         uint96 val
     ) public {
-        require(execution.length == 0, 'EXPECT-OFFER:START: execution already esists');
+        require(execution.length == 0, "EXPECT-OFFER:START: execution already esists");
 
         Run memory run;
 
@@ -189,7 +189,7 @@ contract expectOffer is base {
     }
 
     function stop() public {
-        require(execution.length > 0, 'EXPECT-OFFER:STOP: execution does not exist');
+        require(execution.length > 0, "EXPECT-OFFER:STOP: execution does not exist");
 
         Run memory run = abi.decode(execution, (Run));
 
@@ -214,7 +214,7 @@ contract expectOffer is base {
     }
 
     function rollback() public {
-        require(execution.length > 0, 'EXPECT-OFFER:STOP: execution does not exist');
+        require(execution.length > 0, "EXPECT-OFFER:STOP: execution does not exist");
 
         Run memory run = abi.decode(execution, (Run));
 
@@ -245,8 +245,14 @@ contract expectOffer is base {
         SnapshotData memory pre,
         SnapshotData memory post
     ) private {
-        ds.assertGt(nuggft.eps(), env.eps, 'EXPECT-OFFER:STOP eps should be greater');
-        ds.assertGt(nuggft.msp(), env.msp, 'EXPECT-OFFER:STOP msp should be greater');
+        if (env.eps == 0) {
+            ds.assertGe(nuggft.eps(), env.eps, "EXPECT-OFFER:STOP eps should be gte");
+            ds.assertGe(nuggft.msp(), env.msp, "EXPECT-OFFER:STOP msp should be gte");
+        } else {
+            ds.assertGt(nuggft.eps(), env.eps, "EXPECT-OFFER:STOP eps should be greater");
+            ds.assertGt(nuggft.msp(), env.msp, "EXPECT-OFFER:STOP msp should be greater");
+        }
+
         // @todo sender should be highest offer
         if (env.isItem) {} else {}
     }
