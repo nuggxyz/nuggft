@@ -18,16 +18,16 @@ contract deployment__NuggFatherV1 is NuggftV1Test {
         NuggFatherV1 father = new NuggFatherV1();
         forge.vm.stopPrank();
 
-        for (uint160 i = 1; i < 10; i++) {
-            // father.nuggft().floop(i);
+        // for (uint160 i = 1; i < 10; i++) {
+        //     // father.nuggft().floop(i);
 
-            // uint8[8] memory list = father.dotnugg().decodeProofCore(father.nuggft().proofOf(i));
+        //     // uint8[8] memory list = father.dotnugg().decodeProofCore(father.nuggft().proofOf(i));
 
-            // for (uint8 i = 0; i < 8; i++) {
-            //     father.dotnugg().svg(father.dotnugg().calc(father.dotnugg().read(i, list[i])));
-            // }
+        //     // for (uint8 i = 0; i < 8; i++) {
+        //     //     father.dotnugg().svg(father.dotnugg().calc(father.dotnugg().read(i, list[i])));
+        //     // }
 
-            ds.emit_log_string((father.nuggft().imageURI(i)));
-        }
+        //     ds.emit_log_string((father.nuggft().imageURI(i)));
+        // }
     }
 }

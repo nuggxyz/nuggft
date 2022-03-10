@@ -2,17 +2,17 @@
 
 pragma solidity 0.8.12;
 
-import {IERC721, IERC165, IERC721Metadata} from './interfaces/IERC721.sol';
-import {INuggftV1Migrator} from './interfaces/nuggftv1/INuggftV1Migrator.sol';
-import {IDotnuggV1Safe} from './interfaces/dotnugg/IDotnuggV1Safe.sol';
-import {INuggftV1Stake} from './interfaces/nuggftv1/INuggftV1Stake.sol';
-import {INuggftV1Proof} from './interfaces/nuggftv1/INuggftV1Proof.sol';
-import {INuggftV1} from './interfaces/nuggftv1/INuggftV1.sol';
+import {IERC721, IERC165, IERC721Metadata} from "./interfaces/IERC721.sol";
+import {INuggftV1Migrator} from "./interfaces/nuggftv1/INuggftV1Migrator.sol";
+import {IDotnuggV1Safe} from "./interfaces/dotnugg/IDotnuggV1Safe.sol";
+import {INuggftV1Stake} from "./interfaces/nuggftv1/INuggftV1Stake.sol";
+import {INuggftV1Proof} from "./interfaces/nuggftv1/INuggftV1Proof.sol";
+import {INuggftV1} from "./interfaces/nuggftv1/INuggftV1.sol";
 
-import {NuggftV1Loan} from './core/NuggftV1Loan.sol';
-import {NuggftV1Proof} from './core/NuggftV1Proof.sol';
+import {NuggftV1Loan} from "./core/NuggftV1Loan.sol";
+import {NuggftV1Proof} from "./core/NuggftV1Proof.sol";
 
-import {data as nuggs} from './_data/nuggs.data.sol';
+import {data as nuggs} from "./_data/nuggs.data.sol";
 
 /// @title NuggftV1
 /// @author nugg.xyz - danny7even & dub6ix
@@ -61,8 +61,6 @@ contract NuggftV1 is IERC721, IERC721Metadata, NuggftV1Loan {
     function mint(address to, uint160 tokenId) internal {
         uint256 randomEnough;
 
-        addStakedShareFromMsgValue();
-
         // prettier-ignore
         assembly {
             mstore(0x00, tokenId)
@@ -108,25 +106,30 @@ contract NuggftV1 is IERC721, IERC721Metadata, NuggftV1Loan {
 
             sstore(agency__sptr, agency__cache)
 
-            log4(0x00, 0x00, Event__Transfer, 0, to, tokenId)
-
-            mstore(0x00, tokenId)
-            mstore(0x20, callvalue())
-
-            // prettier-ignore
-            log1( // =======================================================
-                /* param #1 */ 0x00, /* [ tokenId   ]    0x20
-                /* param #2    0x20     [ msg.value ]    0x40,
-                   param #2    0x40     [ proof     ] */ 0x60,
-                /* topic #1 */ Event__Mint
-            ) // ===========================================================
         }
 
         uint256 proof = initFromSeed(randomEnough);
 
         proofs[tokenId] = proof;
 
-        emit Mint(tokenId, uint96(msg.value), bytes32(proof));
+        addStakedShareFromMsgValue();
+
+        // prettier-ignore
+        assembly {
+
+            mstore(0x00, callvalue())
+            mstore(0x20, proof)
+
+            log4(0x00, 0x00, Event__Transfer, 0, to, tokenId)
+
+            log2( // -------------------------------------------------------
+                /* param #1: value   */ 0x00, /* [ msg.value          ]     0x20,
+                   param #2: proof      0x20,    [ proof[tokenId]     ]     0x40,
+                   param #3: proof      0x40,    [ stake              ]  */ 0x60,
+                /* topic #1: sig     */ Event__Mint,
+                /* topic #2: tokenId */ tokenId
+            ) // ===========================================================
+        }
     }
 
     /// @notice removes a staked share from the contract,
@@ -165,12 +168,12 @@ contract NuggftV1 is IERC721, IERC721Metadata, NuggftV1Loan {
 
     /// @inheritdoc IERC721Metadata
     function name() public pure override returns (string memory) {
-        return 'Nugg Fungible Token V1';
+        return "Nugg Fungible Token V1";
     }
 
     /// @inheritdoc IERC721Metadata
     function symbol() public pure override returns (string memory) {
-        return 'NUGGFT';
+        return "NUGGFT";
     }
 
     /// @inheritdoc IERC721Metadata

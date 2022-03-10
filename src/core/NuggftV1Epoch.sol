@@ -2,9 +2,9 @@
 
 pragma solidity 0.8.12;
 
-import {INuggftV1Epoch} from '../interfaces/nuggftv1/INuggftV1Epoch.sol';
+import {INuggftV1Epoch} from "../interfaces/nuggftv1/INuggftV1Epoch.sol";
 
-import {NuggftV1Constants} from './NuggftV1Constants.sol';
+import {NuggftV1Constants} from "./NuggftV1Constants.sol";
 
 abstract contract NuggftV1Epoch is INuggftV1Epoch, NuggftV1Constants {
     uint256 public immutable override genesis;
@@ -16,7 +16,7 @@ abstract contract NuggftV1Epoch is INuggftV1Epoch, NuggftV1Constants {
 
     /// @inheritdoc INuggftV1Epoch
     function epoch() public view override returns (uint24 res) {
-        require(block.number >= genesis, 'YOU MADE A BAD ROOOLLLLLLLLLLL');
+        require(block.number >= genesis, "YOU MADE A BAD ROOOLLLLLLLLLLL");
         res = toEpoch(block.number, genesis);
     }
 
@@ -39,16 +39,16 @@ abstract contract NuggftV1Epoch is INuggftV1Epoch, NuggftV1Constants {
 
     /// @notice calculates a random-enough seed that will stay the same for INTERVAL number of blocks
     function calculateSeed(uint24 _epoch) internal view returns (uint256 res) {
-        uint256 startblock = toStartBlock(_epoch, genesis);
         unchecked {
+            uint256 startblock = toStartBlock(_epoch, genesis);
+
             bytes32 bhash = getBlockHash(startblock - INTERVAL_SUB);
-            // if (bhash == 0) _panic(Error__0x98__BlockHashIsZero);
+            if (bhash == 0) _panic(Error__0x98__BlockHashIsZero);
 
             assembly {
-                // mstore(0x00, bhash)
-                // mstore(0x20, _epoch)
-                // res := keccak256(0x00, 0x40)
-                res := bhash
+                mstore(0x00, bhash)
+                mstore(0x20, _epoch)
+                res := keccak256(0x00, 0x40)
             }
         }
     }

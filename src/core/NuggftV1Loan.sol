@@ -2,9 +2,9 @@
 
 pragma solidity 0.8.12;
 
-import {INuggftV1Loan} from '../interfaces/nuggftv1/INuggftV1Loan.sol';
+import {INuggftV1Loan} from "../interfaces/nuggftv1/INuggftV1Loan.sol";
 
-import {NuggftV1Swap} from './NuggftV1Swap.sol';
+import {NuggftV1Swap} from "./NuggftV1Swap.sol";
 
 abstract contract NuggftV1Loan is INuggftV1Loan, NuggftV1Swap {
     /// @inheritdoc INuggftV1Loan
@@ -78,11 +78,18 @@ abstract contract NuggftV1Loan is INuggftV1Loan, NuggftV1Swap {
                 // send accumulated value * LOSS to msg.sender
                 if iszero(call(gas(), caller(), amt, 0, 0, 0, 0)) {
                     // if someone really ends up here, just donate the eth
-                    sstore(stake.slot, add(sload(stake.slot), shl(96, amt)))
+                    let cache := add(sload(stake.slot), shl(96, amt))
+
+                    sstore(stake.slot, cache)
+
+                    mstore(0x00, cache)
+
+                    log1(0x00, 0x20, Event__Stake)
                 }
 
                 // log2 with "Loan(uint160,bytes32)" topic
                 mstore(add(mptr, 0x40), agency__cache)
+
                 log2(add(mptr, 0x40), 0x20, Event__Loan, mload(mptr))
             }
         }
@@ -95,10 +102,6 @@ abstract contract NuggftV1Loan is INuggftV1Loan, NuggftV1Swap {
         assembly {
             function juke(x, L, R) -> b {
                 b := shr(R, shl(L, x))
-            }
-
-            function iso2(val, bits, offset) -> b {
-                b := shr(sub(256, bits), shl(sub(256, add(offset, bits)), val))
             }
 
             function panic(code) {
@@ -197,7 +200,17 @@ abstract contract NuggftV1Loan is INuggftV1Loan, NuggftV1Swap {
 
             /////////////////////////////////////////////////////////////////////
 
-            pop(call(gas(), caller(), earn, 0, 0, 0, 0))
+            // send accumulated value * LOSS to msg.sender
+            if iszero(call(gas(), caller(), earn, 0, 0, 0, 0)) {
+                // if someone really ends up here, just donate the eth
+                let cache := add(sload(stake.slot), shl(96, earn))
+
+                sstore(stake.slot, cache)
+
+                mstore(0x00, cache)
+
+                log1(0x00, 0x20, Event__Stake)
+            }
 
             /////////////////////////////////////////////////////////////////////
 
@@ -252,10 +265,8 @@ abstract contract NuggftV1Loan is INuggftV1Loan, NuggftV1Swap {
             // 0x60: agents address[]
             // ==========================
 
-            let mptr := mload(0x40)
-
             // store agency slot for continuous calculation of storage pointers
-            mstore(add(mptr, 0x20), agency.slot)
+            mstore(0x20, agency.slot)
 
             // hold the cumlative value to send back to the user
             // it starts off with callvalue in case there is a fee for the user to pay
@@ -269,9 +280,9 @@ abstract contract NuggftV1Loan is INuggftV1Loan, NuggftV1Swap {
             // prettier-ignore
             for { let i := 0 } lt(i, len) { i := add(i, 0x1) } {
                 // get a tokenId from calldata and store it to mem pos 0x00
-                mstore(mptr, calldataload(add(tokenIds.offset, mul(i, 0x20))))
+                mstore(0x00, calldataload(add(tokenIds.offset, mul(i, 0x20))))
 
-                let agency__sptr := keccak256(mptr, 0x40)
+                let agency__sptr := keccak256(0x00, 0x40)
 
                 //
                 let agency__cache := sload(agency__sptr)
@@ -318,7 +329,7 @@ abstract contract NuggftV1Loan is INuggftV1Loan, NuggftV1Swap {
 
                 acc := sub(value, fee)
 
-                mstore(add(add(mptr, 0x60), mul(i, 0xA0)), agency__addr)
+                mstore(add(0x60, mul(i, 0xA0)), agency__addr)
 
                 // set the agency temporarily to 1 to avoid reentrancy
                 // reentrancy here referes to a tokenId being passed multiple times in the calldata array
@@ -337,9 +348,9 @@ abstract contract NuggftV1Loan is INuggftV1Loan, NuggftV1Swap {
 
             // prettier-ignore
             for { let i := 0 } lt(i, len) { i := add(i, 0x1) } {
-                mstore(mptr, calldataload(add(tokenIds.offset, mul(i, 0x20))))
+                mstore(0x00, calldataload(add(tokenIds.offset, mul(i, 0x20))))
 
-                let account := mload(add(add(mptr, 0x60), mul(i, 0xA0)))
+                let account := mload(add(0x60, mul(i, 0xA0)))
 
                 // update agency to reflect new principle and epoch
                 // ==== agency[tokenId] =====
@@ -350,22 +361,28 @@ abstract contract NuggftV1Loan is INuggftV1Loan, NuggftV1Swap {
                 // =========================
                 let agency__cache := or(shl(254, 0x2), or(shl(230, active), or(shl(160, newPrincipal), account)))
 
-                sstore(keccak256(mptr, 0x40), agency__cache)
+                sstore(keccak256(0x00, 0x40), agency__cache)
 
-                mstore(add(mptr, 0x40), agency__cache)
+                mstore(0x40, agency__cache)
 
-                log2(add(mptr, 0x40), 0x20, Event__Rebalance, mload(mptr))
+                log2(0x40, 0x20, Event__Rebalance, mload(0x00))
             }
 
             // ======================================================================
 
-            mstore(mptr, stake__cache)
-            log1(mptr, 0x20, Event__Stake)
+            mstore(0x00, stake__cache)
+            log1(0x00, 0x20, Event__Stake)
 
             // send accumulated value * LOSS to msg.sender
             if iszero(call(gas(), caller(), acc, 0, 0, 0, 0)) {
                 // if someone really ends up here, just donate the eth
-                sstore(stake.slot, add(sload(stake.slot), shl(96, acc)))
+                let cache := add(sload(stake.slot), shl(96, acc))
+
+                sstore(stake.slot, cache)
+
+                mstore(0x00, cache)
+
+                log1(0x00, 0x20, Event__Stake)
             }
         }
     }

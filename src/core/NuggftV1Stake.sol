@@ -2,10 +2,10 @@
 
 pragma solidity 0.8.12;
 
-import {NuggftV1Proof} from './NuggftV1Proof.sol';
+import {NuggftV1Proof} from "./NuggftV1Proof.sol";
 
-import {INuggftV1Migrator} from '../interfaces/nuggftv1/INuggftV1Migrator.sol';
-import {INuggftV1Stake} from '../interfaces/nuggftv1/INuggftV1Stake.sol';
+import {INuggftV1Migrator} from "../interfaces/nuggftv1/INuggftV1Migrator.sol";
+import {INuggftV1Stake} from "../interfaces/nuggftv1/INuggftV1Stake.sol";
 
 abstract contract NuggftV1Stake is INuggftV1Stake, NuggftV1Proof {
     address public migrator;
@@ -112,12 +112,7 @@ abstract contract NuggftV1Stake is INuggftV1Stake, NuggftV1Proof {
 
             sstore(stake.slot, cache)
 
-            // emit current stake state as event
-            // let ptr := mload(0x40)
-            // mstore(ptr, callvalue())
-            // mstore(add(0x20, ptr), 0x01)
-            mstore(0x00, cache)
-            log1(0x00, 0x20, Event__Stake)
+            mstore(0x40, cache)
         }
     }
 
@@ -126,11 +121,9 @@ abstract contract NuggftV1Stake is INuggftV1Stake, NuggftV1Proof {
     /// @param value the amount of eth being staked - must be some portion of msg.value
     function addStakedEth(uint96 value) internal {
         assembly {
-            let cache := sload(stake.slot)
-
             let pro := div(value, PROTOCOL_FEE_BPS)
 
-            cache := add(cache, or(shl(96, sub(value, pro)), pro))
+            let cache := add(sload(stake.slot), or(shl(96, sub(value, pro)), pro))
 
             sstore(stake.slot, cache)
 
