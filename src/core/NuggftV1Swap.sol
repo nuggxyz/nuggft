@@ -492,8 +492,8 @@ abstract contract NuggftV1Swap is INuggftV1ItemSwap, INuggftV1Swap, NuggftV1Stak
                         let proof := sload(proof__sptr)
 
                         // prettier-ignore
-                        for { let j := 8 } lt(j, 17) { j := add(j, 1) } {
-                            if eq(j, 16) { panic(Error__0x79__ProofHasNoFreeSlot) }
+                        for { let j := 8 } lt(j, 16) { j := add(j, 1) } {
+                            // if eq(j, 16) { panic(Error__0x79__ProofHasNoFreeSlot) }
 
                             if iszero(and(shr(mul(j, 16), proof), 0xffff)) {
                                 let tmp := shr(24, tokenId)
