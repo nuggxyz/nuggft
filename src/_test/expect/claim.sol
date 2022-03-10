@@ -82,6 +82,7 @@ contract expectClaim is base {
         Snapshot[] snapshots;
         address sender;
         uint96 expectedBalanceChange;
+        bool shouldDonate;
     }
 
     bytes execution;
@@ -141,6 +142,8 @@ contract expectClaim is base {
         run.sender = sender;
         run.snapshots = new Snapshot[](tokenIds.length);
 
+        run.shouldDonate = sender == ds.noFallback;
+
         for (uint256 i = 0; i < tokenIds.length; i++) {
             SnapshotEnv memory env;
             SnapshotData memory pre;
@@ -175,13 +178,23 @@ contract expectClaim is base {
             preSingleClaimChecks(run, env, pre);
         }
 
-        stake.start(0, 0, true);
+        if (run.shouldDonate) {
+            stake.start(run.expectedBalanceChange, 0, true);
 
-        // ASSERT:CLAIM_0x0D: is the sender balance correct?
-        balance.start(run.sender, run.expectedBalanceChange, true);
+            // ASSERT:CLAIM_0x0D: is the sender balance correct?
+            balance.start(run.sender, 0, true);
 
-        // ASSERT:CLAIM_0x0E: is the nuggft balance correct?
-        balance.start(address(nuggft), run.expectedBalanceChange, false);
+            // ASSERT:CLAIM_0x0E: is the nuggft balance correct?
+            balance.start(address(nuggft), 0, true);
+        } else {
+            stake.start(0, 0, true);
+
+            // ASSERT:CLAIM_0x0D: is the sender balance correct?
+            balance.start(run.sender, run.expectedBalanceChange, true);
+
+            // ASSERT:CLAIM_0x0E: is the nuggft balance correct?
+            balance.start(address(nuggft), run.expectedBalanceChange, false);
+        }
 
         preRunChecks(run);
 
