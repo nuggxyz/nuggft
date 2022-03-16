@@ -95,7 +95,7 @@ abstract contract NuggftV1Swap is INuggftV1ItemSwap, INuggftV1Swap, NuggftV1Stak
             uint256 hotproof__cache = hotproof[uint8(tokenId % HOT_PROOF_AMOUNT)];
 
             // if hot slot 1 is open, save there
-            if (hotproof__cache == 10000) {
+            if (hotproof__cache == HOT_PROOF_EMPTY) {
                 hotproof[uint8(tokenId % HOT_PROOF_AMOUNT)] = proof;
             } else {
                 proofs[tokenId] = proof;
@@ -118,13 +118,7 @@ abstract contract NuggftV1Swap is INuggftV1ItemSwap, INuggftV1Swap, NuggftV1Stak
                 mstore(0x00, agency__cache)
                 mstore(0x20, proof)
 
-                log2( // -------------------------------------------------------
-                    /* param #1: agency  */ 0x00, /* [ agency[tokenId]    ]     0x20,
-                       param #2: proof      0x20,    [ proof[tokenId]     ]     0x40,
-                       param #3: proof      0x40,    [ stake              ]  */ 0x60,
-                    /* topic #1: sig     */ Event__OfferMint,
-                    /* topic #2: tokenId */ tokenId
-                ) // ===========================================================
+                sstore(agency__sptr, agency__cache)
 
                 log4( // =======================================================
                     /* param #0:n/a  */ 0x00, /* [ n/a ] */  0x00,
@@ -134,7 +128,14 @@ abstract contract NuggftV1Swap is INuggftV1ItemSwap, INuggftV1Swap, NuggftV1Stak
                     /* topic #4:id   */ tokenId
                 ) // ===========================================================
 
-                sstore(agency__sptr, agency__cache)
+
+                log2( // -------------------------------------------------------
+                    /* param #1: agency  */ 0x00, /* [ agency[tokenId]    ]     0x20,
+                       param #2: proof      0x20,    [ proof[tokenId]     ]     0x40,
+                       param #3: proof      0x40,    [ stake              ]  */ 0x60,
+                    /* topic #1: sig     */ Event__OfferMint,
+                    /* topic #2: tokenId */ tokenId
+                ) // ===========================================================
 
             }
 
@@ -331,19 +332,19 @@ abstract contract NuggftV1Swap is INuggftV1ItemSwap, INuggftV1Swap, NuggftV1Stak
             switch isItem
             case 1 {
                 log3( // =======================================================
-                    /* param #1:agency   */ 0x00, /* [ itemAgency[tokenId][itemId] ]     0x20
-                       param #2:stake       0x20     [ stake                       ] */  0x40,
-                    /* topic #1:sig      */ Event__OfferItem,
-                    /* topic #2:buyerId  */ and(tokenId, 0xffffff),
-                    /* topic #3:buyerId  */ shl(240, and(shr(24, tokenId), 0xffff))
+                    /* param #1: agency   */ 0x00, /* [ itemAgency[tokenId][itemId] ]     0x20
+                       param #2: stake       0x20     [ stake                       ] */  0x40,
+                    /* topic #1: sig      */ Event__OfferItem,
+                    /* topic #2: sellerId */ and(tokenId, 0xffffff),
+                    /* topic #3: itemId   */ shl(240, and(shr(24, tokenId), 0xffff))
                 ) // ===========================================================
             }
             default {
                 log2( // =======================================================
-                    /* param #1:agency  */ 0x00, /* [ agency[tokenId]  ]     0x20
-                       param #2:stake      0x20     [ stake            ] */  0x40,
-                    /* topic #1:sig     */ Event__Offer,
-                    /* topic #2:tokenId */ tokenId
+                    /* param #1: agency  */ 0x00, /* [ agency[tokenId]  ]     0x20
+                       param #2: stake      0x20     [ stake            ] */  0x40,
+                    /* topic #1: sig     */ Event__Offer,
+                    /* topic #2: tokenId */ tokenId
                 ) // ===========================================================
             }
 

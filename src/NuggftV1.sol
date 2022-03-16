@@ -80,22 +80,20 @@ contract NuggftV1 is IERC721, IERC721Metadata, NuggftV1Loan {
                 revert(27, 0x5)
             }
 
-            // prettier-ignore
-            mstore( // ====================================================
-                /* postion */ 0x20,
-                // we div and mul by 16 here to make the value returned stay constant for 16 blocks
-                // this makes gas estimation more acurate as "initFromSeed" will change in gas useage
-                // + depending on the value returned here
-                /* value   */ blockhash(shl(shr(sub(number(), 2), 4), 4))
-            ) // ==========================================================
 
-            // prettier-ignore
-            randomEnough := keccak256( // =================================
+            // we div and mul by 16 here to make the value returned stay constant for 16 blocks
+            // this makes gas estimation more acurate as "initFromSeed" will change in gas useage
+            // + depending on the value returned here
+            mstore(
+                /* postion */ 0x20,
+                /* value   */ blockhash(shl(shr(sub(number(), 2), 4), 4))
+            )
+
+            randomEnough := keccak256( // ==================================
                 0x00, /* [ tokenId                               ]    0x20
                 0x20     [ blockhash(((blocknum - 2) / 16) * 16) ] */ 0x40
-            ) // ==========================================================
+            ) // ===========================================================
 
-            // prettier-ignore
             let agency__cache := or( // ===================================
                 // set agency to reflect the new agent
                 /* flag  */ shl(254, 0x01), // = OWN(0x01)
@@ -122,13 +120,13 @@ contract NuggftV1 is IERC721, IERC721Metadata, NuggftV1Loan {
 
             log4(0x00, 0x00, Event__Transfer, 0, to, tokenId)
 
-            log2( // -------------------------------------------------------
-                /* param #1: value   */ 0x00, /* [ msg.value          ]     0x20,
-                   param #2: proof      0x20,    [ proof[tokenId]     ]     0x40,
-                   param #3: proof      0x40,    [ stake              ]  */ 0x60,
-                /* topic #1: sig     */ Event__Mint,
-                /* topic #2: tokenId */ tokenId
-            ) // ===========================================================
+            log2( // ----------------------------------------------------------
+                /* param #1: value   */ 0x00, /* [ msg.value      ]     0x20,
+                   param #2: proof      0x20,    [ proof[tokenId] ]     0x40,
+                   param #3: proof      0x40,    [ stake          ]  */ 0x60,
+                /* topic #1: sig     */            Event__Mint,
+                /* topic #2: tokenId */            tokenId
+            ) // -------------------------------------------------------------
         }
     }
 
