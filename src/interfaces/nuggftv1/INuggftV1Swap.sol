@@ -43,8 +43,3 @@ interface INuggftV1Swap {
 
     function vfo(address sender, uint160 tokenId) external view returns (uint96 res);
 }
-
-//  ├─ [458] RiggedNuggft::staked()
-//     │   └─ ← 61951385498220000
-//     ├─ [452] RiggedNuggft::proto()
-//     │   └─ ←61951385498220000/ 2749575201780000
