@@ -22,15 +22,17 @@ contract NuggftV1 is IERC721, IERC721Metadata, NuggftV1Loan {
     /// @inheritdoc INuggftV1Proof
     function mint(uint160 tokenId) public payable override {
         // prettier-ignore
-        if (!(tokenId <= UNTRUSTED_MINT_TOKENS + TRUSTED_MINT_TOKENS &&
-              tokenId >= TRUSTED_MINT_TOKENS)) _panic(Error__0x65__TokenNotMintable);
+        if (!(tokenId <= OFFSET && tokenId >= TRUSTED_MINT_TOKENS))
+            _panic(Error__0x65__TokenNotMintable);
 
         mint(msg.sender, tokenId);
     }
 
     /// @inheritdoc INuggftV1Proof
     function trustedMint(uint160 tokenId, address to) external payable override requiresTrust {
-        if (!(tokenId < TRUSTED_MINT_TOKENS && tokenId != 0)) _panic(Error__0x66__TokenNotTrustMintable);
+        // prettier-ignore
+        if (!(tokenId < TRUSTED_MINT_TOKENS && tokenId != 0))
+            _panic(Error__0x66__TokenNotTrustMintable);
 
         mint(to, tokenId);
     }
@@ -60,6 +62,8 @@ contract NuggftV1 is IERC721, IERC721Metadata, NuggftV1Loan {
 
     function mint(address to, uint160 tokenId) internal {
         uint256 randomEnough;
+
+        uint256 agency__cache;
 
         // prettier-ignore
         assembly {
@@ -94,7 +98,7 @@ contract NuggftV1 is IERC721, IERC721Metadata, NuggftV1Loan {
                 0x20     [ blockhash(((blocknum - 2) / 16) * 16) ] */ 0x40
             ) // ===========================================================
 
-            let agency__cache := or( // ===================================
+            agency__cache := or( // ===================================
                 // set agency to reflect the new agent
                 /* flag  */ shl(254, 0x01), // = OWN(0x01)
                 /* epoch */                 // = 0
@@ -117,13 +121,15 @@ contract NuggftV1 is IERC721, IERC721Metadata, NuggftV1Loan {
 
             mstore(0x00, callvalue())
             mstore(0x20, proof)
+            mstore(0x60, agency__cache)
 
             log4(0x00, 0x00, Event__Transfer, 0, to, tokenId)
 
             log2( // ----------------------------------------------------------
-                /* param #1: value   */ 0x00, /* [ msg.value      ]     0x20,
-                   param #2: proof      0x20,    [ proof[tokenId] ]     0x40,
-                   param #3: proof      0x40,    [ stake          ]  */ 0x60,
+                /* param #1: value   */ 0x00, /* [ msg.value       ]     0x20,
+                   param #2: proof      0x20,    [ proof[tokenId]  ]     0x40,
+                   param #2: stake      0x40,    [ stake           ]     0x60,
+                   param #3: agency     0x60,    [ agency[tokenId] ]  */ 0x80,
                 /* topic #1: sig     */            Event__Mint,
                 /* topic #2: tokenId */            tokenId
             ) // -------------------------------------------------------------

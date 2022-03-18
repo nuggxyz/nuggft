@@ -49,6 +49,7 @@ library DotnuggV1Lib {
         uint256 high = size(loc);
 
         // prettier-ignore
+        /// @solidity memory-safe-assembly
         assembly {
             // ===========================================================
 
@@ -71,7 +72,7 @@ library DotnuggV1Lib {
 
             // Get a pointer to some free memory.
             // no need update pointer becasue after this function, the loaded data is no longer needed
-            // + and solidity does not assume the free memory pointer points to "clean" data
+            //     + and solidity does not assume the free memory pointer points to "clean" data
             let A := mload(0x40)
 
             // Copy the code into memory right after the 32 bytes we used to store the len.
@@ -128,6 +129,7 @@ library DotnuggV1Lib {
     function location(address safe, uint8 feature) internal pure returns (address res) {
         bytes32 h = PROXY_INIT_CODE_HASH;
 
+        /// @solidity memory-safe-assembly
         assembly {
             // [======================================================================
             let mptr := mload(0x40)
@@ -178,6 +180,7 @@ library DotnuggV1Lib {
         uint256 start,
         uint256 len
     ) private view returns (uint256[] memory data) {
+        // prettier-ignore
         assembly {
             let offset := sub(0x20, mod(len, 0x20))
 
@@ -205,6 +208,7 @@ library DotnuggV1Lib {
         uint256 start,
         uint256 len
     ) private view returns (bytes memory data) {
+        // prettier-ignore
         assembly {
             // Get a pointer to some free memory.
             data := mload(0x40)

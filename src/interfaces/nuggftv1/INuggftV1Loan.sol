@@ -50,9 +50,9 @@ interface INuggftV1Loan {
 
     /// @notice "Values For Liquadation"
     /// @dev used to tell user how much eth to send for liquidate
-    function vfl(uint160[] calldata tokenIds) external view returns (uint96[] memory vals);
+    function vfl(uint160[] calldata tokenIds) external view returns (uint96[] memory res);
 
     /// @notice "Values For Rebalance"
     /// @dev used to tell user how much eth to send for rebalance
-    function vfr(uint160[] calldata tokenIds) external view returns (uint96[] memory vals);
+    function vfr(uint160[] calldata tokenIds) external view returns (uint96[] memory res);
 }

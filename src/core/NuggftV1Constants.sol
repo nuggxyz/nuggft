@@ -4,8 +4,7 @@ pragma solidity 0.8.13;
 
 abstract contract NuggftV1Constants {
     uint32 constant TRUSTED_MINT_TOKENS = 500;
-    uint32 constant UNTRUSTED_MINT_TOKENS = 10000;
-    uint24 constant OFFSET = 3000;
+    uint24 constant OFFSET = 5000;
 
     uint256 constant HOT_PROOF_EMPTY = 0x10000;
 
@@ -44,7 +43,7 @@ abstract contract NuggftV1Constants {
     bytes32 constant Event__Repayment = 0xc928c04c08e9d5085139dee5b4b0a24f48d84c91f8f44caefaea39da6108fce3;
     bytes32 constant Event__OfferItem = 0x02f51ae25c6b015c4e1f70d3544a23873078cd2287637831e8e4d1bd0bc5e301;
     bytes32 constant Event__TransferItem = 0x31cf2357b228de5e7b21be4ee816920a4eabd32196b782ad557ba4a0f5c20af1;
-    bytes32 constant Event__Mint = 0xfdc739aeffe371d3b0a40ab7a821110186f26bcd760adaff661c9a6a369c2ba7;
+    bytes32 constant Event__Mint = 0xeb7e020bebf08bd7b26fa5ab6c13f7ff27f22963d01f83fb5aaaa16630c2e489;
     bytes32 constant Event__Rotate = 0x9a674c377cfb461eed8c85cebc9fc607ef62cecde152900174f519f861f90b57;
     bytes32 constant Event__OfferMint = 0x12651006c2efed8cb6941478698d827149f5d535c122b0c3cf88b92a54395a27;
 
