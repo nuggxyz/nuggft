@@ -1,8 +1,8 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
-pragma solidity 0.8.12;
+pragma solidity 0.8.13;
 
-import {INuggftV1Trust} from '../interfaces/nuggftv1/INuggftV1Trust.sol';
+import {INuggftV1Trust} from "../interfaces/nuggftv1/INuggftV1Trust.sol";
 
 abstract contract NuggftV1Trust is INuggftV1Trust {
     event UserTrustUpdated(address indexed user, bool trusted);
@@ -31,6 +31,6 @@ abstract contract NuggftV1Trust is INuggftV1Trust {
     }
 
     function _requiresTrust() internal view {
-        require(isTrusted[msg.sender], 'UNTRUSTED');
+        require(isTrusted[msg.sender], "UNTRUSTED");
     }
 }

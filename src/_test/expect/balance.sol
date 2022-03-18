@@ -1,10 +1,10 @@
 //SPDX-License-Identifier: MIT
 
-pragma solidity 0.8.12;
+pragma solidity 0.8.13;
 
-import '../utils/forge.sol';
+import "../utils/forge.sol";
 
-import './base.sol';
+import "./base.sol";
 
 contract expectBalance is base {
     struct Snapshot {
@@ -30,8 +30,8 @@ contract expectBalance is base {
     ) public {
         uint96 balan = this.bal(user);
         if (!up && value > balan) {
-            ds.emit_log_named_uint('value:   ', value);
-            ds.emit_log_named_uint('balance: ', balan);
+            ds.emit_log_named_uint("value:   ", value);
+            ds.emit_log_named_uint("balance: ", balan);
             ds.assertTrue(
                 false,
                 'EXPECT:BALANCE: DOWN value is greater than balance, it will overflow - make sure you are calling "deal" before starting the expect'
@@ -50,14 +50,14 @@ contract expectBalance is base {
     function stop() public {
         for (uint256 i = 0; i < snapshots.length; i++) {
             this.bal(snapshots[i].user);
-            ds.assertBalance(snapshots[i].user, snapshots[i].expected, 'stopExpectBalance ');
+            ds.assertBalance(snapshots[i].user, snapshots[i].expected, "stopExpectBalance ");
         }
         this.clear();
     }
 
     function rollback() public {
         for (uint256 i = 0; i < snapshots.length; i++) {
-            ds.assertBalance(snapshots[i].user, snapshots[i].start, 'rollbackExpectBalance ');
+            ds.assertBalance(snapshots[i].user, snapshots[i].start, "rollbackExpectBalance ");
         }
         this.clear();
     }

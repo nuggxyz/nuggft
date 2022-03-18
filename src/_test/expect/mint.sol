@@ -1,14 +1,14 @@
 //SPDX-License-Identifier: MIT
 
-pragma solidity 0.8.12;
+pragma solidity 0.8.13;
 
-import '../utils/forge.sol';
+import "../utils/forge.sol";
 
-import './base.sol';
-import './stake.sol';
-import './balance.sol';
+import "./base.sol";
+import "./stake.sol";
+import "./balance.sol";
 
-import {Expect} from './Expect.sol';
+import {Expect} from "./Expect.sol";
 
 contract expectMint is base {
     expectStake stake;
@@ -98,7 +98,7 @@ contract expectMint is base {
         address sender,
         uint96 value
     ) public {
-        require(execution.length == 0, 'EXPECT-MINT:START: execution already esists');
+        require(execution.length == 0, "EXPECT-MINT:START: execution already esists");
 
         Run memory run;
 
@@ -128,7 +128,7 @@ contract expectMint is base {
     }
 
     function stop() public {
-        require(execution.length > 0, 'EXPECT-MINT:STOP: execution does not exist');
+        require(execution.length > 0, "EXPECT-MINT:STOP: execution does not exist");
 
         Run memory run = abi.decode(execution, (Run));
 
@@ -138,10 +138,10 @@ contract expectMint is base {
 
         post.agency = nuggft.agency(env.tokenId);
 
-        ds.assertGt(post.agency, 0, 'EXPECT-MINT:STOP - agency should not be 0');
+        ds.assertGt(post.agency, 0, "EXPECT-MINT:STOP - agency should not be 0");
         if (env.eps != 0) {
-            ds.assertGt(nuggft.msp(), env.msp, 'EXPECT-MINT:STOP - msp should be greater than before');
-            ds.assertGt(nuggft.eps(), env.eps, 'EXPECT-MINT:STOP - eps should be greater than before');
+            ds.assertGt(nuggft.msp(), env.msp, "EXPECT-MINT:STOP - msp should be greater than before");
+            ds.assertGt(nuggft.eps(), env.eps, "EXPECT-MINT:STOP - eps should be greater than before");
         }
 
         // @todo - any other checks we want here?
@@ -153,7 +153,7 @@ contract expectMint is base {
     }
 
     function rollback() public {
-        require(execution.length > 0, 'EXPECT-MINT:ROLLBACK: execution does not exist');
+        require(execution.length > 0, "EXPECT-MINT:ROLLBACK: execution does not exist");
 
         Run memory run = abi.decode(execution, (Run));
 
@@ -162,7 +162,7 @@ contract expectMint is base {
 
         post.agency = nuggft.agency(env.tokenId);
 
-        ds.assertEq(post.agency, 0, 'EXPECT-MINT:ROLLBACK - agency should be 0');
+        ds.assertEq(post.agency, 0, "EXPECT-MINT:ROLLBACK - agency should be 0");
 
         stake.rollback();
         balance.rollback();

@@ -1,11 +1,11 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
-pragma solidity 0.8.12;
+pragma solidity 0.8.13;
 
-import '../../NuggftV1.test.sol';
+import "../../NuggftV1.test.sol";
 
-import {ShiftLib} from '../../helpers/ShiftLib.sol';
-import {NuggftV1Loan} from '../../../core/NuggftV1Loan.sol';
+import {ShiftLib} from "../../helpers/ShiftLib.sol";
+import {NuggftV1Loan} from "../../../core/NuggftV1Loan.sol";
 
 contract stress__NuggftV1Loan is NuggftV1Test {
     uint160 internal constant LOAN_TOKENID = 1499;
@@ -47,12 +47,12 @@ contract stress__NuggftV1Loan is NuggftV1Test {
             (, , , , , uint24 a_insolventEpoch) = nuggft.debt(LOAN_TOKENID);
 
             {
-                require(b_insolventEpoch == a_insolventEpoch || b_insolventEpoch == a_insolventEpoch - 1, 'A');
+                require(b_insolventEpoch == a_insolventEpoch || b_insolventEpoch == a_insolventEpoch - 1, "A");
                 // console.log(frankStartBal, users.frank.balance);
                 console.log(nuggft.eps(), nuggft.msp());
 
                 // require(frankStartBal - value - valueforRebal == users.frank.balance, 'B');
-                require(frankStartBal - value + __earn - __fee == users.frank.balance, 'D');
+                require(frankStartBal - value + __earn - __fee == users.frank.balance, "D");
             }
 
             forge.vm.roll(block.number + 1);
@@ -110,7 +110,7 @@ contract stress__NuggftV1Loan is NuggftV1Test {
             forge.vm.stopPrank();
         }
 
-        emit log_named_uint('balance', address(nuggft).balance);
+        emit log_named_uint("balance", address(nuggft).balance);
 
         jump(5000);
 

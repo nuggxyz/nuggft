@@ -1,8 +1,8 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
-pragma solidity 0.8.12;
+pragma solidity 0.8.13;
 
-import '../../NuggftV1.test.sol';
+import "../../NuggftV1.test.sol";
 
 abstract contract revert__NuggftV1Stake is NuggftV1Test {
     /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -68,7 +68,7 @@ abstract contract revert__NuggftV1Stake is NuggftV1Test {
 
             forge.vm.deal(users.safe, value);
 
-            forge.vm.expectRevert(hex'7e863b48_71');
+            forge.vm.expectRevert(hex"7e863b48_71");
             nuggft.trustedMint{value: value}(tokenId, users.dennis);
         }
         forge.vm.stopPrank();
@@ -90,7 +90,7 @@ abstract contract revert__NuggftV1Stake is NuggftV1Test {
 
         forge.vm.startPrank(users.mac);
         {
-            forge.vm.expectRevert(hex'7e863b48_77');
+            forge.vm.expectRevert(hex"7e863b48_77");
             nuggft.burn(tokenId);
         }
         forge.vm.stopPrank();
@@ -214,7 +214,7 @@ abstract contract revert__NuggftV1Stake is NuggftV1Test {
         {
             // nuggft.approve(_nuggft, tokenId);
 
-            forge.vm.expectRevert(hex'7e863b48_81');
+            forge.vm.expectRevert(hex"7e863b48_81");
             nuggft.migrate(tokenId);
         }
         forge.vm.stopPrank();

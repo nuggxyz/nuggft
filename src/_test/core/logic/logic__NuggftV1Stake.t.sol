@@ -1,11 +1,11 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
-pragma solidity 0.8.12;
+pragma solidity 0.8.13;
 
-import '../../NuggftV1.test.sol';
+import "../../NuggftV1.test.sol";
 
-import {NuggftV1StakeType} from '../../helpers/NuggftV1StakeType.sol';
-import {NuggftV1Loan} from '../../../core/NuggftV1Loan.sol';
+import {NuggftV1StakeType} from "../../helpers/NuggftV1StakeType.sol";
+import {NuggftV1Loan} from "../../../core/NuggftV1Loan.sol";
 
 abstract contract logic__NuggftV1Stake is NuggftV1Test {
     using NuggftV1StakeType for uint256;

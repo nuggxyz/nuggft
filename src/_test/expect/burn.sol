@@ -1,13 +1,13 @@
 //SPDX-License-Identifier: MIT
 
-pragma solidity 0.8.12;
+pragma solidity 0.8.13;
 
-import '../utils/forge.sol';
+import "../utils/forge.sol";
 
-import './base.sol';
-import './stake.sol';
-import './balance.sol';
-import {Expect} from './Expect.sol';
+import "./base.sol";
+import "./stake.sol";
+import "./balance.sol";
+import {Expect} from "./Expect.sol";
 
 contract expectBurn is base {
     expectStake stake;
@@ -78,7 +78,7 @@ contract expectBurn is base {
     }
 
     function start(uint160 tokenId, address sender) public {
-        require(execution.length == 0, 'EXPECT-BURN:START: execution already exists');
+        require(execution.length == 0, "EXPECT-BURN:START: execution already exists");
 
         Run memory run;
 
@@ -97,7 +97,7 @@ contract expectBurn is base {
     }
 
     function stop() public {
-        require(execution.length > 0, 'EXPECT-BURN:STOP: execution does not exist');
+        require(execution.length > 0, "EXPECT-BURN:STOP: execution does not exist");
 
         Run memory run = abi.decode(execution, (Run));
 
@@ -105,9 +105,9 @@ contract expectBurn is base {
 
         uint256 postAgency = nuggft.agency(run.tokenId);
 
-        ds.assertEq(postAgency, 0, 'EXPECT-BURN:STOP: aagency should be zero');
+        ds.assertEq(postAgency, 0, "EXPECT-BURN:STOP: aagency should be zero");
 
-        ds.assertEq(postEps, run.eps, 'EXPECT-BURN:STOP: eps should not have changed');
+        ds.assertEq(postEps, run.eps, "EXPECT-BURN:STOP: eps should not have changed");
 
         balance.stop();
         stake.stop();
@@ -115,7 +115,7 @@ contract expectBurn is base {
     }
 
     function rollback() public {
-        require(execution.length > 0, 'EXPECT-BURN:ROLLBACK: execution does not exist');
+        require(execution.length > 0, "EXPECT-BURN:ROLLBACK: execution does not exist");
 
         Run memory run = abi.decode(execution, (Run));
 
@@ -123,9 +123,9 @@ contract expectBurn is base {
 
         uint256 postAgency = nuggft.agency(run.tokenId);
 
-        ds.assertEq(postAgency, run.agency, 'EXPECT-BURN:ROLLBACK: agency should be the same');
+        ds.assertEq(postAgency, run.agency, "EXPECT-BURN:ROLLBACK: agency should be the same");
 
-        ds.assertEq(postEps, run.eps, 'EXPECT-BURN:ROLLBACK: eps should be the same');
+        ds.assertEq(postEps, run.eps, "EXPECT-BURN:ROLLBACK: eps should be the same");
 
         stake.rollback();
         balance.rollback();

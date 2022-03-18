@@ -1,10 +1,10 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
-pragma solidity 0.8.12;
+pragma solidity 0.8.13;
 
-import './ds.sol';
+import "./ds.sol";
 
-import {DSTest as ogDSTest} from '../../../lib/ds-test/src/test.sol';
+import {DSTest as ogDSTest} from "../../../lib/ds-test/src/test.sol";
 
 contract DSTest is ogDSTest {
     address internal constant DEAD_ADDRESS = 0xDeaDbeefdEAdbeefdEadbEEFdeadbeEFdEaDbeeF;
@@ -26,11 +26,11 @@ contract DSTest is ogDSTest {
 
         bytes32 label = checkpointLabel;
 
-        emit log_named_uint(string(abi.encodePacked(label, ' Gas')), checkpointGasLeft - checkpointGasLeft2 - 22134);
+        emit log_named_uint(string(abi.encodePacked(label, " Gas")), checkpointGasLeft - checkpointGasLeft2 - 22134);
     }
 
     function fail(bytes32 err) internal virtual {
-        emit log_named_string('Error', string(abi.encodePacked(err)));
+        emit log_named_string("Error", string(abi.encodePacked(err)));
         fail();
     }
 
@@ -44,28 +44,28 @@ contract DSTest is ogDSTest {
         string memory str
     ) internal virtual {
         if (expectedBalance < 0) {
-            emit log('Error: assertBalance - expectedBalance < 0');
+            emit log("Error: assertBalance - expectedBalance < 0");
             emit log(str);
-            emit log_named_address('user: ', user);
-            emit log_named_int('  Expected', expectedBalance);
+            emit log_named_address("user: ", user);
+            emit log_named_int("  Expected", expectedBalance);
             fail();
         }
         if (user.balance != uint256(int256(expectedBalance))) {
-            emit log('Error: assertBalance - user.balance != expectedBalance');
+            emit log("Error: assertBalance - user.balance != expectedBalance");
             emit log(str);
 
-            emit log_named_address('user: ', user);
-            emit log_named_int('  Expected', expectedBalance);
-            emit log_named_uint('    Actual', user.balance);
+            emit log_named_address("user: ", user);
+            emit log_named_int("  Expected", expectedBalance);
+            emit log_named_uint("    Actual", user.balance);
             fail();
         }
     }
 
     function assertBytesEq(bytes memory a, bytes memory b) internal virtual {
         if (keccak256(a) != keccak256(b)) {
-            emit log('Error: a == b not satisfied [bytes]');
-            emit log_named_bytes('  Expected', b);
-            emit log_named_bytes('    Actual', a);
+            emit log("Error: a == b not satisfied [bytes]");
+            emit log_named_bytes("  Expected", b);
+            emit log_named_bytes("    Actual", a);
             fail();
         }
     }
@@ -81,7 +81,7 @@ contract DSInvariantTest {
     address[] private targets;
 
     function targetContracts() public view virtual returns (address[] memory) {
-        require(targets.length > 0, 'NO_TARGET_CONTRACTS');
+        require(targets.length > 0, "NO_TARGET_CONTRACTS");
 
         return targets;
     }

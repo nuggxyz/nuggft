@@ -1,6 +1,6 @@
 //SPDX-License-Identifier: MIT
 
-pragma solidity 0.8.12;
+pragma solidity 0.8.13;
 
 contract Injector {
     function logb(bytes32 p0) external view {}

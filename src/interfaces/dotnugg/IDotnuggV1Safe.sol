@@ -1,8 +1,8 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
-pragma solidity 0.8.12;
+pragma solidity 0.8.13;
 
-import {IDotnuggV1Resolver} from './IDotnuggV1Resolver.sol';
+import {IDotnuggV1Resolver} from "./IDotnuggV1Resolver.sol";
 
 interface IDotnuggV1Safe is IDotnuggV1Resolver {
     event Write(uint8 feature, uint8 amount, address sender);

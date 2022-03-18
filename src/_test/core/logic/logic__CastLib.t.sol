@@ -1,8 +1,8 @@
-pragma solidity 0.8.12;
+pragma solidity 0.8.13;
 
-import '../../NuggftV1.test.sol';
+import "../../NuggftV1.test.sol";
 
-import {CastLib} from '../../helpers/CastLib.sol';
+import {CastLib} from "../../helpers/CastLib.sol";
 
 abstract contract logic__CastLib is NuggftV1Test {
     function safe__to24__a(uint256 x) public pure returns (uint24 y) {
@@ -37,7 +37,7 @@ abstract contract logic__CastLib is NuggftV1Test {
 
         console.log(a, real);
 
-        assertEq(a, real, 'A');
+        assertEq(a, real, "A");
     }
 }
 // 49048

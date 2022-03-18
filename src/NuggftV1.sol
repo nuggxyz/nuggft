@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
-pragma solidity 0.8.12;
+pragma solidity 0.8.13;
 
 import {IERC721, IERC165, IERC721Metadata} from "./interfaces/IERC721.sol";
 import {INuggftV1Migrator} from "./interfaces/nuggftv1/INuggftV1Migrator.sol";
