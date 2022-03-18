@@ -2,9 +2,9 @@
 
 pragma solidity 0.8.12;
 
-import '../../NuggftV1.test.sol';
-import {ShiftLib} from '../../helpers/ShiftLib.sol';
-import {NuggftV1Proof} from '../../../core/NuggftV1Proof.sol';
+import "../../NuggftV1.test.sol";
+import {ShiftLib} from "../../helpers/ShiftLib.sol";
+import {NuggftV1Proof} from "../../../core/NuggftV1Proof.sol";
 
 abstract contract logic__NuggftV1Proof is NuggftV1Test {
     //     function dotnuggV1ImplementerCallback(uint256 tokenId) public view override returns (IDotnuggV1Metadata.Memory memory data) {}

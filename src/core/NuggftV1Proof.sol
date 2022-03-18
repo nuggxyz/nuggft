@@ -19,6 +19,18 @@ abstract contract NuggftV1Proof is INuggftV1Proof, NuggftV1Epoch, NuggftV1Trust 
     IDotnuggV1Safe public immutable dotnuggV1;
 
     constructor(address dotnugg) {
+        // address res;
+
+        // assembly {
+        //     mstore(0x02, caller())
+        //     mstore8(0x00, 0xD6)
+        //     mstore8(0x01, 0x94)
+        //     mstore8(0x16, 0x01)
+
+        //     res := shr(96, shl(96, keccak256(0x00, 0x17)))
+        // }
+
+        // firse index of sender
         dotnuggV1 = IDotnuggV1Safe(dotnugg);
     }
 
