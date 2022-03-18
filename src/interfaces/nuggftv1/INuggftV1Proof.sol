@@ -5,14 +5,14 @@ pragma solidity 0.8.13;
 interface INuggftV1Proof {
     event Rotate(uint160 indexed tokenId, bytes32 proof);
 
-    event Mint(uint160 indexed tokenId, uint96 value, bytes32 proof, bytes32 stake);
+    event Mint(uint160 indexed tokenId, uint96 value, bytes32 proof, bytes32 stake, bytes32 agency);
 
     function mint(uint160 tokenId) external payable;
 
     function trustedMint(uint160 tokenId, address to) external payable;
 
     // prettier-ignore
-    function rotate(uint160 tokenId, uint8[] calldata index0s, uint8[] calldata index1s) external;
+    function rotate(uint160 tokenId, uint8[] calldata from, uint8[] calldata to) external;
 
     function proofOf(uint160 tokenId) external view returns (uint256);
 
