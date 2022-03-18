@@ -1,8 +1,8 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
-pragma solidity 0.8.12;
+pragma solidity 0.8.13;
 
-import '../../NuggftV1.test.sol';
+import "../../NuggftV1.test.sol";
 
 contract txgas__NuggftV1Loan is NuggftV1Test {
     uint160 internal constant LOAN_TOKENID = 1499;

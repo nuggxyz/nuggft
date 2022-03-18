@@ -1,10 +1,10 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
-pragma solidity 0.8.12;
+pragma solidity 0.8.13;
 
-import '../NuggftV1.test.sol';
+import "../NuggftV1.test.sol";
 
-import {NuggftV1Epoch} from '../../core/NuggftV1Epoch.sol';
+import {NuggftV1Epoch} from "../../core/NuggftV1Epoch.sol";
 
 contract deployment__PureDeployer is NuggftV1Test {
     function setUp() public {
@@ -26,7 +26,7 @@ contract deployment__PureDeployer is NuggftV1Test {
         forge.vm.startPrank(deployer);
 
         string[] memory inputs = new string[](2);
-        inputs[0] = 'node';
+        inputs[0] = "node";
 
         inputs[1] = "jq '.bin' ../dotnugg-core/out/DotnuggV1.sol/DotnuggV1.json --raw-output";
 

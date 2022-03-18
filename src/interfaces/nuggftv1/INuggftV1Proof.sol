@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
-pragma solidity 0.8.12;
+pragma solidity 0.8.13;
 
 interface INuggftV1Proof {
     event Rotate(uint160 indexed tokenId, bytes32 proof);

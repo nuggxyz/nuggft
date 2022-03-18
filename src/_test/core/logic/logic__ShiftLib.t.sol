@@ -1,8 +1,8 @@
-pragma solidity 0.8.12;
+pragma solidity 0.8.13;
 
-import '../../NuggftV1.test.sol';
+import "../../NuggftV1.test.sol";
 
-import {ShiftLib} from '../../helpers/ShiftLib.sol';
+import {ShiftLib} from "../../helpers/ShiftLib.sol";
 
 abstract contract logic__ShiftLib is NuggftV1Test {
     function mask__safe__a(uint8 bits) public pure returns (uint256) {
@@ -53,28 +53,28 @@ abstract contract logic__ShiftLib is NuggftV1Test {
 
         uint256 exp_a = mask__safe__a(bits);
 
-        assertEq(got, exp_a, 'A');
+        assertEq(got, exp_a, "A");
 
         uint256 exp_b = mask__safe__b(bits);
 
-        assertEq(got, exp_b, 'B');
+        assertEq(got, exp_b, "B");
 
         uint256 exp_c = mask__safe__c(bits);
 
-        assertEq(got, exp_c, 'c');
+        assertEq(got, exp_c, "c");
     }
 
     function test__logic__ShiftLib__manual__mask() public {
-        assertEq(ShiftLib.mask(0), 0x00, '0');
-        assertEq(ShiftLib.mask(1), 0x01, '1');
-        assertEq(ShiftLib.mask(2), 0x03, '2');
-        assertEq(ShiftLib.mask(3), 0x07, '3');
+        assertEq(ShiftLib.mask(0), 0x00, "0");
+        assertEq(ShiftLib.mask(1), 0x01, "1");
+        assertEq(ShiftLib.mask(2), 0x03, "2");
+        assertEq(ShiftLib.mask(3), 0x07, "3");
 
-        assertEq(ShiftLib.mask(252), 0x0fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff, '255');
-        assertEq(ShiftLib.mask(253), 0x1fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff, '255');
-        assertEq(ShiftLib.mask(254), 0x3fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff, '255');
-        assertEq(ShiftLib.mask(255), 0x7fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff, '255');
-        assertEq(ShiftLib.mask(), 0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff, '256');
+        assertEq(ShiftLib.mask(252), 0x0fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff, "255");
+        assertEq(ShiftLib.mask(253), 0x1fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff, "255");
+        assertEq(ShiftLib.mask(254), 0x3fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff, "255");
+        assertEq(ShiftLib.mask(255), 0x7fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff, "255");
+        assertEq(ShiftLib.mask(), 0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff, "256");
     }
 
     function imask__safe__a(uint8 bits, uint8 offset) public pure returns (uint256) {
@@ -126,22 +126,22 @@ abstract contract logic__ShiftLib is NuggftV1Test {
 
         uint256 exp_a = imask__safe__a(bits, offset);
 
-        assertEq(got, exp_a, 'A');
+        assertEq(got, exp_a, "A");
 
         uint256 exp_b = imask__safe__b(bits, offset);
 
-        assertEq(got, exp_b, 'B');
+        assertEq(got, exp_b, "B");
 
         uint256 exp_c = imask__safe__c(bits, offset);
 
-        assertEq(got, exp_c, 'C');
+        assertEq(got, exp_c, "C");
     }
 
     function test__logic__ShiftLib__manual__imask() public {
-        assertEq(ShiftLib.imask(0, 0), 0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff, '(0,0)');
-        assertEq(ShiftLib.imask(16, 8), 0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffff0000ff, '(16,8)');
-        assertEq(ShiftLib.imask(255, 252), 0x0fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff, '(255, 252)');
-        assertEq(ShiftLib.imask(255, 255), 0x7fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff, '(255, 255)');
+        assertEq(ShiftLib.imask(0, 0), 0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff, "(0,0)");
+        assertEq(ShiftLib.imask(16, 8), 0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffff0000ff, "(16,8)");
+        assertEq(ShiftLib.imask(255, 252), 0x0fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff, "(255, 252)");
+        assertEq(ShiftLib.imask(255, 255), 0x7fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff, "(255, 255)");
     }
 
     function get__safe__a(
@@ -174,7 +174,7 @@ abstract contract logic__ShiftLib is NuggftV1Test {
 
         uint256 real = ShiftLib.get(_store, bits, pos);
 
-        assertEq(a, real, 'A');
+        assertEq(a, real, "A");
     }
 
     function set__safe__a(
@@ -210,6 +210,6 @@ abstract contract logic__ShiftLib is NuggftV1Test {
 
         uint256 real = ShiftLib.set(_store, bits, pos, value);
 
-        assertEq(a, real, 'B');
+        assertEq(a, real, "B");
     }
 }

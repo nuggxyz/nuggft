@@ -1,11 +1,11 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
-pragma solidity 0.8.12;
+pragma solidity 0.8.13;
 
-import '../../NuggftV1.test.sol';
+import "../../NuggftV1.test.sol";
 
-import {ShiftLib} from '../../helpers/ShiftLib.sol';
-import {NuggftV1Loan} from '../../../core/NuggftV1Loan.sol';
+import {ShiftLib} from "../../helpers/ShiftLib.sol";
+import {NuggftV1Loan} from "../../../core/NuggftV1Loan.sol";
 
 contract general__NuggftV1Loan is NuggftV1Test {
     uint160 internal constant LOAN_TOKENID = 700;

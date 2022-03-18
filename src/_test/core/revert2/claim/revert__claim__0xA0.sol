@@ -1,8 +1,8 @@
 // SPDX-License-Identifier: UNLICENSED
 
-pragma solidity 0.8.12;
+pragma solidity 0.8.13;
 
-import '../../../NuggftV1.test.sol';
+import "../../../NuggftV1.test.sol";
 
 abstract contract revert__claim__0xA0 is NuggftV1Test {
     // had to rig this one. the checks are too good
@@ -10,7 +10,7 @@ abstract contract revert__claim__0xA0 is NuggftV1Test {
         expect.mint().from(users.frank).value(1 ether).exec(500);
 
         forge.vm.prank(users.frank);
-        forge.vm.expectRevert(hex'7e863b48_a0');
+        forge.vm.expectRevert(hex"7e863b48_a0");
         nuggft.claim(lib.sarr160(500), lib.sarrAddress(users.frank));
     }
 

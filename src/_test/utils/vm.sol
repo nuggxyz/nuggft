@@ -1,9 +1,9 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
-pragma solidity 0.8.12;
+pragma solidity 0.8.13;
 
 library forge {
-    Vm internal constant vm = Vm(address(bytes20(uint160(uint256(keccak256('hevm cheat code'))))));
+    Vm internal constant vm = Vm(address(bytes20(uint160(uint256(keccak256("hevm cheat code"))))));
 }
 
 interface Vm {

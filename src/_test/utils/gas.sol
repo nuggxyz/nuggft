@@ -1,8 +1,8 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
-pragma solidity 0.8.12;
+pragma solidity 0.8.13;
 
-import './ds.sol';
+import "./ds.sol";
 
 library gas {
     struct run {
@@ -49,7 +49,7 @@ contract GasTracker {
             a := sub(a, gas())
         }
 
-        ds.inject.log('gas used: ', a);
+        ds.inject.log("gas used: ", a);
     }
 
     modifier trackGas2(string memory mem) {

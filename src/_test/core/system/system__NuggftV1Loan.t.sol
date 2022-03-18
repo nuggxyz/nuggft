@@ -1,10 +1,10 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
-pragma solidity 0.8.12;
+pragma solidity 0.8.13;
 
-import '../../NuggftV1.test.sol';
-import {NuggftV1Proof} from '../../../core/NuggftV1Proof.sol';
-import {fragments} from './fragments.t.sol';
+import "../../NuggftV1.test.sol";
+import {NuggftV1Proof} from "../../../core/NuggftV1Proof.sol";
+import {fragments} from "./fragments.t.sol";
 
 abstract contract system__NuggftV1Loan is NuggftV1Test, fragments {
     function test__system__loan__revert__0xA4__autoLiquidateCantRebalance() public {

@@ -1,10 +1,10 @@
 //SPDX-License-Identifier: MIT
 
-pragma solidity 0.8.12;
+pragma solidity 0.8.13;
 
-import '../utils/forge.sol';
+import "../utils/forge.sol";
 
-import './base.sol';
+import "./base.sol";
 
 contract expectStake is base {
     struct Run {
@@ -34,7 +34,7 @@ contract expectStake is base {
         uint64 shares,
         bool up
     ) public {
-        require(execution.length == 0, 'EXPECT-STAKE:START: execution already exists');
+        require(execution.length == 0, "EXPECT-STAKE:START: execution already exists");
 
         Run memory run;
 
@@ -44,7 +44,7 @@ contract expectStake is base {
         run.pre.msp = cast.i192(nuggft.msp());
         run.pre.eps = cast.i192(nuggft.eps());
 
-        ds.assertEq(run.pre.eps, run.pre.shares > 0 ? run.pre.staked / run.pre.shares : int256(0), 'EPS is starting off with an incorrect value');
+        ds.assertEq(run.pre.eps, run.pre.shares > 0 ? run.pre.staked / run.pre.shares : int256(0), "EPS is starting off with an incorrect value");
 
         run.burn = !up;
 
@@ -59,7 +59,7 @@ contract expectStake is base {
     }
 
     function stop() public {
-        require(execution.length > 0, 'EXPECT-STAKE:STOP: execution does not exist');
+        require(execution.length > 0, "EXPECT-STAKE:STOP: execution does not exist");
 
         Run memory run = abi.decode(execution, (Run));
 
@@ -76,9 +76,9 @@ contract expectStake is base {
         int256 expectedProto = 0;
 
         if (run.burn) {
-            ds.assertLe(post.msp, pre.msp, 'msp should have decreased');
+            ds.assertLe(post.msp, pre.msp, "msp should have decreased");
         } else {
-            ds.assertGe(post.msp, pre.msp, 'msp is did not increase as expected');
+            ds.assertGe(post.msp, pre.msp, "msp is did not increase as expected");
             expectedProto = lib.take(10, run.expected_stake_change);
         }
 
@@ -91,16 +91,16 @@ contract expectStake is base {
 
         int256 expectedStake = run.expected_stake_change - expectedProto;
 
-        ds.assertEq(post.protocol - pre.protocol, expectedProto, 'totalProtocol is not what is expected');
-        ds.assertEq(post.staked - pre.staked, expectedStake, 'staked change is not 90 percent of expected change');
-        ds.assertEq(post.shares - pre.shares, run.expected_share_change, 'shares difference is not what is expected');
-        ds.assertEq(post.eps, post.shares > 0 ? post.staked / post.shares : int256(0), 'EPS is not ending with correct value');
+        ds.assertEq(post.protocol - pre.protocol, expectedProto, "totalProtocol is not what is expected");
+        ds.assertEq(post.staked - pre.staked, expectedStake, "staked change is not 90 percent of expected change");
+        ds.assertEq(post.shares - pre.shares, run.expected_share_change, "shares difference is not what is expected");
+        ds.assertEq(post.eps, post.shares > 0 ? post.staked / post.shares : int256(0), "EPS is not ending with correct value");
 
         this.clear();
     }
 
     function rollback() public {
-        require(execution.length > 0, 'EXPECT-STAKE:ROLLBACK - execution does not exist');
+        require(execution.length > 0, "EXPECT-STAKE:ROLLBACK - execution does not exist");
 
         Run memory run = abi.decode(execution, (Run));
 
@@ -114,11 +114,11 @@ contract expectStake is base {
         post.msp = cast.i192(nuggft.msp());
         post.eps = cast.i192(nuggft.eps());
 
-        ds.assertTrue(post.msp == pre.msp, 'EXPECT-STAKE:ROLLBACK - msp()');
-        ds.assertTrue(post.protocol == pre.protocol, 'EXPECT-STAKE:ROLLBACK - proto()');
-        ds.assertTrue(post.shares == pre.shares, 'EXPECT-STAKE:ROLLBACK - shares()');
-        ds.assertTrue(post.eps == pre.eps, 'EXPECT-STAKE:ROLLBACK - eps()');
-        ds.assertTrue(post.staked == pre.staked, 'EXPECT-STAKE:ROLLBACK - staked()');
+        ds.assertTrue(post.msp == pre.msp, "EXPECT-STAKE:ROLLBACK - msp()");
+        ds.assertTrue(post.protocol == pre.protocol, "EXPECT-STAKE:ROLLBACK - proto()");
+        ds.assertTrue(post.shares == pre.shares, "EXPECT-STAKE:ROLLBACK - shares()");
+        ds.assertTrue(post.eps == pre.eps, "EXPECT-STAKE:ROLLBACK - eps()");
+        ds.assertTrue(post.staked == pre.staked, "EXPECT-STAKE:ROLLBACK - staked()");
 
         this.clear();
     }

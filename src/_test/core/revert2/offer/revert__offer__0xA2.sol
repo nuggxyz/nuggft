@@ -1,8 +1,8 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
-pragma solidity 0.8.12;
+pragma solidity 0.8.13;
 
-import '../../../NuggftV1.test.sol';
+import "../../../NuggftV1.test.sol";
 
 abstract contract revert__offer__0xA2 is NuggftV1Test {
     function test__revert__offer__0xA2__fail__desc() public {

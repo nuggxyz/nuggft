@@ -1,9 +1,9 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
-pragma solidity 0.8.12;
+pragma solidity 0.8.13;
 
-import '../../NuggftV1.test.sol';
-import {DotnuggV1Lib} from '../../../libraries/DotnuggV1Lib.sol';
+import "../../NuggftV1.test.sol";
+import {DotnuggV1Lib} from "../../../libraries/DotnuggV1Lib.sol";
 
 abstract contract logic__DotnuggV1Lib is NuggftV1Test {
     function test__logic__DotnuggV1Lib__ratityX128__2() public {

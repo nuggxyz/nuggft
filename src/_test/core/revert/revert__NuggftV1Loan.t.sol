@@ -1,8 +1,8 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
-pragma solidity 0.8.12;
+pragma solidity 0.8.13;
 
-import '../../NuggftV1.test.sol';
+import "../../NuggftV1.test.sol";
 
 abstract contract revert__NuggftV1Loan is NuggftV1Test {
     uint160 internal constant LOAN_TOKENID = 700;
@@ -14,7 +14,7 @@ abstract contract revert__NuggftV1Loan is NuggftV1Test {
     function test__revert__NuggftV1Loan__0xA1__loan__successAsSelf() public {
         uint160 tokenId = scenario_frank_has_a_token_and_spent_50_eth();
 
-        expect.loan().exec(lib.sarr160(tokenId), lib.txdata(users.frank, 0, ''));
+        expect.loan().exec(lib.sarr160(tokenId), lib.txdata(users.frank, 0, ""));
     }
 
     function test__revert__NuggftV1Loan__0xA1__loan__failAsNotAgent() public {
@@ -26,7 +26,7 @@ abstract contract revert__NuggftV1Loan is NuggftV1Test {
     function test__revert__NuggftV1Loan__N_1__loan__passAsSelfHasNotApprovedContract() public {
         uint160 tokenId = scenario_frank_has_a_token_and_spent_50_eth();
 
-        expect.loan().exec(lib.sarr160(tokenId), lib.txdata(users.frank, 0, ''));
+        expect.loan().exec(lib.sarr160(tokenId), lib.txdata(users.frank, 0, ""));
     }
 
     function test__revert__NuggftV1Loan__0x77__loan__loanSameNuggTwice() public {
@@ -82,7 +82,7 @@ abstract contract revert__NuggftV1Loan is NuggftV1Test {
 
         forge.vm.startPrank(users.mac);
         {
-            forge.vm.expectRevert(hex'7e863b48_A6');
+            forge.vm.expectRevert(hex"7e863b48_A6");
             nuggft.liquidate{value: value}(tokenId);
         }
         forge.vm.stopPrank();
@@ -141,7 +141,7 @@ abstract contract revert__NuggftV1Loan is NuggftV1Test {
 
         forge.vm.startPrank(users.frank);
         {
-            forge.vm.expectRevert(hex'7e863b48_A7');
+            forge.vm.expectRevert(hex"7e863b48_A7");
             nuggft.liquidate{value: value - 1}(tokenId);
         }
         forge.vm.stopPrank();
@@ -166,10 +166,10 @@ abstract contract revert__NuggftV1Loan is NuggftV1Test {
 
         forge.vm.startPrank(users.frank);
         {
-            forge.vm.expectRevert(hex'7e863b48_A7');
+            forge.vm.expectRevert(hex"7e863b48_A7");
             nuggft.liquidate{value: 1}(tokenId);
 
-            forge.vm.expectRevert(hex'7e863b48_A7');
+            forge.vm.expectRevert(hex"7e863b48_A7");
             nuggft.liquidate{value: value / 2}(tokenId);
         }
         forge.vm.stopPrank();
@@ -179,7 +179,7 @@ abstract contract revert__NuggftV1Loan is NuggftV1Test {
         uint160 tokenId = scenario_frank_has_a_loaned_token();
 
         forge.vm.startPrank(users.frank);
-        forge.vm.expectRevert(hex'7e863b48_A7');
+        forge.vm.expectRevert(hex"7e863b48_A7");
         {
             nuggft.liquidate{value: 0}(tokenId);
         }

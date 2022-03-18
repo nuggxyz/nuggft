@@ -4,5 +4,5 @@
 brew install solidity
 
 # each shell you want to use forge in
-export SOLC_PATH=/opt/homebrew/Cellar/solidity/0.8.12/bin/solc
+export SOLC_PATH=/opt/homebrew/Cellar/solidity/0.8.13/bin/solc
 ```
