@@ -15,7 +15,7 @@ abstract contract NuggftV1Swap is INuggftV1ItemSwap, INuggftV1Swap, NuggftV1Stak
     mapping(uint160 => mapping(address => uint256)) public offers;
     mapping(uint176 => mapping(uint160 => uint256)) public itemOffers;
     mapping(uint176 => uint256) public itemAgency;
-    mapping(uint256 => bool) public currentItemSwap;
+    mapping(uint256 => uint24) public lastItemSwap;
 
     constructor() {
         for (uint8 i = 0; i < HOT_PROOF_AMOUNT; i++) hotproof[i] = HOT_PROOF_EMPTY;
@@ -215,13 +215,15 @@ abstract contract NuggftV1Swap is INuggftV1ItemSwap, INuggftV1Swap, NuggftV1Stak
             // if so, we know this swap has not yet been offered on
             case 1 { // [Offer:Commit]
 
+                let nextEpoch := add(active, SALE_LEN)
+
                 // update the epoch to begin auction
                 agency__cache := xor( // =====================================
                     /* start */  agency__cache,
                     // -------------------------------------------------------
                         /* addr     0       [                             ] 160 */
                         /* eth      160,    [                             ] 230 */
-                   shl( /* epoch */ 230, /* [ */ add(active, SALE_LEN) /* ] 254 */ )
+                   shl( /* epoch */ 230, /* [ */ nextEpoch             /* ] 254 */ )
                         /* flag     254,    [                             ] 255 */
                 ) // ==========================================================
 
@@ -229,13 +231,13 @@ abstract contract NuggftV1Swap is INuggftV1ItemSwap, INuggftV1Swap, NuggftV1Stak
                 case 1 {
                     // check to make sure there is not a swap
 
-                    mstore(0x00, xor(and(tokenId, 0xffff000000), add(active, SALE_LEN)))
-                    mstore(0x20, currentItemSwap.slot)
+                    mstore(0x00, shr(24,and(tokenId, 0xffff000000)))
+                    mstore(0x20, lastItemSwap.slot)
 
                     let kek := keccak256(0x00, 0x40)
 
-                    // if not 0
-                    if iszero(iszero(sload(kek))) {
+                    // this effectivly blocks more than one swap of a particular item of ending in the same epch
+                    if eq(nextEpoch, sload(kek)) {
                         panic(Error__0xAC__MustFinalizeOtherItemSwap)
                     }
 

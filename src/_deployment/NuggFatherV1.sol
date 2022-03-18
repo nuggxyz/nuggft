@@ -11,10 +11,10 @@ contract NuggFatherV1 {
 
     NuggftV1 public immutable nuggft;
 
-    constructor() {
-        dotnugg = DotnuggV1(address(new DotnuggV1()));
+    constructor(uint256 seed) {
+        dotnugg = new DotnuggV1();
 
-        nuggft = new NuggftV1(address(dotnugg));
+        nuggft = new NuggftV1{salt: bytes32(seed)}(address(dotnugg));
 
         for (uint160 i = 0; i < 5; i++) {
             nuggft.trustedMint(i + 1, 0x9B0E2b16F57648C7bAF28EDD7772a815Af266E77);
@@ -30,13 +30,15 @@ contract NuggFatherV1 {
 
             nuggft.sell(i, itemId, 696969 gwei);
 
-            itemId = uint16(f[3]);
+            uint16 itemId2 = uint16(f[3]);
 
-            nuggft.sell(i, itemId, 696969 gwei);
+            nuggft.sell(i, itemId2, 696969 gwei);
 
-            itemId = uint16(f[8]);
+            uint16 itemId3 = uint16(f[8]);
 
-            nuggft.sell(i, itemId, 696969 gwei);
+            if (itemId3 != itemId && itemId3 != itemId2) {
+                nuggft.sell(i, itemId3, 696969 gwei);
+            }
         }
     }
 
