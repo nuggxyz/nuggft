@@ -165,6 +165,7 @@ contract NuggftV1 is IERC721, IERC721Metadata, NuggftV1Loan {
     /// @inheritdoc IERC165
     function supportsInterface(bytes4 interfaceId) public view virtual override returns (bool) {
         return
+            // interfaceId == 0xd9b67a26 || //
             interfaceId == type(IERC721).interfaceId || //
             interfaceId == type(IERC721Metadata).interfaceId ||
             interfaceId == type(IERC165).interfaceId;
@@ -204,7 +205,7 @@ contract NuggftV1 is IERC721, IERC721Metadata, NuggftV1Loan {
     }
 
     /// @inheritdoc INuggftV1Proof
-    function itemURI(uint16 itemId) public view override returns (string memory res) {
+    function itemURI(uint256 itemId) public view override returns (string memory res) {
         res = dotnuggV1.exec(uint8(itemId >> 8), uint8(itemId), true);
     }
 
@@ -271,8 +272,8 @@ contract NuggftV1 is IERC721, IERC721Metadata, NuggftV1Loan {
     }
 
     /// @inheritdoc IERC721
-    function balanceOf(address) external pure override returns (uint256) {
-        return 0;
+    function balanceOf(address you) external view override returns (uint256 acc) {
+        for (uint256 i = 0; i < MAX_TOKENS; i++) if (uint160(you) == uint160(agency[i])) acc++;
     }
 
     //prettier-ignore

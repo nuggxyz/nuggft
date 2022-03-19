@@ -11,6 +11,7 @@
     "editor.detectIndentation": false,
 
     "prettier.requireConfig": true,
+    "gitlens.codeLens.enabled": false,
 
     "editor.formatOnSave": true,
     "editor.defaultFormatter": "esbenp.prettier-vscode",
@@ -60,5 +61,9 @@
     },
     "[properties]": {
         "editor.defaultFormatter": "foxundermoon.shell-format"
-    }
+    },
+    "solidity-va.deco.arguments": false,
+    "solidity-va.deco.statevars": false,
+    "solidity-va.deco.warn.reserved": true,
+    "solidity-va.codelens.enable": false
 }

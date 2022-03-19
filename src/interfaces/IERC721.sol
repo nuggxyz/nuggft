@@ -12,6 +12,67 @@ interface IERC165 {
     function supportsInterface(bytes4 interfaceID) external view returns (bool);
 }
 
+/**
+    Note: The ERC-165 identifier for this interface is 0x0e89341c.
+*/
+interface IERC1155Metadata_URI {
+    /**
+        @notice A distinct Uniform Resource Identifier (URI) for a given token.
+        @dev URIs are defined in RFC 3986.
+        The URI MUST point to a JSON file that conforms to the "ERC-1155 Metadata URI JSON Schema".
+        @return URI string
+    */
+    function uri(uint256 _id) external view returns (string memory);
+}
+
+/**
+    @title ERC-1155 Multi Token Standard
+    @dev See https://eips.ethereum.org/EIPS/eip-1155
+    Note: The ERC-165 identifier for this interface is 0xd9b67a26.
+ */
+/* is ERC165 */
+interface IERC1155 is IERC1155Metadata_URI, IERC165 {
+    /**
+        @dev Either `TransferSingle` or `TransferBatch` MUST emit when tokens are transferred, including zero value transfers as well as minting or burning (see "Safe Transfer Rules" section of the standard).
+        The `_operator` argument MUST be the address of an account/contract that is approved to make the transfer (SHOULD be msg.sender).
+        The `_from` argument MUST be the address of the holder whose balance is decreased.
+        The `_to` argument MUST be the address of the recipient whose balance is increased.
+        The `_id` argument MUST be the token type being transferred.
+        The `_value` argument MUST be the number of tokens the holder balance is decreased by and match what the recipient balance is increased by.
+        When minting/creating tokens, the `_from` argument MUST be set to `0x0` (i.e. zero address).
+        When burning/destroying tokens, the `_to` argument MUST be set to `0x0` (i.e. zero address).
+    */
+    event TransferSingle(address indexed _operator, address indexed _from, address indexed _to, uint256 _id, uint256 _value);
+
+    /**
+        @dev Either `TransferSingle` or `TransferBatch` MUST emit when tokens are transferred, including zero value transfers as well as minting or burning (see "Safe Transfer Rules" section of the standard).
+        The `_operator` argument MUST be the address of an account/contract that is approved to make the transfer (SHOULD be msg.sender).
+        The `_from` argument MUST be the address of the holder whose balance is decreased.
+        The `_to` argument MUST be the address of the recipient whose balance is increased.
+        The `_ids` argument MUST be the list of tokens being transferred.
+        The `_values` argument MUST be the list of number of tokens (matching the list and order of tokens specified in _ids) the holder balance is decreased by and match what the recipient balance is increased by.
+        When minting/creating tokens, the `_from` argument MUST be set to `0x0` (i.e. zero address).
+        When burning/destroying tokens, the `_to` argument MUST be set to `0x0` (i.e. zero address).
+    */
+    event TransferBatch(address indexed _operator, address indexed _from, address indexed _to, uint256[] _ids, uint256[] _values);
+
+    /**
+        @notice Get the balance of an account's tokens.
+        @param _owner  The address of the token holder
+        @param _id     ID of the token
+        @return        The _owner's balance of the token type requested
+     */
+    // function balanceOf(address _owner, uint256 _id) external view returns (uint256);
+
+    /**
+        @notice Get the balance of multiple account/token pairs
+        @param _owners The addresses of the token holders
+        @param _ids    ID of the tokens
+        @return        The _owner's balance of the token types requested (i.e. balance for each (owner, id) pair)
+     */
+    // function balanceOfBatch(address[] calldata _owners, uint256[] calldata _ids) external view returns (uint256[] memory);
+}
+
 /// @title ERC-721 Non-Fungible Token Standard
 /// @dev See https://eips.ethereum.org/EIPS/eip-721
 ///  Note: the ERC-165 identifier for this interface is 0x80ac58cd.

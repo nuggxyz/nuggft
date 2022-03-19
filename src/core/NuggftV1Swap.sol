@@ -361,6 +361,7 @@ abstract contract NuggftV1Swap is INuggftV1ItemSwap, INuggftV1Swap, NuggftV1Stak
 
         // prettier-ignore
         assembly {
+
             function panic(code) {
                 mstore(0x00, Revert__Sig)
                 mstore8(31, code)
@@ -417,6 +418,8 @@ abstract contract NuggftV1Swap is INuggftV1ItemSwap, INuggftV1Swap, NuggftV1Stak
 
             // store common slot for proof in memory
             mstore(0x160, proofs.slot)
+
+
 
             for { let i := 0 } lt(i, len) { i := add(i, 1) } {
                 // tokenIds[i]
@@ -488,16 +491,12 @@ abstract contract NuggftV1Swap is INuggftV1ItemSwap, INuggftV1Swap, NuggftV1Stak
                     case 1 {
                         sstore(agency__sptr, 0)
 
-                        // sstore(protocolItems.slot, sub(sload(protocolItems.slot), 1))
-
                         let proof__sptr := keccak256(0x80, 0x40)
 
                         let proof := sload(proof__sptr)
 
                         // prettier-ignore
                         for { let j := 8 } lt(j, 16) { j := add(j, 1) } {
-                            // if eq(j, 16) { panic(Error__0x79__ProofHasNoFreeSlot) }
-
                             if iszero(and(shr(mul(j, 16), proof), 0xffff)) {
                                 let tmp := shr(24, tokenId)
                                 proof := xor(proof, shl(mul(j, 16), tmp))
@@ -509,7 +508,14 @@ abstract contract NuggftV1Swap is INuggftV1ItemSwap, INuggftV1Swap, NuggftV1Stak
 
                         mstore(0xA0, proof)
 
-                        log4(0xA0, 0x20, Event__TransferItem, 0x00, offerer, shl(240, shr(24, tokenId)))
+                        mstore(0x1A0, or(or(and(tokenId, 0xffff000000) , offerer), shl(40, 0x02)))
+
+                        mstore(sub(0x222,12), address())
+                        mstore8(0x220, 0xD6)
+                        mstore8(0x221, 0x94)
+                        mstore8(0x236, 0x01)
+
+                        pop(call(gas(), juke(keccak256(0x220, 0x17),96,96), 0x00, 0x1A0, 0x20, 0x00, 0x00))
                     }
                     default {
 
@@ -682,9 +688,19 @@ abstract contract NuggftV1Swap is INuggftV1ItemSwap, INuggftV1Swap, NuggftV1Stak
 
                 sstore(proof__sptr, proof)
 
-                mstore(0x00, proof)
+                // mstore(0xA0, shr(24, tokenId))
+                // mstore(0xC0, 0x01)
 
-                log4(0x00, 0x20, Event__TransferItem, and(tokenId, 0xffffff), 0x00, shl(240, shr(24, tokenId)))
+                // log4(0xA0, 0x40, Event__TransferItem, proof, address(), caller())
+
+                mstore(0x1A0, or(tokenId, shl(40, 0x01)))
+
+                mstore(sub(0x222, 12), address())
+                mstore8(0x220, 0xD6)
+                mstore8(0x221, 0x94)
+                mstore8(0x236, 0x01)
+
+                pop(call(gas(), juke(keccak256(0x220, 0x17), 96, 96), 0x00, 0x1A0, 0x20, 0x00, 0x00))
 
                 // ==== agency[tokenId] =====
                 //   flag  = SWAP(0x03)

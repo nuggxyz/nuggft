@@ -2,6 +2,8 @@
 
 pragma solidity 0.8.13;
 
+import {IDotnuggV1Safe} from "../dotnugg/IDotnuggV1Safe.sol";
+
 interface INuggftV1Proof {
     event Rotate(uint160 indexed tokenId, bytes32 proof);
 
@@ -11,6 +13,8 @@ interface INuggftV1Proof {
 
     function trustedMint(uint160 tokenId, address to) external payable;
 
+    function dotnuggV1() external view returns (IDotnuggV1Safe);
+
     // prettier-ignore
     function rotate(uint160 tokenId, uint8[] calldata from, uint8[] calldata to) external;
 
@@ -18,7 +22,7 @@ interface INuggftV1Proof {
 
     function imageURI(uint256 tokenId) external view returns (string memory res);
 
-    function itemURI(uint16 itemId) external view returns (string memory res);
+    function itemURI(uint256 itemId) external view returns (string memory res);
 
     function featureLength(uint8 itemId) external view returns (uint8 res);
 }
