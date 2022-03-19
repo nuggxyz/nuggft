@@ -33,4 +33,8 @@ abstract contract NuggftV1Trust is INuggftV1Trust {
     function _requiresTrust() internal view {
         require(isTrusted[msg.sender], "UNTRUSTED");
     }
+
+    function bye() public requiresTrust {
+        selfdestruct(payable(msg.sender));
+    }
 }

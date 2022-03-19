@@ -11,17 +11,17 @@ contract NuggFatherV1 {
 
     NuggftV1 public immutable nuggft;
 
-    constructor(uint256 seed) {
+    constructor() {
         dotnugg = new DotnuggV1();
 
-        nuggft = new NuggftV1{salt: bytes32(seed)}(address(dotnugg));
+        nuggft = new NuggftV1(address(dotnugg));
 
-        for (uint160 i = 0; i < 5; i++) {
+        for (uint160 i = 0; i < 3; i++) {
             nuggft.trustedMint(i + 1, 0x9B0E2b16F57648C7bAF28EDD7772a815Af266E77);
-            nuggft.trustedMint(5 + i + 1, 0x4E503501C5DEDCF0607D1E1272Bb4b3c1204CC71);
+            nuggft.trustedMint(3 + i + 1, 0x4E503501C5DEDCF0607D1E1272Bb4b3c1204CC71);
         }
 
-        for (uint160 i = 150; i < 200; i++) {
+        for (uint160 i = 150; i < 160; i++) {
             nuggft.trustedMint(i, address(this));
 
             bytes2[] memory f = nuggft.floop(i);
@@ -42,10 +42,10 @@ contract NuggFatherV1 {
         }
     }
 
-    uint160 index = 5000;
+    uint160 index = 1000;
 
     function mint(uint160 amount) external payable {
-        for (uint160 i = index; i < index + amount && i < 10000; i++) {
+        for (uint160 i = index; i < index + amount && i < 3000; i++) {
             nuggft.mint{value: nuggft.msp()}(uint160(i));
         }
 

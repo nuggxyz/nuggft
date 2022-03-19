@@ -14,6 +14,6 @@ abstract contract revert__mint__0x65 is NuggftV1Test {
     function test__revert__mint__0x65__pass__desc() public {
         expect.mint().from(users.frank).exec(500);
 
-        expect.mint().from(users.frank).exec(10499);
+        expect.mint().from(users.frank).exec(OFFSET - 1);
     }
 }

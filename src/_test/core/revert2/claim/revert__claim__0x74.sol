@@ -59,6 +59,8 @@ abstract contract revert__claim__0x74 is NuggftV1Test {
 
     function test__revert__claim__0x74__pass__item__nonWinningIncorrectSenderIncorrectArg() public revert__claim__0x74_setUp {
         expect.claim().from(users.charlie).exec(array.s160(FRANKS_TOKEN_SELLING_ITEM_ID), array.bAddress(address(uint160(CHARLIES_TOKEN))));
+
+        expect.claim().from(users.charlie).exec(array.s160(FRANKS_TOKEN_SELLING_ITEM_ID), array.bAddress(address(uint160(DENNISS_TOKEN))));
     }
 
     function test__revert__claim__0x74__fail__item__userWithPendingWinningNuggClaim() public revert__claim__0x74_setUp {

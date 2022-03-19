@@ -24,7 +24,7 @@ contract deployment__NuggFatherV1 is NuggftV1Test {
 
         forge.vm.startPrank(dub6ix);
         // NuggFatherV1 father = new NuggFatherV1();
-        NuggFatherV1 father = new NuggFatherV1(0x362fe7e5a462b962a02d2209245d33cee08413192407917e03e4610141000000);
+        NuggFatherV1 father = new NuggFatherV1();
 
         // ds.emit_log_address(address(father.nuggft()));
 
