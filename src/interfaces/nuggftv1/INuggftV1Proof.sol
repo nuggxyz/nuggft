@@ -20,9 +20,9 @@ interface INuggftV1Proof {
 
     function proofOf(uint160 tokenId) external view returns (uint256);
 
-    function imageURI(uint256 tokenId) external view returns (string memory res);
+    function imageURI(uint256 tokenId) external view returns (string memory);
 
-    function itemURI(uint256 itemId) external view returns (string memory res);
+    function itemURI(uint256 itemId) external view returns (string memory);
 
-    function featureLength(uint8 itemId) external view returns (uint8 res);
+    function featureLength(uint8 itemId) external view returns (uint8);
 }

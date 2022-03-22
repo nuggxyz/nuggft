@@ -463,10 +463,9 @@ abstract contract NuggftV1Swap is INuggftV1ItemSwap, INuggftV1Swap, NuggftV1Stak
 
                 // calculate offers[tokenId].slot storage pointer
                 mstore(0x80, offerer)
-                mstore(0xa0, offer__sptr)
+                mstore(0xA0, offer__sptr)
                 offer__sptr := keccak256(0x80, 0x40)
 
-                mstore(0xA0, proofs.slot)
 
                 // check if the offerer is the current agent ()
                 switch eq(offerer, juke(agency__cache, 96, 96))
@@ -491,7 +490,9 @@ abstract contract NuggftV1Swap is INuggftV1ItemSwap, INuggftV1Swap, NuggftV1Stak
                     case 1 {
                         sstore(agency__sptr, 0)
 
-                        let proof__sptr := keccak256(0x80, 0x40)
+                        mstore(0x140, offerer)
+
+                        let proof__sptr := keccak256(0x140, 0x40)
 
                         let proof := sload(proof__sptr)
 
@@ -506,8 +507,6 @@ abstract contract NuggftV1Swap is INuggftV1ItemSwap, INuggftV1Swap, NuggftV1Stak
 
                         sstore(proof__sptr, proof)
 
-                        mstore(0xA0, proof)
-
                         mstore(0x1A0, or(or(and(tokenId, 0xffff000000) , offerer), shl(40, 0x02)))
 
                         mstore(sub(0x222,12), address())
@@ -516,10 +515,14 @@ abstract contract NuggftV1Swap is INuggftV1ItemSwap, INuggftV1Swap, NuggftV1Stak
                         mstore8(0x236, 0x01)
 
                         pop(call(gas(), juke(keccak256(0x220, 0x17),96,96), 0x00, 0x1A0, 0x20, 0x00, 0x00))
+
+                        mstore(0x1A0, proof)
                     }
                     default {
 
-                        let proof__sptr := keccak256(0x80, 0x40)
+                        mstore(0x140, tokenId)
+
+                        let proof__sptr := keccak256(0x140, 0x40)
 
                         if iszero(sload(proof__sptr)) {
                             mstore(0xA0, hotproof.slot)
@@ -571,7 +574,8 @@ abstract contract NuggftV1Swap is INuggftV1ItemSwap, INuggftV1Swap, NuggftV1Stak
 
                 switch isItem
                 case 1 {
-                    log4(0x00, 0x00, Event__ClaimItem, and(tokenId, 0xffffff), shl(240, shr(24, tokenId)), offerer)
+                    log4(0x1A0, 0x20, Event__ClaimItem, and(tokenId, 0xffffff), shl(240, shr(24, tokenId)), offerer)
+                    mstore(0x1A0, 0x00)
                 }
                 default {
                     log3(0x00, 0x00, Event__Claim, tokenId, offerer)
@@ -715,8 +719,9 @@ abstract contract NuggftV1Swap is INuggftV1ItemSwap, INuggftV1Swap, NuggftV1Stak
 
                 // log2 with 'Sell(uint160,bytes32)' topic
                 mstore(0x00, agency__cache)
+                mstore(0x20, proof)
 
-                log3(0x00, 0x20, Event__SellItem, and(tokenId, 0xffffff), shl(240, shr(24, tokenId)))
+                log3(0x00, 0x40, Event__SellItem, and(tokenId, 0xffffff), shl(240, shr(24, tokenId)))
             }
             default {
                 // ensure the caller is the agent
@@ -883,8 +888,8 @@ abstract contract NuggftV1Swap is INuggftV1ItemSwap, INuggftV1Swap, NuggftV1Stak
         override
         returns (
             bool canOffer,
-            uint96 nextSwapAmount,
-            uint96 senderCurrentOffer
+            uint96 next,
+            uint96 current
         )
     {
         canOffer = true;
@@ -901,14 +906,14 @@ abstract contract NuggftV1Swap is INuggftV1ItemSwap, INuggftV1Swap, NuggftV1Stak
 
         if (uint24(agency__cache >> 230) == 0 && offerData == agency__cache) canOffer = false;
 
-        senderCurrentOffer = uint96((offerData << 26) >> 186);
+        current = uint96((offerData << 26) >> 186);
 
-        nextSwapAmount = uint96((agency__cache << 26) >> 186);
+        next = uint96((agency__cache << 26) >> 186);
 
-        if (nextSwapAmount != 0) {
-            nextSwapAmount = uint96(nextSwapAmount * INCREMENT_BPS * LOSS) / BASE_BPS;
+        if (next != 0) {
+            next = uint96(next * INCREMENT_BPS * LOSS) / BASE_BPS;
         } else {
-            nextSwapAmount = 100 gwei;
+            next = 100 gwei;
         }
     }
 }

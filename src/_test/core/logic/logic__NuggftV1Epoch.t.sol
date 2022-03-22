@@ -24,7 +24,7 @@ abstract contract logic__NuggftV1Epoch is NuggftV1Test {
     // }
 
     function test__logic__NuggftV1Epoch__toEpoch__symbolic(uint32 blocknum, uint32 gen) public {
-        if (blocknum < gen || gen < 14360430 || blocknum > 14360430 * 50) return;
+        if (blocknum < gen || gen < 14360430 || blocknum > 14360430 * 25) return;
 
         assertEq(
             nuggft.external__toEpoch(blocknum, uint32(gen)), //
