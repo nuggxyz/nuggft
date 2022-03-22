@@ -94,7 +94,7 @@ contract Erc1155Emmitter is IERC1155 {
 
 abstract contract NuggftV1Proof is INuggftV1Proof, NuggftV1Epoch, NuggftV1Trust {
     mapping(uint160 => uint256) proofs;
-    mapping(uint8 => uint256) hotproof;
+    mapping(uint256 => uint256) public hotproof;
 
     mapping(uint256 => uint256) public agency;
 

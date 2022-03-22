@@ -11,7 +11,7 @@ interface INuggftV1Stake {
 
     event Burn(uint160 tokenId, address owner, uint96 ethOwed);
 
-    event Stake(bytes32 cache);
+    event Stake(bytes32 stake);
 
     function migrate(uint160 tokenId) external;
 
@@ -31,7 +31,7 @@ interface INuggftV1Stake {
     /// @dev premium here is used to push against dillution of supply through ensuring the price always increases
     /// @dev used by the front end
     /// @return res -> premium + protcolFee + ethPerShare
-    function msp() external view returns (uint96 res);
+    function msp() external view returns (uint96);
 
     /// @notice returns the amount of eth extractable by protocol
     /// @dev this will be

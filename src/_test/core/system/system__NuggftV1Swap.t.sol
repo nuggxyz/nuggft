@@ -531,4 +531,52 @@ abstract contract system__NuggftV1Swap is NuggftV1Test, fragments {
         forge.vm.prank(tmpUsers[size - 3]);
         nuggft.claim(tmpIds, tmpTokens);
     }
+
+    function test__system__hotproof__pass() public {
+        logHotproof();
+
+        jump(3000);
+
+        uint24 tokenId = nuggft.epoch();
+
+        uint256 proofBeforeOffer = nuggft.proofOf(tokenId);
+
+        expect.offer().from(users.frank).exec{value: nuggft.vfo(users.frank, tokenId)}(tokenId);
+
+        uint256 proofAfterOffer = nuggft.proofOf(tokenId);
+        logHotproof();
+
+        jump(tokenId + 1);
+
+        uint24 tokenId2 = nuggft.epoch();
+
+        expect.offer().from(users.dee).exec{value: nuggft.vfo(users.dee, tokenId)}(tokenId2);
+        logHotproof();
+
+        jump(tokenId2 + 1);
+
+        uint256 proofBeforeClaim = nuggft.proofOf(tokenId);
+
+        expect.claim().from(users.frank).exec(array.b160(tokenId), array.bAddress(users.frank));
+
+        uint256 proofAfterClaim = nuggft.proofOf(tokenId);
+
+        logHotproof();
+
+        ds.emit_log_named_bytes32("proofBeforeOffer", bytes32(proofBeforeOffer));
+        ds.emit_log_named_bytes32("proofAfterOffer", bytes32(proofAfterOffer));
+        ds.emit_log_named_bytes32("proofBeforeClaim", bytes32(proofBeforeClaim));
+        ds.emit_log_named_bytes32("proofAfterClaim", bytes32(proofAfterClaim));
+
+        ds.assertNotEq(proofBeforeOffer, 0, "proofBeforeOffer should not be 0");
+        ds.assertEq(proofAfterOffer, proofBeforeOffer, "proofAfterOffer should be proofBeforeOffer");
+        ds.assertEq(proofBeforeClaim, proofBeforeOffer, "proofBeforeClaim should be proofBeforeOffer");
+        ds.assertEq(proofAfterClaim, proofBeforeOffer, "proofAfterClaim should be proofBeforeOffer");
+    }
+
+    function logHotproof() public {
+        for (uint256 i = 0; i < HOT_PROOF_AMOUNT; i++) {
+            ds.emit_log_named_bytes32(strings.toAsciiString(i), bytes32(nuggft.hotproof(i)));
+        }
+    }
 }
