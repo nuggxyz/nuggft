@@ -35,7 +35,7 @@ interface INuggftV1Stake {
 
     /// @notice returns the amount of eth extractable by protocol
     /// @dev this will be
-    /// @return res -> (PROTOCOL_FEE_BPS * [all eth staked] / 10000) - [all previously extracted eth]
+    /// @return res -> (PROTOCOL_FEE_FRAC * [all eth staked] / 10000) - [all previously extracted eth]
     function proto() external view returns (uint96);
 
     /// @notice returns the total number of staked shares held by the contract

@@ -254,6 +254,10 @@ contract NuggftV1Test is ForgeTest, NuggftV1Constants {
         jump(nuggft.epoch() + uint24(LIQUIDATION_PERIOD) + 1);
     }
 
+    function jumpLoanDown(uint256 amount) public {
+        jump(nuggft.epoch() + uint24(uint24(LIQUIDATION_PERIOD) + 1 - amount));
+    }
+
     function hopUp(uint256 amount) public {
         forge.vm.roll(block.number + amount);
     }

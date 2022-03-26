@@ -30,7 +30,7 @@ abstract contract logic__NuggftV1Stake is NuggftV1Test {
     //     // assembly {
     //     //     cache := sload(stake.slot)
 
-    //     //     let pro := div(mul(eth, PROTOCOL_FEE_BPS), 10000)
+    //     //     let pro := div(mul(eth, PROTOCOL_FEE_FRAC), 10000)
 
     //     //     cache := add(and(shr(96, cache), sub(shl(96, 1), 1)), sub(eth, pro))
 

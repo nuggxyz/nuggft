@@ -13,7 +13,7 @@ abstract contract revert__rebalance__0x75 is NuggftV1Test {
 
         expect.mint().from(users.frank).value(2 ether).exec(501);
 
-        jump(3999);
+        jumpLoanDown(1);
 
         expect.rebalance().from(ds.noFallback).value(nuggft.vfr(lib.sarr160(500))[0]).err(0xA4).exec(lib.sarr160(500));
     }
@@ -26,7 +26,7 @@ abstract contract revert__rebalance__0x75 is NuggftV1Test {
 
         expect.mint().from(users.frank).value(2 ether).exec(501);
 
-        jump(4026); // liquidation period is 1024 epochs
+        jumpLoan(); // liquidation period is 1024 epochs
 
         expect.rebalance().from(ds.hasFallback).value(nuggft.vfr(lib.sarr160(500))[0]).exec(lib.sarr160(500));
     }

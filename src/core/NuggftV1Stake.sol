@@ -79,7 +79,7 @@ abstract contract NuggftV1Stake is INuggftV1Stake, NuggftV1Proof {
 
             let _eps := div(shr(160, shl(64, cache)), shrs)
 
-            let fee := div(_eps, PROTOCOL_FEE_BPS_MINT)
+            let fee := div(_eps, PROTOCOL_FEE_FRAC_MINT)
 
             let premium := div(mul(_eps, shrs), 10000)
 
@@ -97,8 +97,8 @@ abstract contract NuggftV1Stake is INuggftV1Stake, NuggftV1Proof {
             let overpay := sub(callvalue(), _msp)
 
             // add fee of overpay to fee
-            fee := add(div(overpay, PROTOCOL_FEE_BPS), fee)
-            // fee := div(callvalue(), PROTOCOL_FEE_BPS_MINT)
+            fee := add(div(overpay, PROTOCOL_FEE_FRAC), fee)
+            // fee := div(callvalue(), PROTOCOL_FEE_FRAC_MINT)
 
             // update stake
             // =======================
@@ -121,7 +121,7 @@ abstract contract NuggftV1Stake is INuggftV1Stake, NuggftV1Proof {
     /// @param value the amount of eth being staked - must be some portion of msg.value
     function addStakedEth(uint96 value) internal {
         assembly {
-            let pro := div(value, PROTOCOL_FEE_BPS)
+            let pro := div(value, PROTOCOL_FEE_FRAC)
 
             let cache := add(sload(stake.slot), or(shl(96, sub(value, pro)), pro))
 
@@ -150,7 +150,7 @@ abstract contract NuggftV1Stake is INuggftV1Stake, NuggftV1Proof {
         assembly {
             let shrs := shr(192, cache)
             ethPerShare := div(and(shr(96, cache), sub(shl(96, 1), 1)), shrs)
-            protocolFee := div(ethPerShare, PROTOCOL_FEE_BPS_MINT)
+            protocolFee := div(ethPerShare, PROTOCOL_FEE_FRAC_MINT)
             premium := div(mul(ethPerShare, shrs), 10000)
             total := add(ethPerShare, add(protocolFee, premium))
         }

@@ -11,10 +11,10 @@ abstract contract NuggftV1Constants {
     uint256 constant HOT_PROOF_EMPTY = 0x10000;
 
     uint96 constant LOSS = .1 gwei;
-    uint8 constant HOT_PROOF_AMOUNT = 16;
+    uint8 constant HOT_PROOF_AMOUNT = 32;
     // stake
-    uint96 constant PROTOCOL_FEE_BPS = 10;
-    uint96 constant PROTOCOL_FEE_BPS_MINT = 1;
+    uint96 constant PROTOCOL_FEE_FRAC = 10;
+    uint96 constant PROTOCOL_FEE_FRAC_MINT = 1;
 
     // epoch
     uint8 constant INTERVAL_SUB = 16;
@@ -27,10 +27,10 @@ abstract contract NuggftV1Constants {
     uint96 public constant REBALANCE_FEE_BPS = 600;
 
     // loan
-    uint24 constant LIQUIDATION_PERIOD = 1024;
+    uint24 constant LIQUIDATION_PERIOD = 9999;
 
     // swap
-    uint256 constant SALE_LEN = 4;
+    uint256 constant SALE_LEN = 989;
 
     // events
     bytes32 constant Event__Transfer = 0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef;

@@ -330,7 +330,7 @@ abstract contract NuggftV1Swap is INuggftV1ItemSwap, INuggftV1Swap, NuggftV1Stak
             mstore(0x00, agency__cache)
 
 
-            next := div(last, PROTOCOL_FEE_BPS)
+            next := div(last, PROTOCOL_FEE_FRAC)
             last := add(sload(stake.slot), or(shl(96, sub(last, next)), next))
             sstore(stake.slot, last)
             mstore(0x20, last)
@@ -610,7 +610,7 @@ abstract contract NuggftV1Swap is INuggftV1ItemSwap, INuggftV1Swap, NuggftV1Stak
             }
             default {
                 // if someone really ends up here, just donate the eth
-                let pro := div(acc, PROTOCOL_FEE_BPS)
+                let pro := div(acc, PROTOCOL_FEE_FRAC)
 
                 let cache := add(sload(stake.slot), or(shl(96, sub(acc, pro)), pro))
 
