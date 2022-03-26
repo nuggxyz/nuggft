@@ -50,7 +50,7 @@ contract stress__NuggftV1Loan is NuggftV1Test {
                 require(frankStartBal - value + __earn - __fee == users.frank.balance, "D");
             }
 
-            forge.vm.roll(block.number + 1);
+            hopUp(1);
         }
 
         forge.vm.stopPrank();

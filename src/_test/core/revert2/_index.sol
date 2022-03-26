@@ -79,8 +79,6 @@ contract Revert2 is
     revert__sell__0xA9
 {
     function setUp() public {
-        forge.vm.roll(14069560);
-
         ds.setDsTest(address(this));
 
         // dep.init();
