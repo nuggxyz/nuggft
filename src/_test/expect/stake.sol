@@ -77,7 +77,7 @@ contract expectStake is base, NuggftV1Constants {
 
         int256 expectedProto = 0;
 
-        int192 protofee = int192(int256(uint256(run.mint ? PROTOCOL_FEE_BPS_MINT : PROTOCOL_FEE_BPS)));
+        int192 protofee = int192(int256(uint256(PROTOCOL_FEE_BPS)));
 
         if (run.burn) {
             ds.assertLe(post.msp, pre.msp, "msp should have decreased");
@@ -87,7 +87,7 @@ contract expectStake is base, NuggftV1Constants {
         }
 
         if (run.mint) {
-            int192 fee = pre.eps / protofee;
+            int192 fee = pre.eps / int192(int256(uint256(PROTOCOL_FEE_BPS_MINT)));
             int192 overpay = run.expected_stake_change - pre.msp;
             fee += overpay / protofee;
             expectedProto = fee;

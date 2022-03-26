@@ -24,7 +24,7 @@ abstract contract system__NuggftV1Swap is NuggftV1Test, fragments {
 
         expect.mint().from(users.frank).value(1 ether).exec(TRUSTED_MINT_TOKENS);
         // if nothing else is in the pool then value goes to 0 and tests fail
-        expect.mint().from(users.frank).value(1 ether).exec(TRUSTED_MINT_TOKENS + 1);
+        expect.mint().from(users.frank).value(nuggft.msp()).exec(TRUSTED_MINT_TOKENS + 1);
 
         expect.burn().from(users.frank).exec(TRUSTED_MINT_TOKENS);
     }
@@ -563,8 +563,9 @@ abstract contract system__NuggftV1Swap is NuggftV1Test, fragments {
         jump(tokenId + 1);
 
         uint24 tokenId2 = nuggft.epoch();
+        nuggft.check(users.frank, tokenId2);
 
-        expect.offer().from(users.dee).exec{value: nuggft.vfo(users.dee, tokenId)}(tokenId2);
+        expect.offer().from(users.dee).exec{value: nuggft.vfo(users.dee, tokenId2)}(tokenId2);
         logHotproof();
 
         jump(tokenId2 + 1);

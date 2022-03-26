@@ -22,8 +22,8 @@ abstract contract revert__claim__0x74 is NuggftV1Test {
     modifier revert__claim__0x74_setUp() {
         // mint required tokens
         expect.mint().from(users.frank).exec{value: 1 ether}(FRANKS_TOKEN);
-        expect.mint().from(users.charlie).exec{value: 1 ether}(CHARLIES_TOKEN);
-        expect.mint().from(users.dennis).exec{value: 1 ether}(DENNISS_TOKEN);
+        expect.mint().from(users.charlie).exec{value: nuggft.msp()}(CHARLIES_TOKEN);
+        expect.mint().from(users.dennis).exec{value: nuggft.msp()}(DENNISS_TOKEN);
 
         // frank gets a sellable itemId
         ITEM_ID = uint16(nuggft.floop(FRANKS_TOKEN)[2]);
@@ -37,10 +37,10 @@ abstract contract revert__claim__0x74 is NuggftV1Test {
         jump(3500);
 
         // DEE makes a LOSING NUGG offer
-        expect.offer().from(users.dee).exec{value: 2.2 ether}(FRANKS_TOKEN);
+        expect.offer().from(users.dee).exec{value: nuggft.vfo(users.dee, FRANKS_TOKEN)}(FRANKS_TOKEN);
 
         // MAC makes a WINNING NUGG offer
-        expect.offer().from(users.mac).exec{value: 3 ether}(FRANKS_TOKEN);
+        expect.offer().from(users.mac).exec{value: nuggft.vfo(users.mac, FRANKS_TOKEN)}(FRANKS_TOKEN);
 
         // CHARLIE makes a LOSING ITEM offer
         expect.offer().from(users.charlie).exec{value: 2.2 ether}(CHARLIES_TOKEN, FRANKS_TOKEN, ITEM_ID);
@@ -53,25 +53,25 @@ abstract contract revert__claim__0x74 is NuggftV1Test {
         _;
     }
 
-    function test__revert__claim__0x74__pass__nugg__correctSenderCorrectArg() public revert__claim__0x74_setUp globalDs {
+    function test__revert__claim__0x74__pass__nugg__correctSenderCorrectArg() public revert__claim__0x74_setUp {
         expect.claim().from(users.mac).exec(array.s160(FRANKS_TOKEN), array.bAddress(users.mac));
     }
 
-    function test__revert__claim__0x74__pass__item__nonWinningIncorrectSenderIncorrectArg() public revert__claim__0x74_setUp globalDs {
+    function test__revert__claim__0x74__pass__item__nonWinningIncorrectSenderIncorrectArg() public revert__claim__0x74_setUp {
         expect.claim().from(users.charlie).exec(array.s160(FRANKS_TOKEN_SELLING_ITEM_ID), array.bAddress(address(uint160(CHARLIES_TOKEN))));
 
         expect.claim().from(users.charlie).exec(array.s160(FRANKS_TOKEN_SELLING_ITEM_ID), array.bAddress(address(uint160(DENNISS_TOKEN))));
     }
 
-    function test__revert__claim__0x74__fail__item__userWithPendingWinningNuggClaim() public revert__claim__0x74_setUp globalDs {
+    function test__revert__claim__0x74__fail__item__userWithPendingWinningNuggClaim() public revert__claim__0x74_setUp {
         expect.claim().err(0x74).from(users.mac).exec(array.s160(FRANKS_TOKEN_SELLING_ITEM_ID), array.bAddress(users.mac));
     }
 
-    function test__revert__claim__0x74__fail__nugg__incorrectSenderCorrectArg() public revert__claim__0x74_setUp globalDs {
+    function test__revert__claim__0x74__fail__nugg__incorrectSenderCorrectArg() public revert__claim__0x74_setUp {
         expect.claim().err(0x74).from(users.dee).exec(array.s160(FRANKS_TOKEN_SELLING_ITEM_ID), array.bAddress(users.mac));
     }
 
-    function test__revert__claim__0x74__fail__item__nonWinningIncorrectSenderIncorrectArgIncorectUser() public revert__claim__0x74_setUp globalDs {
+    function test__revert__claim__0x74__fail__item__nonWinningIncorrectSenderIncorrectArgIncorrectUser() public revert__claim__0x74_setUp {
         expect.claim().err(0x74).from(users.dee).exec(array.s160(FRANKS_TOKEN_SELLING_ITEM_ID), array.bAddress(address(uint160(CHARLIES_TOKEN))));
     }
 

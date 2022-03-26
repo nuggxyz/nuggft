@@ -36,7 +36,7 @@ abstract contract revert__NuggftV1Loan is NuggftV1Test {
 
         expect.loan().g().exec(lib.sarr160(LOAN_TOKENID));
 
-        expect.mint().g().exec{value: 1 ether}(LOAN_TOKENID + 1);
+        expect.mint().g().exec{value: nuggft.msp()}(LOAN_TOKENID + 1);
 
         expect.loan().g().err(0x77).exec(lib.sarr160(LOAN_TOKENID));
     }
