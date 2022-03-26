@@ -165,7 +165,6 @@ contract NuggftV1 is IERC721, IERC721Metadata, NuggftV1Loan {
     /// @inheritdoc IERC165
     function supportsInterface(bytes4 interfaceId) public view virtual override returns (bool) {
         return
-            // interfaceId == 0xd9b67a26 || //
             interfaceId == type(IERC721).interfaceId || //
             interfaceId == type(IERC721Metadata).interfaceId ||
             interfaceId == type(IERC165).interfaceId;

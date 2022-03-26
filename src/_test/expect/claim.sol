@@ -54,6 +54,12 @@ contract expectClaim is base {
         exec(tokenIds, offerers, _prepped);
     }
 
+    function exec(uint160[] memory tokenIds, uint160[] memory offerers) public {
+        lib.txdata memory _prepped = prepped;
+        delete prepped;
+        exec(tokenIds, offerers, _prepped);
+    }
+
     struct Snapshot {
         SnapshotEnv env;
         SnapshotData data;

@@ -16,7 +16,7 @@ abstract contract revert__sell__0xA3 is NuggftV1Test {
     }
 
     function test__revert__sell__0xA3__pass__desc() public {
-        jump(3000);
+        jumpStart();
 
         (uint160 tokenId, uint16 itemId, ) = scenario_dee_has_a_token_and_can_sell_an_item();
 
@@ -24,7 +24,7 @@ abstract contract revert__sell__0xA3 is NuggftV1Test {
 
         expect.offer().from(users.mac).value(1.3 ether).exec(tokenId);
 
-        jump(3002);
+        jumpSwap();
 
         expect.claim().from(users.mac).exec(lib.sarr160(tokenId), lib.sarrAddress(users.mac));
 

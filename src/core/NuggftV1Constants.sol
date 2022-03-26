@@ -20,7 +20,7 @@ abstract contract NuggftV1Constants {
     uint8 constant INTERVAL_SUB = 16;
     uint16 constant MINT_INTERVAL = 4;
 
-    uint24 constant INTERVAL = 256;
+    uint24 constant INTERVAL = 64;
 
     uint96 constant BASE_BPS = 10000;
     uint96 constant INCREMENT_BPS = 10500;
@@ -30,7 +30,7 @@ abstract contract NuggftV1Constants {
     uint24 constant LIQUIDATION_PERIOD = 1024;
 
     // swap
-    uint256 constant SALE_LEN = 1;
+    uint256 constant SALE_LEN = 4;
 
     // events
     bytes32 constant Event__Transfer = 0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef;
