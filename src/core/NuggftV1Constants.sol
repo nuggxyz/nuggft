@@ -20,14 +20,14 @@ abstract contract NuggftV1Constants {
     uint8 constant INTERVAL_SUB = 16;
     uint16 constant MINT_INTERVAL = 4;
 
-    uint24 constant INTERVAL = 32;
+    uint24 constant INTERVAL = 256;
 
     uint96 constant BASE_BPS = 10000;
     uint96 constant INCREMENT_BPS = 10500;
+    uint96 public constant REBALANCE_FEE_BPS = 100;
 
     // loan
     uint24 constant LIQUIDATION_PERIOD = 1024;
-    uint96 public constant REBALANCE_FEE_BPS = 100;
 
     // swap
     uint256 constant SALE_LEN = 1;
@@ -91,6 +91,8 @@ abstract contract NuggftV1Constants {
     uint8 constant Error__0xAB__NotLiveItemSwap = 0xAB;
     uint8 constant Error__0xAC__MustFinalizeOtherItemSwap = 0xAC;
     uint8 constant Error__0xAD__InvalidZeroProof = 0xAD;
+
+    // uint8 constant Error__0xAE__InvalidZeroProof = 0xAD;
 
     function _panic(uint8 code) internal pure {
         assembly {

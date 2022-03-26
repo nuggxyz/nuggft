@@ -177,7 +177,7 @@ abstract contract system__NuggftV1Swap is NuggftV1Test, fragments {
             tmpTokens.push(OFFSET + i);
             jump(uint24(tmpTokens[i]));
             for (; user__count < i * 10; user__count++) {
-                tmpUsers.push(forge.vm.addr(user__count + 100));
+                tmpUsers.push(address(uint160(uint256(keccak256("nuggfacotry")) + user__count)));
                 uint96 money = nuggft.vfo(tmpUsers[user__count], tmpTokens[i]);
                 forge.vm.deal(tmpUsers[user__count], money);
                 expect.offer().start(tmpTokens[i], tmpUsers[user__count], money);
@@ -210,7 +210,7 @@ abstract contract system__NuggftV1Swap is NuggftV1Test, fragments {
         address[] memory user__list = new address[](size);
 
         for (uint256 i = 0; i < size; i++) {
-            user__list[i] = forge.vm.addr(i + 6);
+            user__list[i] = address(uint160(uint256(keccak256(abi.encodePacked(i + 6)))));
         }
         for (uint24 p = 0; p < size; p++) {
             for (uint256 i = 0; i < size; i++) {
@@ -249,11 +249,8 @@ abstract contract system__NuggftV1Swap is NuggftV1Test, fragments {
 
     function test__system__revert__0xA0__offerWarClaimTwice() public clean {
         test__system__offerWar();
-        // bytes memory mem = expect.startExpectClaim(lib.sarr160(tmpTokens[1]), lib.sarrAddress(tmpUsers[1]), tmpUsers[1]);
-        forge.vm.expectRevert(hex"7e863b48_A0");
-        forge.vm.prank(tmpUsers[1]);
-        nuggft.claim(lib.sarr160(tmpTokens[1]), lib.sarrAddress(tmpUsers[1]));
-        // expect.claim().stop();
+
+        expect.claim().from(tmpUsers[1]).err(0xA0).exec(lib.sarr160(tmpTokens[1]), lib.sarrAddress(tmpUsers[1]));
     }
 
     function test__system__revert__0xA0__claim__twice__frank() public clean {
