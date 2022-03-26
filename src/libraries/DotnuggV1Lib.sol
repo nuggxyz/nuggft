@@ -227,11 +227,11 @@ library DotnuggV1Lib {
         }
     }
 
-    function rarityX128(
+    function rarity(
         address safe,
-        uint256 feature,
-        uint256 position
-    ) internal view returns (uint256 res) {
+        uint8 feature,
+        uint8 position
+    ) internal view returns (uint16 res) {
         address loc = location(safe, uint8(feature));
 
         assembly {
@@ -251,7 +251,12 @@ library DotnuggV1Lib {
                 res := sub(and(res, 0xffff), low)
             }
 
-            res := shl(112, res)
+            // res := shl(112, res)
         }
     }
+}
+
+function parseItemId(uint16 itemId) pure returns (uint8 feat, uint8 pos) {
+    feat = uint8(itemId >> 8);
+    pos = uint8(itemId);
 }

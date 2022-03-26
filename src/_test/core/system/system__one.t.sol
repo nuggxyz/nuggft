@@ -6,13 +6,14 @@ import "../../NuggftV1.test.sol";
 
 abstract contract system__one is NuggftV1Test {
     using SafeCast for uint96;
+    uint160 private TOKEN1 = mintable(0);
 
     function test__logic__NuggftV1Proof__rotate() public {
-        expect.mint().from(users.frank).exec{value: 1 ether}(500);
-        nuggft.floop(500);
+        expect.mint().from(users.frank).exec{value: 1 ether}(TOKEN1);
+        nuggft.floop(TOKEN1);
         forge.vm.prank(users.frank);
-        nuggft.rotate(500, array.b8(1, 2, 3, 4, 5, 6, 7), array.b8(9, 10, 11, 12, 13, 14, 15));
-        nuggft.floop(500);
+        nuggft.rotate(TOKEN1, array.b8(1, 2, 3, 4, 5, 6, 7), array.b8(9, 10, 11, 12, 13, 14, 15));
+        nuggft.floop(TOKEN1);
     }
 
     function test__system__frankMintsATokenForFree() public {
@@ -22,7 +23,7 @@ abstract contract system__one is NuggftV1Test {
 
         forge.vm.startPrank(users.frank);
         {
-            nuggft.mint(500);
+            nuggft.mint(TOKEN1);
         }
         forge.vm.stopPrank();
 
@@ -40,7 +41,7 @@ abstract contract system__one is NuggftV1Test {
 
         forge.vm.startPrank(users.frank);
         {
-            nuggft.mint{value: value}(500);
+            nuggft.mint{value: value}(TOKEN1);
         }
         forge.vm.stopPrank();
 
@@ -69,7 +70,7 @@ abstract contract system__one is NuggftV1Test {
 
     //     forge.vm.startPrank(users.frank);
     //     {
-    //         nuggft.mint{value: value}(500);
+    //         nuggft.mint{value: value}(TOKEN1);
     //     }
     //     forge.vm.stopPrank();
 
@@ -128,7 +129,7 @@ abstract contract system__one is NuggftV1Test {
 
         forge.vm.startPrank(users.frank);
         {
-            nuggft.mint{value: value}(500);
+            nuggft.mint{value: value}(TOKEN1);
         }
         forge.vm.stopPrank();
 
@@ -141,7 +142,7 @@ abstract contract system__one is NuggftV1Test {
     function test__system__frankMintsATokenFor100gwei() public {
         uint96 value = 1000 gwei;
 
-        uint160 tokenId = 500;
+        uint160 tokenId = TOKEN1;
 
         // expect.stake().start(value, 1, true);
         expect.balance().start(users.frank, value, false);
@@ -150,7 +151,7 @@ abstract contract system__one is NuggftV1Test {
         forge.vm.startPrank(users.frank);
         {
             expect.mint().start(tokenId, users.frank, value);
-            nuggft.mint{value: value}(500);
+            nuggft.mint{value: value}(TOKEN1);
             expect.mint().stop();
         }
         forge.vm.stopPrank();

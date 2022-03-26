@@ -8,7 +8,7 @@ import {ShiftLib} from "../../helpers/ShiftLib.sol";
 import {NuggftV1Loan} from "../../../core/NuggftV1Loan.sol";
 
 contract stress__NuggftV1Loan is NuggftV1Test {
-    uint160 internal constant LOAN_TOKENID = 1499;
+    uint160 internal LOAN_TOKENID = mintable(999);
 
     uint160 multiplier = 10;
 
@@ -60,11 +60,13 @@ contract stress__NuggftV1Loan is NuggftV1Test {
         console.log(nuggft.eps(), nuggft.msp());
         forge.vm.deal(users.frank, 1000000000 ether);
 
-        uint160[] memory tokenIds = new uint160[](950);
+        uint256 num = 950;
+        uint160 mint1 = mintable(0);
+        uint160[] memory tokenIds = new uint160[](num);
         forge.vm.startPrank(users.frank);
 
-        for (uint160 i = 500; i < 1450; i++) {
-            tokenIds[i - 500] = i;
+        for (uint160 i = mint1; i < mint1 + num; i++) {
+            tokenIds[i - mint1] = i;
 
             nuggft.mint{value: nuggft.msp()}(i);
 
@@ -89,15 +91,17 @@ contract stress__NuggftV1Loan is NuggftV1Test {
     function test__stress__NuggftV1Loan__rebalance__multi__manyAccounts() public globalDs {
         console.log(nuggft.eps(), nuggft.msp());
         // forge.vm.deal(users.frank, 1000000000 ether);
+        uint256 num = 950;
+        uint160 mint1 = mintable(0);
 
-        uint160[] memory tokenIds = new uint160[](950);
+        uint160[] memory tokenIds = new uint160[](num);
 
-        jump(OFFSET + 1);
+        jumpStart();
 
-        for (uint160 i = 500; i < 1450; i++) {
+        for (uint160 i = mint1; i < (mint1 + num); i++) {
             address a = forge.vm.addr(i * 2699);
 
-            tokenIds[i - 500] = i;
+            tokenIds[i - mint1] = i;
 
             forge.vm.deal(a, nuggft.msp());
 
@@ -108,8 +112,7 @@ contract stress__NuggftV1Loan is NuggftV1Test {
 
         emit log_named_uint("balance", address(nuggft).balance);
 
-        jump(OFFSET + LIQUIDATION_PERIOD + 2);
-
+        jumpLoan();
         // uint96 frankStartBal = uint96(users.frank.balance);
 
         // (, , , , uint24 b_insolventEpoch) = nuggft.loanInfo(LOAN_TOKENID);
@@ -140,13 +143,13 @@ contract stress__NuggftV1Loan is NuggftV1Test {
     function test__stress__NuggftV1Loan__rebalance__small() public {
         console.log(nuggft.eps(), nuggft.msp());
 
-        jump(OFFSET + 1);
+        jumpStart();
 
         address a = address(uint160(0x11111));
         address b = address(uint160(0x22222));
 
-        uint160 tokenId = 500;
-        uint160 tokenId2 = 501;
+        uint160 tokenId = mintable(0);
+        uint160 tokenId2 = mintable(1);
 
         expect.mint().from(a).exec{value: nuggft.msp()}(tokenId);
         expect.mint().from(b).exec{value: nuggft.msp()}(tokenId2);
@@ -156,7 +159,7 @@ contract stress__NuggftV1Loan is NuggftV1Test {
 
         emit log_named_uint("balance", address(nuggft).balance);
 
-        jump(OFFSET + LIQUIDATION_PERIOD + 2);
+        jumpLoan();
 
         uint160[] memory tokenIds = array.b160(tokenId, tokenId2);
 

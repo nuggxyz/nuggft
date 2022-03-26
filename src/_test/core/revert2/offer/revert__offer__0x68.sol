@@ -6,7 +6,7 @@ import "../../../NuggftV1.test.sol";
 
 abstract contract revert__offer__0x68 is NuggftV1Test {
     function test__revert__offer__0x68__fail__desc() public {
-        uint24 tokenId = 3000;
+        uint24 tokenId = nuggft.epoch();
 
         jump(tokenId);
         expect.offer().from(users.mac).value(uint96(nuggft.external__LOSS())).exec(tokenId);
@@ -16,7 +16,7 @@ abstract contract revert__offer__0x68 is NuggftV1Test {
 
     // this is the scenario we really care about
     function test__revert__offer__0x68__fail__zerocommit() public {
-        uint24 tokenId = 3000;
+        uint24 tokenId = nuggft.epoch();
 
         jump(tokenId);
 
@@ -26,7 +26,7 @@ abstract contract revert__offer__0x68 is NuggftV1Test {
     }
 
     function test__revert__offer__0x68__pass__nonmint2() public {
-        uint24 tokenId = 3000;
+        uint24 tokenId = nuggft.epoch();
 
         jump(tokenId);
 
@@ -36,14 +36,14 @@ abstract contract revert__offer__0x68 is NuggftV1Test {
     }
 
     function test__revert__offer__0x68__pass__desc() public {
-        uint24 tokenId = 3000;
+        uint24 tokenId = nuggft.epoch();
         jump(tokenId);
 
         expect.offer().from(users.frank).value(uint96(nuggft.external__LOSS() + 10 gwei)).exec(tokenId);
     }
 
     function test__revert__offer__0x68__pass__onmint() public {
-        uint24 tokenId = 3000;
+        uint24 tokenId = nuggft.epoch();
 
         jump(tokenId);
 

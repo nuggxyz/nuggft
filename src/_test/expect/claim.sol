@@ -101,6 +101,10 @@ contract expectClaim is base {
         this.start(tokenIds, offerers, txdata.from);
         forge.vm.startPrank(txdata.from);
         if (txdata.err.length > 0) forge.vm.expectRevert(txdata.err);
+        // else {
+        //     forge.vm.expectEmit(true, false, false, false);
+        //     emit Claim(0, address(0));
+        // }
         nuggft.claim(tokenIds, offerers);
         forge.vm.stopPrank();
         txdata.err.length > 0 ? this.rollback() : this.stop();

@@ -5,12 +5,16 @@ pragma solidity 0.8.13;
 import "../../../NuggftV1.test.sol";
 
 abstract contract revert__offer__0x71 is NuggftV1Test {
+    uint160 private TOKEN1 = mintable(0);
+
     function test__revert__offer__0x71__fail__desc() public {
-        uint24 tokenId = 3000;
+        jumpStart();
 
-        expect.mint().from(users.frank).value(1 ether).exec(500);
+        uint160 tokenId = nuggft.epoch();
 
-        jump(tokenId);
+        expect.mint().from(users.frank).value(1 ether).exec(TOKEN1);
+
+        // jump(tokenId);
 
         uint96 msp = nuggft.msp();
 
@@ -18,11 +22,13 @@ abstract contract revert__offer__0x71 is NuggftV1Test {
     }
 
     function test__revert__offer__0x71__pass__desc() public {
-        uint24 tokenId = 3000;
+        jumpStart();
 
-        expect.mint().from(users.frank).value(1 ether).exec(500);
+        uint160 tokenId = nuggft.epoch();
 
-        jump(tokenId);
+        expect.mint().from(users.frank).value(1 ether).exec(TOKEN1);
+
+        // jump(tokenId);
 
         uint96 msp = nuggft.msp();
 

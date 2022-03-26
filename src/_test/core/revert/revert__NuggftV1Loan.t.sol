@@ -5,7 +5,7 @@ pragma solidity 0.8.13;
 import "../../NuggftV1.test.sol";
 
 abstract contract revert__NuggftV1Loan is NuggftV1Test {
-    uint160 internal constant LOAN_TOKENID = 700;
+    uint160 internal LOAN_TOKENID = mintable(200);
 
     /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
         hex[A1] - loan - "msg.sender is operator for sender"

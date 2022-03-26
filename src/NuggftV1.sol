@@ -12,6 +12,8 @@ import {INuggftV1} from "./interfaces/nuggftv1/INuggftV1.sol";
 import {NuggftV1Loan} from "./core/NuggftV1Loan.sol";
 import {NuggftV1Proof} from "./core/NuggftV1Proof.sol";
 
+import {DotnuggV1Lib} from "./libraries/DotnuggV1Lib.sol";
+
 import {data as nuggs} from "./_data/nuggs.data.sol";
 
 /// @title NuggftV1
@@ -211,6 +213,10 @@ contract NuggftV1 is IERC721, IERC721Metadata, NuggftV1Loan {
     /// @inheritdoc INuggftV1Proof
     function featureLength(uint8 feature) public view override returns (uint8 res) {
         res = dotnuggV1.lengthOf(feature);
+    }
+
+    function rarity(uint8 feature, uint8 position) public view returns (uint16 res) {
+        res = DotnuggV1Lib.rarity(address(dotnuggV1), feature, position);
     }
 
     function imageURICheat(uint256 startblock, uint24 _epoch) public view returns (string memory res) {

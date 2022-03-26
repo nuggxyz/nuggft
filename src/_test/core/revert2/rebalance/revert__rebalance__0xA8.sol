@@ -5,17 +5,19 @@ pragma solidity 0.8.13;
 import "../../../NuggftV1.test.sol";
 
 abstract contract revert__rebalance__0xA8 is NuggftV1Test {
-    function test__revert__rebalance__0xA8__fail__desc() public {
-        expect.mint().from(users.frank).value(20 ether).exec(500);
+    uint160 private TOKEN1 = mintable(0);
 
-        expect.rebalance().from(users.frank).value(30 ether).err(0xA8).exec(lib.sarr160(500));
+    function test__revert__rebalance__0xA8__fail__desc() public {
+        expect.mint().from(users.frank).value(20 ether).exec(TOKEN1);
+
+        expect.rebalance().from(users.frank).value(30 ether).err(0xA8).exec(lib.sarr160(TOKEN1));
     }
 
     function test__revert__rebalance__0xA8__pass__desc() public {
-        expect.mint().from(users.frank).value(20 ether).exec(500);
+        expect.mint().from(users.frank).value(20 ether).exec(TOKEN1);
 
-        expect.loan().from(users.frank).exec(lib.sarr160(500));
+        expect.loan().from(users.frank).exec(lib.sarr160(TOKEN1));
 
-        expect.rebalance().from(users.frank).value(30 ether).exec(lib.sarr160(500));
+        expect.rebalance().from(users.frank).value(30 ether).exec(lib.sarr160(TOKEN1));
     }
 }
