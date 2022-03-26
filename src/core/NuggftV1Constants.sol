@@ -24,7 +24,7 @@ abstract contract NuggftV1Constants {
 
     uint96 constant BASE_BPS = 10000;
     uint96 constant INCREMENT_BPS = 10500;
-    uint96 public constant REBALANCE_FEE_BPS = 100;
+    uint96 public constant REBALANCE_FEE_BPS = 600;
 
     // loan
     uint24 constant LIQUIDATION_PERIOD = 1024;
