@@ -21,7 +21,7 @@ contract txgas__NuggftV1Stake is NuggftV1Test {
         nuggft.mint{value: 100 ether}(1201);
     }
 
-    function test__txgas__NuggftV1Stake__addStakedEth() public globalDs {
-        nuggft.mint{value: 100 ether}(1202);
+    function test__txgas__NuggftV1Stake__addStakedEth() public {
+        nuggft.mint{value: nuggft.msp()}(1202);
     }
 }

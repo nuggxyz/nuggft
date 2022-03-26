@@ -6,7 +6,9 @@ import "../utils/forge.sol";
 
 import "./base.sol";
 
-contract expectStake is base {
+import "../../core/NuggftV1Constants.sol";
+
+contract expectStake is base, NuggftV1Constants {
     struct Run {
         int192 expected_stake_change;
         int192 expected_share_change;
@@ -75,17 +77,19 @@ contract expectStake is base {
 
         int256 expectedProto = 0;
 
+        int192 protofee = int192(int256(uint256(run.mint ? PROTOCOL_FEE_BPS_MINT : PROTOCOL_FEE_BPS)));
+
         if (run.burn) {
             ds.assertLe(post.msp, pre.msp, "msp should have decreased");
         } else {
             ds.assertGe(post.msp, pre.msp, "msp is did not increase as expected");
-            expectedProto = lib.take(10, run.expected_stake_change);
+            expectedProto = lib.take(protofee, run.expected_stake_change);
         }
 
         if (run.mint) {
-            int192 fee = pre.eps / 10;
+            int192 fee = pre.eps / protofee;
             int192 overpay = run.expected_stake_change - pre.msp;
-            fee += overpay / 10;
+            fee += overpay / protofee;
             expectedProto = fee;
         }
 
