@@ -8,7 +8,6 @@ abstract contract revert__NuggftV1Swap is NuggftV1Test {
     using SafeCast for uint96;
 
     modifier revert__NuggftV1Swap__setUp() {
-        forge.vm.roll(1000);
         _;
     }
 
@@ -316,7 +315,7 @@ abstract contract revert__NuggftV1Swap is NuggftV1Test {
     function test__revert__NuggftV1Swap__0x25__passWithVeryHighEPS() public revert__NuggftV1Swap__setUp {
         (uint160 tokenId, uint96 floor) = scenario_mac_has_sold_a_token_dee_sold();
 
-        uint160 tokenId2 = 1500;
+        uint160 tokenId2 = mintable(1000);
 
         uint96 value = 1500 ether;
         uint96 value2 = floor + 1 ether;
@@ -336,7 +335,7 @@ abstract contract revert__NuggftV1Swap is NuggftV1Test {
     function test__revert__NuggftV1Swap__0x25__successWithLowEPS() public revert__NuggftV1Swap__setUp {
         (uint160 tokenId, uint96 floor) = scenario_mac_has_sold_a_token_dee_sold();
 
-        uint160 tokenId2 = 1500;
+        uint160 tokenId2 = mintable(1000);
 
         uint96 value = floor + .5 ether;
         uint96 value2 = floor + 1 ether;
@@ -766,7 +765,7 @@ abstract contract revert__NuggftV1Swap is NuggftV1Test {
     function test__revert__NuggftV1Swap__0xA4__failOfferInOldSwap() public revert__NuggftV1Swap__setUp {
         (uint160 tokenId, uint96 eth) = scenario_dee_has_sold_a_token_and_mac_has_offered();
 
-        forge.vm.roll(2000);
+        jumpSwap();
 
         uint96 value = eth + 1 ether;
 
@@ -780,7 +779,7 @@ abstract contract revert__NuggftV1Swap is NuggftV1Test {
     }
 
     function test__revert__NuggftV1Swap__0xA0__failOfferInFutureSwap() public revert__NuggftV1Swap__setUp {
-        uint160 tokenId = 50000;
+        uint160 tokenId = nuggft.epoch() + 1;
 
         uint96 value = 1 ether;
 

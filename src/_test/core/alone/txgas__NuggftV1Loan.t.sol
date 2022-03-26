@@ -11,7 +11,6 @@ contract txgas__NuggftV1Loan is NuggftV1Test {
 
     function setUp() public {
         reset();
-        // forge.vm.roll(21000);
 
         forge.vm.deal(users.frank, 40000 ether);
         forge.vm.startPrank(users.frank);
@@ -19,8 +18,6 @@ contract txgas__NuggftV1Loan is NuggftV1Test {
         nuggft.mint{value: 100 ether}(LOAN_TOKENID);
         nuggft.mint{value: nuggft.msp()}(REBALANCE_TOKENID);
         nuggft.loan(lib.sarr160(REBALANCE_TOKENID));
-
-        forge.vm.roll(2400);
 
         nuggft.mint{value: nuggft.msp()}(LIQUIDATE_TOKENID);
 

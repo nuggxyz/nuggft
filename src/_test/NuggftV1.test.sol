@@ -149,11 +149,11 @@ contract NuggftV1Test is ForgeTest, NuggftV1Constants {
     }
 
     function reset() public {
-        forge.vm.roll(1000);
+        // forge.vm.roll(1000);
         // bytes memory tmp = hex'000100';
         ds.setDsTest(address(this));
 
-        // dep.init();
+        // dep.init()   ;
 
         processor = IDotnuggV1Safe(address(new DotnuggV1()));
         nuggft = new RiggedNuggft(address(processor));
@@ -187,6 +187,8 @@ contract NuggftV1Test is ForgeTest, NuggftV1Constants {
         forge.vm.startPrank(0x9B0E2b16F57648C7bAF28EDD7772a815Af266E77);
         nuggft.setIsTrusted(users.safe, true);
         forge.vm.stopPrank();
+
+        jumpStart();
     }
 
     // function reset__fork() public {
@@ -246,6 +248,14 @@ contract NuggftV1Test is ForgeTest, NuggftV1Constants {
 
     function jumpSwap() public {
         jump(nuggft.epoch() + uint24(SALE_LEN) + 1);
+    }
+
+    function jumpLoan() public {
+        jump(nuggft.epoch() + uint24(LIQUIDATION_PERIOD) + 1);
+    }
+
+    function hopUp(uint256 amount) public {
+        forge.vm.roll(block.number + amount);
     }
 
     function encItemId(
@@ -318,13 +328,13 @@ contract NuggftV1Test is ForgeTest, NuggftV1Constants {
     ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━*/
 
     function scenario_dee_has_a_token() public payable returns (uint160 tokenId) {
-        tokenId = 2069;
+        tokenId = mintable(2069);
 
         expect.mint().from(users.dee).exec(tokenId);
     }
 
     function scenario_frank_has_a_token_and_spent_50_eth() public payable returns (uint160 tokenId) {
-        tokenId = 2012;
+        tokenId = mintable(2021);
 
         expect.mint().from(users.frank).exec{value: 50 ether}(tokenId);
     }
@@ -344,11 +354,11 @@ contract NuggftV1Test is ForgeTest, NuggftV1Constants {
     function scenario_frank_has_a_loaned_token_that_has_expired() public payable returns (uint160 tokenId) {
         tokenId = scenario_frank_has_a_loaned_token();
 
-        forge.vm.roll(2000000);
+        jumpLoan();
     }
 
     function scenario_dee_has_a_token_2() public payable returns (uint160 tokenId) {
-        tokenId = 2400;
+        tokenId = mintable(1900);
 
         forge.vm.prank(users.dee);
         nuggft.mint(tokenId);
@@ -392,7 +402,7 @@ contract NuggftV1Test is ForgeTest, NuggftV1Constants {
     function scenario_dee_has_sold_a_token_and_mac_can_claim() public payable returns (uint160 tokenId) {
         (tokenId, ) = scenario_dee_has_sold_a_token_and_mac_has_offered();
 
-        forge.vm.roll(nuggft.epoch() + SALE_LEN + 1);
+        jumpSwap();
     }
 
     function scenario_mac_has_claimed_a_token_dee_sold() public payable returns (uint160 tokenId) {
@@ -404,7 +414,7 @@ contract NuggftV1Test is ForgeTest, NuggftV1Constants {
     function scenario_mac_has_sold_a_token_dee_sold() public payable returns (uint160 tokenId, uint96 floor) {
         (tokenId) = scenario_mac_has_claimed_a_token_dee_sold();
 
-        floor = 3 ether;
+        floor = nuggft.eps() * 2;
 
         expect.sell().from(users.mac).exec(tokenId, floor);
     }
@@ -461,7 +471,7 @@ contract NuggftV1Test is ForgeTest, NuggftV1Constants {
 
         expect.offer().from(users.charlie).exec{value: floor + 1 ether}(charliesTokenId, tokenId, itemId);
 
-        forge.vm.roll(nuggft.epoch() + SALE_LEN + 1);
+        jumpSwap();
     }
 
     /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━

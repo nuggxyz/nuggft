@@ -7,10 +7,7 @@ import "../NuggftV1.test.sol";
 import {NuggftV1Epoch} from "../../core/NuggftV1Epoch.sol";
 
 contract deployment__PureDeployer is NuggftV1Test {
-    function setUp() public {
-        // reset();
-        // fvm.roll(13952818);
-    }
+    function setUp() public {}
 
     /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
         [pure] toEpoch

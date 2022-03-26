@@ -7,7 +7,6 @@ import "../../NuggftV1.test.sol";
 contract txgas__NuggftV1Stake is NuggftV1Test {
     function setUp() public {
         reset();
-        // forge.vm.roll(21000);
 
         forge.vm.deal(users.frank, 40000 ether);
 
@@ -16,7 +15,7 @@ contract txgas__NuggftV1Stake is NuggftV1Test {
         nuggft.mint{value: 100 ether}(1199);
         nuggft.mint{value: nuggft.msp()}(1200);
 
-        forge.vm.roll(2400);
+        jumpStart();
 
         nuggft.mint{value: nuggft.msp()}(1201);
     }
