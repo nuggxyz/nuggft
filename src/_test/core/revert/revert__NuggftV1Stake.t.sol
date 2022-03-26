@@ -68,6 +68,8 @@ abstract contract revert__NuggftV1Stake is NuggftV1Test {
 
             forge.vm.deal(users.safe, value);
 
+            nuggft.msp();
+
             forge.vm.expectRevert(hex"7e863b48_71");
             nuggft.trustedMint{value: value}(tokenId, users.dennis);
         }

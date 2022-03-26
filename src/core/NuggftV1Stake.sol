@@ -93,11 +93,11 @@ abstract contract NuggftV1Stake is INuggftV1Stake, NuggftV1Proof {
             }
 
             // caculate value proveded over msp
-            // will not overflow because of ERRORx71
+            // will not underflow because of ERRORx71
             let overpay := sub(callvalue(), _msp)
 
             // add fee of overpay to fee
-            fee := add(div(overpay, PROTOCOL_FEE_BPS_MINT), fee)
+            fee := add(div(overpay, PROTOCOL_FEE_BPS), fee)
             // fee := div(callvalue(), PROTOCOL_FEE_BPS_MINT)
 
             // update stake

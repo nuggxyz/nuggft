@@ -14,7 +14,7 @@ abstract contract NuggftV1Constants {
     uint8 constant HOT_PROOF_AMOUNT = 16;
     // stake
     uint96 constant PROTOCOL_FEE_BPS = 10;
-    uint96 constant PROTOCOL_FEE_BPS_MINT = 50;
+    uint96 constant PROTOCOL_FEE_BPS_MINT = 1;
 
     // epoch
     uint8 constant INTERVAL_SUB = 16;

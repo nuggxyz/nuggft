@@ -17,15 +17,15 @@ contract txgas__NuggftV1Swap is NuggftV1Test {
         forge.vm.deal(users.dee, 40000 ether);
         forge.vm.startPrank(users.dee);
         nuggft.mint{value: 100 ether}(COMMIT_TOKENID);
-        nuggft.mint{value: 101 ether}(CARRY_TOKENID);
-        nuggft.sell(COMMIT_TOKENID, 150 ether);
-        nuggft.sell(CARRY_TOKENID, 150 ether);
+        nuggft.mint{value: nuggft.msp()}(CARRY_TOKENID);
+        nuggft.sell(COMMIT_TOKENID, nuggft.eps() + LOSS * 2);
+        nuggft.sell(CARRY_TOKENID, nuggft.eps() + LOSS * 2);
 
         forge.vm.stopPrank();
 
         forge.vm.deal(users.frank, 40000 ether);
         forge.vm.startPrank(users.frank);
-        nuggft.mint{value: 150 ether}(SELL_TOKENID);
+        nuggft.mint{value: nuggft.msp()}(SELL_TOKENID);
         forge.vm.stopPrank();
 
         forge.vm.roll(OFFSET);

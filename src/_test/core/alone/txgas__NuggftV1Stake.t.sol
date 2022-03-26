@@ -14,11 +14,11 @@ contract txgas__NuggftV1Stake is NuggftV1Test {
         forge.vm.startPrank(users.frank);
 
         nuggft.mint{value: 100 ether}(1199);
-        nuggft.mint{value: 100 ether}(1200);
+        nuggft.mint{value: nuggft.msp()}(1200);
 
         forge.vm.roll(2400);
 
-        nuggft.mint{value: 100 ether}(1201);
+        nuggft.mint{value: nuggft.msp()}(1201);
     }
 
     function test__txgas__NuggftV1Stake__addStakedEth() public {
