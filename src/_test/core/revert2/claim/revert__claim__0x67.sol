@@ -7,14 +7,16 @@ import "../../../NuggftV1.test.sol";
 abstract contract revert__claim__0x67 is NuggftV1Test {
     using NuggftV1AgentType for uint256;
 
-    uint24 TOKEN_FOR_SALE = 500;
+    uint24 TOKEN_FOR_SALE = mintable(0);
 
     modifier revert__claim__0x67_setUp() {
+        jumpStart();
+
         expect.mint().from(users.frank).exec{value: 1 ether}(TOKEN_FOR_SALE);
 
         expect.sell().from(users.frank).exec(TOKEN_FOR_SALE, 2 ether);
 
-        jump(3500);
+        jumpSwap();
         _;
     }
 

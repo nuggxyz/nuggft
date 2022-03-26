@@ -3,10 +3,10 @@
 pragma solidity 0.8.13;
 
 abstract contract NuggftV1Constants {
-    uint24 constant TRUSTED_MINT_TOKENS = 500;
-    uint24 constant OFFSET = 3000;
+    uint24 constant TRUSTED_MINT_TOKENS = 1000;
+    uint24 constant OFFSET = 5000;
 
-    uint24 constant MAX_TOKENS = 10000;
+    uint24 constant MAX_TOKENS = 20000;
 
     uint256 constant HOT_PROOF_EMPTY = 0x10000;
 

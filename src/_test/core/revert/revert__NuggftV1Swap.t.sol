@@ -10,6 +10,7 @@ abstract contract revert__NuggftV1Swap is NuggftV1Test {
     modifier revert__NuggftV1Swap__setUp() {
         _;
     }
+    uint160 private TOKEN1 = mintable(0);
 
     /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
         [S:0] - offer - "msg.sender is operator for sender"
@@ -92,7 +93,7 @@ abstract contract revert__NuggftV1Swap is NuggftV1Test {
         forge.vm.startPrank(users.frank);
         {
             forge.vm.deal(users.frank, 1 ether);
-            nuggft.mint{value: 1 ether}(500);
+            nuggft.mint{value: 1 ether}(TOKEN1);
 
             uint96 value = 10 gwei - 1;
 
@@ -123,7 +124,7 @@ abstract contract revert__NuggftV1Swap is NuggftV1Test {
         forge.vm.startPrank(users.frank);
         {
             forge.vm.deal(users.frank, 1 ether);
-            nuggft.mint{value: 1 ether}(500);
+            nuggft.mint{value: 1 ether}(TOKEN1);
 
             uint96 value = 0;
 
@@ -276,7 +277,7 @@ abstract contract revert__NuggftV1Swap is NuggftV1Test {
     }
 
     function test__revert__NuggftV1Swap__0xA0__failWithNonexistantToken() public revert__NuggftV1Swap__setUp {
-        uint160 tokenId = 50000;
+        uint160 tokenId = MAX_TOKENS + 1;
 
         uint96 value = 1 ether;
 

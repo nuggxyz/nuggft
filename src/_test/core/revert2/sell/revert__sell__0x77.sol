@@ -21,13 +21,15 @@ abstract contract revert__sell__0x77 is NuggftV1Test {
 
         jumpStart();
 
-        expect.offer().from(users.dee).value(nuggft.vfo(users.dee, 3000)).exec(3000);
+        uint160 tokenId = nuggft.epoch();
 
-        expect.sell().from(users.dee).err(0x77).exec(3000, 3.5 ether);
+        expect.offer().from(users.dee).value(nuggft.vfo(users.dee, tokenId)).exec(tokenId);
+
+        expect.sell().from(users.dee).err(0x77).exec(tokenId, 3.5 ether);
 
         jumpUp(1);
 
-        expect.sell().from(users.dee).err(0x77).exec(3000, 3.5 ether);
+        expect.sell().from(users.dee).err(0x77).exec(tokenId, 3.5 ether);
     }
 
     function test__revert__sell__0x77__pass__desc() public {
