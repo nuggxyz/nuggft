@@ -10,14 +10,14 @@ import "../../../NuggftV1.test.sol";
 abstract contract revert__claim__0x74 is NuggftV1Test {
     using NuggftV1AgentType for uint256;
 
-    uint24 FRANKS_TOKEN = 500;
+    uint24 FRANKS_TOKEN = mintable(0);
 
-    uint24 CHARLIES_TOKEN = 501;
-    uint24 DENNISS_TOKEN = 502;
+    uint24 CHARLIES_TOKEN = mintable(1);
+    uint24 DENNISS_TOKEN = mintable(2);
 
     uint16 ITEM_ID;
 
-    uint40 FRANKS_TOKEN_SELLING_ITEM_ID = 500;
+    uint40 FRANKS_TOKEN_SELLING_ITEM_ID = mintable(0);
 
     modifier revert__claim__0x74_setUp() {
         // mint required tokens
@@ -34,7 +34,7 @@ abstract contract revert__claim__0x74 is NuggftV1Test {
         expect.sell().from(users.frank).exec(FRANKS_TOKEN, ITEM_ID, 2 ether);
 
         // jump to epoch 3500
-        jump(3500);
+        jumpUp(500);
 
         // DEE makes a LOSING NUGG offer
         expect.offer().from(users.dee).exec{value: nuggft.vfo(users.dee, FRANKS_TOKEN)}(FRANKS_TOKEN);
@@ -49,7 +49,7 @@ abstract contract revert__claim__0x74 is NuggftV1Test {
         expect.offer().from(users.dennis).exec{value: 3 ether}(DENNISS_TOKEN, FRANKS_TOKEN, ITEM_ID);
 
         // jump to an epoch where the offer can be claimed
-        jump(nuggft.epoch() + 2);
+        jumpSwap();
         _;
     }
 

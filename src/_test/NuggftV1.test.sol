@@ -140,6 +140,14 @@ contract NuggftV1Test is ForgeTest, NuggftV1Constants {
         _;
     }
 
+    function mintable(uint24 input) public returns (uint24) {
+        return input + TRUSTED_MINT_TOKENS;
+    }
+
+    function trustMintable(uint24 input) public returns (uint24) {
+        return input;
+    }
+
     function reset() public {
         forge.vm.roll(1000);
         // bytes memory tmp = hex'000100';
@@ -226,6 +234,18 @@ contract NuggftV1Test is ForgeTest, NuggftV1Constants {
     function jump(uint24 to) public {
         uint256 startblock = nuggft.external__toStartBlock(to);
         forge.vm.roll(startblock);
+    }
+
+    function jumpStart() public {
+        jump(OFFSET);
+    }
+
+    function jumpUp(uint256 amount) public {
+        jump(nuggft.epoch() + uint24(amount));
+    }
+
+    function jumpSwap() public {
+        jump(nuggft.epoch() + uint24(SALE_LEN) + 1);
     }
 
     function encItemId(
