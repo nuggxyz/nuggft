@@ -78,7 +78,7 @@ abstract contract NuggftV1Loan is INuggftV1Loan, NuggftV1Swap {
                 // send accumulated value * LOSS to msg.sender
                 if iszero(call(gas(), caller(), amt, 0, 0, 0, 0)) {
                     // if someone really ends up here, just donate the eth
-                    let pro := div(amt, PROTOCOL_FEE_BPS)
+                    let pro := div(amt, PROTOCOL_FEE_FRAC)
 
                     let cache := add(sload(stake.slot), or(shl(96, sub(amt, pro)), pro))
 
@@ -178,7 +178,7 @@ abstract contract NuggftV1Loan is INuggftV1Loan, NuggftV1Swap {
 
             fee := sub(fee, principal)
 
-            let pro := div(fee, PROTOCOL_FEE_BPS)
+            let pro := div(fee, PROTOCOL_FEE_FRAC)
 
             stake__cache := add(stake__cache, or(shl(96, sub(fee, pro)), pro))
 
@@ -205,7 +205,7 @@ abstract contract NuggftV1Loan is INuggftV1Loan, NuggftV1Swap {
             // send accumulated value * LOSS to msg.sender
             if iszero(call(gas(), caller(), earn, 0, 0, 0, 0)) {
                 // if someone really ends up here, just donate the eth
-                pro := div(earn, PROTOCOL_FEE_BPS)
+                pro := div(earn, PROTOCOL_FEE_FRAC)
 
                 stake__cache := add(stake__cache, or(shl(96, sub(earn, pro)), pro))
 
@@ -338,7 +338,7 @@ abstract contract NuggftV1Loan is INuggftV1Loan, NuggftV1Swap {
                 sstore(agency__sptr, 0x01)
             }
 
-            let pro := div(accFee, PROTOCOL_FEE_BPS)
+            let pro := div(accFee, PROTOCOL_FEE_FRAC)
 
             stake__cache := add(stake__cache, or(shl(96, sub(accFee, pro)), pro))
 
@@ -373,7 +373,7 @@ abstract contract NuggftV1Loan is INuggftV1Loan, NuggftV1Swap {
             // send accumulated value * LOSS to msg.sender
             if iszero(call(gas(), caller(), acc, 0, 0, 0, 0)) {
                 // if someone really ends up here, just donate the eth
-                pro := div(acc, PROTOCOL_FEE_BPS)
+                pro := div(acc, PROTOCOL_FEE_FRAC)
 
                 stake__cache := add(stake__cache, or(shl(96, sub(acc, pro)), pro))
 

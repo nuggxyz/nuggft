@@ -89,8 +89,8 @@ abstract contract system__NuggftV1Swap is NuggftV1Test, fragments {
         // forge.vm.startPrank(users.frank);
         {
             for (uint16 i = 0; i < 100; i++) {
-                jump(OFFSET + i);
-                tmpTokens.push(OFFSET + i);
+                jumpUp(1);
+                tmpTokens.push(nuggft.epoch());
                 uint96 value = nuggft.msp();
 
                 expect.offer().exec(tmpTokens[i], lib.txdata(users.frank, value, ""));
@@ -100,7 +100,7 @@ abstract contract system__NuggftV1Swap is NuggftV1Test, fragments {
 
             tmpTokens.push(encItemIdClaim(token1, itemId));
 
-            jump(uint24(OFFSET + 50 + tmpTokens.length));
+            jumpSwap();
 
             tmpUsers = lib.mAddress(users.frank, uint16(tmpTokens.length - 1));
             tmpUsers.push(address(uint160(token2)));
