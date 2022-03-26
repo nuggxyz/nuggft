@@ -18,7 +18,7 @@ abstract contract revert__claim__0x67 is NuggftV1Test {
         _;
     }
 
-    function test__revert__claim__0x67__pass__mintingToken__winnerClaimingAfterSwapIsOver() public revert__claim__0x67_setUp {
+    function test__revert__claim__0x67__pass__mintingToken__winnerClaimingAfterSwapIsOver() public revert__claim__0x67_setUp globalDs {
         uint24 tokenId = nuggft.epoch();
 
         expect.offer().from(users.dee).exec{value: nuggft.msp()}(tokenId);
@@ -28,7 +28,7 @@ abstract contract revert__claim__0x67 is NuggftV1Test {
         expect.claim().from(users.dee).exec(lib.sarr160(tokenId), lib.sarrAddress(users.dee));
     }
 
-    function test__revert__claim__0x67__fail__mintingToken__winnerClaimingDuringMintEpoch() public revert__claim__0x67_setUp {
+    function test__revert__claim__0x67__fail__mintingToken__winnerClaimingDuringMintEpoch() public revert__claim__0x67_setUp globalDs {
         uint24 tokenId = nuggft.epoch();
 
         expect.globalFrom(users.dee);
@@ -38,7 +38,7 @@ abstract contract revert__claim__0x67 is NuggftV1Test {
         expect.claim().err(0x67).g().exec(lib.sarr160(tokenId), lib.sarrAddress(users.dee));
     }
 
-    function test__revert__claim__0x67__fail__sellingToken__winnerClaimingDuringInitialEpoch() public revert__claim__0x67_setUp {
+    function test__revert__claim__0x67__fail__sellingToken__winnerClaimingDuringInitialEpoch() public revert__claim__0x67_setUp globalDs {
         expect.globalFrom(users.dee);
 
         expect.offer().g().exec{value: nuggft.vfo(users.dee, TOKEN_FOR_SALE)}(TOKEN_FOR_SALE);
@@ -46,7 +46,7 @@ abstract contract revert__claim__0x67 is NuggftV1Test {
         expect.claim().err(0x67).g().exec(lib.sarr160(TOKEN_FOR_SALE), lib.sarrAddress(users.dee));
     }
 
-    function test__revert__claim__0x67__fail__sellingToken__winnerClaimingDuringFinalEpoch() public revert__claim__0x67_setUp {
+    function test__revert__claim__0x67__fail__sellingToken__winnerClaimingDuringFinalEpoch() public revert__claim__0x67_setUp globalDs {
         expect.globalFrom(users.dee);
 
         expect.offer().g().exec{value: nuggft.vfo(users.dee, TOKEN_FOR_SALE)}(TOKEN_FOR_SALE);
@@ -58,7 +58,7 @@ abstract contract revert__claim__0x67 is NuggftV1Test {
         expect.claim().err(0x67).g().exec(lib.sarr160(TOKEN_FOR_SALE), lib.sarrAddress(users.dee));
     }
 
-    function test__revert__claim__0x67__pass__sellingToken__winnerClaimingAfterSwapIsOver() public revert__claim__0x67_setUp {
+    function test__revert__claim__0x67__pass__sellingToken__winnerClaimingAfterSwapIsOver() public revert__claim__0x67_setUp globalDs {
         expect.globalFrom(users.dee);
 
         expect.offer().g().exec{value: nuggft.vfo(users.dee, TOKEN_FOR_SALE)}(TOKEN_FOR_SALE);

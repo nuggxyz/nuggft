@@ -59,12 +59,12 @@ contract expectRebalance is base {
         uint256 agency;
         uint96 fee;
         uint96 earned;
+        uint160 tokenId;
     }
 
     struct Run {
         Snapshot[] snapshots;
         address sender;
-        uint160 tokenId;
         uint96 eps;
         uint96 accFee;
         uint96 accEarned;
@@ -103,9 +103,9 @@ contract expectRebalance is base {
         for (uint256 i = 0; i < tokenIds.length; i++) {
             Snapshot memory pre;
 
-            run.tokenId = tokenIds[i];
+            pre.tokenId = tokenIds[i];
 
-            pre.agency = nuggft.agency(run.tokenId);
+            pre.agency = nuggft.agency(pre.tokenId);
 
             uint96 agency__eth = uint96((pre.agency << 26) >> 186) * .1 gwei;
 
@@ -151,7 +151,7 @@ contract expectRebalance is base {
             Snapshot memory pre = run.snapshots[i];
             Snapshot memory post;
 
-            post.agency = nuggft.agency(run.tokenId);
+            post.agency = nuggft.agency(pre.tokenId);
 
             ds.assertEq(post.agency >> 254, 0x02, "EXPECT-REBALANCE:STOP - agency flag should be LOAN - 0x02");
 
@@ -185,7 +185,7 @@ contract expectRebalance is base {
             Snapshot memory pre = run.snapshots[i];
             Snapshot memory post;
 
-            post.agency = nuggft.agency(run.tokenId);
+            post.agency = nuggft.agency(pre.tokenId);
 
             ds.assertEq(post.agency, pre.agency, "EXPECT-REBALANCE:ROLLBACK - agency should be same");
         }

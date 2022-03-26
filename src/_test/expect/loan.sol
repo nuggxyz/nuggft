@@ -62,12 +62,12 @@ contract expectLoan is base {
 
     struct Snapshot {
         uint256 agency;
+        uint160 tokenId;
     }
 
     struct Run {
         Snapshot[] snapshots;
         address sender;
-        uint160 tokenId;
         uint96 eps;
         uint96 msp;
         bool shouldDonate;
@@ -106,14 +106,14 @@ contract expectLoan is base {
         for (uint256 i = 0; i < tokenIds.length; i++) {
             Snapshot memory pre;
 
-            run.tokenId = tokenIds[i];
+            pre.tokenId = tokenIds[i];
 
-            pre.agency = nuggft.agency(run.tokenId);
+            pre.agency = nuggft.agency(pre.tokenId);
 
             run.snapshots[i] = pre;
         }
 
-        uint96 expectedReward = run.eps * uint96(tokenIds.length);
+        uint96 expectedReward = ((run.eps * uint96(tokenIds.length)) / .1 gwei) * .1 gwei;
 
         if (!run.shouldDonate) {
             stake.start(0, 0, true);
@@ -137,7 +137,7 @@ contract expectLoan is base {
             Snapshot memory pre = run.snapshots[i];
             Snapshot memory post;
 
-            post.agency = nuggft.agency(run.tokenId);
+            post.agency = nuggft.agency(pre.tokenId);
 
             ds.assertGt(pre.agency, 0, "EXPECT-LOAN:STOP - agency should not be 0");
             ds.assertEq(address(uint160(post.agency)), run.sender, "EXPECT-LOAN:STOP - sender should still be agent");
@@ -166,7 +166,7 @@ contract expectLoan is base {
             Snapshot memory pre = run.snapshots[i];
             Snapshot memory post;
 
-            post.agency = nuggft.agency(run.tokenId);
+            post.agency = nuggft.agency(pre.tokenId);
 
             ds.assertEq(post.agency, pre.agency, "EXPECT-LOAN:ROLLBACK - agency should be same");
         }
