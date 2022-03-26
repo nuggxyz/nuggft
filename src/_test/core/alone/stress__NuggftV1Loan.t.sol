@@ -12,20 +12,17 @@ contract stress__NuggftV1Loan is NuggftV1Test {
 
     uint160 multiplier = 10;
 
-    constructor() {
+    function setUp() public {
         reset();
 
-        forge.vm.deal(users.frank, 1 ether);
+        expect.mint().from(users.frank).exec{value: 1 ether}(LOAN_TOKENID);
 
-        forge.vm.startPrank(users.frank);
-
-        nuggft.mint{value: 1 ether}(LOAN_TOKENID);
-
-        nuggft.loan(lib.sarr160(LOAN_TOKENID));
+        expect.loan().from(users.frank).exec(lib.sarr160(LOAN_TOKENID));
     }
 
-    function test__stress__NuggftV1Loan__rebalance2() public {
+    function test__stress__NuggftV1Loan__rebalance2() public globalDs {
         forge.vm.deal(users.frank, 1000000000 ether);
+        forge.vm.startPrank(users.frank);
 
         for (uint256 i = 0; i < 10 * multiplier; i++) {
             uint96 frankStartBal = uint96(users.frank.balance);
@@ -35,13 +32,11 @@ contract stress__NuggftV1Loan is NuggftV1Test {
             uint160 tokenId = nuggft.epoch();
 
             uint96 value = nuggft.vfo(users.frank, tokenId);
-            forge.vm.startPrank(users.frank);
             nuggft.offer{value: value}(tokenId);
 
             (, , , uint96 __fee, uint96 __earn, ) = nuggft.debt(LOAN_TOKENID);
 
             uint96 valueforRebal = nuggft.vfr(lib.sarr160(LOAN_TOKENID))[0];
-            forge.vm.startPrank(users.frank);
             nuggft.rebalance{value: valueforRebal}(lib.sarr160(LOAN_TOKENID));
 
             (, , , , , uint24 a_insolventEpoch) = nuggft.debt(LOAN_TOKENID);
@@ -57,9 +52,11 @@ contract stress__NuggftV1Loan is NuggftV1Test {
 
             forge.vm.roll(block.number + 1);
         }
+
+        forge.vm.stopPrank();
     }
 
-    function test__stress__NuggftV1Loan__rebalance__multi() public {
+    function test__stress__NuggftV1Loan__rebalance__multi() public globalDs {
         console.log(nuggft.eps(), nuggft.msp());
         forge.vm.deal(users.frank, 1000000000 ether);
 
@@ -89,30 +86,29 @@ contract stress__NuggftV1Loan is NuggftV1Test {
         nuggft.rebalance{value: users.frank.balance}(tokenIds);
     }
 
-    function test__stress__NuggftV1Loan__rebalance__multi__manyAccounts() public {
+    function test__stress__NuggftV1Loan__rebalance__multi__manyAccounts() public globalDs {
         console.log(nuggft.eps(), nuggft.msp());
-        forge.vm.deal(users.frank, 1000000000 ether);
+        // forge.vm.deal(users.frank, 1000000000 ether);
 
         uint160[] memory tokenIds = new uint160[](950);
 
+        jump(OFFSET + 1);
+
         for (uint160 i = 500; i < 1450; i++) {
             address a = forge.vm.addr(i * 2699);
-
-            forge.vm.startPrank(a);
 
             tokenIds[i - 500] = i;
 
             forge.vm.deal(a, nuggft.msp());
 
-            nuggft.mint{value: a.balance}(i);
+            expect.mint().from(a).exec{value: a.balance}(i);
 
-            nuggft.loan(lib.sarr160(i));
-            forge.vm.stopPrank();
+            expect.loan().from(a).exec(lib.sarr160(i));
         }
 
         emit log_named_uint("balance", address(nuggft).balance);
 
-        jump(5000);
+        jump(OFFSET + LIQUIDATION_PERIOD + 2);
 
         // uint96 frankStartBal = uint96(users.frank.balance);
 
@@ -134,9 +130,51 @@ contract stress__NuggftV1Loan is NuggftV1Test {
         for (uint256 i = 0; i < vals.length; i++) {
             tv += vals[i];
         }
-        forge.vm.deal(users.frank, tv);
-        forge.vm.startPrank(users.frank);
-        nuggft.rebalance{value: tv}(tokenIds);
+        // forge.vm.deal(users.frank, tv);
+        // forge.vm.prank(users.frank);
+        // nuggft.rebalance{value: tv}(tokenIds);
+
+        expect.rebalance().from(users.frank).exec{value: tv}(tokenIds);
+    }
+
+    function test__stress__NuggftV1Loan__rebalance__small() public {
+        console.log(nuggft.eps(), nuggft.msp());
+
+        jump(OFFSET + 1);
+
+        address a = address(uint160(0x11111));
+        address b = address(uint160(0x22222));
+
+        uint160 tokenId = 500;
+        uint160 tokenId2 = 501;
+
+        expect.mint().from(a).exec{value: nuggft.msp()}(tokenId);
+        expect.mint().from(b).exec{value: nuggft.msp()}(tokenId2);
+
+        expect.loan().from(a).exec(lib.sarr160(tokenId));
+        expect.loan().from(b).exec(lib.sarr160(tokenId2));
+
+        emit log_named_uint("balance", address(nuggft).balance);
+
+        jump(OFFSET + LIQUIDATION_PERIOD + 2);
+
+        uint160[] memory tokenIds = array.b160(tokenId, tokenId2);
+
+        uint96[] memory vals = nuggft.vfr(tokenIds);
+
+        uint96 tv = vals[0] + vals[1];
+
+        // for (uint256 i = 0; i < vals.length; i++) {
+        //     tv += vals[i];
+        // }
+        // forge.vm.deal(users.frank, tv);
+        // forge.vm.prank(users.frank);
+        // nuggft.rebalance{value: tv}(tokenIds);
+
+        expect.rebalance().from(users.frank).exec{value: tv}(tokenIds);
+
+        nuggft.agency(tokenId);
+        nuggft.agency(tokenId2);
     }
 }
 //   990090000000000000

@@ -53,25 +53,25 @@ abstract contract revert__claim__0x74 is NuggftV1Test {
         _;
     }
 
-    function test__revert__claim__0x74__pass__nugg__correctSenderCorrectArg() public revert__claim__0x74_setUp {
+    function test__revert__claim__0x74__pass__nugg__correctSenderCorrectArg() public revert__claim__0x74_setUp globalDs {
         expect.claim().from(users.mac).exec(array.s160(FRANKS_TOKEN), array.bAddress(users.mac));
     }
 
-    function test__revert__claim__0x74__pass__item__nonWinningIncorrectSenderIncorrectArg() public revert__claim__0x74_setUp {
+    function test__revert__claim__0x74__pass__item__nonWinningIncorrectSenderIncorrectArg() public revert__claim__0x74_setUp globalDs {
         expect.claim().from(users.charlie).exec(array.s160(FRANKS_TOKEN_SELLING_ITEM_ID), array.bAddress(address(uint160(CHARLIES_TOKEN))));
 
         expect.claim().from(users.charlie).exec(array.s160(FRANKS_TOKEN_SELLING_ITEM_ID), array.bAddress(address(uint160(DENNISS_TOKEN))));
     }
 
-    function test__revert__claim__0x74__fail__item__userWithPendingWinningNuggClaim() public revert__claim__0x74_setUp {
+    function test__revert__claim__0x74__fail__item__userWithPendingWinningNuggClaim() public revert__claim__0x74_setUp globalDs {
         expect.claim().err(0x74).from(users.mac).exec(array.s160(FRANKS_TOKEN_SELLING_ITEM_ID), array.bAddress(users.mac));
     }
 
-    function test__revert__claim__0x74__fail__nugg__incorrectSenderCorrectArg() public revert__claim__0x74_setUp {
+    function test__revert__claim__0x74__fail__nugg__incorrectSenderCorrectArg() public revert__claim__0x74_setUp globalDs {
         expect.claim().err(0x74).from(users.dee).exec(array.s160(FRANKS_TOKEN_SELLING_ITEM_ID), array.bAddress(users.mac));
     }
 
-    function test__revert__claim__0x74__fail__item__nonWinningIncorrectSenderIncorrectArgIncorectUser() public revert__claim__0x74_setUp {
+    function test__revert__claim__0x74__fail__item__nonWinningIncorrectSenderIncorrectArgIncorectUser() public revert__claim__0x74_setUp globalDs {
         expect.claim().err(0x74).from(users.dee).exec(array.s160(FRANKS_TOKEN_SELLING_ITEM_ID), array.bAddress(address(uint160(CHARLIES_TOKEN))));
     }
 

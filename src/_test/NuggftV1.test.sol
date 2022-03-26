@@ -110,7 +110,9 @@ contract NuggftV1Test is ForgeTest, NuggftV1Constants {
 
     RiggedNuggft internal nuggft;
 
-    constructor() {}
+    constructor() {
+        ds.setDsTest(address(this));
+    }
 
     address public _nuggft;
     address public _processor;
@@ -132,6 +134,11 @@ contract NuggftV1Test is ForgeTest, NuggftV1Constants {
     address internal dub6ix = 0x9B0E2b16F57648C7bAF28EDD7772a815Af266E77;
 
     // constructor() {}
+
+    modifier globalDs() {
+        ds.setDsTest(address(this));
+        _;
+    }
 
     function reset() public {
         forge.vm.roll(1000);
@@ -293,15 +300,13 @@ contract NuggftV1Test is ForgeTest, NuggftV1Constants {
     function scenario_dee_has_a_token() public payable returns (uint160 tokenId) {
         tokenId = 2069;
 
-        forge.vm.prank(users.dee);
-        nuggft.mint(tokenId);
+        expect.mint().from(users.dee).exec(tokenId);
     }
 
     function scenario_frank_has_a_token_and_spent_50_eth() public payable returns (uint160 tokenId) {
         tokenId = 2012;
 
-        forge.vm.prank(users.frank);
-        nuggft.mint{value: 50 ether}(tokenId);
+        expect.mint().from(users.frank).exec{value: 50 ether}(tokenId);
     }
 
     function scenario_frank_has_a_loaned_token() public payable returns (uint160 tokenId) {
@@ -353,8 +358,7 @@ contract NuggftV1Test is ForgeTest, NuggftV1Constants {
 
         floor = 1 ether;
 
-        forge.vm.prank(users.dee);
-        nuggft.sell(tokenId, floor);
+        expect.sell().from(users.dee).exec(tokenId, floor);
     }
 
     function scenario_dee_has_sold_a_token_and_mac_has_offered() public payable returns (uint160 tokenId, uint96 eth) {
@@ -362,21 +366,19 @@ contract NuggftV1Test is ForgeTest, NuggftV1Constants {
 
         eth = 2 ether;
 
-        forge.vm.prank(users.mac);
-        nuggft.offer{value: eth}(tokenId);
+        expect.offer().from(users.mac).exec{value: eth}(tokenId);
     }
 
     function scenario_dee_has_sold_a_token_and_mac_can_claim() public payable returns (uint160 tokenId) {
         (tokenId, ) = scenario_dee_has_sold_a_token_and_mac_has_offered();
 
-        forge.vm.roll(2000);
+        forge.vm.roll(nuggft.epoch() + SALE_LEN + 1);
     }
 
     function scenario_mac_has_claimed_a_token_dee_sold() public payable returns (uint160 tokenId) {
         (tokenId) = scenario_dee_has_sold_a_token_and_mac_can_claim();
 
-        forge.vm.prank(users.mac);
-        nuggft.claim(lib.sarr160(tokenId), lib.sarrAddress(users.mac));
+        expect.claim().from(users.mac).exec(lib.sarr160(tokenId), lib.sarrAddress(users.mac));
     }
 
     function scenario_mac_has_sold_a_token_dee_sold() public payable returns (uint160 tokenId, uint96 floor) {
@@ -384,11 +386,7 @@ contract NuggftV1Test is ForgeTest, NuggftV1Constants {
 
         floor = 3 ether;
 
-        // forge.vm.prank(users.mac);
-        // nuggft.approve(_nuggft, tokenId);
-
-        forge.vm.prank(users.mac);
-        nuggft.sell(tokenId, floor);
+        expect.sell().from(users.mac).exec(tokenId, floor);
     }
 
     function scenario_dee_has_a_token_and_can_sell_an_item()
@@ -423,9 +421,7 @@ contract NuggftV1Test is ForgeTest, NuggftV1Constants {
         (tokenId, itemId, feature) = scenario_dee_has_a_token_and_can_sell_an_item();
         floor = 3 ether;
 
-        forge.vm.prank(users.dee);
-
-        nuggft.sell(tokenId, itemId, floor);
+        expect.sell().from(users.dee).exec(tokenId, itemId, floor);
     }
 
     function scenario_dee_has_sold_an_item_and_charlie_can_claim()
@@ -443,11 +439,9 @@ contract NuggftV1Test is ForgeTest, NuggftV1Constants {
 
         charliesTokenId = scenario_charlie_has_a_token();
 
-        forge.vm.prank(users.charlie);
+        expect.offer().from(users.charlie).exec{value: floor + 1 ether}(charliesTokenId, tokenId, itemId);
 
-        nuggft.offer{value: floor + 1 ether}(uint160((charliesTokenId << 40) | (uint256(itemId) << 24)) | tokenId);
-
-        forge.vm.roll(2000);
+        forge.vm.roll(nuggft.epoch() + SALE_LEN + 1);
     }
 
     /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━

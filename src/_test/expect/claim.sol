@@ -271,7 +271,6 @@ contract expectClaim is base {
         uint256 proof = nuggft.proofOf(tokenId);
 
         (bool hasItem, ) = proofSearch(proof, itemId);
-
         ds.assertTrue(hasItem, string(abi.encodePacked("assertProofContains FAILED: - ", str)));
     }
 

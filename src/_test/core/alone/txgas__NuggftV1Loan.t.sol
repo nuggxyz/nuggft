@@ -14,7 +14,6 @@ contract txgas__NuggftV1Loan is NuggftV1Test {
         // forge.vm.roll(21000);
 
         forge.vm.deal(users.frank, 40000 ether);
-
         forge.vm.startPrank(users.frank);
 
         nuggft.mint{value: 100 ether}(LOAN_TOKENID);
@@ -26,9 +25,11 @@ contract txgas__NuggftV1Loan is NuggftV1Test {
         nuggft.mint{value: 100 ether}(LIQUIDATE_TOKENID);
 
         nuggft.loan(lib.sarr160(LIQUIDATE_TOKENID));
+        forge.vm.stopPrank();
     }
 
     function test__txgas__NuggftV1Loan__loan() public {
+        forge.vm.prank(users.frank);
         nuggft.loan(lib.sarr160(LOAN_TOKENID));
     }
 
@@ -39,10 +40,12 @@ contract txgas__NuggftV1Loan is NuggftV1Test {
     // }
 
     function test__txgas__NuggftV1Loan__rebalance() public {
+        forge.vm.prank(users.frank);
         nuggft.rebalance{value: 200 ether}(lib.sarr160(REBALANCE_TOKENID));
     }
 
     function test__txgas__NuggftV1Loan__liquidate() public {
+        forge.vm.prank(users.frank);
         nuggft.liquidate{value: 200 ether}(LIQUIDATE_TOKENID);
     }
 }

@@ -222,12 +222,11 @@ abstract contract revert__NuggftV1Stake is NuggftV1Test {
 
     function test__revert__NuggftV1Stake__0x81__migrate__succeeds() public {
         uint160 tokenId = scenario_dee_has_a_token();
+        scenario_migrator_set();
 
         forge.vm.startPrank(users.dee);
         {
             // nuggft.approve(_nuggft, tokenId);
-
-            scenario_migrator_set();
 
             nuggft.migrate(tokenId);
         }

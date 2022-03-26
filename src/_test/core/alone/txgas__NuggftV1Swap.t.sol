@@ -26,7 +26,9 @@ contract txgas__NuggftV1Swap is NuggftV1Test {
         forge.vm.deal(users.frank, 40000 ether);
         forge.vm.startPrank(users.frank);
         nuggft.mint{value: 150 ether}(SELL_TOKENID);
-        forge.vm.roll(2400);
+        forge.vm.stopPrank();
+
+        forge.vm.roll(OFFSET);
 
         forge.vm.startPrank(users.mac);
         uint96 val = nuggft.vfo(users.mac, CARRY_TOKENID);
