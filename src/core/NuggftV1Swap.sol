@@ -18,7 +18,9 @@ abstract contract NuggftV1Swap is INuggftV1ItemSwap, INuggftV1Swap, NuggftV1Stak
     mapping(uint256 => uint24) public lastItemSwap;
 
     constructor() {
-        for (uint8 i = 0; i < HOT_PROOF_AMOUNT; i++) hotproof[i] = HOT_PROOF_EMPTY;
+        unchecked {
+            for (uint256 i = 0; i < HOT_PROOF_AMOUNT; i++) hotproof[i] = HOT_PROOF_EMPTY;
+        }
     }
 
     /// @inheritdoc INuggftV1Swap
@@ -169,15 +171,15 @@ abstract contract NuggftV1Swap is INuggftV1ItemSwap, INuggftV1Swap, NuggftV1Stak
 
 
             mstore(0x20, keccak256( // =================================
-                0x00, /* [ tokenId                 ]    0x20
-                0x20     [ offers[X].slot          ] */ 0x40
+                0x00, /* [ tokenId        )    0x20
+                0x20     [ offers[X].slot ) */ 0x40
             ))// =======================================================
 
             mstore(0x00, sender)
 
              offersSlot := keccak256( // ===========================
-                0x00, /* [ msg.sender              ]    0x20
-                0x20     [ offers[X].slot          ] */ 0x40
+                0x00, /* [ msg.sender     )    0x20
+                0x20     [ offers[X].slot ) */ 0x40
             )// ========================================================
 
             /////////////////////////////////////////////////////////////////////
@@ -220,28 +222,30 @@ abstract contract NuggftV1Swap is INuggftV1ItemSwap, INuggftV1Swap, NuggftV1Stak
                 // update the epoch to begin auction
                 agency__cache := xor( // =====================================
                     /* start */  agency__cache,
+                    // we know that the epoch is 0
                     // -------------------------------------------------------
-                        /* addr     0       [                             ] 160 */
-                        /* eth      160,    [                             ] 230 */
-                   shl( /* epoch */ 230, /* [ */ nextEpoch             /* ] 254 */ )
-                        /* flag     254,    [                             ] 255 */
+                        /* address       0,    [                 ) 160 */
+                        /* eth         160,    [                 ) 230 */
+                   shl( /* epoch    */ 230, /* [ */ nextEpoch /* ) 254 */ )
+                        /* flag        254,    [                 ) 256 */
                 ) // ==========================================================
 
                 switch isItem
                 case 1 {
                     // check to make sure there is not a swap
+                    // this effectivly blocks more than one swap of a particular item of ending in the same epoch
 
                     mstore(0x00, shr(24,and(tokenId, 0xffff000000)))
                     mstore(0x20, lastItemSwap.slot)
 
                     let kek := keccak256(0x00, 0x40)
 
-                    // this effectivly blocks more than one swap of a particular item of ending in the same epch
                     if eq(nextEpoch, sload(kek)) {
                         panic(Error__0xAC__MustFinalizeOtherItemSwap)
                     }
 
-                    sstore(kek, 1)
+                    // since epoch 1 cant happen (unless OFFSET is 0)
+                    sstore(kek, nextEpoch)
 
                 }
                 default {
@@ -249,11 +253,11 @@ abstract contract NuggftV1Swap is INuggftV1ItemSwap, INuggftV1Swap, NuggftV1Stak
                     // the seller (agency__addr) approves this when they put the token up for sale
 
                     log4( // =======================================================
-                        /* param #0:n/a  */ 0x00, /* [       n/a      ] */ 0x00,
-                        /* topic #1:sig  */ Event__Transfer,
-                        /* topic #2:from */ agency__addr,
-                        /* topic #3:to   */ address(),
-                        /* topic #4:id   */ tokenId
+                        /* param 0: n/a  */ 0x00, 0x00,
+                        /* topic 1: sig  */ Event__Transfer,
+                        /* topic 2: from */ agency__addr,
+                        /* topic 3: to   */ address(),
+                        /* topic 4: id   */ tokenId
                     ) // ===========================================================
                 }
             }
@@ -313,10 +317,10 @@ abstract contract NuggftV1Swap is INuggftV1ItemSwap, INuggftV1Swap, NuggftV1Stak
             agency__cache := add(xor(// ========================================
                 /* start  */ agency__cache,
                 // -------------------------------------------------------------
-                    /* addr     0       [ */ sender /* ] 160 */ ),
-               shl( /* eth   */ 160, /* [ */ next   /* ] 230 */ )
-                    /* epoch    230     [              ] 254 */
-                    /* addr     254     [              ] 255 */
+                    /* address      0     [ */ sender /* ) 160 */ ),
+               shl( /* eth     */ 160, /* [ */ next   /* ) 230 */ )
+                    /* epoch      230     [              ) 254 */
+                    /* flag       254     [              ) 256 */
             ) // ===============================================================
 
             sstore(agency__sptr, agency__cache)
@@ -334,19 +338,21 @@ abstract contract NuggftV1Swap is INuggftV1ItemSwap, INuggftV1Swap, NuggftV1Stak
             switch isItem
             case 1 {
                 log3( // =======================================================
-                    /* param #1: agency   */ 0x00, /* [ itemAgency[tokenId][itemId] ]     0x20
-                       param #2: stake       0x20     [ stake                       ] */  0x40,
-                    /* topic #1: sig      */ Event__OfferItem,
-                    /* topic #2: sellerId */ and(tokenId, 0xffffff),
-                    /* topic #3: itemId   */ shl(240, and(shr(24, tokenId), 0xffff))
+                    /* param #1: agency   bytes32 */ 0x00, /* [ itemAgency[tokenId][itemId] )    0x20
+                       param #2: stake    bytes32    0x20     [ stake                       ) */ 0x40,
+                    // ---------------------------------------------------------
+                    /* topic #1: sig              */ Event__OfferItem,
+                    /* topic #2: sellerId uint160 */ and(tokenId, 0xffffff),
+                    /* topic #3: itemId   bytes2  */ shl(240, and(shr(24, tokenId), 0xffff))
                 ) // ===========================================================
             }
             default {
                 log2( // =======================================================
-                    /* param #1: agency  */ 0x00, /* [ agency[tokenId]  ]     0x20
-                       param #2: stake      0x20     [ stake            ] */  0x40,
-                    /* topic #1: sig     */ Event__Offer,
-                    /* topic #2: tokenId */ tokenId
+                    /* param #1: agency  bytes32 */ 0x00, /* [ agency[tokenId] )    0x20
+                       param #2: stake   bytes32    0x20     [ stake           ) */ 0x40,
+                    // ---------------------------------------------------------
+                    /* topic #1: sig             */ Event__Offer,
+                    /* topic #2: tokenId uint160 */ tokenId
                 ) // ===========================================================
             }
 
@@ -589,8 +595,20 @@ abstract contract NuggftV1Swap is INuggftV1ItemSwap, INuggftV1Swap, NuggftV1Stak
 
             acc := mul(acc, LOSS)
 
+            // we could add a whole bunch of logic all over to ensure that contracts cant use this, but
+            // lets just keep it simple - if you own you nugg with a contract, you have no way to make any
+            // eth on it.
+
+            // since a meaninful claim can only be made the epoch after a swap is over, it is at least 1 block
+            // later. So, if a contract that has offered will not be in creation when it hits here,
+            // so our call to extcodesize is sufficcitent to check if caller is a contract or not
+
             // send accumulated value * LOSS to msg.sender
-            if iszero(call(gas(), caller(), acc, 0, 0, 0, 0)) {
+            switch iszero(extcodesize(caller()))
+            case 1 {
+                pop(call(gas(), caller(), acc, 0, 0, 0, 0))
+            }
+            default {
                 // if someone really ends up here, just donate the eth
                 let pro := div(acc, PROTOCOL_FEE_BPS)
 

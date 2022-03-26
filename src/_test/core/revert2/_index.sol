@@ -94,17 +94,17 @@ contract Revert2 is
 
         _processor = address(processor);
 
-        users.frank = forge.vm.addr(12);
+        users.frank = address(uint160(uint256(keccak256(abi.encodePacked("frank")))));
 
-        users.dee = forge.vm.addr(13);
+        users.dee = address(uint160(uint256(keccak256(abi.encodePacked("dee")))));
 
-        users.mac = forge.vm.addr(14);
+        users.mac = address(uint160(uint256(keccak256(abi.encodePacked("mac")))));
 
-        users.dennis = forge.vm.addr(15);
+        users.dennis = address(uint160(uint256(keccak256(abi.encodePacked("dennis")))));
 
-        users.charlie = forge.vm.addr(16);
+        users.charlie = address(uint160(uint256(keccak256(abi.encodePacked("charlie")))));
 
-        users.safe = forge.vm.addr(17);
+        users.safe = address(uint160(uint256(keccak256(abi.encodePacked("safe")))));
 
         forge.vm.startPrank(0x9B0E2b16F57648C7bAF28EDD7772a815Af266E77);
         nuggft.setIsTrusted(users.safe, true);
