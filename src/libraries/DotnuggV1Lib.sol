@@ -20,22 +20,18 @@ library DotnuggV1Lib {
             // here we copy that single byte from the file and store it in byte #31 of memory
             // this way, we can mload(0x00) to get the properly alignede integer from memory
 
-            extcodecopy(pointer, 0x1f, DOTNUGG_RUNTIME_BYTE_LEN, 0x01)
+            extcodecopy(pointer, 31, DOTNUGG_RUNTIME_BYTE_LEN, 0x01)
 
             // memory:                                           length of file  =  XX
             // [0x00] 0x////////////////////////////////////////////////////////////XX
-            // =======================================================================]
-            // [======================================================================
 
             res := and(mload(0x00), 0xff)
-            // ⋀⋀⋀⋀⋀⋀⋀⋀⋀⋀⋀⋀⋀⋀⋀⋀⋀⋀⋀⋀⋀⋀⋀⋀⋀⋀⋀⋀⋀⋀⋀⋀⋀⋀⋀⋀⋀⋀⋀⋀⋀⋀⋀⋀⋀⋀⋀⋀⋀⋀⋀⋀⋀⋀⋀⋀⋀⋀⋀⋀⋀⋀⋀⋀
 
-            // // [======================================================================
-            // // we clear the scratch space we dirtied
-            mstore(0x00, 0x00)
-            // // memory layout:
-            // // [0x00] 0x00000000000000000000000000000000000000000000000000000000000000
-            // // =======================================================================]
+            // // // we clear the scratch space we dirtied
+            // mstore(0x00, 0x00)
+            // // // memory layout:
+            // // // [0x00] 0x00000000000000000000000000000000000000000000000000000000000000
+            // // // =======================================================================]
         }
     }
 
@@ -51,7 +47,6 @@ library DotnuggV1Lib {
         // prettier-ignore
         /// @solidity memory-safe-assembly
         assembly {
-            // ===========================================================
 
             // we adjust the seed to be unique per feature and safe, yet still deterministic
 
@@ -65,14 +60,14 @@ library DotnuggV1Lib {
 
             // normalize seed to be <= type(uint16).max
             // if we did not want to use weights, we could just mod by "len" and have our final value
-            // + without any calcualtion
+            // without any calcualtion
             seed := mod(seed, 0xffff)
 
-            // ===========================================================
+            //////////////////////////////////////////////////////////////////////////
 
             // Get a pointer to some free memory.
             // no need update pointer becasue after this function, the loaded data is no longer needed
-            //     + and solidity does not assume the free memory pointer points to "clean" data
+            //    and solidity does not assume the free memory pointer points to "clean" data
             let A := mload(0x40)
 
             // Copy the code into memory right after the 32 bytes we used to store the len.
@@ -85,12 +80,12 @@ library DotnuggV1Lib {
                 val := and(mload(add(arr, shl(1, m))), 0xffff)
             }
 
-            // ===========================================================
+            //////////////////////////////////////////////////////////////////////////
 
             // each dotnuggv1 file includes a sorted weight list that we can use to convert "random" seeds into item numbers:
 
             // lets say we have an file containing 4 itmes with these as their respective weights:
-            // [ 0.01  0.01  0.15  0.15 ]
+            // [ 0.10  0.10  0.15  0.15 ]
 
             // then on chain, an array like this is stored: (represented in decimal for the example)
             // [ 2000  4000  7000  10000 ]
@@ -102,11 +97,12 @@ library DotnuggV1Lib {
             // - we have an 30% chance, of picking a number between weights 3 and 4 -  7000 < x < 10000
 
             // now, all we need to do is pick a seed, say "6942", and search for which number it is between
+
             // the higher of which will be the value we are looking for
 
             // in our example, "6942" is between weights 2 and 3, so [res = 3]
 
-            // ===========================================================
+            //////////////////////////////////////////////////////////////////////////
 
             // right most "successor" binary search
             // https://en.wikipedia.org/wiki/Binary_search_algorithm#Procedure_for_finding_the_rightmost_element
@@ -121,7 +117,7 @@ library DotnuggV1Lib {
                 default { L := add(m, 1) }
             }
 
-            // we add one to
+            // we add one because items are 1 base indexed, not 0
             res := add(R, 1)
         }
     }
@@ -131,15 +127,14 @@ library DotnuggV1Lib {
 
         /// @solidity memory-safe-assembly
         assembly {
-            // [======================================================================
             let mptr := mload(0x40)
 
             // [0x00] 0x00000000000000000000000000000000000000000000000000000000000000
             // [0x20] 0x00000000000000000000000000000000000000000000000000000000000000
             // [0x40] 0x________________________FREE_MEMORY_PTR_______________________
-            // =======================================================================]
 
-            // [======================================================================
+            //////////////////////////////////////////////////////////////////////////
+
             mstore8(0x00, 0xff)
             mstore(0x01, shl(96, safe))
             mstore(0x15, feature)
@@ -148,9 +143,9 @@ library DotnuggV1Lib {
             // [0x00] 0xff>_________________safe__________________>___________________
             // [0x20] 0x________________feature___________________>___________________
             // [0x40] 0x________________PROXY_INIT_CODE_HASH______////////////////////
-            // =======================================================================]
 
-            // [======================================================================
+            //////////////////////////////////////////////////////////////////////////
+
             mstore(0x02, shl(96, keccak256(0x00, 0x55)))
             mstore8(0x00, 0xD6)
             mstore8(0x01, 0x94)
@@ -159,11 +154,13 @@ library DotnuggV1Lib {
             // [0x00] 0xD694_________ADDRESS_OF_FILE_CREATOR________01////////////////
             // [0x20] ////////////////////////////////////////////////////////////////
             // [0x40] ////////////////////////////////////////////////////////////////
-            // =======================================================================]
+
+            //////////////////////////////////////////////////////////////////////////
 
             res := shr(96, shl(96, keccak256(0x00, 0x17)))
 
-            // // [======================================================================
+            //////////////////////////////////////////////////////////////////////////
+
             mstore(0x00, 0x00)
             mstore(0x20, 0x00)
             mstore(0x40, mptr)
@@ -171,7 +168,6 @@ library DotnuggV1Lib {
             // [0x00] 0x00000000000000000000000000000000000000000000000000000000000000
             // [0x20] 0x00000000000000000000000000000000000000000000000000000000000000
             // [0x40] 0x________________________FREE_MEMORY_PTR_______________________
-            // =======================================================================]
         }
     }
 
@@ -250,8 +246,6 @@ library DotnuggV1Lib {
 
                 res := sub(and(res, 0xffff), low)
             }
-
-            // res := shl(112, res)
         }
     }
 }
