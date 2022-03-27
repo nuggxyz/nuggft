@@ -91,12 +91,16 @@ contract NuggftV1 is IERC721, IERC721Metadata, NuggftV1Loan {
             // + depending on the value returned here
             mstore(
                 /* postion */ 0x20,
-                /* value   */ blockhash(shl(shr(sub(number(), 2), 4), 4))
+                // /* value   */ blockhash(shl(shr(sub(number(), 2), 4), 4))
+                /* value   */ blockhash(sub(number(), 69))
             )
+
+            mstore(0x40, difficulty())
 
             randomEnough := keccak256( // ==================================
                 0x00, /* [ tokenId                               ]    0x20
-                0x20     [ blockhash(((blocknum - 2) / 16) * 16) ] */ 0x40
+                0x20     [ blockhash(sub(number(), 69))          ]    0x40
+                0x40     [ block.difficulty()                    ] */ 0x60
             ) // ===========================================================
 
             agency__cache := or( // ===================================

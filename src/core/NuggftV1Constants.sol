@@ -26,9 +26,8 @@ abstract contract NuggftV1Constants {
 
     // epoch
     uint8 constant INTERVAL_SUB = 16;
-    uint16 constant MINT_INTERVAL = 4;
 
-    uint24 constant INTERVAL = 64;
+    uint24 constant INTERVAL = 256;
 
     uint96 constant BASE_BPS = 10000;
     uint96 constant INCREMENT_BPS = 10500;
