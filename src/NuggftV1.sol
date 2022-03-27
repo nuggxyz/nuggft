@@ -24,7 +24,7 @@ contract NuggftV1 is IERC721, IERC721Metadata, NuggftV1Loan {
     /// @inheritdoc INuggftV1Proof
     function mint(uint160 tokenId) public payable override {
         // prettier-ignore
-        if (!(tokenId <= OFFSET && tokenId >= TRUSTED_MINT_TOKENS))
+        if (!(tokenId >= TRUSTED_MINT_TOKENS + MINT_OFFSET && tokenId <= MAX_TOKENS))
             _panic(Error__0x65__TokenNotMintable);
 
         mint(msg.sender, tokenId);
@@ -33,7 +33,7 @@ contract NuggftV1 is IERC721, IERC721Metadata, NuggftV1Loan {
     /// @inheritdoc INuggftV1Proof
     function trustedMint(uint160 tokenId, address to) external payable override requiresTrust {
         // prettier-ignore
-        if (!(tokenId < TRUSTED_MINT_TOKENS && tokenId != 0))
+        if (!(tokenId >= MINT_OFFSET && tokenId < MINT_OFFSET + TRUSTED_MINT_TOKENS && tokenId != 0))
             _panic(Error__0x66__TokenNotTrustMintable);
 
         mint(to, tokenId);
@@ -85,7 +85,6 @@ contract NuggftV1 is IERC721, IERC721Metadata, NuggftV1Loan {
                 mstore8(31, Error__0x80__TokenDoesExist)
                 revert(27, 0x5)
             }
-
 
             // we div and mul by 16 here to make the value returned stay constant for 16 blocks
             // this makes gas estimation more acurate as "initFromSeed" will change in gas useage
@@ -299,3 +298,34 @@ contract NuggftV1 is IERC721, IERC721Metadata, NuggftV1Loan {
         _panic(Error__0x69__Wut);
     }
 }
+
+// 50
+// 100
+// 200
+// 400
+// 800
+// 1600
+// 3200
+// 6400
+
+// 1 month slowly mint them out to 10000
+// then free for all
+
+// minted nuggs:
+
+// teir a: (once a day from epoch mint)
+// - eyes
+// - mouth
+// - hat/hair
+// -
+
+// tier b: (from epoch mint)
+// - eyes
+// - mouth
+// - hat/hair
+
+// tier c:  (from regular mint)
+// - eyes
+// - mouth
+// - hat/hair
+// - maybe back/neck/hold

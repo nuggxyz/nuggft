@@ -36,13 +36,15 @@ abstract contract system__NuggftV1Swap is NuggftV1Test, fragments {
     function test__system__frankBidsOnANuggThenClaims() public {
         jumpStart();
 
+        uint160 token = nuggft.epoch();
+
         uint96 value = 1 ether;
         {
-            expect.offer().from(users.frank).exec{value: value}(OFFSET);
+            expect.offer().from(users.frank).exec{value: value}(token);
 
             jumpSwap();
 
-            expect.claim().from(users.frank).exec(lib.sarr160(OFFSET), lib.sarrAddress(users.frank));
+            expect.claim().from(users.frank).exec(lib.sarr160(token), lib.sarrAddress(users.frank));
         }
     }
 
@@ -117,11 +119,13 @@ abstract contract system__NuggftV1Swap is NuggftV1Test, fragments {
         userMints(users.frank, token2);
         userMints(users.dennis, token3);
 
+        jumpStart();
+
         // forge.vm.startPrank(users.frank);
         {
             for (uint16 i = 0; i < 100; i++) {
-                jump(OFFSET + i);
-                tmpTokens.push(OFFSET + i);
+                jumpUp(1);
+                tmpTokens.push(nuggft.epoch());
                 uint96 value = nuggft.msp();
                 expect.offer().exec(tmpTokens[i], lib.txdata(users.frank, value, ""));
 
@@ -136,7 +140,7 @@ abstract contract system__NuggftV1Swap is NuggftV1Test, fragments {
 
             tmpTokens.push(encItemIdClaim(token1, itemId));
 
-            jump(uint24(OFFSET + 50 + tmpTokens.length));
+            jumpSwap();
 
             tmpUsers = lib.mAddress(users.frank, uint16(tmpTokens.length - 1));
             tmpUsers.push(address(uint160(token2)));
@@ -153,10 +157,10 @@ abstract contract system__NuggftV1Swap is NuggftV1Test, fragments {
         nuggft.mint{value: 0.02 ether}(token1);
 
         for (uint16 i = 0; i < nugg__size; i++) {
-            tmpTokens.push(OFFSET + i);
-            jump(uint24(tmpTokens[i]));
+            jumpUp(1);
+            tmpTokens.push(nuggft.epoch());
             for (; user__count < i * 10; user__count++) {
-                tmpUsers.push(address(uint160(uint256(keccak256("nuggfacotry")) + user__count)));
+                tmpUsers.push(address(uint160(uint256(keccak256("nuggfactory")) + user__count)));
                 uint96 money = nuggft.vfo(tmpUsers[user__count], tmpTokens[i]);
                 forge.vm.deal(tmpUsers[user__count], money);
                 expect.offer().start(tmpTokens[i], tmpUsers[user__count], money);
@@ -166,7 +170,7 @@ abstract contract system__NuggftV1Swap is NuggftV1Test, fragments {
             }
         }
 
-        jump(OFFSET + 1 + nugg__size);
+        jumpSwap();
         user__count = 0;
 
         for (uint16 i = 0; i < nugg__size; i++) {
@@ -283,7 +287,6 @@ abstract contract system__NuggftV1Swap is NuggftV1Test, fragments {
     }
 
     function test__system__revert__0x99__item__sellThenOffer__frank() public clean {
-        // jump(OFFSET);
         forge.vm.startPrank(users.frank);
         nuggft.mint{value: 0.2 ether}(token1);
 
@@ -420,7 +423,6 @@ abstract contract system__NuggftV1Swap is NuggftV1Test, fragments {
     //     test__system__item__sell__frank();
     //     forge.vm.prank(users.frank);
     //     nuggft.sell(token1, .9 ether);
-    //     jump(OFFSET);
 
     //     // nuggft.mint{value: 200 ether}(509);
 

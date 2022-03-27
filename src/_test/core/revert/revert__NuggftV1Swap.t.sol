@@ -277,7 +277,7 @@ abstract contract revert__NuggftV1Swap is NuggftV1Test {
     }
 
     function test__revert__NuggftV1Swap__0xA0__failWithNonexistantToken() public revert__NuggftV1Swap__setUp {
-        uint160 tokenId = MAX_TOKENS + 1;
+        uint160 tokenId = uint32(MAX_TOKENS) + 1;
 
         uint96 value = 1 ether;
 
@@ -285,7 +285,8 @@ abstract contract revert__NuggftV1Swap is NuggftV1Test {
 
         forge.vm.startPrank(users.frank);
         {
-            forge.vm.expectRevert(hex"7e863b48_A0");
+            // this fails with A0 if token is < 0xffffff;
+            forge.vm.expectRevert(hex"7e863b48_A2");
             nuggft.offer{value: value}(tokenId);
         }
         forge.vm.stopPrank();

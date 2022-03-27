@@ -61,16 +61,16 @@ contract stress__NuggftV1Loan is NuggftV1Test {
         forge.vm.deal(users.frank, 1000000000 ether);
 
         uint256 num = 950;
-        uint160 mint1 = mintable(0);
+        uint24 mint1 = mintable(0);
         uint160[] memory tokenIds = new uint160[](num);
         forge.vm.startPrank(users.frank);
 
-        for (uint160 i = mint1; i < mint1 + num; i++) {
-            tokenIds[i - mint1] = i;
+        for (uint24 i = mint1; i < mint1 + num; i++) {
+            tokenIds[i - mint1] = mintable(i);
 
-            nuggft.mint{value: nuggft.msp()}(i);
+            nuggft.mint{value: nuggft.msp()}(tokenIds[i - mint1]);
 
-            nuggft.loan(lib.sarr160(i));
+            nuggft.loan(lib.sarr160(tokenIds[i - mint1]));
         }
 
         // uint96 frankStartBal = uint96(users.frank.balance);
@@ -92,22 +92,21 @@ contract stress__NuggftV1Loan is NuggftV1Test {
         console.log(nuggft.eps(), nuggft.msp());
         // forge.vm.deal(users.frank, 1000000000 ether);
         uint256 num = 950;
-        uint160 mint1 = mintable(0);
 
         uint160[] memory tokenIds = new uint160[](num);
 
         jumpStart();
 
-        for (uint160 i = mint1; i < (mint1 + num); i++) {
-            address a = forge.vm.addr(i * 2699);
+        for (uint24 i = 0; i < (num); i++) {
+            address a = address(uint160(uint256(keccak256(abi.encodePacked(i * 2699)))));
 
-            tokenIds[i - mint1] = i;
+            tokenIds[i] = mintable(i);
 
             forge.vm.deal(a, nuggft.msp());
 
-            expect.mint().from(a).exec{value: a.balance}(i);
+            expect.mint().from(a).exec{value: a.balance}(tokenIds[i]);
 
-            expect.loan().from(a).exec(lib.sarr160(i));
+            expect.loan().from(a).exec(lib.sarr160(tokenIds[i]));
         }
 
         emit log_named_uint("balance", address(nuggft).balance);
