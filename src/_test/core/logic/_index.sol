@@ -7,6 +7,7 @@ import "./logic__ShiftLib.t.sol";
 import "./logic__TransferLib.t.sol";
 import "./logic__DotnuggV1Lib.t.sol";
 import "./logic__Rarity.t.sol";
+import "./logic__Add.t.sol";
 
 contract Logic is
     logic__ShiftLib,
@@ -17,7 +18,8 @@ contract Logic is
     logic__NuggftV1Epoch,
     logic__CastLib,
     logic__DotnuggV1Lib,
-    logic__Rarity
+    logic__Rarity,
+    logic__Add
 {
     function setUp() public {
         reset();

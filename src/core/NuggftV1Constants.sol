@@ -4,7 +4,7 @@ pragma solidity 0.8.13;
 
 abstract contract NuggftV1Constants {
     uint24 constant TRUSTED_MINT_TOKENS = 1000;
-    uint24 constant OFFSET = 5000;
+    uint24 constant OFFSET = 11000;
 
     uint24 constant MAX_TOKENS = 20000;
 
@@ -12,9 +12,15 @@ abstract contract NuggftV1Constants {
 
     uint96 constant LOSS = .1 gwei;
     uint8 constant HOT_PROOF_AMOUNT = 32;
-    // stake
-    uint96 constant PROTOCOL_FEE_FRAC = 10;
+
+    // the portion of all other earnings to protocol
+    uint96 constant PROTOCOL_FEE_FRAC = 5;
+
+    // the portion added to mints that goes to protocol
     uint96 constant PROTOCOL_FEE_FRAC_MINT = 1;
+
+    // the portion of overpayment to protocol
+    uint96 constant PROTOCOL_FEE_FRAC_MINT_DIV = 2;
 
     // epoch
     uint8 constant INTERVAL_SUB = 16;
