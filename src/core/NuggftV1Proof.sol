@@ -230,8 +230,8 @@ abstract contract NuggftV1Proof is INuggftV1Proof, NuggftV1Epoch, NuggftV1Trust 
 
                 proof := mload(0x00)
 
-                let pos0 := mul(sub(0xf, index0), 0x2)
-                let pos1 := mul(sub(0xf, index1), 0x2)
+                let pos0 := mul(sub(15, index0), 0x2)
+                let pos1 := mul(sub(15, index1), 0x2)
                 let item0 := and(shr(mul(index0, 16), proof), 0xffff)
                 let item1 := and(shr(mul(index1, 16), proof), 0xffff)
 
@@ -259,8 +259,8 @@ abstract contract NuggftV1Proof is INuggftV1Proof, NuggftV1Epoch, NuggftV1Trust 
 
         res |=
             DotnuggV1Lib.search(address(dotnuggV1), 0, seed) |
-            (uint256(0x0100 | DotnuggV1Lib.search(address(dotnuggV1), 1, seed)) << (0x10)) |
-            (uint256(0x0200 | DotnuggV1Lib.search(address(dotnuggV1), 2, seed)) << (0x20)) |
+            (uint256(0x01_00 | DotnuggV1Lib.search(address(dotnuggV1), 1, seed)) << (0x10)) |
+            (uint256(0x02_00 | DotnuggV1Lib.search(address(dotnuggV1), 2, seed)) << (0x20)) |
             (uint256((uint16(selA) << 8) | DotnuggV1Lib.search(address(dotnuggV1), selA, seed)) << (0x30)) |
             (selB == 0 ? 0 : (uint256((uint16(selB) << 8) | DotnuggV1Lib.search(address(dotnuggV1), selB, seed)) << (0x40))) |
             (uint256((uint16(selC) << 8) | DotnuggV1Lib.search(address(dotnuggV1), selC, seed >> 8)) << (0x80));
