@@ -101,7 +101,7 @@ contract expectLoan is base {
 
         run.msp = nuggft.msp();
 
-        run.shouldDonate = ds.noFallback == run.sender;
+        run.shouldDonate = run.sender.code.length > 0;
 
         for (uint256 i = 0; i < tokenIds.length; i++) {
             Snapshot memory pre;

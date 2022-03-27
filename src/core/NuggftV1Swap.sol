@@ -329,13 +329,13 @@ abstract contract NuggftV1Swap is INuggftV1ItemSwap, INuggftV1Swap, NuggftV1Stak
 
             mstore(0x00, agency__cache)
 
-            switch eq(tokenId, active)
-            case 1 {
-                next := div(last, PROTOCOL_FEE_FRAC_MINT_DIV)
-            }
-            default {
+            // switch eq(tokenId, active)
+            // case 1 {
+            //     next := div(last, PROTOCOL_FEE_FRAC_MINT_DIV)
+            // }
+            // default {
                 next := div(last, PROTOCOL_FEE_FRAC)
-            }
+            // }
             last := add(sload(stake.slot), or(shl(96, sub(last, next)), next))
             sstore(stake.slot, last)
             mstore(0x20, last)

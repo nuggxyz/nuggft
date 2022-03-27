@@ -14,7 +14,7 @@ abstract contract NuggftV1Constants {
     uint8 constant HOT_PROOF_AMOUNT = 32;
 
     // the portion of all other earnings to protocol
-    uint96 constant PROTOCOL_FEE_FRAC = 5;
+    uint96 constant PROTOCOL_FEE_FRAC = 10;
 
     // the portion added to mints that goes to protocol
     uint96 constant PROTOCOL_FEE_FRAC_MINT = 1;
@@ -30,13 +30,15 @@ abstract contract NuggftV1Constants {
 
     uint96 constant BASE_BPS = 10000;
     uint96 constant INCREMENT_BPS = 10500;
-    uint96 public constant REBALANCE_FEE_BPS = 600;
+
+    // warning: causes liq and reb noFallback tests to break with +-1 wei rounding error if 600
+    uint96 public constant REBALANCE_FEE_BPS = 100;
 
     // loan
     uint24 constant LIQUIDATION_PERIOD = 9999;
 
     // swap
-    uint256 constant SALE_LEN = 989;
+    uint256 constant SALE_LEN = 1;
 
     // events
     bytes32 constant Event__Transfer = 0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef;

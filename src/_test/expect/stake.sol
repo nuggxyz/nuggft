@@ -15,6 +15,7 @@ contract expectStake is base, NuggftV1Constants {
         Snapshot pre;
         bool mint;
         bool burn;
+        bool mintOverpay;
     }
 
     struct Snapshot {
@@ -83,13 +84,13 @@ contract expectStake is base, NuggftV1Constants {
             ds.assertLe(post.msp, pre.msp, "msp should have decreased");
         } else {
             ds.assertGe(post.msp, pre.msp, "msp is did not increase as expected");
-            expectedProto = lib.take(protofee, run.expected_stake_change);
+            expectedProto = run.expected_stake_change / protofee;
         }
 
         if (run.mint) {
             int192 fee = pre.eps / int192(int256(uint256(PROTOCOL_FEE_FRAC_MINT)));
             int192 overpay = run.expected_stake_change - pre.msp;
-            fee += overpay / protofee;
+            fee += overpay / int192(int256(uint256(PROTOCOL_FEE_FRAC_MINT_DIV)));
             expectedProto = fee;
         }
 
