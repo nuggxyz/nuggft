@@ -97,7 +97,7 @@ abstract contract NuggftV1Stake is INuggftV1Stake, NuggftV1Proof {
             let overpay := sub(callvalue(), _msp)
 
             // add fee of overpay to fee
-            fee := add(div(overpay, PROTOCOL_FEE_FRAC), fee)
+            fee := add(div(overpay, PROTOCOL_FEE_FRAC_MINT_DIV), fee)
             // fee := div(callvalue(), PROTOCOL_FEE_FRAC_MINT)
 
             // update stake
