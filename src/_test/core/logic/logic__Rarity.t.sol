@@ -15,7 +15,7 @@ abstract contract logic__Rarity is NuggftV1Test {
     function test__logic__Rarity__cumlative() public {
         jumpStart();
         jumpSwap();
-        for (uint24 i = 0; i < OFFSET - TRUSTED_MINT_TOKENS; i++) {
+        for (uint24 i = 0; i < 10000; i++) {
             uint160 tokenId = mintable(i);
             nuggft.mint(tokenId);
             bytes2[] memory proof = nuggft.floop(tokenId);

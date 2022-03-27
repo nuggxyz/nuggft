@@ -11,9 +11,15 @@ abstract contract revert__mint__0x66 is NuggftV1Test {
             forge.vm.expectRevert(hex"7e863b48_66");
             nuggft.trustedMint(mintable(0), users.frank);
             forge.vm.expectRevert(hex"7e863b48_66");
-            nuggft.trustedMint(OFFSET, users.frank);
+            nuggft.trustedMint(mintable(0), users.frank);
             forge.vm.expectRevert(hex"7e863b48_66");
             nuggft.trustedMint(0, users.frank);
+            forge.vm.expectRevert(hex"7e863b48_66");
+            nuggft.trustedMint(trustMintable(0) - 1, users.frank);
+            jumpStart();
+            uint160 tokenId = nuggft.epoch();
+            forge.vm.expectRevert(hex"7e863b48_66");
+            nuggft.trustedMint(tokenId, users.frank);
         }
         forge.vm.stopPrank();
     }
@@ -21,7 +27,7 @@ abstract contract revert__mint__0x66 is NuggftV1Test {
     function test__revert__mint__0x66__pass__desc() public {
         forge.vm.startPrank(users.safe);
         {
-            nuggft.trustedMint(1, users.frank);
+            nuggft.trustedMint(trustMintable(0), users.frank);
             nuggft.trustedMint(mintable(0) - 1, users.frank);
         }
         forge.vm.stopPrank();

@@ -17,11 +17,11 @@ contract NuggFatherV1 {
         nuggft = new NuggftV1(address(dotnugg));
 
         for (uint160 i = 0; i < 3; i++) {
-            nuggft.trustedMint(i + 1, 0x9B0E2b16F57648C7bAF28EDD7772a815Af266E77);
-            nuggft.trustedMint(3 + i + 1, 0x4E503501C5DEDCF0607D1E1272Bb4b3c1204CC71);
+            nuggft.trustedMint(1000000 + i + 1, 0x9B0E2b16F57648C7bAF28EDD7772a815Af266E77);
+            nuggft.trustedMint(1000000 + 3 + i + 1, 0x4E503501C5DEDCF0607D1E1272Bb4b3c1204CC71);
         }
 
-        for (uint160 i = 150; i < 160; i++) {
+        for (uint160 i = 1000010; i < 1000110; i++) {
             nuggft.trustedMint(i, address(this));
 
             bytes2[] memory f = nuggft.floop(i);

@@ -8,12 +8,14 @@ abstract contract revert__NuggftV1Stake is NuggftV1Test {
     /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
             [T:1] - addStakedShareFromMsgValue - "value of tx too low"
        ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+    uint160 private TOKEN1 = mintable(2099);
+    uint160 private TOKEN2 = mintable(2098);
 
     // mint
     // ────
 
     function test__revert__NuggftV1Stake__0x71__mint__success() public {
-        uint160 tokenId = 2099;
+        uint160 tokenId = TOKEN1;
 
         uint96 value = 30 ether;
 
@@ -29,13 +31,13 @@ abstract contract revert__NuggftV1Stake is NuggftV1Test {
     function test__revert__NuggftV1Stake__0x71__mint__failWithValue() public {
         test__revert__NuggftV1Stake__0x71__mint__success();
 
-        expect.mint().err(0x71).from(users.dennis).exec{value: nuggft.eps() - 1}(2909);
+        expect.mint().err(0x71).from(users.dennis).exec{value: nuggft.eps() - 1}(TOKEN2);
     }
 
     function test__revert__NuggftV1Stake__0x71__mint__failWithZero() public {
         test__revert__NuggftV1Stake__0x71__mint__success();
 
-        expect.mint().err(0x71).from(users.dennis).exec(2909);
+        expect.mint().err(0x71).from(users.dennis).exec(TOKEN2);
     }
 
     // trustedMint
@@ -44,7 +46,7 @@ abstract contract revert__NuggftV1Stake is NuggftV1Test {
     function test__revert__NuggftV1Stake__0x71__mint__successOnTrusted() public {
         forge.vm.startPrank(users.safe);
         {
-            nuggft.trustedMint{value: 30 ether}(200, users.frank);
+            nuggft.trustedMint{value: 30 ether}(trustMintable(200), users.frank);
         }
         forge.vm.stopPrank();
     }
@@ -54,7 +56,7 @@ abstract contract revert__NuggftV1Stake is NuggftV1Test {
 
         forge.vm.startPrank(users.safe);
         {
-            uint160 tokenId = 499;
+            uint160 tokenId = trustMintable(6);
 
             uint96 value = 500 gwei;
 
@@ -62,7 +64,7 @@ abstract contract revert__NuggftV1Stake is NuggftV1Test {
 
             nuggft.trustedMint{value: value}(tokenId, users.frank);
 
-            tokenId = 498;
+            tokenId = trustMintable(7);
 
             value = 450 gwei;
 

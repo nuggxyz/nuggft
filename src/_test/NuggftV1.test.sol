@@ -141,11 +141,11 @@ contract NuggftV1Test is ForgeTest, NuggftV1Constants {
     }
 
     function mintable(uint24 input) public returns (uint24) {
-        return input + TRUSTED_MINT_TOKENS;
+        return input + TRUSTED_MINT_TOKENS + MINT_OFFSET;
     }
 
     function trustMintable(uint24 input) public returns (uint24) {
-        return input;
+        return MINT_OFFSET + input;
     }
 
     function reset() public {
@@ -369,7 +369,7 @@ contract NuggftV1Test is ForgeTest, NuggftV1Constants {
     }
 
     function scenario_charlie_has_a_token() public payable returns (uint160 tokenId) {
-        tokenId = 2070;
+        tokenId = mintable(2700);
 
         forge.vm.prank(users.charlie);
         nuggft.mint(tokenId);

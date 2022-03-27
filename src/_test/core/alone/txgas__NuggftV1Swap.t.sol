@@ -5,12 +5,12 @@ pragma solidity 0.8.13;
 import "../../NuggftV1.test.sol";
 
 contract txgas__NuggftV1Swap is NuggftV1Test {
-    uint160 internal constant MINT_TOKENID = 3004;
-    uint160 internal constant COMMIT_TOKENID = 1498;
-    uint160 internal constant CARRY_TOKENID = 1300;
+    uint160 private MINT_TOKENID = mintable(3004);
+    uint160 private COMMIT_TOKENID = mintable(1498);
+    uint160 private CARRY_TOKENID = mintable(1300);
 
-    uint160 internal constant SELL_TOKENID = 1496;
-    uint160 internal constant CLAIM_TOKENID = 1497;
+    uint160 private SELL_TOKENID = mintable(1496);
+    uint160 private CLAIM_TOKENID = mintable(1497);
 
     function setUp() public {
         reset();

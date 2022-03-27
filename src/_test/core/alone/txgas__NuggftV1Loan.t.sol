@@ -5,9 +5,9 @@ pragma solidity 0.8.13;
 import "../../NuggftV1.test.sol";
 
 contract txgas__NuggftV1Loan is NuggftV1Test {
-    uint160 internal constant LOAN_TOKENID = 1499;
-    uint160 internal constant REBALANCE_TOKENID = 1498;
-    uint160 internal constant LIQUIDATE_TOKENID = 1497;
+    uint160 private LOAN_TOKENID = mintable(1499);
+    uint160 private REBALANCE_TOKENID = mintable(1498);
+    uint160 private LIQUIDATE_TOKENID = mintable(1497);
 
     function setUp() public {
         reset();
