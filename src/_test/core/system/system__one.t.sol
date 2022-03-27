@@ -11,9 +11,16 @@ abstract contract system__one is NuggftV1Test {
     function test__logic__NuggftV1Proof__rotate() public {
         expect.mint().from(users.frank).exec{value: 1 ether}(TOKEN1);
         nuggft.floop(TOKEN1);
-        forge.vm.prank(users.frank);
+
+        forge.vm.startPrank(users.frank);
         nuggft.rotate(TOKEN1, array.b8(1, 2, 3, 4, 5, 6, 7), array.b8(9, 10, 11, 12, 13, 14, 15));
         nuggft.floop(TOKEN1);
+        forge.vm.expectRevert(hex"7e863b48_73");
+        nuggft.rotate(TOKEN1, array.b8(1, 2, 3, 4, 5, 6, 7), array.b8(9, 10, 11, 12, 13, 14, 16));
+
+        forge.vm.expectRevert(hex"7e863b48_73");
+        nuggft.rotate(TOKEN1, array.b8(0, 2, 3, 4, 5, 6, 7), array.b8(9, 10, 11, 12, 13, 14, 15));
+        forge.vm.stopPrank();
     }
 
     function test__system__frankMintsATokenForFree() public {
