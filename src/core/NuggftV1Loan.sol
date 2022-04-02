@@ -317,6 +317,7 @@ abstract contract NuggftV1Loan is INuggftV1Loan, NuggftV1Swap {
                     // if so: ensure the loan is expired
                     // why? - only after a loan has expired are the "earnings" up for grabs.
                     // otherwise only the loaner is entitled to them
+                    // TODO subtract some amount from LIQUIDATION_PERIOD here, to give rebalancers a head start
                     if iszero(lt(add(juke(agency__cache, 2, 232), LIQUIDATION_PERIOD), active)) {
                         panic(Error__0xA4__ExpiredEpoch) // ERR:0x3B
                     }

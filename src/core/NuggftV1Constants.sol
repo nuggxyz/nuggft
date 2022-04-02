@@ -27,7 +27,9 @@ abstract contract NuggftV1Constants {
     // epoch
     uint8 constant INTERVAL_SUB = 16;
 
-    uint24 constant INTERVAL = 256;
+    uint24 constant INTERVAL = 64;
+
+    uint24 constant PREMIUM_DIV = 10000;
 
     uint96 constant BASE_BPS = 10000;
     uint96 constant INCREMENT_BPS = 10500;
@@ -37,6 +39,8 @@ abstract contract NuggftV1Constants {
 
     // loan
     uint24 constant LIQUIDATION_PERIOD = 9999;
+
+    uint256 constant TICKET = type(uint256).max;
 
     // swap
     uint256 constant SALE_LEN = 1;
@@ -59,8 +63,6 @@ abstract contract NuggftV1Constants {
     bytes32 constant Event__Rotate = 0x9a674c377cfb461eed8c85cebc9fc607ef62cecde152900174f519f861f90b57;
     bytes32 constant Event__OfferMint = 0x12651006c2efed8cb6941478698d827149f5d535c122b0c3cf88b92a54395a27;
     bytes32 constant Event__TransferItem = 0xc3d58168c5ae7397731d063d5bbf3d657854427343f4c083240f7aacaa2d0f62;
-
-    uint32 constant TransferItem__Sig = 0xc70bb199;
 
     error Revert(bytes1);
 
@@ -109,6 +111,10 @@ abstract contract NuggftV1Constants {
             mstore8(31, code)
             revert(27, 0x5)
         }
+    }
+
+    function _repanic(bool yes, uint8 code) internal pure {
+        if (!yes) _panic(code);
     }
 }
 

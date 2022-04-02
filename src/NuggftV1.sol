@@ -19,13 +19,44 @@ import {data as nuggs} from "./_data/nuggs.data.sol";
 /// @title NuggftV1
 /// @author nugg.xyz - danny7even & dub6ix
 contract NuggftV1 is IERC721, IERC721Metadata, NuggftV1Loan {
-    constructor(address dotnugg) NuggftV1Proof(dotnugg) {}
+    constructor(address dotnugg) NuggftV1Proof(dotnugg) {
+        // mint(tx.origin, MINT_OFFSET + TRUSTED_MINT_TOKENS);
+    }
+
+    // mapping(address => uint256) balance;
+
+    // uint160 minted = MINT_OFFSET + TRUSTED_MINT_TOKENS;
+
+    // function mint2(address friend) public payable {
+    //     _repanic(balance[msg.sender] == TICKET, 0x00);
+    //     _repanic(balance[friend] == 0, 0x01);
+    //     _repanic(friend != msg.sender, 0x02);
+
+    //     uint160 _minted = minted;
+
+    //     unchecked {
+    //         mint(msg.sender, _minted + 0);
+    //         mint(msg.sender, _minted + 1);
+    //         mint(msg.sender, _minted + 5);
+
+    //         minted = _minted + 3;
+    //     }
+
+    //     balance[friend] = TICKET;
+
+    //     balance[msg.sender] = 3;
+    // }
+
+    // function trustedMint2(address friend) public payable requiresTrust {
+    //     _repanic(balance[friend] == 0, 0x03);
+    //     balance[friend] = TICKET;
+    // }
 
     /// @inheritdoc INuggftV1Proof
     function mint(uint160 tokenId) public payable override {
         // prettier-ignore
-        if (!(tokenId >= TRUSTED_MINT_TOKENS + MINT_OFFSET && tokenId <= MAX_TOKENS))
-            _panic(Error__0x65__TokenNotMintable);
+        _repanic(tokenId >= TRUSTED_MINT_TOKENS + MINT_OFFSET && tokenId <= MAX_TOKENS,
+            Error__0x65__TokenNotMintable);
 
         mint(msg.sender, tokenId);
     }
@@ -33,8 +64,8 @@ contract NuggftV1 is IERC721, IERC721Metadata, NuggftV1Loan {
     /// @inheritdoc INuggftV1Proof
     function trustedMint(uint160 tokenId, address to) external payable override requiresTrust {
         // prettier-ignore
-        if (!(tokenId >= MINT_OFFSET && tokenId < MINT_OFFSET + TRUSTED_MINT_TOKENS && tokenId != 0))
-            _panic(Error__0x66__TokenNotTrustMintable);
+        _repanic(tokenId >= MINT_OFFSET && tokenId < MINT_OFFSET + TRUSTED_MINT_TOKENS && tokenId != 0,
+            Error__0x66__TokenNotTrustMintable);
 
         mint(to, tokenId);
     }
@@ -91,16 +122,16 @@ contract NuggftV1 is IERC721, IERC721Metadata, NuggftV1Loan {
             // + depending on the value returned here
             mstore(
                 /* postion */ 0x20,
-                // /* value   */ blockhash(shl(shr(sub(number(), 2), 4), 4))
-                /* value   */ blockhash(sub(number(), 69))
+                /* value   */ blockhash(shl(shr(sub(number(), 2), 4), 4))
+                // /* value   */ blockhash(sub(number(), 69))
             )
 
-            mstore(0x40, difficulty())
+            // mstore(0x40, 69)
 
             randomEnough := keccak256( // ==================================
                 0x00, /* [ tokenId                               ]    0x20
                 0x20     [ blockhash(sub(number(), 69))          ]    0x40
-                0x40     [ block.difficulty()                    ] */ 0x60
+                0x40     [ block.difficulty()                    ] */ 0x40
             ) // ===========================================================
 
             agency__cache := or( // ===================================

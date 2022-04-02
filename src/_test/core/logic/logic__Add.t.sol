@@ -11,7 +11,7 @@ abstract contract logic__Add is NuggftV1Test {
         jumpStart();
         jumpSwap();
 
-        uint96 start = .03 ether;
+        uint96 start = .01 ether;
 
         nuggft.mint{value: start}(mintable(0));
 
@@ -28,7 +28,7 @@ abstract contract logic__Add is NuggftV1Test {
     }
 }
 
-// 1000 mints at 100 gwei -   .000094507259963891
+// 1000 mints at 100 gwei -   .000094507259963891 - lol
 // 1000 mints at .001 ether - .945072599688525587
 //                          44.218283425255061369
 // 13414249267230307
@@ -38,3 +38,14 @@ abstract contract logic__Add is NuggftV1Test {
 // .122196917593446897
 
 // .040732305864482299
+
+// 85829845222001755
+
+// 40732305864482259
+
+//       85829845222119873509
+// 109940.5366172285078035201
+
+// 1319.331456094062691824
+//85903684394412377201
+//.004076909426251059

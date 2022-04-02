@@ -7,15 +7,13 @@ import {INuggftV1ItemSwap} from "../interfaces/nuggftv1/INuggftV1ItemSwap.sol";
 
 import {NuggftV1Stake} from "./NuggftV1Stake.sol";
 
-// import '../_test/utils/forge.sol';
-
 /// @notice mechanism for trading of nuggs between users (and items between nuggs)
 /// @dev Explain to a developer any extra details
 abstract contract NuggftV1Swap is INuggftV1ItemSwap, INuggftV1Swap, NuggftV1Stake {
     mapping(uint160 => mapping(address => uint256)) public offers;
     mapping(uint176 => mapping(uint160 => uint256)) public itemOffers;
     mapping(uint176 => uint256) public itemAgency;
-    mapping(uint256 => uint24) public lastItemSwap;
+    mapping(uint256 => uint256) public lastItemSwap;
 
     constructor() {
         unchecked {
@@ -235,17 +233,23 @@ abstract contract NuggftV1Swap is INuggftV1ItemSwap, INuggftV1Swap, NuggftV1Stak
                     // check to make sure there is not a swap
                     // this effectivly blocks more than one swap of a particular item of ending in the same epoch
 
-                    mstore(0x00, shr(24,and(tokenId, 0xffff000000)))
+                    mstore(0x00, shr(24, tokenId))
                     mstore(0x20, lastItemSwap.slot)
 
                     let kek := keccak256(0x00, 0x40)
 
-                    if eq(nextEpoch, sload(kek)) {
+                    let val := sload(kek)
+
+                    if eq(nextEpoch, and(val, 0xffffff)) {
                         panic(Error__0xAC__MustFinalizeOtherItemSwap)
                     }
 
+                    val := shl(48, val)
+
+                    val := or(val, shl(24, and(tokenId, 0xffffff)))
+
                     // since epoch 1 cant happen (unless OFFSET is 0)
-                    sstore(kek, nextEpoch)
+                    sstore(kek, or(val, nextEpoch))
 
                 }
                 default {
