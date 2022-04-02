@@ -8,8 +8,10 @@ import {ShiftLib} from "../../helpers/ShiftLib.sol";
 import {NuggftV1Loan} from "../../../core/NuggftV1Loan.sol";
 
 contract general__NuggftV1Loan is NuggftV1Test {
-    uint160 internal constant LOAN_TOKENID = 700;
-    uint160 internal constant NUM = 4;
+    uint160 internal LOAN_TOKENID = mintable(700);
+    uint160 internal MINT_TOKENID = mintable(500);
+
+    uint160 internal NUM = 4;
 
     function setUp() public {
         reset();
@@ -20,7 +22,7 @@ contract general__NuggftV1Loan is NuggftV1Test {
 
         forge.vm.startPrank(users.frank);
 
-        nuggft.mint{value: 1 ether}(500);
+        nuggft.mint{value: 1 ether}(MINT_TOKENID);
 
         uint160[] memory list = new uint160[](NUM);
 
@@ -44,7 +46,7 @@ contract general__NuggftV1Loan is NuggftV1Test {
 
         forge.vm.startPrank(users.frank);
 
-        nuggft.mint{value: 1 ether}(500);
+        nuggft.mint{value: 1 ether}(MINT_TOKENID);
 
         uint160[] memory list = new uint160[](NUM);
 

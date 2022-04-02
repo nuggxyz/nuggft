@@ -81,7 +81,7 @@ abstract contract NuggftV1Stake is INuggftV1Stake, NuggftV1Proof {
 
             let fee := div(_eps, PROTOCOL_FEE_FRAC_MINT)
 
-            let premium := div(mul(_eps, shrs), 10000)
+            let premium := div(mul(_eps, shrs), PREMIUM_DIV)
 
             let _msp := add(_eps, add(fee, premium))
 
@@ -151,7 +151,7 @@ abstract contract NuggftV1Stake is INuggftV1Stake, NuggftV1Proof {
             let shrs := shr(192, cache)
             ethPerShare := div(and(shr(96, cache), sub(shl(96, 1), 1)), shrs)
             protocolFee := div(ethPerShare, PROTOCOL_FEE_FRAC_MINT)
-            premium := div(mul(ethPerShare, shrs), 10000)
+            premium := div(mul(ethPerShare, shrs), PREMIUM_DIV)
             total := add(ethPerShare, add(protocolFee, premium))
         }
     }
