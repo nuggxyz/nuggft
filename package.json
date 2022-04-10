@@ -4,7 +4,7 @@
     "description": "Core smart contracts for NuggftV1",
     "repository": "https://github.com/nuggxyz/nuggft-v1-core.git",
     "author": "dub6ix <dub6ix@nugg.xyz>",
-    "license": "AGPL-3.0-or-later",
+    "license": "BUSL-1.1",
     "scripts": {
         "generate": "yarn --cwd ../dotnugg-sdk generate-uploader nuggft-art nuggft-core2"
     },
