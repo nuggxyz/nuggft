@@ -39,7 +39,7 @@ abstract contract logic__NuggftV1Proof is NuggftV1Test {
         trickery[6] = ShiftLib.mask(lens[6]);
         trickery[7] = ShiftLib.mask(lens[7]);
 
-        for (uint160 i = 0; i < 1000; i++) {
+        for (uint160 i = 0; i < 3000; i++) {
             for (uint8 j = 0; j < 8; j++) {
                 trickery[j] &= ShiftLib.imask(1, nuggft.external__search(j, (seed << 16) | i) - 1);
             }
@@ -47,7 +47,7 @@ abstract contract logic__NuggftV1Proof is NuggftV1Test {
         bool broken;
         for (uint256 j = 0; j < 8; j++) {
             broken = broken || trickery[j] != 0;
-            ds.inject.log(j, Uint256.toHexString(trickery[j], 32));
+            console.log(j, Uint256.toHexString(trickery[j], 32));
         }
         assertFalse(broken);
     }

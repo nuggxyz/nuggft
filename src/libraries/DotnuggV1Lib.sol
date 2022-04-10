@@ -250,7 +250,129 @@ library DotnuggV1Lib {
     }
 }
 
+function decodeProof(uint256 input) pure returns (uint16[16] memory res) {
+    unchecked {
+        for (uint256 i = 0; i < 16; i++) {
+            res[i] = uint16(input);
+            input >>= 16;
+        }
+    }
+}
+
+function decodeProofCore(uint256 proof) pure returns (uint8[8] memory res) {
+    unchecked {
+        for (uint256 i = 0; i < 8; i++) {
+            (uint8 feature, uint8 pos) = parseItemId(uint16(proof));
+            if (res[feature] == 0) res[feature] = pos;
+            proof >>= 16;
+        }
+    }
+}
+
+function encodeProof(uint8[8] memory ids) pure returns (uint256 proof) {
+    unchecked {
+        for (uint256 i = 0; i < 8; i++) proof |= ((i << 8) | uint256(ids[i])) << (i << 3);
+    }
+}
+
+function encodeProof(uint16[16] memory ids) pure returns (uint256 proof) {
+    unchecked {
+        for (uint256 i = 0; i < 16; i++) proof |= uint256(ids[i]) << (i << 4);
+    }
+}
+
+/// @notice parses the external itemId into a feautre and position
+/// @dev this follows dotnugg v1 specification
+/// @param itemId -> the external itemId
+/// @return feat -> the feautre of the item
+/// @return pos -> the file storage position of the item
 function parseItemId(uint16 itemId) pure returns (uint8 feat, uint8 pos) {
     feat = uint8(itemId >> 8);
     pos = uint8(itemId);
 }
+
+/**
+ * @dev Converts a `uint256` to its ASCII `string` decimal representation.
+ */
+function toAsciiBytes(uint256 value) pure returns (bytes memory buffer) {
+    // Inspired by OraclizeAPI's implementation - MIT licence
+    // https://github.com/oraclize/ethereum-api/blob/b42146b063c7d6ee1358846c198246239e9360e8/oraclizeAPI_0.4.25.sol
+
+    if (value == 0) {
+        return "0";
+    }
+    uint256 temp = value;
+    uint256 digits;
+    while (temp != 0) {
+        digits++;
+        temp /= 10;
+    }
+
+    buffer = new bytes(digits);
+
+    while (value != 0) {
+        digits -= 1;
+        buffer[digits] = bytes1(uint8(48 + uint256(value % 10)));
+        value /= 10;
+    }
+    return buffer;
+}
+
+function parseItemIdAsString(uint16 itemId, string[8] memory labels) pure returns (string memory) {
+    return string.concat(labels[(itemId >> 8)], " ", string(toAsciiBytes((itemId) & 0xff)));
+}
+
+// /**
+//  * @dev Converts a `uint256` to its ASCII `string` decimal representation.
+//  */
+// function toAsciiBytes(uint256 value) internal pure returns (bytes memory buffer) {
+//     // Inspired by OraclizeAPI's implementation - MIT licence
+//     // https://github.com/oraclize/ethereum-api/blob/b42146b063c7d6ee1358846c198246239e9360e8/oraclizeAPI_0.4.25.sol
+
+//     if (value == 0) {
+//         return "0";
+//     }
+//     uint64 alpha = 0xfedca9876543210;
+//      "0123456789abcdef"[val % base]
+// bytes1(uint8(48 + uint256(value % 10)));
+//     assembly {
+//         mstore(0x0, 0x0)
+// for {
+//     let i := 0
+//         } and(iszero(iszero(value)), iszero(iszero(i))) {
+//             i := sub(i, 1)
+//             value := div(value, 10)
+//         } {
+//             mstore(mod)
+//         }
+
+//     }
+
+//     assembly {
+//         let temp := value
+//         let dig := 0
+//         for {
+
+//         } iszero(iszero(temp)) {
+
+//         } {
+//             dig := add(dig, 1)
+//             temp := div(temp, 10)
+//         }
+//     }
+//     uint256 temp = value;
+//     uint256 digits;
+//     while (temp != 0) {
+//         digits++;
+//         temp /= 10;
+//     }
+
+//     buffer = new bytes(digits);
+
+//     while (value != 0) {
+//         digits -= 1;
+//         buffer[digits] = bytes1(uint8(48 + uint256(value % 10)));
+//         value /= 10;
+//     }
+//     return buffer;
+// }
