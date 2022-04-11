@@ -22,4 +22,16 @@ contract general__NuggftV1Loan is NuggftV1Test {
     //     string memory img = nuggft.tokenURI(500);
     //     ds.emit_log_string(img);
     // }
+
+    function setUp() public {
+        reset();
+    }
+
+    function test__imageURI() public {
+        uint160 token = mintable(1);
+        forge.vm.startPrank(users.frank);
+        nuggft.mint(token);
+
+        ds.emit_log_named_string("hi", nuggft.imageURI(token));
+    }
 }

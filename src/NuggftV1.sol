@@ -236,7 +236,7 @@ contract NuggftV1 is IERC721, IERC721Metadata, NuggftV1Loan {
 
     /// @inheritdoc INuggftV1Proof
     function imageURI(uint256 tokenId) public view override returns (string memory res) {
-        res = dotnuggV1.exec(proofOf(uint160(tokenId)), true);
+        res = dotnuggV1.exec(decodeProofCore(proofOf(uint160(tokenId))), true);
     }
 
     /// @inheritdoc INuggftV1Proof
@@ -254,7 +254,7 @@ contract NuggftV1 is IERC721, IERC721Metadata, NuggftV1Loan {
     }
 
     function imageURICheat(uint256 startblock, uint24 _epoch) public view returns (string memory res) {
-        return dotnuggV1.exec(initFromSeed(cheat(startblock, _epoch)), true);
+        return dotnuggV1.exec(decodeProofCore(initFromSeed(cheat(startblock, _epoch))), true);
     }
 
     /// @inheritdoc IERC721
