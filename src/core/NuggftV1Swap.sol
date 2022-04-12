@@ -583,10 +583,6 @@ abstract contract NuggftV1Swap is INuggftV1ItemSwap, INuggftV1Swap, NuggftV1Stak
 
                         sstore(proof__sptr, proof)
 
-                        mstore(0x1A0, or(or(and(tokenId, 0xffff000000) , offerer), shl(40, 0x02)))
-
-                        pop(call(gas(), mload(0x200), 0x00, 0x1A0, 0x20, 0x00, 0x00))
-
 
                         mstore(0x220, Function__transferSingle )
                         mstore(0x240, shr(24, tokenId))

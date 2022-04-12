@@ -53,8 +53,8 @@ contract NuggftV1Items is IERC1155, IERC1155Metadata_URI {
 
     function transferSingle(
         uint256 itemId,
-        address to,
-        address from
+        address from,
+        address to
     ) public {
         emit TransferSingle(address(0), from, to, itemId, 1);
     }
