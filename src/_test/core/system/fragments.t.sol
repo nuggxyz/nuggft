@@ -23,7 +23,7 @@ abstract contract fragments is NuggftV1Test {
 
         expect.mint().exec(TOKEN1, lib.txdata(users.dee, 0, ""));
 
-        bytes2[] memory f = nuggft.floop(TOKEN1);
+        uint16[] memory f = nuggft.floop(TOKEN1);
 
         itemId = uint16(f[1]);
 

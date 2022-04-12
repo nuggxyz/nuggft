@@ -3,13 +3,13 @@
 pragma solidity 0.8.13;
 
 interface INuggftV1ItemSwap {
-    event OfferItem(uint160 indexed sellingTokenId, bytes2 indexed itemId, bytes32 agency, bytes32 stake);
+    event OfferItem(uint160 indexed sellingTokenId, uint16 indexed itemId, bytes32 agency, bytes32 stake);
 
-    event ClaimItem(uint160 indexed sellingTokenId, bytes2 indexed itemId, uint160 indexed buyerTokenId, bytes32 proof);
+    event ClaimItem(uint160 indexed sellingTokenId, uint16 indexed itemId, uint160 indexed buyerTokenId, bytes32 proof);
 
-    event SellItem(uint160 indexed sellingTokenId, bytes2 indexed itemId, bytes32 agency, bytes32 proof);
+    event SellItem(uint160 indexed sellingTokenId, uint16 indexed itemId, bytes32 agency, bytes32 proof);
 
-    // event TransferItem(uint256 indexed from, uint256 indexed to, bytes2 indexed id, bytes32 proof);
+    // event TransferItem(uint256 indexed from, uint256 indexed to, uint16 indexed id, bytes32 proof);
 
     function offer(
         uint160 buyerTokenId,
@@ -52,3 +52,6 @@ interface INuggftV1ItemSwap {
         uint16 itemId
     ) external view returns (uint96 res);
 }
+//  SellItem(uint24,uint16,bytes32,bytes32);
+//     OfferItem(uint24,uint16, bytes32,bytes32);
+//  ClaimItem(uint24,uint16,uint24,bytes32);

@@ -32,17 +32,17 @@ contract NuggFatherV1 {
         for (uint160 i = 1000000; i < 1000020; i++) {
             nuggft.trustedMint(i, address(this));
 
-            bytes2[] memory f = nuggft.floop(i);
+            uint16[] memory f = nuggft.floop(i);
 
-            uint16 itemId3 = uint16(f[4]);
+            uint16 itemId3 = f[4];
 
             if (itemId3 != 0) nuggft.sell(i, itemId3, .0069 ether);
 
-            uint16 itemId4 = uint16(f[8]);
+            uint16 itemId4 = f[8];
 
             nuggft.sell(i, itemId4, .0069 ether);
 
-            // uint16 itemId3 = uint16(f[8]);
+            // uint16 itemId3 = f[8];
 
             // if (itemId3 != itemId && itemId3 != itemId2 && itemId4 != itemId3) {
             //     nuggft.sell(i, itemId3, .005 ether);
@@ -58,7 +58,7 @@ contract NuggFatherV1 {
         for (uint160 i = index; i < index + amount; i++) {
             nuggft.mint{value: nuggft.msp()}(uint160(i));
 
-            bytes2[] memory f = nuggft.floop(i);
+            uint16[] memory f = nuggft.floop(i);
 
             uint16 itemId3 = uint16(f[4]);
 

@@ -18,7 +18,7 @@ abstract contract logic__Rarity is NuggftV1Test {
         for (uint24 i = 0; i < 10000; i++) {
             uint160 tokenId = mintable(i);
             nuggft.mint(tokenId);
-            bytes2[] memory proof = nuggft.floop(tokenId);
+            uint16[] memory proof = nuggft.floop(tokenId);
             for (uint256 j = 0; j < 16; j++) {
                 uint16 item = uint16(proof[j]);
                 (uint8 feature, uint8 pos) = parseItemId(item);
