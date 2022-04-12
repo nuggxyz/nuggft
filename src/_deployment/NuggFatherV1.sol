@@ -29,7 +29,7 @@ contract NuggFatherV1 {
         //     nuggft.trustedMint(1000000 + 3 + i + 1, 0x4E503501C5DEDCF0607D1E1272Bb4b3c1204CC71);
         // }
 
-        for (uint160 i = 1000000; i < 1000050; i++) {
+        for (uint160 i = 1000000; i < 1000020; i++) {
             nuggft.trustedMint(i, address(this));
 
             bytes2[] memory f = nuggft.floop(i);

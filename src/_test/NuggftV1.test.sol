@@ -110,35 +110,15 @@ contract NuggftV1Test is ForgeTest, NuggftV1Constants {
 
     RiggedNuggft internal nuggft;
 
-    constructor() {
-        ds.setDsTest(address(this));
-    }
-
     address public _nuggft;
     address public _processor;
     address public _proxy;
-
-    struct Users {
-        address frank;
-        address dee;
-        address mac;
-        address dennis;
-        address charlie;
-        address safe;
-    }
-
-    Users public users;
 
     Expect expect;
 
     address internal dub6ix = 0x9B0E2b16F57648C7bAF28EDD7772a815Af266E77;
 
     // constructor() {}
-
-    modifier globalDs() {
-        ds.setDsTest(address(this));
-        _;
-    }
 
     function mintable(uint24 input) public returns (uint24) {
         return input + TRUSTED_MINT_TOKENS + MINT_OFFSET;
@@ -165,24 +145,6 @@ contract NuggftV1Test is ForgeTest, NuggftV1Constants {
         _processor = address(processor);
 
         _migrator = new MockNuggftV1Migrator();
-
-        users.frank = address(uint160(uint256(keccak256("frank"))));
-        forge.vm.deal(users.frank, 90000 ether);
-
-        users.dee = address(uint160(uint256(keccak256("dee"))));
-        forge.vm.deal(users.dee, 90000 ether);
-
-        users.mac = address(uint160(uint256(keccak256("mac"))));
-        forge.vm.deal(users.mac, 90000 ether);
-
-        users.dennis = address(uint160(uint256(keccak256("dennis"))));
-        forge.vm.deal(users.dennis, 90000 ether);
-
-        users.charlie = address(uint160(uint256(keccak256("charlie"))));
-        forge.vm.deal(users.charlie, 90000 ether);
-
-        users.safe = address(uint160(uint256(keccak256("safe"))));
-        forge.vm.deal(users.safe, 90000 ether);
 
         forge.vm.startPrank(0x9B0E2b16F57648C7bAF28EDD7772a815Af266E77);
         nuggft.setIsTrusted(users.safe, true);

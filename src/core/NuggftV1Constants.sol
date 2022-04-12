@@ -62,7 +62,9 @@ abstract contract NuggftV1Constants {
     bytes32 constant Event__Mint = 0xeb7e020bebf08bd7b26fa5ab6c13f7ff27f22963d01f83fb5aaaa16630c2e489;
     bytes32 constant Event__Rotate = 0x9a674c377cfb461eed8c85cebc9fc607ef62cecde152900174f519f861f90b57;
     bytes32 constant Event__OfferMint = 0x12651006c2efed8cb6941478698d827149f5d535c122b0c3cf88b92a54395a27;
-    bytes32 constant Event__TransferItem = 0xc3d58168c5ae7397731d063d5bbf3d657854427343f4c083240f7aacaa2d0f62;
+
+    uint64 constant Function__transferSingle = 0x49a035e3;
+    uint64 constant Function__transferBatch = 0xdec6d46d;
 
     error Revert(bytes1);
 

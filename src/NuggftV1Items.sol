@@ -2,59 +2,61 @@
 
 pragma solidity 0.8.13;
 
-import {IERC1155, IERC165} from "./interfaces/IERC721.sol";
+import {IERC1155, IERC165, IERC1155Metadata_URI} from "./interfaces/IERC721.sol";
 
 import {DotnuggV1Lib, parseItemIdAsString} from "./libraries/DotnuggV1Lib.sol";
-import {INuggftV1} from "./interfaces/nuggftv1/INuggftV1.sol";
+import {NuggftV1} from "./NuggftV1.sol";
 
-// 0xe5910fca
-
-contract NuggftV1Items is IERC1155 {
-    INuggftV1 immutable nuggftv1;
-
-    bytes32 constant Event__TransferItem = 0xc3d58168c5ae7397731d063d5bbf3d657854427343f4c083240f7aacaa2d0f62;
+contract NuggftV1Items is IERC1155, IERC1155Metadata_URI {
+    NuggftV1 immutable nuggftv1;
 
     constructor() {
-        nuggftv1 = INuggftV1(msg.sender);
+        nuggftv1 = NuggftV1(msg.sender);
     }
 
-    fallback() external {
-        address nuggft = address(nuggftv1);
-        assembly {
-            if iszero(eq(caller(), nuggft)) {
-                revert(0x00, 0x00)
+    mapping(uint256 => uint256) supply;
+
+    function transferBatch(
+        uint256 proof,
+        address from,
+        address to
+    ) public {
+        unchecked {
+            uint256 tmp = proof;
+            uint256 length = 0;
+            for (uint256 i = 0; i < 16; i++) {
+                uint256 check = tmp & 0xffff;
+                tmp >>= 16;
+                if (check != 0) {
+                    length++;
+                }
             }
 
-            let work := calldataload(0x00)
+            uint256[] memory ids = new uint256[](length);
+            uint256[] memory values = new uint256[](length);
 
-            let operator := and(work, 0xffffff)
-
-            mstore(0x00, and(shr(24, work), 0xffff))
-            mstore(0x20, 1)
-
-            let from := 0
-            let to := 0
-
-            switch shr(40, work)
-            case 1 {
-                from := nuggft
-                to := address()
-            }
-            case 2 {
-                from := address()
-                to := nuggft
-            }
-            case 3 {
-                from := nuggft
-                to := 0
-            }
-            default {
-                from := address()
-                to := nuggft
+            uint256 count = 0;
+            while (count < length) {
+                uint256 check = proof & 0xffff;
+                proof >>= 16;
+                if (check != 0) {
+                    values[count] = 1;
+                    ids[count] = check;
+                    count += 1;
+                    if (from == address(0)) supply[check / 10] += (1 << check % 10);
+                }
             }
 
-            log4(0x00, 0x40, Event__TransferItem, operator, from, to)
+            emit TransferBatch(address(0), from, to, ids, values);
         }
+    }
+
+    function transferSingle(
+        uint256 itemId,
+        address to,
+        address from
+    ) public {
+        emit TransferSingle(address(0), from, to, itemId, 1);
     }
 
     function supportsInterface(bytes4 interfaceId) public view virtual override returns (bool) {
@@ -85,5 +87,50 @@ contract NuggftV1Items is IERC1155 {
                 )
             )
         );
+    }
+
+    function totalSupply(uint256 _id) public view returns (uint256 res) {
+        res = (supply[_id / 10] >> _id % 10) & 0xffffff;
+    }
+
+    function balanceOf(address _owner, uint256 _id) public view returns (uint256 res) {
+        uint256 bal = nuggftv1.balance(_owner);
+
+        while (bal != 0) {
+            uint256 proof = nuggftv1.proofOf(uint160(bal <<= 24));
+            while (proof != 0) if ((proof <<= 16) == _id) res++;
+        }
+    }
+
+    function balanceOfBatch(address[] calldata _owners, uint256[] memory _ids) external view returns (uint256[] memory) {
+        for (uint256 i = 0; i < _owners.length; i++) {
+            _ids[i] = balanceOf(_owners[i], _ids[i]);
+        }
+
+        return _ids;
+    }
+
+    function isApprovedForAll(address, address) external pure override returns (bool) {
+        return false;
+    }
+
+    function safeTransferFrom(
+        address _from,
+        address _to,
+        uint256 _id,
+        uint256 _value,
+        bytes calldata _data
+    ) public {}
+
+    function safeBatchTransferFrom(
+        address _from,
+        address _to,
+        uint256[] calldata _ids,
+        uint256[] calldata _values,
+        bytes calldata _data
+    ) external {}
+
+    function setApprovalForAll(address _operator, bool _approved) external pure {
+        revert("whut");
     }
 }

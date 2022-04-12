@@ -64,13 +64,13 @@ abstract contract NuggftV1Proof is INuggftV1Proof, NuggftV1Epoch, NuggftV1Trust 
     function floop(uint160 tokenId) public view returns (bytes2[] memory arr) {
         arr = new bytes2[](16);
         uint256 proof = proofOf(tokenId);
-        uint256 max = 0;
+        // uint256 max = 0;
         for (uint256 i = 0; i < 16; i++) {
             uint16 check = uint16(proof) & 0xfff;
             proof >>= 16;
             if (check != 0) {
                 arr[i] = bytes2(check);
-                max = i + 1;
+                // max = i + 1;
             }
         }
     }
@@ -178,12 +178,19 @@ abstract contract NuggftV1Proof is INuggftV1Proof, NuggftV1Epoch, NuggftV1Trust 
         selB = selB < 30 ? 5 : selB < 55 ? 6 : selB < 75 ? 7 : 0;
         selC = selC < 30 ? 5 : selC < 55 ? 6 : selC < 75 ? 7 : selC < 115 ? 4 : selC < 155 ? 3 : selC < 205 ? 2 : 1;
 
+        uint256 a = DotnuggV1Lib.pickWithId(address(dotnuggV1), 0, seed);
+        uint256 b = DotnuggV1Lib.pickWithId(address(dotnuggV1), 1, seed);
+        uint256 c = DotnuggV1Lib.pickWithId(address(dotnuggV1), 2, seed);
+        uint256 d = DotnuggV1Lib.pickWithId(address(dotnuggV1), selA, seed);
+        uint256 e = DotnuggV1Lib.pickWithId(address(dotnuggV1), selB, seed);
+        uint256 f = DotnuggV1Lib.pickWithId(address(dotnuggV1), selC, seed >> 8);
+
         res |=
-            DotnuggV1Lib.search(address(dotnuggV1), 0, seed) |
-            (uint256(0x01_00 | DotnuggV1Lib.search(address(dotnuggV1), 1, seed)) << (0x10)) |
-            (uint256(0x02_00 | DotnuggV1Lib.search(address(dotnuggV1), 2, seed)) << (0x20)) |
-            (uint256((uint16(selA) << 8) | DotnuggV1Lib.search(address(dotnuggV1), selA, seed)) << (0x30)) |
-            (selB == 0 ? 0 : (uint256((uint16(selB) << 8) | DotnuggV1Lib.search(address(dotnuggV1), selB, seed)) << (0x40))) |
-            (uint256((uint16(selC) << 8) | DotnuggV1Lib.search(address(dotnuggV1), selC, seed >> 8)) << (0x80));
+            a |
+            (b << (0x10)) | //
+            (c << (0x20)) |
+            (d << (0x30)) |
+            (selB == 0 ? 0 : (e << (0x40))) |
+            (f << (0x80));
     }
 }
