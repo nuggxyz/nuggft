@@ -151,6 +151,12 @@ library array {
         }
     }
 
+    function to40(uint256[] memory a) internal pure returns (uint40[] memory res) {
+        assembly {
+            res := a
+        }
+    }
+
     function to24(uint256[] memory a) internal pure returns (uint24[] memory res) {
         assembly {
             res := a
@@ -189,6 +195,12 @@ library array {
         }
     }
 
+    function from40(uint40[] memory a) internal pure returns (uint256[] memory res) {
+        assembly {
+            res := a
+        }
+    }
+
     function from24(uint24[] memory a) internal pure returns (uint256[] memory res) {
         assembly {
             res := a
@@ -221,6 +233,10 @@ library array {
         return to160(arrayHelpers.repeat(a, amount));
     }
 
+    function r40(uint40 a, uint16 amount) internal pure returns (uint40[] memory arr) {
+        return to40(arrayHelpers.repeat(a, amount));
+    }
+
     function r24(uint24 a, uint16 amount) internal pure returns (uint24[] memory arr) {
         return to24(arrayHelpers.repeat(a, amount));
     }
@@ -247,6 +263,10 @@ library array {
         return to160(arrayHelpers.singleton(a));
     }
 
+    function s40(uint40 a) internal pure returns (uint40[] memory arr) {
+        return to40(arrayHelpers.singleton(a));
+    }
+
     function s24(uint24 a) internal pure returns (uint24[] memory arr) {
         return to24(arrayHelpers.singleton(a));
     }
@@ -271,6 +291,10 @@ library array {
 
     function a160(uint160[] memory a) internal pure returns (uint160) {
         return uint160(arrayHelpers.add(from160(a)));
+    }
+
+    function a40(uint40[] memory a) internal pure returns (uint40) {
+        return uint40(arrayHelpers.add(from40(a)));
     }
 
     function a24(uint24[] memory a) internal pure returns (uint24) {
@@ -429,6 +453,79 @@ library array {
         uint160 h
     ) internal pure returns (uint160[] memory arr) {
         return to160(arrayHelpers.build(a, b, c, d, e, f, g, h));
+    }
+
+    ///////////////////////////////////////////////////////////////
+
+    function b40(uint256 a) internal pure returns (uint40[] memory arr) {
+        return to40(arrayHelpers.build(a));
+    }
+
+    function b40(uint40 a, uint40 b) internal pure returns (uint40[] memory arr) {
+        return to40(arrayHelpers.build(a, b));
+    }
+
+    function b40(
+        uint40 a,
+        uint40 b,
+        uint40 c
+    ) internal pure returns (uint40[] memory arr) {
+        return to40(arrayHelpers.build(a, b, c));
+    }
+
+    function b40(
+        uint40 a,
+        uint40 b,
+        uint40 c,
+        uint40 d
+    ) internal pure returns (uint40[] memory arr) {
+        return to40(arrayHelpers.build(a, b, c, d));
+    }
+
+    function b40(
+        uint40 a,
+        uint40 b,
+        uint40 c,
+        uint40 d,
+        uint40 e
+    ) internal pure returns (uint40[] memory arr) {
+        return to40(arrayHelpers.build(a, b, c, d, e));
+    }
+
+    function b40(
+        uint40 a,
+        uint40 b,
+        uint40 c,
+        uint40 d,
+        uint40 e,
+        uint40 f
+    ) internal pure returns (uint40[] memory arr) {
+        return to40(arrayHelpers.build(a, b, c, d, e, f));
+    }
+
+    function b40(
+        uint40 a,
+        uint40 b,
+        uint40 c,
+        uint40 d,
+        uint40 e,
+        uint40 f,
+        uint40 g
+    ) internal pure returns (uint40[] memory arr) {
+        return to40(arrayHelpers.build(a, b, c, d, e, f, g));
+    }
+
+    function b40(
+        uint40 a,
+        uint40 b,
+        uint40 c,
+        uint40 d,
+        uint40 e,
+        uint40 f,
+        uint40 g,
+        uint40 h
+    ) internal pure returns (uint40[] memory arr) {
+        return to40(arrayHelpers.build(a, b, c, d, e, f, g, h));
     }
 
     ///////////////////////////////////////////////////////////////

@@ -30,7 +30,7 @@ contract deployment__NuggFatherV1 is NuggftV1Test {
 
         forge.vm.stopPrank();
 
-        // for (uint160 i = 1; i < 10; i++) {
+        // for (uint24 i = 1; i < 10; i++) {
         //     // father.nuggft().floop(i);
 
         //     // uint8[8] memory list = father.dotnugg().decodeProofCore(father.nuggft().proofOf(i));

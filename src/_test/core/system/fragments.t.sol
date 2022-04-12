@@ -7,9 +7,9 @@ import {NuggftV1Proof} from "../../../core/NuggftV1Proof.sol";
 
 abstract contract fragments is NuggftV1Test {
     uint16 itemId;
-    uint160 private TOKEN1 = mintable(0);
+    uint24 private TOKEN1 = mintable(0);
 
-    function userMints(address user, uint160 token) public {
+    function userMints(address user, uint24 token) public {
         uint96 value = nuggft.msp();
         if (value < 1 ether) {
             value = 1 ether;

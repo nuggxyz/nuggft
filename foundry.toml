@@ -20,12 +20,12 @@ tx_origin = '0x00a329c0648769a73afac7f9381e08fb43dbea72'
 initial_balance = '0xffffffffffffffffffffffff'
 block_number = 4400000
 chain_id = 1
-gas_limit = 9223372036854775807
+gas_limit = "9223372036854775807"
 gas_price = 0
 block_base_fee_per_gas = 0
 block_coinbase = '0x0000000000000000000000000000000000000000'
 block_timestamp = 0
-block_difficulty = 12
+block_difficulty = 0
 gas_reports = ["RiggedNuggft", "NuggftV1", "Expect"]
 
 

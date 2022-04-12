@@ -3,24 +3,20 @@
 pragma solidity 0.8.13;
 
 interface INuggftV1ItemSwap {
-    event OfferItem(uint160 indexed sellingTokenId, uint16 indexed itemId, bytes32 agency, bytes32 stake);
+    event OfferItem(uint24 indexed sellingTokenId, uint16 indexed itemId, bytes32 agency, bytes32 stake);
 
-    event ClaimItem(uint160 indexed sellingTokenId, uint16 indexed itemId, uint160 indexed buyerTokenId, bytes32 proof);
+    event ClaimItem(uint24 indexed sellingTokenId, uint16 indexed itemId, uint24 indexed buyerTokenId, bytes32 proof);
 
-    event SellItem(uint160 indexed sellingTokenId, uint16 indexed itemId, bytes32 agency, bytes32 proof);
-
-    // event TransferItem(uint256 indexed from, uint256 indexed to, uint16 indexed id, bytes32 proof);
+    event SellItem(uint24 indexed sellingTokenId, uint16 indexed itemId, bytes32 agency, bytes32 proof);
 
     function offer(
-        uint160 buyerTokenId,
-        uint160 sellerTokenId,
+        uint24 buyerTokenId,
+        uint24 sellerTokenId,
         uint16 itemId
     ) external payable;
 
-    function claim(uint160[] calldata sellingTokenItemIds, uint160[] calldata buyerTokenIds) external;
-
     function sell(
-        uint160 sellerTokenId,
+        uint24 sellerTokenId,
         uint16 itemid,
         uint96 floor
     ) external;
@@ -34,8 +30,8 @@ interface INuggftV1ItemSwap {
     /// @return next -> the minimum value that must be sent with a offer call
     /// @return current ->
     function check(
-        uint160 buyer,
-        uint160 seller,
+        uint24 buyer,
+        uint24 seller,
         uint16 itemId
     )
         external
@@ -47,8 +43,8 @@ interface INuggftV1ItemSwap {
         );
 
     function vfo(
-        uint160 buyer,
-        uint160 seller,
+        uint24 buyer,
+        uint24 seller,
         uint16 itemId
     ) external view returns (uint96 res);
 }

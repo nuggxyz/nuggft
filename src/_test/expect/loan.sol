@@ -48,7 +48,7 @@ contract expectLoan is base {
         return this;
     }
 
-    function exec(uint160[] memory tokenIds) public {
+    function exec(uint24[] memory tokenIds) public {
         lib.txdata memory _prepped = prepped;
 
         delete prepped;
@@ -62,7 +62,7 @@ contract expectLoan is base {
 
     struct Snapshot {
         uint256 agency;
-        uint160 tokenId;
+        uint24 tokenId;
     }
 
     struct Run {
@@ -79,7 +79,7 @@ contract expectLoan is base {
         delete execution;
     }
 
-    function exec(uint160[] memory tokenIds, lib.txdata memory txdata) public {
+    function exec(uint24[] memory tokenIds, lib.txdata memory txdata) public {
         this.start(tokenIds, txdata.from);
         forge.vm.startPrank(txdata.from);
         if (txdata.err.length > 0) forge.vm.expectRevert(txdata.err);
@@ -88,7 +88,7 @@ contract expectLoan is base {
         txdata.err.length > 0 ? this.rollback() : this.stop();
     }
 
-    function start(uint160[] memory tokenIds, address sender) public {
+    function start(uint24[] memory tokenIds, address sender) public {
         require(execution.length == 0, "EXPECT-LOAN:START: execution already esists");
 
         Run memory run;

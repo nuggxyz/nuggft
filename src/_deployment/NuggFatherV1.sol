@@ -24,12 +24,12 @@ contract NuggFatherV1 {
 
         nuggft = new NuggftV1(address(dotnugg));
 
-        // for (uint160 i = 0; i < 3; i++) {
+        // for (uint24 i = 0; i < 3; i++) {
         //     nuggft.trustedMint(1000000 + i + 1, 0x9B0E2b16F57648C7bAF28EDD7772a815Af266E77);
         //     nuggft.trustedMint(1000000 + 3 + i + 1, 0x4E503501C5DEDCF0607D1E1272Bb4b3c1204CC71);
         // }
 
-        for (uint160 i = 1000000; i < 1000020; i++) {
+        for (uint24 i = 1000000; i < 1000020; i++) {
             nuggft.trustedMint(i, address(this));
 
             uint16[] memory f = nuggft.floop(i);
@@ -52,11 +52,11 @@ contract NuggFatherV1 {
         // payable(msg.sender).transfer(address(this).balance);
     }
 
-    uint160 index = 1001001;
+    uint24 index = 1001001;
 
-    function mint(uint160 amount) external payable {
-        for (uint160 i = index; i < index + amount; i++) {
-            nuggft.mint{value: nuggft.msp()}(uint160(i));
+    function mint(uint24 amount) external payable {
+        for (uint24 i = index; i < index + amount; i++) {
+            nuggft.mint{value: nuggft.msp()}(uint24(i));
 
             uint16[] memory f = nuggft.floop(i);
 

@@ -27,7 +27,7 @@ abstract contract revert__claim__0x67 is NuggftV1Test {
 
         jump(tokenId + 1);
 
-        expect.claim().from(users.dee).exec(lib.sarr160(tokenId), lib.sarrAddress(users.dee));
+        expect.claim().from(users.dee).exec(array.b24(tokenId), lib.sarrAddress(users.dee));
     }
 
     function test__revert__claim__0x67__fail__mintingToken__winnerClaimingDuringMintEpoch() public revert__claim__0x67_setUp globalDs {
@@ -37,7 +37,7 @@ abstract contract revert__claim__0x67 is NuggftV1Test {
 
         expect.offer().g().exec{value: nuggft.msp()}(tokenId);
 
-        expect.claim().err(0x67).g().exec(lib.sarr160(tokenId), lib.sarrAddress(users.dee));
+        expect.claim().err(0x67).g().exec(array.b24(tokenId), lib.sarrAddress(users.dee));
     }
 
     function test__revert__claim__0x67__fail__sellingToken__winnerClaimingDuringInitialEpoch() public revert__claim__0x67_setUp globalDs {
@@ -45,7 +45,7 @@ abstract contract revert__claim__0x67 is NuggftV1Test {
 
         expect.offer().g().exec{value: nuggft.vfo(users.dee, TOKEN_FOR_SALE)}(TOKEN_FOR_SALE);
 
-        expect.claim().err(0x67).g().exec(lib.sarr160(TOKEN_FOR_SALE), lib.sarrAddress(users.dee));
+        expect.claim().err(0x67).g().exec(array.b24(TOKEN_FOR_SALE), lib.sarrAddress(users.dee));
     }
 
     function test__revert__claim__0x67__fail__sellingToken__winnerClaimingDuringFinalEpoch() public revert__claim__0x67_setUp globalDs {
@@ -57,7 +57,7 @@ abstract contract revert__claim__0x67 is NuggftV1Test {
 
         jump(finalEpoch);
 
-        expect.claim().err(0x67).g().exec(lib.sarr160(TOKEN_FOR_SALE), lib.sarrAddress(users.dee));
+        expect.claim().err(0x67).g().exec(array.b24(TOKEN_FOR_SALE), lib.sarrAddress(users.dee));
     }
 
     function test__revert__claim__0x67__pass__sellingToken__winnerClaimingAfterSwapIsOver() public revert__claim__0x67_setUp globalDs {
@@ -69,6 +69,6 @@ abstract contract revert__claim__0x67 is NuggftV1Test {
 
         jump(finalEpoch + 1);
 
-        expect.claim().g().exec(lib.sarr160(TOKEN_FOR_SALE), lib.sarrAddress(users.dee));
+        expect.claim().g().exec(array.b24(TOKEN_FOR_SALE), lib.sarrAddress(users.dee));
     }
 }

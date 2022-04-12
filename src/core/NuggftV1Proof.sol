@@ -14,10 +14,10 @@ import {NuggftV1Epoch} from "./NuggftV1Epoch.sol";
 import {NuggftV1Trust} from "./NuggftV1Trust.sol";
 
 abstract contract NuggftV1Proof is INuggftV1Proof, NuggftV1Epoch, NuggftV1Trust {
-    mapping(uint160 => uint256) proofs;
+    mapping(uint24 => uint256) proofs;
     mapping(uint256 => uint256) public hotproof;
 
-    mapping(uint256 => uint256) public agency;
+    mapping(uint24 => uint256) public agency;
 
     IDotnuggV1Safe public immutable override dotnuggV1;
 
@@ -41,7 +41,7 @@ abstract contract NuggftV1Proof is INuggftV1Proof, NuggftV1Epoch, NuggftV1Trust 
     }
 
     /// @inheritdoc INuggftV1Proof
-    function proofOf(uint160 tokenId) public view override returns (uint256 res) {
+    function proofOf(uint24 tokenId) public view override returns (uint256 res) {
         if ((res = proofs[tokenId]) != 0) return res;
 
         if ((res = hotproof[uint8(tokenId % HOT_PROOF_AMOUNT)]) != HOT_PROOF_EMPTY && agency[tokenId] != 0) {
@@ -61,7 +61,7 @@ abstract contract NuggftV1Proof is INuggftV1Proof, NuggftV1Epoch, NuggftV1Trust 
         _panic(Error__0xAD__InvalidZeroProof);
     }
 
-    function floop(uint160 tokenId) public view returns (uint16[] memory arr) {
+    function floop(uint24 tokenId) public view returns (uint16[] memory arr) {
         arr = new uint16[](16);
         uint256 proof = proofOf(tokenId);
         // uint256 max = 0;
@@ -77,7 +77,7 @@ abstract contract NuggftV1Proof is INuggftV1Proof, NuggftV1Epoch, NuggftV1Trust 
 
     /// @inheritdoc INuggftV1Proof
     function rotate(
-        uint160 tokenId,
+        uint24 tokenId,
         uint8[] calldata index0s,
         uint8[] calldata index1s
     ) external override {

@@ -23,7 +23,7 @@ contract expectLiquidate is base {
     struct Run {
         uint256 agency;
         address sender;
-        uint160 tokenId;
+        uint24 tokenId;
         uint96 eps;
         uint96 msp;
         uint96 principal;
@@ -65,7 +65,7 @@ contract expectLiquidate is base {
         return this;
     }
 
-    function exec(uint160 tokenId) public payable {
+    function exec(uint24 tokenId) public payable {
         lib.txdata memory _prepped = prepped;
         _prepped.value += uint96(msg.value);
 
@@ -73,7 +73,7 @@ contract expectLiquidate is base {
         exec(tokenId, _prepped);
     }
 
-    function exec(uint160 tokenId, lib.txdata memory txdata) public {
+    function exec(uint24 tokenId, lib.txdata memory txdata) public {
         forge.vm.deal(txdata.from, txdata.from.balance + txdata.value);
         this.start(tokenId, txdata.from, txdata.value);
         forge.vm.startPrank(txdata.from);
@@ -84,7 +84,7 @@ contract expectLiquidate is base {
     }
 
     function start(
-        uint160 tokenId,
+        uint24 tokenId,
         address sender,
         uint96 _value
     ) public {

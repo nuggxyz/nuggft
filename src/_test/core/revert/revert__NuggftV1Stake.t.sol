@@ -8,14 +8,14 @@ abstract contract revert__NuggftV1Stake is NuggftV1Test {
     /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
             [T:1] - addStakedShareFromMsgValue - "value of tx too low"
        ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
-    uint160 private TOKEN1 = mintable(2099);
-    uint160 private TOKEN2 = mintable(2098);
+    uint24 private TOKEN1 = mintable(2099);
+    uint24 private TOKEN2 = mintable(2098);
 
     // mint
     // ────
 
     function test__revert__NuggftV1Stake__0x71__mint__success() public {
-        uint160 tokenId = TOKEN1;
+        uint24 tokenId = TOKEN1;
 
         uint96 value = 30 ether;
 
@@ -57,7 +57,7 @@ abstract contract revert__NuggftV1Stake is NuggftV1Test {
 
         forge.vm.startPrank(users.safe);
         {
-            uint160 tokenId = trustMintable(6);
+            uint24 tokenId = trustMintable(6);
 
             uint96 value = 500 gwei;
 
@@ -91,7 +91,7 @@ abstract contract revert__NuggftV1Stake is NuggftV1Test {
     // ─────────────
 
     function test__revert__NuggftV1Stake__0x77__burn__failNotOwner() public {
-        uint160 tokenId = scenario_dee_has_a_token();
+        uint24 tokenId = scenario_dee_has_a_token();
 
         forge.vm.startPrank(users.mac);
         {
@@ -102,7 +102,7 @@ abstract contract revert__NuggftV1Stake is NuggftV1Test {
     }
 
     // function test__revert__NuggftV1Stake__0x73__burn__failNoApproval() public {
-    //     uint160 tokenId = scenario_dee_has_a_token();
+    //     uint24 tokenId = scenario_dee_has_a_token();
 
     //     forge.vm.startPrank(users.dee);
     //     {
@@ -113,7 +113,7 @@ abstract contract revert__NuggftV1Stake is NuggftV1Test {
     // }
 
     // function test__revert__NuggftV1Stake__0x73__burn__succeedsWithApproval() public {
-    //     uint160 tokenId = scenario_dee_has_a_token();
+    //     uint24 tokenId = scenario_dee_has_a_token();
 
     //     forge.vm.startPrank(users.dee);
     //     {
@@ -124,7 +124,7 @@ abstract contract revert__NuggftV1Stake is NuggftV1Test {
     // }
 
     // function test__revert__NuggftV1Stake__0x73__burn__failOnIncorrectApproval() public {
-    //     uint160 tokenId = scenario_dee_has_a_token();
+    //     uint24 tokenId = scenario_dee_has_a_token();
 
     //     forge.vm.startPrank(users.dee);
     //     {
@@ -137,7 +137,7 @@ abstract contract revert__NuggftV1Stake is NuggftV1Test {
     // }
 
     // function test__revert__NuggftV1Stake__0x73__burn__failOnIncorrectOperatorApproval() public {
-    //     uint160 tokenId = scenario_dee_has_a_token();
+    //     uint24 tokenId = scenario_dee_has_a_token();
 
     //     forge.vm.startPrank(users.dee);
     //     {
@@ -156,7 +156,7 @@ abstract contract revert__NuggftV1Stake is NuggftV1Test {
     // }
 
     // function test__revert__NuggftV1Stake__0x73__burn__failsOnCorrectOperatorApproval() public {
-    //     uint160 tokenId = scenario_dee_has_a_token();
+    //     uint24 tokenId = scenario_dee_has_a_token();
 
     //     forge.vm.startPrank(users.dee);
     //     {
@@ -177,7 +177,7 @@ abstract contract revert__NuggftV1Stake is NuggftV1Test {
     // migrate
     // ─────────────
     // function test__revert__NuggftV1Stake__0x73__migrate__failNoApproval() public {
-    //     uint160 tokenId = scenario_dee_has_a_token();
+    //     uint24 tokenId = scenario_dee_has_a_token();
 
     //     scenario_migrator_set();
 
@@ -190,7 +190,7 @@ abstract contract revert__NuggftV1Stake is NuggftV1Test {
     // }
 
     function test__revert__NuggftV1Stake__0x73__migrate__succeeds() public {
-        uint160 tokenId = scenario_dee_has_a_token();
+        uint24 tokenId = scenario_dee_has_a_token();
 
         scenario_migrator_set();
 
@@ -211,7 +211,7 @@ abstract contract revert__NuggftV1Stake is NuggftV1Test {
     // ────────────
 
     function test__revert__NuggftV1Stake__0x81__migrate__fail() public {
-        uint160 tokenId = scenario_dee_has_a_token();
+        uint24 tokenId = scenario_dee_has_a_token();
 
         // _nuggft.shouldFail(hex'81', dee, migrate(tokenId));
 
@@ -226,7 +226,7 @@ abstract contract revert__NuggftV1Stake is NuggftV1Test {
     }
 
     function test__revert__NuggftV1Stake__0x81__migrate__succeeds() public {
-        uint160 tokenId = scenario_dee_has_a_token();
+        uint24 tokenId = scenario_dee_has_a_token();
         scenario_migrator_set();
 
         forge.vm.startPrank(users.dee);

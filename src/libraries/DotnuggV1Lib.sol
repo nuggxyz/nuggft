@@ -42,7 +42,7 @@ library DotnuggV1Lib {
         uint8 feature,
         uint256 seed
     ) internal view returns (uint16 res) {
-        return (uint16(feature) * 1000) | search(safe, feature, seed);
+        return (uint16(feature) * 1000) + search(safe, feature, seed);
     }
 
     function search(

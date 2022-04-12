@@ -8,7 +8,7 @@ import {NuggftV1Swap} from "./NuggftV1Swap.sol";
 
 abstract contract NuggftV1Loan is INuggftV1Loan, NuggftV1Swap {
     /// @inheritdoc INuggftV1Loan
-    function loan(uint160[] calldata tokenIds) external override {
+    function loan(uint24[] calldata tokenIds) external override {
         uint96 amt = eps();
 
         uint256 active = epoch();
@@ -107,7 +107,7 @@ abstract contract NuggftV1Loan is INuggftV1Loan, NuggftV1Swap {
                     log1(0x00, 0x20, Event__Stake)
                 }
 
-                // log2 with "Loan(uint160,bytes32)" topic
+                // log2 with "Loan(uint24,bytes32)" topic
                 mstore(add(mptr, 0x40), agency__cache)
 
                 log2(add(mptr, 0x40), 0x20, Event__Loan, mload(mptr))
@@ -116,7 +116,7 @@ abstract contract NuggftV1Loan is INuggftV1Loan, NuggftV1Swap {
     }
 
     /// @inheritdoc INuggftV1Loan
-    function liquidate(uint160 tokenId) external payable override {
+    function liquidate(uint24 tokenId) external payable override {
         uint256 active = epoch();
         address itemHolder = address(emitter);
 
@@ -262,7 +262,7 @@ abstract contract NuggftV1Loan is INuggftV1Loan, NuggftV1Swap {
     }
 
     /// @inheritdoc INuggftV1Loan
-    function rebalance(uint160[] calldata tokenIds) external payable {
+    function rebalance(uint24[] calldata tokenIds) external payable {
         uint256 active = epoch();
 
         assembly {
@@ -442,7 +442,7 @@ abstract contract NuggftV1Loan is INuggftV1Loan, NuggftV1Swap {
     }
 
     /// @inheritdoc INuggftV1Loan
-    function debt(uint160 tokenId)
+    function debt(uint24 tokenId)
         public
         view
         returns (
@@ -484,7 +484,7 @@ abstract contract NuggftV1Loan is INuggftV1Loan, NuggftV1Swap {
 
     /// @notice vfr: "Value For Rebalance"
     /// @inheritdoc INuggftV1Loan
-    function vfr(uint160[] calldata tokenIds) external view returns (uint96[] memory vals) {
+    function vfr(uint24[] calldata tokenIds) external view returns (uint96[] memory vals) {
         vals = new uint96[](tokenIds.length);
         for (uint256 i = 0; i < vals.length; i++) {
             (bool ok, , , uint96 fee, uint96 earn, ) = debt(tokenIds[i]);
@@ -499,7 +499,7 @@ abstract contract NuggftV1Loan is INuggftV1Loan, NuggftV1Swap {
 
     /// @notice vfl: "Value For Liquidate"
     /// @inheritdoc INuggftV1Loan
-    function vfl(uint160[] calldata tokenIds) external view returns (uint96[] memory vals) {
+    function vfl(uint24[] calldata tokenIds) external view returns (uint96[] memory vals) {
         vals = new uint96[](tokenIds.length);
         for (uint256 i = 0; i < vals.length; i++) {
             (bool ok, , uint96 prin, uint96 fee, uint96 earn, ) = debt(tokenIds[i]);

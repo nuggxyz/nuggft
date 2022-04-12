@@ -5,13 +5,13 @@ pragma solidity 0.8.13;
 import "../interfaces/nuggftv1/INuggftV1.sol";
 
 contract NuggftV1MinterHelper {
-    function offerem(address nuggftv1, uint160 id) external payable {
+    function offerem(address nuggftv1, uint24 id) external payable {
         INuggftV1(nuggftv1).offer{value: msg.value}(id);
 
         // payable(msg.sender).transfer(address(this).balance);
     }
 
-    // function claimem(address nuggftv1, uint160 id) external {
+    // function claimem(address nuggftv1, uint24 id) external {
     //     INuggftV1(nuggftv1).claim(id);
 
     //     payable(msg.sender).transfer(address(this).balance);
@@ -22,8 +22,8 @@ contract NuggftV1MinterHelper {
 //     address immutable minterHelper;
 //     address immutable deployer;
 
-//     uint160[] toClaimFromHelper;
-//     uint160[] toClaim;
+//     uint24[] toClaimFromHelper;
+//     uint24[] toClaim;
 
 //     uint256 claimedIndex;
 //     uint256 claimedFromHelperIndex;
@@ -40,24 +40,24 @@ contract NuggftV1MinterHelper {
 //         uint256 amount
 //     ) external payable {
 //         for (uint256 i = start; i < start + amount; i++) {
-//             INuggftV1(nuggftv1).trustedMint{value: INuggftV1(nuggftv1).msp()}(uint160(i), to);
+//             INuggftV1(nuggftv1).trustedMint{value: INuggftV1(nuggftv1).msp()}(uint24(i), to);
 //         }
 //         payable(msg.sender).transfer(address(this).balance);
 //     }
 
 //     function mint(
 //         address nuggftv1,
-//         uint160 start,
-//         uint160 amount
+//         uint24 start,
+//         uint24 amount
 //     ) external payable {
-//         for (uint160 i = start; i < start + amount; i++) {
-//             INuggftV1(nuggftv1).mint{value: INuggftV1(nuggftv1).msp()}(uint160(i));
+//         for (uint24 i = start; i < start + amount; i++) {
+//             INuggftV1(nuggftv1).mint{value: INuggftV1(nuggftv1).msp()}(uint24(i));
 //             uint96 floor = INuggftV1(nuggftv1).eps() * 3;
-//             INuggftV1(nuggftv1).approve(nuggftv1, uint160(i));
+//             INuggftV1(nuggftv1).approve(nuggftv1, uint24(i));
 
-//             INuggftV1(nuggftv1).sell(uint160(i), floor);
+//             INuggftV1(nuggftv1).sell(uint24(i), floor);
 
-//             (, uint96 amt, ) = INuggftV1(nuggftv1).check(minterHelper, uint160(i));
+//             (, uint96 amt, ) = INuggftV1(nuggftv1).check(minterHelper, uint24(i));
 
 //             if (i % 2 == 0) {
 //                 NuggftV1MinterHelper(minterHelper).offerem{value: amt}(nuggftv1, i);
@@ -70,7 +70,7 @@ contract NuggftV1MinterHelper {
 //         payable(msg.sender).transfer(address(this).balance);
 //     }
 
-//     // function claimHelper(address nuggftv1, uint160 amount) external {
+//     // function claimHelper(address nuggftv1, uint24 amount) external {
 //     //     uint256 i = claimedIndex;
 //     //     uint256 start = i;
 //     //     for (; i < start + amount; i++) {
@@ -80,7 +80,7 @@ contract NuggftV1MinterHelper {
 //     //     payable(msg.sender).transfer(address(this).balance);
 //     // }
 
-//     // function claimSelf(address nuggftv1, uint160 amount) external {
+//     // function claimSelf(address nuggftv1, uint24 amount) external {
 //     //     uint256 i = claimedIndex;
 //     //     uint256 start = i;
 //     //     for (; i < start + amount; i++) {

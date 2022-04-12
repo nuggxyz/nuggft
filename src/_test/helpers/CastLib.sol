@@ -3,9 +3,9 @@
 pragma solidity 0.8.13;
 
 library CastLib {
-    function to160(uint256 x) internal pure returns (uint160 y) {
-        require(x <= type(uint160).max);
-        y = uint160(x);
+    function to160(uint256 x) internal pure returns (uint24 y) {
+        require(x <= type(uint24).max);
+        y = uint24(x);
     }
 
     function to96(uint256 x) internal pure returns (uint96 y) {

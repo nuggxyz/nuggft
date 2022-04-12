@@ -7,21 +7,21 @@ interface INuggftV1Loan {
                                 EVENTS
     ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━*/
 
-    event Loan(uint160 indexed tokenId, bytes32 agency);
+    event Loan(uint24 indexed tokenId, bytes32 agency);
 
-    event Rebalance(uint160 indexed tokenId, bytes32 agency);
+    event Rebalance(uint24 indexed tokenId, bytes32 agency);
 
-    event Liquidate(uint160 indexed tokenId, bytes32 agency);
+    event Liquidate(uint24 indexed tokenId, bytes32 agency);
 
     /*━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
                             STATE CHANGING
     ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━*/
 
-    function rebalance(uint160[] calldata tokenIds) external payable;
+    function rebalance(uint24[] calldata tokenIds) external payable;
 
-    function loan(uint160[] calldata tokenIds) external;
+    function loan(uint24[] calldata tokenIds) external;
 
-    function liquidate(uint160 tokenId) external payable;
+    function liquidate(uint24 tokenId) external payable;
 
     /*━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
                             VIEW FUNCTIONS
@@ -36,7 +36,7 @@ interface INuggftV1Loan {
     /// @return fee       -> the fee a user must pay to rebalance (and extend) the loan on their nugg
     /// @return earn      -> the amount of eth the minSharePrice has increased since loan was last rebalanced
     /// @return expire    -> the epoch the loan becomes insolvent
-    function debt(uint160 tokenId)
+    function debt(uint24 tokenId)
         external
         view
         returns (
@@ -50,9 +50,9 @@ interface INuggftV1Loan {
 
     /// @notice "Values For Liquadation"
     /// @dev used to tell user how much eth to send for liquidate
-    function vfl(uint160[] calldata tokenIds) external view returns (uint96[] memory res);
+    function vfl(uint24[] calldata tokenIds) external view returns (uint96[] memory res);
 
     /// @notice "Values For Rebalance"
     /// @dev used to tell user how much eth to send for rebalance
-    function vfr(uint160[] calldata tokenIds) external view returns (uint96[] memory res);
+    function vfr(uint24[] calldata tokenIds) external view returns (uint96[] memory res);
 }

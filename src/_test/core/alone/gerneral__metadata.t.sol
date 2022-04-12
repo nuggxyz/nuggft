@@ -5,8 +5,8 @@ pragma solidity 0.8.13;
 import "../../NuggftV1.test.sol";
 
 contract general__NuggftV1Loan is NuggftV1Test {
-    // uint160 internal constant LOAN_TOKENID = 700;
-    // uint160 internal constant NUM = 4;
+    // uint24 internal constant LOAN_TOKENID = 700;
+    // uint24 internal constant NUM = 4;
     // function setUp() public {
     //     reset();
     // }
@@ -28,7 +28,7 @@ contract general__NuggftV1Loan is NuggftV1Test {
     }
 
     function test__imageURI() public {
-        uint160 token = mintable(1);
+        uint24 token = mintable(1);
         forge.vm.startPrank(users.frank);
         nuggft.mint(token);
 

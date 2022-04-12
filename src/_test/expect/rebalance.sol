@@ -47,7 +47,7 @@ contract expectRebalance is base {
         return this;
     }
 
-    function exec(uint160[] memory tokenIds) public payable {
+    function exec(uint24[] memory tokenIds) public payable {
         lib.txdata memory _prepped = prepped;
         _prepped.value += uint96(msg.value);
 
@@ -59,7 +59,7 @@ contract expectRebalance is base {
         uint256 agency;
         uint96 fee;
         uint96 earned;
-        uint160 tokenId;
+        uint24 tokenId;
     }
 
     struct Run {
@@ -77,7 +77,7 @@ contract expectRebalance is base {
         delete execution;
     }
 
-    function exec(uint160[] memory tokenIds, lib.txdata memory txdata) public {
+    function exec(uint24[] memory tokenIds, lib.txdata memory txdata) public {
         forge.vm.deal(txdata.from, txdata.from.balance + txdata.value);
         this.start(tokenIds, txdata.from);
         forge.vm.startPrank(txdata.from);
@@ -87,7 +87,7 @@ contract expectRebalance is base {
         txdata.err.length > 0 ? this.rollback() : this.stop();
     }
 
-    function start(uint160[] memory tokenIds, address sender) public {
+    function start(uint24[] memory tokenIds, address sender) public {
         require(execution.length == 0, "EXPECT-REBALANCE:START: execution already esists");
 
         Run memory run;

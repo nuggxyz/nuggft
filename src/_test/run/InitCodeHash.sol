@@ -3,7 +3,7 @@
 pragma solidity 0.8.13;
 
 contract InitCodeHash {
-    function run(address nuggftv1, uint160 id)
+    function run(address nuggftv1, uint24 id)
         external
         returns (
             address eoa__deployer,

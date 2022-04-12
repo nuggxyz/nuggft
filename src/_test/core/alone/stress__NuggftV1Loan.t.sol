@@ -8,16 +8,16 @@ import {ShiftLib} from "../../helpers/ShiftLib.sol";
 import {NuggftV1Loan} from "../../../core/NuggftV1Loan.sol";
 
 contract stress__NuggftV1Loan is NuggftV1Test {
-    uint160 internal LOAN_TOKENID = mintable(999);
+    uint24 internal LOAN_TOKENID = mintable(999);
 
-    uint160 multiplier = 10;
+    uint24 multiplier = 10;
 
     function setUp() public {
         reset();
 
         expect.mint().from(users.frank).exec{value: 1 ether}(LOAN_TOKENID);
 
-        expect.loan().from(users.frank).exec(lib.sarr160(LOAN_TOKENID));
+        expect.loan().from(users.frank).exec(array.b24(LOAN_TOKENID));
     }
 
     function test__stress__NuggftV1Loan__rebalance2() public globalDs {
@@ -29,15 +29,15 @@ contract stress__NuggftV1Loan is NuggftV1Test {
 
             (, , , , , uint24 b_insolventEpoch) = nuggft.debt(LOAN_TOKENID);
 
-            uint160 tokenId = nuggft.epoch();
+            uint24 tokenId = nuggft.epoch();
 
             uint96 value = nuggft.vfo(users.frank, tokenId);
             nuggft.offer{value: value}(tokenId);
 
             (, , , uint96 __fee, uint96 __earn, ) = nuggft.debt(LOAN_TOKENID);
 
-            uint96 valueforRebal = nuggft.vfr(lib.sarr160(LOAN_TOKENID))[0];
-            nuggft.rebalance{value: valueforRebal}(lib.sarr160(LOAN_TOKENID));
+            uint96 valueforRebal = nuggft.vfr(array.b24(LOAN_TOKENID))[0];
+            nuggft.rebalance{value: valueforRebal}(array.b24(LOAN_TOKENID));
 
             (, , , , , uint24 a_insolventEpoch) = nuggft.debt(LOAN_TOKENID);
 
@@ -62,7 +62,7 @@ contract stress__NuggftV1Loan is NuggftV1Test {
 
         uint256 num = 950;
         uint24 mint1 = mintable(0);
-        uint160[] memory tokenIds = new uint160[](num);
+        uint24[] memory tokenIds = new uint24[](num);
         forge.vm.startPrank(users.frank);
 
         for (uint24 i = mint1; i < mint1 + num; i++) {
@@ -70,14 +70,14 @@ contract stress__NuggftV1Loan is NuggftV1Test {
 
             nuggft.mint{value: nuggft.msp()}(tokenIds[i - mint1]);
 
-            nuggft.loan(lib.sarr160(tokenIds[i - mint1]));
+            nuggft.loan(array.b24(tokenIds[i - mint1]));
         }
 
         // uint96 frankStartBal = uint96(users.frank.balance);
 
         // (, , , , uint24 b_insolventEpoch) = nuggft.loanInfo(LOAN_TOKENID);
 
-        uint160 tokenId = nuggft.epoch();
+        uint24 tokenId = nuggft.epoch();
 
         uint96 value = nuggft.vfo(users.frank, tokenId);
         // forge.vm.startPrank(users.frank);
@@ -93,7 +93,7 @@ contract stress__NuggftV1Loan is NuggftV1Test {
         // forge.vm.deal(users.frank, 1000000000 ether);
         uint256 num = 950;
 
-        uint160[] memory tokenIds = new uint160[](num);
+        uint24[] memory tokenIds = new uint24[](num);
 
         jumpStart();
 
@@ -106,7 +106,7 @@ contract stress__NuggftV1Loan is NuggftV1Test {
 
             expect.mint().from(a).exec{value: a.balance}(tokenIds[i]);
 
-            expect.loan().from(a).exec(lib.sarr160(tokenIds[i]));
+            expect.loan().from(a).exec(array.b24(tokenIds[i]));
         }
 
         emit log_named_uint("balance", address(nuggft).balance);
@@ -116,7 +116,7 @@ contract stress__NuggftV1Loan is NuggftV1Test {
 
         // (, , , , uint24 b_insolventEpoch) = nuggft.loanInfo(LOAN_TOKENID);
 
-        // uint160 tokenId = nuggft.epoch();
+        // uint24 tokenId = nuggft.epoch();
         // (, uint96 nextSwapAmount, uint96 senderCurrentOffer) = nuggft.check(users.frank, tokenId);
 
         // uint96 value = nextSwapAmount - senderCurrentOffer;
@@ -147,20 +147,20 @@ contract stress__NuggftV1Loan is NuggftV1Test {
         address a = address(uint160(0x11111));
         address b = address(uint160(0x22222));
 
-        uint160 tokenId = mintable(0);
-        uint160 tokenId2 = mintable(1);
+        uint24 tokenId = mintable(0);
+        uint24 tokenId2 = mintable(1);
 
         expect.mint().from(a).exec{value: nuggft.msp()}(tokenId);
         expect.mint().from(b).exec{value: nuggft.msp()}(tokenId2);
 
-        expect.loan().from(a).exec(lib.sarr160(tokenId));
-        expect.loan().from(b).exec(lib.sarr160(tokenId2));
+        expect.loan().from(a).exec(array.b24(tokenId));
+        expect.loan().from(b).exec(array.b24(tokenId2));
 
         emit log_named_uint("balance", address(nuggft).balance);
 
         jumpLoan();
 
-        uint160[] memory tokenIds = array.b160(tokenId, tokenId2);
+        uint24[] memory tokenIds = array.b24(tokenId, tokenId2);
 
         uint96[] memory vals = nuggft.vfr(tokenIds);
 

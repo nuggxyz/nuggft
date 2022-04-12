@@ -5,7 +5,7 @@ pragma solidity 0.8.13;
 import "../../../NuggftV1.test.sol";
 
 abstract contract revert__sell__0x77 is NuggftV1Test {
-    uint160 private token1 = mintable(222);
+    uint24 private token1 = mintable(222);
 
     function test__revert__sell__0x77__fail__desc() public {
         // mint
@@ -21,7 +21,7 @@ abstract contract revert__sell__0x77 is NuggftV1Test {
 
         jumpStart();
 
-        uint160 tokenId = nuggft.epoch();
+        uint24 tokenId = nuggft.epoch();
 
         expect.offer().from(users.dee).value(nuggft.vfo(users.dee, tokenId)).exec(tokenId);
 
@@ -43,7 +43,7 @@ abstract contract revert__sell__0x77 is NuggftV1Test {
 
         jumpSwap();
 
-        expect.claim().from(users.dee).exec(lib.sarr160(token1), lib.sarrAddress(users.dee));
+        expect.claim().from(users.dee).exec(array.b24(token1), lib.sarrAddress(users.dee));
 
         expect.sell().from(users.dee).exec(token1, 3 ether);
 
@@ -51,13 +51,13 @@ abstract contract revert__sell__0x77 is NuggftV1Test {
 
         jumpUp(1);
 
-        uint160 token2 = nuggft.epoch();
+        uint24 token2 = nuggft.epoch();
 
         expect.offer().from(users.dee).value(3.2 ether).exec(token2);
 
         jumpUp(1);
 
-        expect.claim().from(users.dee).exec(lib.sarr160(token2), lib.sarrAddress(users.dee));
+        expect.claim().from(users.dee).exec(array.b24(token2), lib.sarrAddress(users.dee));
 
         expect.sell().from(users.dee).exec(token2, 3.5 ether);
     }

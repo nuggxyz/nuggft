@@ -17,13 +17,13 @@ import "../interfaces/nuggftv1/INuggftV1.sol";
 //         selfdestruct(payable(msg.sender));
 //     }
 
-//     function offerem(address nuggftv1, uint160 id) external payable {
+//     function offerem(address nuggftv1, uint24 id) external payable {
 //         INuggftV1(nuggftv1).offer{value: msg.value}(id);
 
 //         // payable(msg.sender).transfer(address(this).balance);
 //     }
 
-//     // function claimem(address nuggftv1, uint160 id) external {
+//     // function claimem(address nuggftv1, uint24 id) external {
 //     //     INuggftV1(nuggftv1).claim(id);
 
 //     //     payable(msg.sender).transfer(address(this).balance);
@@ -38,13 +38,13 @@ import "../interfaces/nuggftv1/INuggftV1.sol";
 //     address immutable minterHelper;
 //     address immutable deployer;
 
-//     uint160[] toClaimFromHelper;
-//     uint160[] toClaim;
+//     uint24[] toClaimFromHelper;
+//     uint24[] toClaim;
 
 //     uint256 claimedIndex;
 //     uint256 claimedFromHelperIndex;
 
-//     uint160 index = 500;
+//     uint24 index = 500;
 
 //     constructor(
 //         bytes32 nuggftSalt,
@@ -182,20 +182,20 @@ import "../interfaces/nuggftv1/INuggftV1.sol";
 //         uint256 amount
 //     ) external payable {
 //         for (uint256 i = start; i < start + amount; i++) {
-//             INuggftV1(__nuggft).trustedMint{value: INuggftV1(__nuggft).msp()}(uint160(i), to);
+//             INuggftV1(__nuggft).trustedMint{value: INuggftV1(__nuggft).msp()}(uint24(i), to);
 //         }
 //         payable(msg.sender).transfer(address(this).balance);
 //     }
 
-//     function mint(uint160 amount) external payable {
-//         for (uint160 i = index; i < index + amount; i++) {
-//             INuggftV1(__nuggft).mint{value: INuggftV1(__nuggft).msp()}(uint160(i));
+//     function mint(uint24 amount) external payable {
+//         for (uint24 i = index; i < index + amount; i++) {
+//             INuggftV1(__nuggft).mint{value: INuggftV1(__nuggft).msp()}(uint24(i));
 //             uint96 floor = INuggftV1(__nuggft).eps() * 3;
-//             INuggftV1(__nuggft).approve(__nuggft, uint160(i));
+//             INuggftV1(__nuggft).approve(__nuggft, uint24(i));
 
-//             INuggftV1(__nuggft).sell(uint160(i), floor);
+//             INuggftV1(__nuggft).sell(uint24(i), floor);
 
-//             (, uint96 amt, ) = INuggftV1(__nuggft).check(minterHelper, uint160(i));
+//             (, uint96 amt, ) = INuggftV1(__nuggft).check(minterHelper, uint24(i));
 
 //             if (i % 2 == 0) {
 //                 PureDeployerCallback(minterHelper).offerem{value: amt}(__nuggft, i);

@@ -25,19 +25,19 @@ contract NuggftV1 is IERC721, IERC721Metadata, NuggftV1Loan {
 
     mapping(address => uint256) public balance;
 
-    uint160 minted = MINT_OFFSET + TRUSTED_MINT_TOKENS;
+    uint256 minted = MINT_OFFSET + TRUSTED_MINT_TOKENS;
 
     function mint2(address friend) public payable {
         _repanic(balance[msg.sender] == TICKET, 0x00);
         _repanic(balance[friend] == 0, 0x01);
         // _repanic(friend != msg.sender, 0x02);
 
-        uint160 _minted = minted;
+        uint256 _minted = minted;
 
         uint96 value = uint96(msg.value / 3);
 
         unchecked {
-            mint(msg.sender, _minted, value);
+            mint(msg.sender, uint24(_minted), value);
             // mint(msg.sender, _minted + 1, value);
             // mint(msg.sender, _minted + 2, value);
 
@@ -55,7 +55,7 @@ contract NuggftV1 is IERC721, IERC721Metadata, NuggftV1Loan {
     }
 
     /// @inheritdoc INuggftV1Proof
-    function mint(uint160 tokenId) public payable override {
+    function mint(uint24 tokenId) public payable override {
         // prettier-ignore
         _repanic(tokenId >= TRUSTED_MINT_TOKENS + MINT_OFFSET && tokenId <= MAX_TOKENS,
             Error__0x65__TokenNotMintable);
@@ -64,7 +64,7 @@ contract NuggftV1 is IERC721, IERC721Metadata, NuggftV1Loan {
     }
 
     /// @inheritdoc INuggftV1Proof
-    function trustedMint(uint160 tokenId, address to) external payable override requiresTrust {
+    function trustedMint(uint24 tokenId, address to) external payable override requiresTrust {
         // prettier-ignore
         _repanic(tokenId >= MINT_OFFSET && tokenId < MINT_OFFSET + TRUSTED_MINT_TOKENS && tokenId != 0,
             Error__0x66__TokenNotTrustMintable);
@@ -73,7 +73,7 @@ contract NuggftV1 is IERC721, IERC721Metadata, NuggftV1Loan {
     }
 
     /// @inheritdoc INuggftV1Stake
-    function burn(uint160 tokenId) external {
+    function burn(uint24 tokenId) external {
         uint96 ethOwed = subStakedShare(tokenId);
 
         payable(msg.sender).transfer(ethOwed);
@@ -82,7 +82,7 @@ contract NuggftV1 is IERC721, IERC721Metadata, NuggftV1Loan {
     }
 
     /// @inheritdoc INuggftV1Stake
-    function migrate(uint160 tokenId) external {
+    function migrate(uint24 tokenId) external {
         if (migrator == address(0)) _panic(Error__0x81__MigratorNotSet);
 
         // stores the proof before deleting the nugg
@@ -97,7 +97,7 @@ contract NuggftV1 is IERC721, IERC721Metadata, NuggftV1Loan {
 
     function mint(
         address to,
-        uint160 tokenId,
+        uint24 tokenId,
         uint256 value
     ) internal {
         uint256 randomEnough;
@@ -199,7 +199,7 @@ contract NuggftV1 is IERC721, IERC721Metadata, NuggftV1Loan {
     /// @dev ensures the user is the owner of the nugg
     /// @param tokenId the id of the nugg being unstaked
     /// @return ethOwed -> the amount of eth owed to the unstaking user - equivilent to "ethPerShare"
-    function subStakedShare(uint160 tokenId) internal returns (uint96 ethOwed) {
+    function subStakedShare(uint24 tokenId) internal returns (uint96 ethOwed) {
         if (!isOwner(msg.sender, tokenId)) _panic(Error__0x77__NotOwner);
 
         uint256 cache = stake;
@@ -246,7 +246,7 @@ contract NuggftV1 is IERC721, IERC721Metadata, NuggftV1Loan {
                      '{"name":"',         name(),
                     '","description":"',  symbol(),
                     '","image":"',        imageURI(tokenId),
-                    '","properites":',    dotnuggV1.props(decodeProofCore(proofOf(uint160(tokenId))),
+                    '","properites":',    dotnuggV1.props(decodeProofCore(proofOf(uint24(tokenId))),
                                 ['base', 'eyes', 'mouth', 'hair', 'hat', 'background', 'scarf', 'held']
                             ),
                     '}'
@@ -257,7 +257,7 @@ contract NuggftV1 is IERC721, IERC721Metadata, NuggftV1Loan {
 
     /// @inheritdoc INuggftV1Proof
     function imageURI(uint256 tokenId) public view override returns (string memory res) {
-        res = dotnuggV1.exec(decodeProofCore(proofOf(uint160(tokenId))), true);
+        res = dotnuggV1.exec(decodeProofCore(proofOf(uint24(tokenId))), true);
     }
 
     /// @inheritdoc INuggftV1Proof
@@ -281,7 +281,7 @@ contract NuggftV1 is IERC721, IERC721Metadata, NuggftV1Loan {
 
     /// @inheritdoc IERC721
     function ownerOf(uint256 tokenId) external view override returns (address res) {
-        uint256 cache = agency[tokenId];
+        uint256 cache = agency[uint24(tokenId)];
 
         if (cache == 0) _panic(Error__0x78__TokenDoesNotExist);
 
@@ -291,16 +291,16 @@ contract NuggftV1 is IERC721, IERC721Metadata, NuggftV1Loan {
         return address(uint160(cache));
     }
 
-    function exists(uint160 tokenId) internal view returns (bool) {
+    function exists(uint24 tokenId) internal view returns (bool) {
         return agency[tokenId] != 0;
     }
 
-    function isOwner(address sender, uint160 tokenId) internal view returns (bool res) {
+    function isOwner(address sender, uint24 tokenId) internal view returns (bool res) {
         uint256 cache = agency[tokenId];
         return address(uint160(cache)) == sender && uint8(cache >> 254) == 0x01;
     }
 
-    function isAgent(address sender, uint160 tokenId) internal view returns (bool res) {
+    function isAgent(address sender, uint24 tokenId) internal view returns (bool res) {
         uint256 cache = agency[tokenId];
 
         if (uint160(cache) == uint160(sender)) {
@@ -334,7 +334,7 @@ contract NuggftV1 is IERC721, IERC721Metadata, NuggftV1Loan {
 
     /// @inheritdoc IERC721
     function balanceOf(address you) external view override returns (uint256 acc) {
-        for (uint256 i = 0; i < MAX_TOKENS; i++) if (uint160(you) == uint160(agency[i])) acc++;
+        for (uint24 i = 0; i < MAX_TOKENS; i++) if (uint160(you) == uint160(agency[i])) acc++;
     }
 
     //prettier-ignore

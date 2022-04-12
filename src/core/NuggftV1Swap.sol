@@ -11,20 +11,45 @@ import "../_test/utils/forge.sol";
 /// @notice mechanism for trading of nuggs between users (and items between nuggs)
 /// @dev Explain to a developer any extra details
 abstract contract NuggftV1Swap is INuggftV1ItemSwap, INuggftV1Swap, NuggftV1Stake {
-    mapping(uint160 => mapping(address => uint256)) public offers;
-    mapping(uint176 => mapping(uint160 => uint256)) public itemOffers;
-    mapping(uint176 => uint256) public itemAgency;
-    mapping(uint256 => uint256) public lastItemSwap;
+    mapping(uint24 => mapping(address => uint256)) private _offers;
+    mapping(uint40 => mapping(uint24 => uint256)) private _itemOffers;
+    mapping(uint40 => uint256) private _itemAgency;
+
+    mapping(uint16 => uint256) public lastItemSwap;
+
+    function offers(uint24 tokenId, address account) public view returns (uint256 value) {
+        return _offers[tokenId][account];
+    }
+
+    function itemAgency(uint24 sellingTokenId, uint16 itemId) public view returns (uint256 value) {
+        return _itemAgency[uint40(sellingTokenId) | (uint40(itemId) << 24)];
+    }
+
+    function itemOffers(
+        uint24 buyingTokenid,
+        uint24 sellingTokenId,
+        uint16 itemId
+    ) public view returns (uint256 value) {
+        return _itemOffers[uint40(sellingTokenId) | (uint40(itemId) << 24)][buyingTokenid];
+    }
 
     constructor() {}
 
-    //     unchecked {
-    //         for (uint256 i = 0; i < HOT_PROOF_AMOUNT; i++) hotproof[i] = HOT_PROOF_EMPTY;
-    //     }
-    // }
-
     /// @inheritdoc INuggftV1Swap
-    function offer(uint160 tokenId) public payable override {
+    function offer(uint24 tokenId) public payable override {
+        _offer(tokenId);
+    }
+
+    /// @inheritdoc INuggftV1ItemSwap
+    function offer(
+        uint24 buyingTokenId,
+        uint24 sellingTokenId,
+        uint16 itemId
+    ) external payable override {
+        _offer((uint64(buyingTokenId) << 40) | (uint64(itemId) << 24) | uint64(sellingTokenId));
+    }
+
+    function _offer(uint256 tokenId) private {
         uint256 agency__sptr;
         uint256 agency__cache;
 
@@ -72,14 +97,14 @@ abstract contract NuggftV1Swap is INuggftV1ItemSwap, INuggftV1Swap, NuggftV1Stak
                     panic(Error__0xA3__NotItemAuthorizedAgent)
                 }
 
-                mstore(0x20, itemAgency.slot)
+                mstore(0x20, _itemAgency.slot)
 
-                offersSlot := itemOffers.slot
+                offersSlot := _itemOffers.slot
             }
             default {
                 sender := caller()
 
-                offersSlot := offers.slot
+                offersSlot := _offers.slot
             }
 
             mstore(0x00, tokenId)
@@ -100,7 +125,7 @@ abstract contract NuggftV1Swap is INuggftV1ItemSwap, INuggftV1Swap, NuggftV1Stak
             // if (hotproof__cache == HOT_PROOF_EMPTY) {
             //     hotproof[uint8(tokenId % HOT_PROOF_AMOUNT)] = proof;
             // } else {
-            proofs[tokenId] = proof;
+            proofs[uint24(tokenId)] = proof;
 
             address itemHolder = address(emitter);
             // }
@@ -357,7 +382,7 @@ abstract contract NuggftV1Swap is INuggftV1ItemSwap, INuggftV1Swap, NuggftV1Stak
             switch isItem
             case 1 {
                 log3( // =======================================================
-                    /* param #1: agency   bytes32 */ 0x00, /* [ itemAgency[tokenId][itemId] )    0x20
+                    /* param #1: agency   bytes32 */ 0x00, /* [ _itemAgency[tokenId][itemId] )    0x20
                        param #2: stake    bytes32    0x20     [ stake                       ) */ 0x40,
                     // ---------------------------------------------------------
                     /* topic #1: sig              */ Event__OfferItem,
@@ -371,7 +396,7 @@ abstract contract NuggftV1Swap is INuggftV1ItemSwap, INuggftV1Swap, NuggftV1Stak
                        param #2: stake   bytes32    0x20     [ stake           ) */ 0x40,
                     // ---------------------------------------------------------
                     /* topic #1: sig             */ Event__Offer,
-                    /* topic #2: tokenId uint160 */ tokenId
+                    /* topic #2: tokenId uint24 */ tokenId
                 ) // ===========================================================
             }
 
@@ -381,7 +406,12 @@ abstract contract NuggftV1Swap is INuggftV1ItemSwap, INuggftV1Swap, NuggftV1Stak
     }
 
     /// @inheritdoc INuggftV1Swap
-    function claim(uint160[] calldata tokenIds, address[] calldata accounts) public override {
+    function claim(
+        uint24[] calldata tokenIds,
+        address[] calldata accounts,
+        uint24[] calldata buyingTokenIds,
+        uint16[] calldata itemIds
+    ) public override {
         uint256 active = epoch();
 
         address itemsHolder = address(emitter);
@@ -410,6 +440,15 @@ abstract contract NuggftV1Swap is INuggftV1ItemSwap, INuggftV1Swap, NuggftV1Stak
                 panic(Error__0x76__InvalidArrayLengths)
             }
 
+            // ensure arrays the same length
+            if iszero(eq(len, calldataload(sub(itemIds.offset, 0x20)))) {
+                panic(Error__0x76__InvalidArrayLengths)
+            }
+
+            if iszero(eq(len, calldataload(sub(buyingTokenIds.offset, 0x20)))) {
+                panic(Error__0x76__InvalidArrayLengths)
+            }
+
             let acc := 0
 
             /*========= memory ============
@@ -418,33 +457,33 @@ abstract contract NuggftV1Swap is INuggftV1ItemSwap, INuggftV1Swap, NuggftV1Stak
               [keccak]: agency[tokenId].slot = "agency__sptr"
               --------------------------
               0x40: tokenId
-              0x60: offers.slot
+              0x60: _offers.slot
               [keccak]: offers[tokenId].slot = "offer__sptr"
               --------------------------
               0x80: offerer
               0xA0: offers[tokenId].slot
-              [keccak]: itemOffers[tokenId][offerer].slot = "offer__sptr"
+              [keccak]: _itemOffers[tokenId][offerer].slot = "offer__sptr"
               --------------------------
               0xC0: itemId || sellingTokenId
-              0xE0: itemAgency.slot
-              [keccak]: itemAgency[itemId || sellingTokenId].slot = "agency__sptr"
+              0xE0: _itemAgency.slot
+              [keccak]: _itemAgency[itemId || sellingTokenId].slot = "agency__sptr"
               --------------------------
               0x100: itemId|sellingTokenId
-              0x120: itemOffers.slot
-              [keccak]: itemOffers[itemId||sellingTokenId].slot
+              0x120: _itemOffers.slot
+              [keccak]: _itemOffers[itemId||sellingTokenId].slot
             ==============================*/
 
             // store common slot for agency in memory
             mstore(0x20, agency.slot)
 
             // store common slot for offers in memory
-            mstore(0x60, offers.slot)
+            mstore(0x60, _offers.slot)
 
             // store common slot for agency in memory
-            mstore(0xE0, itemAgency.slot)
+            mstore(0xE0, _itemAgency.slot)
 
             // store common slot for offers in memory
-            mstore(0x120, itemOffers.slot)
+            mstore(0x120, _itemOffers.slot)
 
             // store common slot for proof in memory
             mstore(0x160, proofs.slot)
@@ -452,16 +491,23 @@ abstract contract NuggftV1Swap is INuggftV1ItemSwap, INuggftV1Swap, NuggftV1Stak
 
 
             for { let i := 0 } lt(i, len) { i := add(i, 1) } {
+
+                let isItem
+
+                 // accounts[i]
+                let offerer := calldataload(add(accounts.offset, shl(5, i)))
+
                 // tokenIds[i]
                 let tokenId := calldataload(add(tokenIds.offset, shl(5, i)))
 
-                // accounts[i]
-                let offerer := calldataload(add(accounts.offset, shl(5, i)))
+                if iszero(offerer) {
+                    offerer := calldataload(add(buyingTokenIds.offset, shl(5, i)))
+                    isItem := 1
+                    tokenId := or(tokenId, shl(24, calldataload(add(itemIds.offset, shl(5, i)))))
+                }
 
                 //
                 let trusted := offerer
-
-                let isItem := gt(tokenId, 0xffffff)
 
                 let mptroffset := 0
 
@@ -487,7 +533,7 @@ abstract contract NuggftV1Swap is INuggftV1ItemSwap, INuggftV1Swap, NuggftV1Stak
                 // load agency value from storage
                 let agency__cache := sload(agency__sptr)
 
-                // calculate offers.slot storage pointer
+                // calculate _offers.slot storage pointer
                 mstore(add(mptroffset, 0x40), tokenId)
                 let offer__sptr := keccak256(add(mptroffset, 0x40), 0x40)
 
@@ -649,8 +695,21 @@ abstract contract NuggftV1Swap is INuggftV1ItemSwap, INuggftV1Swap, NuggftV1Stak
         }
     }
 
+    /// @inheritdoc INuggftV1ItemSwap
+    function sell(
+        uint24 sellingTokenId,
+        uint16 itemId,
+        uint96 floor
+    ) external override {
+        _sell((uint40(itemId) << 24) | uint40(sellingTokenId), floor);
+    }
+
     /// @inheritdoc INuggftV1Swap
-    function sell(uint160 tokenId, uint96 floor) public override {
+    function sell(uint24 tokenId, uint96 floor) public override {
+        _sell(tokenId, floor);
+    }
+
+    function _sell(uint40 tokenId, uint96 floor) private {
         address itemHolder = address(emitter);
 
         assembly {
@@ -693,7 +752,7 @@ abstract contract NuggftV1Swap is INuggftV1ItemSwap, INuggftV1Swap, NuggftV1Stak
                     panic(Error__0xA3__NotItemAuthorizedAgent)
                 }
 
-                mstore(0x20, itemAgency.slot)
+                mstore(0x20, _itemAgency.slot)
             }
 
             mstore(0x00, tokenId)
@@ -749,7 +808,7 @@ abstract contract NuggftV1Swap is INuggftV1ItemSwap, INuggftV1Swap, NuggftV1Stak
 
                 sstore(agency__sptr, agency__cache)
 
-                // log2 with 'Sell(uint160,bytes32)' topic
+                // log2 with 'Sell(uint24,bytes32)' topic
                 mstore(0x00, agency__cache)
                 mstore(0x20, proof)
 
@@ -792,7 +851,7 @@ abstract contract NuggftV1Swap is INuggftV1ItemSwap, INuggftV1Swap, NuggftV1Stak
 
                 sstore(agency__sptr, agency__cache)
 
-                // log2 with 'Sell(uint160,bytes32)' topic
+                // log2 with 'Sell(uint24,bytes32)' topic
                 mstore(0x00, agency__cache)
 
                 log2(0x00, 0x20, Event__Sell, tokenId)
@@ -822,14 +881,14 @@ abstract contract NuggftV1Swap is INuggftV1ItemSwap, INuggftV1Swap, NuggftV1Stak
     }
 
     // @inheritdoc INuggftV1Swap
-    function vfo(address sender, uint160 tokenId) public view override returns (uint96 res) {
+    function vfo(address sender, uint24 tokenId) public view override returns (uint96 res) {
         (bool canOffer, uint96 next, uint96 current) = check(sender, tokenId);
 
         if (canOffer) res = next - current;
     }
 
     // @inheritdoc INuggftV1Swap
-    function check(address sender, uint160 tokenId)
+    function check(address sender, uint24 tokenId)
         public
         view
         override
@@ -860,7 +919,7 @@ abstract contract NuggftV1Swap is INuggftV1ItemSwap, INuggftV1Swap, NuggftV1Stak
             let isLeader := eq(juke(swapData, 96, 96), sender)
 
             if iszero(isLeader) {
-                mstore(0x20, offers.slot)
+                mstore(0x20, _offers.slot)
                 mstore(0x20, keccak256(0x00, 0x40))
                 mstore(0x00, sender)
                 offerData := sload(keccak256(0x00, 0x40))
@@ -898,49 +957,20 @@ abstract contract NuggftV1Swap is INuggftV1ItemSwap, INuggftV1Swap, NuggftV1Stak
     }
 
     /// @inheritdoc INuggftV1ItemSwap
-    function offer(
-        uint160 buyingTokenId,
-        uint160 sellingTokenId,
-        uint16 itemId
-    ) external payable override {
-        offer((buyingTokenId << 40) | (uint160(itemId) << 24) | sellingTokenId);
-    }
-
-    /// @inheritdoc INuggftV1ItemSwap
-    function claim(uint160[] calldata sellingTokenItemIds, uint160[] calldata buyerTokenIds) public {
-        address[] calldata tmp;
-        assembly {
-            tmp.offset := buyerTokenIds.offset
-        }
-        claim(sellingTokenItemIds, tmp);
-    }
-
-    /// @inheritdoc INuggftV1ItemSwap
-    function sell(
-        uint160 sellingTokenId,
-        uint16 itemId,
-        uint96 floor
-    ) external override {
-        sell((uint160(itemId) << 24) | sellingTokenId, floor);
-    }
-
-    /// @inheritdoc INuggftV1ItemSwap
     function vfo(
-        uint160 buyer,
-        uint160 seller,
+        uint24 buyer,
+        uint24 seller,
         uint16 itemId
     ) public view override returns (uint96 res) {
-        (bool canOffer, uint96 nextSwapAmount, uint96 senderCurrentOffer) = check(buyer, seller, itemId);
+        (bool canOffer, uint96 next, uint96 current) = check(buyer, seller, itemId);
 
-        if (canOffer) {
-            return nextSwapAmount - senderCurrentOffer;
-        }
+        if (canOffer) res = next - current;
     }
 
     /// @inheritdoc INuggftV1ItemSwap
     function check(
-        uint160 buyer,
-        uint160 seller,
+        uint24 buyer,
+        uint24 seller,
         uint16 itemId
     )
         public
@@ -954,26 +984,26 @@ abstract contract NuggftV1Swap is INuggftV1ItemSwap, INuggftV1Swap, NuggftV1Stak
     {
         canOffer = true;
 
-        uint176 sellerItemId = (uint176(itemId) << 24) | seller;
-
-        uint256 agency__cache = itemAgency[sellerItemId];
+        uint256 agency__cache = itemAgency(seller, itemId);
 
         uint256 offerData = agency__cache;
 
-        if (buyer != uint160(agency__cache)) {
-            offerData = itemOffers[sellerItemId][buyer];
+        if (buyer != uint24(agency__cache)) {
+            offerData = itemOffers(buyer, seller, itemId);
         }
 
         if (uint24(agency__cache >> 230) == 0 && offerData == agency__cache) canOffer = false;
 
-        current = uint96((offerData << 26) >> 186);
+        current = uint96((offerData << 26) >> 186) * LOSS;
 
-        next = uint96((agency__cache << 26) >> 186);
+        next = uint96((agency__cache << 26) >> 186) * LOSS;
 
-        if (next != 0) {
-            next = uint96(next * INCREMENT_BPS * LOSS) / BASE_BPS;
-        } else {
-            next = 100 gwei;
+        assembly {
+            if lt(next, 100000000000) {
+                next := 100000000000
+            }
+
+            next := mul(div(mul(div(next, LOSS), INCREMENT_BPS), BASE_BPS), LOSS)
         }
     }
 }
