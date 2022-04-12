@@ -61,28 +61,18 @@ abstract contract NuggftV1Proof is INuggftV1Proof, NuggftV1Epoch, NuggftV1Trust 
         _panic(Error__0xAD__InvalidZeroProof);
     }
 
-    function floop(uint160 tokenId) public view returns (bytes2[] memory arr) {
-        arr = new bytes2[](16);
+    function floop(uint160 tokenId) public view returns (uint16[] memory arr) {
+        arr = new uint16[](16);
         uint256 proof = proofOf(tokenId);
         // uint256 max = 0;
         for (uint256 i = 0; i < 16; i++) {
-            uint16 check = uint16(proof) & 0xfff;
+            uint16 check = uint16(proof) & 0xffff;
             proof >>= 16;
             if (check != 0) {
-                arr[i] = bytes2(check);
+                arr[i] = uint16(check);
                 // max = i + 1;
             }
         }
-    }
-
-    /// @notice parses the external itemId into a feautre and position
-    /// @dev this follows dotnugg v1 specification
-    /// @param itemId -> the external itemId
-    /// @return feat -> the feautre of the item
-    /// @return pos -> the file storage position of the item
-    function parseItemId(uint16 itemId) internal pure returns (uint8 feat, uint8 pos) {
-        feat = uint8(itemId >> 8);
-        pos = uint8(itemId & 0xff);
     }
 
     /// @inheritdoc INuggftV1Proof
