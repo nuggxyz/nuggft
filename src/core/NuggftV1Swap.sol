@@ -6,6 +6,7 @@ import {INuggftV1Swap} from "../interfaces/nuggftv1/INuggftV1Swap.sol";
 import {INuggftV1ItemSwap} from "../interfaces/nuggftv1/INuggftV1ItemSwap.sol";
 
 import {NuggftV1Stake} from "./NuggftV1Stake.sol";
+import "../_test/utils/forge.sol";
 
 /// @notice mechanism for trading of nuggs between users (and items between nuggs)
 /// @dev Explain to a developer any extra details
@@ -15,11 +16,12 @@ abstract contract NuggftV1Swap is INuggftV1ItemSwap, INuggftV1Swap, NuggftV1Stak
     mapping(uint176 => uint256) public itemAgency;
     mapping(uint256 => uint256) public lastItemSwap;
 
-    constructor() {
-        unchecked {
-            for (uint256 i = 0; i < HOT_PROOF_AMOUNT; i++) hotproof[i] = HOT_PROOF_EMPTY;
-        }
-    }
+    constructor() {}
+
+    //     unchecked {
+    //         for (uint256 i = 0; i < HOT_PROOF_AMOUNT; i++) hotproof[i] = HOT_PROOF_EMPTY;
+    //     }
+    // }
 
     /// @inheritdoc INuggftV1Swap
     function offer(uint160 tokenId) public payable override {
@@ -92,17 +94,20 @@ abstract contract NuggftV1Swap is INuggftV1ItemSwap, INuggftV1Swap, NuggftV1Stak
 
             uint256 proof = initFromSeed(calculateSeed(uint24(active)));
 
-            uint256 hotproof__cache = hotproof[uint8(tokenId % HOT_PROOF_AMOUNT)];
+            // uint256 hotproof__cache = hotproof[uint8(tokenId % HOT_PROOF_AMOUNT)];
 
-            // if hot slot 1 is open, save there
-            if (hotproof__cache == HOT_PROOF_EMPTY) {
-                hotproof[uint8(tokenId % HOT_PROOF_AMOUNT)] = proof;
-            } else {
-                proofs[tokenId] = proof;
-            }
+            // // if hot slot 1 is open, save there
+            // if (hotproof__cache == HOT_PROOF_EMPTY) {
+            //     hotproof[uint8(tokenId % HOT_PROOF_AMOUNT)] = proof;
+            // } else {
+            proofs[tokenId] = proof;
+
+            address itemHolder = address(emitter);
+            // }
+            // emitter.proofTransferBatch(proof, address(0), address(this));
 
             // otherwise this
-            addStakedShareFromMsgValue();
+            this.addStakedShare(msg.value);
 
             // prettier-ignore
             assembly {
@@ -137,6 +142,11 @@ abstract contract NuggftV1Swap is INuggftV1ItemSwap, INuggftV1Swap, NuggftV1Stak
                     /* topic #2: tokenId */ tokenId
                 ) // ===========================================================
 
+                mstore(0x00, Function__transferBatch)
+                mstore(0x40, 0x00)
+                mstore(0x60, address())
+
+                pop(call(gas(), itemHolder, 0x00, 0x1C, 0x64, 0x00, 0x00))
             }
 
             return;
@@ -256,13 +266,13 @@ abstract contract NuggftV1Swap is INuggftV1ItemSwap, INuggftV1Swap, NuggftV1Stak
                     // Event__Transfer the token to the contract for the remainder of sale
                     // the seller (agency__addr) approves this when they put the token up for sale
 
-                    log4( // =======================================================
-                        /* param 0: n/a  */ 0x00, 0x00,
-                        /* topic 1: sig  */ Event__Transfer,
-                        /* topic 2: from */ agency__addr,
-                        /* topic 3: to   */ address(),
-                        /* topic 4: id   */ tokenId
-                    ) // ===========================================================
+                    // log4( // =======================================================
+                    //     /* param 0: n/a  */ 0x00, 0x00,
+                    //     /* topic 1: sig  */ Event__Transfer,
+                    //     /* topic 2: from */ agency__addr,
+                    //     /* topic 3: to   */ address(),
+                    //     /* topic 4: id   */ tokenId
+                    // ) // ===========================================================
                 }
             }
             default { // [Offer:Carry]
@@ -374,8 +384,13 @@ abstract contract NuggftV1Swap is INuggftV1ItemSwap, INuggftV1Swap, NuggftV1Stak
     function claim(uint160[] calldata tokenIds, address[] calldata accounts) public override {
         uint256 active = epoch();
 
+        address itemsHolder = address(emitter);
+
         // prettier-ignore
         assembly {
+
+            mstore(0x200, itemsHolder)
+            pop(itemsHolder)
 
             function panic(code) {
                 mstore(0x00, Revert__Sig)
@@ -524,12 +539,15 @@ abstract contract NuggftV1Swap is INuggftV1ItemSwap, INuggftV1Swap, NuggftV1Stak
 
                         mstore(0x1A0, or(or(and(tokenId, 0xffff000000) , offerer), shl(40, 0x02)))
 
-                        mstore(sub(0x222,12), address())
-                        mstore8(0x220, 0xD6)
-                        mstore8(0x221, 0x94)
-                        mstore8(0x236, 0x01)
+                        pop(call(gas(), mload(0x200), 0x00, 0x1A0, 0x20, 0x00, 0x00))
 
-                        pop(call(gas(), juke(keccak256(0x220, 0x17),96,96), 0x00, 0x1A0, 0x20, 0x00, 0x00))
+
+                        mstore(0x220, Function__transferSingle )
+                        mstore(0x240, shr(24, tokenId))
+                        mstore(0x260, address())
+                        mstore(0x280, caller())
+
+                        pop(call(gas(), mload(0x200), 0x00, 0x23C, 0x64, 0x00, 0x00))
 
                         mstore(0x1A0, proof)
                     }
@@ -537,15 +555,14 @@ abstract contract NuggftV1Swap is INuggftV1ItemSwap, INuggftV1Swap, NuggftV1Stak
 
                         mstore(0x140, tokenId)
 
-                        let proof__sptr := keccak256(0x140, 0x40)
+                        let proof := sload(keccak256(0x140, 0x40))
 
-                        if iszero(sload(proof__sptr)) {
-                            mstore(0xA0, hotproof.slot)
-                            mstore(0x80, mod(tokenId, HOT_PROOF_AMOUNT))
-                            let hotproof__sptr := keccak256(0x80, 0x40)
-                            sstore(proof__sptr, sload(hotproof__sptr))
-                            sstore(hotproof__sptr, HOT_PROOF_EMPTY)
-                        }
+                        mstore(0x220, Function__transferBatch )
+                        mstore(0x240, proof)
+                        mstore(0x260, address())
+                        mstore(0x280, caller())
+
+                        pop(call(gas(), mload(0x200), 0x00, 0x23C, 0x64, 0x00, 0x00))
 
                         // if either exists for this token, set the proof
 
@@ -634,6 +651,8 @@ abstract contract NuggftV1Swap is INuggftV1ItemSwap, INuggftV1Swap, NuggftV1Stak
 
     /// @inheritdoc INuggftV1Swap
     function sell(uint160 tokenId, uint96 floor) public override {
+        address itemHolder = address(emitter);
+
         assembly {
             function panic(code) {
                 mstore(0x00, Revert__Sig)
@@ -719,20 +738,6 @@ abstract contract NuggftV1Swap is INuggftV1ItemSwap, INuggftV1Swap, NuggftV1Stak
 
                 sstore(proof__sptr, proof)
 
-                // mstore(0xA0, shr(24, tokenId))
-                // mstore(0xC0, 0x01)
-
-                // log4(0xA0, 0x40, Event__TransferItem, proof, address(), caller())
-
-                mstore(0x1A0, or(tokenId, shl(40, 0x01)))
-
-                mstore(sub(0x222, 12), address())
-                mstore8(0x220, 0xD6)
-                mstore8(0x221, 0x94)
-                mstore8(0x236, 0x01)
-
-                pop(call(gas(), juke(keccak256(0x220, 0x17), 96, 96), 0x00, 0x1A0, 0x20, 0x00, 0x00))
-
                 // ==== agency[tokenId] =====
                 //   flag  = SWAP(0x03)
                 //   epoch = 0
@@ -749,6 +754,13 @@ abstract contract NuggftV1Swap is INuggftV1ItemSwap, INuggftV1Swap, NuggftV1Stak
                 mstore(0x20, proof)
 
                 log3(0x00, 0x40, Event__SellItem, and(tokenId, 0xffffff), shl(240, shr(24, tokenId)))
+
+                mstore(0x00, Function__transferSingle)
+                mstore(0x20, shr(24, tokenId))
+                mstore(0x40, caller())
+                mstore(0x60, address())
+
+                pop(call(gas(), itemHolder, 0x00, 0x1C, 0x64, 0x00, 0x00))
             }
             default {
                 // ensure the caller is the agent
@@ -784,6 +796,27 @@ abstract contract NuggftV1Swap is INuggftV1ItemSwap, INuggftV1Swap, NuggftV1Stak
                 mstore(0x00, agency__cache)
 
                 log2(0x00, 0x20, Event__Sell, tokenId)
+
+                // prettier-ignore
+                log4( // =======================================================
+                        /* param 0: n/a  */ 0x00, 0x00,
+                        /* topic 1: sig  */ Event__Transfer,
+                        /* topic 2: from */ caller(),
+                        /* topic 3: to   */ address(),
+                        /* topic 4: id   */ tokenId
+                    ) // ===========================================================
+
+                mstore(0x00, tokenId)
+                mstore(0x20, proofs.slot)
+
+                let proof := sload(keccak256(0x00, 0x40))
+
+                mstore(0x00, Function__transferBatch)
+                mstore(0x20, proof)
+                mstore(0x40, address())
+                mstore(0x60, caller())
+
+                pop(call(gas(), itemHolder, 0x00, 0x1C, 0x64, 0x00, 0x00))
             }
         }
     }

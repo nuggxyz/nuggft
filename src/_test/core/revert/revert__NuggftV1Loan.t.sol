@@ -50,11 +50,7 @@ abstract contract revert__NuggftV1Loan is NuggftV1Test {
 
         uint96 value = nuggft.vfl(lib.sarr160(tokenId))[0];
 
-        forge.vm.startPrank(users.frank);
-        {
-            nuggft.liquidate{value: value}(tokenId);
-        }
-        forge.vm.stopPrank();
+        expect.liquidate().from(users.frank).exec{value: value}(tokenId);
     }
 
     function test__revert__NuggftV1Loan__0xA6__liquidate__successAsSelfExpired() public {
@@ -62,11 +58,7 @@ abstract contract revert__NuggftV1Loan is NuggftV1Test {
 
         uint96 value = nuggft.vfl(lib.sarr160(tokenId))[0];
 
-        forge.vm.startPrank(users.frank);
-        {
-            nuggft.liquidate{value: value}(tokenId);
-        }
-        forge.vm.stopPrank();
+        expect.liquidate().from(users.frank).exec{value: value}(tokenId);
     }
 
     function test__revert__NuggftV1Loan__0xA6__liquidate__failAsNotAgentNotExpired() public {
@@ -74,18 +66,7 @@ abstract contract revert__NuggftV1Loan is NuggftV1Test {
 
         uint96 value = nuggft.vfl(lib.sarr160(tokenId))[0];
 
-        // forge.vm.startPrank(users.frank);
-        // {
-        //     nuggft.setApprovalForAll(users.mac, true);
-        // }
-        // forge.vm.stopPrank();
-
-        forge.vm.startPrank(users.mac);
-        {
-            forge.vm.expectRevert(hex"7e863b48_A6");
-            nuggft.liquidate{value: value}(tokenId);
-        }
-        forge.vm.stopPrank();
+        expect.liquidate().from(users.mac).err(0xA6).exec{value: value}(tokenId);
     }
 
     function test__revert__NuggftV1Loan__0xA6__liquidate__successAsNotAgentExpired() public {
@@ -93,17 +74,7 @@ abstract contract revert__NuggftV1Loan is NuggftV1Test {
 
         uint96 value = nuggft.vfl(lib.sarr160(tokenId))[0];
 
-        // forge.vm.startPrank(users.frank);
-        // {
-        //     nuggft.setApprovalForAll(users.mac, true);
-        // }
-        // forge.vm.stopPrank();
-
-        forge.vm.startPrank(users.mac);
-        {
-            nuggft.liquidate{value: value}(tokenId);
-        }
-        forge.vm.stopPrank();
+        expect.liquidate().from(users.frank).exec{value: value}(tokenId);
     }
 
     /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -115,11 +86,7 @@ abstract contract revert__NuggftV1Loan is NuggftV1Test {
 
         uint96 value = nuggft.vfl(lib.sarr160(tokenId))[0];
 
-        forge.vm.startPrank(users.frank);
-        {
-            nuggft.liquidate{value: value}(tokenId);
-        }
-        forge.vm.stopPrank();
+        expect.liquidate().from(users.frank).exec{value: value}(tokenId);
     }
 
     function test__revert__NuggftV1Loan__0xA7__liquidate__successLiquidateWeiHigher() public {
@@ -127,11 +94,7 @@ abstract contract revert__NuggftV1Loan is NuggftV1Test {
 
         uint96 value = nuggft.vfl(lib.sarr160(tokenId))[0];
 
-        forge.vm.startPrank(users.frank);
-        {
-            nuggft.liquidate{value: value + 1}(tokenId);
-        }
-        forge.vm.stopPrank();
+        expect.liquidate().from(users.frank).exec{value: value + 1}(tokenId);
     }
 
     function test__revert__NuggftV1Loan__0xA7__liquidate__failLiquidateWeiLower() public {
@@ -139,12 +102,7 @@ abstract contract revert__NuggftV1Loan is NuggftV1Test {
 
         uint96 value = nuggft.vfl(lib.sarr160(tokenId))[0];
 
-        forge.vm.startPrank(users.frank);
-        {
-            forge.vm.expectRevert(hex"7e863b48_A7");
-            nuggft.liquidate{value: value - 1}(tokenId);
-        }
-        forge.vm.stopPrank();
+        expect.liquidate().from(users.frank).err(0xA7).exec{value: value - 1}(tokenId);
     }
 
     function test__revert__NuggftV1Loan__0xA7__liquidate__successLiquidateWayHigher() public {
@@ -152,11 +110,7 @@ abstract contract revert__NuggftV1Loan is NuggftV1Test {
 
         uint96 value = nuggft.vfl(lib.sarr160(tokenId))[0];
 
-        forge.vm.startPrank(users.frank);
-        {
-            nuggft.liquidate{value: value + 50 ether}(tokenId);
-        }
-        forge.vm.stopPrank();
+        expect.liquidate().from(users.frank).exec{value: value + 50}(tokenId);
     }
 
     function test__revert__NuggftV1Loan__0xA7__liquidate__failLiquidateWayLower() public {
@@ -164,15 +118,8 @@ abstract contract revert__NuggftV1Loan is NuggftV1Test {
 
         uint96 value = nuggft.vfl(lib.sarr160(tokenId))[0];
 
-        forge.vm.startPrank(users.frank);
-        {
-            forge.vm.expectRevert(hex"7e863b48_A7");
-            nuggft.liquidate{value: 1}(tokenId);
-
-            forge.vm.expectRevert(hex"7e863b48_A7");
-            nuggft.liquidate{value: value / 2}(tokenId);
-        }
-        forge.vm.stopPrank();
+        // expect.liquidate().from(users.frank).err(0xA7).exec{value: 1}(tokenId);
+        expect.liquidate().from(users.frank).err(0xA7).exec{value: value / 2}(tokenId);
     }
 
     function test__revert__NuggftV1Loan__0xA7__liquidate__failLiquidateZero() public {

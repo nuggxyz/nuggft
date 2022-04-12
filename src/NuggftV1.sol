@@ -23,34 +23,36 @@ contract NuggftV1 is IERC721, IERC721Metadata, NuggftV1Loan {
         // mint(tx.origin, MINT_OFFSET + TRUSTED_MINT_TOKENS);
     }
 
-    // mapping(address => uint256) balance;
+    mapping(address => uint256) public balance;
 
-    // uint160 minted = MINT_OFFSET + TRUSTED_MINT_TOKENS;
+    uint160 minted = MINT_OFFSET + TRUSTED_MINT_TOKENS;
 
-    // function mint2(address friend) public payable {
-    //     _repanic(balance[msg.sender] == TICKET, 0x00);
-    //     _repanic(balance[friend] == 0, 0x01);
-    //     _repanic(friend != msg.sender, 0x02);
+    function mint2(address friend) public payable {
+        _repanic(balance[msg.sender] == TICKET, 0x00);
+        _repanic(balance[friend] == 0, 0x01);
+        // _repanic(friend != msg.sender, 0x02);
 
-    //     uint160 _minted = minted;
+        uint160 _minted = minted;
 
-    //     unchecked {
-    //         mint(msg.sender, _minted + 0);
-    //         mint(msg.sender, _minted + 1);
-    //         mint(msg.sender, _minted + 5);
+        uint96 value = uint96(msg.value / 3);
 
-    //         minted = _minted + 3;
-    //     }
+        unchecked {
+            mint(msg.sender, _minted, value);
+            // mint(msg.sender, _minted + 1, value);
+            // mint(msg.sender, _minted + 2, value);
 
-    //     balance[friend] = TICKET;
+            minted = _minted + 1;
+        }
 
-    //     balance[msg.sender] = 3;
-    // }
+        balance[friend] = TICKET;
 
-    // function trustedMint2(address friend) public payable requiresTrust {
-    //     _repanic(balance[friend] == 0, 0x03);
-    //     balance[friend] = TICKET;
-    // }
+        balance[msg.sender] = 3 | ((_minted + 0) << 24) | ((_minted + 1) << 48) | ((_minted + 2) << 72);
+    }
+
+    function trustedMint2(address friend) public payable requiresTrust {
+        _repanic(balance[friend] == 0, 0x03);
+        balance[friend] = TICKET;
+    }
 
     /// @inheritdoc INuggftV1Proof
     function mint(uint160 tokenId) public payable override {
@@ -58,7 +60,7 @@ contract NuggftV1 is IERC721, IERC721Metadata, NuggftV1Loan {
         _repanic(tokenId >= TRUSTED_MINT_TOKENS + MINT_OFFSET && tokenId <= MAX_TOKENS,
             Error__0x65__TokenNotMintable);
 
-        mint(msg.sender, tokenId);
+        mint(msg.sender, tokenId, msg.value);
     }
 
     /// @inheritdoc INuggftV1Proof
@@ -67,7 +69,7 @@ contract NuggftV1 is IERC721, IERC721Metadata, NuggftV1Loan {
         _repanic(tokenId >= MINT_OFFSET && tokenId < MINT_OFFSET + TRUSTED_MINT_TOKENS && tokenId != 0,
             Error__0x66__TokenNotTrustMintable);
 
-        mint(to, tokenId);
+        mint(to, tokenId, msg.value);
     }
 
     /// @inheritdoc INuggftV1Stake
@@ -93,15 +95,23 @@ contract NuggftV1 is IERC721, IERC721Metadata, NuggftV1Loan {
         emit MigrateV1Sent(migrator, tokenId, proof, msg.sender, ethOwed);
     }
 
-    function mint(address to, uint160 tokenId) internal {
+    function mint(
+        address to,
+        uint160 tokenId,
+        uint256 value
+    ) internal {
         uint256 randomEnough;
 
         uint256 agency__cache;
+
+        uint256 ptr;
 
         // prettier-ignore
         assembly {
             mstore(0x00, tokenId)
             mstore(0x20, agency.slot)
+
+            ptr := mload(0x40)
 
             // ============================================================
             // agency__sptr is the storage value that solidity would compute
@@ -143,19 +153,20 @@ contract NuggftV1 is IERC721, IERC721Metadata, NuggftV1Loan {
             ) // ==========================================================
 
             sstore(agency__sptr, agency__cache)
-
         }
 
         uint256 proof = initFromSeed(randomEnough);
 
         proofs[tokenId] = proof;
 
-        addStakedShareFromMsgValue();
+        addStakedShare(value);
+
+        address itemHolder = address(emitter);
 
         // prettier-ignore
         assembly {
 
-            mstore(0x00, callvalue())
+            mstore(0x00, value)
             mstore(0x20, proof)
             mstore(0x60, agency__cache)
 
@@ -169,7 +180,17 @@ contract NuggftV1 is IERC721, IERC721Metadata, NuggftV1Loan {
                 /* topic #1: sig     */            Event__Mint,
                 /* topic #2: tokenId */            tokenId
             ) // -------------------------------------------------------------
+
+            mstore(0x00, Function__transferBatch)
+            mstore(0x40, 0x00)
+            mstore(0x60, caller())
+
+            pop(call(gas(), itemHolder, 0x00, 0x1C, 0x64, 0x00, 0x00))
+
+            mstore(0x40, ptr)
         }
+
+        // emitter.proofTransferBatch(proof, address(0), msg.sender);
     }
 
     /// @notice removes a staked share from the contract,

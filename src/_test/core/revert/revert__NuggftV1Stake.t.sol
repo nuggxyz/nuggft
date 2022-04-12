@@ -44,6 +44,7 @@ abstract contract revert__NuggftV1Stake is NuggftV1Test {
     // ────
 
     function test__revert__NuggftV1Stake__0x71__mint__successOnTrusted() public {
+        forge.vm.deal(users.safe, 200 ether);
         forge.vm.startPrank(users.safe);
         {
             nuggft.trustedMint{value: 30 ether}(trustMintable(200), users.frank);

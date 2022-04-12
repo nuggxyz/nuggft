@@ -70,7 +70,7 @@ abstract contract NuggftV1Stake is INuggftV1Stake, NuggftV1Proof {
 
     /// @notice handles the adding of shares - ensures enough eth is being added
     /// @dev this is the only way to add shares - the logic here ensures that "ethPerShare" can never decrease
-    function addStakedShareFromMsgValue() internal {
+    function addStakedShare(uint256 value) public {
         assembly {
             // load stake to callstack
             let cache := sload(stake.slot)
@@ -86,7 +86,7 @@ abstract contract NuggftV1Stake is INuggftV1Stake, NuggftV1Proof {
             let _msp := add(_eps, add(fee, premium))
 
             // ensure value >= msp
-            if gt(_msp, callvalue()) {
+            if gt(_msp, value) {
                 mstore(0x00, Revert__Sig)
                 mstore8(31, Error__0x71__ValueTooLow)
                 revert(27, 0x5)
@@ -94,11 +94,11 @@ abstract contract NuggftV1Stake is INuggftV1Stake, NuggftV1Proof {
 
             // caculate value proveded over msp
             // will not underflow because of ERRORx71
-            let overpay := sub(callvalue(), _msp)
+            let overpay := sub(value, _msp)
 
             // add fee of overpay to fee
             fee := add(div(overpay, PROTOCOL_FEE_FRAC_MINT_DIV), fee)
-            // fee := div(callvalue(), PROTOCOL_FEE_FRAC_MINT)
+            // fee := div(value, PROTOCOL_FEE_FRAC_MINT)
 
             // update stake
             // =======================
@@ -108,7 +108,7 @@ abstract contract NuggftV1Stake is INuggftV1Stake, NuggftV1Proof {
             //     proto   = prev + fee
             // }
             // =======================
-            cache := add(cache, or(shl(192, 1), or(shl(96, sub(callvalue(), fee)), fee)))
+            cache := add(cache, or(shl(192, 1), or(shl(96, sub(value, fee)), fee)))
 
             sstore(stake.slot, cache)
 
@@ -127,9 +127,6 @@ abstract contract NuggftV1Stake is INuggftV1Stake, NuggftV1Proof {
 
             sstore(stake.slot, cache)
 
-            // let ptr := mload(0x40)
-            // mstore(ptr, callvalue())
-            // mstore(add(0x20, ptr), 0x01)
             mstore(0x00, cache)
             log1(0x00, 0x20, Event__Stake)
         }

@@ -757,11 +757,7 @@ abstract contract revert__NuggftV1Swap is NuggftV1Test {
 
         uint96 value = eth + 1 ether;
 
-        forge.vm.startPrank(users.charlie);
-        {
-            nuggft.offer{value: value}(tokenId);
-        }
-        forge.vm.stopPrank();
+        expect.offer().from(users.charlie).exec{value: value}(tokenId);
     }
 
     function test__revert__NuggftV1Swap__0xA4__failOfferInOldSwap() public revert__NuggftV1Swap__setUp {
@@ -771,13 +767,7 @@ abstract contract revert__NuggftV1Swap is NuggftV1Test {
 
         uint96 value = eth + 1 ether;
 
-        forge.vm.startPrank(users.charlie);
-        {
-            forge.vm.expectRevert(hex"7e863b48_A4");
-
-            nuggft.offer{value: value}(tokenId);
-        }
-        forge.vm.stopPrank();
+        expect.offer().from(users.charlie).err(0xA4).exec{value: value}(tokenId);
     }
 
     function test__revert__NuggftV1Swap__0xA0__failOfferInFutureSwap() public revert__NuggftV1Swap__setUp {
@@ -785,12 +775,7 @@ abstract contract revert__NuggftV1Swap is NuggftV1Test {
 
         uint96 value = 1 ether;
 
-        forge.vm.startPrank(users.charlie);
-        {
-            forge.vm.expectRevert(hex"7e863b48_A0");
-            nuggft.offer{value: value}(tokenId);
-        }
-        forge.vm.stopPrank();
+        expect.offer().from(users.charlie).err(0xA0).exec{value: value}(tokenId);
     }
 }
 

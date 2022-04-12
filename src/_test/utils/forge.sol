@@ -22,4 +22,38 @@ abstract contract ForgeTest is GasTracker, DSTest {
         _;
         forge.vm.stopPrank();
     }
+
+    modifier globalDs() {
+        ds.setDsTest(address(this));
+        _;
+    }
+
+    constructor() {
+        ds.setDsTest(address(this));
+
+        users.frank = forge.vm.addr(uint256(keccak256(abi.encode("frank"))));
+        users.dee = forge.vm.addr(uint256(keccak256(abi.encode("dee"))));
+        users.mac = forge.vm.addr(uint256(keccak256(abi.encode("mac"))));
+        users.dennis = forge.vm.addr(uint256(keccak256(abi.encode("dennis"))));
+        users.charlie = forge.vm.addr(uint256(keccak256(abi.encode("charlie"))));
+        users.safe = forge.vm.addr(uint256(keccak256(abi.encode("safe"))));
+
+        forge.vm.label(users.frank, "frank");
+        forge.vm.label(users.dee, "dee");
+        forge.vm.label(users.mac, "mac");
+        forge.vm.label(users.dennis, "dennis");
+        forge.vm.label(users.charlie, "charlie");
+        forge.vm.label(users.safe, "safe");
+    }
+
+    struct Users {
+        address frank;
+        address dee;
+        address mac;
+        address dennis;
+        address charlie;
+        address safe;
+    }
+
+    Users public users;
 }

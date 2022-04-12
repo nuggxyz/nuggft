@@ -4,6 +4,8 @@ pragma solidity 0.8.13;
 
 // import '../_test/utils/forge.sol';
 
+import {IERC1155} from "../interfaces/IERC721.sol";
+
 library DotnuggV1Lib {
     uint8 constant DOTNUGG_HEADER_BYTE_LEN = 25;
 
@@ -35,6 +37,14 @@ library DotnuggV1Lib {
         }
     }
 
+    function pickWithId(
+        address safe,
+        uint8 feature,
+        uint256 seed
+    ) internal view returns (uint16 res) {
+        return (uint16(feature) << 8) | search(safe, feature, seed);
+    }
+
     function search(
         address safe,
         uint8 feature,
@@ -45,7 +55,6 @@ library DotnuggV1Lib {
         uint256 high = size(loc);
 
         // prettier-ignore
-        /// @solidity memory-safe-assembly
         assembly {
 
             // we adjust the seed to be unique per feature and safe, yet still deterministic
@@ -125,7 +134,6 @@ library DotnuggV1Lib {
     function location(address safe, uint8 feature) internal pure returns (address res) {
         bytes32 h = PROXY_INIT_CODE_HASH;
 
-        /// @solidity memory-safe-assembly
         assembly {
             let mptr := mload(0x40)
 
@@ -171,57 +179,57 @@ library DotnuggV1Lib {
         }
     }
 
-    function readBytecodeAsArray(
-        address file,
-        uint256 start,
-        uint256 len
-    ) private view returns (uint256[] memory data) {
-        // prettier-ignore
-        assembly {
-            let offset := sub(0x20, mod(len, 0x20))
+    // function readBytecodeAsArray(
+    //     address file,
+    //     uint256 start,
+    //     uint256 len
+    // ) private view returns (uint256[] memory data) {
+    //     // prettier-ignore
+    //     assembly {
+    //         let offset := sub(0x20, mod(len, 0x20))
 
-            let arrlen := add(0x01, div(len, 0x20))
+    //         let arrlen := add(0x01, div(len, 0x20))
 
-            // Get a pointer to some free memory.
-            data := mload(0x40)
+    //         // Get a pointer to some free memory.
+    //         data := mload(0x40)
 
-            // Update the free memory pointer to prevent overriding our data.
-            // We use and(x, not(31)) as a cheaper equivalent to sub(x, mod(x, 32)).
-            // Adding 31 to size and running the result through the logic above ensures
-            // the memory pointer remains word-aligned, following the Solidity convention.
-            mstore(0x40, add(data, and(add(add(add(len, 32), offset), 31), not(31))))
+    //         // Update the free memory pointer to prevent overriding our data.
+    //         // We use and(x, not(31)) as a cheaper equivalent to sub(x, mod(x, 32)).
+    //         // Adding 31 to size and running the result through the logic above ensures
+    //         // the memory pointer remains word-aligned, following the Solidity convention.
+    //         mstore(0x40, add(data, and(add(add(add(len, 32), offset), 31), not(31))))
 
-            // Store the len of the data in the first 32 byte chunk of free memory.
-            mstore(data, arrlen)
+    //         // Store the len of the data in the first 32 byte chunk of free memory.
+    //         mstore(data, arrlen)
 
-            // Copy the code into memory right after the 32 bytes we used to store the len.
-            extcodecopy(file, add(add(data, 32), offset), start, len)
-        }
-    }
+    //         // Copy the code into memory right after the 32 bytes we used to store the len.
+    //         extcodecopy(file, add(add(data, 32), offset), start, len)
+    //     }
+    // }
 
-    function readBytecode(
-        address file,
-        uint256 start,
-        uint256 len
-    ) private view returns (bytes memory data) {
-        // prettier-ignore
-        assembly {
-            // Get a pointer to some free memory.
-            data := mload(0x40)
+    // function readBytecode(
+    //     address file,
+    //     uint256 start,
+    //     uint256 len
+    // ) private view returns (bytes memory data) {
+    //     // prettier-ignore
+    //     assembly {
+    //         // Get a pointer to some free memory.
+    //         data := mload(0x40)
 
-            // Update the free memory pointer to prevent overriding our data.
-            // We use and(x, not(31)) as a cheaper equivalent to sub(x, mod(x, 32)).
-            // Adding 31 to len and running the result through the logic above ensures
-            // the memory pointer remains word-aligned, following the Solidity convention.
-            mstore(0x40, add(data, and(add(add(len, 32), 31), not(31))))
+    //         // Update the free memory pointer to prevent overriding our data.
+    //         // We use and(x, not(31)) as a cheaper equivalent to sub(x, mod(x, 32)).
+    //         // Adding 31 to len and running the result through the logic above ensures
+    //         // the memory pointer remains word-aligned, following the Solidity convention.
+    //         mstore(0x40, add(data, and(add(add(len, 32), 31), not(31))))
 
-            // Store the len of the data in the first 32 byte chunk of free memory.
-            mstore(data, len)
+    //         // Store the len of the data in the first 32 byte chunk of free memory.
+    //         mstore(data, len)
 
-            // Copy the code into memory right after the 32 bytes we used to store the len.
-            extcodecopy(file, add(data, 32), start, len)
-        }
-    }
+    //         // Copy the code into memory right after the 32 bytes we used to store the len.
+    //         extcodecopy(file, add(data, 32), start, len)
+    //     }
+    // }
 
     function rarity(
         address safe,
