@@ -9,8 +9,8 @@ import {NuggftV1Proof} from "../../../core/NuggftV1Proof.sol";
 abstract contract logic__NuggftV1Proof is NuggftV1Test {
     //     function dotnuggV1ImplementerCallback(uint256 tokenId) public view override returns (IDotnuggV1Metadata.Memory memory data) {}
     //     function supportsInterface(bytes4 interfaceId) public view virtual override returns (bool) {}
-    //     function trustedMint(uint160 tokenId, address to) external payable override requiresTrust {}
-    //     function mint(uint160 tokenId) public payable override {}
+    //     function trustedMint(uint24 tokenId, address to) external payable override requiresTrust {}
+    //     function mint(uint24 tokenId) public payable override {}
     //     function setUp() public {}
     //     /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
     //         [pure] toProof
@@ -39,7 +39,7 @@ abstract contract logic__NuggftV1Proof is NuggftV1Test {
         trickery[6] = ShiftLib.mask(lens[6]);
         trickery[7] = ShiftLib.mask(lens[7]);
 
-        for (uint160 i = 0; i < 3000; i++) {
+        for (uint24 i = 0; i < 3000; i++) {
             for (uint8 j = 0; j < 8; j++) {
                 trickery[j] &= ShiftLib.imask(1, nuggft.external__search(j, (seed << 16) | i) - 1);
             }

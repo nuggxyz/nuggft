@@ -47,7 +47,7 @@ contract expectBurn is base {
         return this;
     }
 
-    function exec(uint160 tokenId) public payable {
+    function exec(uint24 tokenId) public payable {
         lib.txdata memory _prepped = prepped;
         _prepped.value += uint96(msg.value);
 
@@ -57,7 +57,7 @@ contract expectBurn is base {
 
     struct Run {
         address sender;
-        uint160 tokenId;
+        uint24 tokenId;
         uint96 eps;
         uint256 agency;
     }
@@ -68,7 +68,7 @@ contract expectBurn is base {
         delete execution;
     }
 
-    function exec(uint160 tokenId, lib.txdata memory txdata) public {
+    function exec(uint24 tokenId, lib.txdata memory txdata) public {
         this.start(tokenId, txdata.from);
         forge.vm.startPrank(txdata.from);
         if (txdata.err.length > 0) forge.vm.expectRevert(txdata.err);
@@ -77,7 +77,7 @@ contract expectBurn is base {
         txdata.err.length > 0 ? this.rollback() : this.stop();
     }
 
-    function start(uint160 tokenId, address sender) public {
+    function start(uint24 tokenId, address sender) public {
         require(execution.length == 0, "EXPECT-BURN:START: execution already exists");
 
         Run memory run;

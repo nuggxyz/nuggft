@@ -48,16 +48,53 @@ contract expectClaim is base {
         return this;
     }
 
-    function exec(uint160[] memory tokenIds, address[] memory offerers) public {
+    function exec(uint24[] memory tokenIds, address[] memory offerers) public {
         lib.txdata memory _prepped = prepped;
         delete prepped;
         exec(tokenIds, offerers, _prepped);
     }
 
-    function exec(uint160[] memory tokenIds, uint160[] memory offerers) public {
+    function exec(uint24 tokenId, address account) public {
+        exec(array.b24(tokenId), array.bAddress(account));
+    }
+
+    function exec(
+        uint24 tokenId,
+        uint24 buyerId,
+        uint16 itemId
+    ) public {
+        exec(array.b24(tokenId), array.b24(buyerId), array.b16(itemId));
+    }
+
+    function exec(
+        uint24[] memory tokenIds,
+        uint24[] memory buyingTokenIds,
+        uint16[] memory itemIds
+    ) public {
         lib.txdata memory _prepped = prepped;
         delete prepped;
-        exec(tokenIds, offerers, _prepped);
+        exec(tokenIds, buyingTokenIds, itemIds, _prepped);
+    }
+
+    function execUnchecked(
+        uint24[] memory tokenIds,
+        uint40[] memory buyingTokenIds,
+        uint16[] memory itemIds
+    ) public {
+        lib.txdata memory _prepped = prepped;
+        delete prepped;
+        exec(tokenIds, array.to24(array.from40(buyingTokenIds)), itemIds, _prepped);
+    }
+
+    function exec(
+        uint24[] memory tokenIds,
+        address[] memory offerers,
+        uint24[] memory buyingTokenIds,
+        uint16[] memory itemIds
+    ) public {
+        lib.txdata memory _prepped = prepped;
+        delete prepped;
+        exec(tokenIds, offerers, buyingTokenIds, itemIds, _prepped);
     }
 
     struct Snapshot {
@@ -72,7 +109,7 @@ contract expectClaim is base {
     }
 
     struct SnapshotEnv {
-        uint160 id;
+        uint40 id;
         bool isItem;
         bool winner;
         address buyer;
@@ -94,18 +131,20 @@ contract expectClaim is base {
     bytes execution;
 
     function exec(
-        uint160[] memory tokenIds,
+        uint24[] memory tokenIds,
         address[] memory offerers,
+        uint24[] memory buyingTokenIds,
+        uint16[] memory itemIds,
         lib.txdata memory txdata
     ) public {
-        this.start(tokenIds, offerers, txdata.from);
+        this.start(tokenIds, offerers, buyingTokenIds, itemIds, txdata.from);
         forge.vm.startPrank(txdata.from);
         if (txdata.err.length > 0) forge.vm.expectRevert(txdata.err);
         // else {
         //     forge.vm.expectEmit(true, false, false, false);
         //     emit Claim(0, address(0));
         // }
-        nuggft.claim(tokenIds, offerers);
+        nuggft.claim(tokenIds, offerers, buyingTokenIds, itemIds);
         forge.vm.stopPrank();
         txdata.err.length > 0 ? this.rollback() : this.stop();
     }
@@ -114,33 +153,67 @@ contract expectClaim is base {
         delete execution;
     }
 
+    function exec(uint40[] memory tokenIds, address[] memory offerers) public {
+        uint24[] memory sellers = new uint24[](tokenIds.length);
+        address[] memory eoas = new address[](tokenIds.length);
+        uint24[] memory buyers = new uint24[](tokenIds.length);
+        uint16[] memory items = new uint16[](tokenIds.length);
+
+        for (uint256 i = 0; i < tokenIds.length; i++) {
+            if (tokenIds[i] > 0xffffff) {
+                sellers[i] = safe.u24(tokenIds[i] & 0xffffff);
+                buyers[i] = safe.u24(offerers[i]);
+                items[i] = safe.u16(tokenIds[i] >> 24);
+            } else {
+                sellers[i] = safe.u24(tokenIds[i]);
+                eoas[i] = offerers[i];
+            }
+        }
+        this.exec(sellers, eoas, buyers, items);
+    }
+
     function exec(
-        uint160[] memory tokenIds,
-        uint160[] memory offerers,
+        uint24[] memory tokenIds,
+        address[] memory offerers,
         lib.txdata memory txdata
     ) public {
+        uint16 len = uint16(tokenIds.length);
         address[] memory a;
         assembly {
             a := offerers
         }
-        this.exec(tokenIds, a, txdata);
+        this.exec(tokenIds, offerers, array.r24(0, len), array.r16(0, len), txdata);
     }
 
-    function start(
-        uint160[] memory tokenIds,
-        uint160[] memory offerers,
-        address sender
+    function exec(
+        uint24[] memory tokenIds,
+        uint24[] memory buyingTokenIds,
+        uint16[] memory itemIds,
+        lib.txdata memory txdata
     ) public {
-        address[] memory a;
-        assembly {
-            a := offerers
-        }
-        this.start(tokenIds, a, sender);
+        uint16 len = uint16(tokenIds.length);
+        this.exec(tokenIds, array.rAddress(address(0), len), buyingTokenIds, itemIds, txdata);
     }
 
+    // function start(
+    //     uint24[] memory tokenIds,
+    //     address[] memory offerers,
+    //     uint24[] memory buyingTokenIds,
+    //     uint16[] memory itemIds,
+    //     address sender
+    // ) public {
+    //     address[] memory a;
+    //     assembly {
+    //         a := offerers
+    //     }
+    //     this.start(tokenIds, a, sender);
+    // }
+
     function start(
-        uint160[] memory tokenIds,
+        uint24[] memory tokenIds,
         address[] memory offerers,
+        uint24[] memory buyingTokenIds,
+        uint16[] memory itemIds,
         address sender
     ) public {
         require(execution.length == 0, "EXPECT-CLAIM:START: execution already esists");
@@ -161,15 +234,21 @@ contract expectClaim is base {
             SnapshotData memory pre;
 
             env.id = tokenIds[i];
-            env.isItem = env.id > 0xffffff;
-            env.buyer = offerers[i];
+            env.isItem = offerers[i] == address(0);
 
             if (env.isItem) {
-                pre.agency = nuggft.itemAgency(env.id);
-                pre.offer = nuggft.itemOffers(env.id, uint160(env.buyer));
+                env.buyer = address(uint160(buyingTokenIds[i]));
+                env.id |= uint40(itemIds[i]) << 24;
             } else {
-                pre.agency = nuggft.agency(env.id);
-                pre.offer = nuggft.offers(env.id, env.buyer);
+                env.buyer = offerers[i];
+            }
+
+            if (env.isItem) {
+                pre.agency = nuggft.itemAgency(safe.u24(env.id & 0xffffff), safe.u16(env.id >> 24));
+                pre.offer = nuggft.itemOffers(safe.u24(env.buyer), safe.u24(env.id & 0xffffff), safe.u16(env.id >> 24));
+            } else {
+                pre.agency = nuggft.agency(safe.u24(env.id));
+                pre.offer = nuggft.offers(safe.u24(env.id), env.buyer);
             }
 
             pre.trueoffer = pre.offer;
@@ -224,11 +303,11 @@ contract expectClaim is base {
             SnapshotData memory post;
 
             if (env.isItem) {
-                post.agency = nuggft.itemAgency(env.id);
-                post.offer = nuggft.itemOffers(env.id, uint160(env.buyer));
+                post.agency = nuggft.itemAgency(safe.u24(env.id & 0xffffff), safe.u16(env.id >> 24));
+                post.offer = nuggft.itemOffers(safe.u24(env.buyer), safe.u24(env.id & 0xffffff), safe.u16(env.id >> 24));
             } else {
-                post.agency = nuggft.agency(env.id);
-                post.offer = nuggft.offers(env.id, env.buyer);
+                post.agency = nuggft.agency(safe.u24(env.id));
+                post.offer = nuggft.offers(safe.u24(env.id), env.buyer);
             }
 
             postSingleClaimChecks(run, env, pre, post);
@@ -251,11 +330,11 @@ contract expectClaim is base {
             SnapshotData memory post;
 
             if (env.isItem) {
-                post.agency = nuggft.itemAgency(env.id);
-                post.offer = nuggft.itemOffers(env.id, uint160(env.buyer));
+                post.agency = nuggft.itemAgency(safe.u24(env.id & 0xffffff), safe.u16(env.id >> 24));
+                post.offer = nuggft.itemOffers(safe.u24(env.buyer), safe.u24(env.id & 0xffffff), safe.u16(env.id >> 24));
             } else {
-                post.agency = nuggft.agency(env.id);
-                post.offer = nuggft.offers(env.id, env.buyer);
+                post.agency = nuggft.agency(safe.u24(env.id));
+                post.offer = nuggft.offers(safe.u24(env.id), env.buyer);
             }
 
             ds.assertEq(pre.agency, post.agency, "EXPECT-CLAIM:ROLLBACK agency changed but shouldn't have");
@@ -276,7 +355,7 @@ contract expectClaim is base {
     }
 
     function assertProofContains(
-        uint160 tokenId,
+        uint24 tokenId,
         uint16 itemId,
         string memory str
     ) private {
@@ -287,7 +366,7 @@ contract expectClaim is base {
     }
 
     function assertProofNotContains(
-        uint160 tokenId,
+        uint24 tokenId,
         uint16 itemId,
         string memory str
     ) private {
@@ -358,7 +437,7 @@ contract expectClaim is base {
             if (env.winner) {
                 // @todo make sure post user balance = pre user balance
                 // ASSERT:CLAIM_0x07: is the item inside the winning nugg's proof?
-                assertProofContains(uint160(env.buyer), uint16(env.id >> 24), "ASSERT:CLAIM_0x07: the item SHOULD be inside the winning nugg's proof");
+                assertProofContains(safe.u24(env.buyer), uint16(env.id >> 24), "ASSERT:CLAIM_0x07: the item SHOULD be inside the winning nugg's proof");
 
                 // ASSERT:CLAIM_0x08: is the post agency == 0?
                 ds.assertEq(post.agency, 0, "ASSERT:CLAIM_0x08: the agency SHOULD be 0 after the claim");

@@ -7,25 +7,30 @@ pragma solidity 0.8.13;
 interface INuggftV1Swap {
     /// @notice Explain to an end user what this does
     /// @dev Explain to a developer any extra details
-    /// @param tokenId (uint160)
+    /// @param tokenId (uint24)
     /// @param agency  (bytes32) a parameter just like in doxygen (must be followed by parameter name)
-    event Offer(uint160 indexed tokenId, bytes32 agency, bytes32 stake);
+    event Offer(uint24 indexed tokenId, bytes32 agency, bytes32 stake);
 
-    event OfferMint(uint160 indexed tokenId, bytes32 agency, bytes32 proof, bytes32 stake);
+    event OfferMint(uint24 indexed tokenId, bytes32 agency, bytes32 proof, bytes32 stake);
 
-    event Claim(uint160 indexed tokenId, address indexed account);
+    event Claim(uint24 indexed tokenId, address indexed account);
 
-    event Sell(uint160 indexed tokenId, bytes32 agency);
+    event Sell(uint24 indexed tokenId, bytes32 agency);
 
     /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
                             STATE CHANGING
        ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
 
-    function offer(uint160 tokenId) external payable;
+    function offer(uint24 tokenId) external payable;
 
-    function claim(uint160[] calldata tokenIds, address[] calldata accounts) external;
+    function claim(
+        uint24[] calldata tokenIds,
+        address[] calldata accounts,
+        uint24[] calldata buyingTokenIds,
+        uint16[] calldata itemIds
+    ) external;
 
-    function sell(uint160 tokenId, uint96 floor) external;
+    function sell(uint24 tokenId, uint96 floor) external;
 
     /*━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
                             VIEW FUNCTIONS
@@ -38,8 +43,8 @@ interface INuggftV1Swap {
     /// @return canOffer -> instead of reverting this function will return false
     /// @return next -> the minimum value that must be sent with a offer call
     /// @return current ->
-    function check(address sender, uint160 tokenId) external view
+    function check(address sender, uint24 tokenId) external view
         returns (bool canOffer, uint96 next, uint96 current);
 
-    function vfo(address sender, uint160 tokenId) external view returns (uint96 res);
+    function vfo(address sender, uint24 tokenId) external view returns (uint96 res);
 }

@@ -5,7 +5,7 @@ pragma solidity 0.8.13;
 import "../../../NuggftV1.test.sol";
 
 abstract contract revert__offer__0xA4 is NuggftV1Test {
-    uint160 private token1 = mintable(32);
+    uint24 private token1 = mintable(32);
 
     function test__revert__offer__0xA4__fail__desc() public {
         jumpStart();

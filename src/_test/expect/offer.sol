@@ -48,8 +48,8 @@ contract expectOffer is base {
     }
 
     function exec(
-        uint160 buyingTokenId,
-        uint160 sellingTokenId,
+        uint24 buyingTokenId,
+        uint24 sellingTokenId,
         uint16 itemId
     ) public payable {
         lib.txdata memory _prepped = prepped;
@@ -59,7 +59,7 @@ contract expectOffer is base {
         exec(buyingTokenId, sellingTokenId, itemId, _prepped);
     }
 
-    function exec(uint160 tokenId) public payable {
+    function exec(uint24 tokenId) public payable {
         lib.txdata memory _prepped = prepped;
         _prepped.value += uint96(msg.value);
 
@@ -79,7 +79,7 @@ contract expectOffer is base {
     }
 
     struct SnapshotEnv {
-        uint160 id;
+        uint40 id;
         bool isItem;
         address buyer;
         uint96 value;
@@ -97,7 +97,7 @@ contract expectOffer is base {
         int192 expectedNuggftBalance;
     }
 
-    function exec(uint160 tokenId, lib.txdata memory txdata) public {
+    function exec(uint24 tokenId, lib.txdata memory txdata) public {
         forge.vm.deal(txdata.from, txdata.from.balance + txdata.value);
         this.start(tokenId, txdata.from, txdata.value);
         forge.vm.startPrank(txdata.from);
@@ -108,8 +108,8 @@ contract expectOffer is base {
     }
 
     function exec(
-        uint160 buyingTokenId,
-        uint160 sellingTokenId,
+        uint24 buyingTokenId,
+        uint24 sellingTokenId,
         uint16 itemId,
         lib.txdata memory txdata
     ) public {
@@ -123,13 +123,13 @@ contract expectOffer is base {
     }
 
     function start(
-        uint160 buyingTokenId,
-        uint160 sellingTokenId,
+        uint24 buyingTokenId,
+        uint24 sellingTokenId,
         uint16 itemId,
         address sender,
         uint96 val
     ) public {
-        this.start((buyingTokenId << 40) | (uint160(itemId) << 24) | sellingTokenId, sender, val);
+        this.start((uint64(buyingTokenId) << 40) | (uint64(itemId) << 24) | uint64(sellingTokenId), sender, val);
     }
 
     bytes execution;
@@ -139,7 +139,7 @@ contract expectOffer is base {
     }
 
     function start(
-        uint160 tokenId,
+        uint64 tokenId,
         address sender,
         uint96 val
     ) public {
@@ -152,24 +152,22 @@ contract expectOffer is base {
         SnapshotEnv memory env;
         SnapshotData memory pre;
 
-        env.id = tokenId;
-        env.isItem = env.id > 0xffffff;
+        env.isItem = tokenId > 0xffffff;
         env.value = val;
         env.epoch = nuggft.epoch();
-        env.mintingNugg = env.id == env.epoch;
+        env.mintingNugg = tokenId == env.epoch;
         env.eps = nuggft.eps();
         env.msp = nuggft.msp();
+        env.id = uint40(tokenId);
 
         if (env.isItem) {
-            env.id = tokenId & 0xffffffffff;
-
-            env.buyer = address(tokenId >> 40);
-            pre.agency = nuggft.itemAgency(env.id);
-            pre.offer = nuggft.itemOffers(env.id, uint160(env.buyer));
+            env.buyer = address(uint160(tokenId >> 40));
+            pre.agency = nuggft.itemAgency(safe.u24(env.id & 0xffffff), uint16(env.id >> 24));
+            pre.offer = nuggft.itemOffers(safe.u24(env.buyer), safe.u24(env.id & 0xffffff), safe.u16(env.id >> 24));
         } else {
             env.buyer = sender;
-            pre.agency = nuggft.agency(env.id);
-            pre.offer = nuggft.offers(env.id, env.buyer);
+            pre.agency = nuggft.agency(safe.u24(env.id));
+            pre.offer = nuggft.offers(safe.u24(env.id), env.buyer);
         }
 
         pre.trueoffer = pre.offer;
@@ -198,11 +196,11 @@ contract expectOffer is base {
         SnapshotData memory post;
 
         if (env.isItem) {
-            post.agency = nuggft.itemAgency(env.id);
-            post.offer = nuggft.itemOffers(env.id, uint160(env.buyer));
+            post.agency = nuggft.itemAgency(safe.u24(env.id & 0xffffff), safe.u16(env.id >> 24));
+            post.offer = nuggft.itemOffers(safe.u24(env.buyer), safe.u24(env.id & 0xffffff), safe.u16(env.id >> 24));
         } else {
-            post.agency = nuggft.agency(env.id);
-            post.offer = nuggft.offers(env.id, env.buyer);
+            post.agency = nuggft.agency(safe.u24(env.id));
+            post.offer = nuggft.offers(safe.u24(env.id), env.buyer);
         }
 
         postOfferChecks(run, env, pre, post);
@@ -223,11 +221,11 @@ contract expectOffer is base {
         SnapshotData memory post;
 
         if (env.isItem) {
-            post.agency = nuggft.itemAgency(env.id);
-            post.offer = nuggft.itemOffers(env.id, uint160(env.buyer));
+            post.agency = nuggft.itemAgency(safe.u24(env.id & 0xffffff), safe.u16(env.id >> 24));
+            post.offer = nuggft.itemOffers(safe.u24(env.buyer), safe.u24(env.id & 0xffffff), safe.u16(env.id >> 24));
         } else {
-            post.agency = nuggft.agency(env.id);
-            post.offer = nuggft.offers(env.id, env.buyer);
+            post.agency = nuggft.agency(safe.u24(env.id));
+            post.offer = nuggft.offers(safe.u24(env.id), env.buyer);
         }
 
         ds.assertEq(pre.agency, post.agency, "EXPECT-OFFER:ROLLBACK agency changed but shouldn't have");

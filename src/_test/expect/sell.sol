@@ -47,14 +47,14 @@ contract expectSell is base {
         return this;
     }
 
-    function exec(uint160 tokenId, uint96 floor) public {
+    function exec(uint24 tokenId, uint96 floor) public {
         lib.txdata memory _prepped = prepped;
         delete prepped;
         exec(tokenId, floor, _prepped);
     }
 
     function exec(
-        uint160 tokenId,
+        uint24 tokenId,
         uint16 itemId,
         uint96 floor
     ) public {
@@ -75,7 +75,7 @@ contract expectSell is base {
     }
 
     struct SnapshotEnv {
-        uint160 id;
+        uint40 id;
         bool isItem;
         address buyer;
         uint96 floor;
@@ -95,7 +95,7 @@ contract expectSell is base {
     bytes execution;
 
     function exec(
-        uint160 tokenId,
+        uint24 tokenId,
         uint96 floor,
         lib.txdata memory txdata
     ) public {
@@ -108,7 +108,7 @@ contract expectSell is base {
     }
 
     function exec(
-        uint160 sellingTokenId,
+        uint24 sellingTokenId,
         uint16 itemId,
         uint96 floor,
         lib.txdata memory txdata
@@ -122,16 +122,16 @@ contract expectSell is base {
     }
 
     function start(
-        uint160 sellingTokenId,
+        uint24 sellingTokenId,
         uint16 itemId,
         uint96 floor,
         address sender
     ) public {
-        this.start((uint160(itemId) << 24) | sellingTokenId, floor, sender);
+        this.start((uint24(itemId) << 24) | sellingTokenId, floor, sender);
     }
 
     function start(
-        uint160 tokenId,
+        uint24 tokenId,
         uint96 floor,
         address sender
     ) public {
@@ -151,15 +151,15 @@ contract expectSell is base {
         env.isItem = env.id > 0xffffff;
         env.floor = floor;
         if (env.isItem) {
-            env.buyer = address(tokenId >> 40);
+            env.buyer = address(uint160(tokenId >> 40));
 
-            pre.agency = nuggft.external__itemAgency(env.id);
-            pre.offer = nuggft.external__itemOffers(env.id, uint160(env.buyer));
+            pre.agency = nuggft.itemAgency(safe.u24(env.id & 0xffffff), safe.u16(env.id >> 24));
+            pre.offer = nuggft.itemOffers(safe.u24(env.buyer), safe.u24(env.id & 0xffffff), safe.u16(env.id >> 24));
         } else {
             env.buyer = sender;
 
-            pre.agency = nuggft.external__agency(env.id);
-            pre.offer = nuggft.external__offers(env.id, env.buyer);
+            pre.agency = nuggft.agency(safe.u24(env.id));
+            pre.offer = nuggft.offers(safe.u24(env.id), env.buyer);
             pre.trueoffer = pre.offer;
         }
 
@@ -186,11 +186,11 @@ contract expectSell is base {
         SnapshotData memory post;
 
         if (env.isItem) {
-            post.agency = nuggft.external__itemAgency(env.id);
-            post.offer = nuggft.external__itemOffers(env.id, uint160(env.buyer));
+            post.agency = nuggft.itemAgency(safe.u24(env.id & 0xffffff), safe.u16(env.id >> 24));
+            post.offer = nuggft.itemOffers(safe.u24(env.buyer), safe.u24(env.id & 0xffffff), safe.u16(env.id >> 24));
         } else {
-            post.agency = nuggft.external__agency(env.id);
-            post.offer = nuggft.external__offers(env.id, env.buyer);
+            post.agency = nuggft.agency(safe.u24(env.id));
+            post.offer = nuggft.offers(safe.u24(env.id), env.buyer);
         }
 
         postSellChecks(run, env, pre, post);
@@ -213,11 +213,11 @@ contract expectSell is base {
         SnapshotData memory post;
 
         if (env.isItem) {
-            post.agency = nuggft.external__itemAgency(env.id);
-            post.offer = nuggft.external__itemOffers(env.id, uint160(env.buyer));
+            post.agency = nuggft.itemAgency(safe.u24(env.id & 0xffffff), safe.u16(env.id >> 24));
+            post.offer = nuggft.itemOffers(safe.u24(env.buyer), safe.u24(env.id & 0xffffff), safe.u16(env.id >> 24));
         } else {
-            post.agency = nuggft.external__agency(env.id);
-            post.offer = nuggft.external__offers(env.id, env.buyer);
+            post.agency = nuggft.agency(safe.u24(env.id));
+            post.offer = nuggft.offers(safe.u24(env.id), env.buyer);
         }
 
         ds.assertEq(pre.agency, post.agency, "EXPECT-SELL:ROLLBACK agency changed but shouldn't have");
@@ -236,7 +236,7 @@ contract expectSell is base {
         SnapshotData memory post
     ) private {
         if (env.isItem) {
-            ds.assertEq(address(uint160(post.agency)), address(env.id & 0xffffff), "EXPECT-SELL:STOP owner should be contract");
+            ds.assertEq(address(uint160(post.agency)), address(uint160(env.id & 0xffffff)), "EXPECT-SELL:STOP owner should be contract");
         } else {
             ds.assertEq(run.sender, address(uint160(post.agency)), "EXPECT-SELL:STOP owner should be sender");
         }

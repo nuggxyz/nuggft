@@ -12,18 +12,18 @@ abstract contract revert__claim__0xA0 is NuggftV1Test {
         forge.vm.prank(users.frank);
         forge.vm.expectRevert(hex"7e863b48_a0");
 
-        nuggft.claim(lib.sarr160(mintable(0)), lib.sarrAddress(users.frank));
+        nuggft.claim(array.b24(mintable(0)), lib.sarrAddress(users.frank), array.b24(0), array.b16(0));
     }
 
     function test__revert__claim__0xA0__pass__desc() public {
         jumpStart();
 
-        uint160 tokenId = nuggft.epoch();
+        uint24 tokenId = nuggft.epoch();
 
         expect.offer().from(users.frank).value(1 ether).exec(tokenId);
 
         jumpUp(1);
 
-        expect.claim().from(users.frank).exec(lib.sarr160(tokenId), lib.sarrAddress(users.frank));
+        expect.claim().from(users.frank).exec(array.b24(tokenId), lib.sarrAddress(users.frank));
     }
 }

@@ -26,7 +26,7 @@ contract expectMint is base {
     }
 
     struct SnapshotEnv {
-        uint160 tokenId;
+        uint24 tokenId;
         uint96 value;
         uint96 eps;
         uint96 msp;
@@ -75,7 +75,7 @@ contract expectMint is base {
         return this;
     }
 
-    function exec(uint160 tokenId) public payable {
+    function exec(uint24 tokenId) public payable {
         lib.txdata memory _prepped = prepped;
         _prepped.value += uint96(msg.value);
 
@@ -83,7 +83,7 @@ contract expectMint is base {
         exec(tokenId, _prepped);
     }
 
-    function exec(uint160 tokenId, lib.txdata memory txdata) public {
+    function exec(uint24 tokenId, lib.txdata memory txdata) public {
         forge.vm.deal(txdata.from, txdata.from.balance + txdata.value);
         this.start(tokenId, txdata.from, txdata.value);
         forge.vm.startPrank(txdata.from);
@@ -94,7 +94,7 @@ contract expectMint is base {
     }
 
     function start(
-        uint160 tokenId,
+        uint24 tokenId,
         address sender,
         uint96 value
     ) public {

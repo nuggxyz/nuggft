@@ -6,7 +6,7 @@ import "../../NuggftV1.test.sol";
 
 abstract contract system__one is NuggftV1Test {
     using SafeCast for uint96;
-    uint160 private TOKEN1 = mintable(0);
+    uint24 private TOKEN1 = mintable(0);
 
     function test__logic__NuggftV1Proof__rotate() public {
         expect.mint().from(users.frank).exec{value: 1 ether}(TOKEN1);
@@ -149,7 +149,7 @@ abstract contract system__one is NuggftV1Test {
     function test__system__frankMintsATokenFor100gwei() public {
         uint96 value = 1000 gwei;
 
-        uint160 tokenId = TOKEN1;
+        uint24 tokenId = TOKEN1;
 
         // expect.stake().start(value, 1, true);
         expect.balance().start(users.frank, value, false);

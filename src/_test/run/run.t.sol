@@ -5,7 +5,7 @@ pragma solidity 0.8.13;
 import "../utils/forge.sol";
 
 contract runner {
-    mapping(uint160 => uint256) tokens;
+    mapping(uint24 => uint256) tokens;
 
     struct Test {
         uint256 a;

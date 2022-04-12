@@ -17,7 +17,7 @@ abstract contract revert__mint__0x66 is NuggftV1Test {
             forge.vm.expectRevert(hex"7e863b48_66");
             nuggft.trustedMint(trustMintable(0) - 1, users.frank);
             jumpStart();
-            uint160 tokenId = nuggft.epoch();
+            uint24 tokenId = nuggft.epoch();
             forge.vm.expectRevert(hex"7e863b48_66");
             nuggft.trustedMint(tokenId, users.frank);
         }

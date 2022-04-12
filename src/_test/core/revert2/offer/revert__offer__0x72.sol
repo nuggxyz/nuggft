@@ -8,7 +8,7 @@ abstract contract revert__offer__0x72 is NuggftV1Test {
     function test__revert__offer__0x72__fail__desc() public {
         jumpStart();
 
-        uint160 tokenId = nuggft.epoch();
+        uint24 tokenId = nuggft.epoch();
 
         expect.offer().from(users.mac).value(1 ether).exec(tokenId);
 
@@ -20,7 +20,7 @@ abstract contract revert__offer__0x72 is NuggftV1Test {
     function test__revert__offer__0x72__pass__desc() public {
         jumpStart();
 
-        uint160 tokenId = nuggft.epoch();
+        uint24 tokenId = nuggft.epoch();
 
         expect.offer().from(users.mac).value(1 ether).exec(tokenId);
 

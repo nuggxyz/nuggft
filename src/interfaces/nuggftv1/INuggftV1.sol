@@ -33,20 +33,21 @@ interface INuggftV1Events {
     event OfferItem(uint24 indexed sellingTokenId, uint16 indexed itemId, bytes32 agency, bytes32 stake);
     event ClaimItem(uint24 indexed sellingTokenId, uint16 indexed itemId, uint24 indexed buyerTokenId, bytes32 proof);
     event SellItem(uint24 indexed sellingTokenId, uint16 indexed itemId, bytes32 agency, bytes32 proof);
-    event Loan(uint160 indexed tokenId, bytes32 agency);
-    event Rebalance(uint160 indexed tokenId, bytes32 agency);
-    event Liquidate(uint160 indexed tokenId, bytes32 agency);
-    event MigrateV1Accepted(address v1, uint160 tokenId, uint256 proof, address owner, uint96 eth);
+
+    event Loan(uint24 indexed tokenId, bytes32 agency);
+    event Rebalance(uint24 indexed tokenId, bytes32 agency);
+    event Liquidate(uint24 indexed tokenId, bytes32 agency);
+    event MigrateV1Accepted(address v1, uint24 tokenId, uint256 proof, address owner, uint96 eth);
     event Extract(uint96 eth);
     event MigratorV1Updated(address migrator);
-    event MigrateV1Sent(address v2, uint160 tokenId, uint256 proof, address owner, uint96 eth);
-    event Burn(uint160 tokenId, address owner, uint96 ethOwed);
+    event MigrateV1Sent(address v2, uint24 tokenId, uint256 proof, address owner, uint96 eth);
+    event Burn(uint24 tokenId, address owner, uint96 ethOwed);
     event Stake(bytes32 stake);
-    event Rotate(uint160 indexed tokenId, bytes32 proof);
-    event Mint(uint160 indexed tokenId, uint96 value, bytes32 proof, bytes32 stake, bytes32 agency);
-    event Offer(uint160 indexed tokenId, bytes32 agency, bytes32 stake);
-    event OfferMint(uint160 indexed tokenId, bytes32 agency, bytes32 proof, bytes32 stake);
-    event Claim(uint160 indexed tokenId, address indexed account);
-    event Sell(uint160 indexed tokenId, bytes32 agency);
+    event Rotate(uint24 indexed tokenId, bytes32 proof);
+    event Mint(uint24 indexed tokenId, uint96 value, bytes32 proof, bytes32 stake, bytes32 agency);
+    event Offer(uint24 indexed tokenId, bytes32 agency, bytes32 stake);
+    event OfferMint(uint24 indexed tokenId, bytes32 agency, bytes32 proof, bytes32 stake);
+    event Claim(uint24 indexed tokenId, address indexed account);
+    event Sell(uint24 indexed tokenId, bytes32 agency);
     event TrustUpdated(address indexed user, bool trust);
 }

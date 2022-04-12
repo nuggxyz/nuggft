@@ -7,18 +7,18 @@ interface INuggftV1Stake {
 
     event MigratorV1Updated(address migrator);
 
-    event MigrateV1Sent(address v2, uint160 tokenId, uint256 proof, address owner, uint96 eth);
+    event MigrateV1Sent(address v2, uint24 tokenId, uint256 proof, address owner, uint96 eth);
 
-    event Burn(uint160 tokenId, address owner, uint96 ethOwed);
+    event Burn(uint24 tokenId, address owner, uint96 ethOwed);
 
     event Stake(bytes32 stake);
 
-    function migrate(uint160 tokenId) external;
+    function migrate(uint24 tokenId) external;
 
     /// @notice burns a nugg from existance, dealing the eth worth of that share to the user
     /// @dev should only be called directly
     /// @param tokenId the id of the nugg being burned
-    function burn(uint160 tokenId) external;
+    function burn(uint24 tokenId) external;
 
     /// @notice returns the total "eps" held by the contract
     /// @dev this value not always equivilent to the "floor" price which can consist of perceived value.

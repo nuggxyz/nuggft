@@ -97,7 +97,7 @@ contract NuggftV1Items is IERC1155, IERC1155Metadata_URI {
         uint256 bal = nuggftv1.balance(_owner);
 
         while (bal != 0) {
-            uint256 proof = nuggftv1.proofOf(uint160(bal <<= 24));
+            uint256 proof = nuggftv1.proofOf(uint24(bal <<= 24));
             while (proof != 0) if ((proof <<= 16) == _id) res++;
         }
     }

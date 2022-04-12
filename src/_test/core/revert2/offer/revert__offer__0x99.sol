@@ -5,7 +5,7 @@ pragma solidity 0.8.13;
 import "../../../NuggftV1.test.sol";
 
 abstract contract revert__offer__0x99 is NuggftV1Test {
-    uint160 private token1 = mintable(0);
+    uint24 private token1 = mintable(0);
 
     function test__revert__offer__0x99__fail__desc__claimBeforeOffer() public {
         expect.mint().from(users.mac).value(1 ether).exec(token1);
@@ -20,7 +20,7 @@ abstract contract revert__offer__0x99 is NuggftV1Test {
 
         jumpSwap();
 
-        expect.claim().from(users.dee).exec(lib.sarr160(token1), lib.sarrAddress(users.dee));
+        expect.claim().from(users.dee).exec(array.b24(token1), lib.sarrAddress(users.dee));
 
         jumpUp(1);
 
@@ -52,13 +52,13 @@ abstract contract revert__offer__0x99 is NuggftV1Test {
 
         jumpSwap();
 
-        expect.claim().from(users.dee).exec(lib.sarr160(token1), lib.sarrAddress(users.dee));
+        expect.claim().from(users.dee).exec(array.b24(token1), lib.sarrAddress(users.dee));
 
         jumpUp(1);
 
         expect.sell().from(users.dee).exec(token1, 2 ether);
 
-        expect.claim().from(users.frank).exec(lib.sarr160(token1), lib.sarrAddress(users.frank));
+        expect.claim().from(users.frank).exec(array.b24(token1), lib.sarrAddress(users.frank));
 
         expect.offer().from(users.frank).value(2.2 ether).exec(token1);
     }
@@ -72,7 +72,7 @@ abstract contract revert__offer__0x99 is NuggftV1Test {
 
         expect.offer().from(users.frank).value(1.7 ether).exec(token1);
 
-        expect.claim().from(users.mac).exec(array.b160(token1), array.bAddress(users.mac));
+        expect.claim().from(users.mac).exec(array.b24(token1), array.bAddress(users.mac));
     }
 
     // same as above but mac offers again before he claims
@@ -87,6 +87,6 @@ abstract contract revert__offer__0x99 is NuggftV1Test {
 
         expect.offer().from(users.mac).value(2.2 ether).exec(token1);
 
-        expect.claim().from(users.mac).err(0x67).exec(array.b160(token1), array.bAddress(users.mac));
+        expect.claim().from(users.mac).err(0x67).exec(array.b24(token1), array.bAddress(users.mac));
     }
 }
