@@ -10,6 +10,6 @@ contract MockNuggftV1Migrator is INuggftV1Migrator {
         uint256 proof,
         address owner
     ) external payable override {
-        emit MigrateV1Accepted(msg.sender, tokenId, proof, owner, uint96(msg.value));
+        emit MigrateV1Accepted(msg.sender, tokenId, bytes32(proof), owner, uint96(msg.value));
     }
 }

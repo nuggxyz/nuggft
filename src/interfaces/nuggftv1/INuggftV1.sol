@@ -37,10 +37,10 @@ interface INuggftV1Events {
     event Loan(uint24 indexed tokenId, bytes32 agency);
     event Rebalance(uint24 indexed tokenId, bytes32 agency);
     event Liquidate(uint24 indexed tokenId, bytes32 agency);
-    event MigrateV1Accepted(address v1, uint24 tokenId, uint256 proof, address owner, uint96 eth);
+    event MigrateV1Accepted(address v1, uint24 tokenId, bytes32 proof, address owner, uint96 eth);
     event Extract(uint96 eth);
     event MigratorV1Updated(address migrator);
-    event MigrateV1Sent(address v2, uint24 tokenId, uint256 proof, address owner, uint96 eth);
+    event MigrateV1Sent(address v2, uint24 tokenId, bytes32 proof, address owner, uint96 eth);
     event Burn(uint24 tokenId, address owner, uint96 ethOwed);
     event Stake(bytes32 stake);
     event Rotate(uint24 indexed tokenId, bytes32 proof);

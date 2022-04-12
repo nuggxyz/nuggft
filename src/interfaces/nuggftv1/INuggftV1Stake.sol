@@ -7,7 +7,7 @@ interface INuggftV1Stake {
 
     event MigratorV1Updated(address migrator);
 
-    event MigrateV1Sent(address v2, uint24 tokenId, uint256 proof, address owner, uint96 eth);
+    event MigrateV1Sent(address v2, uint24 tokenId, bytes32 proof, address owner, uint96 eth);
 
     event Burn(uint24 tokenId, address owner, uint96 ethOwed);
 

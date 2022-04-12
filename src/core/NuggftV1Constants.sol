@@ -45,24 +45,45 @@ abstract contract NuggftV1Constants {
     // swap
     uint256 constant SALE_LEN = 1;
 
+    // event Rebalance(uint24,bytes32);
+    // event Liquidate(uint24,bytes32);
+    // event MigrateV1Accepted(address,uint24,bytes32,address,uint96);
+    // event Extract(uint96);
+    // event MigratorV1Updated(address);
+    // event MigrateV1Sent(address,uint24,bytes32,address,uint96);
+    // event Burn(uint24,address,uint96);
+    // event Stake(bytes32);
+    // event Rotate(uint24,bytes32);
+    // event Mint(uint24,uint96,bytes32,bytes32,bytes32);
+    // event Offer(uint24,bytes32,bytes32);
+    // event OfferMint(uint24,bytes32,bytes32,bytes32);
+    // event Claim(uint24,address);
+    // event Sell(uint24,bytes32);
+    // event TrustUpdated(address,bool);
+
+    // event OfferItem(uint24,uint16,bytes32,bytes32);
+
+    // event ClaimItem(uint24,uint16,uint24,bytes32);
+
+    // event SellItem(uint24,uint16,bytes32,bytes32);
+
     // events
     bytes32 constant Event__Transfer = 0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef;
     bytes32 constant Event__Stake = 0xaa5755b13aae1e22c9577b90686d1db9a410d173607fc31d743b5d26182e18d5;
-
-    bytes32 constant Event__Rebalance = 0x4cdd6143e1dfcbcf11937a29941c151f57e9467e19fcff2bf87ce9b4255c92bd;
-    bytes32 constant Event__Liquidate = 0x7dc78d32e32a79dbb28ffc73e80d5c0d1961c893f5b437aa8328ab854f08e09f;
-    bytes32 constant Event__Loan = 0x764dd32e4d33677f4bc9a37133c10ecef6409f7feb33af67a31d1fb01b392867;
-    bytes32 constant Event__Claim = 0x938187ad30d2557f8eb68b094a2305a858ec4f65c86a957b4bc26d9c0a496fef;
+    bytes32 constant Event__Rebalance = 0xeb8e55e8fc88bc9f628322210d29573d744e485c0d6187a21a714f78d7d061b4;
+    bytes32 constant Event__Liquidate = 0x7fd4eefc393ae5de976724f1b15e506c4a3defc689243aaed3055caac17fb264;
+    // Loan(uint24,bytes32)
+    bytes32 constant Event__Loan = 0x9fee03d24f4262ff4c5fb3232ff16949f4dccdd085da00bf1f1193c3723eee53;
+    bytes32 constant Event__Claim = 0xbacda7540a51e78a634d77c6141a7d5a880d452aaa9eadbd7dcf76f28df7116d;
     bytes32 constant Event__ClaimItem = 0xcd1615176b23cfc579068e17d243a2b8aa647d8052f1f285153e4d2464c5faf8;
-    bytes32 constant Event__Sell = 0x251e78527ba3c62fcb4405d22087f8ab0c434b97b46e2d7f020d112e763171b3;
+    bytes32 constant Event__Sell = 0x8db33e627ce35c1bbfb6417c838e02c148d2c95bed15ec87fdaf3855d0afbb8c;
     bytes32 constant Event__SellItem = 0xe6b9f9b164a3157991009234a9a3018382c7bef2519e6293bfa9e496174fbbcb;
-    bytes32 constant Event__Offer = 0x5ea112c29e91e483ca0a2d50575f1c12f798c209459d7076b157f41bb876690d;
+    bytes32 constant Event__Offer = 0x4c15f3795daf7602f4762cff646acbca438577dc8ba33ed2af7f2d37f321cbd1;
     bytes32 constant Event__Repayment = 0xc928c04c08e9d5085139dee5b4b0a24f48d84c91f8f44caefaea39da6108fce3;
-    bytes32 constant Event__OfferItem = 0x2d5008daafde4b2ecc9a1a5799c67be8756017f41fbb1e6ae268e683e241540a;
-    // bytes32 constant Event__TransferItem = 0x31cf2357b228de5e7b21be4ee816920a4eabd32196b782ad557ba4a0f5c20af1;
-    bytes32 constant Event__Mint = 0xeb7e020bebf08bd7b26fa5ab6c13f7ff27f22963d01f83fb5aaaa16630c2e489;
-    bytes32 constant Event__Rotate = 0x9a674c377cfb461eed8c85cebc9fc607ef62cecde152900174f519f861f90b57;
-    bytes32 constant Event__OfferMint = 0x12651006c2efed8cb6941478698d827149f5d535c122b0c3cf88b92a54395a27;
+    bytes32 constant Event__OfferItem = 0xe8cac8b90eb1aeaafc7f3d81f15f23eb57e6855f3045d04c8b7ca5e49560bb6b;
+    bytes32 constant Event__Mint = 0xf361d74158bc4afac21219557dde72e7cd117ff4502a0912efa7611ea209d561;
+    bytes32 constant Event__Rotate = 0x3164c3636b11a9bb92d737b9969a71092afc31f7e1559858875ba56e59167402;
+    bytes32 constant Event__OfferMint = 0x4698de13feeaed20868f2b3ea382b32ad4ba5de37e7b73a101ef23a886a2dd04;
 
     uint64 constant Function__transferSingle = 0x49a035e3;
     uint64 constant Function__transferBatch = 0xdec6d46d;

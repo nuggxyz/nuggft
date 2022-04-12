@@ -92,7 +92,7 @@ contract NuggftV1 is IERC721, IERC721Metadata, NuggftV1Loan {
 
         INuggftV1Migrator(migrator).nuggftMigrateFromV1{value: ethOwed}(tokenId, proof, msg.sender);
 
-        emit MigrateV1Sent(migrator, tokenId, proof, msg.sender, ethOwed);
+        emit MigrateV1Sent(migrator, tokenId, bytes32(proof), msg.sender, ethOwed);
     }
 
     function mint(
