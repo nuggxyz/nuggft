@@ -118,6 +118,7 @@ abstract contract NuggftV1Loan is INuggftV1Loan, NuggftV1Swap {
     /// @inheritdoc INuggftV1Loan
     function liquidate(uint160 tokenId) external payable override {
         uint256 active = epoch();
+        address itemHolder = address(emitter);
 
         assembly {
             function juke(x, L, R) -> b {
@@ -166,6 +167,18 @@ abstract contract NuggftV1Loan is INuggftV1Loan, NuggftV1Swap {
                     // this transfer event is the only extra logic required here since the
                     // ... agency is updated to reflect "caller()" as the owner at the end
                     log4(0x00, 0x00, Event__Transfer, loaner, caller(), tokenId)
+
+                    mstore(0x00, tokenId)
+                    mstore(0x20, proofs.slot)
+
+                    let proof := sload(keccak256(0x00, 0x40))
+
+                    mstore(0x00, Function__transferBatch)
+                    mstore(0x20, proof)
+                    mstore(0x40, address())
+                    mstore(0x60, caller())
+
+                    pop(call(gas(), itemHolder, 0x00, 0x1C, 0x64, 0x00, 0x00))
                 }
                 default {
                     // if not, then we revert.

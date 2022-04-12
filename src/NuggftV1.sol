@@ -12,7 +12,7 @@ import {INuggftV1} from "./interfaces/nuggftv1/INuggftV1.sol";
 import {NuggftV1Loan} from "./core/NuggftV1Loan.sol";
 import {NuggftV1Proof} from "./core/NuggftV1Proof.sol";
 
-import {DotnuggV1Lib, decodeProofCore} from "./libraries/DotnuggV1Lib.sol";
+import {DotnuggV1Lib, decodeProofCore, parseItemId} from "./libraries/DotnuggV1Lib.sol";
 
 import {data as nuggs} from "./_data/nuggs.data.sol";
 
@@ -262,7 +262,8 @@ contract NuggftV1 is IERC721, IERC721Metadata, NuggftV1Loan {
 
     /// @inheritdoc INuggftV1Proof
     function itemURI(uint256 itemId) public view override returns (string memory res) {
-        res = dotnuggV1.exec(uint8(itemId >> 8), uint8(itemId), true);
+        (uint8 feature, uint8 position) = parseItemId(itemId);
+        res = dotnuggV1.exec(feature, position, true);
     }
 
     /// @inheritdoc INuggftV1Proof

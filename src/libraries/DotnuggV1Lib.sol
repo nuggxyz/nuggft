@@ -42,7 +42,7 @@ library DotnuggV1Lib {
         uint8 feature,
         uint256 seed
     ) internal view returns (uint16 res) {
-        return (uint16(feature) << 8) | search(safe, feature, seed);
+        return (uint16(feature) * 1000) | search(safe, feature, seed);
     }
 
     function search(
@@ -294,9 +294,9 @@ function encodeProof(uint16[16] memory ids) pure returns (uint256 proof) {
 /// @param itemId -> the external itemId
 /// @return feat -> the feautre of the item
 /// @return pos -> the file storage position of the item
-function parseItemId(uint16 itemId) pure returns (uint8 feat, uint8 pos) {
-    feat = uint8(itemId >> 8);
-    pos = uint8(itemId);
+function parseItemId(uint256 itemId) pure returns (uint8 feat, uint8 pos) {
+    feat = uint8(itemId / 1000);
+    pos = uint8(itemId % 1000);
 }
 
 /**
@@ -327,7 +327,7 @@ function toAsciiBytes(uint256 value) pure returns (bytes memory buffer) {
 }
 
 function parseItemIdAsString(uint16 itemId, string[8] memory labels) pure returns (string memory) {
-    return string.concat(labels[(itemId >> 8)], " ", string(toAsciiBytes((itemId) & 0xff)));
+    return string.concat(labels[(itemId / 1000)], " ", string(toAsciiBytes(itemId % 1000)));
 }
 
 // /**
