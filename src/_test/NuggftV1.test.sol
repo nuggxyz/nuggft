@@ -396,7 +396,7 @@ contract NuggftV1Test is ForgeTest, NuggftV1Constants {
     {
         (tokenId) = scenario_dee_has_a_token();
 
-        bytes2[] memory f = nuggft.floop(tokenId);
+        uint16[] memory f = nuggft.floop(tokenId);
 
         feature = 1;
         itemId = uint16(f[feature]);

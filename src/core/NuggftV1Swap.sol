@@ -361,8 +361,8 @@ abstract contract NuggftV1Swap is INuggftV1ItemSwap, INuggftV1Swap, NuggftV1Stak
                        param #2: stake    bytes32    0x20     [ stake                       ) */ 0x40,
                     // ---------------------------------------------------------
                     /* topic #1: sig              */ Event__OfferItem,
-                    /* topic #2: sellerId uint160 */ and(tokenId, 0xffffff),
-                    /* topic #3: itemId   bytes2  */ shl(240, and(shr(24, tokenId), 0xffff))
+                    /* topic #2: sellerId uint24  */ and(tokenId, 0xffffff),
+                    /* topic #3: itemId   uint16  */ shr(24, tokenId)
                 ) // ===========================================================
             }
             default {
@@ -606,7 +606,7 @@ abstract contract NuggftV1Swap is INuggftV1ItemSwap, INuggftV1Swap, NuggftV1Stak
 
                 switch isItem
                 case 1 {
-                    log4(0x1A0, 0x20, Event__ClaimItem, and(tokenId, 0xffffff), shl(240, shr(24, tokenId)), offerer)
+                    log4(0x1A0, 0x20, Event__ClaimItem, and(tokenId, 0xffffff), shr(24, tokenId), offerer)
                     mstore(0x1A0, 0x00)
                 }
                 default {
@@ -753,7 +753,7 @@ abstract contract NuggftV1Swap is INuggftV1ItemSwap, INuggftV1Swap, NuggftV1Stak
                 mstore(0x00, agency__cache)
                 mstore(0x20, proof)
 
-                log3(0x00, 0x40, Event__SellItem, and(tokenId, 0xffffff), shl(240, shr(24, tokenId)))
+                log3(0x00, 0x40, Event__SellItem, and(tokenId, 0xffffff), shr(24, tokenId))
 
                 mstore(0x00, Function__transferSingle)
                 mstore(0x20, shr(24, tokenId))
