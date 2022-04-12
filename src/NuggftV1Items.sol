@@ -14,7 +14,7 @@ contract NuggftV1Items is IERC1155, IERC1155Metadata_URI {
         nuggftv1 = NuggftV1(msg.sender);
     }
 
-    mapping(uint256 => uint256) supply;
+    // mapping(uint256 => uint256) supply;
 
     function transferBatch(
         uint256 proof,
@@ -43,7 +43,7 @@ contract NuggftV1Items is IERC1155, IERC1155Metadata_URI {
                     values[count] = 1;
                     ids[count] = check;
                     count += 1;
-                    if (from == address(0)) supply[check / 10] += (1 << check % 10);
+                    // if (from == address(0)) supply[check / 10] += (1 << check % 10);
                 }
             }
 
@@ -89,9 +89,9 @@ contract NuggftV1Items is IERC1155, IERC1155Metadata_URI {
         );
     }
 
-    function totalSupply(uint256 _id) public view returns (uint256 res) {
-        res = (supply[_id / 10] >> _id % 10) & 0xffffff;
-    }
+    // function totalSupply(uint256 _id) public view returns (uint256 res) {
+    //     res = (supply[_id / 10] >> _id % 10) & 0xffffff;
+    // }
 
     function balanceOf(address _owner, uint256 _id) public view returns (uint256 res) {
         uint256 bal = nuggftv1.balance(_owner);
