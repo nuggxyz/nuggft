@@ -12,7 +12,7 @@ import {INuggftV1} from "./interfaces/nuggftv1/INuggftV1.sol";
 import {NuggftV1Loan} from "./core/NuggftV1Loan.sol";
 import {NuggftV1Proof} from "./core/NuggftV1Proof.sol";
 
-import {DotnuggV1Lib, decodeProofCore, parseItemId} from "./libraries/DotnuggV1Lib.sol";
+import {DotnuggV1Lib, decodeProofCore, parseItemId, props} from "./libraries/DotnuggV1Lib.sol";
 
 import {data as nuggs} from "./_data/nuggs.data.sol";
 
@@ -246,7 +246,7 @@ contract NuggftV1 is IERC721, IERC721Metadata, NuggftV1Loan {
                      '{"name":"',         name(),
                     '","description":"',  symbol(),
                     '","image":"',        imageURI(tokenId),
-                    '","properites":',    dotnuggV1.props(decodeProofCore(proofOf(uint24(tokenId))),
+                    '","properites":',    props(decodeProofCore(proofOf(uint24(tokenId))),
                                 ['base', 'eyes', 'mouth', 'hair', 'hat', 'background', 'scarf', 'held']
                             ),
                     '}'
@@ -268,7 +268,7 @@ contract NuggftV1 is IERC721, IERC721Metadata, NuggftV1Loan {
 
     /// @inheritdoc INuggftV1Proof
     function featureLength(uint8 feature) public view override returns (uint8 res) {
-        res = dotnuggV1.lengthOf(feature);
+        res = DotnuggV1Lib.lengthOf(address(dotnuggV1), feature);
     }
 
     function rarity(uint8 feature, uint8 position) public view returns (uint16 res) {

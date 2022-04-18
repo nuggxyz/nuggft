@@ -67,11 +67,11 @@ contract NuggftV1Items is IERC1155, IERC1155Metadata_URI {
     }
 
     function name() public pure returns (string memory) {
-        return "Nugg Fungible Token V1 (Items)";
+        return "Nugg Fungible Items V1";
     }
 
     function symbol() public pure returns (string memory) {
-        return "NUGGFT-ITEM";
+        return "iNUGGFT";
     }
 
     function uri(uint256 tokenId) public view virtual override returns (string memory res) {
