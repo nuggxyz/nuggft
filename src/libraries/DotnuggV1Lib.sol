@@ -15,6 +15,22 @@ library DotnuggV1Lib {
 
     bytes32 internal constant PROXY_INIT_CODE_HASH = keccak256(abi.encodePacked(PROXY_INIT_CODE));
 
+    function lengthOf(address safe, uint8 feature) internal view returns (uint8) {
+        return size(location(safe, feature));
+    }
+
+    function randOf(
+        address safe,
+        uint8 feature,
+        uint256 seed
+    ) internal view returns (uint8 a) {
+        return search(safe, feature, seed);
+    }
+
+    function locationOf(address safe, uint8 feature) internal pure returns (address res) {
+        return address(location(safe, feature));
+    }
+
     function size(address pointer) internal view returns (uint8 res) {
         assembly {
             // [======================================================================
@@ -328,6 +344,16 @@ function toAsciiBytes(uint256 value) pure returns (bytes memory buffer) {
 
 function parseItemIdAsString(uint16 itemId, string[8] memory labels) pure returns (string memory) {
     return string.concat(labels[(itemId / 1000)], " ", string(toAsciiBytes(itemId % 1000)));
+}
+
+function props(uint8[8] memory ids, string[8] memory labels) pure returns (string memory) {
+    bytes memory res;
+
+    for (uint8 i = 0; i < 8; i++) {
+        if (ids[i] == 0) continue;
+        res = abi.encodePacked(res, i != 0 ? "," : "", '"', labels[i], '":"', string(toAsciiBytes(uint8(ids[i]))), '"');
+    }
+    return string(abi.encodePacked("{", res, "}"));
 }
 
 // /**

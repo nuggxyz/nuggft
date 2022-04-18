@@ -148,17 +148,6 @@ abstract contract NuggftV1Swap is INuggftV1ItemSwap, INuggftV1Swap, NuggftV1Stak
                 mstore(0x00, agency__cache)
                 mstore(0x20, proof)
 
-                sstore(agency__sptr, agency__cache)
-
-                log4( // =======================================================
-                    /* param #0:n/a  */ 0x00, /* [ n/a ] */  0x00,
-                    /* topic #1:sig  */ Event__Transfer,
-                    /* topic #2:from */ 0,
-                    /* topic #3:to   */ address(),
-                    /* topic #4:id   */ tokenId
-                ) // ===========================================================
-
-
                 log2( // -------------------------------------------------------
                     /* param #1: agency  */ 0x00, /* [ agency[tokenId]    ]     0x20,
                        param #2: proof      0x20,    [ proof[tokenId]     ]     0x40,
@@ -171,7 +160,24 @@ abstract contract NuggftV1Swap is INuggftV1ItemSwap, INuggftV1Swap, NuggftV1Stak
                 mstore(0x40, 0x00)
                 mstore(0x60, address())
 
-                pop(call(gas(), itemHolder, 0x00, 0x1C, 0x64, 0x00, 0x00))
+                if iszero(call(gas(), itemHolder, 0x00, 0x1C, 0x64, 0x00, 0x00)) {
+                    mstore(0x00, Revert__Sig)
+                    mstore8(31, Error__0xAE__FailedCallToItemsHolder)
+                    revert(27, 0x5)
+                }
+
+                log4( // =======================================================
+                    /* param #0:n/a  */ 0x00, /* [ n/a ] */  0x00,
+                    /* topic #1:sig  */ Event__Transfer,
+                    /* topic #2:from */ 0,
+                    /* topic #3:to   */ address(),
+                    /* topic #4:id   */ tokenId
+                ) // ===========================================================
+
+
+
+                sstore(agency__sptr, agency__cache)
+
             }
 
             return;
@@ -589,7 +595,9 @@ abstract contract NuggftV1Swap is INuggftV1ItemSwap, INuggftV1Swap, NuggftV1Stak
                         mstore(0x260, address())
                         mstore(0x280, caller())
 
-                        pop(call(gas(), mload(0x200), 0x00, 0x23C, 0x64, 0x00, 0x00))
+                        if iszero(call(gas(), mload(0x200), 0x00, 0x23C, 0x64, 0x00, 0x00)) {
+                            panic(Error__0xAE__FailedCallToItemsHolder)
+                         }
 
                         mstore(0x1A0, proof)
                     }
@@ -599,12 +607,14 @@ abstract contract NuggftV1Swap is INuggftV1ItemSwap, INuggftV1Swap, NuggftV1Stak
 
                         let proof := sload(keccak256(0x140, 0x40))
 
-                        mstore(0x220, Function__transferBatch )
+                        mstore(0x220, Function__transferBatch)
                         mstore(0x240, proof)
                         mstore(0x260, address())
                         mstore(0x280, caller())
 
-                        pop(call(gas(), mload(0x200), 0x00, 0x23C, 0x64, 0x00, 0x00))
+                        if iszero(call(gas(), mload(0x200), 0x00, 0x23C, 0x64, 0x00, 0x00)) {
+                            panic(Error__0xAE__FailedCallToItemsHolder)
+                        }
 
                         // if either exists for this token, set the proof
 
@@ -815,7 +825,9 @@ abstract contract NuggftV1Swap is INuggftV1ItemSwap, INuggftV1Swap, NuggftV1Stak
                 mstore(0x40, caller())
                 mstore(0x60, address())
 
-                pop(call(gas(), itemHolder, 0x00, 0x1C, 0x64, 0x00, 0x00))
+                if iszero(call(gas(), itemHolder, 0x00, 0x1C, 0x64, 0x00, 0x00)) {
+                    panic(Error__0xAE__FailedCallToItemsHolder)
+                }
             }
             default {
                 // ensure the caller is the agent
@@ -871,7 +883,9 @@ abstract contract NuggftV1Swap is INuggftV1ItemSwap, INuggftV1Swap, NuggftV1Stak
                 mstore(0x40, address())
                 mstore(0x60, caller())
 
-                pop(call(gas(), itemHolder, 0x00, 0x1C, 0x64, 0x00, 0x00))
+                if iszero(call(gas(), itemHolder, 0x00, 0x1C, 0x64, 0x00, 0x00)) {
+                    panic(Error__0xAE__FailedCallToItemsHolder)
+                }
             }
         }
     }
