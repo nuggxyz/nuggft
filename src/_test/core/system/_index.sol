@@ -6,6 +6,10 @@ import "./system__one.t.sol";
 contract System is system__NuggftV1Swap, system__one, system__NuggftV1Loan, system__NuggftV1Epoch {
     function setUp() public {
         // dep.init();
+
+        forge.vm.startPrank(dub6ix);
+
+        forge.vm.deal(dub6ix, 1 ether);
         processor = IDotnuggV1Safe(address(new DotnuggV1()));
         nuggft = new RiggedNuggft(address(processor));
         // record.build(nuggft.agency__slot());
@@ -36,7 +40,6 @@ contract System is system__NuggftV1Swap, system__one, system__NuggftV1Loan, syst
         users.safe = address(uint160(uint256(keccak256("safe"))));
         forge.vm.deal(users.safe, 90000 ether);
 
-        forge.vm.startPrank(0x9B0E2b16F57648C7bAF28EDD7772a815Af266E77);
         nuggft.setIsTrusted(users.safe, true);
         forge.vm.stopPrank();
     }

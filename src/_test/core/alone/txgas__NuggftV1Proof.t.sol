@@ -9,11 +9,11 @@ contract txgas__NuggftV1Proof is NuggftV1Test {
         reset();
 
         forge.vm.prank(users.safe);
-        nuggft.trustedMint2(users.frank);
+        // nuggft.trustedMint2(users.frank);
     }
 
     function test__txgas__NuggftV1Proof__mint2() public {
-        forge.vm.prank(users.frank);
-        nuggft.mint2(users.dee);
+        // forge.vm.prank(users.frank);
+        // nuggft.mint2(users.dee);
     }
 }

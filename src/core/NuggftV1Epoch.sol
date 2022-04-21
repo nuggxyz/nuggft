@@ -5,15 +5,9 @@ pragma solidity 0.8.13;
 import {INuggftV1Epoch} from "../interfaces/nuggftv1/INuggftV1Epoch.sol";
 
 import {NuggftV1Constants} from "./NuggftV1Constants.sol";
+import {NuggftV1Globals} from "./NuggftV1Globals.sol";
 
-abstract contract NuggftV1Epoch is INuggftV1Epoch, NuggftV1Constants {
-    uint256 public immutable override genesis;
-
-    constructor() {
-        genesis = (block.number / INTERVAL) * INTERVAL;
-        emit Genesis(genesis, uint16(INTERVAL), uint16(OFFSET), INTERVAL_SUB);
-    }
-
+abstract contract NuggftV1Epoch is INuggftV1Epoch, NuggftV1Globals {
     /// @inheritdoc INuggftV1Epoch
     function epoch() public view override returns (uint24 res) {
         require(block.number >= genesis, "YOU MADE A BAD ROOOLLLLLLLLLLL");

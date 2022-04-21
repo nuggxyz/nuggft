@@ -16,14 +16,14 @@ abstract contract system__NuggftV1Swap is NuggftV1Test, fragments {
         delete tmpUsers;
         delete tmpTokens;
         delete itemId;
+
         _;
     }
 
-    uint24 private token1 = mintable(0);
-    uint24 private token2 = mintable(99);
-    uint24 private token3 = mintable(48);
-
-    function test__system__frankMintsThenBurns() public {
+    function test__system__frankMintsThenBurns() public clean {
+        uint24 token1 = mintable(0);
+        uint24 token2 = mintable(99);
+        uint24 token3 = mintable(48);
         jumpStart();
 
         expect.mint().from(users.frank).value(1 ether).exec(token1);
@@ -33,7 +33,10 @@ abstract contract system__NuggftV1Swap is NuggftV1Test, fragments {
         expect.burn().from(users.frank).exec(token1);
     }
 
-    function test__system__frankBidsOnANuggThenClaims() public {
+    function test__system__frankBidsOnANuggThenClaims() public clean {
+        uint24 token1 = mintable(0);
+        uint24 token2 = mintable(99);
+        uint24 token3 = mintable(48);
         jumpStart();
 
         uint24 token = nuggft.epoch();
@@ -48,7 +51,10 @@ abstract contract system__NuggftV1Swap is NuggftV1Test, fragments {
         }
     }
 
-    function test__system__frankSellsANuggThenReclaims() public {
+    function test__system__frankSellsANuggThenReclaims() public clean {
+        uint24 token1 = mintable(0);
+        uint24 token2 = mintable(99);
+        uint24 token3 = mintable(48);
         jumpStart();
         uint96 value = 1 ether;
 
@@ -60,7 +66,10 @@ abstract contract system__NuggftV1Swap is NuggftV1Test, fragments {
         expect.claim().from(users.frank).exec(array.b24(token1), array.bAddress(users.frank));
     }
 
-    function test__system__frankBidsOnAnItemThenClaims() public {
+    function test__system__frankBidsOnAnItemThenClaims() public clean {
+        uint24 token1 = mintable(0);
+        uint24 token2 = mintable(99);
+        uint24 token3 = mintable(48);
         deeSellsAnItem();
 
         uint96 value = 1.1 ether;
@@ -76,7 +85,10 @@ abstract contract system__NuggftV1Swap is NuggftV1Test, fragments {
         expect.claim().from(users.frank).exec(array.b24(token1), array.b24(token2), array.b16(itemId));
     }
 
-    function test__system__frankMulticlaimWinningItemAndNuggs() public {
+    function test__system__frankMulticlaimWinningItemAndNuggs() public clean {
+        uint24 token1 = mintable(0);
+        uint24 token2 = mintable(99);
+        uint24 token3 = mintable(48);
         deeSellsAnItem();
         userMints(users.frank, token2);
 
@@ -107,6 +119,9 @@ abstract contract system__NuggftV1Swap is NuggftV1Test, fragments {
     event log_array(uint24[] tmp);
 
     function test__system__frankMulticlaimLosingItemAndNuggs() public clean {
+        uint24 token1 = mintable(0);
+        uint24 token2 = mintable(99);
+        uint24 token3 = mintable(48);
         deeSellsAnItem();
         userMints(users.frank, token2);
         userMints(users.dennis, token3);
@@ -143,10 +158,13 @@ abstract contract system__NuggftV1Swap is NuggftV1Test, fragments {
     }
 
     function test__system__nuggFactory() public clean {
+        uint24 token1 = mintable(0);
+        uint24 token2 = mintable(99);
+        uint24 token3 = mintable(48);
         uint16 nugg__size = 100;
         uint256 user__count = 0;
 
-        nuggft.mint{value: 0.02 ether}(token1);
+        nuggft.mint{value: nuggft.msp()}(token1);
 
         for (uint16 i = 0; i < nugg__size; i++) {
             jumpUp(1);
@@ -171,9 +189,12 @@ abstract contract system__NuggftV1Swap is NuggftV1Test, fragments {
     }
 
     function test__system__offerWar() public clean {
+        uint24 token1 = mintable(0);
+        uint24 token2 = mintable(99);
+        uint24 token3 = mintable(48);
         jumpStart();
 
-        nuggft.mint{value: 0.02 ether}(token1);
+        nuggft.mint{value: nuggft.msp()}(token1);
 
         uint16 size = 2;
 
@@ -218,27 +239,36 @@ abstract contract system__NuggftV1Swap is NuggftV1Test, fragments {
     }
 
     function test__system__revert__0xA0__offerWarClaimTwice() public clean {
+        uint24 token1 = mintable(0);
+        uint24 token2 = mintable(99);
+        uint24 token3 = mintable(48);
         test__system__offerWar();
 
         expect.claim().from(tmpUsers[1]).err(0xA0).exec(array.b24(tmpTokens[1]), lib.sarrAddress(tmpUsers[1]));
     }
 
     function test__system__revert__0xA0__claim__twice__frank() public clean {
+        uint24 token1 = mintable(0);
+        uint24 token2 = mintable(99);
+        uint24 token3 = mintable(48);
         jumpStart();
         jumpUp(1000);
         uint24 token = nuggft.epoch();
-        expect.offer().from(users.frank).exec{value: 0.2 ether}(token);
+        expect.offer().from(users.frank).exec{value: nuggft.vfo(users.frank, token)}(token);
         jumpSwap();
 
         expect.claim().from(users.frank).exec(array.b24(token), array.bAddress(users.frank));
     }
 
     function test__system__revert__0x67__claim__early__frank() public clean {
+        uint24 token1 = mintable(0);
+        uint24 token2 = mintable(99);
+        uint24 token3 = mintable(48);
         jumpStart();
         jumpUp(1000);
         uint24 token = nuggft.epoch();
 
-        expect.offer().from(users.frank).exec{value: 0.2 ether}(token);
+        expect.offer().from(users.frank).exec{value: nuggft.vfo(users.frank, token)}(token);
 
         expect.claim().from(users.frank).err(0x67).exec(array.b24(token), array.bAddress(users.frank));
     }
@@ -247,12 +277,16 @@ abstract contract system__NuggftV1Swap is NuggftV1Test, fragments {
     // 79228162514264337593543950336
 
     function test__system__item__sell__frank() public clean {
-        forge.vm.startPrank(users.frank);
-        nuggft.mint{value: 0.2 ether}(token1);
+        uint24 token1 = mintable(0);
+        uint24 token2 = mintable(99);
+        uint24 token3 = mintable(48);
+        expect.mint().from(users.frank).exec{value: nuggft.msp()}(token1);
 
         uint16[] memory f = nuggft.floop(token1);
 
         itemId = uint16(f[1]);
+
+        forge.vm.startPrank(users.frank);
 
         // nuggft.floop(token1);
         nuggft.sell(token1, itemId, 50 ether);
@@ -267,8 +301,11 @@ abstract contract system__NuggftV1Swap is NuggftV1Test, fragments {
     }
 
     function test__system__revert__0x99__item__sellThenOffer__frank() public clean {
+        uint24 token1 = mintable(0);
+        uint24 token2 = mintable(99);
+        uint24 token3 = mintable(48);
+        expect.mint().from(users.frank).exec{value: nuggft.msp()}(token1);
         forge.vm.startPrank(users.frank);
-        nuggft.mint{value: 0.2 ether}(token1);
 
         uint16[] memory f = nuggft.floop(token1);
 
@@ -282,9 +319,12 @@ abstract contract system__NuggftV1Swap is NuggftV1Test, fragments {
     }
 
     function test__system__item__sellWaitThenOffer__frank() public clean {
+        uint24 token1 = mintable(0);
+        uint24 token2 = mintable(99);
+        uint24 token3 = mintable(48);
         jumpStart();
+        expect.mint().from(users.frank).exec{value: nuggft.msp()}(token1);
         forge.vm.startPrank(users.frank);
-        nuggft.mint{value: 0.2 ether}(token1);
 
         uint16[] memory f = nuggft.floop(token1);
 
@@ -311,6 +351,9 @@ abstract contract system__NuggftV1Swap is NuggftV1Test, fragments {
     }
 
     function test__system__item__sellTwo__frank() public clean {
+        uint24 token1 = mintable(0);
+        uint24 token2 = mintable(99);
+        uint24 token3 = mintable(48);
         expect.mint().from(users.frank).exec{value: 2 ether}(token1);
 
         uint16[] memory f = nuggft.floop(token1);
@@ -330,6 +373,9 @@ abstract contract system__NuggftV1Swap is NuggftV1Test, fragments {
     }
 
     function test__system__item__sellTwoClaimBack__frank() public clean {
+        uint24 token1 = mintable(0);
+        uint24 token2 = mintable(99);
+        uint24 token3 = mintable(48);
         expect.mint().from(users.frank).exec{value: 2 ether}(token1);
 
         uint16[] memory f = nuggft.floop(token1);
@@ -348,6 +394,9 @@ abstract contract system__NuggftV1Swap is NuggftV1Test, fragments {
     }
 
     function test__system__item__offerWar__frankSale() public clean {
+        uint24 token1 = mintable(0);
+        uint24 token2 = mintable(99);
+        uint24 token3 = mintable(48);
         test__system__item__sell__frank();
         jumpStart();
         uint16 size = 20;
@@ -370,6 +419,9 @@ abstract contract system__NuggftV1Swap is NuggftV1Test, fragments {
     }
 
     function test__system__item__everyoneClaimsTheirOwn__offerWar__frankSale() public clean {
+        uint24 token1 = mintable(0);
+        uint24 token2 = mintable(99);
+        uint24 token3 = mintable(48);
         test__system__item__offerWar__frankSale();
 
         jumpSwap();
@@ -380,6 +432,9 @@ abstract contract system__NuggftV1Swap is NuggftV1Test, fragments {
     }
 
     function test__system__revert__0x74__item__oneClaimsAll__offerWar__frankSale() public clean {
+        uint24 token1 = mintable(0);
+        uint24 token2 = mintable(99);
+        uint24 token3 = mintable(48);
         test__system__item__offerWar__frankSale();
 
         jumpSwap();
@@ -396,6 +451,9 @@ abstract contract system__NuggftV1Swap is NuggftV1Test, fragments {
     }
 
     function test__system__item__trustlessWinnerClaim__offerWar__frankSale() public clean {
+        uint24 token1 = mintable(0);
+        uint24 token2 = mintable(99);
+        uint24 token3 = mintable(48);
         test__system__item__offerWar__frankSale();
 
         jumpSwap();
@@ -414,7 +472,8 @@ abstract contract system__NuggftV1Swap is NuggftV1Test, fragments {
     uint24[] tmpIds;
     uint16[] tmpItemIds;
 
-    // function test__system__item__offerWar__ffrankSale__hf() clean public {
+    // function test__system__item__offerWar__ffrankSale__hf() clean public clean {
+
     //     test__system__item__sell__frank();
     //     forge.vm.prank(users.frank);
     //     nuggft.sell(token1, .9 ether);
@@ -477,6 +536,9 @@ abstract contract system__NuggftV1Swap is NuggftV1Test, fragments {
     // }
 
     function test__system__item__initSaleThenSellNugg() public clean {
+        uint24 token1 = mintable(0);
+        uint24 token2 = mintable(99);
+        uint24 token3 = mintable(48);
         test__system__item__sell__frank();
         forge.vm.prank(users.frank);
         nuggft.sell(token1, 90 ether);
@@ -484,20 +546,29 @@ abstract contract system__NuggftV1Swap is NuggftV1Test, fragments {
     }
 
     function test__system__item__initSaleThenLoanNugg() public clean {
+        uint24 token1 = mintable(0);
+        uint24 token2 = mintable(99);
+        uint24 token3 = mintable(48);
         test__system__item__sell__frank();
         forge.vm.prank(users.frank);
         nuggft.loan(array.b24(token1));
         fragment__item__offerWar__ffrankSale__hf();
     }
 
-    function test__system__item__initSaleThenBurnNugg() public clean {
-        test__system__item__sell__frank();
-        forge.vm.prank(users.frank);
-        nuggft.burn(token1);
-        fragment__item__offerWar__ffrankSale__hf();
-    }
+    // function test__system__item__initSaleThenBurnNugg() public clean {
+    //     uint24 token1 = mintable(0);
+    //     uint24 token2 = mintable(99);
+    //     uint24 token3 = mintable(48);
+    //     test__system__item__sell__frank();
+    //     forge.vm.prank(users.frank);
+    //     // nuggft.burn(token1);
+    //     fragment__item__offerWar__ffrankSale__hf();
+    // }
 
     function fragment__item__offerWar__ffrankSale__hf() public {
+        uint24 token1 = mintable(0);
+        uint24 token2 = mintable(99);
+        uint24 token3 = mintable(48);
         jumpStart();
 
         uint16 size = 20;
@@ -530,52 +601,54 @@ abstract contract system__NuggftV1Swap is NuggftV1Test, fragments {
         expect.claim().from(tmpUsers[size - 3]).execUnchecked(tmpIds, tmpTokens, tmpItemIds);
     }
 
-    function test__system__hotproof__pass() public {
-        logHotproof();
+    // function test__system__hotproof__pass() public clean {
 
-        jumpStart();
+    //     logHotproof();
 
-        uint24 tokenId = nuggft.epoch();
+    //     jumpStart();
 
-        uint256 proofBeforeOffer = nuggft.proofOf(tokenId);
+    //     uint24 tokenId = nuggft.epoch();
 
-        expect.offer().from(users.frank).exec{value: nuggft.vfo(users.frank, tokenId)}(tokenId);
+    //     uint256 proofBeforeOffer = nuggft.proof(tokenId);
 
-        uint256 proofAfterOffer = nuggft.proofOf(tokenId);
-        logHotproof();
+    //     expect.offer().from(users.frank).exec{value: nuggft.vfo(users.frank, tokenId)}(tokenId);
 
-        jumpUp(1);
+    //     uint256 proofAfterOffer = nuggft.proof(tokenId);
+    //     logHotproof();
 
-        uint24 tokenId2 = nuggft.epoch();
-        nuggft.check(users.frank, tokenId2);
+    //     jumpUp(1);
 
-        expect.offer().from(users.dee).exec{value: nuggft.vfo(users.dee, tokenId2)}(tokenId2);
-        logHotproof();
+    //     uint24 tokenId2 = nuggft.epoch();
+    //     nuggft.check(users.frank, tokenId2);
 
-        jumpSwap();
+    //     expect.offer().from(users.dee).exec{value: nuggft.vfo(users.dee, tokenId2)}(tokenId2);
+    //     logHotproof();
 
-        uint256 proofBeforeClaim = nuggft.proofOf(tokenId);
+    //     jumpSwap();
 
-        expect.claim().from(users.frank).exec(array.b24(tokenId), array.bAddress(users.frank));
+    //     uint256 proofBeforeClaim = nuggft.proof(tokenId);
 
-        uint256 proofAfterClaim = nuggft.proofOf(tokenId);
+    //     expect.claim().from(users.frank).exec(array.b24(tokenId), array.bAddress(users.frank));
 
-        logHotproof();
+    //     uint256 proofAfterClaim = nuggft.proof(tokenId);
 
-        ds.emit_log_named_bytes32("proofBeforeOffer", bytes32(proofBeforeOffer));
-        ds.emit_log_named_bytes32("proofAfterOffer", bytes32(proofAfterOffer));
-        ds.emit_log_named_bytes32("proofBeforeClaim", bytes32(proofBeforeClaim));
-        ds.emit_log_named_bytes32("proofAfterClaim", bytes32(proofAfterClaim));
+    //     logHotproof();
 
-        ds.assertNotEq(proofBeforeOffer, 0, "proofBeforeOffer should not be 0");
-        ds.assertEq(proofAfterOffer, proofBeforeOffer, "proofAfterOffer should be proofBeforeOffer");
-        ds.assertEq(proofBeforeClaim, proofBeforeOffer, "proofBeforeClaim should be proofBeforeOffer");
-        ds.assertEq(proofAfterClaim, proofBeforeOffer, "proofAfterClaim should be proofBeforeOffer");
-    }
+    //     ds.emit_log_named_bytes32("proofBeforeOffer", bytes32(proofBeforeOffer));
+    //     ds.emit_log_named_bytes32("proofAfterOffer", bytes32(proofAfterOffer));
+    //     ds.emit_log_named_bytes32("proofBeforeClaim", bytes32(proofBeforeClaim));
+    //     ds.emit_log_named_bytes32("proofAfterClaim", bytes32(proofAfterClaim));
 
-    function logHotproof() public {
-        for (uint256 i = 0; i < HOT_PROOF_AMOUNT; i++) {
-            ds.emit_log_named_bytes32(strings.toAsciiString(i), bytes32(nuggft.hotproof(i)));
-        }
-    }
+    //     ds.assertNotEq(proofBeforeOffer, 0, "proofBeforeOffer should not be 0");
+    //     ds.assertEq(proofAfterOffer, proofBeforeOffer, "proofAfterOffer should be proofBeforeOffer");
+    //     ds.assertEq(proofBeforeClaim, proofBeforeOffer, "proofBeforeClaim should be proofBeforeOffer");
+    //     ds.assertEq(proofAfterClaim, proofBeforeOffer, "proofAfterClaim should be proofBeforeOffer");
+    // }
+
+    // function logHotproof() public clean {
+
+    //     for (uint256 i = 0; i < HOT_PROOF_AMOUNT; i++) {
+    //         ds.emit_log_named_bytes32(strings.toAsciiString(i), bytes32(nuggft.hotproof(i)));
+    //     }
+    // }
 }

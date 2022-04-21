@@ -3,6 +3,8 @@
 pragma solidity 0.8.13;
 
 abstract contract NuggftV1Constants {
+    uint96 constant STARTING_PRICE = .01 ether;
+
     uint24 constant TRUSTED_MINT_TOKENS = 1000;
     uint24 constant OFFSET = 1; // must be > 0
 

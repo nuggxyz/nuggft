@@ -7,10 +7,12 @@ import {INuggftV1Migrator} from "./interfaces/nuggftv1/INuggftV1Migrator.sol";
 import {IDotnuggV1Safe} from "./interfaces/dotnugg/IDotnuggV1Safe.sol";
 import {INuggftV1Stake} from "./interfaces/nuggftv1/INuggftV1Stake.sol";
 import {INuggftV1Proof} from "./interfaces/nuggftv1/INuggftV1Proof.sol";
+
 import {INuggftV1} from "./interfaces/nuggftv1/INuggftV1.sol";
 
 import {NuggftV1Loan} from "./core/NuggftV1Loan.sol";
 import {NuggftV1Proof} from "./core/NuggftV1Proof.sol";
+import {NuggftV1Globals} from "./core/NuggftV1Globals.sol";
 
 import {DotnuggV1Lib, decodeProofCore, parseItemId, props} from "./libraries/DotnuggV1Lib.sol";
 
@@ -19,55 +21,64 @@ import {data as nuggs} from "./_data/nuggs.data.sol";
 /// @title NuggftV1
 /// @author nugg.xyz - danny7even & dub6ix
 contract NuggftV1 is IERC721, IERC721Metadata, NuggftV1Loan {
-    constructor(address dotnugg) NuggftV1Proof(dotnugg) {
-        // mint(tx.origin, MINT_OFFSET + TRUSTED_MINT_TOKENS);
+    constructor(address dotnugg) payable NuggftV1Globals(dotnugg) {}
+
+    function premintTokens() public view returns (uint24 first, uint24 last) {
+        first = MINT_OFFSET;
+
+        last = first + early - 1;
     }
 
-    mapping(address => uint256) public balance;
+    function trustedMintTokens() public view returns (uint24 first, uint24 last) {
+        (, first) = premintTokens();
 
-    uint256 minted = MINT_OFFSET + TRUSTED_MINT_TOKENS;
+        last = first + TRUSTED_MINT_TOKENS;
 
-    function mint2(address friend) public payable {
-        _repanic(balance[msg.sender] == TICKET, 0x00);
-        _repanic(balance[friend] == 0, 0x01);
-        // _repanic(friend != msg.sender, 0x02);
-
-        uint256 _minted = minted;
-
-        uint96 value = uint96(msg.value / 3);
-
-        unchecked {
-            mint(msg.sender, uint24(_minted), value);
-            // mint(msg.sender, _minted + 1, value);
-            // mint(msg.sender, _minted + 2, value);
-
-            minted = _minted + 1;
-        }
-
-        balance[friend] = TICKET;
-
-        balance[msg.sender] = 3 | ((_minted + 0) << 24) | ((_minted + 1) << 48) | ((_minted + 2) << 72);
+        // to avoid having to subtract from last
+        first++;
     }
 
-    function trustedMint2(address friend) public payable requiresTrust {
-        _repanic(balance[friend] == 0, 0x03);
-        balance[friend] = TICKET;
+    function mintTokens() public view returns (uint24 first, uint24 last) {
+        (, first) = trustedMintTokens();
+
+        last = MAX_TOKENS;
+
+        first++;
+    }
+
+    function premint(uint24 tokenId) public requiresTrust {
+        _repanic(agency[tokenId] == 0, Error__0x65__TokenNotMintable);
+
+        (uint24 first, uint24 last) = premintTokens();
+
+        _repanic(tokenId >= first && tokenId <= last, Error__0x65__TokenNotMintable);
+
+        uint256 _agency = (0x01 << 254) + uint160(msg.sender);
+
+        uint256 _proof = initFromSeed(calculateEarlySeed(tokenId));
+
+        proof[tokenId] = _proof;
+        agency[tokenId] = _agency;
+
+        emit Mint(tokenId, STARTING_PRICE, bytes32(_proof), bytes32(stake), bytes32(_agency));
+
+        inuggftv1.transferBatch(_proof, address(0), msg.sender);
     }
 
     /// @inheritdoc INuggftV1Proof
     function mint(uint24 tokenId) public payable override {
-        // prettier-ignore
-        _repanic(tokenId >= TRUSTED_MINT_TOKENS + MINT_OFFSET && tokenId <= MAX_TOKENS,
-            Error__0x65__TokenNotMintable);
+        (uint24 first, uint24 last) = mintTokens();
+
+        _repanic(tokenId >= first && tokenId <= last, Error__0x65__TokenNotMintable);
 
         mint(msg.sender, tokenId, msg.value);
     }
 
     /// @inheritdoc INuggftV1Proof
     function trustedMint(uint24 tokenId, address to) external payable override requiresTrust {
-        // prettier-ignore
-        _repanic(tokenId >= MINT_OFFSET && tokenId < MINT_OFFSET + TRUSTED_MINT_TOKENS && tokenId != 0,
-            Error__0x66__TokenNotTrustMintable);
+        (uint24 first, uint24 last) = trustedMintTokens();
+
+        _repanic(tokenId >= first && tokenId <= last, Error__0x66__TokenNotTrustMintable);
 
         mint(to, tokenId, msg.value);
     }
@@ -155,19 +166,19 @@ contract NuggftV1 is IERC721, IERC721Metadata, NuggftV1Loan {
             sstore(agency__sptr, agency__cache)
         }
 
-        uint256 proof = initFromSeed(randomEnough);
+        uint256 _proof = initFromSeed(randomEnough);
 
-        proofs[tokenId] = proof;
+        proof[tokenId] = _proof;
 
         addStakedShare(value);
 
-        address itemHolder = address(emitter);
+        address itemHolder = address(inuggftv1);
 
         // prettier-ignore
         assembly {
 
             mstore(0x00, value)
-            mstore(0x20, proof)
+            mstore(0x20, _proof)
             mstore(0x60, agency__cache)
 
             log4(0x00, 0x00, Event__Transfer, 0, to, tokenId)
@@ -185,12 +196,11 @@ contract NuggftV1 is IERC721, IERC721Metadata, NuggftV1Loan {
             mstore(0x40, 0x00)
             mstore(0x60, caller())
 
+            // TODO make sure this is the right way to do this
             pop(call(gas(), itemHolder, 0x00, 0x1C, 0x64, 0x00, 0x00))
 
             mstore(0x40, ptr)
         }
-
-        // emitter.proofTransferBatch(proof, address(0), msg.sender);
     }
 
     /// @notice removes a staked share from the contract,
@@ -206,7 +216,7 @@ contract NuggftV1 is IERC721, IERC721Metadata, NuggftV1Loan {
 
         // handles all logic not related to staking the nugg
         delete agency[tokenId];
-        delete proofs[tokenId];
+        delete proof[tokenId];
 
         ethOwed = calculateEthPerShare(cache);
 
@@ -241,7 +251,7 @@ contract NuggftV1 is IERC721, IERC721Metadata, NuggftV1Loan {
     function tokenURI(uint256 tokenId) public view virtual override returns (string memory res) {
         // prettier-ignore
         res = string(
-            dotnuggV1.encodeJsonAsBase64(
+            dotnuggv1.encodeJsonAsBase64(
                 abi.encodePacked(
                      '{"name":"',         name(),
                     '","description":"',  symbol(),
@@ -257,26 +267,26 @@ contract NuggftV1 is IERC721, IERC721Metadata, NuggftV1Loan {
 
     /// @inheritdoc INuggftV1Proof
     function imageURI(uint256 tokenId) public view override returns (string memory res) {
-        res = dotnuggV1.exec(decodeProofCore(proofOf(uint24(tokenId))), true);
+        res = dotnuggv1.exec(decodeProofCore(proofOf(uint24(tokenId))), true);
     }
 
     /// @inheritdoc INuggftV1Proof
     function itemURI(uint256 itemId) public view override returns (string memory res) {
         (uint8 feature, uint8 position) = parseItemId(itemId);
-        res = dotnuggV1.exec(feature, position, true);
+        res = dotnuggv1.exec(feature, position, true);
     }
 
     /// @inheritdoc INuggftV1Proof
     function featureLength(uint8 feature) public view override returns (uint8 res) {
-        res = DotnuggV1Lib.lengthOf(address(dotnuggV1), feature);
+        res = DotnuggV1Lib.lengthOf(address(dotnuggv1), feature);
     }
 
     function rarity(uint8 feature, uint8 position) public view returns (uint16 res) {
-        res = DotnuggV1Lib.rarity(address(dotnuggV1), feature, position);
+        res = DotnuggV1Lib.rarity(address(dotnuggv1), feature, position);
     }
 
     function imageURICheat(uint256 startblock, uint24 _epoch) public view returns (string memory res) {
-        return dotnuggV1.exec(decodeProofCore(initFromSeed(cheat(startblock, _epoch))), true);
+        return dotnuggv1.exec(decodeProofCore(initFromSeed(cheat(startblock, _epoch))), true);
     }
 
     /// @inheritdoc IERC721
@@ -386,3 +396,32 @@ contract NuggftV1 is IERC721, IERC721Metadata, NuggftV1Loan {
 // - mouth
 // - hat/hair
 // - maybe back/neck/hold
+
+// uint256 minted = MINT_OFFSET + TRUSTED_MINT_TOKENS;
+
+// function mint2(address friend) public payable {
+//     _repanic(balance[msg.sender] == TICKET, 0x00);
+//     _repanic(balance[friend] == 0, 0x01);
+//     // _repanic(friend != msg.sender, 0x02);
+
+//     uint256 _minted = minted;
+
+//     uint96 value = uint96(msg.value / 3);
+
+//     unchecked {
+//         mint(msg.sender, uint24(_minted), value);
+//         // mint(msg.sender, _minted + 1, value);
+//         // mint(msg.sender, _minted + 2, value);
+
+//         minted = _minted + 1;
+//     }
+
+//     balance[friend] = TICKET;
+
+//     balance[msg.sender] = 3 | ((_minted + 0) << 24) | ((_minted + 1) << 48) | ((_minted + 2) << 72);
+// }
+
+// function trustedMint2(address friend) public payable requiresTrust {
+//     _repanic(balance[friend] == 0, 0x03);
+//     balance[friend] = TICKET;
+// }

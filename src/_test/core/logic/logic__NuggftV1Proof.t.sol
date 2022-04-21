@@ -7,7 +7,7 @@ import {ShiftLib} from "../../helpers/ShiftLib.sol";
 import {NuggftV1Proof} from "../../../core/NuggftV1Proof.sol";
 
 abstract contract logic__NuggftV1Proof is NuggftV1Test {
-    //     function dotnuggV1ImplementerCallback(uint256 tokenId) public view override returns (IDotnuggV1Metadata.Memory memory data) {}
+    //     function dotnuggv1ImplementerCallback(uint256 tokenId) public view override returns (IDotnuggV1Metadata.Memory memory data) {}
     //     function supportsInterface(bytes4 interfaceId) public view virtual override returns (bool) {}
     //     function trustedMint(uint24 tokenId, address to) external payable override requiresTrust {}
     //     function mint(uint24 tokenId) public payable override {}

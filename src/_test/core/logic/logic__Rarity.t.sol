@@ -22,7 +22,7 @@ abstract contract logic__Rarity is NuggftV1Test {
             uint16[] memory proof;
 
             uint24 tokenId = mintable(uint24(i));
-            nuggft.mint(tokenId);
+            nuggft.mint{value: nuggft.msp()}(tokenId);
             proof = nuggft.floop(tokenId);
             for (uint256 j = 0; j < 16; j++) {
                 uint16 item = proof[j];
@@ -41,6 +41,7 @@ abstract contract logic__Rarity is NuggftV1Test {
     }
 
     function test__logic__Rarity__cumlative() public {
+        forge.vm.deal(address(this), type(uint96).max);
         jumpStart();
         jumpSwap();
         for (uint24 i = 0; i < 5; i++) this.grrr(i);

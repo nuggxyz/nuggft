@@ -8,12 +8,14 @@ import {ShiftLib} from "../../helpers/ShiftLib.sol";
 import {NuggftV1Loan} from "../../../core/NuggftV1Loan.sol";
 
 contract stress__NuggftV1Loan is NuggftV1Test {
-    uint24 internal LOAN_TOKENID = mintable(999);
+    uint24 internal LOAN_TOKENID;
 
     uint24 multiplier = 10;
 
     function setUp() public {
         reset();
+
+        LOAN_TOKENID = mintable(999);
 
         expect.mint().from(users.frank).exec{value: 1 ether}(LOAN_TOKENID);
 

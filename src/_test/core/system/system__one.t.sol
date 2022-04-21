@@ -6,9 +6,12 @@ import "../../NuggftV1.test.sol";
 
 abstract contract system__one is NuggftV1Test {
     using SafeCast for uint96;
-    uint24 private TOKEN1 = mintable(0);
+
+    uint24 private TOKEN1;
 
     function test__logic__NuggftV1Proof__rotate() public {
+        TOKEN1 = mintable(1);
+
         expect.mint().from(users.frank).exec{value: 1 ether}(TOKEN1);
         nuggft.floop(TOKEN1);
 
@@ -24,6 +27,8 @@ abstract contract system__one is NuggftV1Test {
     }
 
     function test__system__frankMintsATokenForFree() public {
+        TOKEN1 = mintable(1);
+
         // expect.stake().start(0, 1, true);
         expect.balance().start(users.frank, 0, false);
         expect.balance().start(address(nuggft), 0, true);
@@ -39,6 +44,8 @@ abstract contract system__one is NuggftV1Test {
     }
 
     function test__system__frankMintsATokenFuzz(uint96 value) public {
+        TOKEN1 = mintable(1);
+
         // expect.stake().start(value, 1, true);
 
         forge.vm.deal(users.frank, value);
@@ -57,6 +64,7 @@ abstract contract system__one is NuggftV1Test {
     }
 
     // function test__system__frankMintsATokenForMaxTwice__FAILS_HORRIBLY() public {
+
     //     uint96 value = type(uint96).max;
 
     //     emit log_uint(0);
@@ -116,6 +124,8 @@ abstract contract system__one is NuggftV1Test {
     // }
 
     function test__system__frankMintsATokenForMax() public {
+        TOKEN1 = mintable(1);
+
         uint96 value = type(uint96).max;
 
         emit log_uint(0);
@@ -147,6 +157,8 @@ abstract contract system__one is NuggftV1Test {
     }
 
     function test__system__frankMintsATokenFor100gwei() public {
+        TOKEN1 = mintable(1);
+
         uint96 value = 1000 gwei;
 
         uint24 tokenId = TOKEN1;

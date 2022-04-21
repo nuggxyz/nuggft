@@ -9,11 +9,12 @@ abstract contract revert__claim__0x76 is NuggftV1Test {
         jumpStart();
         uint24 tokenId = nuggft.epoch();
 
-        expect.offer().from(users.frank).exec(tokenId);
+        expect.offer().from(users.frank).exec{value: nuggft.msp()}(tokenId);
 
         expect.offer().from(users.dee).exec{value: 43 ether}(tokenId);
 
         jumpSwap();
+
         expect.claim().from(users.frank).err(0x76).exec(array.b24(tokenId), array.bAddress(users.frank, users.dee));
     }
 
@@ -21,7 +22,7 @@ abstract contract revert__claim__0x76 is NuggftV1Test {
         jumpStart();
         uint24 tokenId = nuggft.epoch();
 
-        expect.offer().from(users.frank).exec(tokenId);
+        expect.offer().from(users.frank).exec{value: nuggft.msp()}(tokenId);
 
         expect.offer().from(users.dee).exec{value: 43 ether}(tokenId);
 

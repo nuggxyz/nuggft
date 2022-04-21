@@ -8,13 +8,15 @@ abstract contract revert__NuggftV1Stake is NuggftV1Test {
     /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
             [T:1] - addStakedShareFromMsgValue - "value of tx too low"
        ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
-    uint24 private TOKEN1 = mintable(2099);
-    uint24 private TOKEN2 = mintable(2098);
+    uint24 private TOKEN1;
+    uint24 private TOKEN2;
 
     // mint
     // ────
 
     function test__revert__NuggftV1Stake__0x71__mint__success() public {
+        TOKEN1 = mintable(2099);
+        TOKEN2 = mintable(2098);
         uint24 tokenId = TOKEN1;
 
         uint96 value = 30 ether;
@@ -29,12 +31,16 @@ abstract contract revert__NuggftV1Stake is NuggftV1Test {
     }
 
     function test__revert__NuggftV1Stake__0x71__mint__failWithValue() public {
+        TOKEN1 = mintable(2099);
+        TOKEN2 = mintable(2098);
         test__revert__NuggftV1Stake__0x71__mint__success();
 
         expect.mint().err(0x71).from(users.dennis).exec{value: nuggft.eps() - 1}(TOKEN2);
     }
 
     function test__revert__NuggftV1Stake__0x71__mint__failWithZero() public {
+        TOKEN1 = mintable(2099);
+        TOKEN2 = mintable(2098);
         test__revert__NuggftV1Stake__0x71__mint__success();
 
         expect.mint().err(0x71).from(users.dennis).exec(TOKEN2);
@@ -44,6 +50,8 @@ abstract contract revert__NuggftV1Stake is NuggftV1Test {
     // ────
 
     function test__revert__NuggftV1Stake__0x71__mint__successOnTrusted() public {
+        TOKEN1 = mintable(2099);
+        TOKEN2 = mintable(2098);
         forge.vm.deal(users.safe, 200 ether);
         forge.vm.startPrank(users.safe);
         {
@@ -53,6 +61,8 @@ abstract contract revert__NuggftV1Stake is NuggftV1Test {
     }
 
     function test__revert__NuggftV1Stake__0x71__trustedMint__failOnTrustedNotEnoughValue() public {
+        TOKEN1 = mintable(2099);
+        TOKEN2 = mintable(2098);
         if (nuggft.shares() != 0) return;
 
         forge.vm.startPrank(users.safe);
@@ -91,6 +101,8 @@ abstract contract revert__NuggftV1Stake is NuggftV1Test {
     // ─────────────
 
     function test__revert__NuggftV1Stake__0x77__burn__failNotOwner() public {
+        TOKEN1 = mintable(2099);
+        TOKEN2 = mintable(2098);
         uint24 tokenId = scenario_dee_has_a_token();
 
         forge.vm.startPrank(users.mac);
@@ -102,41 +114,49 @@ abstract contract revert__NuggftV1Stake is NuggftV1Test {
     }
 
     // function test__revert__NuggftV1Stake__0x73__burn__failNoApproval() public {
-    //     uint24 tokenId = scenario_dee_has_a_token();
+    //         TOKEN1 = mintable(2099);
+    // TOKEN2 = mintable(2098);
+    //     //     uint24 tokenId = scenario_dee_has_a_token();
 
-    //     forge.vm.startPrank(users.dee);
-    //     {
-    //         forge.vm.expectRevert(hex'7e863b48_73');
-    //         nuggft.burn(tokenId);
-    //     }
-    //     forge.vm.stopPrank();
-    // }
+    //     //     forge.vm.startPrank(users.dee);
+    //     //     {
+    //     //         forge.vm.expectRevert(hex'7e863b48_73');
+    //     //         nuggft.burn(tokenId);
+    //     //     }
+    //     //     forge.vm.stopPrank();
+    //     // }
 
-    // function test__revert__NuggftV1Stake__0x73__burn__succeedsWithApproval() public {
-    //     uint24 tokenId = scenario_dee_has_a_token();
+    //     // function test__revert__NuggftV1Stake__0x73__burn__succeedsWithApproval() public {
+    //         TOKEN1 = mintable(2099);
+    // TOKEN2 = mintable(2098);
+    //     //     uint24 tokenId = scenario_dee_has_a_token();
 
-    //     forge.vm.startPrank(users.dee);
-    //     {
-    //         nuggft.approve(_nuggft, tokenId);
-    //         nuggft.burn(tokenId);
-    //     }
-    //     forge.vm.stopPrank();
-    // }
+    //     //     forge.vm.startPrank(users.dee);
+    //     //     {
+    //     //         nuggft.approve(_nuggft, tokenId);
+    //     //         nuggft.burn(tokenId);
+    //     //     }
+    //     //     forge.vm.stopPrank();
+    //     // }
 
-    // function test__revert__NuggftV1Stake__0x73__burn__failOnIncorrectApproval() public {
-    //     uint24 tokenId = scenario_dee_has_a_token();
+    //     // function test__revert__NuggftV1Stake__0x73__burn__failOnIncorrectApproval() public {
+    //         TOKEN1 = mintable(2099);
+    // TOKEN2 = mintable(2098);
+    //     //     uint24 tokenId = scenario_dee_has_a_token();
 
-    //     forge.vm.startPrank(users.dee);
-    //     {
-    //         nuggft.approve(users.mac, tokenId);
+    //     //     forge.vm.startPrank(users.dee);
+    //     //     {
+    //     //         nuggft.approve(users.mac, tokenId);
 
-    //         forge.vm.expectRevert(hex'7e863b48_73');
-    //         nuggft.burn(tokenId);
-    //     }
-    //     forge.vm.stopPrank();
-    // }
+    //     //         forge.vm.expectRevert(hex'7e863b48_73');
+    //     //         nuggft.burn(tokenId);
+    //     //     }
+    //     //     forge.vm.stopPrank();
+    //     // }
 
-    // function test__revert__NuggftV1Stake__0x73__burn__failOnIncorrectOperatorApproval() public {
+    //     // function test__revert__NuggftV1Stake__0x73__burn__failOnIncorrectOperatorApproval() public {
+    //         TOKEN1 = mintable(2099);
+    // TOKEN2 = mintable(2098);
     //     uint24 tokenId = scenario_dee_has_a_token();
 
     //     forge.vm.startPrank(users.dee);
@@ -156,27 +176,31 @@ abstract contract revert__NuggftV1Stake is NuggftV1Test {
     // }
 
     // function test__revert__NuggftV1Stake__0x73__burn__failsOnCorrectOperatorApproval() public {
-    //     uint24 tokenId = scenario_dee_has_a_token();
+    //         TOKEN1 = mintable(2099);
+    // TOKEN2 = mintable(2098);
+    //     //     uint24 tokenId = scenario_dee_has_a_token();
 
-    //     forge.vm.startPrank(users.dee);
-    //     {
-    //         nuggft.approve(_nuggft, tokenId);
+    //     //     forge.vm.startPrank(users.dee);
+    //     //     {
+    //     //         nuggft.approve(_nuggft, tokenId);
 
-    //         nuggft.setApprovalForAll(users.mac, true);
-    //     }
-    //     forge.vm.stopPrank();
+    //     //         nuggft.setApprovalForAll(users.mac, true);
+    //     //     }
+    //     //     forge.vm.stopPrank();
 
-    //     forge.vm.startPrank(users.mac);
-    //     {
-    //         forge.vm.expectRevert(hex'7e863b48_73');
-    //         nuggft.burn(tokenId);
-    //     }
-    //     forge.vm.stopPrank();
-    // }
+    //     //     forge.vm.startPrank(users.mac);
+    //     //     {
+    //     //         forge.vm.expectRevert(hex'7e863b48_73');
+    //     //         nuggft.burn(tokenId);
+    //     //     }
+    //     //     forge.vm.stopPrank();
+    //     // }
 
-    // migrate
-    // ─────────────
-    // function test__revert__NuggftV1Stake__0x73__migrate__failNoApproval() public {
+    //     // migrate
+    //     // ─────────────
+    //     // function test__revert__NuggftV1Stake__0x73__migrate__failNoApproval() public {
+    //         TOKEN1 = mintable(2099);
+    // TOKEN2 = mintable(2098);
     //     uint24 tokenId = scenario_dee_has_a_token();
 
     //     scenario_migrator_set();
@@ -190,6 +214,8 @@ abstract contract revert__NuggftV1Stake is NuggftV1Test {
     // }
 
     function test__revert__NuggftV1Stake__0x73__migrate__succeeds() public {
+        TOKEN1 = mintable(2099);
+        TOKEN2 = mintable(2098);
         uint24 tokenId = scenario_dee_has_a_token();
 
         scenario_migrator_set();
@@ -211,6 +237,8 @@ abstract contract revert__NuggftV1Stake is NuggftV1Test {
     // ────────────
 
     function test__revert__NuggftV1Stake__0x81__migrate__fail() public {
+        TOKEN1 = mintable(2099);
+        TOKEN2 = mintable(2098);
         uint24 tokenId = scenario_dee_has_a_token();
 
         // _nuggft.shouldFail(hex'81', dee, migrate(tokenId));
@@ -226,6 +254,8 @@ abstract contract revert__NuggftV1Stake is NuggftV1Test {
     }
 
     function test__revert__NuggftV1Stake__0x81__migrate__succeeds() public {
+        TOKEN1 = mintable(2099);
+        TOKEN2 = mintable(2098);
         uint24 tokenId = scenario_dee_has_a_token();
         scenario_migrator_set();
 

@@ -10,7 +10,7 @@ abstract contract revert__claim__0xA5 is NuggftV1Test {
 
         uint24 tokenId = nuggft.epoch();
 
-        expect.offer().from(users.dee).exec(tokenId);
+        expect.offer().from(users.dee).exec{value: nuggft.vfo(users.dee, tokenId)}(tokenId);
 
         jumpSwap();
 
@@ -22,7 +22,7 @@ abstract contract revert__claim__0xA5 is NuggftV1Test {
 
         uint24 tokenId = nuggft.epoch();
 
-        expect.offer().from(users.dee).exec(tokenId);
+        expect.offer().from(users.dee).exec{value: nuggft.vfo(users.dee, tokenId)}(tokenId);
 
         jumpSwap();
 

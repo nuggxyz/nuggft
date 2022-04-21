@@ -10,14 +10,18 @@ import "../../../NuggftV1.test.sol";
 abstract contract revert__claim__0x74 is NuggftV1Test {
     using NuggftV1AgentType for uint256;
 
-    uint24 FRANKS_TOKEN = mintable(0);
+    uint24 FRANKS_TOKEN;
 
-    uint24 CHARLIES_TOKEN = mintable(1);
-    uint24 DENNISS_TOKEN = mintable(2);
+    uint24 CHARLIES_TOKEN;
+    uint24 DENNISS_TOKEN;
 
     uint16 ITEM_ID;
 
     modifier revert__claim__0x74_setUp() {
+        FRANKS_TOKEN = mintable(0);
+
+        CHARLIES_TOKEN = mintable(1);
+        DENNISS_TOKEN = mintable(2);
         // mint required tokens
         expect.mint().from(users.frank).exec{value: 1 ether}(FRANKS_TOKEN);
         expect.mint().from(users.charlie).exec{value: nuggft.msp()}(CHARLIES_TOKEN);

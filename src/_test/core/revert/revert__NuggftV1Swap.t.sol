@@ -8,9 +8,10 @@ abstract contract revert__NuggftV1Swap is NuggftV1Test {
     using SafeCast for uint96;
 
     modifier revert__NuggftV1Swap__setUp() {
+        TOKEN1 = mintable(0);
         _;
     }
-    uint24 private TOKEN1 = mintable(0);
+    uint24 private TOKEN1;
 
     /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
         [S:0] - offer - "msg.sender is operator for sender"
@@ -36,75 +37,53 @@ abstract contract revert__NuggftV1Swap is NuggftV1Test {
     function test__revert__NuggftV1Swap__0x71__offer__passWithExactMinOffer() public revert__NuggftV1Swap__setUp {
         uint24 tokenId = nuggft.epoch();
 
-        uint96 value = 10 gwei;
-        forge.vm.deal(users.frank, value);
+        // uint96 value = 10 gwei;
+        // forge.vm.deal(users.frank, value);
 
-        expect.balance().start(users.frank, value, false);
-        expect.balance().start(_nuggft, value, true);
-        expect.stake().start(value, 1, true);
-        forge.vm.startPrank(users.frank);
-        {
-            // forge.vm.expectRevert(hex"7e863b48_68");
-            nuggft.offer{value: value}(tokenId);
-        }
-        forge.vm.stopPrank();
+        expect.offer().from(users.frank).exec{value: nuggft.vfo(users.frank, tokenId)}(tokenId);
 
-        expect.stake().stop();
-        expect.balance().stop();
+        // expect.balance().start(users.frank, value, false);
+        // expect.balance().start(_nuggft, value, true);
+        // expect.stake().start(value, 1, true);
+        // forge.vm.startPrank(users.frank);
+        // {
+        //     // forge.vm.expectRevert(hex"7e863b48_68");
+        //     nuggft.offer{value: value}(tokenId);
+        // }
+        // forge.vm.stopPrank();
+
+        // expect.stake().stop();
+        // expect.balance().stop();
     }
 
     function test__revert__NuggftV1Swap__0x71__offer__successWithHigherMinOffer() public revert__NuggftV1Swap__setUp {
         uint24 tokenId = nuggft.epoch();
 
-        uint96 value = 10 gwei + .1 gwei;
-
-        forge.vm.deal(users.frank, value);
-
-        expect.balance().start(users.frank, value, false);
-        expect.balance().start(_nuggft, value, true);
-        expect.stake().start(value, 1, true);
-        forge.vm.startPrank(users.frank);
-        {
-            nuggft.offer{value: value}(tokenId);
-        }
-
-        forge.vm.stopPrank();
-        expect.stake().stop();
-        expect.balance().stop();
+        expect.offer().from(users.frank).exec{value: nuggft.vfo(users.frank, tokenId) + 1}(tokenId);
     }
 
-    function test__revert__NuggftV1Swap__0x68__offer__passWithOneWeiLessThanMin() public revert__NuggftV1Swap__setUp {
-        uint24 tokenId = nuggft.epoch();
+    // function test__revert__NuggftV1Swap__0x68__offer__failWithOneWeiLessThanMin() public revert__NuggftV1Swap__setUp {
+    //     uint24 tokenId = nuggft.epoch();
 
-        uint96 value = 10 gwei - .1 gwei;
+    //     uint96 value = 10 gwei - .1 gwei;
 
-        forge.vm.startPrank(users.frank);
-        {
-            forge.vm.deal(users.frank, value);
-            // forge.vm.expectRevert(hex"7e863b48_68");
-            nuggft.offer{value: value}(tokenId);
-        }
-        forge.vm.stopPrank();
-    }
+    //     expect.offer().from(users.frank).exec{value: nuggft.vfo(users.frank, tokenId)}(tokenId);
+
+    // }
 
     function test__revert__NuggftV1Swap__0x71__offer__mint__failWithOneWeiLessThanMinAfterSomeValue() public revert__NuggftV1Swap__setUp {
         uint24 tokenId = nuggft.epoch();
 
-        forge.vm.startPrank(users.frank);
-        {
-            forge.vm.deal(users.frank, 1 ether);
-            nuggft.mint{value: 1 ether}(TOKEN1);
-
-            uint96 value = 10 gwei - 1;
-
-            forge.vm.deal(users.frank, value);
-            forge.vm.expectRevert(hex"7e863b48_71");
-            nuggft.offer{value: value}(tokenId);
-        }
-        forge.vm.stopPrank();
+        expect.offer().from(users.frank).err(0x71).exec{value: nuggft.vfo(users.frank, tokenId) - 1}(tokenId);
     }
 
-    function test__revert__NuggftV1Swap__0x68__offer__mint__passWithZero() public revert__NuggftV1Swap__setUp {
+    function test__revert__NuggftV1Swap__0x71__offer__mint__failWithOneWeiLessThanMinAfterSomeValueMsp() public revert__NuggftV1Swap__setUp {
+        uint24 tokenId = nuggft.epoch();
+
+        expect.offer().from(users.frank).err(0x71).exec{value: nuggft.msp() - 1}(tokenId);
+    }
+
+    function test__revert__NuggftV1Swap__0x68__offer__mint__failWithZero() public revert__NuggftV1Swap__setUp {
         uint24 tokenId = nuggft.epoch();
 
         uint96 value = 0;
@@ -112,7 +91,7 @@ abstract contract revert__NuggftV1Swap is NuggftV1Test {
         forge.vm.startPrank(users.frank);
         {
             forge.vm.deal(users.frank, value);
-            // forge.vm.expectRevert(hex"7e863b48_68");
+            forge.vm.expectRevert(hex"7e863b48_71");
             nuggft.offer{value: value}(tokenId);
         }
         forge.vm.stopPrank();
@@ -231,11 +210,9 @@ abstract contract revert__NuggftV1Swap is NuggftV1Test {
     function test__revert__NuggftV1Swap__0x99__successWithPrevClaimUserAfterClaiming() public revert__NuggftV1Swap__setUp {
         (uint24 tokenId, uint96 floor) = scenario_mac_has_sold_a_token_dee_sold();
 
-        uint96 value = floor + 1 ether;
-
         expect.claim().from(users.dee).exec(array.b24(tokenId), lib.sarrAddress(users.dee));
 
-        expect.offer().from(users.dee).exec{value: value}(tokenId);
+        expect.offer().from(users.dee).exec{value: nuggft.vfo(users.dee, tokenId)}(tokenId);
     }
 
     function test__revert__NuggftV1Swap__0x99__failWtihUserWithPrevClaim() public revert__NuggftV1Swap__setUp {
@@ -270,13 +247,11 @@ abstract contract revert__NuggftV1Swap is NuggftV1Test {
     function test__revert__NuggftV1Swap__0xA0__successWithSwap() public revert__NuggftV1Swap__setUp {
         (uint24 tokenId, uint96 floor) = scenario_mac_has_sold_a_token_dee_sold();
 
-        uint96 value = floor + 1 ether;
-
         nuggft.epoch();
 
         expect.claim().from(users.dee).exec(array.b24(tokenId), lib.sarrAddress(users.dee));
 
-        expect.offer().from(users.dee).exec{value: value}(tokenId);
+        expect.offer().from(users.dee).exec{value: nuggft.vfo(users.dee, tokenId)}(tokenId);
     }
 
     /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━

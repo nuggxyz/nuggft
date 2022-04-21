@@ -8,13 +8,16 @@ import {ShiftLib} from "../../helpers/ShiftLib.sol";
 import {NuggftV1Loan} from "../../../core/NuggftV1Loan.sol";
 
 contract general__NuggftV1Loan is NuggftV1Test {
-    uint24 internal LOAN_TOKENID = mintable(700);
-    uint24 internal MINT_TOKENID = mintable(500);
+    uint24 internal LOAN_TOKENID;
+    uint24 internal MINT_TOKENID;
 
     uint24 internal NUM = 4;
 
     function setUp() public {
         reset();
+
+        LOAN_TOKENID = mintable(700);
+        MINT_TOKENID = mintable(500);
     }
 
     function test__general__NuggftV1Loan__multirebalance() public {

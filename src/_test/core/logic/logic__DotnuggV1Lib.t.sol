@@ -9,7 +9,7 @@ abstract contract logic__DotnuggV1Lib is NuggftV1Test {
     function test__logic__DotnuggV1Lib__ratityX128__2() public {
         expect.mint().from(users.frank).exec{value: 1 ether}(mintable(100));
         ds.inject.log(DotnuggV1Lib.size(DotnuggV1Lib.location(address(processor), 0)));
-        // ds.inject.logBytes32(bytes32(DotnuggV1Lib.rarityX128(address(processor), nuggft.proofOf(600))));
+        // ds.inject.logBytes32(bytes32(DotnuggV1Lib.rarityX128(address(processor), nuggft.proof(600))));
     }
 
     function test__logic__DotnuggV1Lib__ratityX128() public {

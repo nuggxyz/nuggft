@@ -7,10 +7,10 @@ import "../interfaces/nuggftv1/INuggftV1.sol";
 // import '../_test/utils/DSEmit.sol';
 
 // contract PureDeployerCallback {
-//     address public dotnuggV1;
+//     address public dotnuggv1;
 
 //     constructor(address _dotnugg) {
-//         dotnuggV1 = _dotnugg;
+//         dotnuggv1 = _dotnugg;
 //     }
 
 //     function done() external {
@@ -107,7 +107,7 @@ import "../interfaces/nuggftv1/INuggftV1.sol";
 //         require(nuggft != address(0), 'OOPS:2');
 //         // DSEmit.stopMeasuringGas();
 //         /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-//            [3] - call NuggftV1 "dotnuggV1StorageProxy()"
+//            [3] - call NuggftV1 "dotnuggv1StorageProxy()"
 //            ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
 //         // DSEmit.startMeasuringGas('C');
 

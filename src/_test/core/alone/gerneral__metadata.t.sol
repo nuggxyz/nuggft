@@ -29,8 +29,8 @@ contract general__NuggftV1Loan is NuggftV1Test {
 
     function test__imageURI() public {
         uint24 token = mintable(1);
-        forge.vm.startPrank(users.frank);
-        nuggft.mint(token);
+
+        expect.mint().from(users.frank).exec{value: nuggft.msp()}(token);
 
         ds.emit_log_named_string("hi", nuggft.imageURI(token));
     }

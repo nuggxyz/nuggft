@@ -5,31 +5,35 @@ pragma solidity 0.8.13;
 import "../../NuggftV1.test.sol";
 
 abstract contract revert__NuggftV1Loan is NuggftV1Test {
-    uint24 internal LOAN_TOKENID = mintable(200);
+    uint24 internal LOAN_TOKENID;
 
     /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
         hex[A1] - loan - "msg.sender is operator for sender"
        ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
 
     function test__revert__NuggftV1Loan__0xA1__loan__successAsSelf() public {
+        LOAN_TOKENID = mintable(200);
         uint24 tokenId = scenario_frank_has_a_token_and_spent_50_eth();
 
         expect.loan().exec(array.b24(tokenId), lib.txdata(users.frank, 0, ""));
     }
 
     function test__revert__NuggftV1Loan__0xA1__loan__failAsNotAgent() public {
+        LOAN_TOKENID = mintable(200);
         uint24 tokenId = scenario_frank_has_a_token_and_spent_50_eth();
 
         expect.loan().err(0xA1).from(users.dennis).exec(array.b24(tokenId));
     }
 
     function test__revert__NuggftV1Loan__N_1__loan__passAsSelfHasNotApprovedContract() public {
+        LOAN_TOKENID = mintable(200);
         uint24 tokenId = scenario_frank_has_a_token_and_spent_50_eth();
 
         expect.loan().exec(array.b24(tokenId), lib.txdata(users.frank, 0, ""));
     }
 
     function test__revert__NuggftV1Loan__0x77__loan__loanSameNuggTwice() public {
+        LOAN_TOKENID = mintable(200);
         expect.globalFrom(users.frank);
 
         expect.mint().g().exec{value: 1 ether}(LOAN_TOKENID);
@@ -46,6 +50,7 @@ abstract contract revert__NuggftV1Loan is NuggftV1Test {
        ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
 
     function test__revert__NuggftV1Loan__0xA6__liquidate__successAsSelf() public {
+        LOAN_TOKENID = mintable(200);
         uint24 tokenId = scenario_frank_has_a_loaned_token();
 
         uint96 value = nuggft.vfl(array.b24(tokenId))[0];
@@ -54,6 +59,7 @@ abstract contract revert__NuggftV1Loan is NuggftV1Test {
     }
 
     function test__revert__NuggftV1Loan__0xA6__liquidate__successAsSelfExpired() public {
+        LOAN_TOKENID = mintable(200);
         uint24 tokenId = scenario_frank_has_a_loaned_token_that_has_expired();
 
         uint96 value = nuggft.vfl(array.b24(tokenId))[0];
@@ -62,6 +68,7 @@ abstract contract revert__NuggftV1Loan is NuggftV1Test {
     }
 
     function test__revert__NuggftV1Loan__0xA6__liquidate__failAsNotAgentNotExpired() public {
+        LOAN_TOKENID = mintable(200);
         uint24 tokenId = scenario_frank_has_a_loaned_token();
 
         uint96 value = nuggft.vfl(array.b24(tokenId))[0];
@@ -70,6 +77,7 @@ abstract contract revert__NuggftV1Loan is NuggftV1Test {
     }
 
     function test__revert__NuggftV1Loan__0xA6__liquidate__successAsNotAgentExpired() public {
+        LOAN_TOKENID = mintable(200);
         uint24 tokenId = scenario_frank_has_a_loaned_token_that_has_expired();
 
         uint96 value = nuggft.vfl(array.b24(tokenId))[0];
@@ -82,6 +90,7 @@ abstract contract revert__NuggftV1Loan is NuggftV1Test {
        ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
 
     function test__revert__NuggftV1Loan__0xA7__liquidate__successLiquidateExact() public {
+        LOAN_TOKENID = mintable(200);
         uint24 tokenId = scenario_frank_has_a_loaned_token();
 
         uint96 value = nuggft.vfl(array.b24(tokenId))[0];
@@ -90,6 +99,7 @@ abstract contract revert__NuggftV1Loan is NuggftV1Test {
     }
 
     function test__revert__NuggftV1Loan__0xA7__liquidate__successLiquidateWeiHigher() public {
+        LOAN_TOKENID = mintable(200);
         uint24 tokenId = scenario_frank_has_a_loaned_token();
 
         uint96 value = nuggft.vfl(array.b24(tokenId))[0];
@@ -98,6 +108,7 @@ abstract contract revert__NuggftV1Loan is NuggftV1Test {
     }
 
     function test__revert__NuggftV1Loan__0xA7__liquidate__failLiquidateWeiLower() public {
+        LOAN_TOKENID = mintable(200);
         uint24 tokenId = scenario_frank_has_a_loaned_token();
 
         uint96 value = nuggft.vfl(array.b24(tokenId))[0];
@@ -106,6 +117,7 @@ abstract contract revert__NuggftV1Loan is NuggftV1Test {
     }
 
     function test__revert__NuggftV1Loan__0xA7__liquidate__successLiquidateWayHigher() public {
+        LOAN_TOKENID = mintable(200);
         uint24 tokenId = scenario_frank_has_a_loaned_token();
 
         uint96 value = nuggft.vfl(array.b24(tokenId))[0];
@@ -114,6 +126,7 @@ abstract contract revert__NuggftV1Loan is NuggftV1Test {
     }
 
     function test__revert__NuggftV1Loan__0xA7__liquidate__failLiquidateWayLower() public {
+        LOAN_TOKENID = mintable(200);
         uint24 tokenId = scenario_frank_has_a_loaned_token();
 
         uint96 value = nuggft.vfl(array.b24(tokenId))[0];
@@ -123,6 +136,7 @@ abstract contract revert__NuggftV1Loan is NuggftV1Test {
     }
 
     function test__revert__NuggftV1Loan__0xA7__liquidate__failLiquidateZero() public {
+        LOAN_TOKENID = mintable(200);
         uint24 tokenId = scenario_frank_has_a_loaned_token();
 
         forge.vm.startPrank(users.frank);

@@ -9,9 +9,12 @@ abstract contract revert__offer__0x68 is NuggftV1Test {
         uint24 tokenId = nuggft.epoch();
 
         jump(tokenId);
-        expect.offer().from(users.mac).value(uint96(nuggft.external__LOSS())).exec(tokenId);
 
-        expect.offer().from(users.frank).value(uint96(nuggft.external__LOSS() + 1)).err(0x68).exec(tokenId);
+        uint96 ogvfo = nuggft.vfo(users.mac, tokenId);
+
+        expect.offer().from(users.mac).value(uint96(ogvfo)).exec(tokenId);
+
+        expect.offer().from(users.frank).value(uint96(ogvfo + 1)).err(0x72).exec(tokenId);
     }
 
     // this is the scenario we really care about
@@ -20,7 +23,17 @@ abstract contract revert__offer__0x68 is NuggftV1Test {
 
         jump(tokenId);
 
-        expect.offer().from(users.mac).value(uint96(0)).exec(tokenId);
+        expect.offer().from(users.mac).value(uint96(0)).err(0x71).exec(tokenId);
+
+        expect.offer().from(users.frank).value(uint96(0)).err(0x71).exec(tokenId);
+    }
+
+    function test__revert__offer__0x68__fail__zerocommit1() public {
+        uint24 tokenId = nuggft.epoch();
+
+        jump(tokenId);
+
+        expect.offer().from(users.mac).value(nuggft.vfo(users.mac, tokenId)).exec(tokenId);
 
         expect.offer().from(users.frank).value(uint96(0)).err(0x68).exec(tokenId);
     }
@@ -30,16 +43,26 @@ abstract contract revert__offer__0x68 is NuggftV1Test {
 
         jump(tokenId);
 
-        expect.offer().from(users.mac).value(uint96(0)).exec(tokenId);
+        expect.offer().from(users.mac).value(nuggft.vfo(users.mac, tokenId)).exec(tokenId);
 
-        expect.offer().from(users.frank).value(uint96(nuggft.external__LOSS() + 10 gwei)).exec(tokenId);
+        expect.offer().from(users.frank).value(nuggft.vfo(users.frank, tokenId)).exec(tokenId);
+    }
+
+    function test__revert__offer__0x68__fail__nocommit3() public {
+        uint24 tokenId = nuggft.epoch();
+
+        jump(tokenId);
+
+        expect.offer().from(users.mac).value(nuggft.vfo(users.mac, tokenId)).exec(tokenId);
+
+        expect.offer().from(users.frank).value(nuggft.vfo(users.frank, tokenId) - 1).err(0x72).exec(tokenId);
     }
 
     function test__revert__offer__0x68__pass__desc() public {
         uint24 tokenId = nuggft.epoch();
         jump(tokenId);
 
-        expect.offer().from(users.frank).value(uint96(nuggft.external__LOSS() + 10 gwei)).exec(tokenId);
+        expect.offer().from(users.frank).value(uint96(nuggft.vfo(users.frank, tokenId))).exec(tokenId);
     }
 
     function test__revert__offer__0x68__pass__onmint() public {
@@ -47,6 +70,6 @@ abstract contract revert__offer__0x68 is NuggftV1Test {
 
         jump(tokenId);
 
-        expect.offer().from(users.frank).value(uint96(nuggft.external__LOSS())).exec(tokenId);
+        expect.offer().from(users.frank).value(nuggft.vfo(users.frank, tokenId)).exec(tokenId);
     }
 }

@@ -14,47 +14,25 @@ import {NuggftV1Epoch} from "./NuggftV1Epoch.sol";
 import {NuggftV1Trust} from "./NuggftV1Trust.sol";
 
 abstract contract NuggftV1Proof is INuggftV1Proof, NuggftV1Epoch, NuggftV1Trust {
-    mapping(uint24 => uint256) proofs;
-    mapping(uint256 => uint256) public hotproof;
-
-    mapping(uint24 => uint256) public agency;
-
-    IDotnuggV1Safe public immutable override dotnuggV1;
-
-    NuggftV1Items public immutable emitter;
-
-    constructor(address dotnugg) {
-        // address res;
-
-        // assembly {
-        //     mstore(0x02, caller())
-        //     mstore8(0x00, 0xD6)
-        //     mstore8(0x01, 0x94)
-        //     mstore8(0x16, 0x01)
-
-        //     res := shr(96, shl(96, keccak256(0x00, 0x17)))
-        // }
-
-        // firse index of sender
-        dotnuggV1 = IDotnuggV1Safe(dotnugg);
-        emitter = new NuggftV1Items();
+    function calculateEarlySeed(uint24 tokenId) public view returns (uint256 seed) {
+        return uint256(keccak256(abi.encodePacked(tokenId, earlySeed)));
     }
 
     /// @inheritdoc INuggftV1Proof
     function proofOf(uint24 tokenId) public view override returns (uint256 res) {
-        if ((res = proofs[tokenId]) != 0) return res;
+        if ((res = proof[tokenId]) != 0) return res;
 
-        if ((res = hotproof[uint8(tokenId % HOT_PROOF_AMOUNT)]) != HOT_PROOF_EMPTY && agency[tokenId] != 0) {
-            return res;
+        uint256 seed;
+
+        if (tokenId >= MINT_OFFSET && tokenId <= early) {
+            seed = calculateEarlySeed(tokenId);
         } else {
-            res = 0;
+            uint24 epoch = epoch();
+
+            if (tokenId == epoch + 1) epoch++;
+
+            seed = calculateSeed(epoch);
         }
-
-        uint24 epoch = epoch();
-
-        if (tokenId == epoch + 1) epoch++;
-
-        uint256 seed = calculateSeed(epoch);
 
         if (seed != 0) return initFromSeed(seed);
 
@@ -108,11 +86,11 @@ abstract contract NuggftV1Proof is INuggftV1Proof, NuggftV1Epoch, NuggftV1Trust 
                 panic(Error__0xA3__NotItemAuthorizedAgent)
             }
 
-            mstore(0x20, proofs.slot)
+            mstore(0x20, proof.slot)
 
             let proof__sptr := keccak256(0x00, 0x40)
 
-            let proof := sload(proof__sptr)
+            let _proof := sload(proof__sptr)
 
             // extract length of tokenIds array from calldata
             let len := calldataload(sub(index0s.offset, 0x20))
@@ -121,7 +99,7 @@ abstract contract NuggftV1Proof is INuggftV1Proof, NuggftV1Epoch, NuggftV1Trust 
             if iszero(eq(len, calldataload(sub(index1s.offset, 0x20)))) {
                 panic(Error__0x76__InvalidArrayLengths)
             }
-            mstore(0x00, proof)
+            mstore(0x00, _proof)
 
             // prettier-ignore
             for { let i := 0 } lt(i, len) { i := add(i, 1) } {
@@ -139,12 +117,12 @@ abstract contract NuggftV1Proof is INuggftV1Proof, NuggftV1Epoch, NuggftV1Trust 
                     iszero(gt(16, index1))
                  ) { panic(Error__0x73__InvalidProofIndex) } // ==============
 
-                proof := mload(0x00)
+                _proof := mload(0x00)
 
                 let pos0 := mul(sub(15, index0), 0x2)
                 let pos1 := mul(sub(15, index1), 0x2)
-                let item0 := and(shr(mul(index0, 16), proof), 0xffff)
-                let item1 := and(shr(mul(index1, 16), proof), 0xffff)
+                let item0 := and(shr(mul(index0, 16), _proof), 0xffff)
+                let item1 := and(shr(mul(index1, 16), _proof), 0xffff)
 
                 mstore8(pos1, shr(8, item0))
                 mstore8(add(pos1, 1), item0)
@@ -168,12 +146,12 @@ abstract contract NuggftV1Proof is INuggftV1Proof, NuggftV1Epoch, NuggftV1Trust 
         selB = selB < 30 ? 5 : selB < 55 ? 6 : selB < 75 ? 7 : 0;
         selC = selC < 30 ? 5 : selC < 55 ? 6 : selC < 75 ? 7 : selC < 115 ? 4 : selC < 155 ? 3 : selC < 205 ? 2 : 1;
 
-        uint256 a = DotnuggV1Lib.pickWithId(address(dotnuggV1), 0, seed);
-        uint256 b = DotnuggV1Lib.pickWithId(address(dotnuggV1), 1, seed);
-        uint256 c = DotnuggV1Lib.pickWithId(address(dotnuggV1), 2, seed);
-        uint256 d = DotnuggV1Lib.pickWithId(address(dotnuggV1), selA, seed);
-        uint256 e = DotnuggV1Lib.pickWithId(address(dotnuggV1), selB, seed);
-        uint256 f = DotnuggV1Lib.pickWithId(address(dotnuggV1), selC, seed >> 8);
+        uint256 a = DotnuggV1Lib.pickWithId(address(dotnuggv1), 0, seed);
+        uint256 b = DotnuggV1Lib.pickWithId(address(dotnuggv1), 1, seed);
+        uint256 c = DotnuggV1Lib.pickWithId(address(dotnuggv1), 2, seed);
+        uint256 d = DotnuggV1Lib.pickWithId(address(dotnuggv1), selA, seed);
+        uint256 e = DotnuggV1Lib.pickWithId(address(dotnuggv1), selB, seed);
+        uint256 f = DotnuggV1Lib.pickWithId(address(dotnuggv1), selC, seed >> 8);
 
         res |=
             a |

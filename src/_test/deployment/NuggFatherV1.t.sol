@@ -8,7 +8,7 @@ import "../../_deployment/NuggFatherV1.sol";
 
 contract deployment__NuggFatherV1 is NuggftV1Test {
     function test__deployment__NuggFatherV1__constructor__1() public {
-        address dub6ix = 0xfb24279ca9eFC26146D6458bbc19FA4d29315524;
+        address dub6ix = 0x9B0E2b16F57648C7bAF28EDD7772a815Af266E77;
         // private: 75807422351f1bb13f627dca88ed8b465e38d3eaeb7dee595ba1fae3c93e40a8
         // public:  0xfb24279ca9eFC26146D6458bbc19FA4d29315524
         // nugg father proxy 1: 0x63bd444960c11fae19fa66a912c5c910cc606b08
@@ -24,7 +24,14 @@ contract deployment__NuggFatherV1 is NuggftV1Test {
 
         forge.vm.startPrank(dub6ix);
         // NuggFatherV1 father = new NuggFatherV1();
-        NuggFatherV1 father = new NuggFatherV1();
+        NuggFatherV1 father = new NuggFatherV1{value: 1 ether}();
+
+        father.nuggft().imageURI(MINT_OFFSET);
+
+        father.nuggft().premint(MINT_OFFSET);
+
+        father.nuggft().msp();
+        father.nuggft().eps();
 
         // ds.emit_log_address(address(father.nuggft()));
 
@@ -33,7 +40,7 @@ contract deployment__NuggFatherV1 is NuggftV1Test {
         // for (uint24 i = 1; i < 10; i++) {
         //     // father.nuggft().floop(i);
 
-        //     // uint8[8] memory list = father.dotnugg().decodeProofCore(father.nuggft().proofOf(i));
+        //     // uint8[8] memory list = father.dotnugg().decodeProofCore(father.nuggft().proof(i));
 
         //     // for (uint8 i = 0; i < 8; i++) {
         //     //     father.dotnugg().svg(father.dotnugg().calc(father.dotnugg().read(i, list[i])));

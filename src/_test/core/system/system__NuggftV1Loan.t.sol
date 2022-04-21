@@ -7,9 +7,11 @@ import {NuggftV1Proof} from "../../../core/NuggftV1Proof.sol";
 import {fragments} from "./fragments.t.sol";
 
 abstract contract system__NuggftV1Loan is NuggftV1Test, fragments {
-    uint24 private TOKEN1 = mintable(1);
+    uint24 private TOKEN1;
 
     function test__system__loan__revert__0xA4__autoLiquidateCantRebalance() public {
+        TOKEN1 = mintable(1);
+
         expect.mint().from(users.frank).value(1 ether).exec(TOKEN1);
         jumpStart();
 
@@ -23,6 +25,8 @@ abstract contract system__NuggftV1Loan is NuggftV1Test, fragments {
     }
 
     function test__system__loan__rebalanceFactory() public {
+        TOKEN1 = mintable(1);
+
         //jumpStart();
         expect.globalFrom(users.frank);
 
@@ -39,6 +43,8 @@ abstract contract system__NuggftV1Loan is NuggftV1Test, fragments {
     }
 
     function test__system__loan__friendsRebalanceFactory() public {
+        TOKEN1 = mintable(1);
+
         jumpStart();
 
         expect.mint().from(users.frank).value(1 ether).exec(TOKEN1);
@@ -57,6 +63,8 @@ abstract contract system__NuggftV1Loan is NuggftV1Test, fragments {
     }
 
     function test__system__loan__nuggHeritage() public {
+        TOKEN1 = mintable(1);
+
         jumpStart();
 
         expect.mint().from(users.frank).value(1 ether).exec(TOKEN1);

@@ -5,15 +5,22 @@ pragma solidity 0.8.13;
 import "../../NuggftV1.test.sol";
 
 contract txgas__NuggftV1Swap is NuggftV1Test {
-    uint24 private MINT_TOKENID = mintable(3004);
-    uint24 private COMMIT_TOKENID = mintable(1498);
-    uint24 private CARRY_TOKENID = mintable(1300);
+    uint24 private MINT_TOKENID;
+    uint24 private COMMIT_TOKENID;
+    uint24 private CARRY_TOKENID;
 
-    uint24 private SELL_TOKENID = mintable(1496);
-    uint24 private CLAIM_TOKENID = mintable(1497);
+    uint24 private SELL_TOKENID;
+    uint24 private CLAIM_TOKENID;
 
     function setUp() public {
         reset();
+
+        MINT_TOKENID = mintable(3004);
+        COMMIT_TOKENID = mintable(1498);
+        CARRY_TOKENID = mintable(1300);
+
+        SELL_TOKENID = mintable(1496);
+        CLAIM_TOKENID = mintable(1497);
         forge.vm.deal(users.dee, 40000 ether);
         forge.vm.startPrank(users.dee);
         nuggft.mint{value: 100 ether}(COMMIT_TOKENID);

@@ -11,12 +11,6 @@ import "../_test/utils/forge.sol";
 /// @notice mechanism for trading of nuggs between users (and items between nuggs)
 /// @dev Explain to a developer any extra details
 abstract contract NuggftV1Swap is INuggftV1ItemSwap, INuggftV1Swap, NuggftV1Stake {
-    mapping(uint24 => mapping(address => uint256)) private _offers;
-    mapping(uint40 => mapping(uint24 => uint256)) private _itemOffers;
-    mapping(uint40 => uint256) private _itemAgency;
-
-    mapping(uint16 => uint256) public lastItemSwap;
-
     function offers(uint24 tokenId, address account) public view returns (uint256 value) {
         return _offers[tokenId][account];
     }
@@ -32,8 +26,6 @@ abstract contract NuggftV1Swap is INuggftV1ItemSwap, INuggftV1Swap, NuggftV1Stak
     ) public view returns (uint256 value) {
         return _itemOffers[uint40(sellingTokenId) | (uint40(itemId) << 24)][buyingTokenid];
     }
-
-    constructor() {}
 
     /// @inheritdoc INuggftV1Swap
     function offer(uint24 tokenId) public payable override {
@@ -117,7 +109,7 @@ abstract contract NuggftV1Swap is INuggftV1ItemSwap, INuggftV1Swap, NuggftV1Stak
         if (active == tokenId && agency__cache == 0) {
             // [Offer:Mint]
 
-            uint256 proof = initFromSeed(calculateSeed(uint24(active)));
+            uint256 _proof = initFromSeed(calculateSeed(uint24(active)));
 
             // uint256 hotproof__cache = hotproof[uint8(tokenId % HOT_PROOF_AMOUNT)];
 
@@ -125,11 +117,11 @@ abstract contract NuggftV1Swap is INuggftV1ItemSwap, INuggftV1Swap, NuggftV1Stak
             // if (hotproof__cache == HOT_PROOF_EMPTY) {
             //     hotproof[uint8(tokenId % HOT_PROOF_AMOUNT)] = proof;
             // } else {
-            proofs[uint24(tokenId)] = proof;
+            proof[uint24(tokenId)] = _proof;
 
-            address itemHolder = address(emitter);
+            address itemHolder = address(inuggftv1);
             // }
-            // emitter.proofTransferBatch(proof, address(0), address(this));
+            // inuggftv1.proofTransferBatch(proof, address(0), address(this));
 
             // otherwise this
             this.addStakedShare(msg.value);
@@ -146,7 +138,7 @@ abstract contract NuggftV1Swap is INuggftV1ItemSwap, INuggftV1Swap, NuggftV1Stak
 
                 // log the updated agency
                 mstore(0x00, agency__cache)
-                mstore(0x20, proof)
+                mstore(0x20, _proof)
 
                 log2( // -------------------------------------------------------
                     /* param #1: agency  */ 0x00, /* [ agency[tokenId]    ]     0x20,
@@ -420,7 +412,7 @@ abstract contract NuggftV1Swap is INuggftV1ItemSwap, INuggftV1Swap, NuggftV1Stak
     ) public override {
         uint256 active = epoch();
 
-        address itemsHolder = address(emitter);
+        address itemsHolder = address(inuggftv1);
 
         // prettier-ignore
         assembly {
@@ -492,7 +484,7 @@ abstract contract NuggftV1Swap is INuggftV1ItemSwap, INuggftV1Swap, NuggftV1Stak
             mstore(0x120, _itemOffers.slot)
 
             // store common slot for proof in memory
-            mstore(0x160, proofs.slot)
+            mstore(0x160, proof.slot)
 
 
 
@@ -576,18 +568,18 @@ abstract contract NuggftV1Swap is INuggftV1ItemSwap, INuggftV1Swap, NuggftV1Stak
 
                         let proof__sptr := keccak256(0x140, 0x40)
 
-                        let proof := sload(proof__sptr)
+                        let _proof := sload(proof__sptr)
 
                         // prettier-ignore
                         for { let j := 8 } lt(j, 16) { j := add(j, 1) } {
-                            if iszero(and(shr(mul(j, 16), proof), 0xffff)) {
+                            if iszero(and(shr(mul(j, 16), _proof), 0xffff)) {
                                 let tmp := shr(24, tokenId)
-                                proof := xor(proof, shl(mul(j, 16), tmp))
+                                _proof := xor(_proof, shl(mul(j, 16), tmp))
                                 break
                             }
                         }
 
-                        sstore(proof__sptr, proof)
+                        sstore(proof__sptr, _proof)
 
 
                         mstore(0x220, Function__transferSingle )
@@ -599,16 +591,16 @@ abstract contract NuggftV1Swap is INuggftV1ItemSwap, INuggftV1Swap, NuggftV1Stak
                             panic(Error__0xAE__FailedCallToItemsHolder)
                          }
 
-                        mstore(0x1A0, proof)
+                        mstore(0x1A0, _proof)
                     }
                     default {
 
                         mstore(0x140, tokenId)
 
-                        let proof := sload(keccak256(0x140, 0x40))
+                        let _proof := sload(keccak256(0x140, 0x40))
 
                         mstore(0x220, Function__transferBatch)
-                        mstore(0x240, proof)
+                        mstore(0x240, _proof)
                         mstore(0x260, address())
                         mstore(0x280, caller())
 
@@ -716,7 +708,7 @@ abstract contract NuggftV1Swap is INuggftV1ItemSwap, INuggftV1Swap, NuggftV1Stak
     }
 
     function _sell(uint40 tokenId, uint96 floor) private {
-        address itemHolder = address(emitter);
+        address itemHolder = address(inuggftv1);
 
         assembly {
             function panic(code) {
@@ -778,11 +770,11 @@ abstract contract NuggftV1Swap is INuggftV1ItemSwap, INuggftV1Swap, NuggftV1Stak
                 mstore(0x00, sender)
 
                 // store common slot for offers in memory
-                mstore(0x20, proofs.slot)
+                mstore(0x20, proof.slot)
 
                 let proof__sptr := keccak256(0x00, 0x40)
 
-                let proof := sload(proof__sptr)
+                let _proof := sload(proof__sptr)
 
                 let id := shr(24, tokenId)
 
@@ -791,8 +783,8 @@ abstract contract NuggftV1Swap is INuggftV1ItemSwap, INuggftV1Swap, NuggftV1Stak
 
                 // prettier-ignore
                 for { } lt(j, 16) { j := add(j, 1) } {
-                    if eq(and(shr(mul(j, 16), proof), 0xffff), id) {
-                        proof := and(proof, not(shl(mul(j, 16), 0xffff)))
+                    if eq(and(shr(mul(j, 16), _proof), 0xffff), id) {
+                        _proof := and(_proof, not(shl(mul(j, 16), 0xffff)))
                         break
                     }
                 }
@@ -801,7 +793,7 @@ abstract contract NuggftV1Swap is INuggftV1ItemSwap, INuggftV1Swap, NuggftV1Stak
                     panic(Error__0xA9__ProofDoesNotHaveItem)
                 }
 
-                sstore(proof__sptr, proof)
+                sstore(proof__sptr, _proof)
 
                 // ==== agency[tokenId] =====
                 //   flag  = SWAP(0x03)
@@ -816,7 +808,7 @@ abstract contract NuggftV1Swap is INuggftV1ItemSwap, INuggftV1Swap, NuggftV1Stak
 
                 // log2 with 'Sell(uint24,bytes32)' topic
                 mstore(0x00, agency__cache)
-                mstore(0x20, proof)
+                mstore(0x20, _proof)
 
                 log3(0x00, 0x40, Event__SellItem, and(tokenId, 0xffffff), shr(24, tokenId))
 
@@ -874,12 +866,12 @@ abstract contract NuggftV1Swap is INuggftV1ItemSwap, INuggftV1Swap, NuggftV1Stak
                     ) // ===========================================================
 
                 mstore(0x00, tokenId)
-                mstore(0x20, proofs.slot)
+                mstore(0x20, proof.slot)
 
-                let proof := sload(keccak256(0x00, 0x40))
+                let _proof := sload(keccak256(0x00, 0x40))
 
                 mstore(0x00, Function__transferBatch)
-                mstore(0x20, proof)
+                mstore(0x20, _proof)
                 mstore(0x40, address())
                 mstore(0x60, caller())
 
@@ -956,13 +948,13 @@ abstract contract NuggftV1Swap is INuggftV1ItemSwap, INuggftV1Swap, NuggftV1Stak
                 current := mul(juke(offerData, 26, 186), LOSS)
 
                 next := mul(juke(swapData, 26, 186), LOSS)
-            }
 
-            if lt(next, 100000000000) {
-                next := 100000000000
-            }
+                if lt(next, 100000000000) {
+                    next := 100000000000
+                }
 
-            next := mul(div(mul(div(next, LOSS), INCREMENT_BPS), BASE_BPS), LOSS)
+                next := mul(div(mul(div(next, LOSS), INCREMENT_BPS), BASE_BPS), LOSS)
+            }
         }
     }
 

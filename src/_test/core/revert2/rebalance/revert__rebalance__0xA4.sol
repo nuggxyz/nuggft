@@ -5,10 +5,9 @@ pragma solidity 0.8.13;
 import "../../../NuggftV1.test.sol";
 
 abstract contract revert__rebalance__0xA4 is NuggftV1Test {
-    uint24 private TOKEN1 = mintable(0);
-    uint24 private TOKEN2 = mintable(1);
-
     function test__revert__rebalance__0xA4__fail__desc() public {
+        uint24 TOKEN1 = mintable(0);
+        uint24 TOKEN2 = mintable(1);
         jumpStart();
         expect.mint().from(users.frank).value(1 ether).exec(TOKEN1);
 
@@ -22,6 +21,8 @@ abstract contract revert__rebalance__0xA4 is NuggftV1Test {
     }
 
     function test__revert__rebalance__0xA4__pass__desc() public {
+        uint24 TOKEN1 = mintable(0);
+        uint24 TOKEN2 = mintable(1);
         jumpStart();
         expect.mint().from(users.frank).value(1 ether).exec(TOKEN1);
 
@@ -35,6 +36,8 @@ abstract contract revert__rebalance__0xA4 is NuggftV1Test {
     }
 
     function test__revert__rebalance__0xA4__pass__donate() public {
+        uint24 TOKEN1 = mintable(0);
+        uint24 TOKEN2 = mintable(1);
         jumpStart();
         expect.mint().from(users.frank).value(1 ether).exec(TOKEN1);
 

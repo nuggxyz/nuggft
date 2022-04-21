@@ -5,12 +5,16 @@ pragma solidity 0.8.13;
 import "../../NuggftV1.test.sol";
 
 contract txgas__NuggftV1Loan is NuggftV1Test {
-    uint24 private LOAN_TOKENID = mintable(1499);
-    uint24 private REBALANCE_TOKENID = mintable(1498);
-    uint24 private LIQUIDATE_TOKENID = mintable(1497);
+    uint24 private LOAN_TOKENID;
+    uint24 private REBALANCE_TOKENID;
+    uint24 private LIQUIDATE_TOKENID;
 
     function setUp() public {
         reset();
+
+        LOAN_TOKENID = mintable(1499);
+        REBALANCE_TOKENID = mintable(1498);
+        LIQUIDATE_TOKENID = mintable(1497);
 
         forge.vm.deal(users.frank, 40000 ether);
         forge.vm.startPrank(users.frank);

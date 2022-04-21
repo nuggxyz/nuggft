@@ -11,7 +11,7 @@ abstract contract logic__Add is NuggftV1Test {
         jumpStart();
         jumpSwap();
 
-        uint96 start = .01 ether;
+        uint96 start = nuggft.msp();
 
         nuggft.mint{value: start}(mintable(0));
 

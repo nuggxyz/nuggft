@@ -83,8 +83,12 @@ contract Revert2 is
     function setUp() public {
         // dep.init();
 
+        forge.vm.startPrank(dub6ix);
+
+        forge.vm.deal(dub6ix, 1 ether);
+
         processor = IDotnuggV1Safe(address(new DotnuggV1()));
-        nuggft = new RiggedNuggft(address(processor));
+        nuggft = new RiggedNuggft{value: 1 ether}(address(processor));
 
         _nuggft = address(nuggft);
 
@@ -92,7 +96,6 @@ contract Revert2 is
 
         _processor = address(processor);
 
-        forge.vm.startPrank(0x9B0E2b16F57648C7bAF28EDD7772a815Af266E77);
         nuggft.setIsTrusted(users.safe, true);
         forge.vm.stopPrank();
     }

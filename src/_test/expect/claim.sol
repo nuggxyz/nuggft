@@ -359,7 +359,7 @@ contract expectClaim is base {
         uint16 itemId,
         string memory str
     ) private {
-        uint256 proof = nuggft.proofOf(tokenId);
+        uint256 proof = nuggft.proof(tokenId);
 
         (bool hasItem, ) = proofSearch(proof, itemId);
         ds.assertTrue(hasItem, string(abi.encodePacked("assertProofContains FAILED: - ", str)));
@@ -370,7 +370,7 @@ contract expectClaim is base {
         uint16 itemId,
         string memory str
     ) private {
-        uint256 proof = nuggft.proofOf(tokenId);
+        uint256 proof = nuggft.proof(tokenId);
 
         (bool hasItem, ) = proofSearch(proof, itemId);
 

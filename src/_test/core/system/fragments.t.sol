@@ -7,7 +7,6 @@ import {NuggftV1Proof} from "../../../core/NuggftV1Proof.sol";
 
 abstract contract fragments is NuggftV1Test {
     uint16 itemId;
-    uint24 private TOKEN1 = mintable(0);
 
     function userMints(address user, uint24 token) public {
         uint96 value = nuggft.msp();
@@ -19,6 +18,8 @@ abstract contract fragments is NuggftV1Test {
     }
 
     function deeSellsAnItem() public {
+        uint24 TOKEN1 = mintable(0);
+
         uint96 value = 1 ether;
 
         expect.mint().exec(TOKEN1, lib.txdata(users.dee, 0, ""));

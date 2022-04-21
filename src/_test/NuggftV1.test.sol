@@ -20,7 +20,7 @@ import {DotnuggV1Lib} from "../libraries/DotnuggV1Lib.sol";
 import {NuggftV1AgentType} from "./helpers/NuggftV1AgentType.sol";
 
 contract RiggedNuggft is NuggftV1 {
-    constructor(address dotnuggv1) NuggftV1(dotnuggv1) {
+    constructor(address dotnuggv1) payable NuggftV1(dotnuggv1) {
         // featureLengths = 0x0303030303030303;
     }
 
@@ -31,7 +31,7 @@ contract RiggedNuggft is NuggftV1 {
     }
 
     function external__search(uint8 feature, uint256 seed) external view returns (uint8) {
-        return DotnuggV1Lib.search(address(dotnuggV1), feature, seed);
+        return DotnuggV1Lib.search(address(dotnuggv1), feature, seed);
     }
 
     function external__calculateSeed() external view returns (uint256 res, uint24 _epoch) {
@@ -112,11 +112,15 @@ contract NuggftV1Test is ForgeTest, NuggftV1Constants {
 
     // constructor() {}
 
-    function mintable(uint24 input) public returns (uint24) {
-        return input + TRUSTED_MINT_TOKENS + MINT_OFFSET;
+    function trustMintable(uint24 input) public view returns (uint24) {
+        return earlyMintable(input) + nuggft.early();
     }
 
-    function trustMintable(uint24 input) public returns (uint24) {
+    function mintable(uint24 input) public view returns (uint24) {
+        return TRUSTED_MINT_TOKENS + trustMintable(input);
+    }
+
+    function earlyMintable(uint24 input) public pure returns (uint24) {
         return MINT_OFFSET + input;
     }
 
@@ -127,8 +131,11 @@ contract NuggftV1Test is ForgeTest, NuggftV1Constants {
 
         // dep.init()   ;
 
+        forge.vm.deal(dub6ix, 1 ether);
+        forge.vm.startPrank(dub6ix);
+
         processor = IDotnuggV1Safe(address(new DotnuggV1()));
-        nuggft = new RiggedNuggft(address(processor));
+        nuggft = new RiggedNuggft{value: 1 ether}(address(processor));
 
         _nuggft = address(nuggft);
 
@@ -138,8 +145,8 @@ contract NuggftV1Test is ForgeTest, NuggftV1Constants {
 
         _migrator = new MockNuggftV1Migrator();
 
-        forge.vm.startPrank(0x9B0E2b16F57648C7bAF28EDD7772a815Af266E77);
         nuggft.setIsTrusted(users.safe, true);
+
         forge.vm.stopPrank();
 
         jumpStart();
@@ -288,7 +295,7 @@ contract NuggftV1Test is ForgeTest, NuggftV1Constants {
     function scenario_dee_has_a_token() public payable returns (uint24 tokenId) {
         tokenId = mintable(2069);
 
-        expect.mint().from(users.dee).exec(tokenId);
+        expect.mint().from(users.dee).exec{value: nuggft.msp()}(tokenId);
     }
 
     function scenario_frank_has_a_token_and_spent_50_eth() public payable returns (uint24 tokenId) {
@@ -318,15 +325,13 @@ contract NuggftV1Test is ForgeTest, NuggftV1Constants {
     function scenario_dee_has_a_token_2() public payable returns (uint24 tokenId) {
         tokenId = mintable(1900);
 
-        forge.vm.prank(users.dee);
-        nuggft.mint(tokenId);
+        expect.mint().from(users.dee).exec{value: nuggft.msp()}(tokenId);
     }
 
     function scenario_charlie_has_a_token() public payable returns (uint24 tokenId) {
         tokenId = mintable(2700);
 
-        forge.vm.prank(users.charlie);
-        nuggft.mint(tokenId);
+        expect.mint().from(users.charlie).exec{value: nuggft.msp()}(tokenId);
     }
 
     function scenario_migrator_set() public payable {

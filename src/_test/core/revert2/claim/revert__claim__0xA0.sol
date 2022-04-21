@@ -7,12 +7,13 @@ import "../../../NuggftV1.test.sol";
 abstract contract revert__claim__0xA0 is NuggftV1Test {
     // had to rig this one. the checks are too good
     function test__revert__claim__0xA0__fail__desc() public {
-        expect.mint().from(users.frank).value(1 ether).exec(mintable(0));
+        uint24 tokenIdA = mintable(0);
+        expect.mint().from(users.frank).value(1 ether).exec(tokenIdA);
 
         forge.vm.prank(users.frank);
         forge.vm.expectRevert(hex"7e863b48_a0");
 
-        nuggft.claim(array.b24(mintable(0)), lib.sarrAddress(users.frank), array.b24(0), array.b16(0));
+        nuggft.claim(array.b24(tokenIdA), lib.sarrAddress(users.frank), array.b24(0), array.b16(0));
     }
 
     function test__revert__claim__0xA0__pass__desc() public {

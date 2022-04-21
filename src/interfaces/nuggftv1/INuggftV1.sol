@@ -9,6 +9,7 @@ import {INuggftV1Loan} from "./INuggftV1Loan.sol";
 import {INuggftV1Epoch} from "./INuggftV1Epoch.sol";
 import {INuggftV1Trust} from "./INuggftV1Trust.sol";
 import {INuggftV1ItemSwap} from "./INuggftV1ItemSwap.sol";
+import {INuggftV1Globals} from "./INuggftV1Globals.sol";
 
 import {IERC721Metadata, IERC721} from "../IERC721.sol";
 
@@ -22,18 +23,18 @@ interface INuggftV1 is
     INuggftV1Loan,
     INuggftV1Epoch,
     INuggftV1Trust,
-    INuggftV1ItemSwap
+    INuggftV1ItemSwap,
+    INuggftV1Globals
 {
 
 
 }
 
 interface INuggftV1Events {
-    event Genesis(uint256 blocknum, uint32 interval, uint24 offset, uint8 intervalOffset);
+    event Genesis(uint256 blocknum, uint32 interval, uint24 offset, uint8 intervalOffset, uint24 early, address dotnugg, address inuggftv1, bytes32 stake);
     event OfferItem(uint24 indexed sellingTokenId, uint16 indexed itemId, bytes32 agency, bytes32 stake);
     event ClaimItem(uint24 indexed sellingTokenId, uint16 indexed itemId, uint24 indexed buyerTokenId, bytes32 proof);
     event SellItem(uint24 indexed sellingTokenId, uint16 indexed itemId, bytes32 agency, bytes32 proof);
-
     event Loan(uint24 indexed tokenId, bytes32 agency);
     event Rebalance(uint24 indexed tokenId, bytes32 agency);
     event Liquidate(uint24 indexed tokenId, bytes32 agency);

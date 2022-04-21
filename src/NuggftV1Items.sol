@@ -77,7 +77,7 @@ contract NuggftV1Items is IERC1155, IERC1155Metadata_URI {
     function uri(uint256 tokenId) public view virtual override returns (string memory res) {
         // prettier-ignore
         res = string(
-            nuggftv1.dotnuggV1().encodeJsonAsBase64(
+            nuggftv1.dotnuggv1().encodeJsonAsBase64(
                 abi.encodePacked(
                      '{"name":"',         name(),
                     '","description":"',  parseItemIdAsString(uint16(tokenId),
@@ -97,7 +97,7 @@ contract NuggftV1Items is IERC1155, IERC1155Metadata_URI {
         uint256 bal = nuggftv1.balance(_owner);
 
         while (bal != 0) {
-            uint256 proof = nuggftv1.proofOf(uint24(bal <<= 24));
+            uint256 proof = nuggftv1.proof(uint24(bal <<= 24));
             while (proof != 0) if ((proof <<= 16) == _id) res++;
         }
     }
