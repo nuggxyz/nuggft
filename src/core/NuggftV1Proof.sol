@@ -18,13 +18,38 @@ abstract contract NuggftV1Proof is INuggftV1Proof, NuggftV1Epoch, NuggftV1Trust 
         return uint256(keccak256(abi.encodePacked(tokenId, earlySeed)));
     }
 
+    function premintTokens() public view returns (uint24 first, uint24 last) {
+        first = MINT_OFFSET;
+
+        last = first + early - 1;
+    }
+
+    function trustedMintTokens() public view returns (uint24 first, uint24 last) {
+        (, first) = premintTokens();
+
+        last = first + TRUSTED_MINT_TOKENS;
+
+        // to avoid having to subtract from last
+        first++;
+    }
+
+    function mintTokens() public view returns (uint24 first, uint24 last) {
+        (, first) = trustedMintTokens();
+
+        last = MAX_TOKENS;
+
+        first++;
+    }
+
     /// @inheritdoc INuggftV1Proof
     function proofOf(uint24 tokenId) public view override returns (uint256 res) {
         if ((res = proof[tokenId]) != 0) return res;
 
         uint256 seed;
 
-        if (tokenId >= MINT_OFFSET && tokenId <= early) {
+        (uint24 first, uint24 last) = premintTokens();
+
+        if (tokenId >= first && tokenId <= last) {
             seed = calculateEarlySeed(tokenId);
         } else {
             uint24 epoch = epoch();

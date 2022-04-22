@@ -23,29 +23,6 @@ import {data as nuggs} from "./_data/nuggs.data.sol";
 contract NuggftV1 is IERC721, IERC721Metadata, NuggftV1Loan {
     constructor(address dotnugg) payable NuggftV1Globals(dotnugg) {}
 
-    function premintTokens() public view returns (uint24 first, uint24 last) {
-        first = MINT_OFFSET;
-
-        last = first + early - 1;
-    }
-
-    function trustedMintTokens() public view returns (uint24 first, uint24 last) {
-        (, first) = premintTokens();
-
-        last = first + TRUSTED_MINT_TOKENS;
-
-        // to avoid having to subtract from last
-        first++;
-    }
-
-    function mintTokens() public view returns (uint24 first, uint24 last) {
-        (, first) = trustedMintTokens();
-
-        last = MAX_TOKENS;
-
-        first++;
-    }
-
     function premint(uint24 tokenId) public requiresTrust {
         _repanic(agency[tokenId] == 0, Error__0x65__TokenNotMintable);
 
@@ -60,7 +37,7 @@ contract NuggftV1 is IERC721, IERC721Metadata, NuggftV1Loan {
         proof[tokenId] = _proof;
         agency[tokenId] = _agency;
 
-        emit Mint(tokenId, STARTING_PRICE, bytes32(_proof), bytes32(stake), bytes32(_agency));
+        emit PreMint(tokenId, STARTING_PRICE, bytes32(_proof), bytes32(_agency));
 
         inuggftv1.transferBatch(_proof, address(0), msg.sender);
     }
