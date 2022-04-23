@@ -3,8 +3,9 @@ pragma solidity 0.8.13;
 import "../../NuggftV1.test.sol";
 
 import {CastLib} from "../../helpers/CastLib.sol";
+import {NuggftV1} from "../../../NuggftV1.sol";
 
-import {parseItemId, decodeProof} from "../../../libraries/DotnuggV1Lib.sol";
+import {parseItemId, decodeProof, DotnuggV1Lib} from "../../../libraries/DotnuggV1Lib.sol";
 
 abstract contract logic__Rarity is NuggftV1Test {
     error Stupid(uint256);
@@ -15,15 +16,20 @@ abstract contract logic__Rarity is NuggftV1Test {
     mapping(uint16 => mapping(uint16 => uint16)) rarity;
     mapping(uint8 => uint8) count;
 
+    NuggftV1 instance;
+
+    address _dotnugg_;
+
     function grrr(uint24 offset) public {
         uint24 start = offset * 10000;
         uint24 end = start + 10000;
         for (uint24 i = start; i < end; i++) {
             uint16[] memory proof;
 
-            uint24 tokenId = mintable(uint24(i));
-            nuggft.mint{value: nuggft.msp()}(tokenId);
-            proof = nuggft.floop(tokenId);
+            uint24 tokenId = earlyMintable(uint24(i));
+
+            proof = instance.floop(tokenId);
+
             for (uint256 j = 0; j < 16; j++) {
                 uint16 item = proof[j];
                 (uint8 feature, uint8 pos) = parseItemId(item);
@@ -31,7 +37,7 @@ abstract contract logic__Rarity is NuggftV1Test {
                     if (cuml[feature][pos] == 0) {
                         // all.push(item);
                         count[feature]++;
-                        rarity[feature][pos] = nuggft.rarity(feature, pos);
+                        rarity[feature][pos] = DotnuggV1Lib.rarity(_dotnugg_, feature, pos);
                     }
                     cuml[feature][pos]++;
                     picks[feature]++;
@@ -44,10 +50,15 @@ abstract contract logic__Rarity is NuggftV1Test {
         forge.vm.deal(address(this), type(uint96).max);
         jumpStart();
         jumpSwap();
+
+        instance = new NuggftV1{value: STARTING_PRICE * 50000}();
+
+        _dotnugg_ = address(instance.dotnuggv1());
+
         for (uint24 i = 0; i < 5; i++) this.grrr(i);
 
         for (uint8 feature = 0; feature < 8; feature++) {
-            uint256 countfeat = nuggft.featureLength(feature);
+            uint256 countfeat = instance.xnuggftv1().featureSupply(feature);
             for (uint8 position = 1; position < countfeat + 1; position++) {
                 uint16 expected = rarity[feature][position];
                 uint16 real = uint16((uint32(cuml[feature][position]) * uint32(type(uint16).max)) / picks[feature]);

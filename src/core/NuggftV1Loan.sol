@@ -118,7 +118,7 @@ abstract contract NuggftV1Loan is INuggftV1Loan, NuggftV1Swap {
     /// @inheritdoc INuggftV1Loan
     function liquidate(uint24 tokenId) external payable override {
         uint256 active = epoch();
-        address itemHolder = address(inuggftv1);
+        address itemHolder = address(xnuggftv1);
 
         assembly {
             function juke(x, L, R) -> b {

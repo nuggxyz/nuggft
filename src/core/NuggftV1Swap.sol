@@ -119,9 +119,9 @@ abstract contract NuggftV1Swap is INuggftV1ItemSwap, INuggftV1Swap, NuggftV1Stak
             // } else {
             proof[uint24(tokenId)] = _proof;
 
-            address itemHolder = address(inuggftv1);
+            address itemHolder = address(xnuggftv1);
             // }
-            // inuggftv1.proofTransferBatch(proof, address(0), address(this));
+            // xnuggftv1.proofTransferBatch(proof, address(0), address(this));
 
             // otherwise this
             this.addStakedShare(msg.value);
@@ -412,7 +412,7 @@ abstract contract NuggftV1Swap is INuggftV1ItemSwap, INuggftV1Swap, NuggftV1Stak
     ) public override {
         uint256 active = epoch();
 
-        address itemsHolder = address(inuggftv1);
+        address itemsHolder = address(xnuggftv1);
 
         // prettier-ignore
         assembly {
@@ -708,7 +708,7 @@ abstract contract NuggftV1Swap is INuggftV1ItemSwap, INuggftV1Swap, NuggftV1Stak
     }
 
     function _sell(uint40 tokenId, uint96 floor) private {
-        address itemHolder = address(inuggftv1);
+        address itemHolder = address(xnuggftv1);
 
         assembly {
             function panic(code) {

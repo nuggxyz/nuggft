@@ -20,7 +20,5 @@ interface INuggftV1Proof {
 
     function imageURI(uint256 tokenId) external view returns (string memory);
 
-    function itemURI(uint256 itemId) external view returns (string memory);
-
-    function featureLength(uint8 itemId) external view returns (uint8);
+    function imageSVG(uint256 tokenId) external view returns (string memory);
 }

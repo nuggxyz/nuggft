@@ -7,7 +7,7 @@ import {IDotnuggV1Safe} from "../dotnugg/IDotnuggV1Safe.sol";
 interface INuggftV1Globals {
     /// @notice Explain to an end user what this does
     /// @dev Explain to a developer any extra details
-    event Genesis(uint256 blocknum, uint32 interval, uint24 offset, uint8 intervalOffset, uint24 early, address dotnugg, address inuggftv1, bytes32 stake);
+    event Genesis(uint256 blocknum, uint32 interval, uint24 offset, uint8 intervalOffset, uint24 early, address dotnugg, address xnuggftv1, bytes32 stake);
 
     function genesis() external view returns (uint256 res);
 

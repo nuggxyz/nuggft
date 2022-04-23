@@ -6,7 +6,7 @@ import {NuggftV1} from "../NuggftV1.sol";
 import {DotnuggV1Lib} from "../libraries/DotnuggV1Lib.sol";
 
 contract RiggedNuggftV1 is NuggftV1 {
-    constructor(address dotnuggv1) payable NuggftV1(dotnuggv1) {}
+    constructor() payable {}
 
     function getBlockHash(uint256 blocknum) internal view override returns (bytes32 res) {
         if (block.number > blocknum && block.number - blocknum < 256) {

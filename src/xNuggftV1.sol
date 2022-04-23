@@ -4,48 +4,56 @@ pragma solidity 0.8.13;
 
 import {IERC1155, IERC165, IERC1155Metadata_URI} from "./interfaces/IERC721.sol";
 
-import {DotnuggV1Lib, parseItemIdAsString} from "./libraries/DotnuggV1Lib.sol";
+import {DotnuggV1Lib, parseItemIdAsString, decodeProofCore} from "./libraries/DotnuggV1Lib.sol";
+import {IxNuggftV1} from "./interfaces/nuggftv1/IxNuggftV1.sol";
+import {DotnuggV1Lib, decodeProofCore, parseItemId, props} from "./libraries/DotnuggV1Lib.sol";
+
 import {NuggftV1} from "./NuggftV1.sol";
 
-contract NuggftV1Items is IERC1155, IERC1155Metadata_URI {
+contract xNuggftV1 is IERC1155, IERC1155Metadata_URI, IxNuggftV1 {
     NuggftV1 immutable nuggftv1;
 
     constructor() {
         nuggftv1 = NuggftV1(msg.sender);
     }
 
-    // mapping(uint256 => uint256) supply;
+    /// @inheritdoc IxNuggftV1
+    function imageURI(uint256 tokenId) public view override returns (string memory res) {
+        (uint8 feature, uint8 position) = parseItemId(tokenId);
+        res = nuggftv1.dotnuggv1().exec(feature, position, true);
+    }
+
+    /// @inheritdoc IxNuggftV1
+    function imageSVG(uint256 tokenId) public view override returns (string memory res) {
+        (uint8 feature, uint8 position) = parseItemId(tokenId);
+        res = nuggftv1.dotnuggv1().exec(feature, position, false);
+    }
 
     function transferBatch(
         uint256 proof,
         address from,
         address to
-    ) public {
+    ) public payable {
+        require(msg.sender == address(nuggftv1));
+
         unchecked {
             uint256 tmp = proof;
-            uint256 length = 0;
-            for (uint256 i = 0; i < 16; i++) {
-                uint256 check = tmp & 0xffff;
-                tmp >>= 16;
-                if (check != 0) {
-                    length++;
-                }
-            }
+
+            uint256 length = 1;
+
+            while (tmp != 0) if ((tmp >>= 16) & 0xffff != 0) length++;
 
             uint256[] memory ids = new uint256[](length);
             uint256[] memory values = new uint256[](length);
 
-            uint256 count = 0;
-            while (count < length) {
-                uint256 check = proof & 0xffff;
-                proof >>= 16;
-                if (check != 0) {
-                    values[count] = 1;
-                    ids[count] = check;
-                    count += 1;
-                    // if (from == address(0)) supply[check / 10] += (1 << check % 10);
+            ids[0] = proof & 0xffff;
+            values[0] = 1;
+
+            while (proof != 0)
+                if ((tmp = ((proof >>= 16) & 0xffff)) != 0) {
+                    ids[--length] = tmp;
+                    values[length] = 1;
                 }
-            }
 
             emit TransferBatch(address(0), from, to, ids, values);
         }
@@ -55,7 +63,8 @@ contract NuggftV1Items is IERC1155, IERC1155Metadata_URI {
         uint256 itemId,
         address from,
         address to
-    ) public {
+    ) public payable {
+        require(msg.sender == address(nuggftv1));
         emit TransferSingle(address(0), from, to, itemId, 1);
     }
 
@@ -71,7 +80,7 @@ contract NuggftV1Items is IERC1155, IERC1155Metadata_URI {
     }
 
     function symbol() public pure returns (string memory) {
-        return "iNUGGFT";
+        return "xNUGGFT";
     }
 
     function uri(uint256 tokenId) public view virtual override returns (string memory res) {
@@ -82,16 +91,25 @@ contract NuggftV1Items is IERC1155, IERC1155Metadata_URI {
                      '{"name":"',         name(),
                     '","description":"',  parseItemIdAsString(uint16(tokenId),
                             ["base", "eyes", "mouth", "hair", "hat", "background", "scarf", "held"]),
-                    '","image":"',        nuggftv1.itemURI(tokenId),
+                    '","image":"',        imageURI(tokenId),
                     '}'
                 )
             )
         );
     }
 
-    // function totalSupply(uint256 _id) public view returns (uint256 res) {
-    //     res = (supply[_id / 10] >> _id % 10) & 0xffffff;
-    // }
+    function totalSupply() public view returns (uint256 res) {
+        for (uint8 i = 0; i < 8; i++) res += featureSupply(i);
+    }
+
+    function featureSupply(uint8 feature) public view override returns (uint256 res) {
+        res = DotnuggV1Lib.lengthOf(address(nuggftv1.dotnuggv1()), feature);
+    }
+
+    function rarity(uint256 tokenId) public view returns (uint16 res) {
+        (uint8 feature, uint8 position) = parseItemId(tokenId);
+        res = DotnuggV1Lib.rarity(address(nuggftv1.dotnuggv1()), feature, position);
+    }
 
     function balanceOf(address _owner, uint256 _id) public view returns (uint256 res) {
         uint256 bal = nuggftv1.balance(_owner);
@@ -130,7 +148,7 @@ contract NuggftV1Items is IERC1155, IERC1155Metadata_URI {
         bytes calldata _data
     ) external {}
 
-    function setApprovalForAll(address _operator, bool _approved) external pure {
+    function setApprovalForAll(address, bool) external pure {
         revert("whut");
     }
 }

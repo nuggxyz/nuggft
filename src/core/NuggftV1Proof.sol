@@ -6,7 +6,7 @@ import {INuggftV1Proof} from "../interfaces/nuggftv1/INuggftV1Proof.sol";
 import {IDotnuggV1Safe} from "../interfaces/dotnugg/IDotnuggV1Safe.sol";
 import {IERC1155, IERC165} from "../interfaces/IERC721.sol";
 import {INuggftV1} from "../interfaces/nuggftv1/INuggftV1.sol";
-import {NuggftV1Items} from "../NuggftV1Items.sol";
+import {xNuggftV1} from "../xNuggftV1.sol";
 
 import {DotnuggV1Lib, parseItemIdAsString} from "../libraries/DotnuggV1Lib.sol";
 

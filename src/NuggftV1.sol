@@ -21,7 +21,7 @@ import {data as nuggs} from "./_data/nuggs.data.sol";
 /// @title NuggftV1
 /// @author nugg.xyz - danny7even & dub6ix
 contract NuggftV1 is IERC721, IERC721Metadata, NuggftV1Loan {
-    constructor(address dotnugg) payable NuggftV1Globals(dotnugg) {}
+    constructor() payable {}
 
     function premint(uint24 tokenId) public requiresTrust {
         _repanic(agency[tokenId] == 0, Error__0x65__TokenNotMintable);
@@ -39,7 +39,7 @@ contract NuggftV1 is IERC721, IERC721Metadata, NuggftV1Loan {
 
         emit PreMint(tokenId, STARTING_PRICE, bytes32(_proof), bytes32(_agency));
 
-        inuggftv1.transferBatch(_proof, address(0), msg.sender);
+        xnuggftv1.transferBatch(_proof, address(0), msg.sender);
     }
 
     /// @inheritdoc INuggftV1Proof
@@ -149,7 +149,7 @@ contract NuggftV1 is IERC721, IERC721Metadata, NuggftV1Loan {
 
         addStakedShare(value);
 
-        address itemHolder = address(inuggftv1);
+        address itemHolder = address(xnuggftv1);
 
         // prettier-ignore
         assembly {
@@ -248,18 +248,8 @@ contract NuggftV1 is IERC721, IERC721Metadata, NuggftV1Loan {
     }
 
     /// @inheritdoc INuggftV1Proof
-    function itemURI(uint256 itemId) public view override returns (string memory res) {
-        (uint8 feature, uint8 position) = parseItemId(itemId);
-        res = dotnuggv1.exec(feature, position, true);
-    }
-
-    /// @inheritdoc INuggftV1Proof
-    function featureLength(uint8 feature) public view override returns (uint8 res) {
-        res = DotnuggV1Lib.lengthOf(address(dotnuggv1), feature);
-    }
-
-    function rarity(uint8 feature, uint8 position) public view returns (uint16 res) {
-        res = DotnuggV1Lib.rarity(address(dotnuggv1), feature, position);
+    function imageSVG(uint256 tokenId) public view override returns (string memory res) {
+        res = dotnuggv1.exec(decodeProofCore(proofOf(uint24(tokenId))), false);
     }
 
     function imageURICheat(uint256 startblock, uint24 _epoch) public view returns (string memory res) {
@@ -402,3 +392,6 @@ contract NuggftV1 is IERC721, IERC721Metadata, NuggftV1Loan {
 //     _repanic(balance[friend] == 0, 0x03);
 //     balance[friend] = TICKET;
 // }
+
+// todo
+// define rarity of nuggft - make it calculatable

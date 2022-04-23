@@ -12,8 +12,8 @@ contract RiggedNuggFatherV1 {
     RiggedNuggftV1 public immutable nuggftv1;
 
     constructor() payable {
-        dotnuggv1 = new DotnuggV1();
+        nuggftv1 = new RiggedNuggftV1{value: msg.value}();
 
-        nuggftv1 = new RiggedNuggftV1{value: msg.value}(address(dotnuggv1));
+        dotnuggv1 = DotnuggV1(address(nuggftv1.dotnuggv1()));
     }
 }

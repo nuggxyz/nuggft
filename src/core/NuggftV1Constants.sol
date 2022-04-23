@@ -3,7 +3,7 @@
 pragma solidity 0.8.13;
 
 abstract contract NuggftV1Constants {
-    uint96 constant STARTING_PRICE = .01 ether;
+    uint96 constant STARTING_PRICE = .001 ether;
 
     uint24 constant TRUSTED_MINT_TOKENS = 1000;
 
@@ -31,7 +31,7 @@ abstract contract NuggftV1Constants {
 
     uint24 constant INTERVAL = 64;
 
-    uint24 constant PREMIUM_DIV = 10000;
+    uint24 constant PREMIUM_DIV = 2000;
 
     uint96 constant BASE_BPS = 10000;
 
@@ -41,7 +41,7 @@ abstract contract NuggftV1Constants {
     uint96 public constant REBALANCE_FEE_BPS = 100;
 
     // loan
-    uint24 constant LIQUIDATION_PERIOD = 9999;
+    uint24 constant LIQUIDATION_PERIOD = 200;
 
     // swap
     uint256 constant SALE_LEN = 1;
