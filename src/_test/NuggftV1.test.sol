@@ -4,86 +4,21 @@ pragma solidity 0.8.13;
 
 import {MockNuggftV1Migrator} from "./mock/MockNuggftV1Migrator.sol";
 
-import {NuggftV1} from "../NuggftV1.sol";
 import {IDotnuggV1Safe} from "../interfaces/dotnugg/IDotnuggV1Safe.sol";
-import {NuggFatherV1} from "../_deployment/NuggFatherV1.sol";
+
 import {NuggftV1Constants} from "../core/NuggftV1Constants.sol";
 
 import {Expect} from "./expect/Expect.sol";
 
-import {data} from "../_data/nuggs.data.sol";
-
-import "./utils/forge.sol";
 import {DotnuggV1} from "../../../dotnugg-v1-core/src/DotnuggV1.sol";
 import {DotnuggV1Lib} from "../libraries/DotnuggV1Lib.sol";
 
 import {NuggftV1AgentType} from "./helpers/NuggftV1AgentType.sol";
 
-contract RiggedNuggft is NuggftV1 {
-    constructor(address dotnuggv1) payable NuggftV1(dotnuggv1) {
-        // featureLengths = 0x0303030303030303;
-    }
+import {RiggedNuggFatherV1} from "./RiggedNuggFatherV1.sol";
+import {RiggedNuggftV1} from "./RiggedNuggftV1.sol";
 
-    function getBlockHash(uint256 blocknum) internal view override returns (bytes32 res) {
-        if (block.number > blocknum && block.number - blocknum < 256) {
-            return keccak256(abi.encodePacked(blocknum));
-        }
-    }
-
-    function external__search(uint8 feature, uint256 seed) external view returns (uint8) {
-        return DotnuggV1Lib.search(address(dotnuggv1), feature, seed);
-    }
-
-    function external__calculateSeed() external view returns (uint256 res, uint24 _epoch) {
-        return calculateSeed();
-    }
-
-    function external__calculateSeed(uint24 epoch) external view returns (uint256 res) {
-        return calculateSeed(epoch);
-    }
-
-    function external__agency(uint24 tokenId) external view returns (uint256 res) {
-        return agency[tokenId];
-    }
-
-    function external__stake() external view returns (uint256 res) {
-        return stake;
-    }
-
-    function external__calc(uint96 a, uint96 b) external pure returns (uint96 resa, uint96 resb) {
-        return calc(a, b);
-    }
-
-    function external__toStartBlock(uint24 _epoch, uint32 gen) public view returns (uint256 res) {
-        return toStartBlock(_epoch, gen);
-    }
-
-    function external__toStartBlock(uint24 _epoch) public view returns (uint256 res) {
-        return toStartBlock(_epoch, genesis);
-    }
-
-    function external__toEndBlock(uint24 _epoch, uint32 gen) public view returns (uint256 res) {
-        return toEndBlock(_epoch, gen);
-    }
-
-    function external__toEpoch(uint256 blocknum, uint256 gen) public view returns (uint256 res) {
-        return toEpoch(blocknum, gen);
-    }
-
-    function external__agency__slot() public view returns (bytes32 res) {
-        assembly {
-            res := agency.slot
-        }
-    }
-
-    function external__LOSS() public view returns (uint256 res) {
-        res = LOSS;
-    }
-
-    function external__initFromSeed(uint256 seed) public view returns (uint256 res) {
-        return initFromSeed(seed);
-    }
-}
+import "./utils/forge.sol";
 
 library SafeCast {
     function safeInt(uint96 input) internal pure returns (int192) {
@@ -96,14 +31,16 @@ contract NuggftV1Test is ForgeTest, NuggftV1Constants {
     using SafeCast for uint256;
     using SafeCast for uint64;
 
-    IDotnuggV1Safe public processor;
+    DotnuggV1 public dotnugg;
 
-    MockNuggftV1Migrator public _migrator;
+    MockNuggftV1Migrator public migrator;
 
-    RiggedNuggft internal nuggft;
+    RiggedNuggftV1 internal nuggft;
+
+    RiggedNuggFatherV1 internal father;
 
     address public _nuggft;
-    address public _processor;
+    address public _dotnugg;
     address public _proxy;
 
     Expect expect;
@@ -124,26 +61,26 @@ contract NuggftV1Test is ForgeTest, NuggftV1Constants {
         return MINT_OFFSET + input;
     }
 
-    function reset() public {
-        // forge.vm.roll(1000);
-        // bytes memory tmp = hex'000100';
+    function createInstance(address creator, uint96 value) private {
         ds.setDsTest(address(this));
 
-        // dep.init()   ;
+        forge.vm.deal(creator, value);
 
-        forge.vm.deal(dub6ix, 1 ether);
-        forge.vm.startPrank(dub6ix);
+        forge.vm.startPrank(creator);
 
-        processor = IDotnuggV1Safe(address(new DotnuggV1()));
-        nuggft = new RiggedNuggft{value: 1 ether}(address(processor));
+        father = new RiggedNuggFatherV1{value: value}();
+
+        nuggft = father.nuggftv1();
+
+        dotnugg = father.dotnuggv1();
+
+        migrator = new MockNuggftV1Migrator();
 
         _nuggft = address(nuggft);
 
         expect = new Expect(_nuggft);
 
-        _processor = address(processor);
-
-        _migrator = new MockNuggftV1Migrator();
+        _dotnugg = address(dotnugg);
 
         nuggft.setIsTrusted(users.safe, true);
 
@@ -152,14 +89,22 @@ contract NuggftV1Test is ForgeTest, NuggftV1Constants {
         jumpStart();
     }
 
+    function resetManual(address trusted, uint96 value) public {
+        createInstance(trusted, value);
+    }
+
+    function reset() public {
+        createInstance(dub6ix, 1 ether);
+    }
+
     // function reset__fork() public {
     //     ds.setDsTest(address(this));
     //     NuggFatherV1 dep = new NuggFatherV1(data);
 
     //     // dep.init();
 
-    //     processor = IDotnuggV1Safe(dep.dotnugg());
-    //     nuggft = new RiggedNuggft(address(processor));
+    //     dotnugg = IDotnuggV1Safe(dep.dotnugg());
+    //     nuggft = new RiggedNuggft(address(dotnugg));
 
     //     // record.build(nuggft.external__agency__slot());
 
@@ -167,9 +112,9 @@ contract NuggftV1Test is ForgeTest, NuggftV1Constants {
 
     //     expect = new Expect(_nuggft);
 
-    //     _processor = address(processor);
+    //     _dotnugg = address(dotnugg);
 
-    //     _migrator = new MockNuggftV1Migrator();
+    //      migrator = new MockNuggftV1Migrator();
 
     //     users.frank = forge.vm.addr(12);
     //     forge.vm.deal(users.frank, 90000 ether);
@@ -336,7 +281,7 @@ contract NuggftV1Test is ForgeTest, NuggftV1Constants {
 
     function scenario_migrator_set() public payable {
         forge.vm.prank(users.safe);
-        nuggft.setMigrator(address(_migrator));
+        nuggft.setMigrator(address(migrator));
     }
 
     function scenario_dee_has_a_token_and_can_sell() public payable returns (uint24 tokenId) {

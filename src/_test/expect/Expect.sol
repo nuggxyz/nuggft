@@ -17,8 +17,6 @@ import {expectLiquidate} from "./liquidate.sol";
 import {expectBurn} from "./burn.sol";
 import {expectDonate} from "./donate.sol";
 
-import {RiggedNuggft} from "../NuggftV1.test.sol";
-
 contract Expect {
     expectClaim public claim;
     expectOffer public offer;

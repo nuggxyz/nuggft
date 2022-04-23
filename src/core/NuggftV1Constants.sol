@@ -6,6 +6,7 @@ abstract contract NuggftV1Constants {
     uint96 constant STARTING_PRICE = .01 ether;
 
     uint24 constant TRUSTED_MINT_TOKENS = 1000;
+
     uint24 constant OFFSET = 1; // must be > 0
 
     uint24 constant MINT_OFFSET = 1000000;
@@ -15,7 +16,6 @@ abstract contract NuggftV1Constants {
     uint256 constant HOT_PROOF_EMPTY = 0x10000;
 
     uint96 constant LOSS = .1 gwei;
-    uint8 constant HOT_PROOF_AMOUNT = 32;
 
     // the portion of all other earnings to protocol
     uint96 constant PROTOCOL_FEE_FRAC = 10;
@@ -34,6 +34,7 @@ abstract contract NuggftV1Constants {
     uint24 constant PREMIUM_DIV = 10000;
 
     uint96 constant BASE_BPS = 10000;
+
     uint96 constant INCREMENT_BPS = 10500;
 
     // warning: causes liq and reb noFallback tests to break with +-1 wei rounding error if 600
@@ -41,8 +42,6 @@ abstract contract NuggftV1Constants {
 
     // loan
     uint24 constant LIQUIDATION_PERIOD = 9999;
-
-    uint256 constant TICKET = type(uint256).max;
 
     // swap
     uint256 constant SALE_LEN = 1;
@@ -62,11 +61,8 @@ abstract contract NuggftV1Constants {
     // event Claim(uint24,address);
     // event Sell(uint24,bytes32);
     // event TrustUpdated(address,bool);
-
     // event OfferItem(uint24,uint16,bytes32,bytes32);
-
     // event ClaimItem(uint24,uint16,uint24,bytes32);
-
     // event SellItem(uint24,uint16,bytes32,bytes32);
 
     // events
@@ -74,7 +70,6 @@ abstract contract NuggftV1Constants {
     bytes32 constant Event__Stake = 0xaa5755b13aae1e22c9577b90686d1db9a410d173607fc31d743b5d26182e18d5;
     bytes32 constant Event__Rebalance = 0xeb8e55e8fc88bc9f628322210d29573d744e485c0d6187a21a714f78d7d061b4;
     bytes32 constant Event__Liquidate = 0x7fd4eefc393ae5de976724f1b15e506c4a3defc689243aaed3055caac17fb264;
-    // Loan(uint24,bytes32)
     bytes32 constant Event__Loan = 0x9fee03d24f4262ff4c5fb3232ff16949f4dccdd085da00bf1f1193c3723eee53;
     bytes32 constant Event__Claim = 0xbacda7540a51e78a634d77c6141a7d5a880d452aaa9eadbd7dcf76f28df7116d;
     bytes32 constant Event__ClaimItem = 0xcd1615176b23cfc579068e17d243a2b8aa647d8052f1f285153e4d2464c5faf8;

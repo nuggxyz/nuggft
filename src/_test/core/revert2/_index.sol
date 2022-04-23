@@ -81,22 +81,6 @@ contract Revert2 is
     revert__sell__0xA9
 {
     function setUp() public {
-        // dep.init();
-
-        forge.vm.startPrank(dub6ix);
-
-        forge.vm.deal(dub6ix, 1 ether);
-
-        processor = IDotnuggV1Safe(address(new DotnuggV1()));
-        nuggft = new RiggedNuggft{value: 1 ether}(address(processor));
-
-        _nuggft = address(nuggft);
-
-        expect = new Expect(_nuggft);
-
-        _processor = address(processor);
-
-        nuggft.setIsTrusted(users.safe, true);
-        forge.vm.stopPrank();
+        resetManual(dub6ix, 1 ether);
     }
 }
