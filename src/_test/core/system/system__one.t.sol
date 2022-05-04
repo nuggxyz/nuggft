@@ -26,6 +26,29 @@ abstract contract system__one is NuggftV1Test {
         forge.vm.stopPrank();
     }
 
+    function test__system__frankHasItemWar() public {
+        uint24 token1 = mintable(1);
+        uint24 token2 = mintable(2);
+
+        expect.mint().from(users.frank).value(nuggft.msp()).exec(token1);
+        expect.mint().from(users.frank).value(nuggft.msp()).exec(token2);
+
+        uint16 item = nuggft.floop(token1)[8];
+
+        expect.sell().from(users.frank).exec(token1, item, 1 ether);
+
+        expect.offer().from(users.frank).value(1.1 ether).exec(token2, token1, item);
+
+        jumpSwap();
+
+        expect.claim().from(users.frank).exec(
+            array.b24(token1, token1),
+            array.bAddress(address(0), address(0)),
+            array.b24(token1, token2),
+            array.b16(item, item)
+        );
+    }
+
     function test__system__frankMintsATokenForFree() public {
         // TOKEN1 = mintable(1);
         // // expect.stake().start(0, 1, true);
