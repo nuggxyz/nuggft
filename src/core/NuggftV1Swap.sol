@@ -604,6 +604,7 @@ abstract contract NuggftV1Swap is INuggftV1ItemSwap, INuggftV1Swap, NuggftV1Stak
                         mstore(0x260, address())
                         mstore(0x280, caller())
 
+                        // this call can only fail if not enough gas is passed
                         if iszero(call(gas(), mload(0x200), 0x00, 0x23C, 0x64, 0x00, 0x00)) {
                             panic(Error__0xAE__FailedCallToItemsHolder)
                         }

@@ -174,7 +174,11 @@ contract NuggftV1 is IERC721, IERC721Metadata, NuggftV1Loan {
             mstore(0x60, caller())
 
             // TODO make sure this is the right way to do this
-            pop(call(gas(), itemHolder, 0x00, 0x1C, 0x64, 0x00, 0x00))
+            if iszero(call(gas(), itemHolder, 0x00, 0x1C, 0x64, 0x00, 0x00)) {
+                mstore(0x00, Revert__Sig)
+                mstore8(31, Error__0xAE__FailedCallToItemsHolder)
+                revert(27, 0x5)
+            }
 
             mstore(0x40, ptr)
         }
