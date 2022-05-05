@@ -86,14 +86,14 @@ contract xNuggftV1 is IERC1155, IERC1155Metadata_URI, IxNuggftV1 {
     function uri(uint256 tokenId) public view virtual override returns (string memory res) {
         // prettier-ignore
         res = string(
-            nuggftv1.dotnuggv1().encodeJsonAsBase64(
+            nuggftv1.dotnuggv1().encodeJson(
                 abi.encodePacked(
                      '{"name":"',         name(),
                     '","description":"',  parseItemIdAsString(uint16(tokenId),
                             ["base", "eyes", "mouth", "hair", "hat", "background", "scarf", "held"]),
                     '","image":"',        imageURI(tokenId),
                     '}'
-                )
+                ), true
             )
         );
     }

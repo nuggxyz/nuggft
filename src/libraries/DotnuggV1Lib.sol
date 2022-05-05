@@ -410,3 +410,27 @@ function props(uint8[8] memory ids, string[8] memory labels) pure returns (strin
 //     }
 //     return buffer;
 // }
+
+function chunk(
+    string memory input,
+    uint8 chunks,
+    uint8 index
+) pure returns (string memory res) {
+    res = input;
+
+    if (chunks == 0 || index > chunks - 1) return "";
+
+    assembly {
+        let strlen := div(mload(res), chunks)
+
+        let start := mul(strlen, index)
+
+        if gt(strlen, sub(mload(res), start)) {
+            strlen := sub(mload(res), start)
+        }
+
+        res := add(res, start)
+
+        mstore(res, strlen)
+    }
+}

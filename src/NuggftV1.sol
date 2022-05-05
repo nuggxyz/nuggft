@@ -232,7 +232,7 @@ contract NuggftV1 is IERC721, IERC721Metadata, NuggftV1Loan {
     function tokenURI(uint256 tokenId) public view virtual override returns (string memory res) {
         // prettier-ignore
         res = string(
-            dotnuggv1.encodeJsonAsBase64(
+            dotnuggv1.encodeJson(
                 abi.encodePacked(
                      '{"name":"',         name(),
                     '","description":"',  symbol(),
@@ -241,8 +241,8 @@ contract NuggftV1 is IERC721, IERC721Metadata, NuggftV1Loan {
                                 ['base', 'eyes', 'mouth', 'hair', 'hat', 'background', 'scarf', 'held']
                             ),
                     '}'
-                )
-            )
+                ),
+            true)
         );
     }
 
@@ -254,6 +254,24 @@ contract NuggftV1 is IERC721, IERC721Metadata, NuggftV1Loan {
     /// @inheritdoc INuggftV1Proof
     function imageSVG(uint256 tokenId) public view override returns (string memory res) {
         res = dotnuggv1.exec(decodeProofCore(proofOf(uint24(tokenId))), false);
+    }
+
+    /// @inheritdoc INuggftV1Proof
+    function image123(
+        uint256 tokenId,
+        bool base64,
+        uint8 chunk,
+        bytes calldata prev
+    ) public view override returns (bytes memory res) {
+        if (chunk == 1) {
+            res = abi.encode(dotnuggv1.read(decodeProofCore(proofOf(uint24(tokenId)))));
+        } else if (chunk == 2) {
+            (uint256[] memory calced, uint256 dat) = dotnuggv1.calc(abi.decode(prev, (uint256[][])));
+            res = abi.encode(calced, dat);
+        } else if (chunk == 3) {
+            (uint256[] memory calced, uint256 dat) = abi.decode(prev, (uint256[], uint256));
+            res = bytes(dotnuggv1.svg(calced, dat, base64));
+        }
     }
 
     function imageURICheat(uint256 startblock, uint24 _epoch) public view returns (string memory res) {

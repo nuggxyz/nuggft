@@ -21,4 +21,18 @@ interface INuggftV1Proof {
     function imageURI(uint256 tokenId) external view returns (string memory);
 
     function imageSVG(uint256 tokenId) external view returns (string memory);
+
+    // function imageSVG(
+    //     uint256 tokenId,
+    //     bool base64,
+    //     uint8 chunks,
+    //     uint8 index
+    // ) external view returns (string memory res);
+
+    function image123(
+        uint256 tokenId,
+        bool base64,
+        uint8 chunk,
+        bytes memory prev
+    ) external view returns (bytes memory res);
 }

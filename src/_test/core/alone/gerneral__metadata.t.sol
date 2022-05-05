@@ -34,4 +34,23 @@ contract general__NuggftV1Loan is NuggftV1Test {
 
         ds.emit_log_named_string("hi", nuggft.imageURI(token));
     }
+
+    function test__image123() public {
+        uint24 token = mintable(1);
+
+        expect.mint().from(users.frank).exec{value: nuggft.msp()}(token);
+
+        bytes memory working = nuggft.image123(token, false, 1, "");
+
+        working = nuggft.image123(token, false, 2, working);
+
+        working = nuggft.image123(token, false, 3, working);
+
+        ds.emit_log_named_string("hi", string(working));
+    }
 }
+
+// nuggft deployed to : 0xcd7f2f0750ebe73fa37122ee6839b342ca30e58c
+// xnuggft deployed to: 0x50ce039792db7f40e4ee40d0418a0efabd7badee
+// dotnugg deployed to: 0x7e3cf6b416d52f9c6765ea27250ca6d724e42fce
+// genesis block is: 10623680
