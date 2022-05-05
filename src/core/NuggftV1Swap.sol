@@ -267,7 +267,6 @@ abstract contract NuggftV1Swap is INuggftV1ItemSwap, INuggftV1Swap, NuggftV1Stak
                     // this effectivly blocks more than one swap of a particular item of ending in the same epoch
 
                     mstore(0x80, shr(24, tokenId))
-
                     mstore(0xA0, lastItemSwap.slot)
 
                     let kek := keccak256(0x80, 0x40)
@@ -284,7 +283,6 @@ abstract contract NuggftV1Swap is INuggftV1ItemSwap, INuggftV1Swap, NuggftV1Stak
 
                     // since epoch 1 cant happen (unless OFFSET is 0)
                     sstore(kek, or(val, nextEpoch))
-
 
                 }
                 default {
