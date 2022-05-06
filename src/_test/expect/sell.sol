@@ -127,11 +127,11 @@ contract expectSell is base {
         uint96 floor,
         address sender
     ) public {
-        this.start((uint24(itemId) << 24) | sellingTokenId, floor, sender);
+        this.start((uint40(itemId) << 24) | sellingTokenId, floor, sender);
     }
 
     function start(
-        uint24 tokenId,
+        uint40 tokenId,
         uint96 floor,
         address sender
     ) public {
@@ -240,6 +240,9 @@ contract expectSell is base {
         } else {
             ds.assertEq(run.sender, address(uint160(post.agency)), "EXPECT-SELL:STOP owner should be sender");
         }
+        ds.emit_log_named_bytes32("hi", bytes32(post.agency));
+        require(0x03 == (post.agency >> 254), string.concat("EXPECT-SELL:STOP flag should be swap  -  ", strings.toAsciiString((post.agency >> 254))));
+        require(0x00 == (post.agency << 2) >> 232, "EXPECT-SELL:STOP flag should be zero");
     }
 
     function postRunChecks(Run memory run) private {}

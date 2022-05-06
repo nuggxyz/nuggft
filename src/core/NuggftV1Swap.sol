@@ -124,7 +124,7 @@ abstract contract NuggftV1Swap is INuggftV1ItemSwap, INuggftV1Swap, NuggftV1Stak
             // xnuggftv1.proofTransferBatch(proof, address(0), address(this));
 
             // otherwise this
-            this.addStakedShare(msg.value);
+            addStakedShare(msg.value);
 
             // prettier-ignore
             assembly {
@@ -747,6 +747,7 @@ abstract contract NuggftV1Swap is INuggftV1ItemSwap, INuggftV1Swap, NuggftV1Stak
                 let flag := shr(254, buyerTokenAgency)
 
                 // ensure the caller is really the agent
+                // aka makes sure they are not in the middle of a swap
                 if and(eq(flag, 0x3), iszero(iszero(juke(buyerTokenAgency, 2, 232)))) {
                     panic(Error__0xA3__NotItemAuthorizedAgent)
                 }
@@ -765,7 +766,20 @@ abstract contract NuggftV1Swap is INuggftV1ItemSwap, INuggftV1Swap, NuggftV1Stak
             switch isItem
             case 1 {
                 if iszero(iszero(agency__cache)) {
-                    panic(Error__0x97__ItemAgencyAlreadySet)
+                    // panic(Error__0x97__ItemAgencyAlreadySet)
+
+                    agency__cache := xor(xor(shl(254, 0x03), shl(160, div(floor, LOSS))), sender)
+
+                    sstore(agency__sptr, agency__cache)
+
+                    mstore(0x00, agency__cache)
+                    mstore(0x20, 0x00)
+
+                    log3(0x00, 0x40, Event__SellItem, and(tokenId, 0xffffff), shr(24, tokenId))
+
+                    // panic(Error__0x97__ItemAgencyAlreadySet)
+
+                    return(0, 0)
                 }
 
                 mstore(0x00, sender)
@@ -779,7 +793,7 @@ abstract contract NuggftV1Swap is INuggftV1ItemSwap, INuggftV1Swap, NuggftV1Stak
 
                 let id := shr(24, tokenId)
 
-                // start at 1 to jump over the base
+                // start at 1 to jump over the visibles
                 let j := 1
 
                 // prettier-ignore
@@ -828,17 +842,47 @@ abstract contract NuggftV1Swap is INuggftV1ItemSwap, INuggftV1Swap, NuggftV1Stak
                     panic(Error__0xA1__NotAgent)
                 }
 
+                let flag := shr(254, agency__cache)
+
+                let isWaitingForOffer := and(eq(flag, 0x3), iszero(juke(agency__cache, 2, 232)))
+
                 // ensure the agent is the owner
-                if iszero(eq(shr(254, agency__cache), 0x1)) {
-                    panic(Error__0x77__NotOwner)
-                }
+                if iszero(isWaitingForOffer) {
+                    // ensure the agent is the owner
+                    if iszero(eq(flag, 0x1)) {
+                        panic(Error__0x77__NotOwner)
+                    }
 
-                let stake__cache := sload(stake.slot)
+                    let stake__cache := sload(stake.slot)
 
-                let activeEps := div(juke(stake__cache, 64, 160), shr(192, stake__cache))
+                    let activeEps := div(juke(stake__cache, 64, 160), shr(192, stake__cache))
 
-                if lt(floor, activeEps) {
-                    panic(Error__0x70__FloorTooLow)
+                    if lt(floor, activeEps) {
+                        panic(Error__0x70__FloorTooLow)
+                    }
+
+                    // prettier-ignore
+                    log4( // =======================================================
+                        /* param 0: n/a  */ 0x00, 0x00,
+                        /* topic 1: sig  */ Event__Transfer,
+                        /* topic 2: from */ caller(),
+                        /* topic 3: to   */ address(),
+                        /* topic 4: id   */ tokenId
+                    ) // ===========================================================
+
+                    mstore(0x00, tokenId)
+                    mstore(0x20, proof.slot)
+
+                    let _proof := sload(keccak256(0x00, 0x40))
+
+                    mstore(0x00, Function__transferBatch)
+                    mstore(0x20, _proof)
+                    mstore(0x40, address())
+                    mstore(0x60, caller())
+
+                    if iszero(call(gas(), itemHolder, 0x00, 0x1C, 0x64, 0x00, 0x00)) {
+                        panic(Error__0xAE__FailedCallToItemsHolder)
+                    }
                 }
 
                 // ==== agency[tokenId] =====
@@ -848,7 +892,7 @@ abstract contract NuggftV1Swap is INuggftV1ItemSwap, INuggftV1Swap, NuggftV1Stak
                 //   addr  = seller
                 // ==========================
 
-                agency__cache := add(agency__cache, xor(shl(254, 0x02), shl(160, div(floor, LOSS))))
+                agency__cache := xor(xor(shl(254, 0x03), shl(160, div(floor, LOSS))), caller())
 
                 sstore(agency__sptr, agency__cache)
 
@@ -856,29 +900,6 @@ abstract contract NuggftV1Swap is INuggftV1ItemSwap, INuggftV1Swap, NuggftV1Stak
                 mstore(0x00, agency__cache)
 
                 log2(0x00, 0x20, Event__Sell, tokenId)
-
-                // prettier-ignore
-                log4( // =======================================================
-                        /* param 0: n/a  */ 0x00, 0x00,
-                        /* topic 1: sig  */ Event__Transfer,
-                        /* topic 2: from */ caller(),
-                        /* topic 3: to   */ address(),
-                        /* topic 4: id   */ tokenId
-                    ) // ===========================================================
-
-                mstore(0x00, tokenId)
-                mstore(0x20, proof.slot)
-
-                let _proof := sload(keccak256(0x00, 0x40))
-
-                mstore(0x00, Function__transferBatch)
-                mstore(0x20, _proof)
-                mstore(0x40, address())
-                mstore(0x60, caller())
-
-                if iszero(call(gas(), itemHolder, 0x00, 0x1C, 0x64, 0x00, 0x00)) {
-                    panic(Error__0xAE__FailedCallToItemsHolder)
-                }
             }
         }
     }
