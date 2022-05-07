@@ -852,15 +852,33 @@ abstract contract NuggftV1Swap is INuggftV1ItemSwap, INuggftV1Swap, NuggftV1Stak
                     if iszero(eq(flag, 0x1)) {
                         panic(Error__0x77__NotOwner)
                     }
+                }
 
-                    let stake__cache := sload(stake.slot)
+                let stake__cache := sload(stake.slot)
 
-                    let activeEps := div(juke(stake__cache, 64, 160), shr(192, stake__cache))
+                let activeEps := div(juke(stake__cache, 64, 160), shr(192, stake__cache))
 
-                    if lt(floor, activeEps) {
-                        panic(Error__0x70__FloorTooLow)
-                    }
+                if lt(floor, activeEps) {
+                    panic(Error__0x70__FloorTooLow)
+                }
 
+                // ==== agency[tokenId] =====
+                //   flag  = SWAP(0x03)
+                //   epoch = 0
+                //   eth   = seller decided floor / .1 gwei
+                //   addr  = seller
+                // ==========================
+
+                agency__cache := xor(xor(shl(254, 0x03), shl(160, div(floor, LOSS))), caller())
+
+                sstore(agency__sptr, agency__cache)
+
+                // log2 with 'Sell(uint24,bytes32)' topic
+                mstore(0x00, agency__cache)
+
+                log2(0x00, 0x20, Event__Sell, tokenId)
+
+                if iszero(isWaitingForOffer) {
                     // prettier-ignore
                     log4( // =======================================================
                         /* param 0: n/a  */ 0x00, 0x00,
@@ -884,22 +902,6 @@ abstract contract NuggftV1Swap is INuggftV1ItemSwap, INuggftV1Swap, NuggftV1Stak
                         panic(Error__0xAE__FailedCallToItemsHolder)
                     }
                 }
-
-                // ==== agency[tokenId] =====
-                //   flag  = SWAP(0x03)
-                //   epoch = 0
-                //   eth   = seller decided floor / .1 gwei
-                //   addr  = seller
-                // ==========================
-
-                agency__cache := xor(xor(shl(254, 0x03), shl(160, div(floor, LOSS))), caller())
-
-                sstore(agency__sptr, agency__cache)
-
-                // log2 with 'Sell(uint24,bytes32)' topic
-                mstore(0x00, agency__cache)
-
-                log2(0x00, 0x20, Event__Sell, tokenId)
             }
         }
     }
