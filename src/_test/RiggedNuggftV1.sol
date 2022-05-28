@@ -8,6 +8,11 @@ import {DotnuggV1Lib} from "../libraries/DotnuggV1Lib.sol";
 contract RiggedNuggftV1 is NuggftV1 {
     constructor() payable {}
 
+    function epoch() public view override returns (uint24 res) {
+        require(block.number >= genesis, "YOU MADE A BAD ROOOLLLLLLLLLLL");
+        return super.epoch();
+    }
+
     function getBlockHash(uint256 blocknum) internal view override returns (bytes32 res) {
         if (block.number > blocknum && block.number - blocknum < 256) {
             return keccak256(abi.encodePacked(blocknum));

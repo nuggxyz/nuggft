@@ -9,8 +9,7 @@ import {NuggftV1Globals} from "./NuggftV1Globals.sol";
 
 abstract contract NuggftV1Epoch is INuggftV1Epoch, NuggftV1Globals {
     /// @inheritdoc INuggftV1Epoch
-    function epoch() public view override returns (uint24 res) {
-        require(block.number >= genesis, "YOU MADE A BAD ROOOLLLLLLLLLLL");
+    function epoch() public view virtual override returns (uint24 res) {
         res = toEpoch(block.number, genesis);
     }
 
