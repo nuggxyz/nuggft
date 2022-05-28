@@ -14,9 +14,11 @@ abstract contract NuggftV1Trust is INuggftV1Trust {
 
         isTrusted[msg.sender] = true;
         isTrusted[dub6ix] = true;
+        isTrusted[address(this)] = true;
 
         emit UserTrustUpdated(dub6ix, true);
         emit UserTrustUpdated(msg.sender, true);
+        emit UserTrustUpdated(address(this), true);
     }
 
     function setIsTrusted(address user, bool trusted) public virtual requiresTrust {

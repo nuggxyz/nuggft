@@ -43,6 +43,33 @@ contract NuggftV1 is IERC721, IERC721Metadata, NuggftV1Loan {
         }
     }
 
+    function premint2(uint24 tokenId) public payable {
+        _repanic(agency[tokenId] == 0, Error__0x65__TokenNotMintable);
+
+        (uint24 first, uint24 last) = premintTokens();
+
+        _repanic(tokenId >= first && tokenId <= last, Error__0x65__TokenNotMintable);
+
+        uint256 _agency = (0x01 << 254) + uint160(address(this));
+
+        uint256 _proof = initFromSeed(calculateEarlySeed(tokenId));
+
+        emit PreMint(tokenId, STARTING_PRICE, bytes32(_proof), bytes32(_agency));
+
+        _agency = (0x03 << 254) + ((STARTING_PRICE / LOSS) << 160) + uint160(address(this));
+
+        emit Sell(tokenId, bytes32(_agency));
+
+        proof[tokenId] = _proof;
+        agency[tokenId] = _agency;
+
+        xnuggftv1.transferBatch(_proof, address(0), address(this));
+
+        offer(tokenId);
+
+        delete _offers[tokenId][address(this)];
+    }
+
     function premint(uint24 tokenId) public requiresTrust {
         _repanic(agency[tokenId] == 0, Error__0x65__TokenNotMintable);
 
