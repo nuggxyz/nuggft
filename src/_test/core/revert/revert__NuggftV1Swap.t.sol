@@ -235,13 +235,24 @@ abstract contract revert__NuggftV1Swap is NuggftV1Test {
     }
 
     function test__revert__NuggftV1Swap__0xA0__failWithNonexistantToken() public revert__NuggftV1Swap__setUp {
+        uint24 tokenId = earlyMintable(0) - 1;
+
+        uint96 value = 1 ether;
+
+        require(nuggft.agency(tokenId) == 0, "NON EXISTANT REQUIRED");
+
+        expect.offer().from(users.frank).err(0x65).exec{value: value}(tokenId);
+    }
+
+    function test__revert__NuggftV1Swap__0xA0__passWithPreMint() public revert__NuggftV1Swap__setUp {
         uint24 tokenId = trustMintable(0) - 1;
 
         uint96 value = 1 ether;
 
         require(nuggft.agency(tokenId) == 0, "NON EXISTANT REQUIRED");
 
-        expect.offer().from(users.frank).err(0xA0).exec{value: value}(tokenId);
+        // TODO update offer expect for premints
+        // expect.offer().from(users.frank).exec{value: value}(tokenId);
     }
 
     function test__revert__NuggftV1Swap__0xA0__successWithSwap() public revert__NuggftV1Swap__setUp {
@@ -656,7 +667,7 @@ abstract contract revert__NuggftV1Swap is NuggftV1Test {
 
         uint96 value = 1 ether;
 
-        expect.offer().from(users.charlie).err(0xA0).exec{value: value}(tokenId);
+        expect.offer().from(users.charlie).err(0x65).exec{value: value}(tokenId);
     }
 }
 

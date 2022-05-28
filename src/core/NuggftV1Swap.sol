@@ -173,6 +173,9 @@ abstract contract NuggftV1Swap is INuggftV1ItemSwap, INuggftV1Swap, NuggftV1Stak
             }
 
             return;
+        } else if (!isItem && agency__cache == 0) {
+            premint(uint24(tokenId));
+            return;
         }
 
         // prettier-ignore
@@ -401,6 +404,46 @@ abstract contract NuggftV1Swap is INuggftV1ItemSwap, INuggftV1Swap, NuggftV1Stak
             // add the increment * LOSS to staked eth
 
         }
+    }
+
+    function premint(uint24 tokenId) internal {
+        _repanic(agency[tokenId] == 0, Error__0x65__TokenNotMintable);
+
+        (uint24 first, uint24 last) = premintTokens();
+
+        _repanic(tokenId >= first && tokenId <= last, Error__0x65__TokenNotMintable);
+
+        uint256 _agency = (0x01 << 254) + uint160(address(this));
+
+        uint256 _proof = initFromSeed(calculateEarlySeed(tokenId));
+
+        uint256 prefix = (0x03 << 254) + (uint256((STARTING_PRICE / LOSS)) << 160);
+
+        _agency = prefix + uint160(address(this));
+
+        // emit Sell(tokenId, bytes32(_agency));
+
+        uint16 item = uint16(_proof >> 0x90);
+
+        uint256 __itemAgency = prefix | uint256(tokenId);
+
+        xnuggftv1.transferBatch(_proof, address(0), address(this));
+
+        _itemAgency[((uint40(item) << 24) | uint40(tokenId))] = __itemAgency;
+
+        assembly {
+            _proof := and(_proof, not(shl(mul(9, 16), 0xffff)))
+        }
+
+        emit PreMint(tokenId, bytes32(_proof), bytes32(_agency), item, bytes32(__itemAgency));
+
+        proof[tokenId] = _proof;
+        agency[tokenId] = _agency;
+
+        // a little reentrancy never hurt nobody
+        offer(tokenId);
+
+        delete _offers[tokenId][address(this)];
     }
 
     /// @inheritdoc INuggftV1Swap

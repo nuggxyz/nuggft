@@ -32,7 +32,7 @@ contract deployment__NuggFatherV1 is NuggftV1Test {
 
         father.nuggft().msp();
         father.nuggft().eps();
-        father.mint();
+        // father.mint();
         // ds.emit_log_address(address(father.nuggft()));
 
         forge.vm.stopPrank();

@@ -31,7 +31,7 @@ contract NuggFatherV1 {
         uint24 i = index;
         for (; gasleft() > 200000 && i <= last; i++) {
             nuggft.agency(i);
-            nuggft.premint(uint24(i));
+            nuggft.offer(uint24(i));
 
             uint16[] memory f = nuggft.floop(i);
 

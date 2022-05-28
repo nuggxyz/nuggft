@@ -43,51 +43,24 @@ contract NuggftV1 is IERC721, IERC721Metadata, NuggftV1Loan {
         }
     }
 
-    function premint2(uint24 tokenId) public payable {
-        _repanic(agency[tokenId] == 0, Error__0x65__TokenNotMintable);
+    // function premint(uint24 tokenId) public requiresTrust {
+    //     _repanic(agency[tokenId] == 0, Error__0x65__TokenNotMintable);
 
-        (uint24 first, uint24 last) = premintTokens();
+    //     (uint24 first, uint24 last) = premintTokens();
 
-        _repanic(tokenId >= first && tokenId <= last, Error__0x65__TokenNotMintable);
+    //     _repanic(tokenId >= first && tokenId <= last, Error__0x65__TokenNotMintable);
 
-        uint256 _agency = (0x01 << 254) + uint160(address(this));
+    //     uint256 _agency = (0x01 << 254) + uint160(msg.sender);
 
-        uint256 _proof = initFromSeed(calculateEarlySeed(tokenId));
+    //     uint256 _proof = initFromSeed(calculateEarlySeed(tokenId));
 
-        emit PreMint(tokenId, STARTING_PRICE, bytes32(_proof), bytes32(_agency));
+    //     proof[tokenId] = _proof;
+    //     agency[tokenId] = _agency;
 
-        _agency = (0x03 << 254) + ((STARTING_PRICE / LOSS) << 160) + uint160(address(this));
+    //     emit PreMint(tokenId, STARTING_PRICE, bytes32(_proof), bytes32(_agency));
 
-        emit Sell(tokenId, bytes32(_agency));
-
-        proof[tokenId] = _proof;
-        agency[tokenId] = _agency;
-
-        xnuggftv1.transferBatch(_proof, address(0), address(this));
-
-        offer(tokenId);
-
-        delete _offers[tokenId][address(this)];
-    }
-
-    function premint(uint24 tokenId) public requiresTrust {
-        _repanic(agency[tokenId] == 0, Error__0x65__TokenNotMintable);
-
-        (uint24 first, uint24 last) = premintTokens();
-
-        _repanic(tokenId >= first && tokenId <= last, Error__0x65__TokenNotMintable);
-
-        uint256 _agency = (0x01 << 254) + uint160(msg.sender);
-
-        uint256 _proof = initFromSeed(calculateEarlySeed(tokenId));
-
-        proof[tokenId] = _proof;
-        agency[tokenId] = _agency;
-
-        emit PreMint(tokenId, STARTING_PRICE, bytes32(_proof), bytes32(_agency));
-
-        xnuggftv1.transferBatch(_proof, address(0), msg.sender);
-    }
+    //     xnuggftv1.transferBatch(_proof, address(0), msg.sender);
+    // }
 
     /// @inheritdoc INuggftV1Proof
     function mint(uint24 tokenId) public payable override {

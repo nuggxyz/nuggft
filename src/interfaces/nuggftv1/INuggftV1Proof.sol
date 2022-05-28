@@ -7,7 +7,7 @@ interface INuggftV1Proof {
 
     event Mint(uint24 indexed tokenId, uint96 value, bytes32 proof, bytes32 stake, bytes32 agency);
 
-    event PreMint(uint24 indexed tokenId, uint96 value, bytes32 proof, bytes32 agency);
+    // event PreMint(uint24 indexed tokenId, uint96 value, bytes32 proof, bytes32 agency);
 
     function mint(uint24 tokenId) external payable;
 

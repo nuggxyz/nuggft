@@ -13,6 +13,8 @@ interface INuggftV1Swap {
 
     event OfferMint(uint24 indexed tokenId, bytes32 agency, bytes32 proof, bytes32 stake);
 
+    event PreMint(uint24 indexed tokenId, bytes32 proof, bytes32 nuggAgency, uint16 indexed itemId, bytes32 itemAgency);
+
     event Claim(uint24 indexed tokenId, address indexed account);
 
     event Sell(uint24 indexed tokenId, bytes32 agency);
