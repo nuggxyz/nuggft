@@ -161,33 +161,46 @@ abstract contract NuggftV1Proof is INuggftV1Proof, NuggftV1Epoch, NuggftV1Trust 
         }
     }
 
+    function breaker(uint8 seed) internal pure returns (uint8) {
+        if (seed >= 160) {
+            return ((seed - 160) / 48) + 1;
+        }
+        return (seed / 32) + 3;
+        /* [1=18.75%, 2=18.75%, 3=12.5%, 4=12.5%, 5=12.5%, 6=12.5%, 7=12.5%] */
+    }
+
     // TODO TO BE TESTED
     function initFromSeed(uint256 seed) internal view returns (uint256 res) {
         uint8 selA = uint8((seed >> 8));
         uint8 selB = uint8((seed >> 16));
         uint8 selC = uint8((seed >> 24));
+        uint8 selD = uint8((seed >> 32));
 
         selA = (selA / 128) + 3; /* [3=50%, 4=50%] */
 
         if ((selB /= 32) <= 4) selB = 0; /* [5=12.5%, 6=12.5%, 7=12.5%, 0=62.5%] */
 
-        selC = selC < 32 ? 5 : selC < 64 ? 6 : selC < 96 ? 7 : selC < 128 ? 4 : selC < 160 ? 3 : selC < 208 ? 2 : 1;
-        /* [1=25%, 2=25%, 3=12.5%, 4=12.5%, 5=12.5%, 6=12.5%, 7=12.5%] */
+        selC = breaker(selC);
+        selD = breaker(selD);
 
-        uint256 a = DotnuggV1Lib.pickWithId(address(dotnuggv1), 0, seed);
-        uint256 b = DotnuggV1Lib.pickWithId(address(dotnuggv1), 1, seed);
-        uint256 c = DotnuggV1Lib.pickWithId(address(dotnuggv1), 2, seed);
-        uint256 d = DotnuggV1Lib.pickWithId(address(dotnuggv1), selA, seed);
-        uint256 e = selB == 0 ? 0 : DotnuggV1Lib.pickWithId(address(dotnuggv1), selB, seed);
-        uint256 f = DotnuggV1Lib.pickWithId(address(dotnuggv1), selC, seed >> 8);
+        res |= uint256(DotnuggV1Lib.pickWithId(address(dotnuggv1), 0, seed)) << 0x00;
+        res |= uint256(DotnuggV1Lib.pickWithId(address(dotnuggv1), 1, seed)) << 0x10;
+        res |= uint256(DotnuggV1Lib.pickWithId(address(dotnuggv1), 2, seed)) << 0x20;
+        res |= uint256(DotnuggV1Lib.pickWithId(address(dotnuggv1), selA, seed)) << 0x30;
+        if (selB != 0) {
+            res |= uint256(DotnuggV1Lib.pickWithId(address(dotnuggv1), selB, seed)) << (0x40);
+        }
+        res |= uint256(DotnuggV1Lib.pickWithId(address(dotnuggv1), selC, seed >> 40)) << (0x80);
+        res |= uint256(DotnuggV1Lib.pickWithId(address(dotnuggv1), selD, seed >> 48)) << (0x90);
 
-        res |=
-            a |
-            (b << (0x10)) | //
-            (c << (0x20)) |
-            (d << (0x30)) |
-            (selB == 0 ? 0 : (e << (0x40))) |
-            (f << (0x80));
+        // res |=
+        //     a |
+        //     (b << (0x10)) | //
+        //     (c << (0x20)) |
+        //     (d << (0x30)) |
+        //     (selB == 0 ? 0 : (e << (0x40))) |
+        //     (f << (0x80)) |
+        //     (g << (0x90));
 
         // 100%
         // 125%
@@ -198,13 +211,22 @@ abstract contract NuggftV1Proof is INuggftV1Proof, NuggftV1Epoch, NuggftV1Trust 
         // 25%
         // 25%
 
+        // 100%
+        // 137.5%
+        // 137.5%
+        // 75%
+        // 75%
+        // 37.5%
+        // 37.5%
+        // 37.5%
+
         // 0 = 8/8
-        // 1 = 8/8 + 2/8
-        // 2 = 8/8 + 2/8
-        // 3 = 4/8 + 1/8
-        // 4 = 4/8 + 1/8
-        // 5 = 1/8 + 1/8
-        // 6 = 1/8 + 1/8
-        // 7 = 1/8 + 1/8
+        // 1 = 8/8 + 3/16 + 3/16 = 11
+        // 2 = 8/8 + 3/16 + 3/16 = 11
+        // 3 = 4/8 + 1/8 + 1/8 = 6
+        // 4 = 4/8 + 1/8 + 1/8 = 6
+        // 5 = 1/8 + 1/8 + 1/8 = 3
+        // 6 = 1/8 + 1/8 + 1/8 = 3
+        // 7 = 1/8 + 1/8 + 1/8 = 3
     }
 }
