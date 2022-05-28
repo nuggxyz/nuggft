@@ -427,7 +427,7 @@ abstract contract NuggftV1Swap is INuggftV1ItemSwap, INuggftV1Swap, NuggftV1Stak
 
         uint256 _proof = initFromSeed(calculateEarlySeed(tokenId));
 
-        uint256 prefix = (0x03 << 254) + (uint256((STARTING_PRICE / LOSS)) << 160);
+        uint256 prefix = (0x03 << 254) + (uint256((msp() / LOSS)) << 160);
 
         _agency = prefix + uint160(address(this));
 
@@ -1034,7 +1034,7 @@ abstract contract NuggftV1Swap is INuggftV1ItemSwap, INuggftV1Swap, NuggftV1Stak
                         return(0x00, 0x80)
                     }
 
-                    next := STARTING_PRICE
+                    next := _msp
                 }
             }
             default {
