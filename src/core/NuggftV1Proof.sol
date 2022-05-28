@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: BUSL-1.1
 
-pragma solidity 0.8.13;
+pragma solidity 0.8.14;
 
 import {INuggftV1Proof} from "../interfaces/nuggftv1/INuggftV1Proof.sol";
 import {IDotnuggV1Safe} from "../interfaces/dotnugg/IDotnuggV1Safe.sol";
@@ -161,13 +161,11 @@ abstract contract NuggftV1Proof is INuggftV1Proof, NuggftV1Epoch, NuggftV1Trust 
         }
     }
 
-
     // TODO TO BE TESTED
     function initFromSeed(uint256 seed) internal view returns (uint256 res) {
         uint8 selA = uint8((seed >> 8));
         uint8 selB = uint8((seed >> 16));
         uint8 selC = uint8((seed >> 24));
-
 
         selA = (selA / 128) + 3; /* [3=50%, 4=50%] */
 
@@ -180,7 +178,7 @@ abstract contract NuggftV1Proof is INuggftV1Proof, NuggftV1Epoch, NuggftV1Trust 
         uint256 b = DotnuggV1Lib.pickWithId(address(dotnuggv1), 1, seed);
         uint256 c = DotnuggV1Lib.pickWithId(address(dotnuggv1), 2, seed);
         uint256 d = DotnuggV1Lib.pickWithId(address(dotnuggv1), selA, seed);
-        uint256 e = selB == 0 ? 0 :DotnuggV1Lib.pickWithId(address(dotnuggv1), selB, seed);
+        uint256 e = selB == 0 ? 0 : DotnuggV1Lib.pickWithId(address(dotnuggv1), selB, seed);
         uint256 f = DotnuggV1Lib.pickWithId(address(dotnuggv1), selC, seed >> 8);
 
         res |=
@@ -208,6 +206,5 @@ abstract contract NuggftV1Proof is INuggftV1Proof, NuggftV1Epoch, NuggftV1Trust 
         // 5 = 1/8 + 1/8
         // 6 = 1/8 + 1/8
         // 7 = 1/8 + 1/8
-
     }
 }

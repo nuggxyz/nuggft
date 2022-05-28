@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: BUSL-1.1
 
-pragma solidity 0.8.13;
+pragma solidity 0.8.14;
 
 interface INuggftV1Stake {
     event Extract(uint96 eth);

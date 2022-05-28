@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: BUSL-1.1
 
-pragma solidity 0.8.13;
+pragma solidity 0.8.14;
 
 import {IERC721, IERC165, IERC721Metadata} from "./interfaces/IERC721.sol";
 import {INuggftV1Migrator} from "./interfaces/nuggftv1/INuggftV1Migrator.sol";

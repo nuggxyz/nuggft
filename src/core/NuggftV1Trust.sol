@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: BUSL-1.1
 
-pragma solidity 0.8.13;
+pragma solidity 0.8.14;
 
 import {INuggftV1Trust} from "../interfaces/nuggftv1/INuggftV1Trust.sol";
 

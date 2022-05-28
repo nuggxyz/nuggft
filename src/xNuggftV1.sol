@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: BUSL-1.1
 
-pragma solidity 0.8.13;
+pragma solidity 0.8.14;
 
 import {IERC1155, IERC165, IERC1155Metadata_URI} from "./interfaces/IERC721.sol";
 

@@ -7,7 +7,7 @@ cache = false
 force = false
 evm_version = 'london'
 ## Sets the concrete solc version to use, this overrides the `auto_detect_solc` value
-# solc_version = '0.8.13'
+solc_version = '0.8.14'
 auto_detect_solc = false
 optimizer = true
 optimizer_runs = 1000000
