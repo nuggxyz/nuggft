@@ -124,6 +124,7 @@ abstract contract NuggftV1Constants {
     uint8 constant Error__0xAC__MustFinalizeOtherItemSwap = 0xAC;
     uint8 constant Error__0xAD__InvalidZeroProof = 0xAD;
     uint8 constant Error__0xAE__FailedCallToItemsHolder = 0xAE;
+    uint8 constant Error__0xAF__MulticallError = 0xAF;
 
     // uint8 constant Error__0xAE__InvalidZeroProof = 0xAD;
 

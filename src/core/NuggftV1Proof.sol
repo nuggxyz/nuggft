@@ -136,9 +136,9 @@ abstract contract NuggftV1Proof is INuggftV1Proof, NuggftV1Epoch, NuggftV1Trust 
 
                 // prettier-ignore
                 if or(or(or( // ================================================
-                    iszero(index0),           // since we are taking working with external input here, we want
+                    iszero(index0),           // since we are working with external input here, we want
                     iszero(index1)),          // + to make sure the indexs passed are valid (1 <= x <= 16)
-                    iszero(gt(16, index0))),
+                    iszero(gt(16, index0))),   // FIXME - shouldnt this be 15?
                     iszero(gt(16, index1))
                  ) { panic(Error__0x73__InvalidProofIndex) } // ==============
 

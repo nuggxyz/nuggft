@@ -90,7 +90,7 @@ contract xNuggftV1 is IERC1155, IERC1155Metadata_URI, IxNuggftV1 {
                 abi.encodePacked(
                      '{"name":"',         name(),
                     '","description":"',  parseItemIdAsString(uint16(tokenId),
-                            ["base", "eyes", "mouth", "hair", "hat", "background", "scarf", "held"]),
+                            ["base", "eyes", "mouth", "hair", "hat", "background", "scarf", "h0ld"]),
                     '","image":"',        imageURI(tokenId),
                     '}'
                 ), true

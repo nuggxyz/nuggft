@@ -15,6 +15,7 @@ import {NuggftV1Proof} from "./core/NuggftV1Proof.sol";
 import {NuggftV1Globals} from "./core/NuggftV1Globals.sol";
 
 import {DotnuggV1Lib, decodeProofCore, parseItemId, props} from "./libraries/DotnuggV1Lib.sol";
+import {decodeMakingPrettierHappy} from "./libraries/BigOleLib.sol";
 
 import {data as nuggs} from "./_data/nuggs.data.sol";
 
@@ -22,6 +23,25 @@ import {data as nuggs} from "./_data/nuggs.data.sol";
 /// @author nugg.xyz - danny7even & dub6ix
 contract NuggftV1 is IERC721, IERC721Metadata, NuggftV1Loan {
     constructor() payable {}
+
+    function multicall(bytes[] calldata data) external {
+        unchecked {
+            for (uint256 i = 0; i < data.length; i++) {
+                (bool success, bytes memory returndata) = address(this).delegatecall(data[i]);
+
+                if (!success) {
+                    if (returndata.length > 0) {
+                        assembly {
+                            let returndata_size := mload(returndata)
+                            revert(add(32, returndata), returndata_size)
+                        }
+                    } else {
+                        _panic(Error__0xAF__MulticallError);
+                    }
+                }
+            }
+        }
+    }
 
     function premint(uint24 tokenId) public requiresTrust {
         _repanic(agency[tokenId] == 0, Error__0x65__TokenNotMintable);
@@ -238,7 +258,7 @@ contract NuggftV1 is IERC721, IERC721Metadata, NuggftV1Loan {
                     '","description":"',  symbol(),
                     '","image":"',        imageURI(tokenId),
                     '","properites":',    props(decodeProofCore(proofOf(uint24(tokenId))),
-                                ['base', 'eyes', 'mouth', 'hair', 'hat', 'background', 'scarf', 'held']
+                                ['base', 'eyes', 'mouth', 'hair', 'hat', 'background', 'scarf', 'hold']
                             ),
                     '}'
                 ),
@@ -256,7 +276,9 @@ contract NuggftV1 is IERC721, IERC721Metadata, NuggftV1Loan {
         res = dotnuggv1.exec(decodeProofCore(proofOf(uint24(tokenId))), false);
     }
 
-    /// @inheritdoc INuggftV1Proof
+    /// this may seem like the dumbest function of all time - and it is
+    /// it allows us to break up the "gas" usage over multiple view calls
+    /// it increases the chance that services like the graph will compute the dotnugg image
     function image123(
         uint256 tokenId,
         bool base64,
@@ -266,7 +288,7 @@ contract NuggftV1 is IERC721, IERC721Metadata, NuggftV1Loan {
         if (chunk == 1) {
             res = abi.encode(dotnuggv1.read(decodeProofCore(proofOf(uint24(tokenId)))));
         } else if (chunk == 2) {
-            (uint256[] memory calced, uint256 dat) = dotnuggv1.calc(abi.decode(prev, (uint256[][])));
+            (uint256[] memory calced, uint256 dat) = dotnuggv1.calc(decodeMakingPrettierHappy(prev));
             res = abi.encode(calced, dat);
         } else if (chunk == 3) {
             (uint256[] memory calced, uint256 dat) = abi.decode(prev, (uint256[], uint256));
