@@ -36,4 +36,21 @@ contract general__premint2 is NuggftV1Test {
 
         expect.claim().from(users.dee).exec(token, token1, item);
     }
+
+    function test__premint2__vfo() public {
+        (uint24 token, ) = nuggft.premintTokens();
+
+        nuggft.vfo(users.frank, token);
+    }
+
+    function test__premint2__vfo__longtime() public {
+        uint24 token1 = nuggft.epoch();
+
+        expect.offer().from(users.dee).exec{value: nuggft.msp()}(token1);
+
+        for (uint256 i = 0; i < INTERVAL; i++) {
+            nuggft.vfo(users.frank, token1);
+            hopUp(1);
+        }
+    }
 }

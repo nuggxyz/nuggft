@@ -47,7 +47,7 @@ interface INuggftV1Swap {
     /// @return next -> the minimum value that must be sent with a offer call
     /// @return current ->
     function check(address sender, uint24 tokenId) external view
-        returns (bool canOffer, uint96 next, uint96 current);
+        returns (bool canOffer, uint96 next, uint96 current, uint96 incrementBps);
 
     function vfo(address sender, uint24 tokenId) external view returns (uint96 res);
 }

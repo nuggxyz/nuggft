@@ -325,8 +325,18 @@ abstract contract NuggftV1Swap is INuggftV1ItemSwap, INuggftV1Swap, NuggftV1Stak
                 panic(Error__0x68__OfferLowerThanLOSS)
             }
 
+            let remain := sub(INTERVAL, mod(number(), INTERVAL))
+
+            switch and(eq(agency__epoch, active),lt(remain, 45))
+            case 1 {
+                remain := add(mul(sub(50, remain), 100), BASE_BPS)
+            }
+            default {
+                remain := INCREMENT_BPS
+            }
+
             // ensure next offer includes at least a 2% increment
-            if gt(div(mul(last, INCREMENT_BPS), BASE_BPS), next) {
+            if gt(div(mul(last, remain), BASE_BPS), next) {
                 panic(Error__0x72__IncrementTooLow)
             }
             // convert next into the increment
@@ -431,8 +441,18 @@ abstract contract NuggftV1Swap is INuggftV1ItemSwap, INuggftV1Swap, NuggftV1Stak
 
         _itemAgency[((uint40(item) << 24) | uint40(tokenId))] = __itemAgency;
 
+        // prettier-ignore
         assembly {
             _proof := and(_proof, not(shl(mul(9, 16), 0xffff)))
+
+            log4( // =======================================================
+                /* param #0:n/a  */ 0x00, /* [ n/a ] */  0x00,
+                /* topic #1:sig  */ Event__Transfer,
+                /* topic #2:from */ 0,
+                /* topic #3:to   */ address(),
+                /* topic #4:id   */ tokenId
+            ) // ===========================================================
+
         }
 
         emit PreMint(tokenId, bytes32(_proof), bytes32(_agency), item, bytes32(__itemAgency));
@@ -951,7 +971,7 @@ abstract contract NuggftV1Swap is INuggftV1ItemSwap, INuggftV1Swap, NuggftV1Stak
 
     // @inheritdoc INuggftV1Swap
     function vfo(address sender, uint24 tokenId) public view override returns (uint96 res) {
-        (bool canOffer, uint96 next, uint96 current) = check(sender, tokenId);
+        (bool canOffer, uint96 next, uint96 current, ) = check(sender, tokenId);
 
         if (canOffer) res = next - current;
     }
@@ -964,7 +984,8 @@ abstract contract NuggftV1Swap is INuggftV1ItemSwap, INuggftV1Swap, NuggftV1Stak
         returns (
             bool canOffer,
             uint96 next,
-            uint96 current
+            uint96 current,
+            uint96 incrementBps
         )
     {
         canOffer = true;
@@ -972,6 +993,10 @@ abstract contract NuggftV1Swap is INuggftV1ItemSwap, INuggftV1Swap, NuggftV1Stak
         uint24 activeEpoch = epoch();
 
         uint96 _msp = msp();
+
+        uint24 _early = early;
+
+        incrementBps = INCREMENT_BPS;
 
         assembly {
             function juke(x, L, R) -> b {
@@ -1001,26 +1026,42 @@ abstract contract NuggftV1Swap is INuggftV1ItemSwap, INuggftV1Swap, NuggftV1Stak
                     next := _msp
                 }
                 default {
-                    mstore(0x00, 0x00)
-                    mstore(0x20, 0x00)
-                    mstore(0x40, 0x00)
-                    return(0x00, 0x60)
+                    if iszero(and(iszero(lt(tokenId, MINT_OFFSET)), lt(tokenId, add(MINT_OFFSET, _early)))) {
+                        mstore(0x00, 0x00)
+                        mstore(0x20, 0x00)
+                        mstore(0x40, 0x00)
+                        mstore(0x60, 0x00)
+                        return(0x00, 0x80)
+                    }
+
+                    next := STARTING_PRICE
                 }
             }
             default {
-                if and(isLeader, iszero(juke(swapData, 2, 232))) {
+                let swapEpoch := juke(swapData, 2, 232)
+
+                if and(isLeader, iszero(swapEpoch)) {
                     canOffer := 0
+                }
+
+                if eq(swapEpoch, activeEpoch) {
+                    let remain := sub(INTERVAL, mod(number(), INTERVAL))
+
+                    if lt(remain, 45) {
+                        incrementBps := add(mul(sub(50, remain), 100), BASE_BPS)
+                    }
                 }
 
                 current := mul(juke(offerData, 26, 186), LOSS)
 
                 next := mul(juke(swapData, 26, 186), LOSS)
 
-                if lt(next, 100000000000) {
-                    next := 100000000000
+                if lt(next, STARTING_PRICE) {
+                    next := STARTING_PRICE
+                    incrementBps := INCREMENT_BPS
                 }
 
-                next := mul(div(mul(div(next, LOSS), INCREMENT_BPS), BASE_BPS), LOSS)
+                next := mul(div(mul(div(next, LOSS), incrementBps), BASE_BPS), LOSS)
             }
         }
     }
@@ -1031,7 +1072,7 @@ abstract contract NuggftV1Swap is INuggftV1ItemSwap, INuggftV1Swap, NuggftV1Stak
         uint24 seller,
         uint16 itemId
     ) public view override returns (uint96 res) {
-        (bool canOffer, uint96 next, uint96 current) = check(buyer, seller, itemId);
+        (bool canOffer, uint96 next, uint96 current, ) = check(buyer, seller, itemId);
 
         if (canOffer) res = next - current;
     }
@@ -1048,10 +1089,13 @@ abstract contract NuggftV1Swap is INuggftV1ItemSwap, INuggftV1Swap, NuggftV1Stak
         returns (
             bool canOffer,
             uint96 next,
-            uint96 current
+            uint96 current,
+            uint96 incrementBps
         )
     {
         canOffer = true;
+
+        uint24 activeEpoch = epoch();
 
         uint256 agency__cache = itemAgency(seller, itemId);
 
@@ -1061,18 +1105,31 @@ abstract contract NuggftV1Swap is INuggftV1ItemSwap, INuggftV1Swap, NuggftV1Stak
             offerData = itemOffers(buyer, seller, itemId);
         }
 
-        if (uint24(agency__cache >> 230) == 0 && offerData == agency__cache) canOffer = false;
+        uint24 agencyEpoch = uint24(agency__cache >> 230);
+
+        if (agencyEpoch == 0 && offerData == agency__cache) canOffer = false;
 
         current = uint96((offerData << 26) >> 186) * LOSS;
 
         next = uint96((agency__cache << 26) >> 186) * LOSS;
 
+        incrementBps = INCREMENT_BPS;
+
         assembly {
-            if lt(next, 100000000000) {
-                next := 100000000000
+            if eq(agencyEpoch, activeEpoch) {
+                let remain := sub(INTERVAL, mod(number(), INTERVAL))
+
+                if lt(remain, 45) {
+                    incrementBps := add(mul(sub(50, remain), 100), BASE_BPS)
+                }
             }
 
-            next := mul(div(mul(div(next, LOSS), INCREMENT_BPS), BASE_BPS), LOSS)
+            if lt(next, STARTING_PRICE) {
+                next := STARTING_PRICE
+                incrementBps := INCREMENT_BPS
+            }
+
+            next := mul(div(mul(div(next, LOSS), incrementBps), BASE_BPS), LOSS)
         }
     }
 }

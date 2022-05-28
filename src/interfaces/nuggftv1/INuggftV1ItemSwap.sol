@@ -39,7 +39,8 @@ interface INuggftV1ItemSwap {
         returns (
             bool canOffer,
             uint96 next,
-            uint96 current
+            uint96 current,
+            uint96 incrementBps
         );
 
     function vfo(
