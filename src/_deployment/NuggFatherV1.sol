@@ -15,36 +15,38 @@ contract NuggFatherV1Lite {
 }
 
 contract NuggFatherV1 {
-    DotnuggV1 public immutable dotnugg;
-
     NuggftV1 public immutable nuggft;
 
     constructor() payable {
         nuggft = new NuggftV1{value: msg.value}();
 
-        dotnugg = DotnuggV1(address(nuggft.dotnuggv1()));
+        (index, last) = nuggft.premintTokens();
     }
 
-    uint24 index = 1001001;
+    uint24 last;
 
-    function mint(uint24 amount) external payable {
-        for (uint24 i = index; i < index + amount; i++) {
-            nuggft.mint{value: nuggft.msp()}(uint24(i));
+    uint24 index;
+
+    function mint() external {
+        uint24 i = index;
+        for (; gasleft() > 200000 && i <= last; i++) {
+            nuggft.agency(i);
+            nuggft.premint(uint24(i));
 
             uint16[] memory f = nuggft.floop(i);
 
-            uint16 itemId3 = uint16(f[4]);
+            uint16 itemId3 = (f[4]);
 
-            if (itemId3 != 0) nuggft.sell(i, itemId3, .0069 ether);
+            if (itemId3 != 0) nuggft.sell(i, itemId3, .0042 ether);
 
-            uint16 itemId4 = uint16(f[8]);
+            uint16 itemId4 = (f[8]);
 
             nuggft.sell(i, itemId4, .0069 ether);
+
+            nuggft.sell(i, .069 ether);
         }
 
-        index += amount;
-
-        payable(msg.sender).transfer(address(this).balance);
+        index = i;
     }
 }
 

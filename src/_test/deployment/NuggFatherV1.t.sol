@@ -28,11 +28,11 @@ contract deployment__NuggFatherV1 is NuggftV1Test {
 
         father.nuggft().imageURI(MINT_OFFSET);
 
-        father.nuggft().premint(MINT_OFFSET);
+        // father.nuggft().premint(MINT_OFFSET);
 
         father.nuggft().msp();
         father.nuggft().eps();
-
+        father.mint();
         // ds.emit_log_address(address(father.nuggft()));
 
         forge.vm.stopPrank();

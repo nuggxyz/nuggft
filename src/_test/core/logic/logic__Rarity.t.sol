@@ -23,6 +23,7 @@ abstract contract logic__Rarity is NuggftV1Test {
     function grrr(uint24 offset) public {
         uint24 start = offset * 10000;
         uint24 end = start + 10000;
+
         for (uint24 i = start; i < end; i++) {
             uint16[] memory proof;
 

@@ -161,21 +161,26 @@ abstract contract NuggftV1Proof is INuggftV1Proof, NuggftV1Epoch, NuggftV1Trust 
         }
     }
 
+
     // TODO TO BE TESTED
     function initFromSeed(uint256 seed) internal view returns (uint256 res) {
-        uint8 selA = uint8((seed >> 8) & 0xff);
-        uint8 selB = uint8((seed >> 16) & 0xff);
-        uint8 selC = uint8((seed >> 24) & 0xff);
+        uint8 selA = uint8((seed >> 8));
+        uint8 selB = uint8((seed >> 16));
+        uint8 selC = uint8((seed >> 24));
 
-        selA = selA < 128 ? 3 : 4;
-        selB = selB < 30 ? 5 : selB < 55 ? 6 : selB < 75 ? 7 : 0;
-        selC = selC < 30 ? 5 : selC < 55 ? 6 : selC < 75 ? 7 : selC < 115 ? 4 : selC < 155 ? 3 : selC < 205 ? 2 : 1;
+
+        selA = (selA / 128) + 3; /* [3=50%, 4=50%] */
+
+        if ((selB /= 32) <= 4) selB = 0; /* [5=12.5%, 6=12.5%, 7=12.5%, 0=62.5%] */
+
+        selC = selC < 32 ? 5 : selC < 64 ? 6 : selC < 96 ? 7 : selC < 128 ? 4 : selC < 160 ? 3 : selC < 208 ? 2 : 1;
+        /* [1=25%, 2=25%, 3=12.5%, 4=12.5%, 5=12.5%, 6=12.5%, 7=12.5%] */
 
         uint256 a = DotnuggV1Lib.pickWithId(address(dotnuggv1), 0, seed);
         uint256 b = DotnuggV1Lib.pickWithId(address(dotnuggv1), 1, seed);
         uint256 c = DotnuggV1Lib.pickWithId(address(dotnuggv1), 2, seed);
         uint256 d = DotnuggV1Lib.pickWithId(address(dotnuggv1), selA, seed);
-        uint256 e = DotnuggV1Lib.pickWithId(address(dotnuggv1), selB, seed);
+        uint256 e = selB == 0 ? 0 :DotnuggV1Lib.pickWithId(address(dotnuggv1), selB, seed);
         uint256 f = DotnuggV1Lib.pickWithId(address(dotnuggv1), selC, seed >> 8);
 
         res |=
@@ -185,5 +190,24 @@ abstract contract NuggftV1Proof is INuggftV1Proof, NuggftV1Epoch, NuggftV1Trust 
             (d << (0x30)) |
             (selB == 0 ? 0 : (e << (0x40))) |
             (f << (0x80));
+
+        // 100%
+        // 125%
+        // 125%
+        // 62.5%
+        // 62.5%
+        // 25%
+        // 25%
+        // 25%
+
+        // 0 = 8/8
+        // 1 = 8/8 + 2/8
+        // 2 = 8/8 + 2/8
+        // 3 = 4/8 + 1/8
+        // 4 = 4/8 + 1/8
+        // 5 = 1/8 + 1/8
+        // 6 = 1/8 + 1/8
+        // 7 = 1/8 + 1/8
+
     }
 }
