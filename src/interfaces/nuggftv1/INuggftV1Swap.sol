@@ -20,11 +20,15 @@ interface INuggftV1Swap {
     event Sell(uint24 indexed tokenId, bytes32 agency);
 
 
+
+
     /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
                             STATE CHANGING
        ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
 
     function offer(uint24 tokenId) external payable;
+
+    function offer(uint40[] calldata tokenIds, uint256[] calldata values) external payable;
 
     function claim(
         uint24[] calldata tokenIds,

@@ -41,18 +41,19 @@ abstract contract NuggftV1Swap is INuggftV1ItemSwap, INuggftV1Swap, NuggftV1Stak
         _offer((uint64(buyingTokenId) << 40) | (uint64(itemId) << 24) | uint64(sellingTokenId), msg.value);
     }
 
+    /// @inheritdoc INuggftV1Swap
     function offer(uint40[] calldata tokenIds, uint256[] calldata values) external payable {
-        uint256 cumval;
+        uint256 total;
 
         for (uint256 i = 0; i < tokenIds.length; ) {
             _offer(tokenIds[i], values[i]);
-            cumval += values[i];
+            total += values[i];
             unchecked {
                 i++;
             }
         }
 
-        _repanic(tokenIds.length == values.length && msg.value == cumval, Error__0xB0__InvalidMulticall);
+        _repanic(tokenIds.length == values.length && msg.value == total, Error__0xB0__InvalidMulticall);
     }
 
     function _offer(uint256 tokenId, uint256 value) internal {
