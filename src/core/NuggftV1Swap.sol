@@ -29,7 +29,7 @@ abstract contract NuggftV1Swap is INuggftV1ItemSwap, INuggftV1Swap, NuggftV1Stak
 
     /// @inheritdoc INuggftV1Swap
     function offer(uint24 tokenId) public payable override {
-        _offer(tokenId);
+        _offer(tokenId, msg.value);
     }
 
     /// @inheritdoc INuggftV1ItemSwap
@@ -38,10 +38,24 @@ abstract contract NuggftV1Swap is INuggftV1ItemSwap, INuggftV1Swap, NuggftV1Stak
         uint24 sellingTokenId,
         uint16 itemId
     ) external payable override {
-        _offer((uint64(buyingTokenId) << 40) | (uint64(itemId) << 24) | uint64(sellingTokenId));
+        _offer((uint64(buyingTokenId) << 40) | (uint64(itemId) << 24) | uint64(sellingTokenId), msg.value);
     }
 
-    function _offer(uint256 tokenId) private {
+    function offer(uint40[] calldata tokenIds, uint256[] calldata values) external payable {
+        uint256 cumval;
+
+        for (uint256 i = 0; i < tokenIds.length; ) {
+            _offer(tokenIds[i], values[i]);
+            cumval += values[i];
+            unchecked {
+                i++;
+            }
+        }
+
+        _repanic(tokenIds.length == values.length && msg.value == cumval, Error__0xB0__InvalidMulticall);
+    }
+
+    function _offer(uint256 tokenId, uint256 value) internal {
         uint256 agency__sptr;
         uint256 agency__cache;
 
@@ -111,19 +125,10 @@ abstract contract NuggftV1Swap is INuggftV1ItemSwap, INuggftV1Swap, NuggftV1Stak
 
             uint256 _proof = initFromSeed(calculateSeed(uint24(active)));
 
-            // uint256 hotproof__cache = hotproof[uint8(tokenId % HOT_PROOF_AMOUNT)];
-
-            // // if hot slot 1 is open, save there
-            // if (hotproof__cache == HOT_PROOF_EMPTY) {
-            //     hotproof[uint8(tokenId % HOT_PROOF_AMOUNT)] = proof;
-            // } else {
             proof[uint24(tokenId)] = _proof;
 
             address itemHolder = address(xnuggftv1);
-            // }
-            // xnuggftv1.proofTransferBatch(proof, address(0), address(this));
 
-            // otherwise this
             addStakedShare(msg.value);
 
             // prettier-ignore
@@ -131,7 +136,7 @@ abstract contract NuggftV1Swap is INuggftV1ItemSwap, INuggftV1Swap, NuggftV1Stak
                 // save the updated agency
                 agency__cache := xor(xor(xor( // =============================
                           /* addr     0       [ */ caller(),              /* ] 160 */
-                    shl(  /* eth   */ 160, /* [ */ div(callvalue(), LOSS) /* ] 230 */ )),
+                    shl(  /* eth   */ 160, /* [ */ div(value, LOSS) /* ] 230 */ )),
                     shl(  /* epoch */ 230, /* [ */ active                 /* ] 254 */ )),
                     shl(  /* flag  */ 254, /* [ */ 0x03                   /* ] 255 */ )
                 ) // ==========================================================
@@ -174,7 +179,7 @@ abstract contract NuggftV1Swap is INuggftV1ItemSwap, INuggftV1Swap, NuggftV1Stak
 
             return;
         } else if (!isItem && agency__cache == 0) {
-            premint(uint24(tokenId));
+            premint(uint24(tokenId), value);
             return;
         }
 
@@ -272,9 +277,9 @@ abstract contract NuggftV1Swap is INuggftV1ItemSwap, INuggftV1Swap, NuggftV1Stak
                     mstore(0x80, shr(24, tokenId))
                     mstore(0xA0, lastItemSwap.slot)
 
-                    let kek := keccak256(0x80, 0x40)
+                    mstore(0x80, keccak256(0x80, 0x40))
 
-                    let val := sload(kek)
+                    let val := sload(mload(0x80))
 
                     if eq(nextEpoch, and(val, 0xffffff)) {
                         panic(Error__0xAC__MustFinalizeOtherItemSwap)
@@ -285,7 +290,7 @@ abstract contract NuggftV1Swap is INuggftV1ItemSwap, INuggftV1Swap, NuggftV1Stak
                     val := or(val, shl(24, and(tokenId, 0xffffff)))
 
                     // since epoch 1 cant happen (unless OFFSET is 0)
-                    sstore(kek, or(val, nextEpoch))
+                    sstore(mload(0x80), or(val, nextEpoch))
 
                 }
                 default {
@@ -309,14 +314,14 @@ abstract contract NuggftV1Swap is INuggftV1ItemSwap, INuggftV1Swap, NuggftV1Stak
                     panic(Error__0xA4__ExpiredEpoch)
                 }
             }
-
+            // log1(0x00, 0x00, abc)
             /////////////////////////////////////////////////////////////////////
 
             // parse last offer value
            let last := juke(agency__cache, 26, 186)
 
             // store callvalue formatted in .1 gwei for caculation of total offer
-            let next := div(callvalue(), LOSS)
+            let next := div(value, LOSS)
 
             // parse and caculate next offer value
             next := add(juke(offer__cache, 26, 186), next)
@@ -416,7 +421,7 @@ abstract contract NuggftV1Swap is INuggftV1ItemSwap, INuggftV1Swap, NuggftV1Stak
         }
     }
 
-    function premint(uint24 tokenId) internal {
+    function premint(uint24 tokenId, uint256 value) internal {
         _repanic(agency[tokenId] == 0, Error__0x65__TokenNotMintable);
 
         (uint24 first, uint24 last) = premintTokens();
@@ -461,7 +466,7 @@ abstract contract NuggftV1Swap is INuggftV1ItemSwap, INuggftV1Swap, NuggftV1Stak
         agency[tokenId] = _agency;
 
         // a little reentrancy never hurt nobody
-        offer(tokenId);
+        _offer(tokenId, value);
 
         delete _offers[tokenId][address(this)];
     }

@@ -25,42 +25,22 @@ contract NuggftV1 is IERC721, IERC721Metadata, NuggftV1Loan {
     constructor() payable {}
 
     function multicall(bytes[] calldata data) external {
+        // purposly not payable here
         unchecked {
-            for (uint256 i = 0; i < data.length; i++) {
-                (bool success, bytes memory returndata) = address(this).delegatecall(data[i]);
+            bytes memory a;
+            bool success;
 
-                if (!success) {
-                    if (returndata.length > 0) {
-                        assembly {
-                            let returndata_size := mload(returndata)
-                            revert(add(32, returndata), returndata_size)
-                        }
-                    } else {
-                        _panic(Error__0xAF__MulticallError);
+            for (uint256 i = 0; i < data.length; i++) {
+                a = data[i];
+                assembly {
+                    success := delegatecall(gas(), address(), add(a, 32), mload(a), a, 5)
+                    if iszero(success) {
+                        revert(a, 5)
                     }
                 }
             }
         }
     }
-
-    // function premint(uint24 tokenId) public requiresTrust {
-    //     _repanic(agency[tokenId] == 0, Error__0x65__TokenNotMintable);
-
-    //     (uint24 first, uint24 last) = premintTokens();
-
-    //     _repanic(tokenId >= first && tokenId <= last, Error__0x65__TokenNotMintable);
-
-    //     uint256 _agency = (0x01 << 254) + uint160(msg.sender);
-
-    //     uint256 _proof = initFromSeed(calculateEarlySeed(tokenId));
-
-    //     proof[tokenId] = _proof;
-    //     agency[tokenId] = _agency;
-
-    //     emit PreMint(tokenId, STARTING_PRICE, bytes32(_proof), bytes32(_agency));
-
-    //     xnuggftv1.transferBatch(_proof, address(0), msg.sender);
-    // }
 
     /// @inheritdoc INuggftV1Proof
     function mint(uint24 tokenId) public payable override {

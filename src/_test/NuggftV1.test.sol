@@ -10,7 +10,7 @@ import {NuggftV1Constants} from "../core/NuggftV1Constants.sol";
 
 import {Expect} from "./expect/Expect.sol";
 
-import {DotnuggV1} from "../../../dotnugg-v1-core/src/DotnuggV1.sol";
+import {DotnuggV1} from "dotnugg-v1-core/DotnuggV1.sol";
 import {DotnuggV1Lib} from "../libraries/DotnuggV1Lib.sol";
 
 import {NuggftV1AgentType} from "./helpers/NuggftV1AgentType.sol";

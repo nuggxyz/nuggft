@@ -2,7 +2,7 @@
 
 pragma solidity 0.8.14;
 
-import {DotnuggV1} from "../../../dotnugg-v1-core/src/DotnuggV1.sol";
+import {DotnuggV1} from "dotnugg-v1-core/DotnuggV1.sol";
 
 import {IDotnuggV1Safe} from "../interfaces/dotnugg/IDotnuggV1Safe.sol";
 import {xNuggftV1} from "../xNuggftV1.sol";

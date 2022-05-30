@@ -4,7 +4,7 @@ pragma solidity 0.8.14;
 
 import {NuggftV1} from "../NuggftV1.sol";
 
-import {DotnuggV1} from "../../../dotnugg-v1-core/src/DotnuggV1.sol";
+import {DotnuggV1} from "dotnugg-v1-core/DotnuggV1.sol";
 
 contract NuggFatherV1Lite {
     DotnuggV1 public immutable dotnugg;
