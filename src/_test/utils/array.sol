@@ -151,6 +151,12 @@ library array {
         }
     }
 
+    function to64(uint256[] memory a) internal pure returns (uint64[] memory res) {
+        assembly {
+            res := a
+        }
+    }
+
     function to40(uint256[] memory a) internal pure returns (uint40[] memory res) {
         assembly {
             res := a
@@ -526,6 +532,79 @@ library array {
         uint40 h
     ) internal pure returns (uint40[] memory arr) {
         return to40(arrayHelpers.build(a, b, c, d, e, f, g, h));
+    }
+
+    ///////////////////////////////////////////////////////////////
+
+    function b64(uint256 a) internal pure returns (uint64[] memory arr) {
+        return to64(arrayHelpers.build(a));
+    }
+
+    function b64(uint64 a, uint64 b) internal pure returns (uint64[] memory arr) {
+        return to64(arrayHelpers.build(a, b));
+    }
+
+    function b64(
+        uint64 a,
+        uint64 b,
+        uint64 c
+    ) internal pure returns (uint64[] memory arr) {
+        return to64(arrayHelpers.build(a, b, c));
+    }
+
+    function b64(
+        uint64 a,
+        uint64 b,
+        uint64 c,
+        uint64 d
+    ) internal pure returns (uint64[] memory arr) {
+        return to64(arrayHelpers.build(a, b, c, d));
+    }
+
+    function b64(
+        uint64 a,
+        uint64 b,
+        uint64 c,
+        uint64 d,
+        uint64 e
+    ) internal pure returns (uint64[] memory arr) {
+        return to64(arrayHelpers.build(a, b, c, d, e));
+    }
+
+    function b64(
+        uint64 a,
+        uint64 b,
+        uint64 c,
+        uint64 d,
+        uint64 e,
+        uint64 f
+    ) internal pure returns (uint64[] memory arr) {
+        return to64(arrayHelpers.build(a, b, c, d, e, f));
+    }
+
+    function b64(
+        uint64 a,
+        uint64 b,
+        uint64 c,
+        uint64 d,
+        uint64 e,
+        uint64 f,
+        uint64 g
+    ) internal pure returns (uint64[] memory arr) {
+        return to64(arrayHelpers.build(a, b, c, d, e, f, g));
+    }
+
+    function b64(
+        uint64 a,
+        uint64 b,
+        uint64 c,
+        uint64 d,
+        uint64 e,
+        uint64 f,
+        uint64 g,
+        uint64 h
+    ) internal pure returns (uint64[] memory arr) {
+        return to64(arrayHelpers.build(a, b, c, d, e, f, g, h));
     }
 
     ///////////////////////////////////////////////////////////////

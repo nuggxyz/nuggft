@@ -16,12 +16,12 @@ contract general__multioffer is NuggftV1Test {
 
         forge.vm.prank(users.frank);
 
-        nuggft.offer{value: 2 ether}(array.b40(first, first + 1), array.b256(1 ether, 1 ether));
+        nuggft.offer{value: 2 ether}(array.b64(first, first + 1), array.b256(1 ether, 1 ether));
 
         forge.vm.expectRevert(abi.encodePacked(bytes4(0x7e863b48), bytes1(0xAF)));
-        nuggft.offer{value: 1 ether}(array.b40(first + 2, first + 3), array.b256(1 ether, 1 ether));
+        nuggft.offer{value: 1 ether}(array.b64(first + 2, first + 3), array.b256(1 ether, 1 ether));
 
         forge.vm.expectRevert(abi.encodePacked(bytes4(0x7e863b48), bytes1(0xAF)));
-        nuggft.offer{value: 2 ether}(array.b40(first + 2, first + 3), array.b256(1 ether, 1 ether, 1 ether));
+        nuggft.offer{value: 2 ether}(array.b64(first + 2, first + 3), array.b256(1 ether, 1 ether, 1 ether));
     }
 }

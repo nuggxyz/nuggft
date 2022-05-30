@@ -28,7 +28,7 @@ interface INuggftV1Swap {
 
     function offer(uint24 tokenId) external payable;
 
-    function offer(uint40[] calldata tokenIds, uint256[] calldata values) external payable;
+    function offer(uint64[] calldata tokenIds, uint256[] calldata values) external payable;
 
     function claim(
         uint24[] calldata tokenIds,

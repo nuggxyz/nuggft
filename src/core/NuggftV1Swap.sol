@@ -6,7 +6,6 @@ import {INuggftV1Swap} from "../interfaces/nuggftv1/INuggftV1Swap.sol";
 import {INuggftV1ItemSwap} from "../interfaces/nuggftv1/INuggftV1ItemSwap.sol";
 
 import {NuggftV1Stake} from "./NuggftV1Stake.sol";
-import "../_test/utils/forge.sol";
 
 /// @notice mechanism for trading of nuggs between users (and items between nuggs)
 /// @dev Explain to a developer any extra details
@@ -42,7 +41,7 @@ abstract contract NuggftV1Swap is INuggftV1ItemSwap, INuggftV1Swap, NuggftV1Stak
     }
 
     /// @inheritdoc INuggftV1Swap
-    function offer(uint40[] calldata tokenIds, uint256[] calldata values) external payable {
+    function offer(uint64[] calldata tokenIds, uint256[] calldata values) external payable {
         uint256 total;
 
         for (uint256 i = 0; i < tokenIds.length; ) {
