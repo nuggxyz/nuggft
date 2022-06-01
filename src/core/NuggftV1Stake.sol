@@ -37,7 +37,8 @@ abstract contract NuggftV1Stake is INuggftV1Stake, NuggftV1Proof {
 
     /// @inheritdoc INuggftV1Stake
     function msp() public view override returns (uint96 res) {
-        (res, , , ) = minSharePriceBreakdown(stake);
+        (uint96 total, , , , uint96 increment) = minSharePriceBreakdown(stake);
+        res = total + increment;
     }
 
     // / @inheritdoc INuggftV1Stake
@@ -80,6 +81,8 @@ abstract contract NuggftV1Stake is INuggftV1Stake, NuggftV1Proof {
             let premium := div(mul(_eps, shrs), PREMIUM_DIV)
 
             let _msp := add(_eps, add(fee, premium))
+
+            _msp := div(mul(_msp, INCREMENT_BPS), BASE_BPS)
 
             // ensure value >= msp
             if gt(_msp, value) {
@@ -137,7 +140,8 @@ abstract contract NuggftV1Stake is INuggftV1Stake, NuggftV1Proof {
             uint96 total,
             uint96 ethPerShare,
             uint96 protocolFee,
-            uint96 premium
+            uint96 premium,
+            uint96 increment
         )
     {
         assembly {
@@ -146,6 +150,9 @@ abstract contract NuggftV1Stake is INuggftV1Stake, NuggftV1Proof {
             protocolFee := div(ethPerShare, PROTOCOL_FEE_FRAC_MINT)
             premium := div(mul(ethPerShare, shrs), PREMIUM_DIV)
             total := add(ethPerShare, add(protocolFee, premium))
+            // TODO --- fix this
+            increment := sub(div(mul(total, INCREMENT_BPS), BASE_BPS), total)
+            // total := add(total, increment)
         }
     }
 

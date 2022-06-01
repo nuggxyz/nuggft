@@ -72,4 +72,18 @@ contract RiggedNuggftV1 is NuggftV1 {
     function external__initFromSeed(uint256 seed) public view returns (uint256 res) {
         return initFromSeed(seed);
     }
+
+    function external__minSharePriceBreakdown()
+        public
+        view
+        returns (
+            uint96 total,
+            uint96 ethPerShare,
+            uint96 protocolFee,
+            uint96 premium,
+            uint96 increment
+        )
+    {
+        return minSharePriceBreakdown(stake);
+    }
 }

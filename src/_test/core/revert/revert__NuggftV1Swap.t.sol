@@ -73,14 +73,35 @@ abstract contract revert__NuggftV1Swap is NuggftV1Test {
 
     function test__revert__NuggftV1Swap__0x71__offer__mint__failWithOneWeiLessThanMinAfterSomeValue() public revert__NuggftV1Swap__setUp {
         uint24 tokenId = nuggft.epoch();
+        // subtract 1 for when the "round up" is nothing
 
-        expect.offer().from(users.frank).err(0x71).exec{value: nuggft.vfo(users.frank, tokenId) - 1}(tokenId);
+        uint96 abc = ((nuggft.vfo(users.frank, tokenId) - 1) / LOSS) * LOSS;
+
+        ds.emit_log_named_uint("abc", abc);
+
+        expect.offer().from(users.frank).err(0x71).exec{value: abc}(tokenId);
     }
 
     function test__revert__NuggftV1Swap__0x71__offer__mint__failWithOneWeiLessThanMinAfterSomeValueMsp() public revert__NuggftV1Swap__setUp {
         uint24 tokenId = nuggft.epoch();
+        (uint96 _trueMsp, , , , ) = nuggft.external__minSharePriceBreakdown();
 
-        expect.offer().from(users.frank).err(0x71).exec{value: nuggft.msp() - 1}(tokenId);
+        expect.offer().from(users.frank).err(0x71).exec{value: _trueMsp - 1}(tokenId);
+    }
+
+    function test__revert__NuggftV1Swap__0x71__offer__mint__failWithOneWeiMoreThanMinAfterSomeValueMsp() public revert__NuggftV1Swap__setUp {
+        uint24 tokenId = nuggft.epoch();
+        (uint96 _trueMsp, , , , ) = nuggft.external__minSharePriceBreakdown();
+
+        expect.offer().from(users.frank).err(0x71).exec{value: _trueMsp + 1}(tokenId);
+    }
+
+    function test__revert__NuggftV1Swap__0x71__offer__mint__failMspAfterSomeValue() public revert__NuggftV1Swap__setUp {
+        uint24 tokenId = nuggft.epoch();
+
+        (uint96 _trueMsp, , , , ) = nuggft.external__minSharePriceBreakdown();
+
+        expect.offer().from(users.frank).err(0x71).exec{value: _trueMsp}(tokenId);
     }
 
     function test__revert__NuggftV1Swap__0x68__offer__mint__failWithZero() public revert__NuggftV1Swap__setUp {

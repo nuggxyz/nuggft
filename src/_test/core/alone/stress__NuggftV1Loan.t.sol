@@ -32,7 +32,7 @@ contract stress__NuggftV1Loan is NuggftV1Test {
             (, , , , , uint24 b_insolventEpoch) = nuggft.debt(LOAN_TOKENID);
 
             uint24 tokenId = nuggft.epoch();
-
+            nuggft.msp();
             uint96 value = nuggft.vfo(users.frank, tokenId);
             nuggft.offer{value: value}(tokenId);
 

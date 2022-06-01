@@ -55,7 +55,8 @@ abstract contract revert__offer__0x68 is NuggftV1Test {
 
         expect.offer().from(users.mac).value(nuggft.vfo(users.mac, tokenId)).exec(tokenId);
 
-        expect.offer().from(users.frank).value(nuggft.vfo(users.frank, tokenId) - 1).err(0x72).exec(tokenId);
+        // subtract 1 for when the "round up" is nothing
+        expect.offer().from(users.frank).value(((nuggft.vfo(users.frank, tokenId) - 1) / LOSS) * LOSS).err(0x72).exec(tokenId);
     }
 
     function test__revert__offer__0x68__pass__desc() public {

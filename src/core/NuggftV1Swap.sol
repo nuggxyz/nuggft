@@ -330,18 +330,19 @@ abstract contract NuggftV1Swap is INuggftV1ItemSwap, INuggftV1Swap, NuggftV1Stak
                 panic(Error__0x68__OfferLowerThanLOSS)
             }
 
-            let remain := sub(INTERVAL, mod(number(), INTERVAL))
+            let increment := sub(INTERVAL, mod(number(), INTERVAL))
 
-            switch and(eq(agency__epoch, active),lt(remain, 45))
+            // 10 min 50% increment jump
+            switch and(eq(agency__epoch, active), lt(increment, 45))
             case 1 {
-                remain := add(mul(sub(50, remain), 100), BASE_BPS)
+                increment := add(mul(sub(50, increment), 100), BASE_BPS)
             }
             default {
-                remain := INCREMENT_BPS
+                increment := INCREMENT_BPS
             }
 
-            // ensure next offer includes at least a 2% increment
-            if gt(div(mul(last, remain), BASE_BPS), next) {
+            // ensure next offer includes at least a 5-50% increment
+            if gt(div(mul(last, increment), BASE_BPS), next) {
                 panic(Error__0x72__IncrementTooLow)
             }
             // convert next into the increment
@@ -432,11 +433,11 @@ abstract contract NuggftV1Swap is INuggftV1ItemSwap, INuggftV1Swap, NuggftV1Stak
 
         uint256 _proof = initFromSeed(calculateEarlySeed(tokenId));
 
-        uint256 prefix = (0x03 << 254) + (uint256((msp() / LOSS)) << 160);
+        (uint96 _msp, , , , ) = minSharePriceBreakdown(stake);
+
+        uint256 prefix = (0x03 << 254) + (uint256((_msp / LOSS)) << 160);
 
         _agency = prefix + uint160(address(this));
-
-        // emit Sell(tokenId, bytes32(_agency));
 
         uint16 item = uint16(_proof >> 0x90);
 
@@ -457,7 +458,6 @@ abstract contract NuggftV1Swap is INuggftV1ItemSwap, INuggftV1Swap, NuggftV1Stak
                 /* topic #3:to   */ address(),
                 /* topic #4:id   */ tokenId
             ) // ===========================================================
-
         }
 
         emit PreMint(tokenId, bytes32(_proof), bytes32(_agency), item, bytes32(__itemAgency));
@@ -997,7 +997,7 @@ abstract contract NuggftV1Swap is INuggftV1ItemSwap, INuggftV1Swap, NuggftV1Stak
 
         uint24 activeEpoch = epoch();
 
-        uint96 _msp = msp();
+        (uint96 _msp, , , , ) = minSharePriceBreakdown(stake);
 
         uint24 _early = early;
 
@@ -1065,8 +1065,13 @@ abstract contract NuggftV1Swap is INuggftV1ItemSwap, INuggftV1Swap, NuggftV1Stak
                     next := STARTING_PRICE
                     incrementBps := INCREMENT_BPS
                 }
+            }
 
-                next := mul(div(mul(div(next, LOSS), incrementBps), BASE_BPS), LOSS)
+            // add at the end to round up
+            next := div(mul(next, incrementBps), BASE_BPS)
+
+            if iszero(iszero(mod(next, LOSS))) {
+                next := add(mul(div(next, LOSS), LOSS), LOSS)
             }
         }
     }
@@ -1134,7 +1139,14 @@ abstract contract NuggftV1Swap is INuggftV1ItemSwap, INuggftV1Swap, NuggftV1Stak
                 incrementBps := INCREMENT_BPS
             }
 
-            next := mul(div(mul(div(next, LOSS), incrementBps), BASE_BPS), LOSS)
+            // next := mul(div(mul(div(next, LOSS), incrementBps), BASE_BPS), LOSS)
+
+            // add at the end to round up
+            next := div(mul(next, incrementBps), BASE_BPS)
+
+            if iszero(iszero(mod(next, LOSS))) {
+                next := add(mul(div(next, LOSS), LOSS), LOSS)
+            }
         }
     }
 }
