@@ -14,7 +14,7 @@ import {NuggftV1Epoch} from "./NuggftV1Epoch.sol";
 import {NuggftV1Trust} from "./NuggftV1Trust.sol";
 
 abstract contract NuggftV1Proof is INuggftV1Proof, NuggftV1Epoch, NuggftV1Trust {
-    function calculateEarlySeed(uint24 tokenId) public view returns (uint256 seed) {
+    function calculateEarlySeed(uint24 tokenId) internal view returns (uint256 seed) {
         return uint256(keccak256(abi.encodePacked(tokenId, earlySeed)));
     }
 
@@ -107,6 +107,7 @@ abstract contract NuggftV1Proof is INuggftV1Proof, NuggftV1Epoch, NuggftV1Trust 
             let flag := shr(254, buyerTokenAgency)
 
             // ensure the caller is really the agent
+            // aka is the nugg claimed
             if and(eq(flag, 0x3), iszero(iszero(juke(buyerTokenAgency, 2, 232)))) {
                 panic(Error__0xA3__NotItemAuthorizedAgent)
             }

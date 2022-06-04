@@ -168,12 +168,16 @@ contract NuggftV1Test is ForgeTest, NuggftV1Constants {
         forge.vm.roll(block.number + amount);
     }
 
+    function encodeRevert(bytes1 code) internal pure returns (bytes memory) {
+        return abi.encodePacked(Revert.selector, code);
+    }
+
     function encItemId(
         uint24 buyerTokenId,
         uint24 tokenId,
         uint16 itemId
     ) internal pure returns (uint64) {
-        return uint24((buyerTokenId << 40) | (uint256(itemId) << 24)) | tokenId;
+        return uint64((uint256(buyerTokenId) << 40) | (uint256(itemId) << 24) | uint256(tokenId));
     }
 
     function encItemIdClaim(uint24 tokenId, uint16 itemId) internal pure returns (uint40) {

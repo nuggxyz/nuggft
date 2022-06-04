@@ -44,6 +44,24 @@ abstract contract NuggftV1Globals is NuggftV1Constants, INuggftV1Globals {
 
         emit Genesis(genesis, uint16(INTERVAL), uint16(OFFSET), INTERVAL_SUB, early, address(dotnuggv1), address(xnuggftv1), bytes32(stake));
     }
+
+    function multicall(bytes[] calldata data) external {
+        // purposly not payable here
+        unchecked {
+            bytes memory a;
+            bool success;
+
+            for (uint256 i = 0; i < data.length; i++) {
+                a = data[i];
+                assembly {
+                    success := delegatecall(gas(), address(), add(a, 32), mload(a), a, 5)
+                    if iszero(success) {
+                        revert(a, 5)
+                    }
+                }
+            }
+        }
+    }
 }
 
 // address res;

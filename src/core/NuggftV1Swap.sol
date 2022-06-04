@@ -7,6 +7,8 @@ import {INuggftV1ItemSwap} from "../interfaces/nuggftv1/INuggftV1ItemSwap.sol";
 
 import {NuggftV1Stake} from "./NuggftV1Stake.sol";
 
+import "../_test/utils/forge.sol";
+
 /// @notice mechanism for trading of nuggs between users (and items between nuggs)
 /// @dev Explain to a developer any extra details
 abstract contract NuggftV1Swap is INuggftV1ItemSwap, INuggftV1Swap, NuggftV1Stake {
@@ -37,22 +39,41 @@ abstract contract NuggftV1Swap is INuggftV1ItemSwap, INuggftV1Swap, NuggftV1Stak
         uint24 sellingTokenId,
         uint16 itemId
     ) external payable override {
-        _offer((uint64(buyingTokenId) << 40) | (uint64(itemId) << 24) | uint64(sellingTokenId), msg.value);
+        _offer(buyingTokenId, sellingTokenId, itemId, msg.value);
     }
 
     /// @inheritdoc INuggftV1Swap
-    function offer(uint64[] calldata tokenIds, uint256[] calldata values) external payable {
-        uint256 total;
+    function offer(
+        uint24 buyingTokenId,
+        uint24 sellingTokenId,
+        uint16 itemId,
+        uint96 offerValue1,
+        uint96 offerValue2
+    ) external payable {
+        _repanic(offerValue1 + offerValue2 == msg.value, Error__0xB1__InvalidMulticallValue);
 
-        for (uint256 i = 0; i < tokenIds.length; ) {
-            _offer(tokenIds[i], values[i]);
-            total += values[i];
-            unchecked {
-                i++;
-            }
+        if (agency[buyingTokenId] >> 254 == 0x3) {
+            uint24[] memory a = new uint24[](1);
+            a[0] = buyingTokenId;
+
+            address[] memory b = new address[](1);
+            b[0] = msg.sender;
+
+            this.claim(a, b, new uint24[](1), new uint16[](1));
         }
 
-        _repanic(tokenIds.length == values.length && msg.value == total, Error__0xB0__InvalidMulticall);
+        if (offerValue1 > 0) _offer(sellingTokenId, offerValue1);
+
+        _offer(buyingTokenId, sellingTokenId, itemId, offerValue2);
+    }
+
+    function _offer(
+        uint256 buyingTokenId,
+        uint256 sellingTokenId,
+        uint256 itemId,
+        uint256 value
+    ) internal {
+        _offer((buyingTokenId << 40) | (itemId << 24) | sellingTokenId, value);
     }
 
     function _offer(uint256 tokenId, uint256 value) internal {
@@ -314,7 +335,7 @@ abstract contract NuggftV1Swap is INuggftV1ItemSwap, INuggftV1Swap, NuggftV1Stak
                     panic(Error__0xA4__ExpiredEpoch)
                 }
             }
-            // log1(0x00, 0x00, abc)
+
             /////////////////////////////////////////////////////////////////////
 
             // parse last offer value
@@ -335,6 +356,7 @@ abstract contract NuggftV1Swap is INuggftV1ItemSwap, INuggftV1Swap, NuggftV1Stak
             // 10 min 50% increment jump
             switch and(eq(agency__epoch, active), lt(increment, 45))
             case 1 {
+                increment := mul(div(increment, 5), 5)
                 increment := add(mul(sub(50, increment), 100), BASE_BPS)
             }
             default {
@@ -440,6 +462,8 @@ abstract contract NuggftV1Swap is INuggftV1ItemSwap, INuggftV1Swap, NuggftV1Stak
         _agency = prefix + uint160(address(this));
 
         uint16 item = uint16(_proof >> 0x90);
+
+        prefix = (0x03 << 254) + (uint256((STARTING_PRICE / LOSS)) << 160);
 
         uint256 __itemAgency = prefix | uint256(tokenId);
 
@@ -728,36 +752,35 @@ abstract contract NuggftV1Swap is INuggftV1ItemSwap, INuggftV1Swap, NuggftV1Stak
             }
 
             // skip sending value if amount to send is 0
-            if iszero(acc) {
-                return(0, 0)
-            }
+            if iszero(iszero(acc)) {
 
-            acc := mul(acc, LOSS)
+                acc := mul(acc, LOSS)
 
-            // we could add a whole bunch of logic all over to ensure that contracts cant use this, but
-            // lets just keep it simple - if you own you nugg with a contract, you have no way to make any
-            // eth on it.
+                // we could add a whole bunch of logic all over to ensure that contracts cant use this, but
+                // lets just keep it simple - if you own you nugg with a contract, you have no way to make any
+                // eth on it.
 
-            // since a meaninful claim can only be made the epoch after a swap is over, it is at least 1 block
-            // later. So, if a contract that has offered will not be in creation when it hits here,
-            // so our call to extcodesize is sufficcitent to check if caller is a contract or not
+                // since a meaninful claim can only be made the epoch after a swap is over, it is at least 1 block
+                // later. So, if a contract that has offered will not be in creation when it hits here,
+                // so our call to extcodesize is sufficcitent to check if caller is a contract or not
 
-            // send accumulated value * LOSS to msg.sender
-            switch iszero(extcodesize(caller()))
-            case 1 {
-                pop(call(gas(), caller(), acc, 0, 0, 0, 0))
-            }
-            default {
-                // if someone really ends up here, just donate the eth
-                let pro := div(acc, PROTOCOL_FEE_FRAC)
+                // send accumulated value * LOSS to msg.sender
+                switch iszero(extcodesize(caller()))
+                case 1 {
+                    pop(call(gas(), caller(), acc, 0, 0, 0, 0))
+                }
+                default {
+                    // if someone really ends up here, just donate the eth
+                    let pro := div(acc, PROTOCOL_FEE_FRAC)
 
-                let cache := add(sload(stake.slot), or(shl(96, sub(acc, pro)), pro))
+                    let cache := add(sload(stake.slot), or(shl(96, sub(acc, pro)), pro))
 
-                sstore(stake.slot, cache)
+                    sstore(stake.slot, cache)
 
-                mstore(0x00, cache)
+                    mstore(0x00, cache)
 
-                log1(0x00, 0x20, Event__Stake)
+                    log1(0x00, 0x20, Event__Stake)
+                }
             }
         }
     }
@@ -1053,6 +1076,7 @@ abstract contract NuggftV1Swap is INuggftV1ItemSwap, INuggftV1Swap, NuggftV1Stak
                     let remain := sub(INTERVAL, mod(number(), INTERVAL))
 
                     if lt(remain, 45) {
+                        remain := mul(div(remain, 5), 5)
                         incrementBps := add(mul(sub(50, remain), 100), BASE_BPS)
                     }
                 }
@@ -1130,6 +1154,7 @@ abstract contract NuggftV1Swap is INuggftV1ItemSwap, INuggftV1Swap, NuggftV1Stak
                 let remain := sub(INTERVAL, mod(number(), INTERVAL))
 
                 if lt(remain, 45) {
+                    remain := mul(div(remain, 5), 5)
                     incrementBps := add(mul(sub(50, remain), 100), BASE_BPS)
                 }
             }
@@ -1138,8 +1163,6 @@ abstract contract NuggftV1Swap is INuggftV1ItemSwap, INuggftV1Swap, NuggftV1Stak
                 next := STARTING_PRICE
                 incrementBps := INCREMENT_BPS
             }
-
-            // next := mul(div(mul(div(next, LOSS), incrementBps), BASE_BPS), LOSS)
 
             // add at the end to round up
             next := div(mul(next, incrementBps), BASE_BPS)

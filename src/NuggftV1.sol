@@ -24,24 +24,6 @@ import {data as nuggs} from "./_data/nuggs.data.sol";
 contract NuggftV1 is IERC721, IERC721Metadata, NuggftV1Loan {
     constructor() payable {}
 
-    function multicall(bytes[] calldata data) external {
-        // purposly not payable here
-        unchecked {
-            bytes memory a;
-            bool success;
-
-            for (uint256 i = 0; i < data.length; i++) {
-                a = data[i];
-                assembly {
-                    success := delegatecall(gas(), address(), add(a, 32), mload(a), a, 5)
-                    if iszero(success) {
-                        revert(a, 5)
-                    }
-                }
-            }
-        }
-    }
-
     /// @inheritdoc INuggftV1Proof
     function mint(uint24 tokenId) public payable override {
         (uint24 first, uint24 last) = mintTokens();
@@ -276,9 +258,9 @@ contract NuggftV1 is IERC721, IERC721Metadata, NuggftV1Loan {
         }
     }
 
-    function imageURICheat(uint256 startblock, uint24 _epoch) public view returns (string memory res) {
-        return dotnuggv1.exec(decodeProofCore(initFromSeed(cheat(startblock, _epoch))), true);
-    }
+    // function imageURICheat(uint256 startblock, uint24 _epoch) public view returns (string memory res) {
+    //     return dotnuggv1.exec(decodeProofCore(initFromSeed(cheat(startblock, _epoch))), true);
+    // }
 
     /// @inheritdoc IERC721
     function ownerOf(uint256 tokenId) external view override returns (address res) {

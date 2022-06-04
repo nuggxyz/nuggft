@@ -12,16 +12,156 @@ contract general__multioffer is NuggftV1Test {
     function test__multioffer() public {
         (uint24 first, uint24 last) = nuggft.premintTokens();
 
-        forge.vm.deal(users.frank, 2 ether);
+        forge.vm.startPrank(users.frank);
 
-        forge.vm.prank(users.frank);
+        forge.vm.deal(users.frank, 5 ether);
 
-        nuggft.offer{value: 2 ether}(array.b64(first, first + 1), array.b256(1 ether, 1 ether));
+        uint24 tokenA = first + 10;
+        uint24 tokenB = first + 11;
 
-        forge.vm.expectRevert(abi.encodePacked(bytes4(0x7e863b48), bytes1(0xAF)));
-        nuggft.offer{value: 1 ether}(array.b64(first + 2, first + 3), array.b256(1 ether, 1 ether));
+        nuggft.offer{value: 2 ether}(tokenA);
 
-        forge.vm.expectRevert(abi.encodePacked(bytes4(0x7e863b48), bytes1(0xAF)));
-        nuggft.offer{value: 2 ether}(array.b64(first + 2, first + 3), array.b256(1 ether, 1 ether, 1 ether));
+        jumpSwap();
+
+        uint256 proof = nuggft.proofOf(tokenB);
+
+        uint16 item = uint16(proof >> 0x90);
+
+        nuggft.offer{value: 2 ether}(tokenA, tokenB, item, 1 ether, 1 ether);
+    }
+
+    function test__multioffer__2() public {
+        (uint24 first, uint24 last) = nuggft.premintTokens();
+
+        forge.vm.startPrank(users.frank);
+
+        forge.vm.deal(users.frank, 5 ether);
+
+        uint24 tokenA = first + 10;
+        uint24 tokenB = first + 11;
+
+        nuggft.offer{value: 2 ether}(tokenA);
+
+        jumpSwap();
+
+        uint256 proof = nuggft.proofOf(tokenB);
+
+        uint16 item = uint16(proof >> 0x90);
+
+        uint24[] memory a = new uint24[](1);
+        a[0] = tokenA;
+
+        address[] memory b = new address[](1);
+        b[0] = users.frank;
+
+        nuggft.claim(a, b, new uint24[](1), new uint16[](1));
+
+        nuggft.offer{value: 2 ether}(tokenA, tokenB, item, 1 ether, 1 ether);
+    }
+
+    function test__multioffer__3() public {
+        (uint24 first, uint24 last) = nuggft.premintTokens();
+
+        forge.vm.startPrank(users.frank);
+
+        forge.vm.deal(users.frank, 5 ether);
+
+        uint24 tokenA = first + 10;
+        uint24 tokenB = first + 11;
+
+        nuggft.offer{value: 2 ether}(tokenA);
+
+        jumpSwap();
+
+        uint256 proof = nuggft.proofOf(tokenB);
+
+        uint16 item = uint16(proof >> 0x90);
+
+        uint24[] memory a = new uint24[](1);
+        a[0] = tokenA;
+
+        address[] memory b = new address[](1);
+        b[0] = users.frank;
+
+        nuggft.claim(a, b, new uint24[](1), new uint16[](1));
+
+        nuggft.offer{value: 1 ether}(tokenB);
+
+        nuggft.offer{value: 1 ether}(tokenA, tokenB, item, 0 ether, 1 ether);
+    }
+
+    function test__multioffer__4() public {
+        (uint24 first, uint24 last) = nuggft.premintTokens();
+
+        forge.vm.startPrank(users.frank);
+
+        forge.vm.deal(users.frank, 5 ether);
+
+        uint24 tokenA = first + 10;
+        uint24 tokenB = first + 11;
+
+        nuggft.offer{value: 2 ether}(tokenA);
+
+        jumpSwap();
+
+        uint256 proof = nuggft.proofOf(tokenB);
+
+        uint16 item = uint16(proof >> 0x90);
+
+        nuggft.offer{value: 1 ether}(tokenB);
+
+        nuggft.offer{value: 1 ether}(tokenA, tokenB, item, 0 ether, 1 ether);
+    }
+
+    function test__multioffer__5() public {
+        (uint24 first, uint24 last) = nuggft.premintTokens();
+
+        forge.vm.startPrank(users.frank);
+
+        forge.vm.deal(users.frank, 5 ether);
+        forge.vm.deal(users.dee, 5 ether);
+
+        uint24 tokenA = first + 10;
+        uint24 tokenB = first + 11;
+
+        nuggft.offer{value: 2 ether}(tokenA);
+
+        jumpSwap();
+
+        uint256 proof = nuggft.proofOf(tokenB);
+
+        uint16 item = uint16(proof >> 0x90);
+
+        forge.vm.stopPrank();
+
+        forge.vm.startPrank(users.dee);
+
+        forge.vm.expectRevert(encodeRevert(0x74));
+        nuggft.offer{value: 2 ether}(tokenA, tokenB, item, 1 ether, 1 ether);
+
+        forge.vm.stopPrank();
+    }
+
+    function test__multioffer__6() public {
+        (uint24 first, uint24 last) = nuggft.premintTokens();
+
+        forge.vm.startPrank(users.frank);
+
+        forge.vm.deal(users.frank, 5 ether);
+        forge.vm.deal(users.dee, 5 ether);
+
+        uint24 tokenA = first + 10;
+        uint24 tokenB = first + 11;
+
+        nuggft.offer{value: 2 ether}(tokenA);
+
+        uint256 proof = nuggft.proofOf(tokenB);
+
+        uint16 item = uint16(proof >> 0x90);
+
+        forge.vm.expectRevert(encodeRevert(0x67));
+        nuggft.offer{value: 2 ether}(tokenA, tokenB, item, 1 ether, 1 ether);
+
+        forge.vm.stopPrank();
     }
 }
