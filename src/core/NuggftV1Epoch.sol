@@ -13,11 +13,11 @@ abstract contract NuggftV1Epoch is INuggftV1Epoch, NuggftV1Globals {
         res = toEpoch(block.number, genesis);
     }
 
-    function start(uint24 _epoch) public view returns (uint256 res) {
+    function start(uint24 _epoch) internal view returns (uint256 res) {
         res = toStartBlock(_epoch, genesis);
     }
 
-    function end(uint24 _epoch) public view returns (uint256 res) {
+    function end(uint24 _epoch) internal view returns (uint256 res) {
         res = toEndBlock(_epoch, genesis);
     }
 

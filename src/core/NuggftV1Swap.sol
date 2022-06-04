@@ -999,7 +999,7 @@ abstract contract NuggftV1Swap is INuggftV1ItemSwap, INuggftV1Swap, NuggftV1Stak
 
     // @inheritdoc INuggftV1Swap
     function vfo(address sender, uint24 tokenId) public view override returns (uint96 res) {
-        (bool canOffer, uint96 next, uint96 current, ) = check(sender, tokenId);
+        (bool canOffer, uint96 next, uint96 current, , ) = check(sender, tokenId);
 
         if (canOffer) res = next - current;
     }
@@ -1012,7 +1012,8 @@ abstract contract NuggftV1Swap is INuggftV1ItemSwap, INuggftV1Swap, NuggftV1Stak
         returns (
             bool canOffer,
             uint96 next,
-            uint96 current,
+            uint96 currentUserOffer,
+            uint96 currentLeaderOffer,
             uint96 incrementBps
         )
     {
@@ -1051,7 +1052,7 @@ abstract contract NuggftV1Swap is INuggftV1ItemSwap, INuggftV1Swap, NuggftV1Stak
             case 1 {
                 switch eq(tokenId, activeEpoch)
                 case 1 {
-                    next := _msp
+                    currentLeaderOffer := _msp
                 }
                 default {
                     if iszero(and(iszero(lt(tokenId, MINT_OFFSET)), lt(tokenId, add(MINT_OFFSET, _early)))) {
@@ -1062,7 +1063,7 @@ abstract contract NuggftV1Swap is INuggftV1ItemSwap, INuggftV1Swap, NuggftV1Stak
                         return(0x00, 0x80)
                     }
 
-                    next := _msp
+                    currentLeaderOffer := _msp
                 }
             }
             default {
@@ -1081,14 +1082,16 @@ abstract contract NuggftV1Swap is INuggftV1ItemSwap, INuggftV1Swap, NuggftV1Stak
                     }
                 }
 
-                current := mul(juke(offerData, 26, 186), LOSS)
+                currentUserOffer := mul(juke(offerData, 26, 186), LOSS)
 
-                next := mul(juke(swapData, 26, 186), LOSS)
+                currentLeaderOffer := mul(juke(swapData, 26, 186), LOSS)
+            }
 
-                if lt(next, STARTING_PRICE) {
-                    next := STARTING_PRICE
-                    incrementBps := INCREMENT_BPS
-                }
+            next := currentLeaderOffer
+
+            if lt(next, STARTING_PRICE) {
+                next := STARTING_PRICE
+                incrementBps := INCREMENT_BPS
             }
 
             // add at the end to round up
@@ -1106,7 +1109,7 @@ abstract contract NuggftV1Swap is INuggftV1ItemSwap, INuggftV1Swap, NuggftV1Stak
         uint24 seller,
         uint16 itemId
     ) public view override returns (uint96 res) {
-        (bool canOffer, uint96 next, uint96 current, , , ) = check(buyer, seller, itemId);
+        (bool canOffer, uint96 next, uint96 current, , , , ) = check(buyer, seller, itemId);
 
         if (canOffer) res = next - current;
     }
@@ -1123,7 +1126,8 @@ abstract contract NuggftV1Swap is INuggftV1ItemSwap, INuggftV1Swap, NuggftV1Stak
         returns (
             bool canOffer,
             uint96 next,
-            uint96 current,
+            uint96 currentUserOffer,
+            uint96 currentLeaderOffer,
             uint96 incrementBps,
             bool mustClaimBuyer,
             bool mustOfferOnSeller
@@ -1141,6 +1145,8 @@ abstract contract NuggftV1Swap is INuggftV1ItemSwap, INuggftV1Swap, NuggftV1Stak
 
         uint256 offerData = agency__cache;
 
+        currentLeaderOffer = STARTING_PRICE;
+
         if (agency__cache == 0 && agency[seller] == 0 && uint16(proofOf(seller) >> 0x90) == itemId) {
             mustOfferOnSeller = true;
 
@@ -1153,9 +1159,11 @@ abstract contract NuggftV1Swap is INuggftV1ItemSwap, INuggftV1Swap, NuggftV1Stak
 
         if (agencyEpoch == 0 && offerData == agency__cache) canOffer = false;
 
-        current = uint96((offerData << 26) >> 186) * LOSS;
+        currentUserOffer = uint96((offerData << 26) >> 186) * LOSS;
 
-        next = uint96((agency__cache << 26) >> 186) * LOSS;
+        currentLeaderOffer = uint96((agency__cache << 26) >> 186) * LOSS;
+
+        next = currentLeaderOffer;
 
         incrementBps = INCREMENT_BPS;
 

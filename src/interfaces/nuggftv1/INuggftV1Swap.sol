@@ -54,10 +54,16 @@ interface INuggftV1Swap {
     /// @param tokenId -> the token to be offerd to
     /// @param sender -> the address of the user who will be delegating
     /// @return canOffer -> instead of reverting this function will return false
-    /// @return next -> the minimum value that must be sent with a offer call
-    /// @return current ->
+    /// @return nextMinUserOffer -> the minimum value that must be sent with a offer call
+    /// @return currentUserOffer ->
     function check(address sender, uint24 tokenId) external view
-        returns (bool canOffer, uint96 next, uint96 current, uint96 incrementBps);
+        returns (
+            bool canOffer,
+            uint96 nextMinUserOffer,
+            uint96 currentUserOffer,
+            uint96 currentLeaderOffer,
+            uint96 incrementBps
+        );
 
     function vfo(address sender, uint24 tokenId) external view returns (uint96 res);
 }

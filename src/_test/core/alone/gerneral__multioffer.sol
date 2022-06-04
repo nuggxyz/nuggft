@@ -89,6 +89,8 @@ contract general__multioffer is NuggftV1Test {
 
         nuggft.claim(a, b, new uint24[](1), new uint16[](1));
 
+        nuggft.check(address(0), tokenB);
+
         nuggft.offer{value: 1 ether}(tokenB);
 
         nuggft.check(tokenA, tokenB, item);

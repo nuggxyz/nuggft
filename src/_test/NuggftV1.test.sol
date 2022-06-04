@@ -68,11 +68,9 @@ contract NuggftV1Test is ForgeTest, NuggftV1Constants {
 
         forge.vm.startPrank(creator);
 
-        father = new RiggedNuggFatherV1{value: value}();
+        nuggft = new RiggedNuggftV1{value: value}();
 
-        nuggft = father.nuggftv1();
-
-        dotnugg = father.dotnuggv1();
+        dotnugg = DotnuggV1(address(nuggft.dotnuggv1()));
 
         migrator = new MockNuggftV1Migrator();
 
@@ -94,7 +92,7 @@ contract NuggftV1Test is ForgeTest, NuggftV1Constants {
     }
 
     function reset() public {
-        createInstance(dub6ix, 1 ether);
+        createInstance(dub6ix, 2 ether);
     }
 
     // function reset__fork() public {

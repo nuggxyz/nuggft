@@ -27,8 +27,8 @@ interface INuggftV1ItemSwap {
     /// @param seller -> the address of the user who will be delegating
     /// @param itemId -> the address of the user who will be delegating
     /// @return canOffer -> instead of reverting this function will return false
-    /// @return next -> the minimum value that must be sent with a offer call
-    /// @return current ->
+    /// @return nextMinUserOffer -> the minimum value that must be sent with a offer call
+    /// @return currentUserOffer ->
     function check(
         uint24 buyer,
         uint24 seller,
@@ -38,8 +38,9 @@ interface INuggftV1ItemSwap {
         view
         returns (
             bool canOffer,
-            uint96 next,
-            uint96 current,
+            uint96 nextMinUserOffer,
+            uint96 currentUserOffer,
+            uint96 currentLeaderOffer,
             uint96 incrementBps,
             bool mustClaimBuyer,
             bool mustOfferOnSeller
