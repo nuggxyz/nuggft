@@ -1106,7 +1106,7 @@ abstract contract NuggftV1Swap is INuggftV1ItemSwap, INuggftV1Swap, NuggftV1Stak
         uint24 seller,
         uint16 itemId
     ) public view override returns (uint96 res) {
-        (bool canOffer, uint96 next, uint96 current, ) = check(buyer, seller, itemId);
+        (bool canOffer, uint96 next, uint96 current, , , ) = check(buyer, seller, itemId);
 
         if (canOffer) res = next - current;
     }
@@ -1124,18 +1124,28 @@ abstract contract NuggftV1Swap is INuggftV1ItemSwap, INuggftV1Swap, NuggftV1Stak
             bool canOffer,
             uint96 next,
             uint96 current,
-            uint96 incrementBps
+            uint96 incrementBps,
+            bool mustClaimBuyer,
+            bool mustOfferOnSeller
         )
     {
         canOffer = true;
 
         uint24 activeEpoch = epoch();
 
+        uint256 buyerAgency = agency[buyer];
+
+        if (buyerAgency >> 254 == 0x3) mustClaimBuyer = true;
+
         uint256 agency__cache = itemAgency(seller, itemId);
 
         uint256 offerData = agency__cache;
 
-        if (buyer != uint24(agency__cache)) {
+        if (agency__cache == 0 && agency[seller] == 0 && uint16(proofOf(seller) >> 0x90) == itemId) {
+            mustOfferOnSeller = true;
+
+            agency__cache = (0x03 << 254) + (uint256((STARTING_PRICE / LOSS)) << 160) + uint256(seller);
+        } else if (buyer != uint24(agency__cache)) {
             offerData = itemOffers(buyer, seller, itemId);
         }
 

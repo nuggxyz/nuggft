@@ -9,7 +9,7 @@ contract general__multioffer is NuggftV1Test {
         reset();
     }
 
-    function test__multioffer() public {
+    function test__multioffer__1() public {
         (uint24 first, uint24 last) = nuggft.premintTokens();
 
         forge.vm.startPrank(users.frank);
@@ -26,6 +26,8 @@ contract general__multioffer is NuggftV1Test {
         uint256 proof = nuggft.proofOf(tokenB);
 
         uint16 item = uint16(proof >> 0x90);
+
+        nuggft.check(tokenA, tokenB, item);
 
         nuggft.offer{value: 2 ether}(tokenA, tokenB, item, 1 ether, 1 ether);
     }
@@ -55,6 +57,8 @@ contract general__multioffer is NuggftV1Test {
         b[0] = users.frank;
 
         nuggft.claim(a, b, new uint24[](1), new uint16[](1));
+
+        nuggft.check(tokenA, tokenB, item);
 
         nuggft.offer{value: 2 ether}(tokenA, tokenB, item, 1 ether, 1 ether);
     }
@@ -87,6 +91,8 @@ contract general__multioffer is NuggftV1Test {
 
         nuggft.offer{value: 1 ether}(tokenB);
 
+        nuggft.check(tokenA, tokenB, item);
+
         nuggft.offer{value: 1 ether}(tokenA, tokenB, item, 0 ether, 1 ether);
     }
 
@@ -109,6 +115,8 @@ contract general__multioffer is NuggftV1Test {
         uint16 item = uint16(proof >> 0x90);
 
         nuggft.offer{value: 1 ether}(tokenB);
+
+        nuggft.check(tokenA, tokenB, item);
 
         nuggft.offer{value: 1 ether}(tokenA, tokenB, item, 0 ether, 1 ether);
     }

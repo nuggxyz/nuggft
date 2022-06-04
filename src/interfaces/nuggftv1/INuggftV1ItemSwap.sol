@@ -40,7 +40,9 @@ interface INuggftV1ItemSwap {
             bool canOffer,
             uint96 next,
             uint96 current,
-            uint96 incrementBps
+            uint96 incrementBps,
+            bool mustClaimBuyer,
+            bool mustOfferOnSeller
         );
 
     function vfo(
