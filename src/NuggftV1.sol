@@ -17,8 +17,6 @@ import {NuggftV1Globals} from "./core/NuggftV1Globals.sol";
 import {DotnuggV1Lib, decodeProofCore, parseItemId, props} from "./libraries/DotnuggV1Lib.sol";
 import {decodeMakingPrettierHappy} from "./libraries/BigOleLib.sol";
 
-import {data as nuggs} from "./_data/nuggs.data.sol";
-
 /// @title NuggftV1
 /// @author nugg.xyz - danny7even & dub6ix
 contract NuggftV1 is IERC721, IERC721Metadata, NuggftV1Loan {

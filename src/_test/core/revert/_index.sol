@@ -1,3 +1,6 @@
+// SPDX-License-Identifier: BUSL-1.1
+pragma solidity 0.8.14;
+
 import "./revert__NuggftV1Epoch.t.sol";
 import "./revert__NuggftV1Loan.t.sol";
 import "./revert__NuggftV1Stake.t.sol";

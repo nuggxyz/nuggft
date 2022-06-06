@@ -27,8 +27,8 @@ contract RiggedNuggftV1 is NuggftV1 {
         return calculateSeed();
     }
 
-    function external__calculateSeed(uint24 epoch) external view returns (uint256 res) {
-        return calculateSeed(epoch);
+    function external__calculateSeed(uint24 _epoch) external view returns (uint256 res) {
+        return calculateSeed(_epoch);
     }
 
     function external__agency(uint24 tokenId) external view returns (uint256 res) {

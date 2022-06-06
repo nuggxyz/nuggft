@@ -1,3 +1,7 @@
+// SPDX-License-Identifier: BUSL-1.1
+
+pragma solidity 0.8.14;
+
 import "./logic__CastLib.t.sol";
 import "./logic__NuggftV1Epoch.t.sol";
 import "./logic__NuggftV1Loan.t.sol";

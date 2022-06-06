@@ -1,3 +1,6 @@
+// SPDX-License-Identifier: BUSL-1.1
+pragma solidity 0.8.14;
+
 import "./claim/revert__claim__0x67.sol";
 import "./claim/revert__claim__0x74.sol";
 import "./claim/revert__claim__0x75.sol";

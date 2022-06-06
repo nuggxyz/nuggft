@@ -96,7 +96,7 @@ contract expectMint is base {
     function start(
         uint24 tokenId,
         address sender,
-        uint96 value
+        uint96 _value
     ) public {
         require(execution.length == 0, "EXPECT-MINT:START: execution already esists");
 
@@ -108,7 +108,7 @@ contract expectMint is base {
         SnapshotData memory pre;
 
         env.tokenId = tokenId;
-        env.value = value;
+        env.value = _value;
         env.msp = nuggft.msp();
         env.eps = nuggft.eps();
 
