@@ -10,7 +10,7 @@ evm_version = 'london'
 solc_version = '0.8.14'
 auto_detect_solc = false
 optimizer = true
-optimizer_runs = 1000000
+optimizer_runs = 10000000
 verbosity = 0
 ignored_error_codes = []
 fuzz_runs = 1000
@@ -27,6 +27,6 @@ block_coinbase = '0x0000000000000000000000000000000000000000'
 block_timestamp = 0
 block_difficulty = 0
 gas_reports = ["RiggedNuggft", "NuggftV1", "Expect"]
-
-
 no_storage_caching = true
+
+

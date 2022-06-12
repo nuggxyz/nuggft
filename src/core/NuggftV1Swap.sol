@@ -197,10 +197,6 @@ abstract contract NuggftV1Swap is INuggftV1ItemSwap, INuggftV1Swap, NuggftV1Stak
                 b := shr(R, shl(L, x))
             }
 
-            function mask(val, shift, size) -> b {
-                b := and(shr(shift, val), sub(shl(size, 1),1))
-            }
-
             function panic(code) {
                 mstore(0x00, Revert__Sig)
                 mstore8(31, code)
@@ -231,9 +227,9 @@ abstract contract NuggftV1Swap is INuggftV1ItemSwap, INuggftV1Swap, NuggftV1Stak
 
             /////////////////////////////////////////////////////////////////////
 
-            let agency__addr  := mask(agency__cache, 0, 160)
+            let agency__addr  := juke(agency__cache, 96, 96)
 
-            let agency__epoch := mask(agency__cache, 230, 24)
+            let agency__epoch := juke(agency__cache, 2, 232)
 
             // we assume offer__cache is same as agency__cache
             // this will only be the case for the leader
@@ -277,10 +273,9 @@ abstract contract NuggftV1Swap is INuggftV1ItemSwap, INuggftV1Swap, NuggftV1Stak
                         /* flag        254,    [                 ) 256 */
                 ) // ==========================================================
 
-                switch isItem
-                case 1 {
+                if isItem {
                     // check to make sure there is not a swap
-                    // this effectivly blocks more than one swap of a particular item of ending in the same epoch
+                    // this blocks more than one swap of a particular item of ending in the same epoch
 
                     mstore(0x80, shr(24, tokenId))
                     mstore(0xA0, lastItemSwap.slot)
@@ -301,18 +296,7 @@ abstract contract NuggftV1Swap is INuggftV1ItemSwap, INuggftV1Swap, NuggftV1Stak
                     sstore(mload(0x80), or(val, nextEpoch))
 
                 }
-                default {
-                    // Event__Transfer the token to the contract for the remainder of sale
-                    // the seller (agency__addr) approves this when they put the token up for sale
 
-                    // log4( // =======================================================
-                    //     /* param 0: n/a  */ 0x00, 0x00,
-                    //     /* topic 1: sig  */ Event__Transfer,
-                    //     /* topic 2: from */ agency__addr,
-                    //     /* topic 3: to   */ address(),
-                    //     /* topic 4: id   */ tokenId
-                    // ) // ===========================================================
-                }
             }
             default { // [Offer:Carry]
                 // otherwise we validate the epoch to ensure the swap is still active
@@ -358,21 +342,21 @@ abstract contract NuggftV1Swap is INuggftV1ItemSwap, INuggftV1Swap, NuggftV1Stak
             // convert next into the increment
             next := sub(next, last)
 
-            switch eq(agency__addr, address()) case 1 {
+            switch eq(agency__addr, address())
+            case 1 {
                 last := mul(add(next, last), LOSS)
+                // TODO make sure no overflow issue
                 if lt(last, value) {
                     if gt(sub(value, last),LOSS) {
                         panic(Error__0xB2__UnexpectedIncrement)
                     }
                     last := add(last, sub(value, last))
                 }
-            }default {
-                     // convert last into increment * LOSS for staking
-                    last := mul(next, LOSS)
-
             }
-// emit topic 0: 0x000000000000000000000000000000000000000000000000000b34f8253b6340
-//   topic 1: 0x000000000000000000000000000000000000000000000000000b34f823bdeb00
+            default {
+                // convert last into increment * LOSS for staking
+                last := mul(next, LOSS)
+            }
 
             /////////////////////////////////////////////////////////////////////
 
@@ -408,21 +392,18 @@ abstract contract NuggftV1Swap is INuggftV1ItemSwap, INuggftV1Swap, NuggftV1Stak
 
             mstore(0x00, agency__cache)
 
-            // switch eq(tokenId, active)
-            // case 1 {
-            //     next := div(last, PROTOCOL_FEE_FRAC_MINT_DIV)
-            // }
-            // default {
-                next := div(last, PROTOCOL_FEE_FRAC)
-            // }
+            next := div(last, PROTOCOL_FEE_FRAC)
+
             last := add(sload(stake.slot), or(shl(96, sub(last, next)), next))
+
             sstore(stake.slot, last)
+
             mstore(0x20, last)
 
             switch isItem
             case 1 {
                 log3( // =======================================================
-                    /* param #1: agency   bytes32 */ 0x00, /* [ _itemAgency[tokenId][itemId] )    0x20
+                    /* param #1: agency   bytes32 */ 0x00, /* [ _itemAgency[tokenId][itemId] )   0x20
                        param #2: stake    bytes32    0x20     [ stake                       ) */ 0x40,
                     // ---------------------------------------------------------
                     /* topic #1: sig              */ Event__OfferItem,
@@ -439,8 +420,6 @@ abstract contract NuggftV1Swap is INuggftV1ItemSwap, INuggftV1Swap, NuggftV1Stak
                     /* topic #2: tokenId uint24 */ tokenId
                 ) // ===========================================================
             }
-
-            // add the increment * LOSS to staked eth
 
         }
     }
@@ -579,8 +558,6 @@ abstract contract NuggftV1Swap is INuggftV1ItemSwap, INuggftV1Swap, NuggftV1Stak
             // store common slot for proof in memory
             mstore(0x160, proof.slot)
 
-
-
             for { let i := 0 } lt(i, len) { i := add(i, 1) } {
 
                 let isItem
@@ -673,7 +650,6 @@ abstract contract NuggftV1Swap is INuggftV1ItemSwap, INuggftV1Swap, NuggftV1Stak
                         }
 
                         sstore(proof__sptr, _proof)
-
 
                         mstore(0x220, Function__transferSingle )
                         mstore(0x240, shr(24, tokenId))
