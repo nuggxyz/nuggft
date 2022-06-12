@@ -1,10 +1,10 @@
 on: [push]
 
-name: forge
+name: test
 
 jobs:
     check:
-        name: forge test
+        name: Foundry project
         runs-on: ubuntu-latest
         steps:
             - uses: actions/checkout@v3
@@ -18,3 +18,6 @@ jobs:
 
             - name: Run tests
               run: forge test -vvv
+
+            - name: Run snapshot
+              run: forge snapshot >> $GITHUB_STEP_SUMMARY
