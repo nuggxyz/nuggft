@@ -12,7 +12,7 @@ abstract contract system__one is NuggftV1Test {
     function test__logic__NuggftV1Proof__rotate() public {
         TOKEN1 = mintable(1);
 
-        expect.mint().from(users.frank).exec{value: 1 ether}(TOKEN1);
+        mintHelper(TOKEN1, users.frank, 1 ether);
         nuggft.floop(TOKEN1);
 
         forge.vm.startPrank(users.frank);
@@ -30,8 +30,9 @@ abstract contract system__one is NuggftV1Test {
         uint24 token1 = mintable(1);
         uint24 token2 = mintable(2);
 
-        expect.mint().from(users.frank).value(nuggft.msp()).exec(token1);
-        expect.mint().from(users.frank).value(nuggft.msp()).exec(token2);
+        mintHelper(token1, users.frank, nuggft.msp());
+
+        mintHelper(token2, users.frank, nuggft.msp());
 
         uint16 item = nuggft.floop(token1)[8];
 
@@ -71,7 +72,7 @@ abstract contract system__one is NuggftV1Test {
         // expect.balance().start(address(nuggft), value, true);
         // forge.vm.startPrank(users.frank);
         // {
-        //     nuggft.mint{value: value}(TOKEN1);
+        //     mintHelper(TOKEN1, FIX_ADDRESS, value);
         // }
         // forge.vm.stopPrank();
         // // expect.stake().stop();
@@ -100,7 +101,8 @@ abstract contract system__one is NuggftV1Test {
 
     //     forge.vm.startPrank(users.frank);
     //     {
-    //         nuggft.mint{value: value}(TOKEN1);
+    //         mintHelper(TOKEN1, FIX_ADDRESS, value);
+
     //     }
     //     forge.vm.stopPrank();
 
@@ -127,7 +129,8 @@ abstract contract system__one is NuggftV1Test {
 
     //     forge.vm.startPrank(users.frank);
     //     {
-    //         nuggft.mint{value: value}(501);
+    //         mintHelper(501, FIX_ADDRESS, value);
+
     //     }
     //     forge.vm.stopPrank();
 
@@ -151,7 +154,7 @@ abstract contract system__one is NuggftV1Test {
         // emit log_uint(3);
         // forge.vm.startPrank(users.frank);
         // {
-        //     nuggft.mint{value: value}(TOKEN1);
+        //     mintHelper(TOKEN1, FIX_ADDRESS, value);
         // }
         // forge.vm.stopPrank();
         // emit log_uint(4);
@@ -169,7 +172,7 @@ abstract contract system__one is NuggftV1Test {
         // forge.vm.startPrank(users.frank);
         // {
         //     expect.mint().start(tokenId, users.frank, value);
-        //     nuggft.mint{value: value}(TOKEN1);
+        //     mintHelper(TOKEN1, FIX_ADDRESS, value);
         //     expect.mint().stop();
         // }
         // forge.vm.stopPrank();

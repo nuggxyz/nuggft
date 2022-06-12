@@ -33,14 +33,6 @@ abstract contract NuggftV1Proof is INuggftV1Proof, NuggftV1Epoch, NuggftV1Trust 
         first++;
     }
 
-    function mintTokens() public view returns (uint24 first, uint24 last) {
-        (, first) = trustedMintTokens();
-
-        last = MAX_TOKENS;
-
-        first++;
-    }
-
     /// @inheritdoc INuggftV1Proof
     function proofOf(uint24 tokenId) public view override returns (uint256 res) {
         if ((res = proof[tokenId]) != 0) return res;

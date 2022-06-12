@@ -8,12 +8,12 @@ abstract contract revert__rebalance__0x75 is NuggftV1Test {
     function test__revert__rebalance__0x75__pass__noFallback() public {
         uint24 TOKEN1 = mintable(0);
         uint24 TOKEN2 = mintable(1);
-        jumpStart();
-        expect.mint().from(users.frank).value(1 ether).exec(TOKEN1);
+        mintHelper(TOKEN1, users.frank, 1 ether);
+        mintHelper(TOKEN2, users.frank, 2 ether);
 
         expect.loan().from(users.frank).exec(array.b24(TOKEN1));
 
-        expect.mint().from(users.frank).value(2 ether).exec(TOKEN2);
+        jumpStart();
 
         jumpLoanDown(1);
 
@@ -24,11 +24,11 @@ abstract contract revert__rebalance__0x75 is NuggftV1Test {
         uint24 TOKEN1 = mintable(0);
         uint24 TOKEN2 = mintable(1);
         jumpStart();
-        expect.mint().from(users.frank).value(1 ether).exec(TOKEN1);
+        mintHelper(TOKEN1, users.frank, 1 ether);
 
         expect.loan().from(users.frank).exec(array.b24(TOKEN1));
 
-        expect.mint().from(users.frank).value(2 ether).exec(TOKEN2);
+        mintHelper(TOKEN2, users.frank, 2 ether);
 
         jumpLoan(); // liquidation period is 1024 epochs
 

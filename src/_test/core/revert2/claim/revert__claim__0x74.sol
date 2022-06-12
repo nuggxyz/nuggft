@@ -25,11 +25,11 @@ abstract contract revert__claim__0x74 is NuggftV1Test {
         CHARLIES_TOKEN = mintable(1);
         DENNISS_TOKEN = mintable(2);
         // mint required tokens
-        expect.mint().from(users.frank).exec{value: 1 ether}(FRANKS_TOKEN);
-        expect.mint().from(users.frank).exec{value: 2 ether}(FRANKS_TOKEN_2);
+        mintHelper(FRANKS_TOKEN, users.frank, 1 ether);
+        mintHelper(FRANKS_TOKEN_2, users.frank, 2 ether);
 
-        expect.mint().from(users.charlie).exec{value: nuggft.msp()}(CHARLIES_TOKEN);
-        expect.mint().from(users.dennis).exec{value: nuggft.msp()}(DENNISS_TOKEN);
+        mintHelper(CHARLIES_TOKEN, users.charlie, nuggft.msp());
+        mintHelper(DENNISS_TOKEN, users.dennis, nuggft.msp());
 
         // frank gets a sellable itemId
         ITEM_ID = uint16(nuggft.floop(FRANKS_TOKEN_2)[2]);

@@ -10,7 +10,7 @@ abstract contract revert__offer__0xA3 is NuggftV1Test {
 
         (uint24 tokenId, , uint16 itemId, uint96 floor) = scenario_dee_has_sold_an_item();
 
-        expect.mint().from(users.charlie).value(1.1 ether).exec(token1);
+        mintHelper(token1, users.charlie, 1.1 ether);
 
         expect.sell().from(users.charlie).exec(token1, 1.2 ether);
 
@@ -28,7 +28,7 @@ abstract contract revert__offer__0xA3 is NuggftV1Test {
 
         (uint24 tokenId, , uint16 itemId, uint96 floor) = scenario_dee_has_sold_an_item();
 
-        expect.mint().from(users.charlie).value(1.1 ether).exec(token1);
+        mintHelper(token1, users.charlie, 1.1 ether);
 
         expect.sell().from(users.charlie).exec(token1, 1.2 ether);
 

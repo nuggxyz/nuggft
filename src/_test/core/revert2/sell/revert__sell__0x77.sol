@@ -9,7 +9,7 @@ abstract contract revert__sell__0x77 is NuggftV1Test {
         uint24 token1 = mintable(222);
 
         // mint
-        expect.mint().from(users.frank).value(1 ether).exec(token1);
+        mintHelper(token1, users.frank, 1 ether);
 
         expect.sell().from(users.frank).exec(token1, 2 ether);
 
@@ -37,7 +37,7 @@ abstract contract revert__sell__0x77 is NuggftV1Test {
 
         jumpStart();
         // mint
-        expect.mint().from(users.frank).value(1 ether).exec(token1);
+        mintHelper(token1, users.frank, 1 ether);
 
         expect.sell().from(users.frank).exec(token1, 2 ether);
 

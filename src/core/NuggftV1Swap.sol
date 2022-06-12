@@ -12,22 +12,6 @@ import "../_test/utils/forge.sol";
 /// @notice mechanism for trading of nuggs between users (and items between nuggs)
 /// @dev Explain to a developer any extra details
 abstract contract NuggftV1Swap is INuggftV1ItemSwap, INuggftV1Swap, NuggftV1Stake {
-    function offers(uint24 tokenId, address account) public view returns (uint256 value) {
-        return _offers[tokenId][account];
-    }
-
-    function itemAgency(uint24 sellingTokenId, uint16 itemId) public view returns (uint256 value) {
-        return _itemAgency[uint40(sellingTokenId) | (uint40(itemId) << 24)];
-    }
-
-    function itemOffers(
-        uint24 buyingTokenid,
-        uint24 sellingTokenId,
-        uint16 itemId
-    ) public view returns (uint256 value) {
-        return _itemOffers[uint40(sellingTokenId) | (uint40(itemId) << 24)][buyingTokenid];
-    }
-
     /// @inheritdoc INuggftV1Swap
     function offer(uint24 tokenId) public payable override {
         _offer(tokenId, msg.value);
@@ -52,6 +36,7 @@ abstract contract NuggftV1Swap is INuggftV1ItemSwap, INuggftV1Swap, NuggftV1Stak
     ) external payable {
         _repanic(offerValue1 + offerValue2 == msg.value, Error__0xB1__InvalidMulticallValue);
 
+        // claim a nugg
         if (agency[buyingTokenId] >> 254 == 0x3) {
             uint24[] memory a = new uint24[](1);
             a[0] = buyingTokenId;
@@ -62,8 +47,10 @@ abstract contract NuggftV1Swap is INuggftV1ItemSwap, INuggftV1Swap, NuggftV1Stak
             this.claim(a, b, new uint24[](1), new uint16[](1));
         }
 
+        // offer on a nugg
         if (offerValue1 > 0) _offer(sellingTokenId, offerValue1);
 
+        // offer on an item
         _offer(buyingTokenId, sellingTokenId, itemId, offerValue2);
     }
 
@@ -362,6 +349,7 @@ abstract contract NuggftV1Swap is INuggftV1ItemSwap, INuggftV1Swap, NuggftV1Stak
             default {
                 increment := INCREMENT_BPS
             }
+                log3(0x00, 0x00, next, last, increment)
 
             // ensure next offer includes at least a 5-50% increment
             if gt(div(mul(last, increment), BASE_BPS), next) {
@@ -370,8 +358,21 @@ abstract contract NuggftV1Swap is INuggftV1ItemSwap, INuggftV1Swap, NuggftV1Stak
             // convert next into the increment
             next := sub(next, last)
 
-            // convert last into increment * LOSS for staking
-            last := mul(next, LOSS)
+            switch eq(agency__addr, address()) case 1 {
+                last := mul(add(next, last), LOSS)
+                if lt(last, value) {
+                    if gt(sub(value, last),LOSS) {
+                        panic(Error__0xB2__UnexpectedIncrement)
+                    }
+                    last := add(last, sub(value, last))
+                }
+            }default {
+                     // convert last into increment * LOSS for staking
+                    last := mul(next, LOSS)
+
+            }
+// emit topic 0: 0x000000000000000000000000000000000000000000000000000b34f8253b6340
+//   topic 1: 0x000000000000000000000000000000000000000000000000000b34f823bdeb00
 
             /////////////////////////////////////////////////////////////////////
 
@@ -457,7 +458,7 @@ abstract contract NuggftV1Swap is INuggftV1ItemSwap, INuggftV1Swap, NuggftV1Stak
 
         (uint96 _msp, , , , ) = minSharePriceBreakdown(stake);
 
-        uint256 prefix = (0x03 << 254) + (uint256((_msp / LOSS)) << 160);
+        uint256 prefix = (0x03 << 254) + (uint256(((_msp / LOSS))) << 160);
 
         _agency = prefix + uint160(address(this));
 
@@ -700,8 +701,6 @@ abstract contract NuggftV1Swap is INuggftV1ItemSwap, INuggftV1Swap, NuggftV1Stak
                         if iszero(call(gas(), mload(0x200), 0x00, 0x23C, 0x64, 0x00, 0x00)) {
                             panic(Error__0xAE__FailedCallToItemsHolder)
                         }
-
-                        // if either exists for this token, set the proof
 
                         // save the updated agency
                         sstore(agency__sptr, xor( // =============================

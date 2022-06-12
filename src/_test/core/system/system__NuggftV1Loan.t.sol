@@ -12,7 +12,8 @@ abstract contract system__NuggftV1Loan is NuggftV1Test, fragments {
     function test__system__loan__revert__0xA4__autoLiquidateCantRebalance() public {
         TOKEN1 = mintable(1);
 
-        expect.mint().from(users.frank).value(1 ether).exec(TOKEN1);
+        mintHelper(TOKEN1, users.frank, 1 ether);
+
         jumpStart();
 
         expect.loan().from(users.frank).exec(array.b24(TOKEN1));
@@ -30,15 +31,14 @@ abstract contract system__NuggftV1Loan is NuggftV1Test, fragments {
         //jumpStart();
         expect.globalFrom(users.frank);
 
-        expect.mint().g().value(1 ether).exec(TOKEN1);
+        mintHelper(TOKEN1, users.frank, 1 ether);
 
         expect.loan().g().exec(array.b24(TOKEN1));
         for (uint16 i = 0; i < 50; i++) {
             jumpUp(1);
 
             expect.rebalance().g().value(lib.asum(nuggft.vfr(array.b24(TOKEN1)))).exec(array.b24(TOKEN1));
-
-            expect.mint().g().value(nuggft.msp()).exec(mintable(i + 100));
+            mintHelper(mintable(i + 100), users.frank, nuggft.msp());
         }
     }
 
@@ -47,7 +47,7 @@ abstract contract system__NuggftV1Loan is NuggftV1Test, fragments {
 
         jumpStart();
 
-        expect.mint().from(users.frank).value(1 ether).exec(TOKEN1);
+        mintHelper(TOKEN1, users.frank, 1 ether);
 
         expect.loan().from(users.frank).exec(array.b24(TOKEN1));
 
@@ -67,7 +67,7 @@ abstract contract system__NuggftV1Loan is NuggftV1Test, fragments {
 
         jumpStart();
 
-        expect.mint().from(users.frank).value(1 ether).exec(TOKEN1);
+        mintHelper(TOKEN1, users.frank, 1 ether);
 
         expect.loan().from(users.frank).exec(array.b24(TOKEN1));
 

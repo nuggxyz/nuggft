@@ -11,7 +11,7 @@ contract sim__release is NuggftV1Test {
         resetManual(dub6ix, 1 ether);
 
         for (uint24 i = 0; i < 2; i++) {
-            expect.mint().from(users.mac).value(nuggft.msp()).exec(mintable(i));
+            mintHelper(mintable(i), users.mac, nuggft.msp());
         }
 
         ds.emit_log_named_decimal_uint("msp    ", nuggft.msp(), 18);

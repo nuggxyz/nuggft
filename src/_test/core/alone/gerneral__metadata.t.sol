@@ -12,13 +12,15 @@ contract general__NuggftV1Loan is NuggftV1Test {
     // }
     // function test__print__imageURI() public {
     //     forge.vm.startPrank(users.frank);
-    //     nuggft.mint{value: 1 ether}(500);
+    //     mintHelper(500, FIX_ADDRESS, 1 ether);
+
     //     string memory img = nuggft.imageURI(500);
     //     ds.emit_log_string(img);
     // }
     // function test__print__tokenURI() public {
     //     forge.vm.startPrank(users.frank);
-    //     nuggft.mint{value: 1 ether}(500);
+    //     mintHelper(500, FIX_ADDRESS, 1 ether);
+
     //     string memory img = nuggft.tokenURI(500);
     //     ds.emit_log_string(img);
     // }
@@ -30,7 +32,7 @@ contract general__NuggftV1Loan is NuggftV1Test {
     function test__imageURI() public {
         uint24 token = mintable(1);
 
-        expect.mint().from(users.frank).exec{value: nuggft.msp()}(token);
+        mintHelper(token, users.frank, nuggft.msp());
 
         ds.emit_log_named_string("hi", nuggft.imageURI(token));
     }
@@ -38,7 +40,7 @@ contract general__NuggftV1Loan is NuggftV1Test {
     function test__image123() public {
         uint24 token = mintable(1);
 
-        expect.mint().from(users.frank).exec{value: nuggft.msp()}(token);
+        mintHelper(token, users.frank, nuggft.msp());
 
         bytes memory working = nuggft.image123(token, false, 1, "");
 

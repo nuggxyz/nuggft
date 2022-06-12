@@ -13,8 +13,7 @@ abstract contract fragments is NuggftV1Test {
         if (value < 1 ether) {
             value = 1 ether;
         }
-
-        expect.mint().exec(token, lib.txdata(user, value, ""));
+        mintHelper(token, user, value);
     }
 
     function deeSellsAnItem() public {
@@ -22,7 +21,7 @@ abstract contract fragments is NuggftV1Test {
 
         uint96 value = 1 ether;
 
-        expect.mint().exec(TOKEN1, lib.txdata(users.dee, 0, ""));
+        mintHelper(TOKEN1, users.dee, 0);
 
         uint16[] memory f = nuggft.floop(TOKEN1);
 

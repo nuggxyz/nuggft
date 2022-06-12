@@ -6,13 +6,12 @@ import "../../../NuggftV1.test.sol";
 
 abstract contract revert__offer__0x71 is NuggftV1Test {
     function test__revert__offer__0x71__fail__desc() public {
-        uint24 TOKEN1 = mintable(0);
+        uint24 TOKEN1 = mintable(1);
 
         jumpStart();
 
+        mintHelper(TOKEN1, users.frank, 1 ether);
         uint24 tokenId = nuggft.epoch();
-
-        expect.mint().from(users.frank).value(1 ether).exec(TOKEN1);
 
         // jump(tokenId);
 
@@ -26,9 +25,8 @@ abstract contract revert__offer__0x71 is NuggftV1Test {
 
         jumpStart();
 
+        mintHelper(TOKEN1, users.frank, 1 ether);
         uint24 tokenId = nuggft.epoch();
-
-        expect.mint().from(users.frank).value(1 ether).exec(TOKEN1);
 
         // jump(tokenId);
 

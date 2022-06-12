@@ -36,11 +36,11 @@ abstract contract revert__NuggftV1Loan is NuggftV1Test {
         LOAN_TOKENID = mintable(200);
         expect.globalFrom(users.frank);
 
-        expect.mint().g().exec{value: 1 ether}(LOAN_TOKENID);
+        mintHelper(LOAN_TOKENID, users.frank, 1 ether);
 
         expect.loan().g().exec(array.b24(LOAN_TOKENID));
 
-        expect.mint().g().exec{value: nuggft.msp()}(LOAN_TOKENID + 1);
+        mintHelper(LOAN_TOKENID + 1, users.frank, nuggft.msp());
 
         expect.loan().g().err(0x77).exec(array.b24(LOAN_TOKENID));
     }

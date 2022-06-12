@@ -13,7 +13,7 @@ abstract contract revert__claim__0x67 is NuggftV1Test {
         TOKEN_FOR_SALE = mintable(0);
         jumpStart();
 
-        expect.mint().from(users.frank).exec{value: 1 ether}(TOKEN_FOR_SALE);
+        mintHelper(TOKEN_FOR_SALE, users.frank, 1 ether);
 
         expect.sell().from(users.frank).exec(TOKEN_FOR_SALE, 2 ether);
 

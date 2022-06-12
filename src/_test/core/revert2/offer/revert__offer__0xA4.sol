@@ -10,7 +10,7 @@ abstract contract revert__offer__0xA4 is NuggftV1Test {
 
         jumpStart();
 
-        expect.mint().from(users.frank).value(.5 ether).exec(token1);
+        mintHelper(token1, users.frank, .5 ether);
 
         expect.sell().from(users.frank).exec(token1, .5 ether);
 
@@ -26,7 +26,7 @@ abstract contract revert__offer__0xA4 is NuggftV1Test {
 
         jumpStart();
 
-        expect.mint().from(users.frank).value(.5 ether).exec(token1);
+        mintHelper(token1, users.frank, .5 ether);
 
         expect.sell().from(users.frank).exec(token1, .5 ether);
 

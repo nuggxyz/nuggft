@@ -8,7 +8,7 @@ abstract contract revert__NuggftV1Swap is NuggftV1Test {
     using SafeCast for uint96;
 
     modifier revert__NuggftV1Swap__setUp() {
-        TOKEN1 = mintable(0);
+        TOKEN1 = mintable(1);
         _;
     }
     uint24 private TOKEN1;
@@ -119,12 +119,12 @@ abstract contract revert__NuggftV1Swap is NuggftV1Test {
     }
 
     function test__revert__NuggftV1Swap__0x71__offer__mint__failWithZeroAfterSomeValue() public revert__NuggftV1Swap__setUp {
+        mintHelper(TOKEN1, users.frank, 1 ether);
         uint24 tokenId = nuggft.epoch();
 
         forge.vm.startPrank(users.frank);
         {
             forge.vm.deal(users.frank, 1 ether);
-            nuggft.mint{value: 1 ether}(TOKEN1);
 
             uint96 value = 0;
 
@@ -299,11 +299,10 @@ abstract contract revert__NuggftV1Swap is NuggftV1Test {
         uint96 value2 = floor + 1 ether;
 
         forge.vm.deal(users.frank, value + value2);
+        mintHelper(tokenId2, users.frank, value);
 
         forge.vm.startPrank(users.frank);
         {
-            nuggft.mint{value: value}(tokenId2);
-
             // forge.vm.expectRevert(hex'7e863b48_25');
             nuggft.offer{value: value2}(tokenId);
         }
@@ -322,11 +321,10 @@ abstract contract revert__NuggftV1Swap is NuggftV1Test {
         nuggft.msp();
 
         forge.vm.deal(users.frank, value + value2);
+        mintHelper(tokenId2, users.frank, value);
 
         forge.vm.startPrank(users.frank);
         {
-            nuggft.mint{value: value}(tokenId2);
-
             nuggft.offer{value: value2}(tokenId);
         }
         forge.vm.stopPrank();

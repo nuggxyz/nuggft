@@ -8,15 +8,16 @@ import {parseItemId} from "../../../libraries/DotnuggV1Lib.sol";
 
 abstract contract logic__Add is NuggftV1Test {
     function test__logic__Add__cumlative() public {
+        resetManual(dub6ix, 10 ether);
         jumpStart();
         jumpSwap();
 
         uint96 start = nuggft.msp();
 
-        nuggft.mint{value: start}(mintable(0));
+        mintHelper(mintable(0), users.frank, start);
 
         for (uint24 i = 1; i < 10000; i++) {
-            nuggft.mint{value: nuggft.msp()}(mintable(i));
+            mintHelper(mintable(i), users.frank, nuggft.msp());
         }
 
         console.log("proto:  ", nuggft.proto());

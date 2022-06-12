@@ -9,7 +9,7 @@ abstract contract revert__liquidate__0xA7 is NuggftV1Test {
 
     function test__revert__liquidate__0xA7__fail__desc() public {
         TOKEN1 = mintable(0);
-        expect.mint().from(users.frank).value(1 ether).exec(TOKEN1);
+        mintHelper(TOKEN1, users.frank, 1 ether);
 
         expect.loan().from(users.frank).exec(array.b24(TOKEN1));
 
@@ -20,7 +20,7 @@ abstract contract revert__liquidate__0xA7 is NuggftV1Test {
 
     function test__revert__liquidate__0xA7__pass__desc() public {
         TOKEN1 = mintable(0);
-        expect.mint().from(users.frank).value(1 ether).exec(TOKEN1);
+        mintHelper(TOKEN1, users.frank, 1 ether);
 
         expect.loan().from(users.frank).exec(array.b24(TOKEN1));
 

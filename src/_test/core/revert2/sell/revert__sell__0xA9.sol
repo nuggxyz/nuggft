@@ -12,7 +12,7 @@ abstract contract revert__sell__0xA9 is NuggftV1Test {
 
         (uint24 tokenId, uint16 itemId, ) = scenario_dee_has_a_token_and_can_sell_an_item();
 
-        expect.mint().from(users.mac).value(nuggft.msp()).exec(TOKEN1);
+        mintHelper(TOKEN1, users.mac, nuggft.msp());
 
         expect.sell().from(users.dee).exec(tokenId, itemId, .1 ether);
 
@@ -32,7 +32,7 @@ abstract contract revert__sell__0xA9 is NuggftV1Test {
 
         (uint24 tokenId, uint16 itemId, ) = scenario_dee_has_a_token_and_can_sell_an_item();
 
-        expect.mint().from(users.mac).value(nuggft.msp()).exec(TOKEN1);
+        mintHelper(TOKEN1, users.mac, nuggft.msp());
 
         expect.sell().from(users.dee).exec(tokenId, itemId, .1 ether);
 

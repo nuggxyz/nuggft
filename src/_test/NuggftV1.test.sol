@@ -54,7 +54,7 @@ contract NuggftV1Test is ForgeTest, NuggftV1Constants {
     }
 
     function mintable(uint24 input) public view returns (uint24) {
-        return TRUSTED_MINT_TOKENS + trustMintable(input);
+        return earlyMintable(input);
     }
 
     function earlyMintable(uint24 input) public pure returns (uint24) {
@@ -235,20 +235,38 @@ contract NuggftV1Test is ForgeTest, NuggftV1Constants {
         return (value * percent) / 100;
     }
 
+    function mintHelper(
+        uint24 tokenId,
+        address user,
+        uint256 value
+    ) public {
+        expect.offer().from(user).exec{value: value}(tokenId);
+        jumpSwap();
+        expect.claim().from(user).exec(tokenId, user);
+    }
+
+    function mintHelper(
+        uint24 tokenId,
+        address user,
+        uint256 value,
+        bytes1 err
+    ) public {
+        expect.offer().err(err).from(user).exec{value: value}(tokenId);
+    }
+
     /*━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
                                 scenarios
     ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━*/
 
     function scenario_dee_has_a_token() public payable returns (uint24 tokenId) {
-        tokenId = mintable(2069);
-
-        expect.mint().from(users.dee).exec{value: nuggft.msp()}(tokenId);
+        tokenId = mintable(1069);
+        mintHelper(tokenId, users.dee, nuggft.msp());
     }
 
     function scenario_frank_has_a_token_and_spent_50_eth() public payable returns (uint24 tokenId) {
-        tokenId = mintable(2021);
+        tokenId = mintable(1021);
 
-        expect.mint().from(users.frank).exec{value: 50 ether}(tokenId);
+        mintHelper(tokenId, users.frank, 50 ether);
     }
 
     function scenario_frank_has_a_loaned_token() public payable returns (uint24 tokenId) {
@@ -272,13 +290,13 @@ contract NuggftV1Test is ForgeTest, NuggftV1Constants {
     function scenario_dee_has_a_token_2() public payable returns (uint24 tokenId) {
         tokenId = mintable(1900);
 
-        expect.mint().from(users.dee).exec{value: nuggft.msp()}(tokenId);
+        mintHelper(tokenId, users.dee, nuggft.msp());
     }
 
     function scenario_charlie_has_a_token() public payable returns (uint24 tokenId) {
-        tokenId = mintable(2700);
+        tokenId = mintable(1700);
 
-        expect.mint().from(users.charlie).exec{value: nuggft.msp()}(tokenId);
+        mintHelper(tokenId, users.charlie, nuggft.msp());
     }
 
     function scenario_migrator_set() public payable {

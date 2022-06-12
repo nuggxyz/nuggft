@@ -17,7 +17,7 @@ contract stress__NuggftV1Loan is NuggftV1Test {
 
         LOAN_TOKENID = mintable(999);
 
-        expect.mint().from(users.frank).exec{value: 1 ether}(LOAN_TOKENID);
+        mintHelper(LOAN_TOKENID, users.frank, 1 ether);
 
         expect.loan().from(users.frank).exec(array.b24(LOAN_TOKENID));
     }
@@ -63,15 +63,14 @@ contract stress__NuggftV1Loan is NuggftV1Test {
         forge.vm.deal(users.frank, 1000000000 ether);
 
         uint256 num = 950;
-        uint24 mint1 = mintable(0);
+        uint24 mint1 = 1000;
         uint24[] memory tokenIds = new uint24[](num);
-        forge.vm.startPrank(users.frank);
 
         for (uint24 i = mint1; i < mint1 + num; i++) {
             tokenIds[i - mint1] = mintable(i);
 
-            nuggft.mint{value: nuggft.msp()}(tokenIds[i - mint1]);
-
+            mintHelper(tokenIds[i - mint1], users.frank, nuggft.msp());
+            forge.vm.prank(users.frank);
             nuggft.loan(array.b24(tokenIds[i - mint1]));
         }
 
@@ -83,16 +82,18 @@ contract stress__NuggftV1Loan is NuggftV1Test {
 
         uint96 value = nuggft.vfo(users.frank, tokenId);
         // forge.vm.startPrank(users.frank);
+        forge.vm.prank(users.frank);
         nuggft.offer{value: value}(tokenId);
 
         // uint96 valueforRebal = nuggft.valueForRebalance(LOAN_TOKENID);
         // forge.vm.startPrank(users.frank);
+        forge.vm.prank(users.frank);
         nuggft.rebalance{value: users.frank.balance}(tokenIds);
     }
 
     function test__stress__NuggftV1Loan__rebalance__multi__manyAccounts() public globalDs {
         console.log(nuggft.eps(), nuggft.msp());
-        // forge.vm.deal(users.frank, 1000000000 ether);
+
         uint256 num = 950;
 
         uint24[] memory tokenIds = new uint24[](num);
@@ -106,7 +107,7 @@ contract stress__NuggftV1Loan is NuggftV1Test {
 
             forge.vm.deal(a, nuggft.msp());
 
-            expect.mint().from(a).exec{value: a.balance}(tokenIds[i]);
+            mintHelper(tokenIds[i], a, a.balance);
 
             expect.loan().from(a).exec(array.b24(tokenIds[i]));
         }
@@ -152,8 +153,8 @@ contract stress__NuggftV1Loan is NuggftV1Test {
         uint24 tokenId = mintable(0);
         uint24 tokenId2 = mintable(1);
 
-        expect.mint().from(a).exec{value: nuggft.msp()}(tokenId);
-        expect.mint().from(b).exec{value: nuggft.msp()}(tokenId2);
+        mintHelper(tokenId, a, nuggft.msp());
+        mintHelper(tokenId2, b, nuggft.msp());
 
         expect.loan().from(a).exec(array.b24(tokenId));
         expect.loan().from(b).exec(array.b24(tokenId2));

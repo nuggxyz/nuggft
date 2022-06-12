@@ -16,17 +16,19 @@ contract txgas__NuggftV1Loan is NuggftV1Test {
         REBALANCE_TOKENID = mintable(1498);
         LIQUIDATE_TOKENID = mintable(1497);
 
+        mintHelper(LOAN_TOKENID, users.frank, 100 ether);
+
+        mintHelper(REBALANCE_TOKENID, users.frank, nuggft.msp());
+
         forge.vm.deal(users.frank, 40000 ether);
         forge.vm.startPrank(users.frank);
-
-        nuggft.mint{value: 100 ether}(LOAN_TOKENID);
-        nuggft.mint{value: nuggft.msp()}(REBALANCE_TOKENID);
         nuggft.loan(array.b24(REBALANCE_TOKENID));
-
-        nuggft.mint{value: nuggft.msp()}(LIQUIDATE_TOKENID);
-
-        nuggft.loan(array.b24(LIQUIDATE_TOKENID));
         forge.vm.stopPrank();
+
+        mintHelper(LIQUIDATE_TOKENID, users.frank, nuggft.msp());
+
+        forge.vm.prank(users.frank);
+        nuggft.loan(array.b24(LIQUIDATE_TOKENID));
     }
 
     function test__txgas__NuggftV1Loan__loan() public {

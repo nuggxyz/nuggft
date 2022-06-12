@@ -8,7 +8,7 @@ abstract contract revert__claim__0xA0 is NuggftV1Test {
     // had to rig this one. the checks are too good
     function test__revert__claim__0xA0__fail__desc() public {
         uint24 tokenIdA = mintable(0);
-        expect.mint().from(users.frank).value(1 ether).exec(tokenIdA);
+        mintHelper(tokenIdA, users.frank, 1 ether);
 
         forge.vm.prank(users.frank);
         forge.vm.expectRevert(hex"7e863b48_a0");

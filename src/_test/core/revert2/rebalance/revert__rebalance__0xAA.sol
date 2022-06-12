@@ -8,7 +8,7 @@ abstract contract revert__rebalance__0xAA is NuggftV1Test {
     function test__revert__rebalance__0xAA__fail__desc() public {
         uint24 TOKEN1 = mintable(0);
 
-        expect.mint().from(users.frank).value(20 ether).exec(TOKEN1);
+        mintHelper(TOKEN1, users.frank, 20 ether);
 
         expect.loan().from(users.frank).exec(array.b24(TOKEN1));
 
@@ -18,7 +18,7 @@ abstract contract revert__rebalance__0xAA is NuggftV1Test {
     function test__revert__rebalance__0xAA__pass__desc() public {
         uint24 TOKEN1 = mintable(0);
 
-        expect.mint().from(users.frank).value(20 ether).exec(TOKEN1);
+        mintHelper(TOKEN1, users.frank, 20 ether);
 
         expect.loan().from(users.frank).exec(array.b24(TOKEN1));
 

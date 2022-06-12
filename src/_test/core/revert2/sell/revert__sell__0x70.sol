@@ -8,7 +8,7 @@ abstract contract revert__sell__0x70 is NuggftV1Test {
     function test__revert__sell__0x70__fail__desc() public {
         uint24 TOKEN1 = mintable(0);
 
-        expect.mint().from(users.frank).value(1 ether).exec(TOKEN1);
+        mintHelper(TOKEN1, users.frank, 1 ether);
 
         uint96 value = nuggft.eps() - 10 gwei;
 
@@ -18,7 +18,7 @@ abstract contract revert__sell__0x70 is NuggftV1Test {
     function test__revert__sell__0x70__pass__desc() public {
         uint24 TOKEN1 = mintable(0);
 
-        expect.mint().from(users.frank).value(1 ether).exec(TOKEN1);
+        mintHelper(TOKEN1, users.frank, 1 ether);
 
         uint96 value = nuggft.eps();
 

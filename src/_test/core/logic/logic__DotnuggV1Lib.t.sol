@@ -7,7 +7,7 @@ import {DotnuggV1Lib} from "../../../libraries/DotnuggV1Lib.sol";
 
 abstract contract logic__DotnuggV1Lib is NuggftV1Test {
     function test__logic__DotnuggV1Lib__ratityX128__2() public {
-        expect.mint().from(users.frank).exec{value: 1 ether}(mintable(100));
+        mintHelper(mintable(100), users.frank, 1 ether);
         ds.inject.log(DotnuggV1Lib.size(DotnuggV1Lib.location(address(dotnugg), 0)));
         // ds.inject.logBytes32(bytes32(DotnuggV1Lib.rarityX128(address( dotnugg), nuggft.proof(600))));
     }

@@ -62,6 +62,22 @@ abstract contract NuggftV1Globals is NuggftV1Constants, INuggftV1Globals {
             }
         }
     }
+
+    function offers(uint24 tokenId, address account) public view returns (uint256 value) {
+        return _offers[tokenId][account];
+    }
+
+    function itemAgency(uint24 sellingTokenId, uint16 itemId) public view returns (uint256 value) {
+        return _itemAgency[uint40(sellingTokenId) | (uint40(itemId) << 24)];
+    }
+
+    function itemOffers(
+        uint24 buyingTokenid,
+        uint24 sellingTokenId,
+        uint16 itemId
+    ) public view returns (uint256 value) {
+        return _itemOffers[uint40(sellingTokenId) | (uint40(itemId) << 24)][buyingTokenid];
+    }
 }
 
 // address res;

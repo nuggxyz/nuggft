@@ -21,52 +21,51 @@ contract general__NuggftV1Loan is NuggftV1Test {
     }
 
     function test__general__NuggftV1Loan__multirebalance() public {
-        forge.vm.deal(users.frank, 1000000000 ether);
-
-        forge.vm.startPrank(users.frank);
-
-        nuggft.mint{value: 1 ether}(MINT_TOKENID);
+        mintHelper(MINT_TOKENID, users.frank, 1 ether);
 
         uint24[] memory list = new uint24[](NUM);
 
         for (uint24 i = 0; i < NUM; i++) {
-            nuggft.mint{value: nuggft.msp()}(LOAN_TOKENID + i);
+            mintHelper(LOAN_TOKENID + i, users.frank, nuggft.msp());
+            forge.vm.deal(users.frank, 1000000000 ether);
+
+            forge.vm.prank(users.frank);
             nuggft.loan(array.b24(LOAN_TOKENID + i));
             list[i] = LOAN_TOKENID + i;
         }
 
         for (uint24 i = NUM; i < NUM * 2; i++) {
-            nuggft.mint{value: nuggft.msp()}(LOAN_TOKENID + i);
+            mintHelper(LOAN_TOKENID + i, users.frank, nuggft.msp());
         }
 
         jumpUp(33);
-
-        nuggft.rebalance{value: nuggft.vfr(array.b24(LOAN_TOKENID))[0] * 1000}(list);
+        uint96[] memory vfr = nuggft.vfr(array.b24(LOAN_TOKENID));
+        forge.vm.prank(users.frank);
+        nuggft.rebalance{value: vfr[0] * 1000}(list);
     }
 
     function test__general__NuggftV1Loan__rebalance() public {
-        forge.vm.deal(users.frank, 1000000000 ether);
-
-        forge.vm.startPrank(users.frank);
-
-        nuggft.mint{value: 1 ether}(MINT_TOKENID);
+        mintHelper(MINT_TOKENID, users.frank, 1 ether);
 
         uint24[] memory list = new uint24[](NUM);
 
         for (uint24 i = 0; i < NUM; i++) {
-            nuggft.mint{value: nuggft.msp()}(LOAN_TOKENID + i);
+            mintHelper(LOAN_TOKENID + i, users.frank, nuggft.msp());
+            forge.vm.prank(users.frank);
             nuggft.loan(array.b24(LOAN_TOKENID + i));
             list[i] = LOAN_TOKENID + i;
         }
 
         for (uint24 i = NUM; i < NUM * 2; i++) {
-            nuggft.mint{value: nuggft.msp()}(LOAN_TOKENID + i);
+            mintHelper(LOAN_TOKENID + i, users.frank, nuggft.msp());
         }
 
         jumpUp(44);
 
         for (uint24 i = 0; i < NUM; i++) {
-            nuggft.rebalance{value: nuggft.vfr(array.b24(LOAN_TOKENID + i))[0]}(array.b24(LOAN_TOKENID + i));
+            uint96[] memory vfr = nuggft.vfr(array.b24(LOAN_TOKENID + i));
+            forge.vm.prank(users.frank);
+            nuggft.rebalance{value: vfr[0]}(array.b24(LOAN_TOKENID + i));
         }
     }
 }

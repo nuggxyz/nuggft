@@ -22,33 +22,6 @@ import {decodeMakingPrettierHappy} from "./libraries/BigOleLib.sol";
 contract NuggftV1 is IERC721, IERC721Metadata, NuggftV1Loan {
     constructor() payable {}
 
-    /// @inheritdoc INuggftV1Proof
-    function mint(uint24 tokenId) public payable override {
-        (uint24 first, uint24 last) = mintTokens();
-
-        _repanic(tokenId >= first && tokenId <= last, Error__0x65__TokenNotMintable);
-
-        mint(msg.sender, tokenId, msg.value);
-    }
-
-    /// @inheritdoc INuggftV1Proof
-    function trustedMint(uint24 tokenId, address to) external payable override requiresTrust {
-        (uint24 first, uint24 last) = trustedMintTokens();
-
-        _repanic(tokenId >= first && tokenId <= last, Error__0x66__TokenNotTrustMintable);
-
-        mint(to, tokenId, msg.value);
-    }
-
-    /// @inheritdoc INuggftV1Stake
-    function burn(uint24 tokenId) external {
-        uint96 ethOwed = subStakedShare(tokenId);
-
-        payable(msg.sender).transfer(ethOwed);
-
-        emit Burn(tokenId, msg.sender, ethOwed);
-    }
-
     /// @inheritdoc INuggftV1Stake
     function migrate(uint24 tokenId) external {
         if (migrator == address(0)) _panic(Error__0x81__MigratorNotSet);
@@ -61,107 +34,6 @@ contract NuggftV1 is IERC721, IERC721Metadata, NuggftV1Loan {
         INuggftV1Migrator(migrator).nuggftMigrateFromV1{value: ethOwed}(tokenId, proof, msg.sender);
 
         emit MigrateV1Sent(migrator, tokenId, bytes32(proof), msg.sender, ethOwed);
-    }
-
-    function mint(
-        address to,
-        uint24 tokenId,
-        uint256 value
-    ) internal {
-        uint256 randomEnough;
-
-        uint256 agency__cache;
-
-        uint256 ptr;
-
-        // prettier-ignore
-        assembly {
-            mstore(0x00, tokenId)
-            mstore(0x20, agency.slot)
-
-            ptr := mload(0x40)
-
-            // ============================================================
-            // agency__sptr is the storage value that solidity would compute
-            // + if you used "agency[tokenId]"
-            let agency__sptr := keccak256( // =============================
-                0x00, /* [ tokenId                               ]    0x20
-                0x20     [ agency.slot                           ] */ 0x40
-            ) // ==========================================================
-
-            if iszero(iszero(sload(agency__sptr))) {
-                mstore(0x00, Revert__Sig)
-                mstore8(31, Error__0x80__TokenDoesExist)
-                revert(27, 0x5)
-            }
-
-            // we div and mul by 16 here to make the value returned stay constant for 16 blocks
-            // this makes gas estimation more acurate as "initFromSeed" will change in gas useage
-            // + depending on the value returned here
-            mstore(
-                /* postion */ 0x20,
-                /* value   */ blockhash(shl(shr(sub(number(), 2), 4), 4))
-                // /* value   */ blockhash(sub(number(), 69))
-            )
-
-            // mstore(0x40, 69)
-
-            randomEnough := keccak256( // ==================================
-                0x00, /* [ tokenId                               ]    0x20
-                0x20     [ blockhash(sub(number(), 69))          ]    0x40
-                0x40     [ block.difficulty()                    ] */ 0x40
-            ) // ===========================================================
-
-            agency__cache := or( // ===================================
-                // set agency to reflect the new agent
-                /* flag  */ shl(254, 0x01), // = OWN(0x01)
-                /* epoch */                 // = 0
-                /* eth   */                 // = 0
-                /* addr  */ to              // = new agent
-            ) // ==========================================================
-
-            sstore(agency__sptr, agency__cache)
-        }
-
-        uint256 _proof = initFromSeed(randomEnough);
-
-        proof[tokenId] = _proof;
-
-        addStakedShare(value);
-
-        address itemHolder = address(xnuggftv1);
-
-        // prettier-ignore
-        assembly {
-
-            mstore(0x00, value)
-            mstore(0x20, _proof)
-            mstore(0x60, agency__cache)
-
-            log4(0x00, 0x00, Event__Transfer, 0, to, tokenId)
-
-            log2( // ----------------------------------------------------------
-                /* param #1: value   */ 0x00, /* [ msg.value       ]     0x20,
-                   param #2: proof      0x20,    [ proof[tokenId]  ]     0x40,
-                   param #2: stake      0x40,    [ stake           ]     0x60,
-                   param #3: agency     0x60,    [ agency[tokenId] ]  */ 0x80,
-                /* topic #1: sig     */            Event__Mint,
-                /* topic #2: tokenId */            tokenId
-            ) // -------------------------------------------------------------
-
-            mstore(0x00, Function__transferBatch)
-            mstore(0x40, 0x00)
-            mstore(0x60, caller())
-
-            // TODO make sure this is the right way to do this
-            if iszero(call(gas(), itemHolder, 0x00, 0x1C, 0x64, 0x00, 0x00)) {
-                mstore(0x00, Revert__Sig)
-                mstore8(31, Error__0xAE__FailedCallToItemsHolder)
-                revert(27, 0x5)
-            }
-
-            mstore(0x40, ptr)
-        }
     }
 
     /// @notice removes a staked share from the contract,
@@ -256,15 +128,16 @@ contract NuggftV1 is IERC721, IERC721Metadata, NuggftV1Loan {
         }
     }
 
-    // function imageURICheat(uint256 startblock, uint24 _epoch) public view returns (string memory res) {
-    //     return dotnuggv1.exec(decodeProofCore(initFromSeed(cheat(startblock, _epoch))), true);
-    // }
-
     /// @inheritdoc IERC721
     function ownerOf(uint256 tokenId) external view override returns (address res) {
         uint256 cache = agency[uint24(tokenId)];
 
-        if (cache == 0) _panic(Error__0x78__TokenDoesNotExist);
+        if (cache == 0) {
+            if (proofOf(uint24(tokenId)) != 0) {
+                return address(this);
+            }
+            _panic(Error__0x78__TokenDoesNotExist);
+        }
 
         if (cache >> 254 == 0x03 && (cache << 2) >> 232 != 0) {
             return address(this);
@@ -273,7 +146,7 @@ contract NuggftV1 is IERC721, IERC721Metadata, NuggftV1Loan {
     }
 
     function exists(uint24 tokenId) internal view returns (bool) {
-        return agency[tokenId] != 0;
+        return agency[tokenId] != 0 || proofOf(tokenId) != 0;
     }
 
     function isOwner(address sender, uint24 tokenId) internal view returns (bool res) {
@@ -399,3 +272,104 @@ contract NuggftV1 is IERC721, IERC721Metadata, NuggftV1Loan {
 
 // todo
 // define rarity of nuggft - make it calculatable
+
+// function mint(
+//     address to,
+//     uint24 tokenId,
+//     uint256 value
+// ) internal {
+//     uint256 randomEnough;
+
+//     uint256 agency__cache;
+
+//     uint256 ptr;
+
+//     // prettier-ignore
+//     assembly {
+//         mstore(0x00, tokenId)
+//         mstore(0x20, agency.slot)
+
+//         ptr := mload(0x40)
+
+//         // ============================================================
+//         // agency__sptr is the storage value that solidity would compute
+//         // + if you used "agency[tokenId]"
+//         let agency__sptr := keccak256( // =============================
+//             0x00, /* [ tokenId                               ]    0x20
+//             0x20     [ agency.slot                           ] */ 0x40
+//         ) // ==========================================================
+
+//         if iszero(iszero(sload(agency__sptr))) {
+//             mstore(0x00, Revert__Sig)
+//             mstore8(31, Error__0x80__TokenDoesExist)
+//             revert(27, 0x5)
+//         }
+
+//         // we div and mul by 16 here to make the value returned stay constant for 16 blocks
+//         // this makes gas estimation more acurate as "initFromSeed" will change in gas useage
+//         // + depending on the value returned here
+//         mstore(
+//             /* postion */ 0x20,
+//             /* value   */ blockhash(shl(shr(sub(number(), 2), 4), 4))
+//             // /* value   */ blockhash(sub(number(), 69))
+//         )
+
+//         // mstore(0x40, 69)
+
+//         randomEnough := keccak256( // ==================================
+//             0x00, /* [ tokenId                               ]    0x20
+//             0x20     [ blockhash(sub(number(), 69))          ]    0x40
+//             0x40     [ block.difficulty()                    ] */ 0x40
+//         ) // ===========================================================
+
+//         agency__cache := or( // ===================================
+//             // set agency to reflect the new agent
+//             /* flag  */ shl(254, 0x01), // = OWN(0x01)
+//             /* epoch */                 // = 0
+//             /* eth   */                 // = 0
+//             /* addr  */ to              // = new agent
+//         ) // ==========================================================
+
+//         sstore(agency__sptr, agency__cache)
+//     }
+
+//     uint256 _proof = initFromSeed(randomEnough);
+
+//     proof[tokenId] = _proof;
+
+//     addStakedShare(value);
+
+//     address itemHolder = address(xnuggftv1);
+
+//     // prettier-ignore
+//     assembly {
+
+//         mstore(0x00, value)
+//         mstore(0x20, _proof)
+//         mstore(0x60, agency__cache)
+
+//         log4(0x00, 0x00, Event__Transfer, 0, to, tokenId)
+
+//         log2( // ----------------------------------------------------------
+//             /* param #1: value   */ 0x00, /* [ msg.value       ]     0x20,
+//                param #2: proof      0x20,    [ proof[tokenId]  ]     0x40,
+//                param #2: stake      0x40,    [ stake           ]     0x60,
+//                param #3: agency     0x60,    [ agency[tokenId] ]  */ 0x80,
+//             /* topic #1: sig     */            Event__Mint,
+//             /* topic #2: tokenId */            tokenId
+//         ) // -------------------------------------------------------------
+
+//         mstore(0x00, Function__transferBatch)
+//         mstore(0x40, 0x00)
+//         mstore(0x60, caller())
+
+//         // TODO make sure this is the right way to do this
+//         if iszero(call(gas(), itemHolder, 0x00, 0x1C, 0x64, 0x00, 0x00)) {
+//             mstore(0x00, Revert__Sig)
+//             mstore8(31, Error__0xAE__FailedCallToItemsHolder)
+//             revert(27, 0x5)
+//         }
+
+//         mstore(0x40, ptr)
+//     }
+// }

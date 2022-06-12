@@ -8,7 +8,7 @@ abstract contract revert__offer__0x99 is NuggftV1Test {
     function test__revert__offer__0x99__fail__desc__claimBeforeOffer() public {
         uint24 token1 = mintable(0);
 
-        expect.mint().from(users.mac).value(1 ether).exec(token1);
+        mintHelper(token1, users.mac, 1 ether);
 
         jumpStart();
 
@@ -32,7 +32,7 @@ abstract contract revert__offer__0x99 is NuggftV1Test {
     function test__revert__offer__0x99__fail__desc__claimOnOwnSwap() public {
         uint24 token1 = mintable(0);
 
-        expect.mint().from(users.mac).value(1 ether).exec(token1);
+        mintHelper(token1, users.mac, 1 ether);
 
         jumpStart();
 
@@ -44,7 +44,7 @@ abstract contract revert__offer__0x99 is NuggftV1Test {
     function test__revert__offer__0x99__pass__desc__claimBeforeOffer() public {
         uint24 token1 = mintable(0);
 
-        expect.mint().from(users.mac).value(1 ether).exec(token1);
+        mintHelper(token1, users.mac, 1 ether);
 
         jumpStart();
 
@@ -70,7 +70,7 @@ abstract contract revert__offer__0x99 is NuggftV1Test {
     function test__revert__offer__0x99__pass__desc__claimOnOwnSwap() public {
         uint24 token1 = mintable(0);
 
-        expect.mint().from(users.mac).value(1 ether).exec(token1);
+        mintHelper(token1, users.mac, 1 ether);
 
         jumpStart();
 
@@ -85,7 +85,7 @@ abstract contract revert__offer__0x99 is NuggftV1Test {
     function test__revert__claim__0x67__fail__desc__claimOnOwnSwap() public {
         uint24 token1 = mintable(0);
 
-        expect.mint().from(users.mac).value(1 ether).exec(token1);
+        mintHelper(token1, users.mac, 1 ether);
 
         jumpStart();
 

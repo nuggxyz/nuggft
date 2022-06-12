@@ -8,7 +8,7 @@ abstract contract revert__loan__0x77 is NuggftV1Test {
     function test__revert__loan__0x77__fail__desc() public {
         uint24 token1 = mintable(0);
 
-        expect.mint().from(users.frank).value(1 ether).exec(token1);
+        mintHelper(token1, users.frank, 1 ether);
 
         expect.sell().from(users.frank).exec(token1, 2 ether);
 
@@ -34,7 +34,7 @@ abstract contract revert__loan__0x77 is NuggftV1Test {
 
         jumpStart();
 
-        expect.mint().from(users.frank).value(1 ether).exec(token1);
+        mintHelper(token1, users.frank, 1 ether);
 
         expect.sell().from(users.frank).exec(token1, 2 ether);
 

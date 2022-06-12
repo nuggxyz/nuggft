@@ -13,14 +13,6 @@ abstract contract NuggftV1Epoch is INuggftV1Epoch, NuggftV1Globals {
         res = toEpoch(block.number, genesis);
     }
 
-    function start(uint24 _epoch) internal view returns (uint256 res) {
-        res = toStartBlock(_epoch, genesis);
-    }
-
-    function end(uint24 _epoch) internal view returns (uint256 res) {
-        res = toEndBlock(_epoch, genesis);
-    }
-
     /// @notice calculates a random-enough seed that will stay the same for INTERVAL number of blocks
     function calculateSeed(uint24 _epoch) internal view returns (uint256 res) {
         unchecked {
@@ -46,6 +38,8 @@ abstract contract NuggftV1Epoch is INuggftV1Epoch, NuggftV1Globals {
         res = calculateSeed(_epoch);
     }
 
+    // this function is nessesary to overwrite the blockhash in testing environments where it
+    // either equals zero or does not change
     function getBlockHash(uint256 blocknum) internal view virtual returns (bytes32 res) {
         return blockhash(blocknum);
     }

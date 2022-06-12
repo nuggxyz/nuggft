@@ -6,14 +6,14 @@ import "../../../NuggftV1.test.sol";
 
 abstract contract revert__mint__0x65 is NuggftV1Test {
     function test__revert__mint__0x65__fail__desc() public {
-        expect.mint().from(users.frank).err(0x65).exec{value: nuggft.msp()}(mintable(0) - 1);
+        mintHelper(mintable(0) - 1, users.frank, nuggft.msp(), 0x65);
 
         // expect.mint().from(users.frank).err(0x65).exec(uint32(MAX_TOKENS) + 1);
     }
 
     function test__revert__mint__0x65__pass__desc() public {
-        expect.mint().from(users.frank).exec{value: nuggft.msp()}(mintable(0));
+        mintHelper(mintable(0), users.frank, nuggft.msp());
 
-        expect.mint().from(users.frank).exec{value: nuggft.msp()}(mintable(1000));
+        mintHelper(mintable(1000), users.frank, nuggft.msp());
     }
 }

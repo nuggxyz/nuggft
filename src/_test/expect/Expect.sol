@@ -10,11 +10,9 @@ import {expectOffer} from "./offer.sol";
 import {expectBalance} from "./balance.sol";
 import {expectStake} from "./stake.sol";
 import {expectSell} from "./sell.sol";
-import {expectMint} from "./mint.sol";
 import {expectLoan} from "./loan.sol";
 import {expectRebalance} from "./rebalance.sol";
 import {expectLiquidate} from "./liquidate.sol";
-import {expectBurn} from "./burn.sol";
 import {expectDonate} from "./donate.sol";
 
 contract Expect {
@@ -23,11 +21,9 @@ contract Expect {
     expectBalance public balance;
     expectStake public stake;
     expectSell public sell;
-    expectMint public mint;
     expectLoan public loan;
     expectRebalance public rebalance;
     expectLiquidate public liquidate;
-    expectBurn public burn;
     expectDonate public donate;
 
     address public _globalFrom;
@@ -44,12 +40,10 @@ contract Expect {
         balance = new expectBalance();
         stake = new expectStake();
         sell = new expectSell();
-        mint = new expectMint();
         loan = new expectLoan();
         donate = new expectDonate();
 
         rebalance = new expectRebalance();
         liquidate = new expectLiquidate();
-        burn = new expectBurn();
     }
 }
