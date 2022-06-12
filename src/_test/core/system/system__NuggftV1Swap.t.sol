@@ -258,7 +258,7 @@ abstract contract system__NuggftV1Swap is NuggftV1Test, fragments {
         uint24 token3 = mintable(48);
         mintHelper(token1, users.frank, nuggft.msp());
 
-        uint16[] memory f = nuggft.floop(token1);
+        uint16[16] memory f = nuggft.floop(token1);
 
         itemId = uint16(f[1]);
 
@@ -283,7 +283,7 @@ abstract contract system__NuggftV1Swap is NuggftV1Test, fragments {
         mintHelper(token1, users.frank, nuggft.msp());
         forge.vm.startPrank(users.frank);
 
-        uint16[] memory f = nuggft.floop(token1);
+        uint16[16] memory f = nuggft.floop(token1);
 
         itemId = uint16(f[1]);
 
@@ -302,7 +302,7 @@ abstract contract system__NuggftV1Swap is NuggftV1Test, fragments {
         mintHelper(token1, users.frank, nuggft.msp());
         forge.vm.startPrank(users.frank);
 
-        uint16[] memory f = nuggft.floop(token1);
+        uint16[16] memory f = nuggft.floop(token1);
 
         itemId = uint16(f[1]);
 
@@ -333,7 +333,7 @@ abstract contract system__NuggftV1Swap is NuggftV1Test, fragments {
         uint24 token3 = mintable(48);
         mintHelper(token1, users.frank, 2 ether);
 
-        uint16[] memory f = nuggft.floop(token1);
+        uint16[16] memory f = nuggft.floop(token1);
 
         itemId = uint16(f[1]);
 
@@ -355,7 +355,7 @@ abstract contract system__NuggftV1Swap is NuggftV1Test, fragments {
         uint24 token3 = mintable(48);
         mintHelper(token1, users.frank, 2 ether);
 
-        uint16[] memory f = nuggft.floop(token1);
+        uint16[16] memory f = nuggft.floop(token1);
 
         itemId = uint16(f[1]);
 

@@ -4,7 +4,7 @@ pragma solidity 0.8.14;
 
 import {IERC721, IERC165, IERC721Metadata} from "./interfaces/IERC721.sol";
 import {INuggftV1Migrator} from "./interfaces/nuggftv1/INuggftV1Migrator.sol";
-import {IDotnuggV1Safe} from "./interfaces/dotnugg/IDotnuggV1Safe.sol";
+import {IDotnuggV1} from "dotnugg-v1-core/IDotnuggV1.sol";
 import {INuggftV1Stake} from "./interfaces/nuggftv1/INuggftV1Stake.sol";
 import {INuggftV1Proof} from "./interfaces/nuggftv1/INuggftV1Proof.sol";
 
@@ -14,7 +14,8 @@ import {NuggftV1Loan} from "./core/NuggftV1Loan.sol";
 import {NuggftV1Proof} from "./core/NuggftV1Proof.sol";
 import {NuggftV1Globals} from "./core/NuggftV1Globals.sol";
 
-import {DotnuggV1Lib, decodeProofCore, parseItemId, props} from "./libraries/DotnuggV1Lib.sol";
+import {DotnuggV1Lib} from "dotnugg-v1-core/DotnuggV1Lib.sol";
+
 import {decodeMakingPrettierHappy} from "./libraries/BigOleLib.sol";
 
 /// @title NuggftV1
@@ -89,7 +90,7 @@ contract NuggftV1 is IERC721, IERC721Metadata, NuggftV1Loan {
                      '{"name":"',         name(),
                     '","description":"',  symbol(),
                     '","image":"',        imageURI(tokenId),
-                    '","properites":',    props(decodeProofCore(proofOf(uint24(tokenId))),
+                    '","properites":',    DotnuggV1Lib.props(decodeProofCore(proofOf(uint24(tokenId))),
                                 ['base', 'eyes', 'mouth', 'hair', 'hat', 'background', 'scarf', 'hold']
                             ),
                     '}'

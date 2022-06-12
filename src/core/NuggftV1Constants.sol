@@ -42,7 +42,7 @@ abstract contract NuggftV1Constants {
     uint24 constant LIQUIDATION_PERIOD = 200;
 
     // swap
-    uint256 constant SALE_LEN = 1 days;
+    uint256 constant SALE_LEN = 1;
 
     // event Rebalance(uint24,bytes32);
     // event Liquidate(uint24,bytes32);

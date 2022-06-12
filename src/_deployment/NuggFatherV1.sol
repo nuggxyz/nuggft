@@ -10,8 +10,4 @@ contract NuggFatherV1 {
     constructor(bytes32 salt) payable {
         nuggft = new NuggftV1{value: msg.value, salt: salt}();
     }
-
-    function yep() public view returns (address) {
-        return address(nuggft);
-    }
 }

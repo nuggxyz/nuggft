@@ -23,7 +23,7 @@ abstract contract fragments is NuggftV1Test {
 
         mintHelper(TOKEN1, users.dee, 0);
 
-        uint16[] memory f = nuggft.floop(TOKEN1);
+        uint16[16] memory f = nuggft.floop(TOKEN1);
 
         itemId = uint16(f[1]);
 

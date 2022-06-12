@@ -75,20 +75,6 @@ abstract contract NuggftV1Loan is INuggftV1Loan, NuggftV1Swap {
                 // ensures amt stored in agency and eth sent to caller are the same
                 amt := mul(amt, LOSS)
 
-                // // send accumulated value * LOSS to msg.sender
-                // if iszero(call(gas(), caller(), amt, 0, 0, 0, 0)) {
-                //     // if someone really ends up here, just donate the eth
-                //     let pro := div(amt, PROTOCOL_FEE_FRAC)
-
-                //     let cache := add(sload(stake.slot), or(shl(96, sub(amt, pro)), pro))
-
-                //     sstore(stake.slot, cache)
-
-                //     mstore(0x00, cache)
-
-                //     log1(0x00, 0x20, Event__Stake)
-                // }
-
                 // send accumulated value * LOSS to msg.sender
                 switch iszero(extcodesize(caller()))
                 case 1 {

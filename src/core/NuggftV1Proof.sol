@@ -3,17 +3,19 @@
 pragma solidity 0.8.14;
 
 import {INuggftV1Proof} from "../interfaces/nuggftv1/INuggftV1Proof.sol";
-import {IDotnuggV1Safe} from "../interfaces/dotnugg/IDotnuggV1Safe.sol";
 import {IERC1155, IERC165} from "../interfaces/IERC721.sol";
 import {INuggftV1} from "../interfaces/nuggftv1/INuggftV1.sol";
 import {xNuggftV1} from "../xNuggftV1.sol";
 
-import {DotnuggV1Lib, parseItemIdAsString} from "../libraries/DotnuggV1Lib.sol";
+import {DotnuggV1Lib} from "dotnugg-v1-core/DotnuggV1Lib.sol";
+import {IDotnuggV1} from "dotnugg-v1-core/IDotnuggV1.sol";
 
 import {NuggftV1Epoch} from "./NuggftV1Epoch.sol";
 import {NuggftV1Trust} from "./NuggftV1Trust.sol";
 
 abstract contract NuggftV1Proof is INuggftV1Proof, NuggftV1Epoch, NuggftV1Trust {
+    using DotnuggV1Lib for IDotnuggV1;
+
     function calculateEarlySeed(uint24 tokenId) internal view returns (uint256 seed) {
         return uint256(keccak256(abi.encodePacked(tokenId, earlySeed)));
     }
@@ -22,15 +24,6 @@ abstract contract NuggftV1Proof is INuggftV1Proof, NuggftV1Epoch, NuggftV1Trust 
         first = MINT_OFFSET;
 
         last = first + early - 1;
-    }
-
-    function trustedMintTokens() public view returns (uint24 first, uint24 last) {
-        (, first) = premintTokens();
-
-        last = first + TRUSTED_MINT_TOKENS;
-
-        // to avoid having to subtract from last
-        first++;
     }
 
     /// @inheritdoc INuggftV1Proof
@@ -56,16 +49,46 @@ abstract contract NuggftV1Proof is INuggftV1Proof, NuggftV1Epoch, NuggftV1Trust 
         _panic(Error__0xAD__InvalidZeroProof);
     }
 
-    function floop(uint24 tokenId) public view returns (uint16[] memory arr) {
-        arr = new uint16[](16);
+    function decodeProof(uint256 input) internal pure returns (uint16[16] memory res) {
+        unchecked {
+            for (uint256 i = 0; i < 16; i++) {
+                res[i] = uint16(input);
+                input >>= 16;
+            }
+        }
+    }
+
+    function decodeProofCore(uint256 proof) internal pure returns (uint8[8] memory res) {
+        unchecked {
+            for (uint256 i = 0; i < 8; i++) {
+                (uint8 feature, uint8 pos) = DotnuggV1Lib.parseItemId(uint16(proof));
+                if (res[feature] == 0) res[feature] = pos;
+                proof >>= 16;
+            }
+        }
+    }
+
+    function encodeProof(uint8[8] memory ids) internal pure returns (uint256 proof) {
+        unchecked {
+            for (uint256 i = 0; i < 8; i++) proof |= ((i << 8) | uint256(ids[i])) << (i << 3);
+        }
+    }
+
+    function encodeProof(uint16[16] memory ids) internal pure returns (uint256 proof) {
+        unchecked {
+            for (uint256 i = 0; i < 16; i++) proof |= uint256(ids[i]) << (i << 4);
+        }
+    }
+
+    function floop(uint24 tokenId) public view returns (uint16[16] memory arr) {
+        // arr = new uint16[](16);
         uint256 proof = proofOf(tokenId);
-        // uint256 max = 0;
+
         for (uint256 i = 0; i < 16; i++) {
-            uint16 check = uint16(proof) & 0xffff;
+            uint16 check = uint16(proof);
             proof >>= 16;
             if (check != 0) {
                 arr[i] = uint16(check);
-                // max = i + 1;
             }
         }
     }
@@ -162,7 +185,14 @@ abstract contract NuggftV1Proof is INuggftV1Proof, NuggftV1Epoch, NuggftV1Trust 
         /* [1=18.75%, 2=18.75%, 3=12.5%, 4=12.5%, 5=12.5%, 6=12.5%, 7=12.5%] */
     }
 
-    // TODO TO BE TESTED
+    // 0 = 8/8               = 8
+    // 1 = 8/8 + 3/16 + 3/16 = 11
+    // 2 = 8/8 + 3/16 + 3/16 = 11
+    // 3 = 4/8 + 1/8 + 1/8   = 6
+    // 4 = 4/8 + 1/8 + 1/8   = 6
+    // 5 = 1/8 + 1/8 + 1/8   = 3
+    // 6 = 1/8 + 1/8 + 1/8   = 3
+    // 7 = 1/8 + 1/8 + 1/8   = 3
     function initFromSeed(uint256 seed) internal view returns (uint256 res) {
         uint8 selA = uint8((seed >> 8));
         uint8 selB = uint8((seed >> 16));
@@ -176,50 +206,14 @@ abstract contract NuggftV1Proof is INuggftV1Proof, NuggftV1Epoch, NuggftV1Trust 
         selC = breaker(selC);
         selD = breaker(selD);
 
-        res |= uint256(DotnuggV1Lib.pickWithId(address(dotnuggv1), 0, seed)) << 0x00;
-        res |= uint256(DotnuggV1Lib.pickWithId(address(dotnuggv1), 1, seed)) << 0x10;
-        res |= uint256(DotnuggV1Lib.pickWithId(address(dotnuggv1), 2, seed)) << 0x20;
-        res |= uint256(DotnuggV1Lib.pickWithId(address(dotnuggv1), selA, seed)) << 0x30;
+        res |= uint256(dotnuggv1.searchToId(0, seed)) << 0x00;
+        res |= uint256(dotnuggv1.searchToId(1, seed)) << 0x10;
+        res |= uint256(dotnuggv1.searchToId(2, seed)) << 0x20;
+        res |= uint256(dotnuggv1.searchToId(selA, seed)) << 0x30;
         if (selB != 0) {
-            res |= uint256(DotnuggV1Lib.pickWithId(address(dotnuggv1), selB, seed)) << (0x40);
+            res |= uint256(dotnuggv1.searchToId(selB, seed)) << (0x40);
         }
-        res |= uint256(DotnuggV1Lib.pickWithId(address(dotnuggv1), selC, seed >> 40)) << (0x80);
-        res |= uint256(DotnuggV1Lib.pickWithId(address(dotnuggv1), selD, seed >> 48)) << (0x90);
-
-        // res |=
-        //     a |
-        //     (b << (0x10)) | //
-        //     (c << (0x20)) |
-        //     (d << (0x30)) |
-        //     (selB == 0 ? 0 : (e << (0x40))) |
-        //     (f << (0x80)) |
-        //     (g << (0x90));
-
-        // 100%
-        // 125%
-        // 125%
-        // 62.5%
-        // 62.5%
-        // 25%
-        // 25%
-        // 25%
-
-        // 100%
-        // 137.5%
-        // 137.5%
-        // 75%
-        // 75%
-        // 37.5%
-        // 37.5%
-        // 37.5%
-
-        // 0 = 8/8
-        // 1 = 8/8 + 3/16 + 3/16 = 11
-        // 2 = 8/8 + 3/16 + 3/16 = 11
-        // 3 = 4/8 + 1/8 + 1/8 = 6
-        // 4 = 4/8 + 1/8 + 1/8 = 6
-        // 5 = 1/8 + 1/8 + 1/8 = 3
-        // 6 = 1/8 + 1/8 + 1/8 = 3
-        // 7 = 1/8 + 1/8 + 1/8 = 3
+        res |= uint256(dotnuggv1.searchToId(selC, seed >> 40)) << (0x80);
+        res |= uint256(dotnuggv1.searchToId(selD, seed >> 48)) << (0x90);
     }
 }

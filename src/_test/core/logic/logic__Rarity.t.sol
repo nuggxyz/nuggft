@@ -5,7 +5,7 @@ import "../../NuggftV1.test.sol";
 import {CastLib} from "../../helpers/CastLib.sol";
 import {NuggftV1} from "../../../NuggftV1.sol";
 
-import {parseItemId, decodeProof, DotnuggV1Lib} from "../../../libraries/DotnuggV1Lib.sol";
+import {DotnuggV1Lib} from "dotnugg-v1-core/DotnuggV1Lib.sol";
 
 abstract contract logic__Rarity is NuggftV1Test {
     error Stupid(uint256);
@@ -18,14 +18,14 @@ abstract contract logic__Rarity is NuggftV1Test {
 
     NuggftV1 instance;
 
-    address _dotnugg_;
+    IDotnuggV1 _dotnugg_;
 
     function grrr(uint24 offset) public {
         uint24 start = offset * 10000;
         uint24 end = start + 10000;
 
         for (uint24 i = start; i < end; i++) {
-            uint16[] memory proof;
+            uint16[16] memory proof;
 
             uint24 tokenId = earlyMintable(uint24(i));
 
@@ -33,7 +33,7 @@ abstract contract logic__Rarity is NuggftV1Test {
 
             for (uint256 j = 0; j < 16; j++) {
                 uint16 item = proof[j];
-                (uint8 feature, uint8 pos) = parseItemId(item);
+                (uint8 feature, uint8 pos) = DotnuggV1Lib.parseItemId(item);
                 if (item != 0) {
                     if (cuml[feature][pos] == 0) {
                         // all.push(item);
@@ -54,7 +54,7 @@ abstract contract logic__Rarity is NuggftV1Test {
 
         instance = new NuggftV1{value: STARTING_PRICE * 50000}();
 
-        _dotnugg_ = address(instance.dotnuggv1());
+        _dotnugg_ = instance.dotnuggv1();
 
         for (uint24 i = 0; i < 5; i++) this.grrr(i);
 

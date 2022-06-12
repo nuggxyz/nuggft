@@ -4,14 +4,13 @@ pragma solidity 0.8.14;
 
 import {MockNuggftV1Migrator} from "./mock/MockNuggftV1Migrator.sol";
 
-import {IDotnuggV1Safe} from "../interfaces/dotnugg/IDotnuggV1Safe.sol";
-
 import {NuggftV1Constants} from "../core/NuggftV1Constants.sol";
 
 import {Expect} from "./expect/Expect.sol";
 
 import {DotnuggV1} from "dotnugg-v1-core/DotnuggV1.sol";
-import {DotnuggV1Lib} from "../libraries/DotnuggV1Lib.sol";
+import {DotnuggV1Lib} from "dotnugg-v1-core/DotnuggV1Lib.sol";
+import {IDotnuggV1} from "dotnugg-v1-core/IDotnuggV1.sol";
 
 import {NuggftV1AgentType} from "./helpers/NuggftV1AgentType.sol";
 
@@ -31,7 +30,7 @@ contract NuggftV1Test is ForgeTest, NuggftV1Constants {
     using SafeCast for uint256;
     using SafeCast for uint64;
 
-    DotnuggV1 public dotnugg;
+    IDotnuggV1 public dotnugg;
 
     MockNuggftV1Migrator public migrator;
 
@@ -70,7 +69,7 @@ contract NuggftV1Test is ForgeTest, NuggftV1Constants {
 
         nuggft = new RiggedNuggftV1{value: value}();
 
-        dotnugg = DotnuggV1(address(nuggft.dotnuggv1()));
+        dotnugg = nuggft.dotnuggv1();
 
         migrator = new MockNuggftV1Migrator();
 
@@ -358,7 +357,7 @@ contract NuggftV1Test is ForgeTest, NuggftV1Constants {
     {
         (tokenId) = scenario_dee_has_a_token();
 
-        uint16[] memory f = nuggft.floop(tokenId);
+        uint16[16] memory f = nuggft.floop(tokenId);
 
         feature = 1;
         itemId = uint16(f[feature]);
@@ -585,3 +584,16 @@ contract NuggftV1Test is ForgeTest, NuggftV1Constants {
 //   nuggft.shares(): 3000
 
 //
+
+// address res;
+
+// assembly {
+//     mstore(0x02, caller())
+//     mstore8(0x00, 0xD6)
+//     mstore8(0x01, 0x94)
+//     mstore8(0x16, 0x01)
+
+//     res := shr(96, shl(96, keccak256(0x00, 0x17)))
+// }
+
+// firse index of sender

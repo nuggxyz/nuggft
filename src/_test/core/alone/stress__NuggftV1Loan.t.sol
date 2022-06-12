@@ -81,14 +81,14 @@ contract stress__NuggftV1Loan is NuggftV1Test {
         uint24 tokenId = nuggft.epoch();
 
         uint96 value = nuggft.vfo(users.frank, tokenId);
-        // forge.vm.startPrank(users.frank);
-        forge.vm.prank(users.frank);
-        nuggft.offer{value: value}(tokenId);
+
+        expect.offer().from(users.frank).exec{value: value}(tokenId);
 
         // uint96 valueforRebal = nuggft.valueForRebalance(LOAN_TOKENID);
         // forge.vm.startPrank(users.frank);
         forge.vm.prank(users.frank);
-        nuggft.rebalance{value: users.frank.balance}(tokenIds);
+
+        expect.rebalance().from(users.frank).exec{value: users.frank.balance}(tokenIds);
     }
 
     function test__stress__NuggftV1Loan__rebalance__multi__manyAccounts() public globalDs {

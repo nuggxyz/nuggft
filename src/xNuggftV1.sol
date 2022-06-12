@@ -4,13 +4,15 @@ pragma solidity 0.8.14;
 
 import {IERC1155, IERC165, IERC1155Metadata_URI} from "./interfaces/IERC721.sol";
 
-import {DotnuggV1Lib, parseItemIdAsString, decodeProofCore} from "./libraries/DotnuggV1Lib.sol";
 import {IxNuggftV1} from "./interfaces/nuggftv1/IxNuggftV1.sol";
-import {DotnuggV1Lib, decodeProofCore, parseItemId, props} from "./libraries/DotnuggV1Lib.sol";
+import {DotnuggV1Lib} from "dotnugg-v1-core/DotnuggV1Lib.sol";
+import {IDotnuggV1} from "dotnugg-v1-core/IDotnuggV1.sol";
 
 import {NuggftV1} from "./NuggftV1.sol";
 
 contract xNuggftV1 is IERC1155, IERC1155Metadata_URI, IxNuggftV1 {
+    using DotnuggV1Lib for IDotnuggV1;
+
     NuggftV1 immutable nuggftv1;
 
     constructor() {
@@ -19,13 +21,13 @@ contract xNuggftV1 is IERC1155, IERC1155Metadata_URI, IxNuggftV1 {
 
     /// @inheritdoc IxNuggftV1
     function imageURI(uint256 tokenId) public view override returns (string memory res) {
-        (uint8 feature, uint8 position) = parseItemId(tokenId);
+        (uint8 feature, uint8 position) = DotnuggV1Lib.parseItemId(tokenId);
         res = nuggftv1.dotnuggv1().exec(feature, position, true);
     }
 
     /// @inheritdoc IxNuggftV1
     function imageSVG(uint256 tokenId) public view override returns (string memory res) {
-        (uint8 feature, uint8 position) = parseItemId(tokenId);
+        (uint8 feature, uint8 position) = DotnuggV1Lib.parseItemId(tokenId);
         res = nuggftv1.dotnuggv1().exec(feature, position, false);
     }
 
@@ -89,8 +91,8 @@ contract xNuggftV1 is IERC1155, IERC1155Metadata_URI, IxNuggftV1 {
             nuggftv1.dotnuggv1().encodeJson(
                 abi.encodePacked(
                      '{"name":"',         name(),
-                    '","description":"',  parseItemIdAsString(uint16(tokenId),
-                            ["base", "eyes", "mouth", "hair", "hat", "background", "scarf", "h0ld"]),
+                    '","description":"',  DotnuggV1Lib.itemIdToString(uint16(tokenId),
+                            ["base", "eyes", "mouth", "hair", "hat", "background", "scarf", "hold"]),
                     '","image":"',        imageURI(tokenId),
                     '}'
                 ), true
@@ -103,12 +105,12 @@ contract xNuggftV1 is IERC1155, IERC1155Metadata_URI, IxNuggftV1 {
     }
 
     function featureSupply(uint8 feature) public view override returns (uint256 res) {
-        res = DotnuggV1Lib.lengthOf(address(nuggftv1.dotnuggv1()), feature);
+        res = nuggftv1.dotnuggv1().lengthOf(feature);
     }
 
     function rarity(uint256 tokenId) public view returns (uint16 res) {
-        (uint8 feature, uint8 position) = parseItemId(tokenId);
-        res = DotnuggV1Lib.rarity(address(nuggftv1.dotnuggv1()), feature, position);
+        (uint8 feature, uint8 position) = DotnuggV1Lib.parseItemId(tokenId);
+        res = nuggftv1.dotnuggv1().rarity(feature, position);
     }
 
     function balanceOf(address _owner, uint256 _id) public view returns (uint256 res) {

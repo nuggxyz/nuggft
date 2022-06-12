@@ -7,6 +7,8 @@ import {ShiftLib} from "../../helpers/ShiftLib.sol";
 import {NuggftV1Proof} from "../../../core/NuggftV1Proof.sol";
 
 abstract contract logic__NuggftV1Proof is NuggftV1Test {
+    using DotnuggV1Lib for IDotnuggV1;
+
     //     function dotnuggv1ImplementerCallback(uint256 tokenId) public view override returns (IDotnuggV1Metadata.Memory memory data) {}
     //     function supportsInterface(bytes4 interfaceId) public view virtual override returns (bool) {}
     //     function trustedMint(uint24 tokenId, address to) external payable override requiresTrust {}
@@ -21,14 +23,14 @@ abstract contract logic__NuggftV1Proof is NuggftV1Test {
         uint8[] memory lens = new uint8[](8);
         uint256[] memory trickery = new uint256[](8);
 
-        lens[0] = DotnuggV1Lib.lengthOf(address(dotnugg), 0);
-        lens[1] = DotnuggV1Lib.lengthOf(address(dotnugg), 1);
-        lens[2] = DotnuggV1Lib.lengthOf(address(dotnugg), 2);
-        lens[3] = DotnuggV1Lib.lengthOf(address(dotnugg), 3);
-        lens[4] = DotnuggV1Lib.lengthOf(address(dotnugg), 4);
-        lens[5] = DotnuggV1Lib.lengthOf(address(dotnugg), 5);
-        lens[6] = DotnuggV1Lib.lengthOf(address(dotnugg), 6);
-        lens[7] = DotnuggV1Lib.lengthOf(address(dotnugg), 7);
+        lens[0] = dotnugg.lengthOf(0);
+        lens[1] = dotnugg.lengthOf(1);
+        lens[2] = dotnugg.lengthOf(2);
+        lens[3] = dotnugg.lengthOf(3);
+        lens[4] = dotnugg.lengthOf(4);
+        lens[5] = dotnugg.lengthOf(5);
+        lens[6] = dotnugg.lengthOf(6);
+        lens[7] = dotnugg.lengthOf(7);
 
         trickery[0] = ShiftLib.mask(lens[0]);
         trickery[1] = ShiftLib.mask(lens[1]);

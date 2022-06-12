@@ -2,7 +2,7 @@
 
 pragma solidity 0.8.14;
 
-import {IDotnuggV1Safe} from "../dotnugg/IDotnuggV1Safe.sol";
+import {IDotnuggV1} from "dotnugg-v1-core/IDotnuggV1.sol";
 
 interface INuggftV1Globals {
     /// @notice Explain to an end user what this does
@@ -21,5 +21,5 @@ interface INuggftV1Globals {
 
     function early() external view returns (uint24 res);
 
-    function dotnuggv1() external view returns (IDotnuggV1Safe);
+    function dotnuggv1() external view returns (IDotnuggV1);
 }

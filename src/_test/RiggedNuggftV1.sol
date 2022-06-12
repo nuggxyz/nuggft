@@ -3,7 +3,7 @@
 pragma solidity 0.8.14;
 
 import {NuggftV1} from "../NuggftV1.sol";
-import {DotnuggV1Lib} from "../libraries/DotnuggV1Lib.sol";
+import {DotnuggV1Lib} from "dotnugg-v1-core/DotnuggV1Lib.sol";
 
 contract RiggedNuggftV1 is NuggftV1 {
     constructor() payable {}
@@ -20,7 +20,7 @@ contract RiggedNuggftV1 is NuggftV1 {
     }
 
     function external__search(uint8 feature, uint256 seed) external view returns (uint8) {
-        return DotnuggV1Lib.search(address(dotnuggv1), feature, seed);
+        return DotnuggV1Lib.search(dotnuggv1, feature, seed);
     }
 
     function external__calculateSeed() external view returns (uint256 res, uint24 _epoch) {
