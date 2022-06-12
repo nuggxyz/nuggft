@@ -10,6 +10,7 @@ import {IDotnuggV1} from "dotnugg-v1-core/IDotnuggV1.sol";
 
 import {NuggftV1} from "./NuggftV1.sol";
 
+/// @author nugg.xyz - danny7even and dub6ix - 2022
 contract xNuggftV1 is IERC1155, IERC1155Metadata_URI, IxNuggftV1 {
     using DotnuggV1Lib for IDotnuggV1;
 

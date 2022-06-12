@@ -13,6 +13,7 @@ import {IDotnuggV1} from "dotnugg-v1-core/IDotnuggV1.sol";
 import {NuggftV1Epoch} from "./NuggftV1Epoch.sol";
 import {NuggftV1Trust} from "./NuggftV1Trust.sol";
 
+/// @author nugg.xyz - danny7even and dub6ix - 2022
 abstract contract NuggftV1Proof is INuggftV1Proof, NuggftV1Epoch, NuggftV1Trust {
     using DotnuggV1Lib for IDotnuggV1;
 

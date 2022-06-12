@@ -6,6 +6,7 @@ import {INuggftV1Loan} from "../interfaces/nuggftv1/INuggftV1Loan.sol";
 
 import {NuggftV1Swap} from "./NuggftV1Swap.sol";
 
+/// @author nugg.xyz - danny7even and dub6ix - 2022
 abstract contract NuggftV1Loan is INuggftV1Loan, NuggftV1Swap {
     /// @inheritdoc INuggftV1Loan
     function loan(uint24[] calldata tokenIds) external override {

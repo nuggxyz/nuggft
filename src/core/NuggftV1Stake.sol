@@ -7,6 +7,7 @@ import {NuggftV1Proof} from "./NuggftV1Proof.sol";
 import {INuggftV1Migrator} from "../interfaces/nuggftv1/INuggftV1Migrator.sol";
 import {INuggftV1Stake} from "../interfaces/nuggftv1/INuggftV1Stake.sol";
 
+/// @author nugg.xyz - danny7even and dub6ix - 2022
 abstract contract NuggftV1Stake is INuggftV1Stake, NuggftV1Proof {
     /// @inheritdoc INuggftV1Stake
     function extract() external requiresTrust {

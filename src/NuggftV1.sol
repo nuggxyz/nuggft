@@ -19,7 +19,7 @@ import {DotnuggV1Lib} from "dotnugg-v1-core/DotnuggV1Lib.sol";
 import {decodeMakingPrettierHappy} from "./libraries/BigOleLib.sol";
 
 /// @title NuggftV1
-/// @author nugg.xyz - danny7even & dub6ix
+/// @author nugg.xyz - danny7even and dub6ix - 2022
 contract NuggftV1 is IERC721, IERC721Metadata, NuggftV1Loan {
     constructor() payable {}
 

@@ -8,6 +8,7 @@ import {xNuggftV1} from "../xNuggftV1.sol";
 import {NuggftV1Constants} from "./NuggftV1Constants.sol";
 import {INuggftV1Globals} from "../interfaces/nuggftv1/INuggftV1Globals.sol";
 
+/// @author nugg.xyz - danny7even and dub6ix - 2022
 abstract contract NuggftV1Globals is NuggftV1Constants, INuggftV1Globals {
     mapping(uint24 => uint256) public override proof;
     mapping(uint24 => uint256) public override agency;

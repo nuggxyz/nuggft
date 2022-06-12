@@ -7,6 +7,7 @@ import {INuggftV1Epoch} from "../interfaces/nuggftv1/INuggftV1Epoch.sol";
 import {NuggftV1Constants} from "./NuggftV1Constants.sol";
 import {NuggftV1Globals} from "./NuggftV1Globals.sol";
 
+/// @author nugg.xyz - danny7even and dub6ix - 2022
 abstract contract NuggftV1Epoch is INuggftV1Epoch, NuggftV1Globals {
     /// @inheritdoc INuggftV1Epoch
     function epoch() public view virtual override returns (uint24 res) {

@@ -2,6 +2,8 @@
 
 pragma solidity 0.8.14;
 
+/// @author nugg.xyz - danny7even and dub6ix - 2022
+
 abstract contract NuggftV1Constants {
     uint96 constant STARTING_PRICE = .001 ether;
 

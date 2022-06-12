@@ -4,6 +4,7 @@ pragma solidity 0.8.14;
 
 import {INuggftV1Trust} from "../interfaces/nuggftv1/INuggftV1Trust.sol";
 
+/// @author nugg.xyz - danny7even and dub6ix - 2022
 abstract contract NuggftV1Trust is INuggftV1Trust {
     event UserTrustUpdated(address indexed user, bool trusted);
 
