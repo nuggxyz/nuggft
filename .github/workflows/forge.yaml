@@ -16,6 +16,9 @@ jobs:
               with:
                   version: nightly
 
+            - name: clone dotnugg
+              run: git clone https://github.com/nuggxyz/dotnugg-v1-core.git
+
             - name: Run tests
               run: forge test -vvv
 
