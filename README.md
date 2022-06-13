@@ -1,8 +1,14 @@
 # Nugg Fungible Token V1 Smart Contracts
 
-the core logic and smart contracts for Nuggft V1 - written in solidity - (to be soon) deployed on ethereum
+> **Warning**
+> this code is yet to be deployed and licensed under BUSL-1.1
 
 [![forge](https://github.com/nuggxyz/nuggft-v1-core/actions/workflows/forge.yaml/badge.svg)](https://github.com/nuggxyz/nuggft-v1-core/actions/workflows/forge.yaml)
+
+the core logic and smart contracts for nuggft v1
+
+-   written in solidity
+-   (to be soon) deployed on ethereum
 
 ## Deployments
 
@@ -14,7 +20,7 @@ the core logic and smart contracts for Nuggft V1 - written in solidity - (to be 
 | goerli  | `0x69420000c537a53ff966610aee8c8884f02c88f8` |
 | kovan   | `0x694200002e1540157c5fe987705e418ee0a9577d` |
 
-# m1 configuration
+## m1 configuration
 
 ```bash
 # to install apple silicon version of solc
@@ -30,7 +36,7 @@ This repository is subject to the nuggft v1 bug bounty program, per the terms de
 
 ## Licensing
 
-The primary license for DotnuggV1 Core is the Business Source License 1.1 (`BUSL-1.1`), see [`LICENSE`](./LICENSE).
+The primary license for NuggftV1 Core is the Business Source License 1.1 (`BUSL-1.1`), see [`LICENSE.txt`](./LICENSE.txt).
 
 ### Exceptions
 
