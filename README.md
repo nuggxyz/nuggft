@@ -27,3 +27,11 @@ export SOLC_PATH=/opt/homebrew/Cellar/solidity/0.8.13/bin/solc
 ## bug bounty
 
 This repository is subject to the nuggft v1 bug bounty program, per the terms defined [here](./bug-bounty.md).
+
+## Licensing
+
+The primary license for DotnuggV1 Core is the Business Source License 1.1 (`BUSL-1.1`), see [`LICENSE`](./LICENSE).
+
+### Exceptions
+
+-   All files in `src/_test` are unlicensed
