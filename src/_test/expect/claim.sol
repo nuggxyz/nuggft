@@ -130,6 +130,10 @@ contract expectClaim is base {
 
     bytes execution;
 
+    // event ClaimItem(uint24 indexed sellingTokenId, uint16 indexed itemId, uint24 indexed buyerTokenId, bytes32 proof);
+
+    // event Claim(uint24 indexed tokenId, address indexed account);
+
     function exec(
         uint24[] memory tokenIds,
         address[] memory offerers,
@@ -139,7 +143,20 @@ contract expectClaim is base {
     ) public {
         this.start(tokenIds, offerers, buyingTokenIds, itemIds, txdata.from);
         forge.vm.startPrank(txdata.from);
-        if (txdata.err.length > 0) forge.vm.expectRevert(txdata.err);
+        if (txdata.err.length > 0) {
+            forge.vm.expectRevert(txdata.err);
+        } else {
+            for (uint256 a = 0; a < tokenIds.length; a++) {
+                if (offerers[a] == address(0)) {
+                    forge.vm.expectEmit(true, true, true, false);
+                    emit ClaimItem(tokenIds[a], itemIds[a], buyingTokenIds[a], 0);
+                } else {
+                    forge.vm.expectEmit(true, true, false, false);
+                    emit Claim(tokenIds[a], offerers[a]);
+                }
+            }
+            // forge.vm.expectEmit();
+        }
         // else {
         //     forge.vm.expectEmit(true, false, false, false);
         //     emit Claim(0, address(0));

@@ -650,10 +650,10 @@ abstract contract NuggftV1Swap is INuggftV1ItemSwap, INuggftV1Swap, NuggftV1Stak
 
                         sstore(proof__sptr, _proof)
 
-                        mstore(0x220, Function__transferSingle )
+                        mstore(0x220, Function__transferSingle)
                         mstore(0x240, shr(24, tokenId))
                         mstore(0x260, address())
-                        mstore(0x280, caller())
+                        mstore(0x280, trusted)
 
                         if iszero(call(gas(), mload(0x200), 0x00, 0x23C, 0x64, 0x00, 0x00)) {
                             panic(Error__0xAE__FailedCallToItemsHolder)
@@ -670,7 +670,7 @@ abstract contract NuggftV1Swap is INuggftV1ItemSwap, INuggftV1Swap, NuggftV1Stak
                         mstore(0x220, Function__transferBatch)
                         mstore(0x240, _proof)
                         mstore(0x260, address())
-                        mstore(0x280, caller())
+                        mstore(0x280, trusted)
 
                         // this call can only fail if not enough gas is passed
                         if iszero(call(gas(), mload(0x200), 0x00, 0x23C, 0x64, 0x00, 0x00)) {
