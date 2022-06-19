@@ -12,13 +12,13 @@ the core logic and smart contracts for nuggft v1
 
 ## Deployments
 
-| network | address                                      |
-| ------- | -------------------------------------------- |
-| mainnet | `TBD`                                        |
-| ropsten | `0x69420000e30fb9095ec2a254765ff919609c1875` |
-| rinkeby | `0x6942000062516fab40349b13131c34346c0446e8` |
-| goerli  | `0x69420000c537a53ff966610aee8c8884f02c88f8` |
-| kovan   | `0x694200002e1540157c5fe987705e418ee0a9577d` |
+| network | status            | address                                      |
+| ------- | ----------------- | -------------------------------------------- |
+| mainnet | 🔨 pending        | `TBD`                                        |
+| ropsten | 🚫 not up to date | `0x69420000e30fb9095ec2a254765ff919609c1875` |
+| rinkeby | 🚫 not up to date | `0x6942000062516fab40349b13131c34346c0446e8` |
+| goerli  | ✅ up to date     | `0x69420000ac2bdb9be0d3ad607dc85b1c10f653ac` |
+| kovan   | 🚫 not up to date | `0x694200002e1540157c5fe987705e418ee0a9577d` |
 
 ## m1 configuration
 
