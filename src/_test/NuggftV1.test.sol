@@ -16,6 +16,7 @@ import {NuggftV1AgentType} from "./helpers/NuggftV1AgentType.sol";
 
 import {RiggedNuggFatherV1} from "./RiggedNuggFatherV1.sol";
 import {RiggedNuggftV1} from "./RiggedNuggftV1.sol";
+import {xNuggftV1} from "../xNuggftV1.sol";
 
 import "./utils/forge.sol";
 
@@ -36,11 +37,14 @@ contract NuggftV1Test is ForgeTest, NuggftV1Constants {
 
     RiggedNuggftV1 internal nuggft;
 
+    xNuggftV1 internal xnuggft;
+
     RiggedNuggFatherV1 internal father;
 
     address public _nuggft;
     address public _dotnugg;
     address public _proxy;
+    address public _xnuggft;
 
     Expect expect;
 
@@ -68,6 +72,10 @@ contract NuggftV1Test is ForgeTest, NuggftV1Constants {
         forge.vm.startPrank(creator);
 
         nuggft = new RiggedNuggftV1{value: value}();
+
+        xnuggft = nuggft.xnuggftv1();
+
+        _xnuggft = address(xnuggft);
 
         dotnugg = nuggft.dotnuggv1();
 

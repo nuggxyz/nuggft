@@ -114,6 +114,8 @@ contract expectClaim is base {
         bool winner;
         address buyer;
         bool reclaim;
+        address buyingNuggOwner;
+        uint256 nuggsProof;
     }
 
     struct RunBalances {
@@ -134,14 +136,18 @@ contract expectClaim is base {
 
     // event Claim(uint24 indexed tokenId, address indexed account);
 
+    // function mockProofUpdate__add(uint256 proof, uint16 item) pure returns (uint256 res) {
+
+    // }
+
     function exec(
         uint24[] memory tokenIds,
         address[] memory offerers,
         uint24[] memory buyingTokenIds,
         uint16[] memory itemIds,
         lib.txdata memory txdata
-    ) public {
-        this.start(tokenIds, offerers, buyingTokenIds, itemIds, txdata.from);
+    ) public returns (Run memory run) {
+        run = this.start(tokenIds, offerers, buyingTokenIds, itemIds, txdata.from);
         forge.vm.startPrank(txdata.from);
         if (txdata.err.length > 0) {
             forge.vm.expectRevert(txdata.err);
@@ -150,17 +156,25 @@ contract expectClaim is base {
                 if (offerers[a] == address(0)) {
                     forge.vm.expectEmit(true, true, true, false);
                     emit ClaimItem(tokenIds[a], itemIds[a], buyingTokenIds[a], 0);
+                    if (run.snapshots[a].env.winner) {
+                        forge.vm.expectCall(
+                            address(xnuggft),
+                            abi.encodeWithSelector(xnuggft.transferSingle.selector, itemIds[a], address(nuggft), run.snapshots[a].env.buyingNuggOwner)
+                        );
+                    }
                 } else {
                     forge.vm.expectEmit(true, true, false, false);
                     emit Claim(tokenIds[a], offerers[a]);
+
+                    if (run.snapshots[a].env.winner) {
+                        forge.vm.expectCall(
+                            address(xnuggft),
+                            abi.encodeWithSelector(xnuggft.transferBatch.selector, run.snapshots[a].env.nuggsProof, address(nuggft), offerers[a])
+                        );
+                    }
                 }
             }
-            // forge.vm.expectEmit();
         }
-        // else {
-        //     forge.vm.expectEmit(true, false, false, false);
-        //     emit Claim(0, address(0));
-        // }
         nuggft.claim(tokenIds, offerers, buyingTokenIds, itemIds);
         forge.vm.stopPrank();
         txdata.err.length > 0 ? this.rollback() : this.stop();
@@ -232,12 +246,10 @@ contract expectClaim is base {
         uint24[] memory buyingTokenIds,
         uint16[] memory itemIds,
         address sender
-    ) public {
+    ) public returns (Run memory run) {
         require(execution.length == 0, "EXPECT-CLAIM:START: execution already esists");
 
         // require(tokenIds.length == offerers.length, 'EXPECT-CLAIM:START:ArrayLengthNotSame');
-
-        Run memory run;
 
         run.sender = sender;
         run.snapshots = new Snapshot[](tokenIds.length);
@@ -263,9 +275,11 @@ contract expectClaim is base {
             if (env.isItem) {
                 pre.agency = nuggft.itemAgency(safe.u24(env.id & 0xffffff), safe.u16(env.id >> 24));
                 pre.offer = nuggft.itemOffers(safe.u24(env.buyer), safe.u24(env.id & 0xffffff), safe.u16(env.id >> 24));
+                env.buyingNuggOwner = address(uint160(nuggft.agency(safe.u24(uint160(env.buyer)))));
             } else {
                 pre.agency = nuggft.agency(safe.u24(env.id));
                 pre.offer = nuggft.offers(safe.u24(env.id), env.buyer);
+                env.nuggsProof = nuggft.proofOf(safe.u24(env.id));
             }
 
             pre.trueoffer = pre.offer;
