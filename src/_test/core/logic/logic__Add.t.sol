@@ -6,7 +6,7 @@ import {CastLib} from "../../helpers/CastLib.sol";
 
 abstract contract logic__Add is NuggftV1Test {
     function test__logic__Add__cumlative() public {
-        resetManual(dub6ix, 10 ether);
+        resetManual(dub6ix, (10000 * STARTING_PRICE));
         jumpStart();
         jumpSwap();
 

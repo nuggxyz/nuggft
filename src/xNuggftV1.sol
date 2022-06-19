@@ -8,16 +8,16 @@ import {IxNuggftV1} from "./interfaces/nuggftv1/IxNuggftV1.sol";
 import {DotnuggV1Lib} from "dotnugg-v1-core/DotnuggV1Lib.sol";
 import {IDotnuggV1} from "dotnugg-v1-core/IDotnuggV1.sol";
 
-import {NuggftV1} from "./NuggftV1.sol";
+import {INuggftV1} from "./interfaces/nuggftv1/INuggftV1.sol";
 
 /// @author nugg.xyz - danny7even and dub6ix - 2022
 contract xNuggftV1 is IERC1155, IERC1155Metadata_URI, IxNuggftV1 {
     using DotnuggV1Lib for IDotnuggV1;
 
-    NuggftV1 immutable nuggftv1;
+    INuggftV1 immutable nuggftv1;
 
     constructor() {
-        nuggftv1 = NuggftV1(msg.sender);
+        nuggftv1 = INuggftV1(msg.sender);
     }
 
     /// @inheritdoc IxNuggftV1
@@ -36,7 +36,7 @@ contract xNuggftV1 is IERC1155, IERC1155Metadata_URI, IxNuggftV1 {
         uint256 proof,
         address from,
         address to
-    ) public payable {
+    ) external payable {
         require(msg.sender == address(nuggftv1));
 
         unchecked {
@@ -66,7 +66,7 @@ contract xNuggftV1 is IERC1155, IERC1155Metadata_URI, IxNuggftV1 {
         uint256 itemId,
         address from,
         address to
-    ) public payable {
+    ) external payable {
         require(msg.sender == address(nuggftv1));
         emit TransferSingle(address(0), from, to, itemId, 1);
     }
@@ -115,7 +115,7 @@ contract xNuggftV1 is IERC1155, IERC1155Metadata_URI, IxNuggftV1 {
     }
 
     function balanceOf(address _owner, uint256 _id) public view returns (uint256 res) {
-        uint256 bal = nuggftv1.balance(_owner);
+        uint256 bal = 0;
 
         while (bal != 0) {
             uint256 proof = nuggftv1.proof(uint24(bal <<= 24));

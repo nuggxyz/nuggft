@@ -8,7 +8,7 @@ import "./system__one.t.sol";
 
 contract System is system__NuggftV1Swap, system__one, system__NuggftV1Loan, system__NuggftV1Epoch {
     function setUp() public {
-        resetManual(dub6ix, 2 ether);
+        reset();
 
         forge.vm.deal(users.frank, 90000 ether);
 

@@ -84,6 +84,6 @@ contract Revert2 is
     revert__sell__0xA9
 {
     function setUp() public {
-        resetManual(dub6ix, 2 ether);
+        reset();
     }
 }

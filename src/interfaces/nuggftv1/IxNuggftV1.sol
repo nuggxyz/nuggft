@@ -12,4 +12,16 @@ interface IxNuggftV1 {
     function totalSupply() external view returns (uint256);
 
     function rarity(uint256 tokenId) external view returns (uint16 res);
+
+    function transferBatch(
+        uint256 proof,
+        address from,
+        address to
+    ) external payable;
+
+    function transferSingle(
+        uint256 itemId,
+        address from,
+        address to
+    ) external payable;
 }

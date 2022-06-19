@@ -16,7 +16,7 @@ import {NuggftV1AgentType} from "./helpers/NuggftV1AgentType.sol";
 
 import {RiggedNuggFatherV1} from "./RiggedNuggFatherV1.sol";
 import {RiggedNuggftV1} from "./RiggedNuggftV1.sol";
-import {xNuggftV1} from "../xNuggftV1.sol";
+import {IxNuggftV1} from "../interfaces/nuggftv1/IxNuggftV1.sol";
 
 import "./utils/forge.sol";
 
@@ -37,7 +37,7 @@ contract NuggftV1Test is ForgeTest, NuggftV1Constants {
 
     RiggedNuggftV1 internal nuggft;
 
-    xNuggftV1 internal xnuggft;
+    IxNuggftV1 internal xnuggft;
 
     RiggedNuggFatherV1 internal father;
 
@@ -99,7 +99,7 @@ contract NuggftV1Test is ForgeTest, NuggftV1Constants {
     }
 
     function reset() public {
-        createInstance(dub6ix, 2 ether);
+        createInstance(dub6ix, 10 ether);
     }
 
     // function reset__fork() public {

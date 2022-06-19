@@ -4,7 +4,9 @@ pragma solidity 0.8.14;
 
 import {IDotnuggV1} from "dotnugg-v1-core/IDotnuggV1.sol";
 import {DotnuggV1} from "dotnugg-v1-core/DotnuggV1.sol";
+import {IxNuggftV1} from "../interfaces/nuggftv1/IxNuggftV1.sol";
 import {xNuggftV1} from "../xNuggftV1.sol";
+
 import {NuggftV1Constants} from "./NuggftV1Constants.sol";
 import {INuggftV1Globals} from "../interfaces/nuggftv1/INuggftV1Globals.sol";
 
@@ -24,7 +26,7 @@ abstract contract NuggftV1Globals is NuggftV1Constants, INuggftV1Globals {
     address public override migrator;
     uint256 public immutable override genesis;
     IDotnuggV1 public immutable override dotnuggv1;
-    xNuggftV1 public immutable xnuggftv1;
+    IxNuggftV1 public immutable xnuggftv1;
     uint24 public immutable override early;
 
     uint256 internal immutable earlySeed;
@@ -38,7 +40,7 @@ abstract contract NuggftV1Globals is NuggftV1Constants, INuggftV1Globals {
 
         dotnuggv1 = IDotnuggV1(address(DotnuggV1(new DotnuggV1())));
 
-        xnuggftv1 = new xNuggftV1();
+        xnuggftv1 = IxNuggftV1(new xNuggftV1());
 
         stake = (msg.value << 96) + (uint256(early) << 192);
 
