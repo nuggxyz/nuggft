@@ -128,6 +128,7 @@ abstract contract NuggftV1Constants {
     uint8 constant Error__0xB0__InvalidMulticall = 0xB0;
     uint8 constant Error__0xB1__InvalidMulticallValue = 0xB1;
     uint8 constant Error__0xB2__UnexpectedIncrement = 0xB2;
+    uint8 constant Error__0xB3__NuggIsNotItemAgent = 0xB3;
 
     function _panic(uint8 code) internal pure {
         assembly {

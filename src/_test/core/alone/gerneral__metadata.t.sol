@@ -50,6 +50,16 @@ contract general__NuggftV1Loan is NuggftV1Test {
 
         ds.emit_log_named_string("hi", string(working));
     }
+
+    function test__v2() public {
+        bytes memory check = nuggft.loop();
+
+        uint256 len = check.length / 37;
+
+        for (uint256 i = 0; i < len; i++) {
+            ds.emit_log_named_bytes(DotnuggV1Lib.toString(i), byteslib.slice(check, i * 37, 37));
+        }
+    }
 }
 
 // nuggft deployed to : 0xcd7f2f0750ebe73fa37122ee6839b342ca30e58c

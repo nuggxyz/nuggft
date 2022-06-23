@@ -6,6 +6,7 @@ import {INuggftV1Swap} from "../interfaces/nuggftv1/INuggftV1Swap.sol";
 import {INuggftV1ItemSwap} from "../interfaces/nuggftv1/INuggftV1ItemSwap.sol";
 
 import {NuggftV1Stake} from "./NuggftV1Stake.sol";
+import {DotnuggV1Lib} from "dotnugg-v1-core/DotnuggV1Lib.sol";
 
 /// @author nugg.xyz - danny7even and dub6ix - 2022
 /// @notice mechanism for trading of nuggs between users (and items between nuggs)
@@ -332,7 +333,6 @@ abstract contract NuggftV1Swap is INuggftV1ItemSwap, INuggftV1Swap, NuggftV1Stak
             default {
                 increment := INCREMENT_BPS
             }
-                log3(0x00, 0x00, next, last, increment)
 
             // ensure next offer includes at least a 5-50% increment
             if gt(div(mul(last, increment), BASE_BPS), next) {
@@ -798,8 +798,6 @@ abstract contract NuggftV1Swap is INuggftV1ItemSwap, INuggftV1Swap, NuggftV1Stak
             if isItem {
                 sender := and(tokenId, 0xffffff)
 
-                tokenId := and(tokenId, 0xffffffffff)
-
                 mstore(0x00, sender)
 
                 let buyerTokenAgency := sload(keccak256(0x00, 0x40))
@@ -832,6 +830,10 @@ abstract contract NuggftV1Swap is INuggftV1ItemSwap, INuggftV1Swap, NuggftV1Stak
             case 1 {
                 if iszero(iszero(agency__cache)) {
                     // panic(Error__0x97__ItemAgencyAlreadySet)
+
+                    if iszero(eq(juke(agency__cache, 96, 96), sender)) {
+                        panic(Error__0xB3__NuggIsNotItemAgent)
+                    }
 
                     agency__cache := xor(xor(shl(254, 0x03), shl(160, div(floor, LOSS))), sender)
 
@@ -910,7 +912,7 @@ abstract contract NuggftV1Swap is INuggftV1ItemSwap, INuggftV1Swap, NuggftV1Stak
                 let flag := shr(254, agency__cache)
 
                 let isWaitingForOffer := and(eq(flag, 0x3), iszero(juke(agency__cache, 2, 232)))
-
+                log2(0x00, 0x00, 0x123456789, tokenId)
                 // ensure the agent is the owner
                 if iszero(isWaitingForOffer) {
                     // ensure the agent is the owner
@@ -1077,6 +1079,83 @@ abstract contract NuggftV1Swap is INuggftV1ItemSwap, INuggftV1Swap, NuggftV1Stak
         }
     }
 
+    // @inheritdoc INuggftV1Swap
+    function loop() external view returns (bytes memory res) {
+        unchecked {
+            uint24 epoch = epoch();
+            uint256 working;
+            uint256 ptr;
+
+            res = new bytes(37 * 10000);
+
+            assembly {
+                ptr := add(res, 32)
+            }
+
+            for (uint24 i = 0; i < epoch; i++) {
+                if ((working = agency[i]) >> 254 == 0x3) {
+                    assembly {
+                        mstore(add(ptr, 5), i)
+                        mstore(ptr, working)
+                        ptr := add(ptr, 37)
+                    }
+                }
+            }
+            working = agencyOf(epoch);
+
+            assembly {
+                mstore(add(ptr, 5), epoch)
+                mstore(ptr, working)
+                ptr := add(ptr, 37)
+            }
+
+            (uint24 start, uint24 end) = premintTokens();
+
+            for (uint24 i = start; i <= end; i++) {
+                if ((working = agencyOf(i)) >> 254 == 0x3) {
+                    assembly {
+                        mstore(add(ptr, 5), i)
+                        mstore(ptr, working)
+                        ptr := add(ptr, 37)
+                    }
+                    if (agency[i] == 0) {
+                        uint40 token = uint40(i) | (uint40(proofOf(i) >> 0x90) << 24);
+                        working = itemAgencyOf(i, uint16(token >> 24));
+                        assembly {
+                            mstore(add(ptr, 5), token)
+                            mstore(ptr, working)
+                            ptr := add(ptr, 37)
+                        }
+                    }
+                }
+            }
+
+            for (uint8 i = 0; i < 8; i++) {
+                uint8 num = DotnuggV1Lib.lengthOf(dotnuggv1, i);
+                for (uint8 j = 1; j <= num; j++) {
+                    uint16 item = (uint16(i) * 1000) + j;
+                    for (uint8 z = 0; z < 2; z++) {
+                        if ((working = lastItemSwap[item] & 0xffffff) >> z != 0) {
+                            uint40 token = (uint40(item) << 24) + uint40(working);
+                            working = itemAgencyOf(uint24(working), item);
+                            if (working >> 254 == 0x3 && (working >> 232) & 0xffffff >= epoch) {
+                                assembly {
+                                    mstore(add(ptr, 5), token)
+                                    mstore(ptr, working)
+                                    ptr := add(ptr, 37)
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
+            assembly {
+                mstore(res, sub(sub(ptr, res), 32))
+            }
+        }
+    }
+
     /// @inheritdoc INuggftV1ItemSwap
     function vfo(
         uint24 buyer,
@@ -1086,6 +1165,30 @@ abstract contract NuggftV1Swap is INuggftV1ItemSwap, INuggftV1Swap, NuggftV1Stak
         (bool canOffer, uint96 next, uint96 current, , , , ) = check(buyer, seller, itemId);
 
         if (canOffer) res = next - current;
+    }
+
+    function agencyOf(uint24 tokenId) internal view returns (uint256 res) {
+        if ((res = agency[tokenId]) != 0) return res;
+
+        (uint24 start, uint24 end) = premintTokens();
+
+        if (tokenId >= start || tokenId <= end) {
+            (uint96 _msp, , , , ) = minSharePriceBreakdown(stake);
+
+            res = (0x03 << 254) + (uint256(((_msp / LOSS))) << 160);
+
+            res += uint160(address(this));
+        }
+        uint24 e = epoch();
+        if (e == tokenId) res |= uint256(e) << 232;
+    }
+
+    function itemAgencyOf(uint24 seller, uint16 itemId) internal view returns (uint256 res) {
+        res = itemAgency(seller, itemId);
+
+        if (res == 0 && agency[seller] == 0 && uint16(proofOf(seller) >> 0x90) == itemId) {
+            return (0x03 << 254) + (uint256((STARTING_PRICE / LOSS)) << 160) + uint256(seller);
+        }
     }
 
     /// @inheritdoc INuggftV1ItemSwap

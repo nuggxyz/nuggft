@@ -64,4 +64,7 @@ interface INuggftV1Swap {
         );
 
     function vfo(address sender, uint24 tokenId) external view returns (uint96 res);
+
+    function loop() external view returns (bytes memory);
+
 }
