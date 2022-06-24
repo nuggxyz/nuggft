@@ -1079,6 +1079,10 @@ abstract contract NuggftV1Swap is INuggftV1ItemSwap, INuggftV1Swap, NuggftV1Stak
         }
     }
 
+    function validAgency(uint256 _agency, uint24 epoch) public pure returns (bool) {
+        return _agency >> 254 == 0x3 && (uint24(_agency >> 232) >= epoch || uint24(_agency >> 232) == 0);
+    }
+
     // @inheritdoc INuggftV1Swap
     function loop() external view returns (bytes memory res) {
         unchecked {
@@ -1092,15 +1096,6 @@ abstract contract NuggftV1Swap is INuggftV1ItemSwap, INuggftV1Swap, NuggftV1Stak
                 ptr := add(res, 32)
             }
 
-            for (uint24 i = 0; i < epoch; i++) {
-                if ((working = agency[i]) >> 254 == 0x3) {
-                    assembly {
-                        mstore(add(ptr, 5), i)
-                        mstore(ptr, working)
-                        ptr := add(ptr, 37)
-                    }
-                }
-            }
             working = agencyOf(epoch);
 
             assembly {
@@ -1109,10 +1104,22 @@ abstract contract NuggftV1Swap is INuggftV1ItemSwap, INuggftV1Swap, NuggftV1Stak
                 ptr := add(ptr, 37)
             }
 
+            for (uint24 i = 0; i < epoch; i++) {
+                working = agency[i];
+                if (validAgency(working, epoch)) {
+                    assembly {
+                        mstore(add(ptr, 5), i)
+                        mstore(ptr, working)
+                        ptr := add(ptr, 37)
+                    }
+                }
+            }
+
             (uint24 start, uint24 end) = premintTokens();
 
             for (uint24 i = start; i <= end; i++) {
-                if ((working = agencyOf(i)) >> 254 == 0x3) {
+                working = agencyOf(i);
+                if (validAgency(working, epoch)) {
                     assembly {
                         mstore(add(ptr, 5), i)
                         mstore(ptr, working)
@@ -1135,10 +1142,10 @@ abstract contract NuggftV1Swap is INuggftV1ItemSwap, INuggftV1Swap, NuggftV1Stak
                 for (uint8 j = 1; j <= num; j++) {
                     uint16 item = (uint16(i) * 1000) + j;
                     for (uint8 z = 0; z < 2; z++) {
-                        if ((working = lastItemSwap[item] & 0xffffff) >> z != 0) {
+                        if ((working = (lastItemSwap[item] >> (z * 24)) & 0xffffff) != 0) {
                             uint40 token = (uint40(item) << 24) + uint40(working);
                             working = itemAgencyOf(uint24(working), item);
-                            if (working >> 254 == 0x3 && (working >> 232) & 0xffffff >= epoch) {
+                            if (validAgency(working, epoch)) {
                                 assembly {
                                     mstore(add(ptr, 5), token)
                                     mstore(ptr, working)
@@ -1180,7 +1187,7 @@ abstract contract NuggftV1Swap is INuggftV1ItemSwap, INuggftV1Swap, NuggftV1Stak
             res += uint160(address(this));
         }
         uint24 e = epoch();
-        if (e == tokenId) res |= uint256(e) << 232;
+        if (e == tokenId) res |= uint256(e) << 230;
     }
 
     function itemAgencyOf(uint24 seller, uint16 itemId) internal view returns (uint256 res) {

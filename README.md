@@ -17,7 +17,7 @@ the core logic and smart contracts for nuggft v1
 | mainnet | 🔨 pending        | `TBD`                                        |
 | ropsten | 🚫 not up to date | `0x69420000e30fb9095ec2a254765ff919609c1875` |
 | rinkeby | 🚫 not up to date | `0x6942000062516fab40349b13131c34346c0446e8` |
-| goerli  | ✅ up to date     | `0x69420000ac2bdb9be0d3ad607dc85b1c10f653ac` |
+| goerli  | ✅ up to date     | `0xb0b9cd000a5afa56d016c39470c3ec237df4e043` |
 | kovan   | 🚫 not up to date | `0x694200002e1540157c5fe987705e418ee0a9577d` |
 
 ## m1 configuration
