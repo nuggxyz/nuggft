@@ -2,4 +2,4 @@
 
 forge build \
     --force \
-    --optimize --optimizer-runs=6969
+    --optimize --optimizer-runs=1000000

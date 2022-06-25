@@ -50,37 +50,6 @@ abstract contract NuggftV1Proof is INuggftV1Proof, NuggftV1Epoch, NuggftV1Trust 
         _panic(Error__0xAD__InvalidZeroProof);
     }
 
-    function decodeProof(uint256 input) internal pure returns (uint16[16] memory res) {
-        unchecked {
-            for (uint256 i = 0; i < 16; i++) {
-                res[i] = uint16(input);
-                input >>= 16;
-            }
-        }
-    }
-
-    function decodeProofCore(uint256 proof) internal pure returns (uint8[8] memory res) {
-        unchecked {
-            for (uint256 i = 0; i < 8; i++) {
-                (uint8 feature, uint8 pos) = DotnuggV1Lib.parseItemId(uint16(proof));
-                if (res[feature] == 0) res[feature] = pos;
-                proof >>= 16;
-            }
-        }
-    }
-
-    function encodeProof(uint8[8] memory ids) internal pure returns (uint256 proof) {
-        unchecked {
-            for (uint256 i = 0; i < 8; i++) proof |= ((i << 8) | uint256(ids[i])) << (i << 3);
-        }
-    }
-
-    function encodeProof(uint16[16] memory ids) internal pure returns (uint256 proof) {
-        unchecked {
-            for (uint256 i = 0; i < 16; i++) proof |= uint256(ids[i]) << (i << 4);
-        }
-    }
-
     function floop(uint24 tokenId) public view returns (uint16[16] memory arr) {
         // arr = new uint16[](16);
         uint256 proof = proofOf(tokenId);

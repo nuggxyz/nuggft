@@ -73,13 +73,39 @@ contract NuggftV1 is IERC721, IERC721Metadata, NuggftV1Loan {
 
     /// @inheritdoc IERC721Metadata
     function name() public pure override returns (string memory) {
-        return "Nugg Fungible Token V1";
+        return hex"4e7567672046756e6769626c6520546f6b656e205631";
     }
 
     /// @inheritdoc IERC721Metadata
     function symbol() public pure override returns (string memory) {
-        return "NUGGFT";
+        return hex"4e5547474654";
     }
+
+    // //  24534 bytes of code
+    // // 24372 bytes of code
+    // function name() external pure override returns (string memory res) {
+    //     assembly {
+    //         mstore(0x00, 0x20)
+    //         mstore(0x38, 0x184e7567672046756e6769626c6520546f6b656e205631)
+    //         return(0x00, 0x60)
+    //     }
+    // }
+
+    // /// @inheritdoc IERC721Metadata
+    // function symbol() external pure override returns (string memory) {
+    //     assembly {
+    //         mstore(0x00, 0x20)
+    //         mstore(0x26, 0x064e5547474654)
+    //         return(0x00, 0x60)
+    //     }
+    // }
+
+    // function symbol2() external returns (string memory mem) {
+    //     mem = "NUGGFT";
+    //     assembly {
+    //         log1(mem, 0x80, mem)
+    //     }
+    // }
 
     /// @inheritdoc IERC721Metadata
     function tokenURI(uint256 tokenId) public view virtual override returns (string memory res) {
@@ -87,10 +113,9 @@ contract NuggftV1 is IERC721, IERC721Metadata, NuggftV1Loan {
         res = string(
             dotnuggv1.encodeJson(
                 abi.encodePacked(
-                     '{"name":"',         name(),
-                    '","description":"',  symbol(),
-                    '","image":"',        imageURI(tokenId),
-                    '","properites":',    DotnuggV1Lib.props(decodeProofCore(proofOf(uint24(tokenId))),
+                     '{"name":"NUGGFT","description":"Nugg Fungible Token V1","image":"',
+                                            imageURI(tokenId),
+                    '","properites":',    dotnuggv1.props(proofOf(uint24(tokenId)),
                                 ['base', 'eyes', 'mouth', 'hair', 'hat', 'background', 'scarf', 'hold']
                             ),
                     '}'
@@ -101,12 +126,12 @@ contract NuggftV1 is IERC721, IERC721Metadata, NuggftV1Loan {
 
     /// @inheritdoc INuggftV1Proof
     function imageURI(uint256 tokenId) public view override returns (string memory res) {
-        res = dotnuggv1.exec(decodeProofCore(proofOf(uint24(tokenId))), true);
+        res = dotnuggv1.exec(proofOf(uint24(tokenId)), true);
     }
 
     /// @inheritdoc INuggftV1Proof
     function imageSVG(uint256 tokenId) public view override returns (string memory res) {
-        res = dotnuggv1.exec(decodeProofCore(proofOf(uint24(tokenId))), false);
+        res = dotnuggv1.exec(proofOf(uint24(tokenId)), false);
     }
 
     /// this may seem like the dumbest function of all time - and it is
@@ -119,7 +144,7 @@ contract NuggftV1 is IERC721, IERC721Metadata, NuggftV1Loan {
         bytes calldata prev
     ) public view override returns (bytes memory res) {
         if (chunk == 1) {
-            res = abi.encode(dotnuggv1.read(decodeProofCore(proofOf(uint24(tokenId)))));
+            res = abi.encode(dotnuggv1.read((proofOf(uint24(tokenId)))));
         } else if (chunk == 2) {
             (uint256[] memory calced, uint256 dat) = dotnuggv1.calc(decodeMakingPrettierHappy(prev));
             res = abi.encode(calced, dat);

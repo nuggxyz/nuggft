@@ -4,7 +4,7 @@ NETWORK=$1
 
 SEED=$2
 
-OPTIMIZER_RUNS=6969
+OPTIMIZER_RUNS=1000000
 
 if [ "$NETWORK" == "local" ]; then
     ETH_RPC_URL="http://127.0.0.1:8545"

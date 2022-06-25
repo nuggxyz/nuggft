@@ -2,7 +2,7 @@
 src = 'src'
 test = '_test'
 out = './out'
-libs = ['lib']
+libs = ['lib', "../dotnugg-v1-core"]
 cache = true
 force = false
 evm_version = 'london'
@@ -10,7 +10,7 @@ evm_version = 'london'
 solc_version = '0.8.14'
 auto_detect_solc = false
 optimizer = true
-optimizer_runs = 6969
+optimizer_runs = 1000000
 verbosity = 0
 ignored_error_codes = []
 fuzz_runs = 1000
@@ -29,4 +29,14 @@ block_difficulty = 0
 gas_reports = ["RiggedNuggft", "NuggftV1", "Expect"]
 no_storage_caching = true
 
+
+[default.optimizer_details]
+constantOptimizer = true
+cse = true
+deduplicate=true
+orderLiterals=true
+yul=true
+
+[default.optimizer_details.yulDetails]
+stackAllocation = true
 

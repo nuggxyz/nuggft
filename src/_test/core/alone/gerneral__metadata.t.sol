@@ -60,6 +60,17 @@ contract general__NuggftV1Loan is NuggftV1Test {
             ds.emit_log_named_bytes(DotnuggV1Lib.toString(i), byteslib.slice(check, i * 37, 37));
         }
     }
+
+    function test__metadata() public {
+        nuggft.name();
+        nuggft.symbol();
+        // nuggft.symbol2();
+        // nuggft.symbol3();
+
+        address(nuggft).code.length;
+
+        // nuggft.tokenURI(nuggft.epoch());
+    }
 }
 
 // nuggft deployed to : 0xcd7f2f0750ebe73fa37122ee6839b342ca30e58c
