@@ -2,7 +2,7 @@
 src = 'src'
 test = '_test'
 out = './out'
-libs = ['lib', "../dotnugg-v1-core"]
+libs = ['lib']
 cache = true
 force = false
 evm_version = 'london'

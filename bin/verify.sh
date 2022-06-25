@@ -2,7 +2,7 @@
 
 NETWORK=$1
 
-OPTIMIZER_RUNS=1000000
+OPTIMIZER_RUNS=100000
 
 NUGGFT=$2
 xNUGGFT=$(cast call "$NUGGFT" 'xnuggftv1()(address)')
