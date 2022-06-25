@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: BUSL-1.1
 
-pragma solidity 0.8.14;
+pragma solidity 0.8.15;
 
 interface IERC165 {
     /// @notice Query if a contract implements an interface

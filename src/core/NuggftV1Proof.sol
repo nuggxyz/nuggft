@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: BUSL-1.1
 
-pragma solidity 0.8.14;
+pragma solidity 0.8.15;
 
 import {INuggftV1Proof} from "../interfaces/nuggftv1/INuggftV1Proof.sol";
 import {IERC1155, IERC165} from "../interfaces/IERC721.sol";

@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: UNLICENSED
 
-pragma solidity 0.8.14;
+pragma solidity 0.8.15;
 
 import "./logic__CastLib.t.sol";
 import "./logic__NuggftV1Epoch.t.sol";

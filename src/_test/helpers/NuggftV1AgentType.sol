@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: UNLICENSED
 
-pragma solidity 0.8.14;
+pragma solidity 0.8.15;
 
 import {ShiftLib} from "./ShiftLib.sol";
 import {CastLib} from "./CastLib.sol";

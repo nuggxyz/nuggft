@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: UNLICENSED
 
-pragma solidity 0.8.14;
+pragma solidity 0.8.15;
 
 library arrayHelpers {
     function add(uint256[] memory input) internal pure returns (uint256 res) {

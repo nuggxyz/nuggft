@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: UNLICENSED
 
-pragma solidity 0.8.14;
+pragma solidity 0.8.15;
 
 import {INuggftV1Migrator} from "../../interfaces/nuggftv1/INuggftV1Migrator.sol";
 
