@@ -27,6 +27,10 @@ abstract contract NuggftV1Proof is INuggftV1Proof, NuggftV1Epoch, NuggftV1Trust 
         last = first + early - 1;
     }
 
+    function decodedCoreProofOf(uint24 tokenId) internal view returns (uint8[8] memory proof) {
+        return DotnuggV1Lib.decodeProofCore(proofOf(tokenId));
+    }
+
     /// @inheritdoc INuggftV1Proof
     function proofOf(uint24 tokenId) public view override returns (uint256 res) {
         if ((res = proof[tokenId]) != 0) return res;
@@ -48,19 +52,6 @@ abstract contract NuggftV1Proof is INuggftV1Proof, NuggftV1Epoch, NuggftV1Trust 
         if (seed != 0) return initFromSeed(seed);
 
         _panic(Error__0xAD__InvalidZeroProof);
-    }
-
-    function floop(uint24 tokenId) public view returns (uint16[16] memory arr) {
-        // arr = new uint16[](16);
-        uint256 proof = proofOf(tokenId);
-
-        for (uint256 i = 0; i < 16; i++) {
-            uint16 check = uint16(proof);
-            proof >>= 16;
-            if (check != 0) {
-                arr[i] = uint16(check);
-            }
-        }
     }
 
     /// @inheritdoc INuggftV1Proof

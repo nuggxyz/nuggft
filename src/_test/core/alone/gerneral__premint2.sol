@@ -23,7 +23,7 @@ contract general__premint2 is NuggftV1Test {
         forge.vm.startPrank(users.frank);
         forge.vm.deal(users.frank, 5 ether);
 
-        uint16 item = nuggft.floop(token)[9];
+        uint16 item = xnuggft.floop(token)[9];
 
         nuggft.offer{value: 1 ether}(token);
 

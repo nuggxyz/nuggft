@@ -7,11 +7,12 @@ import {IERC1155, IERC165, IERC1155Metadata_URI} from "./interfaces/IERC721.sol"
 import {IxNuggftV1} from "./interfaces/nuggftv1/IxNuggftV1.sol";
 import {DotnuggV1Lib} from "dotnugg-v1-core/DotnuggV1Lib.sol";
 import {IDotnuggV1} from "dotnugg-v1-core/IDotnuggV1.sol";
+import {NuggftV1Constants} from "./core/NuggftV1Constants.sol";
 
 import {INuggftV1} from "./interfaces/nuggftv1/INuggftV1.sol";
 
 /// @author nugg.xyz - danny7even and dub6ix - 2022
-contract xNuggftV1 is IERC1155, IERC1155Metadata_URI, IxNuggftV1 {
+contract xNuggftV1 is IxNuggftV1 {
     using DotnuggV1Lib for IDotnuggV1;
 
     INuggftV1 immutable nuggftv1;
@@ -86,6 +87,10 @@ contract xNuggftV1 is IERC1155, IERC1155Metadata_URI, IxNuggftV1 {
         return "xNUGGFT";
     }
 
+    function features() public pure returns (string[8] memory) {
+        return ["base", "eyes", "mouth", "hair", "hat", "background", "scarf", "hold"];
+    }
+
     function uri(uint256 tokenId) public view virtual override returns (string memory res) {
         // prettier-ignore
         res = string(
@@ -93,7 +98,7 @@ contract xNuggftV1 is IERC1155, IERC1155Metadata_URI, IxNuggftV1 {
                 abi.encodePacked(
                      '{"name":"',         name(),
                     '","description":"',  DotnuggV1Lib.itemIdToString(uint16(tokenId),
-                            ["base", "eyes", "mouth", "hair", "hat", "background", "scarf", "hold"]),
+                            features()),
                     '","image":"',        imageURI(tokenId),
                     '}'
                 ), true
@@ -114,16 +119,19 @@ contract xNuggftV1 is IERC1155, IERC1155Metadata_URI, IxNuggftV1 {
         res = nuggftv1.dotnuggv1().rarity(feature, position);
     }
 
-    function balanceOf(address _owner, uint256 _id) public view returns (uint256 res) {
-        uint256 bal = 0;
+    function balanceOf(address _owner, uint256 _id) public view override returns (uint256 res) {
+        uint24[] memory tokens = nuggftv1.tokensOf(_owner);
 
-        while (bal != 0) {
-            uint256 proof = nuggftv1.proof(uint24(bal <<= 24));
-            while (proof != 0) if ((proof <<= 16) == _id) res++;
+        for (uint24 i = 0; i < tokens.length; i++) {
+            uint256 proof = nuggftv1.proofOf(tokens[i]);
+            do {
+                if (uint16(proof) == _id) res++;
+                proof >>= 16;
+            } while (proof != 0);
         }
     }
 
-    function balanceOfBatch(address[] calldata _owners, uint256[] memory _ids) external view returns (uint256[] memory) {
+    function balanceOfBatch(address[] calldata _owners, uint256[] memory _ids) external view override returns (uint256[] memory) {
         for (uint256 i = 0; i < _owners.length; i++) {
             _ids[i] = balanceOf(_owners[i], _ids[i]);
         }
@@ -154,4 +162,362 @@ contract xNuggftV1 is IERC1155, IERC1155Metadata_URI, IxNuggftV1 {
     function setApprovalForAll(address, bool) external pure {
         revert("whut");
     }
+
+    function floop(uint24 tokenId) public view returns (uint16[16] memory arr) {
+        return DotnuggV1Lib.decodeProof(nuggftv1.proofOf(tokenId));
+    }
+
+    function ploop(uint24 tokenId) public view returns (string memory) {
+        return DotnuggV1Lib.props(floop(tokenId), features());
+    }
+
+    function iloop() external view override returns (bytes memory res) {
+        uint256 ptr;
+
+        res = new bytes(256 * 8);
+
+        assembly {
+            ptr := add(res, 32)
+        }
+
+        for (uint8 i = 0; i < 8; i++) {
+            uint8 len = nuggftv1.dotnuggv1().lengthOf(i) + 1;
+            for (uint8 j = 1; j < len; j++) {
+                uint16 item = DotnuggV1Lib.encodeItemId(i, j);
+                // @solidity memory-safe-assembly
+                assembly {
+                    mstore8(ptr, shr(8, item))
+                    mstore8(add(ptr, 1), item)
+                    ptr := add(ptr, 2)
+                }
+            }
+        }
+
+        assembly {
+            mstore(res, sub(sub(ptr, res), 32))
+        }
+    }
+
+    function tloop() external view override returns (bytes memory res) {
+        uint24 epoch = nuggftv1.epoch();
+        uint256 ptr;
+
+        res = new bytes(24 * 100000);
+
+        assembly {
+            ptr := add(res, 32)
+        }
+
+        for (uint24 i = 1; i <= epoch; i++)
+            if (0 != nuggftv1.agencyOf(i)) {
+                // @solidity memory-safe-assembly
+                assembly {
+                    mstore8(ptr, shr(16, i))
+                    mstore8(add(ptr, 1), shr(8, i))
+                    mstore8(add(ptr, 2), i)
+                    ptr := add(ptr, 3)
+                }
+            }
+
+        (uint24 start, uint24 end) = nuggftv1.premintTokens();
+
+        for (uint24 i = start; i <= end; i++)
+            if (0 != nuggftv1.agencyOf(i)) {
+                // @solidity memory-safe-assembly
+                assembly {
+                    mstore8(ptr, shr(16, i))
+                    mstore8(add(ptr, 1), shr(8, i))
+                    mstore8(add(ptr, 2), i)
+                    ptr := add(ptr, 3)
+                }
+            }
+
+        assembly {
+            mstore(res, sub(sub(ptr, res), 32))
+        }
+    }
+
+    function sloop() external view override returns (bytes memory res) {
+        unchecked {
+            uint24 epoch = nuggftv1.epoch();
+            uint256 working;
+            uint256 ptr;
+
+            res = new bytes(37 * 10000);
+
+            // @solidity memory-safe-assembly
+            assembly {
+                ptr := add(res, 32)
+            }
+
+            working = nuggftv1.agencyOf(epoch);
+
+            assembly {
+                mstore(add(ptr, 5), epoch)
+                mstore(ptr, working)
+                ptr := add(ptr, 37)
+            }
+
+            for (uint24 i = 0; i < epoch; i++) {
+                working = nuggftv1.agency(i);
+                if (validAgency(working, epoch)) {
+                    // @solidity memory-safe-assembly
+                    assembly {
+                        mstore(add(ptr, 5), i)
+                        mstore(ptr, working)
+                        ptr := add(ptr, 37)
+                    }
+                }
+            }
+
+            (uint24 start, uint24 end) = nuggftv1.premintTokens();
+
+            for (uint24 i = start; i <= end; i++) {
+                working = nuggftv1.agencyOf(i);
+                if (validAgency(working, epoch)) {
+                    // @solidity memory-safe-assembly
+                    assembly {
+                        mstore(add(ptr, 5), i)
+                        mstore(ptr, working)
+                        ptr := add(ptr, 37)
+                    }
+                    if (nuggftv1.agency(i) == 0) {
+                        uint40 token = uint40(i) | (uint40(nuggftv1.proofOf(i) >> 0x90) << 24);
+                        working = nuggftv1.itemAgencyOf(i, uint16(token >> 24));
+                        assembly {
+                            mstore(add(ptr, 5), token)
+                            mstore(ptr, working)
+                            ptr := add(ptr, 37)
+                        }
+                    }
+                }
+            }
+
+            for (uint8 i = 0; i < 8; i++) {
+                uint8 num = DotnuggV1Lib.lengthOf(nuggftv1.dotnuggv1(), i);
+                for (uint8 j = 1; j <= num; j++) {
+                    uint16 item = (uint16(i) * 1000) + j;
+                    uint256 checker = nuggftv1.lastItemSwap(item);
+                    for (uint8 z = 0; z < 2; z++) {
+                        if ((working = (checker >> (z * 24)) & 0xffffff) != 0) {
+                            uint40 token = (uint40(item) << 24) + uint40(working);
+                            working = nuggftv1.itemAgencyOf(uint24(working), item);
+                            if (validAgency(working, epoch)) {
+                                // @solidity memory-safe-assembly
+                                assembly {
+                                    mstore(add(ptr, 5), token)
+                                    mstore(ptr, working)
+                                    ptr := add(ptr, 37)
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+            // @solidity memory-safe-assembly
+            assembly {
+                mstore(res, sub(sub(ptr, res), 32))
+            }
+        }
+    }
+
+    function validAgency(uint256 _agency, uint24 epoch) internal pure returns (bool) {
+        return _agency >> 254 == 0x3 && (uint24(_agency >> 232) >= epoch || uint24(_agency >> 232) == 0);
+    }
+
+    // function check(address sender, uint24 tokenId)
+    //     public
+    //     view
+    //     override
+    //     returns (
+    //         bool canOffer,
+    //         uint96 next,
+    //         uint96 currentUserOffer,
+    //         uint96 currentLeaderOffer,
+    //         uint96 incrementBps
+    //     )
+    // {
+    //     canOffer = true;
+
+    //     uint24 activeEpoch = nuggftv1.epoch();
+
+    //     uint96 _msp = nuggftv1.mspni();
+
+    //     uint24 _early = nuggftv1.early();
+
+    //     incrementBps = INCREMENT_BPS;
+
+    //     uint256 swapData = nuggftv1.agency(tokenId);
+
+    //     uint256 offerData = swapData;
+
+    //     uint256 isLeader = address(uint160(swapData)) == sender ? 1 : 0;
+
+    //     if (isLeader == 0) {
+    //         offerData = nuggftv1.offers(tokenId, sender);
+    //     }
+
+    //     assembly {
+    //         function juke(x, L, R) -> b {
+    //             b := shr(R, shl(L, x))
+    //         }
+    //         switch iszero(swapData)
+    //         case 1 {
+    //             switch eq(tokenId, activeEpoch)
+    //             case 1 {
+    //                 currentLeaderOffer := _msp
+    //             }
+    //             default {
+    //                 if iszero(and(iszero(lt(tokenId, MINT_OFFSET)), lt(tokenId, add(MINT_OFFSET, _early)))) {
+    //                     mstore(0x00, 0x00)
+    //                     mstore(0x20, 0x00)
+    //                     mstore(0x40, 0x00)
+    //                     mstore(0x60, 0x00)
+    //                     return(0x00, 0x80)
+    //                 }
+
+    //                 currentLeaderOffer := _msp
+    //             }
+    //         }
+    //         default {
+    //             let swapEpoch := juke(swapData, 2, 232)
+
+    //             if and(isLeader, iszero(swapEpoch)) {
+    //                 canOffer := 0
+    //             }
+
+    //             if eq(swapEpoch, activeEpoch) {
+    //                 let remain := sub(INTERVAL, mod(number(), INTERVAL))
+
+    //                 if lt(remain, 45) {
+    //                     remain := mul(div(remain, 5), 5)
+    //                     incrementBps := add(mul(sub(50, remain), 100), BASE_BPS)
+    //                 }
+    //             }
+
+    //             currentUserOffer := mul(juke(offerData, 26, 186), LOSS)
+
+    //             currentLeaderOffer := mul(juke(swapData, 26, 186), LOSS)
+    //         }
+
+    //         next := currentLeaderOffer
+
+    //         if lt(next, STARTING_PRICE) {
+    //             next := STARTING_PRICE
+    //             incrementBps := INCREMENT_BPS
+    //         }
+
+    //         // add at the end to round up
+    //         next := div(mul(next, incrementBps), BASE_BPS)
+
+    //         if iszero(iszero(mod(next, LOSS))) {
+    //             next := add(mul(div(next, LOSS), LOSS), LOSS)
+    //         }
+    //     }
+    // }
+
+    // function check(
+    //     uint24 buyer,
+    //     uint24 seller,
+    //     uint16 itemId
+    // )
+    //     public
+    //     view
+    //     override
+    //     returns (
+    //         bool canOffer,
+    //         uint96 next,
+    //         uint96 currentUserOffer,
+    //         uint96 currentLeaderOffer,
+    //         uint96 incrementBps,
+    //         bool mustClaimBuyer,
+    //         bool mustOfferOnSeller
+    //     )
+    // {
+    //     canOffer = true;
+
+    //     uint256 buyerAgency = nuggftv1.agency(buyer);
+
+    //     if (buyerAgency >> 254 == 0x3) mustClaimBuyer = true;
+
+    //     uint256 agency__cache = nuggftv1.itemAgencyOf(seller, itemId);
+
+    //     uint256 offerData = agency__cache;
+
+    //     // currentLeaderOffer = STARTING_PRICE;
+
+    //     uint24 agencyEpoch = uint24(agency__cache >> 230);
+
+    //     // if (nuggftv1.agency(seller) == 0) {
+    //     //     mustOfferOnSeller = true;
+    //     // } else if (buyer != uint24(agency__cache)) {
+    //     //     offerData = nuggftv1.itemOffers(buyer, seller, itemId);
+    //     // } else {
+    //     //     if (agencyEpoch == 0 && offerData == agency__cache) canOffer = false;
+    //     // }
+
+    //     // used for stack too deep
+    //     currentUserOffer = nuggftv1.agency(seller) == 0 ? 0 : 1;
+
+    //     currentLeaderOffer = uint16(nuggftv1.proofOf(seller) >> 0x90);
+
+    //     if (agency__cache == 0 && currentUserOffer == 0 && uint16(currentLeaderOffer) == itemId) {
+    //         mustOfferOnSeller = true;
+
+    //         agency__cache = (0x03 << 254) + (uint256((STARTING_PRICE / LOSS)) << 160) + uint256(seller);
+    //     } else if (buyer != uint24(agency__cache)) {
+    //         offerData = nuggftv1.itemOffers(buyer, seller, itemId);
+    //     }
+
+    //     if (agencyEpoch == 0 && offerData == agency__cache) canOffer = false;
+
+    //     currentUserOffer = uint96((offerData << 26) >> 186) * LOSS;
+
+    //     currentLeaderOffer = uint96((agency__cache << 26) >> 186) * LOSS;
+
+    //     next = currentLeaderOffer;
+
+    //     incrementBps = INCREMENT_BPS;
+
+    //     uint24 activeEpoch = nuggftv1.epoch();
+
+    //     assembly {
+    //         if eq(agencyEpoch, activeEpoch) {
+    //             let remain := sub(INTERVAL, mod(number(), INTERVAL))
+
+    //             if lt(remain, 45) {
+    //                 remain := mul(div(remain, 5), 5)
+    //                 incrementBps := add(mul(sub(50, remain), 100), BASE_BPS)
+    //             }
+    //         }
+
+    //         if lt(next, STARTING_PRICE) {
+    //             next := STARTING_PRICE
+    //             incrementBps := INCREMENT_BPS
+    //         }
+
+    //         // add at the end to round up
+    //         next := div(mul(next, incrementBps), BASE_BPS)
+
+    //         if iszero(iszero(mod(next, LOSS))) {
+    //             next := add(mul(div(next, LOSS), LOSS), LOSS)
+    //         }
+    //     }
+    // }
+
+    // function vfo(address sender, uint24 tokenId) public view override returns (uint96 res) {
+    //     (bool canOffer, uint96 next, uint96 current, , ) = check(sender, tokenId);
+
+    //     if (canOffer) res = next - current;
+    // }
+
+    // function vfo(
+    //     uint24 buyer,
+    //     uint24 seller,
+    //     uint16 itemId
+    // ) public view override returns (uint96 res) {
+    //     (bool canOffer, uint96 next, uint96 current, , , , ) = check(buyer, seller, itemId);
+
+    //     if (canOffer) res = next - current;
+    // }
 }

@@ -18,6 +18,8 @@ abstract contract logic__Rarity is NuggftV1Test {
 
     NuggftV1 instance;
 
+    IxNuggftV1 _xnuggft_;
+
     IDotnuggV1 _dotnugg_;
 
     function grrr(uint24 offset) public {
@@ -29,7 +31,7 @@ abstract contract logic__Rarity is NuggftV1Test {
 
             uint24 tokenId = earlyMintable(uint24(i));
 
-            proof = instance.floop(tokenId);
+            proof = _xnuggft_.floop(tokenId);
 
             for (uint256 j = 0; j < 16; j++) {
                 uint16 item = proof[j];
@@ -55,11 +57,12 @@ abstract contract logic__Rarity is NuggftV1Test {
         instance = new NuggftV1{value: STARTING_PRICE * 50000}();
 
         _dotnugg_ = instance.dotnuggv1();
+        _xnuggft_ = instance.xnuggftv1();
 
         for (uint24 i = 0; i < 5; i++) this.grrr(i);
 
         for (uint8 feature = 0; feature < 8; feature++) {
-            uint256 countfeat = instance.xnuggftv1().featureSupply(feature);
+            uint256 countfeat = _xnuggft_.featureSupply(feature);
             for (uint8 position = 1; position < countfeat + 1; position++) {
                 uint16 expected = rarity[feature][position];
                 uint16 real = uint16((uint32(cuml[feature][position]) * uint32(type(uint16).max)) / picks[feature]);

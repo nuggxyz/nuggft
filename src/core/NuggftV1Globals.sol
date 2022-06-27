@@ -14,9 +14,7 @@ import {INuggftV1Globals} from "../interfaces/nuggftv1/INuggftV1Globals.sol";
 abstract contract NuggftV1Globals is NuggftV1Constants, INuggftV1Globals {
     mapping(uint24 => uint256) public override proof;
     mapping(uint24 => uint256) public override agency;
-
-    mapping(address => uint256) public balance;
-    mapping(uint16 => uint256) public lastItemSwap;
+    mapping(uint16 => uint256) public override lastItemSwap;
 
     mapping(uint24 => mapping(address => uint256)) internal _offers;
     mapping(uint40 => mapping(uint24 => uint256)) internal _itemOffers;
@@ -38,7 +36,7 @@ abstract contract NuggftV1Globals is NuggftV1Constants, INuggftV1Globals {
 
         early = uint24(msg.value / STARTING_PRICE);
 
-        dotnuggv1 = IDotnuggV1(address(DotnuggV1(new DotnuggV1())));
+        dotnuggv1 = new DotnuggV1();
 
         xnuggftv1 = IxNuggftV1(new xNuggftV1());
 
@@ -65,11 +63,11 @@ abstract contract NuggftV1Globals is NuggftV1Constants, INuggftV1Globals {
         }
     }
 
-    function offers(uint24 tokenId, address account) public view returns (uint256 value) {
+    function offers(uint24 tokenId, address account) public view override returns (uint256 value) {
         return _offers[tokenId][account];
     }
 
-    function itemAgency(uint24 sellingTokenId, uint16 itemId) public view returns (uint256 value) {
+    function itemAgency(uint24 sellingTokenId, uint16 itemId) public view override returns (uint256 value) {
         return _itemAgency[uint40(sellingTokenId) | (uint40(itemId) << 24)];
     }
 
@@ -77,7 +75,7 @@ abstract contract NuggftV1Globals is NuggftV1Constants, INuggftV1Globals {
         uint24 buyingTokenid,
         uint24 sellingTokenId,
         uint16 itemId
-    ) public view returns (uint256 value) {
+    ) public view override returns (uint256 value) {
         return _itemOffers[uint40(sellingTokenId) | (uint40(itemId) << 24)][buyingTokenid];
     }
 }

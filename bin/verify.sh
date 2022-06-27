@@ -2,7 +2,13 @@
 
 NETWORK=$1
 
-OPTIMIZER_RUNS=100000
+OPTIMIZER_RUNS=10000000
+
+if [ "$NETWORK" == "local" ]; then
+    ETH_RPC_URL="http://127.0.0.1:8545"
+else
+    ETH_RPC_URL="https://$NETWORK.infura.io/v3/$INFURA_KEY"
+fi
 
 NUGGFT=$2
 xNUGGFT=$(cast call "$NUGGFT" 'xnuggftv1()(address)')
@@ -28,7 +34,7 @@ forge verify-contract "$xNUGGFT" src/xNuggftV1.sol:xNuggftV1 \
 echo "---------------------------------------------------------"
 
 echo "verifying DotnuggV1 @ $DOTNUGG"
-forge verify-contract "$DOTNUGG" lib/dotnugg-v1-core/src/DotnuggV1.sol:DotnuggV1 \
+forge verify-contract "$DOTNUGG" ../dotnugg-v1-core/src/DotnuggV1.sol:DotnuggV1 \
     --chain "$NETWORK" \
     --compiler-version 0.8.15+commit.e14f2714 \
     --num-of-optimizations "$OPTIMIZER_RUNS" \

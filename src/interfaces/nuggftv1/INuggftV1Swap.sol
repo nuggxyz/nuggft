@@ -47,6 +47,11 @@ interface INuggftV1Swap {
                             VIEW FUNCTIONS
     ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━*/
 
+
+
+    function agencyOf(uint24 tokenId) external view returns (uint256);
+
+    function itemAgencyOf(uint24 tokenId, uint16 itemId) external view returns (uint256);
     /// @notice calculates the minimum eth that must be sent with a offer call
     /// @dev returns 0 if no offer can be made for this oken
     /// @param tokenId -> the token to be offerd to
@@ -54,7 +59,9 @@ interface INuggftV1Swap {
     /// @return canOffer -> instead of reverting this function will return false
     /// @return nextMinUserOffer -> the minimum value that must be sent with a offer call
     /// @return currentUserOffer ->
-    function check(address sender, uint24 tokenId) external view
+    function check(address sender, uint24 tokenId)
+        external
+        view
         returns (
             bool canOffer,
             uint96 nextMinUserOffer,
@@ -63,8 +70,39 @@ interface INuggftV1Swap {
             uint96 incrementBps
         );
 
+    /// @notice calculates the minimum eth that must be sent with a offer call
+    /// @dev returns 0 if no offer can be made for this oken
+    /// @param buyer -> the token to be offerd to
+    /// @param seller -> the address of the user who will be delegating
+    /// @param itemId -> the address of the user who will be delegating
+    /// @return canOffer -> instead of reverting this function will return false
+    /// @return nextMinUserOffer -> the minimum value that must be sent with a offer call
+    /// @return currentUserOffer ->
+    function check(
+        uint24 buyer,
+        uint24 seller,
+        uint16 itemId
+    )
+        external
+        view
+        returns (
+            bool canOffer,
+            uint96 nextMinUserOffer,
+            uint96 currentUserOffer,
+            uint96 currentLeaderOffer,
+            uint96 incrementBps,
+            bool mustClaimBuyer,
+            bool mustOfferOnSeller
+        );
+
     function vfo(address sender, uint24 tokenId) external view returns (uint96 res);
 
-    function loop() external view returns (bytes memory);
+    function vfo(
+        uint24 buyer,
+        uint24 seller,
+        uint16 itemId
+    ) external view returns (uint96 res);
+
+    // function tloop() external view returns (bytes memory);
 
 }

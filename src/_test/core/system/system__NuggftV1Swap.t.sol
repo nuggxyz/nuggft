@@ -258,18 +258,18 @@ abstract contract system__NuggftV1Swap is NuggftV1Test, fragments {
         uint24 token3 = mintable(48);
         mintHelper(token1, users.frank, nuggft.msp());
 
-        uint16[16] memory f = nuggft.floop(token1);
+        uint16[16] memory f = xnuggft.floop(token1);
 
         itemId = uint16(f[1]);
 
         forge.vm.startPrank(users.frank);
 
-        // nuggft.floop(token1);
+        // xnuggft.floop(token1);
         nuggft.sell(token1, itemId, 50 ether);
         // nuggft.sell(token1, 90 ether);
-        // nuggft.floop(token1);
+        // xnuggft.floop(token1);
         // nuggft.rotate(token1, 1, 8);
-        // nuggft.floop(token1);
+        // xnuggft.floop(token1);
 
         // nuggft.proofToDotnuggMetadata(token1);
 
@@ -283,7 +283,7 @@ abstract contract system__NuggftV1Swap is NuggftV1Test, fragments {
         mintHelper(token1, users.frank, nuggft.msp());
         forge.vm.startPrank(users.frank);
 
-        uint16[16] memory f = nuggft.floop(token1);
+        uint16[16] memory f = xnuggft.floop(token1);
 
         itemId = uint16(f[1]);
 
@@ -302,11 +302,11 @@ abstract contract system__NuggftV1Swap is NuggftV1Test, fragments {
         mintHelper(token1, users.frank, nuggft.msp());
         forge.vm.startPrank(users.frank);
 
-        uint16[16] memory f = nuggft.floop(token1);
+        uint16[16] memory f = xnuggft.floop(token1);
 
         itemId = uint16(f[1]);
 
-        // nuggft.floop(token1);
+        // xnuggft.floop(token1);
         nuggft.sell(token1, itemId, 1 ether);
         // forge.vm.expectRevert(hex'7e863b48_99');
         forge.vm.stopPrank();
@@ -320,9 +320,9 @@ abstract contract system__NuggftV1Swap is NuggftV1Test, fragments {
         forge.vm.prank(users.frank);
         nuggft.offer{value: 1.2 ether}(token1, token1, itemId);
         // nuggft.sell(token1, 90 ether);
-        // nuggft.floop(token1);
+        // xnuggft.floop(token1);
         // nuggft.rotate(token1, 1, 8);s
-        // nuggft.floop(token1);
+        // xnuggft.floop(token1);
 
         // nuggft.proofToDotnuggMetadata(token1);
     }
@@ -333,14 +333,14 @@ abstract contract system__NuggftV1Swap is NuggftV1Test, fragments {
         uint24 token3 = mintable(48);
         mintHelper(token1, users.frank, 2 ether);
 
-        uint16[16] memory f = nuggft.floop(token1);
+        uint16[16] memory f = xnuggft.floop(token1);
 
         itemId = uint16(f[1]);
 
         expect.sell().from(users.frank).exec(token1, itemId, 50 ether);
         // nuggft.claim(array.b24(encItemIdClaim(token1, itemId)), array.b24(token1));
 
-        nuggft.floop(token1);
+        xnuggft.floop(token1);
 
         itemId = uint16(f[2]);
 
@@ -355,14 +355,14 @@ abstract contract system__NuggftV1Swap is NuggftV1Test, fragments {
         uint24 token3 = mintable(48);
         mintHelper(token1, users.frank, 2 ether);
 
-        uint16[16] memory f = nuggft.floop(token1);
+        uint16[16] memory f = xnuggft.floop(token1);
 
         itemId = uint16(f[1]);
 
         expect.sell().from(users.frank).exec(token1, itemId, 50 ether);
         expect.claim().from(users.frank).exec(array.b24(token1), array.b24(token1), array.b16(itemId));
 
-        nuggft.floop(token1);
+        xnuggft.floop(token1);
 
         itemId = uint16(f[2]);
 

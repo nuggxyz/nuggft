@@ -44,9 +44,11 @@ contract NuggftV1 is IERC721, IERC721Metadata, NuggftV1Loan {
     /// @param tokenId the id of the nugg being unstaked
     /// @return ethOwed -> the amount of eth owed to the unstaking user - equivilent to "ethPerShare"
     function subStakedShare(uint24 tokenId) internal returns (uint96 ethOwed) {
-        if (!isOwner(msg.sender, tokenId)) _panic(Error__0x77__NotOwner);
+        uint256 cache = agency[tokenId];
 
-        uint256 cache = stake;
+        _repanic(address(uint160(cache)) == msg.sender && uint8(cache >> 254) == 0x01, Error__0x77__NotOwner);
+
+        cache = stake;
 
         // handles all logic not related to staking the nugg
         delete agency[tokenId];
@@ -73,39 +75,13 @@ contract NuggftV1 is IERC721, IERC721Metadata, NuggftV1Loan {
 
     /// @inheritdoc IERC721Metadata
     function name() public pure override returns (string memory) {
-        return hex"4e7567672046756e6769626c6520546f6b656e205631";
+        return "Nugg Fungible Token V1";
     }
 
     /// @inheritdoc IERC721Metadata
     function symbol() public pure override returns (string memory) {
-        return hex"4e5547474654";
+        return "NUGGFT";
     }
-
-    // //  24534 bytes of code
-    // // 24372 bytes of code
-    // function name() external pure override returns (string memory res) {
-    //     assembly {
-    //         mstore(0x00, 0x20)
-    //         mstore(0x38, 0x184e7567672046756e6769626c6520546f6b656e205631)
-    //         return(0x00, 0x60)
-    //     }
-    // }
-
-    // /// @inheritdoc IERC721Metadata
-    // function symbol() external pure override returns (string memory) {
-    //     assembly {
-    //         mstore(0x00, 0x20)
-    //         mstore(0x26, 0x064e5547474654)
-    //         return(0x00, 0x60)
-    //     }
-    // }
-
-    // function symbol2() external returns (string memory mem) {
-    //     mem = "NUGGFT";
-    //     assembly {
-    //         log1(mem, 0x80, mem)
-    //     }
-    // }
 
     /// @inheritdoc IERC721Metadata
     function tokenURI(uint256 tokenId) public view virtual override returns (string memory res) {
@@ -115,9 +91,9 @@ contract NuggftV1 is IERC721, IERC721Metadata, NuggftV1Loan {
                 abi.encodePacked(
                      '{"name":"NUGGFT","description":"Nugg Fungible Token V1","image":"',
                                             imageURI(tokenId),
-                    '","properites":',    dotnuggv1.props(proofOf(uint24(tokenId)),
-                                ['base', 'eyes', 'mouth', 'hair', 'hat', 'background', 'scarf', 'hold']
-                            ),
+                    '","properites":',    xnuggftv1.ploop(uint24(tokenId))
+                                
+                            ,
                     '}'
                 ),
             true)
@@ -126,12 +102,12 @@ contract NuggftV1 is IERC721, IERC721Metadata, NuggftV1Loan {
 
     /// @inheritdoc INuggftV1Proof
     function imageURI(uint256 tokenId) public view override returns (string memory res) {
-        res = dotnuggv1.exec(proofOf(uint24(tokenId)), true);
+        res = dotnuggv1.exec(decodedCoreProofOf(uint24(tokenId)), true);
     }
 
     /// @inheritdoc INuggftV1Proof
     function imageSVG(uint256 tokenId) public view override returns (string memory res) {
-        res = dotnuggv1.exec(proofOf(uint24(tokenId)), false);
+        res = dotnuggv1.exec(decodedCoreProofOf(uint24(tokenId)), false);
     }
 
     /// this may seem like the dumbest function of all time - and it is
@@ -144,7 +120,7 @@ contract NuggftV1 is IERC721, IERC721Metadata, NuggftV1Loan {
         bytes calldata prev
     ) public view override returns (bytes memory res) {
         if (chunk == 1) {
-            res = abi.encode(dotnuggv1.read((proofOf(uint24(tokenId)))));
+            res = abi.encode(dotnuggv1.read(decodedCoreProofOf((uint24(tokenId)))));
         } else if (chunk == 2) {
             (uint256[] memory calced, uint256 dat) = dotnuggv1.calc(decodeMakingPrettierHappy(prev));
             res = abi.encode(calced, dat);
@@ -155,41 +131,55 @@ contract NuggftV1 is IERC721, IERC721Metadata, NuggftV1Loan {
     }
 
     /// @inheritdoc IERC721
-    function ownerOf(uint256 tokenId) external view override returns (address res) {
-        uint256 cache = agency[uint24(tokenId)];
+    function ownerOf(uint256 tokenId) public view override returns (address res) {
+        res = _ownerOf(uint24(tokenId), epoch());
 
-        if (cache == 0) {
-            if (proofOf(uint24(tokenId)) != 0) {
-                return address(this);
-            }
+        if (res == address(0)) {
+            // if (proofOf(uint24(tokenId)) != 0) {
+            //     return address(this);
+            // }
             _panic(Error__0x78__TokenDoesNotExist);
         }
+    }
 
-        if (cache >> 254 == 0x03 && (cache << 2) >> 232 != 0) {
+    function _ownerOf(uint256 tokenId, uint24 epoch) internal view returns (address res) {
+        uint256 cache = agencyOf(uint24(tokenId));
+
+        if (cache == 0) {
+            // if (proofOf(uint24(tokenId)) != 0) {
+            //     return address(this);
+            // }
+            return address(0);
+        }
+
+        if (cache >> 254 == 0x03 && (cache << 2) >> 232 >= epoch) {
             return address(this);
         }
+
         return address(uint160(cache));
     }
 
-    function exists(uint24 tokenId) internal view returns (bool) {
-        return agency[tokenId] != 0 || proofOf(tokenId) != 0;
-    }
+    function tokensOf(address you) external view override returns (uint24[] memory res) {
+        res = new uint24[](10000);
 
-    function isOwner(address sender, uint24 tokenId) internal view returns (bool res) {
-        uint256 cache = agency[tokenId];
-        return address(uint160(cache)) == sender && uint8(cache >> 254) == 0x01;
-    }
+        uint24 iter = 0;
 
-    function isAgent(address sender, uint24 tokenId) internal view returns (bool res) {
-        uint256 cache = agency[tokenId];
+        uint24 epoch = epoch();
 
-        if (uint160(cache) == uint160(sender)) {
-            if (
-                uint8(cache >> 254) == 0x01 || //
-                uint8(cache >> 254) == 0x02 ||
-                (uint8(cache >> 254) == 0x03 && ((cache >> 230) & 0xffffff) == 0)
-            ) return true;
+        for (uint24 i = 1; i < epoch; i++) if (you == _ownerOf(i, epoch)) res[iter++] = i;
+
+        (uint24 start, uint24 end) = premintTokens();
+
+        for (uint24 i = start; i < end; i++) if (you == _ownerOf(i, epoch)) res[iter++] = i;
+
+        assembly {
+            mstore(res, iter)
         }
+    }
+
+    /// @inheritdoc IERC721
+    function balanceOf(address you) external view override returns (uint256 acc) {
+        return this.tokensOf(you).length;
     }
 
     /// @inheritdoc IERC721
@@ -212,11 +202,6 @@ contract NuggftV1 is IERC721, IERC721Metadata, NuggftV1Loan {
         return false;
     }
 
-    /// @inheritdoc IERC721
-    function balanceOf(address you) external view override returns (uint256 acc) {
-        for (uint24 i = 0; i < MAX_TOKENS; i++) if (uint160(you) == uint160(agency[i])) acc++;
-    }
-
     //prettier-ignore
     /// @inheritdoc IERC721
     function transferFrom(address, address, uint256) external payable override {
@@ -235,6 +220,26 @@ contract NuggftV1 is IERC721, IERC721Metadata, NuggftV1Loan {
         _panic(Error__0x69__Wut);
     }
 }
+// function exists(uint24 tokenId) internal view returns (bool) {
+//     return agency[tokenId] != 0 || proofOf(tokenId) != 0;
+// }
+
+// function isOwner(address sender, uint24 tokenId) internal view returns (bool res) {
+//     uint256 cache = agency[tokenId];
+//     return address(uint160(cache)) == sender && uint8(cache >> 254) == 0x01;
+// }
+
+// function isAgent(address sender, uint24 tokenId) internal view returns (bool res) {
+//     uint256 cache = agency[tokenId];
+
+//     if (uint160(cache) == uint160(sender)) {
+//         if (
+//             uint8(cache >> 254) == 0x01 || //
+//             uint8(cache >> 254) == 0x02 ||
+//             (uint8(cache >> 254) == 0x03 && ((cache >> 230) & 0xffffff) == 0)
+//         ) return true;
+//     }
+// }
 
 // 50
 // 100

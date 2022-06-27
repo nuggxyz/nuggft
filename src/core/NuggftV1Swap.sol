@@ -137,7 +137,7 @@ abstract contract NuggftV1Swap is INuggftV1ItemSwap, INuggftV1Swap, NuggftV1Stak
 
             address itemHolder = address(xnuggftv1);
 
-            addStakedShare(msg.value);
+            addStakedShare(value);
 
             // prettier-ignore
             assembly {
@@ -419,7 +419,6 @@ abstract contract NuggftV1Swap is INuggftV1ItemSwap, INuggftV1Swap, NuggftV1Stak
                     /* topic #2: tokenId uint24 */ tokenId
                 ) // ===========================================================
             }
-
         }
     }
 
@@ -1083,114 +1082,27 @@ abstract contract NuggftV1Swap is INuggftV1ItemSwap, INuggftV1Swap, NuggftV1Stak
         return _agency >> 254 == 0x3 && (uint24(_agency >> 232) >= epoch || uint24(_agency >> 232) == 0);
     }
 
-    // @inheritdoc INuggftV1Swap
-    function loop() external view returns (bytes memory res) {
-        unchecked {
-            uint24 epoch = epoch();
-            uint256 working;
-            uint256 ptr;
-
-            res = new bytes(37 * 10000);
-
-            assembly {
-                ptr := add(res, 32)
-            }
-
-            working = agencyOf(epoch);
-
-            assembly {
-                mstore(add(ptr, 5), epoch)
-                mstore(ptr, working)
-                ptr := add(ptr, 37)
-            }
-
-            for (uint24 i = 0; i < epoch; i++) {
-                working = agency[i];
-                if (validAgency(working, epoch)) {
-                    assembly {
-                        mstore(add(ptr, 5), i)
-                        mstore(ptr, working)
-                        ptr := add(ptr, 37)
-                    }
-                }
-            }
-
-            (uint24 start, uint24 end) = premintTokens();
-
-            for (uint24 i = start; i <= end; i++) {
-                working = agencyOf(i);
-                if (validAgency(working, epoch)) {
-                    assembly {
-                        mstore(add(ptr, 5), i)
-                        mstore(ptr, working)
-                        ptr := add(ptr, 37)
-                    }
-                    if (agency[i] == 0) {
-                        uint40 token = uint40(i) | (uint40(proofOf(i) >> 0x90) << 24);
-                        working = itemAgencyOf(i, uint16(token >> 24));
-                        assembly {
-                            mstore(add(ptr, 5), token)
-                            mstore(ptr, working)
-                            ptr := add(ptr, 37)
-                        }
-                    }
-                }
-            }
-
-            for (uint8 i = 0; i < 8; i++) {
-                uint8 num = DotnuggV1Lib.lengthOf(dotnuggv1, i);
-                for (uint8 j = 1; j <= num; j++) {
-                    uint16 item = (uint16(i) * 1000) + j;
-                    for (uint8 z = 0; z < 2; z++) {
-                        if ((working = (lastItemSwap[item] >> (z * 24)) & 0xffffff) != 0) {
-                            uint40 token = (uint40(item) << 24) + uint40(working);
-                            working = itemAgencyOf(uint24(working), item);
-                            if (validAgency(working, epoch)) {
-                                assembly {
-                                    mstore(add(ptr, 5), token)
-                                    mstore(ptr, working)
-                                    ptr := add(ptr, 37)
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-
-            assembly {
-                mstore(res, sub(sub(ptr, res), 32))
-            }
-        }
-    }
-
-    /// @inheritdoc INuggftV1ItemSwap
-    function vfo(
-        uint24 buyer,
-        uint24 seller,
-        uint16 itemId
-    ) public view override returns (uint96 res) {
-        (bool canOffer, uint96 next, uint96 current, , , , ) = check(buyer, seller, itemId);
-
-        if (canOffer) res = next - current;
-    }
-
-    function agencyOf(uint24 tokenId) internal view returns (uint256 res) {
-        if ((res = agency[tokenId]) != 0) return res;
+    function agencyOf(uint24 tokenId) public view override returns (uint256 res) {
+        if (tokenId == 0 || (res = agency[tokenId]) != 0) return res;
 
         (uint24 start, uint24 end) = premintTokens();
 
-        if (tokenId >= start || tokenId <= end) {
+        uint24 e;
+
+        if ((tokenId >= start && tokenId <= end) || (e = epoch()) == tokenId) {
             (uint96 _msp, , , , ) = minSharePriceBreakdown(stake);
 
             res = (0x03 << 254) + (uint256(((_msp / LOSS))) << 160);
 
             res += uint160(address(this));
+
+            if (e == tokenId) {
+                res |= uint256(e) << 230;
+            }
         }
-        uint24 e = epoch();
-        if (e == tokenId) res |= uint256(e) << 230;
     }
 
-    function itemAgencyOf(uint24 seller, uint16 itemId) internal view returns (uint256 res) {
+    function itemAgencyOf(uint24 seller, uint16 itemId) public view override returns (uint256 res) {
         res = itemAgency(seller, itemId);
 
         if (res == 0 && agency[seller] == 0 && uint16(proofOf(seller) >> 0x90) == itemId) {
@@ -1198,7 +1110,6 @@ abstract contract NuggftV1Swap is INuggftV1ItemSwap, INuggftV1Swap, NuggftV1Stak
         }
     }
 
-    /// @inheritdoc INuggftV1ItemSwap
     function check(
         uint24 buyer,
         uint24 seller,
@@ -1273,5 +1184,15 @@ abstract contract NuggftV1Swap is INuggftV1ItemSwap, INuggftV1Swap, NuggftV1Stak
                 next := add(mul(div(next, LOSS), LOSS), LOSS)
             }
         }
+    }
+
+    function vfo(
+        uint24 buyer,
+        uint24 seller,
+        uint16 itemId
+    ) public view override returns (uint96 res) {
+        (bool canOffer, uint96 next, uint96 current, , , , ) = check(buyer, seller, itemId);
+
+        if (canOffer) res = next - current;
     }
 }

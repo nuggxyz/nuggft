@@ -4,7 +4,7 @@ NETWORK=$1
 
 SEED=$2
 
-OPTIMIZER_RUNS=1000000
+OPTIMIZER_RUNS=10000000
 
 if [ "$NETWORK" == "local" ]; then
     ETH_RPC_URL="http://127.0.0.1:8545"
@@ -20,10 +20,11 @@ RESULT=$(
         --mnemonic-path "$MNEMONIC_PATH_1" \
         --mnemonic-index 1 \
         --value 10ether \
-        --gas-limit 25000000 \
+        --gas-limit 26500000 \
         --rpc-url "$ETH_RPC_URL" \
         --from "$ETH_FROM" \
-        --optimize --optimizer-runs="$OPTIMIZER_RUNS"
+        --optimize --optimizer-runs="$OPTIMIZER_RUNS" \
+        --extra-output-files metadata
 )
 
 echo "---------------------------------------------------------"
@@ -80,7 +81,7 @@ if [ "$NETWORK" != "local" ]; then
     echo "---------------------------------------------------------"
 
     echo "verifying DotnuggV1 @ $DOTNUGG"
-    forge verify-contract "$DOTNUGG" lib/dotnugg-v1-core/src/DotnuggV1.sol:DotnuggV1 \
+    forge verify-contract "$DOTNUGG" ../dotnugg-v1-core/src/DotnuggV1.sol:DotnuggV1 \
         --chain "$NETWORK" \
         --compiler-version 0.8.15+commit.e14f2714 \
         --num-of-optimizations "$OPTIMIZER_RUNS" \

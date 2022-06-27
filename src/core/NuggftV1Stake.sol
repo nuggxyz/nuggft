@@ -42,7 +42,7 @@ abstract contract NuggftV1Stake is INuggftV1Stake, NuggftV1Proof {
         res = total + increment;
     }
 
-    // / @inheritdoc INuggftV1Stake
+    /// @inheritdoc INuggftV1Stake
     function shares() public view override returns (uint64 res) {
         res = uint64(stake >> 192);
     }

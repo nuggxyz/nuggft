@@ -8,7 +8,6 @@ import {NuggftV1Constants} from "../core/NuggftV1Constants.sol";
 
 import {Expect} from "./expect/Expect.sol";
 
-import {DotnuggV1} from "dotnugg-v1-core/DotnuggV1.sol";
 import {DotnuggV1Lib} from "dotnugg-v1-core/DotnuggV1Lib.sol";
 import {IDotnuggV1} from "dotnugg-v1-core/IDotnuggV1.sol";
 
@@ -365,7 +364,7 @@ contract NuggftV1Test is ForgeTest, NuggftV1Constants {
     {
         (tokenId) = scenario_dee_has_a_token();
 
-        uint16[16] memory f = nuggft.floop(tokenId);
+        uint16[16] memory f = xnuggft.floop(tokenId);
 
         feature = 1;
         itemId = uint16(f[feature]);

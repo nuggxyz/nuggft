@@ -51,13 +51,36 @@ contract general__NuggftV1Loan is NuggftV1Test {
         ds.emit_log_named_string("hi", string(working));
     }
 
-    function test__v2() public {
-        bytes memory check = nuggft.loop();
+    function test__sloop() public {
+        uint24 token = mintable(1);
 
+        mintHelper(token, users.frank, nuggft.msp());
+
+        bytes memory check = xnuggft.sloop();
         uint256 len = check.length / 37;
 
         for (uint256 i = 0; i < len; i++) {
             ds.emit_log_named_bytes(DotnuggV1Lib.toString(i), byteslib.slice(check, i * 37, 37));
+        }
+    }
+
+    function test__tloop() public {
+        bytes memory check = xnuggft.tloop();
+
+        uint256 len = check.length / 3;
+
+        for (uint256 i = 0; i < len; i++) {
+            ds.emit_log_named_uint(DotnuggV1Lib.toString(i), uint24(bytes3(byteslib.slice(check, i * 3, 3))));
+        }
+    }
+
+    function test__iloop() public {
+        bytes memory check = xnuggft.iloop();
+
+        uint256 len = check.length / 2;
+
+        for (uint256 i = 0; i < len; i++) {
+            ds.emit_log_named_uint(DotnuggV1Lib.toString(i), uint16(bytes2(byteslib.slice(check, i * 2, 2))));
         }
     }
 
@@ -67,7 +90,14 @@ contract general__NuggftV1Loan is NuggftV1Test {
         // nuggft.symbol2();
         // nuggft.symbol3();
 
-        address(nuggft).code.length;
+        // uint24[] memory tokens = nuggft.tokensOf(address(nuggft));
+        // uint256 len = DotnuggV1Lib.lengthOf(dotnugg, 1);
+        // for (uint24 i = 0; i < len; i++) {
+        //     uint256 bal = xnuggft.balanceOf(address(nuggft), 1000 + i);
+        //     ds.emit_log_named_uint(DotnuggV1Lib.toString(i), bal);
+        // }
+
+        // address(nuggft).code.length;
 
         // nuggft.tokenURI(nuggft.epoch());
     }

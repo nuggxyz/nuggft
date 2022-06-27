@@ -24,7 +24,21 @@ contract deployment__NuggFatherV1 is NuggftV1Test {
 
         forge.vm.startPrank(dub6ix);
         // NuggFatherV1 father = new NuggFatherV1();
-        new NuggFatherV1{value: 1 ether}(bytes32(0));
+        NuggFatherV1 father = new NuggFatherV1{value: 1 ether}(bytes32(0));
+
+        NuggftV1 nuggft = father.nuggft();
+
+        address dotnugg = address(nuggft.dotnuggv1());
+        address xnuggft = address(nuggft.xnuggftv1());
+
+        uint256 nuggftCode = address(nuggft).code.length;
+        uint256 dotnuggCode = dotnugg.code.length;
+        uint256 xnuggftCode = xnuggft.code.length;
+
+        ds.emit_log_named_uint("nuggft code len:", nuggftCode);
+        ds.emit_log_named_uint("dotnugg code len:", dotnuggCode);
+
+        ds.emit_log_named_uint("xnuggft code len:", xnuggftCode);
 
         // father.nuggft().imageURI(MINT_OFFSET);
 

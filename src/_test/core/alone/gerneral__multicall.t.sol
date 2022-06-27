@@ -20,14 +20,14 @@ contract general__multicall is NuggftV1Test {
 
         expect.claim().start(array.b24(token), array.bAddress(users.frank), new uint24[](1), new uint16[](1), users.frank);
 
-        uint16[16] memory floopA = nuggft.floop(token);
+        uint16[16] memory floopA = xnuggft.floop(token);
         a[0] = abi.encodeWithSelector(nuggft.claim.selector, array.b24(token), array.bAddress(users.frank), new uint24[](1), new uint16[](1));
         a[1] = abi.encodeWithSelector(nuggft.rotate.selector, token, array.b8(1), array.b8(9));
 
         forge.vm.prank(users.frank);
         nuggft.multicall(a);
 
-        uint16[16] memory floopB = nuggft.floop(token);
+        uint16[16] memory floopB = xnuggft.floop(token);
 
         require(floopA[1] == floopB[9] && floopA[9] == floopB[1], "floops are off");
 

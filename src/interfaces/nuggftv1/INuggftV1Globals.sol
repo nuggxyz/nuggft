@@ -15,6 +15,18 @@ interface INuggftV1Globals {
 
     function agency(uint24 tokenId) external view returns (uint256 res);
 
+    function offers(uint24 tokenId, address account) external view returns (uint256 value);
+
+    function itemAgency(uint24 sellingTokenId, uint16 itemId) external view returns (uint256 res);
+
+    function itemOffers(
+        uint24 buyingTokenid,
+        uint24 sellingTokenId,
+        uint16 itemId
+    ) external view returns (uint256 res);
+
+    function lastItemSwap(uint16 itemId) external view returns (uint256 res);
+
     function proof(uint24 tokenId) external view returns (uint256 res);
 
     function migrator() external view returns (address res);

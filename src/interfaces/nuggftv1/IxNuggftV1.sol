@@ -1,8 +1,9 @@
 // SPDX-License-Identifier: BUSL-1.1
 
 pragma solidity 0.8.15;
+import {IERC1155Metadata_URI, IERC1155} from "../IERC721.sol";
 
-interface IxNuggftV1 {
+interface IxNuggftV1 is IERC1155Metadata_URI, IERC1155 {
     function imageURI(uint256 tokenId) external view returns (string memory);
 
     function imageSVG(uint256 tokenId) external view returns (string memory);
@@ -12,6 +13,16 @@ interface IxNuggftV1 {
     function totalSupply() external view returns (uint256);
 
     function rarity(uint256 tokenId) external view returns (uint16 res);
+
+    function iloop() external view returns (bytes memory res);
+
+    function tloop() external view returns (bytes memory res);
+
+    function sloop() external view returns (bytes memory res);
+
+    function floop(uint24 tokenId) external view returns (uint16[16] memory arr);
+
+    function ploop(uint24 tokenId) external view returns (string memory);
 
     function transferBatch(
         uint256 proof,

@@ -13,11 +13,11 @@ abstract contract system__one is NuggftV1Test {
         TOKEN1 = mintable(1);
 
         mintHelper(TOKEN1, users.frank, 1 ether);
-        nuggft.floop(TOKEN1);
+        xnuggft.floop(TOKEN1);
 
         forge.vm.startPrank(users.frank);
         nuggft.rotate(TOKEN1, array.b8(1, 2, 3, 4, 5, 6, 7), array.b8(9, 10, 11, 12, 13, 14, 15));
-        nuggft.floop(TOKEN1);
+        xnuggft.floop(TOKEN1);
         forge.vm.expectRevert(hex"7e863b48_73");
         nuggft.rotate(TOKEN1, array.b8(1, 2, 3, 4, 5, 6, 7), array.b8(9, 10, 11, 12, 13, 14, 16));
 
@@ -34,7 +34,7 @@ abstract contract system__one is NuggftV1Test {
 
         mintHelper(token2, users.frank, nuggft.msp());
 
-        uint16 item = nuggft.floop(token1)[8];
+        uint16 item = xnuggft.floop(token1)[8];
 
         expect.sell().from(users.frank).exec(token1, item, 1 ether);
 

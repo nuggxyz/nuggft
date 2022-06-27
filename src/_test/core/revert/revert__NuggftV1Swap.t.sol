@@ -450,11 +450,11 @@ abstract contract revert__NuggftV1Swap is NuggftV1Test {
     function test__revert__NuggftV1Swap__0x29__failAsNotOperator() public revert__NuggftV1Swap__setUp {
         (uint24 charliesTokenId, uint24 tokenId, uint16 itemId) = scenario_dee_has_sold_an_item_and_charlie_can_claim();
 
-        nuggft.floop(charliesTokenId);
+        xnuggft.floop(charliesTokenId);
 
         expect.claim().from(users.mac).exec(tokenId, charliesTokenId, itemId);
 
-        nuggft.floop(charliesTokenId);
+        xnuggft.floop(charliesTokenId);
     }
 
     /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━

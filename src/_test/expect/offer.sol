@@ -76,6 +76,7 @@ contract expectOffer is base {
         uint256 agency;
         uint256 offer;
         uint256 trueoffer;
+        uint256 lastItemSwap;
     }
 
     struct SnapshotEnv {
@@ -164,6 +165,7 @@ contract expectOffer is base {
             env.buyer = address(uint160(tokenId >> 40));
             pre.agency = nuggft.itemAgency(safe.u24(env.id & 0xffffff), uint16(env.id >> 24));
             pre.offer = nuggft.itemOffers(safe.u24(env.buyer), safe.u24(env.id & 0xffffff), safe.u16(env.id >> 24));
+            pre.lastItemSwap = nuggft.lastItemSwap(safe.u16(env.id >> 24));
         } else {
             env.buyer = sender;
             pre.agency = nuggft.agency(safe.u24(env.id));
@@ -206,6 +208,7 @@ contract expectOffer is base {
         if (env.isItem) {
             post.agency = nuggft.itemAgency(safe.u24(env.id & 0xffffff), safe.u16(env.id >> 24));
             post.offer = nuggft.itemOffers(safe.u24(env.buyer), safe.u24(env.id & 0xffffff), safe.u16(env.id >> 24));
+            post.lastItemSwap = nuggft.lastItemSwap(safe.u16(env.id >> 24));
         } else {
             post.agency = nuggft.agency(safe.u24(env.id));
             post.offer = nuggft.offers(safe.u24(env.id), env.buyer);
@@ -251,6 +254,9 @@ contract expectOffer is base {
         SnapshotData memory pre,
         SnapshotData memory post
     ) private {
+        if (env.isItem && uint24(pre.lastItemSwap >> 24) != uint24(env.id)) {
+            ds.assertEq(uint24(post.lastItemSwap >> 24), uint24(env.id), "EXPECT-OFFER:ROLLBACK lastItemSwap didnt change as expected");
+        }
         if (env.eps == 0) {
             ds.assertGe(nuggft.eps(), env.eps, "EXPECT-OFFER:STOP eps should be gte");
             ds.assertGe(nuggft.msp(), env.msp, "EXPECT-OFFER:STOP msp should be gte");

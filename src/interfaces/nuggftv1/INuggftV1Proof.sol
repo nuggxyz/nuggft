@@ -7,6 +7,10 @@ interface INuggftV1Proof {
 
     function proofOf(uint24 tokenId) external view returns (uint256 res);
 
+    function tokensOf(address you) external view returns (uint24[] memory res);
+
+    function premintTokens() external view returns (uint24 first, uint24 last);
+
     // prettier-ignore
     function rotate(uint24 tokenId, uint8[] calldata from, uint8[] calldata to) external;
 

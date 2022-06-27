@@ -31,6 +31,8 @@ interface INuggftV1Stake {
     /// @return res -> premium + protcolFee + ethPerShare
     function msp() external view returns (uint96);
 
+    // function mspni() external view returns (uint96);
+
     /// @notice returns the amount of eth extractable by protocol
     /// @dev this will be
     /// @return res -> (PROTOCOL_FEE_FRAC * [all eth staked] / 10000) - [all previously extracted eth]
