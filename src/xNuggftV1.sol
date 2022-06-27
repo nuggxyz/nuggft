@@ -97,8 +97,7 @@ contract xNuggftV1 is IxNuggftV1 {
             nuggftv1.dotnuggv1().encodeJson(
                 abi.encodePacked(
                      '{"name":"',         name(),
-                    '","description":"',  DotnuggV1Lib.itemIdToString(uint16(tokenId),
-                            features()),
+                    '","description":"',  DotnuggV1Lib.itemIdToString(uint16(tokenId), features()),
                     '","image":"',        imageURI(tokenId),
                     '}'
                 ), true
