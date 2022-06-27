@@ -48,7 +48,7 @@ abstract contract NuggftV1Swap is INuggftV1ItemSwap, INuggftV1Swap, NuggftV1Stak
         }
 
         // offer on a nugg
-        if (offerValue1 > 0) _offer(sellingTokenId, offerValue1);
+        if (offerValue1 > 0) premint(sellingTokenId, offerValue1);
 
         // offer on an item
         _offer(buyingTokenId, sellingTokenId, itemId, offerValue2);
@@ -131,26 +131,15 @@ abstract contract NuggftV1Swap is INuggftV1ItemSwap, INuggftV1Swap, NuggftV1Stak
         if (active == tokenId && agency__cache == 0) {
             // [Offer:Mint]
 
-            uint256 _proof = initFromSeed(calculateSeed(uint24(active)));
-
-            proof[uint24(tokenId)] = _proof;
-
-            address itemHolder = address(xnuggftv1);
+            (uint256 _agency, uint256 _proof) = mint(uint24(tokenId), calculateSeed(uint24(active)), uint24(active), uint96(value), msg.sender);
 
             addStakedShare(value);
 
             // prettier-ignore
             assembly {
-                // save the updated agency
-                agency__cache := xor(xor(xor( // =============================
-                          /* addr     0       [ */ caller(),              /* ] 160 */
-                    shl(  /* eth   */ 160, /* [ */ div(value, LOSS) /* ] 230 */ )),
-                    shl(  /* epoch */ 230, /* [ */ active                 /* ] 254 */ )),
-                    shl(  /* flag  */ 254, /* [ */ 0x03                   /* ] 255 */ )
-                ) // ==========================================================
 
                 // log the updated agency
-                mstore(0x00, agency__cache)
+                mstore(0x00, _agency)
                 mstore(0x20, _proof)
 
                 log2( // -------------------------------------------------------
@@ -160,29 +149,6 @@ abstract contract NuggftV1Swap is INuggftV1ItemSwap, INuggftV1Swap, NuggftV1Stak
                     /* topic #1: sig     */ Event__OfferMint,
                     /* topic #2: tokenId */ tokenId
                 ) // ===========================================================
-
-                mstore(0x00, Function__transferBatch)
-                mstore(0x40, 0x00)
-                mstore(0x60, address())
-
-                if iszero(call(gas(), itemHolder, 0x00, 0x1C, 0x64, 0x00, 0x00)) {
-                    mstore(0x00, Revert__Sig)
-                    mstore8(31, Error__0xAE__FailedCallToItemsHolder)
-                    revert(27, 0x5)
-                }
-
-                log4( // =======================================================
-                    /* param #0:n/a  */ 0x00, /* [ n/a ] */  0x00,
-                    /* topic #1:sig  */ Event__Transfer,
-                    /* topic #2:from */ 0,
-                    /* topic #3:to   */ address(),
-                    /* topic #4:id   */ tokenId
-                ) // ===========================================================
-
-
-
-                sstore(agency__sptr, agency__cache)
-
             }
 
             return;
@@ -429,48 +395,90 @@ abstract contract NuggftV1Swap is INuggftV1ItemSwap, INuggftV1Swap, NuggftV1Stak
 
         _repanic(tokenId >= first && tokenId <= last, Error__0x65__TokenNotMintable);
 
-        uint256 _agency = (0x01 << 254) + uint160(address(this));
-
-        uint256 _proof = initFromSeed(calculateEarlySeed(tokenId));
-
-        (uint96 _msp, , , , ) = minSharePriceBreakdown(stake);
-
-        uint256 prefix = (0x03 << 254) + (uint256(((_msp / LOSS))) << 160);
-
-        _agency = prefix + uint160(address(this));
+        (, uint256 _proof) = mint(tokenId, calculateEarlySeed(tokenId), 0, 0, address(this));
 
         uint16 item = uint16(_proof >> 0x90);
 
-        prefix = (0x03 << 254) + (uint256((STARTING_PRICE / LOSS)) << 160);
+        this.sell(tokenId, item, STARTING_PRICE);
 
-        uint256 __itemAgency = prefix | uint256(tokenId);
+        (uint96 _msp, , , , ) = minSharePriceBreakdown(stake);
 
-        xnuggftv1.transferBatch(_proof, address(0), address(this));
+        this.sell(tokenId, _msp);
 
-        _itemAgency[((uint40(item) << 24) | uint40(tokenId))] = __itemAgency;
-
-        // prettier-ignore
-        assembly {
-            _proof := and(_proof, not(shl(mul(9, 16), 0xffff)))
-
-            log4( // =======================================================
-                /* param #0:n/a  */ 0x00, /* [ n/a ] */  0x00,
-                /* topic #1:sig  */ Event__Transfer,
-                /* topic #2:from */ 0,
-                /* topic #3:to   */ address(),
-                /* topic #4:id   */ tokenId
-            ) // ===========================================================
-        }
-
-        emit PreMint(tokenId, bytes32(_proof), bytes32(_agency), item, bytes32(__itemAgency));
-
-        proof[tokenId] = _proof;
-        agency[tokenId] = _agency;
-
-        // a little reentrancy never hurt nobody
         _offer(tokenId, value);
 
         delete _offers[tokenId][address(this)];
+    }
+
+    function mint(
+        uint24 tokenId,
+        uint256 seed,
+        uint24 epoch,
+        uint96 value,
+        address to
+    ) internal returns (uint256 _agency, uint256 _proof) {
+        uint256 ptrA;
+        uint256 ptrB;
+
+        _proof = initFromSeed(seed);
+
+        address itemHolder = address(xnuggftv1);
+
+        proof[tokenId] = _proof;
+
+        // @solidity memory-safe-assembly
+        assembly {
+            mstore(0x00, tokenId)
+            mstore(0x20, agency.slot)
+
+            ptrA := mload(0x40)
+            ptrB := mload(0x40)
+
+            // ============================================================
+            // agency__sptr is the storage value that solidity would compute
+            // + if you used "agency[tokenId]"
+            // prettier-ignore
+            let agency__sptr := keccak256( // =============================
+                0x00, /* [ tokenId                               ]    0x20
+                0x20     [ agency.slot                           ] */ 0x40
+            ) // ==========================================================
+
+            if iszero(iszero(sload(agency__sptr))) {
+                mstore(0x00, Revert__Sig)
+                mstore8(31, Error__0x80__TokenDoesExist)
+                revert(27, 0x5)
+            }
+
+            // prettier-ignore
+            _agency := xor(xor(xor( // =============================
+                          /* addr     0       [ */ to,              /* ] 160 */
+                    shl(  /* eth   */ 160, /* [ */ div(value, LOSS) /* ] 230 */ )),
+                    shl(  /* epoch */ 230, /* [ */ epoch                 /* ] 254 */ )),
+                    shl(  /* flag  */ 254, /* [ */ 0x03                   /* ] 255 */ )
+                ) // ==========================================================
+
+            sstore(agency__sptr, _agency)
+
+            // mstore(0x00, value)
+            mstore(0x20, _proof)
+            // mstore(0x60, _agency)
+
+            log4(0x00, 0x00, Event__Transfer, 0, address(), tokenId)
+
+            mstore(0x00, Function__transferBatch)
+            mstore(0x40, 0x00)
+            mstore(0x60, address())
+
+            // TODO make sure this is the right way to do this
+            if iszero(call(gas(), itemHolder, 0x00, 0x1C, 0x64, 0x00, 0x00)) {
+                mstore(0x00, Revert__Sig)
+                mstore8(31, Error__0xAE__FailedCallToItemsHolder)
+                revert(27, 0x5)
+            }
+
+            mstore(0x40, ptrA)
+            mstore(0x40, ptrB)
+        }
     }
 
     /// @inheritdoc INuggftV1Swap
@@ -768,7 +776,7 @@ abstract contract NuggftV1Swap is INuggftV1ItemSwap, INuggftV1Swap, NuggftV1Stak
     }
 
     /// @inheritdoc INuggftV1Swap
-    function sell(uint24 tokenId, uint96 floor) public override {
+    function sell(uint24 tokenId, uint96 floor) external override {
         _sell(tokenId, floor);
     }
 

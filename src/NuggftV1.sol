@@ -85,18 +85,17 @@ contract NuggftV1 is IERC721, IERC721Metadata, NuggftV1Loan {
 
     /// @inheritdoc IERC721Metadata
     function tokenURI(uint256 tokenId) public view virtual override returns (string memory res) {
-        // prettier-ignore
         res = string(
             dotnuggv1.encodeJson(
                 abi.encodePacked(
-                     '{"name":"NUGGFT","description":"Nugg Fungible Token V1","image":"',
-                                            imageURI(tokenId),
-                    '","properites":',    xnuggftv1.ploop(uint24(tokenId))
-                                
-                            ,
-                    '}'
+                    '{"name":"NUGGFT","description":"Nugg Fungible Token V1","image":"',
+                    imageURI(tokenId),
+                    '","properites":',
+                    xnuggftv1.ploop(uint24(tokenId)),
+                    "}"
                 ),
-            true)
+                true
+            )
         );
     }
 

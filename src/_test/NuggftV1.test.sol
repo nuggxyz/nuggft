@@ -101,6 +101,18 @@ contract NuggftV1Test is ForgeTest, NuggftV1Constants {
         createInstance(dub6ix, 10 ether);
     }
 
+    function getAllNuggs() public view returns (uint24[] memory res) {
+        bytes memory _check = xnuggft.tloop();
+
+        uint256 len = _check.length / 3;
+
+        res = new uint24[](len);
+
+        for (uint256 i = 0; i < len; i++) {
+            res[i] = uint24(bytes3(byteslib.slice(_check, i * 3, 3)));
+        }
+    }
+
     // function reset__fork() public {
     //     ds.setDsTest(address(this));
     //     NuggFatherV1 dep = new NuggFatherV1(data);
