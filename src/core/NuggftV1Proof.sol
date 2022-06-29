@@ -155,14 +155,11 @@ abstract contract NuggftV1Proof is INuggftV1Proof, NuggftV1Epoch, NuggftV1Trust 
     // 6 = 1/8 + 1/8 + 1/8   = 3
     // 7 = 1/8 + 1/8 + 1/8   = 3
     function initFromSeed(uint256 seed) internal view returns (uint256 res) {
-        uint8 selA = uint8((seed >> 8));
         uint8 selB = uint8((seed >> 16));
         uint8 selC = uint8((seed >> 24));
         uint8 selD = uint8((seed >> 32));
 
-        selA = (selA / 128) + 3; /* [3=50%, 4=50%] */
-
-        if ((selB /= 32) <= 4) selB = 0; /* [5=12.5%, 6=12.5%, 7=12.5%, 0=62.5%] */
+        if ((selB /= 32) <= 3) selB = 0; /* [4=12.5% 5=12.5%, 6=12.5%, 7=12.5%, 0=50%] */
 
         selC = breaker(selC);
         selD = breaker(selD);
@@ -170,7 +167,7 @@ abstract contract NuggftV1Proof is INuggftV1Proof, NuggftV1Epoch, NuggftV1Trust 
         res |= uint256(dotnuggv1.searchToId(0, seed)) << 0x00;
         res |= uint256(dotnuggv1.searchToId(1, seed)) << 0x10;
         res |= uint256(dotnuggv1.searchToId(2, seed)) << 0x20;
-        res |= uint256(dotnuggv1.searchToId(selA, seed)) << 0x30;
+        res |= uint256(dotnuggv1.searchToId(3, seed)) << 0x30;
         if (selB != 0) {
             res |= uint256(dotnuggv1.searchToId(selB, seed)) << (0x40);
         }

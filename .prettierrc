@@ -5,7 +5,7 @@
             "options": {
                 "printWidth": 160,
                 "tabWidth": 4,
-                "useTabs": false,
+                "useTabs": true,
                 "bracketSpacing": false,
                 "explicitTypes": "always",
                 "compiler": "0.8.15"

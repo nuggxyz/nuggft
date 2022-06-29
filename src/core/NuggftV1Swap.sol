@@ -12,131 +12,131 @@ import {DotnuggV1Lib} from "dotnugg-v1-core/DotnuggV1Lib.sol";
 /// @notice mechanism for trading of nuggs between users (and items between nuggs)
 /// @dev Explain to a developer any extra details
 abstract contract NuggftV1Swap is INuggftV1ItemSwap, INuggftV1Swap, NuggftV1Stake {
-    /// @inheritdoc INuggftV1Swap
-    function offer(uint24 tokenId) public payable override {
-        _offer(tokenId, msg.value);
-    }
+	/// @inheritdoc INuggftV1Swap
+	function offer(uint24 tokenId) public payable override {
+		_offer(tokenId, msg.value);
+	}
 
-    /// @inheritdoc INuggftV1ItemSwap
-    function offer(
-        uint24 buyingTokenId,
-        uint24 sellingTokenId,
-        uint16 itemId
-    ) external payable override {
-        _offer(buyingTokenId, sellingTokenId, itemId, msg.value);
-    }
+	/// @inheritdoc INuggftV1ItemSwap
+	function offer(
+		uint24 buyingTokenId,
+		uint24 sellingTokenId,
+		uint16 itemId
+	) external payable override {
+		_offer(buyingTokenId, sellingTokenId, itemId, msg.value);
+	}
 
-    /// @inheritdoc INuggftV1Swap
-    function offer(
-        uint24 buyingTokenId,
-        uint24 sellingTokenId,
-        uint16 itemId,
-        uint96 offerValue1,
-        uint96 offerValue2
-    ) external payable {
-        _repanic(offerValue1 + offerValue2 == msg.value, Error__0xB1__InvalidMulticallValue);
+	/// @inheritdoc INuggftV1Swap
+	function offer(
+		uint24 buyingTokenId,
+		uint24 sellingTokenId,
+		uint16 itemId,
+		uint96 offerValue1,
+		uint96 offerValue2
+	) external payable {
+		_repanic(offerValue1 + offerValue2 == msg.value, Error__0xB1__InvalidMulticallValue);
 
-        // claim a nugg
-        if (agency[buyingTokenId] >> 254 == 0x3) {
-            uint24[] memory a = new uint24[](1);
-            a[0] = buyingTokenId;
+		// claim a nugg
+		if (agency[buyingTokenId] >> 254 == 0x3) {
+			uint24[] memory a = new uint24[](1);
+			a[0] = buyingTokenId;
 
-            address[] memory b = new address[](1);
-            b[0] = msg.sender;
+			address[] memory b = new address[](1);
+			b[0] = msg.sender;
 
-            this.claim(a, b, new uint24[](1), new uint16[](1));
-        }
+			this.claim(a, b, new uint24[](1), new uint16[](1));
+		}
 
-        // offer on a nugg
-        if (offerValue1 > 0) premint(sellingTokenId, offerValue1);
+		// offer on a nugg
+		if (offerValue1 > 0) premint(sellingTokenId, offerValue1);
 
-        // offer on an item
-        _offer(buyingTokenId, sellingTokenId, itemId, offerValue2);
-    }
+		// offer on an item
+		_offer(buyingTokenId, sellingTokenId, itemId, offerValue2);
+	}
 
-    function _offer(
-        uint256 buyingTokenId,
-        uint256 sellingTokenId,
-        uint256 itemId,
-        uint256 value
-    ) internal {
-        _offer((buyingTokenId << 40) | (itemId << 24) | sellingTokenId, value);
-    }
+	function _offer(
+		uint256 buyingTokenId,
+		uint256 sellingTokenId,
+		uint256 itemId,
+		uint256 value
+	) internal {
+		_offer((buyingTokenId << 40) | (itemId << 24) | sellingTokenId, value);
+	}
 
-    function _offer(uint256 tokenId, uint256 value) internal {
-        uint256 agency__sptr;
-        uint256 agency__cache;
+	function _offer(uint256 tokenId, uint256 value) internal {
+		uint256 agency__sptr;
+		uint256 agency__cache;
 
-        uint256 active = epoch();
+		uint256 active = epoch();
 
-        address sender;
-        uint256 offersSlot;
+		address sender;
+		uint256 offersSlot;
 
-        bool isItem;
+		bool isItem;
 
-        assembly {
-            function juke(x, L, R) -> b {
-                b := shr(R, shl(L, x))
-            }
+		assembly {
+			function juke(x, L, R) -> b {
+				b := shr(R, shl(L, x))
+			}
 
-            function panic(code) {
-                mstore(0x00, Revert__Sig)
-                mstore8(31, code)
-                revert(27, 0x5)
-            }
+			function panic(code) {
+				mstore(0x00, Revert__Sig)
+				mstore8(31, code)
+				revert(27, 0x5)
+			}
 
-            mstore(0x20, agency.slot)
+			mstore(0x20, agency.slot)
 
-            isItem := gt(tokenId, 0xffffff)
+			isItem := gt(tokenId, 0xffffff)
 
-            switch isItem
-            case 1 {
-                sender := shr(40, tokenId)
+			switch isItem
+			case 1 {
+				sender := shr(40, tokenId)
 
-                tokenId := and(tokenId, 0xffffffffff)
+				tokenId := and(tokenId, 0xffffffffff)
 
-                mstore(0x00, sender)
+				mstore(0x00, sender)
 
-                let buyerTokenAgency := sload(keccak256(0x00, 0x40))
+				let buyerTokenAgency := sload(keccak256(0x00, 0x40))
 
-                // ensure the caller is the agent
-                if iszero(eq(juke(buyerTokenAgency, 96, 96), caller())) {
-                    panic(Error__0xA2__NotItemAgent)
-                }
+				// ensure the caller is the agent
+				if iszero(eq(juke(buyerTokenAgency, 96, 96), caller())) {
+					panic(Error__0xA2__NotItemAgent)
+				}
 
-                let flag := shr(254, buyerTokenAgency)
+				let flag := shr(254, buyerTokenAgency)
 
-                // ensure the caller is really the agent
-                if and(eq(flag, 0x3), iszero(iszero(juke(buyerTokenAgency, 2, 232)))) {
-                    panic(Error__0xA3__NotItemAuthorizedAgent)
-                }
+				// ensure the caller is really the agent
+				if and(eq(flag, 0x3), iszero(iszero(juke(buyerTokenAgency, 2, 232)))) {
+					panic(Error__0xA3__NotItemAuthorizedAgent)
+				}
 
-                mstore(0x20, _itemAgency.slot)
+				mstore(0x20, _itemAgency.slot)
 
-                offersSlot := _itemOffers.slot
-            }
-            default {
-                sender := caller()
+				offersSlot := _itemOffers.slot
+			}
+			default {
+				sender := caller()
 
-                offersSlot := _offers.slot
-            }
+				offersSlot := _offers.slot
+			}
 
-            mstore(0x00, tokenId)
+			mstore(0x00, tokenId)
 
-            agency__sptr := keccak256(0x00, 0x40)
-            agency__cache := sload(agency__sptr)
-        }
+			agency__sptr := keccak256(0x00, 0x40)
+			agency__cache := sload(agency__sptr)
+		}
 
-        // check to see if this nugg needs to be minted
-        if (active == tokenId && agency__cache == 0) {
-            // [Offer:Mint]
+		// check to see if this nugg needs to be minted
+		if (active == tokenId && agency__cache == 0) {
+			// [Offer:Mint]
 
-            (uint256 _agency, uint256 _proof) = mint(uint24(tokenId), calculateSeed(uint24(active)), uint24(active), uint96(value), msg.sender);
+			(uint256 _agency, uint256 _proof) = mint(uint24(tokenId), calculateSeed(uint24(active)), uint24(active), uint96(value), msg.sender);
 
-            addStakedShare(value);
+			addStakedShare(value);
 
-            // prettier-ignore
-            assembly {
+			// prettier-ignore
+			assembly {
 
                 // log the updated agency
                 mstore(0x00, _agency)
@@ -151,14 +151,14 @@ abstract contract NuggftV1Swap is INuggftV1ItemSwap, INuggftV1Swap, NuggftV1Stak
                 ) // ===========================================================
             }
 
-            return;
-        } else if (!isItem && agency__cache == 0) {
-            premint(uint24(tokenId), value);
-            return;
-        }
+			return;
+		} else if (!isItem && agency__cache == 0) {
+			premint(uint24(tokenId), value);
+			return;
+		}
 
-        // prettier-ignore
-        assembly {
+		// prettier-ignore
+		assembly {
             function juke(x, L, R) -> b {
                 b := shr(R, shl(L, x))
             }
@@ -386,114 +386,114 @@ abstract contract NuggftV1Swap is INuggftV1ItemSwap, INuggftV1Swap, NuggftV1Stak
                 ) // ===========================================================
             }
         }
-    }
+	}
 
-    function premint(uint24 tokenId, uint256 value) internal {
-        _repanic(agency[tokenId] == 0, Error__0x65__TokenNotMintable);
+	function premint(uint24 tokenId, uint256 value) internal {
+		_repanic(agency[tokenId] == 0, Error__0x65__TokenNotMintable);
 
-        (uint24 first, uint24 last) = premintTokens();
+		(uint24 first, uint24 last) = premintTokens();
 
-        _repanic(tokenId >= first && tokenId <= last, Error__0x65__TokenNotMintable);
+		_repanic(tokenId >= first && tokenId <= last, Error__0x65__TokenNotMintable);
 
-        (, uint256 _proof) = mint(tokenId, calculateEarlySeed(tokenId), 0, 0, address(this));
+		(, uint256 _proof) = mint(tokenId, calculateEarlySeed(tokenId), 0, 0, address(this));
 
-        uint16 item = uint16(_proof >> 0x90);
+		uint16 item = uint16(_proof >> 0x90);
 
-        this.sell(tokenId, item, STARTING_PRICE);
+		this.sell(tokenId, item, STARTING_PRICE);
 
-        (uint96 _msp, , , , ) = minSharePriceBreakdown(stake);
+		(uint96 _msp, , , , ) = minSharePriceBreakdown(stake);
 
-        this.sell(tokenId, _msp);
+		this.sell(tokenId, _msp);
 
-        _offer(tokenId, value);
+		_offer(tokenId, value);
 
-        delete _offers[tokenId][address(this)];
-    }
+		delete _offers[tokenId][address(this)];
+	}
 
-    function mint(
-        uint24 tokenId,
-        uint256 seed,
-        uint24 epoch,
-        uint96 value,
-        address to
-    ) internal returns (uint256 _agency, uint256 _proof) {
-        uint256 ptrA;
-        uint256 ptrB;
+	function mint(
+		uint24 tokenId,
+		uint256 seed,
+		uint24 epoch,
+		uint96 value,
+		address to
+	) internal returns (uint256 _agency, uint256 _proof) {
+		uint256 ptrA;
+		uint256 ptrB;
 
-        _proof = initFromSeed(seed);
+		_proof = initFromSeed(seed);
 
-        address itemHolder = address(xnuggftv1);
+		address itemHolder = address(xnuggftv1);
 
-        proof[tokenId] = _proof;
+		proof[tokenId] = _proof;
 
-        // @solidity memory-safe-assembly
-        assembly {
-            mstore(0x00, tokenId)
-            mstore(0x20, agency.slot)
+		// @solidity memory-safe-assembly
+		assembly {
+			mstore(0x00, tokenId)
+			mstore(0x20, agency.slot)
 
-            ptrA := mload(0x40)
-            ptrB := mload(0x40)
+			ptrA := mload(0x40)
+			ptrB := mload(0x40)
 
-            // ============================================================
-            // agency__sptr is the storage value that solidity would compute
-            // + if you used "agency[tokenId]"
-            // prettier-ignore
-            let agency__sptr := keccak256( // =============================
+			// ============================================================
+			// agency__sptr is the storage value that solidity would compute
+			// + if you used "agency[tokenId]"
+			// prettier-ignore
+			let agency__sptr := keccak256( // =============================
                 0x00, /* [ tokenId                               ]    0x20
                 0x20     [ agency.slot                           ] */ 0x40
             ) // ==========================================================
 
-            if iszero(iszero(sload(agency__sptr))) {
-                mstore(0x00, Revert__Sig)
-                mstore8(31, Error__0x80__TokenDoesExist)
-                revert(27, 0x5)
-            }
+			if iszero(iszero(sload(agency__sptr))) {
+				mstore(0x00, Revert__Sig)
+				mstore8(31, Error__0x80__TokenDoesExist)
+				revert(27, 0x5)
+			}
 
-            // prettier-ignore
-            _agency := xor(xor(xor( // =============================
+			// prettier-ignore
+			_agency := xor(xor(xor( // =============================
                           /* addr     0       [ */ to,              /* ] 160 */
                     shl(  /* eth   */ 160, /* [ */ div(value, LOSS) /* ] 230 */ )),
                     shl(  /* epoch */ 230, /* [ */ epoch                 /* ] 254 */ )),
                     shl(  /* flag  */ 254, /* [ */ 0x03                   /* ] 255 */ )
                 ) // ==========================================================
 
-            sstore(agency__sptr, _agency)
+			sstore(agency__sptr, _agency)
 
-            // mstore(0x00, value)
-            mstore(0x20, _proof)
-            // mstore(0x60, _agency)
+			// mstore(0x00, value)
+			mstore(0x20, _proof)
+			// mstore(0x60, _agency)
 
-            log4(0x00, 0x00, Event__Transfer, 0, address(), tokenId)
+			log4(0x00, 0x00, Event__Transfer, 0, address(), tokenId)
 
-            mstore(0x00, Function__transferBatch)
-            mstore(0x40, 0x00)
-            mstore(0x60, address())
+			mstore(0x00, Function__transferBatch)
+			mstore(0x40, 0x00)
+			mstore(0x60, address())
 
-            // TODO make sure this is the right way to do this
-            if iszero(call(gas(), itemHolder, 0x00, 0x1C, 0x64, 0x00, 0x00)) {
-                mstore(0x00, Revert__Sig)
-                mstore8(31, Error__0xAE__FailedCallToItemsHolder)
-                revert(27, 0x5)
-            }
+			// TODO make sure this is the right way to do this
+			if iszero(call(gas(), itemHolder, 0x00, 0x1C, 0x64, 0x00, 0x00)) {
+				mstore(0x00, Revert__Sig)
+				mstore8(31, Error__0xAE__FailedCallToItemsHolder)
+				revert(27, 0x5)
+			}
 
-            mstore(0x40, ptrA)
-            mstore(0x40, ptrB)
-        }
-    }
+			mstore(0x40, ptrA)
+			mstore(0x40, ptrB)
+		}
+	}
 
-    /// @inheritdoc INuggftV1Swap
-    function claim(
-        uint24[] calldata tokenIds,
-        address[] calldata accounts,
-        uint24[] calldata buyingTokenIds,
-        uint16[] calldata itemIds
-    ) public override {
-        uint256 active = epoch();
+	/// @inheritdoc INuggftV1Swap
+	function claim(
+		uint24[] calldata tokenIds,
+		address[] calldata accounts,
+		uint24[] calldata buyingTokenIds,
+		uint16[] calldata itemIds
+	) public override {
+		uint256 active = epoch();
 
-        address itemsHolder = address(xnuggftv1);
+		address itemsHolder = address(xnuggftv1);
 
-        // prettier-ignore
-        assembly {
+		// prettier-ignore
+		assembly {
 
             mstore(0x200, itemsHolder)
             pop(itemsHolder)
@@ -764,197 +764,197 @@ abstract contract NuggftV1Swap is INuggftV1ItemSwap, INuggftV1Swap, NuggftV1Stak
                 }
             }
         }
-    }
+	}
 
-    /// @inheritdoc INuggftV1ItemSwap
-    function sell(
-        uint24 sellingTokenId,
-        uint16 itemId,
-        uint96 floor
-    ) external override {
-        _sell((uint40(itemId) << 24) | uint40(sellingTokenId), floor);
-    }
+	/// @inheritdoc INuggftV1ItemSwap
+	function sell(
+		uint24 sellingTokenId,
+		uint16 itemId,
+		uint96 floor
+	) external override {
+		_sell((uint40(itemId) << 24) | uint40(sellingTokenId), floor);
+	}
 
-    /// @inheritdoc INuggftV1Swap
-    function sell(uint24 tokenId, uint96 floor) external override {
-        _sell(tokenId, floor);
-    }
+	/// @inheritdoc INuggftV1Swap
+	function sell(uint24 tokenId, uint96 floor) external override {
+		_sell(tokenId, floor);
+	}
 
-    function _sell(uint40 tokenId, uint96 floor) private {
-        address itemHolder = address(xnuggftv1);
+	function _sell(uint40 tokenId, uint96 floor) private {
+		address itemHolder = address(xnuggftv1);
 
-        assembly {
-            function panic(code) {
-                mstore(0x00, Revert__Sig)
-                mstore8(31, code)
-                revert(27, 0x5)
-            }
+		assembly {
+			function panic(code) {
+				mstore(0x00, Revert__Sig)
+				mstore8(31, code)
+				revert(27, 0x5)
+			}
 
-            function juke(x, L, R) -> b {
-                b := shr(R, shl(L, x))
-            }
+			function juke(x, L, R) -> b {
+				b := shr(R, shl(L, x))
+			}
 
-            let mptr := mload(0x40)
+			let mptr := mload(0x40)
 
-            mstore(0x20, agency.slot)
+			mstore(0x20, agency.slot)
 
-            let sender := caller()
+			let sender := caller()
 
-            let isItem := gt(tokenId, 0xffffff)
+			let isItem := gt(tokenId, 0xffffff)
 
-            if isItem {
-                sender := and(tokenId, 0xffffff)
+			if isItem {
+				sender := and(tokenId, 0xffffff)
 
-                mstore(0x00, sender)
+				mstore(0x00, sender)
 
-                let buyerTokenAgency := sload(keccak256(0x00, 0x40))
+				let buyerTokenAgency := sload(keccak256(0x00, 0x40))
 
-                // ensure the caller is the agent
-                if iszero(eq(juke(buyerTokenAgency, 96, 96), caller())) {
-                    panic(Error__0xA2__NotItemAgent)
-                }
+				// ensure the caller is the agent
+				if iszero(eq(juke(buyerTokenAgency, 96, 96), caller())) {
+					panic(Error__0xA2__NotItemAgent)
+				}
 
-                let flag := shr(254, buyerTokenAgency)
+				let flag := shr(254, buyerTokenAgency)
 
-                // ensure the caller is really the agent
-                // aka makes sure they are not in the middle of a swap
-                if and(eq(flag, 0x3), iszero(iszero(juke(buyerTokenAgency, 2, 232)))) {
-                    panic(Error__0xA3__NotItemAuthorizedAgent)
-                }
+				// ensure the caller is really the agent
+				// aka makes sure they are not in the middle of a swap
+				if and(eq(flag, 0x3), iszero(iszero(juke(buyerTokenAgency, 2, 232)))) {
+					panic(Error__0xA3__NotItemAuthorizedAgent)
+				}
 
-                mstore(0x20, _itemAgency.slot)
-            }
+				mstore(0x20, _itemAgency.slot)
+			}
 
-            mstore(0x00, tokenId)
+			mstore(0x00, tokenId)
 
-            let agency__sptr := keccak256(0x00, 0x40)
+			let agency__sptr := keccak256(0x00, 0x40)
 
-            let agency__cache := sload(agency__sptr)
+			let agency__cache := sload(agency__sptr)
 
-            // update agency to reflect the new sale
+			// update agency to reflect the new sale
 
-            switch isItem
-            case 1 {
-                if iszero(iszero(agency__cache)) {
-                    // panic(Error__0x97__ItemAgencyAlreadySet)
+			switch isItem
+			case 1 {
+				if iszero(iszero(agency__cache)) {
+					// panic(Error__0x97__ItemAgencyAlreadySet)
 
-                    if iszero(eq(juke(agency__cache, 96, 96), sender)) {
-                        panic(Error__0xB3__NuggIsNotItemAgent)
-                    }
+					if iszero(eq(juke(agency__cache, 96, 96), sender)) {
+						panic(Error__0xB3__NuggIsNotItemAgent)
+					}
 
-                    agency__cache := xor(xor(shl(254, 0x03), shl(160, div(floor, LOSS))), sender)
+					agency__cache := xor(xor(shl(254, 0x03), shl(160, div(floor, LOSS))), sender)
 
-                    sstore(agency__sptr, agency__cache)
+					sstore(agency__sptr, agency__cache)
 
-                    mstore(0x00, agency__cache)
-                    mstore(0x20, 0x00)
+					mstore(0x00, agency__cache)
+					mstore(0x20, 0x00)
 
-                    log3(0x00, 0x40, Event__SellItem, and(tokenId, 0xffffff), shr(24, tokenId))
+					log3(0x00, 0x40, Event__SellItem, and(tokenId, 0xffffff), shr(24, tokenId))
 
-                    // panic(Error__0x97__ItemAgencyAlreadySet)
+					// panic(Error__0x97__ItemAgencyAlreadySet)
 
-                    return(0, 0)
-                }
+					return(0, 0)
+				}
 
-                mstore(0x00, sender)
+				mstore(0x00, sender)
 
-                // store common slot for offers in memory
-                mstore(0x20, proof.slot)
+				// store common slot for offers in memory
+				mstore(0x20, proof.slot)
 
-                let proof__sptr := keccak256(0x00, 0x40)
+				let proof__sptr := keccak256(0x00, 0x40)
 
-                let _proof := sload(proof__sptr)
+				let _proof := sload(proof__sptr)
 
-                let id := shr(24, tokenId)
+				let id := shr(24, tokenId)
 
-                // start at 1 to jump over the visibles
-                let j := 1
+				// start at 1 to jump over the visibles
+				let j := 1
 
-                // prettier-ignore
-                for { } lt(j, 16) { j := add(j, 1) } {
+				// prettier-ignore
+				for { } lt(j, 16) { j := add(j, 1) } {
                     if eq(and(shr(mul(j, 16), _proof), 0xffff), id) {
                         _proof := and(_proof, not(shl(mul(j, 16), 0xffff)))
                         break
                     }
                 }
 
-                if eq(j, 16) {
-                    panic(Error__0xA9__ProofDoesNotHaveItem)
-                }
+				if eq(j, 16) {
+					panic(Error__0xA9__ProofDoesNotHaveItem)
+				}
 
-                sstore(proof__sptr, _proof)
+				sstore(proof__sptr, _proof)
 
-                // ==== agency[tokenId] =====
-                //   flag  = SWAP(0x03)
-                //   epoch = 0
-                //   eth   = seller decided floor / .1 gwei
-                //   addr  = seller
-                // ==========================
+				// ==== agency[tokenId] =====
+				//   flag  = SWAP(0x03)
+				//   epoch = 0
+				//   eth   = seller decided floor / .1 gwei
+				//   addr  = seller
+				// ==========================
 
-                agency__cache := xor(xor(shl(254, 0x03), shl(160, div(floor, LOSS))), sender)
+				agency__cache := xor(xor(shl(254, 0x03), shl(160, div(floor, LOSS))), sender)
 
-                sstore(agency__sptr, agency__cache)
+				sstore(agency__sptr, agency__cache)
 
-                // log2 with 'Sell(uint24,bytes32)' topic
-                mstore(0x00, agency__cache)
-                mstore(0x20, _proof)
+				// log2 with 'Sell(uint24,bytes32)' topic
+				mstore(0x00, agency__cache)
+				mstore(0x20, _proof)
 
-                log3(0x00, 0x40, Event__SellItem, and(tokenId, 0xffffff), shr(24, tokenId))
+				log3(0x00, 0x40, Event__SellItem, and(tokenId, 0xffffff), shr(24, tokenId))
 
-                mstore(0x00, Function__transferSingle)
-                mstore(0x20, shr(24, tokenId))
-                mstore(0x40, caller())
-                mstore(0x60, address())
+				mstore(0x00, Function__transferSingle)
+				mstore(0x20, shr(24, tokenId))
+				mstore(0x40, caller())
+				mstore(0x60, address())
 
-                if iszero(call(gas(), itemHolder, 0x00, 0x1C, 0x64, 0x00, 0x00)) {
-                    panic(Error__0xAE__FailedCallToItemsHolder)
-                }
-            }
-            default {
-                // ensure the caller is the agent
-                if iszero(eq(shr(96, shl(96, agency__cache)), caller())) {
-                    panic(Error__0xA1__NotAgent)
-                }
+				if iszero(call(gas(), itemHolder, 0x00, 0x1C, 0x64, 0x00, 0x00)) {
+					panic(Error__0xAE__FailedCallToItemsHolder)
+				}
+			}
+			default {
+				// ensure the caller is the agent
+				if iszero(eq(shr(96, shl(96, agency__cache)), caller())) {
+					panic(Error__0xA1__NotAgent)
+				}
 
-                let flag := shr(254, agency__cache)
+				let flag := shr(254, agency__cache)
 
-                let isWaitingForOffer := and(eq(flag, 0x3), iszero(juke(agency__cache, 2, 232)))
-                log2(0x00, 0x00, 0x123456789, tokenId)
-                // ensure the agent is the owner
-                if iszero(isWaitingForOffer) {
-                    // ensure the agent is the owner
-                    if iszero(eq(flag, 0x1)) {
-                        panic(Error__0x77__NotOwner)
-                    }
-                }
+				let isWaitingForOffer := and(eq(flag, 0x3), iszero(juke(agency__cache, 2, 232)))
 
-                let stake__cache := sload(stake.slot)
+				// ensure the agent is the owner
+				if iszero(isWaitingForOffer) {
+					// ensure the agent is the owner
+					if iszero(eq(flag, 0x1)) {
+						panic(Error__0x77__NotOwner)
+					}
+				}
 
-                let activeEps := div(juke(stake__cache, 64, 160), shr(192, stake__cache))
+				let stake__cache := sload(stake.slot)
 
-                if lt(floor, activeEps) {
-                    panic(Error__0x70__FloorTooLow)
-                }
+				let activeEps := div(juke(stake__cache, 64, 160), shr(192, stake__cache))
 
-                // ==== agency[tokenId] =====
-                //   flag  = SWAP(0x03)
-                //   epoch = 0
-                //   eth   = seller decided floor / .1 gwei
-                //   addr  = seller
-                // ==========================
+				if lt(floor, activeEps) {
+					panic(Error__0x70__FloorTooLow)
+				}
 
-                agency__cache := xor(xor(shl(254, 0x03), shl(160, div(floor, LOSS))), caller())
+				// ==== agency[tokenId] =====
+				//   flag  = SWAP(0x03)
+				//   epoch = 0
+				//   eth   = seller decided floor / .1 gwei
+				//   addr  = seller
+				// ==========================
 
-                sstore(agency__sptr, agency__cache)
+				agency__cache := xor(xor(shl(254, 0x03), shl(160, div(floor, LOSS))), caller())
 
-                // log2 with 'Sell(uint24,bytes32)' topic
-                mstore(0x00, agency__cache)
+				sstore(agency__sptr, agency__cache)
 
-                log2(0x00, 0x20, Event__Sell, tokenId)
+				// log2 with 'Sell(uint24,bytes32)' topic
+				mstore(0x00, agency__cache)
 
-                if iszero(isWaitingForOffer) {
-                    // prettier-ignore
-                    log4( // =======================================================
+				log2(0x00, 0x20, Event__Sell, tokenId)
+
+				if iszero(isWaitingForOffer) {
+					// prettier-ignore
+					log4( // =======================================================
                         /* param 0: n/a  */ 0x00, 0x00,
                         /* topic 1: sig  */ Event__Transfer,
                         /* topic 2: from */ caller(),
@@ -962,245 +962,245 @@ abstract contract NuggftV1Swap is INuggftV1ItemSwap, INuggftV1Swap, NuggftV1Stak
                         /* topic 4: id   */ tokenId
                     ) // ===========================================================
 
-                    mstore(0x00, tokenId)
-                    mstore(0x20, proof.slot)
+					mstore(0x00, tokenId)
+					mstore(0x20, proof.slot)
 
-                    let _proof := sload(keccak256(0x00, 0x40))
+					let _proof := sload(keccak256(0x00, 0x40))
 
-                    mstore(0x00, Function__transferBatch)
-                    mstore(0x20, _proof)
-                    mstore(0x40, address())
-                    mstore(0x60, caller())
+					mstore(0x00, Function__transferBatch)
+					mstore(0x20, _proof)
+					mstore(0x40, address())
+					mstore(0x60, caller())
 
-                    if iszero(call(gas(), itemHolder, 0x00, 0x1C, 0x64, 0x00, 0x00)) {
-                        panic(Error__0xAE__FailedCallToItemsHolder)
-                    }
-                }
-            }
-        }
-    }
+					if iszero(call(gas(), itemHolder, 0x00, 0x1C, 0x64, 0x00, 0x00)) {
+						panic(Error__0xAE__FailedCallToItemsHolder)
+					}
+				}
+			}
+		}
+	}
 
-    // @inheritdoc INuggftV1Swap
-    function vfo(address sender, uint24 tokenId) public view override returns (uint96 res) {
-        (bool canOffer, uint96 next, uint96 current, , ) = check(sender, tokenId);
+	// @inheritdoc INuggftV1Swap
+	function vfo(address sender, uint24 tokenId) public view override returns (uint96 res) {
+		(bool canOffer, uint96 next, uint96 current, , ) = check(sender, tokenId);
 
-        if (canOffer) res = next - current;
-    }
+		if (canOffer) res = next - current;
+	}
 
-    // @inheritdoc INuggftV1Swap
-    function check(address sender, uint24 tokenId)
-        public
-        view
-        override
-        returns (
-            bool canOffer,
-            uint96 next,
-            uint96 currentUserOffer,
-            uint96 currentLeaderOffer,
-            uint96 incrementBps
-        )
-    {
-        canOffer = true;
+	// @inheritdoc INuggftV1Swap
+	function check(address sender, uint24 tokenId)
+		public
+		view
+		override
+		returns (
+			bool canOffer,
+			uint96 next,
+			uint96 currentUserOffer,
+			uint96 currentLeaderOffer,
+			uint96 incrementBps
+		)
+	{
+		canOffer = true;
 
-        uint24 activeEpoch = epoch();
+		uint24 activeEpoch = epoch();
 
-        (uint96 _msp, , , , ) = minSharePriceBreakdown(stake);
+		(uint96 _msp, , , , ) = minSharePriceBreakdown(stake);
 
-        uint24 _early = early;
+		uint24 _early = early;
 
-        incrementBps = INCREMENT_BPS;
+		incrementBps = INCREMENT_BPS;
 
-        assembly {
-            function juke(x, L, R) -> b {
-                b := shr(R, shl(L, x))
-            }
+		assembly {
+			function juke(x, L, R) -> b {
+				b := shr(R, shl(L, x))
+			}
 
-            mstore(0x00, tokenId)
-            mstore(0x20, agency.slot)
+			mstore(0x00, tokenId)
+			mstore(0x20, agency.slot)
 
-            let swapData := sload(keccak256(0x00, 0x40))
+			let swapData := sload(keccak256(0x00, 0x40))
 
-            let offerData := swapData
+			let offerData := swapData
 
-            let isLeader := eq(juke(swapData, 96, 96), sender)
+			let isLeader := eq(juke(swapData, 96, 96), sender)
 
-            if iszero(isLeader) {
-                mstore(0x20, _offers.slot)
-                mstore(0x20, keccak256(0x00, 0x40))
-                mstore(0x00, sender)
-                offerData := sload(keccak256(0x00, 0x40))
-            }
+			if iszero(isLeader) {
+				mstore(0x20, _offers.slot)
+				mstore(0x20, keccak256(0x00, 0x40))
+				mstore(0x00, sender)
+				offerData := sload(keccak256(0x00, 0x40))
+			}
 
-            switch iszero(swapData)
-            case 1 {
-                switch eq(tokenId, activeEpoch)
-                case 1 {
-                    currentLeaderOffer := _msp
-                }
-                default {
-                    if iszero(and(iszero(lt(tokenId, MINT_OFFSET)), lt(tokenId, add(MINT_OFFSET, _early)))) {
-                        mstore(0x00, 0x00)
-                        mstore(0x20, 0x00)
-                        mstore(0x40, 0x00)
-                        mstore(0x60, 0x00)
-                        return(0x00, 0x80)
-                    }
+			switch iszero(swapData)
+			case 1 {
+				switch eq(tokenId, activeEpoch)
+				case 1 {
+					currentLeaderOffer := _msp
+				}
+				default {
+					if iszero(and(iszero(lt(tokenId, MINT_OFFSET)), lt(tokenId, add(MINT_OFFSET, _early)))) {
+						mstore(0x00, 0x00)
+						mstore(0x20, 0x00)
+						mstore(0x40, 0x00)
+						mstore(0x60, 0x00)
+						return(0x00, 0x80)
+					}
 
-                    currentLeaderOffer := _msp
-                }
-            }
-            default {
-                let swapEpoch := juke(swapData, 2, 232)
+					currentLeaderOffer := _msp
+				}
+			}
+			default {
+				let swapEpoch := juke(swapData, 2, 232)
 
-                if and(isLeader, iszero(swapEpoch)) {
-                    canOffer := 0
-                }
+				if and(isLeader, iszero(swapEpoch)) {
+					canOffer := 0
+				}
 
-                if eq(swapEpoch, activeEpoch) {
-                    let remain := sub(INTERVAL, mod(number(), INTERVAL))
+				if eq(swapEpoch, activeEpoch) {
+					let remain := sub(INTERVAL, mod(number(), INTERVAL))
 
-                    if lt(remain, 45) {
-                        remain := mul(div(remain, 5), 5)
-                        incrementBps := add(mul(sub(50, remain), 100), BASE_BPS)
-                    }
-                }
+					if lt(remain, 45) {
+						remain := mul(div(remain, 5), 5)
+						incrementBps := add(mul(sub(50, remain), 100), BASE_BPS)
+					}
+				}
 
-                currentUserOffer := mul(juke(offerData, 26, 186), LOSS)
+				currentUserOffer := mul(juke(offerData, 26, 186), LOSS)
 
-                currentLeaderOffer := mul(juke(swapData, 26, 186), LOSS)
-            }
+				currentLeaderOffer := mul(juke(swapData, 26, 186), LOSS)
+			}
 
-            next := currentLeaderOffer
+			next := currentLeaderOffer
 
-            if lt(next, STARTING_PRICE) {
-                next := STARTING_PRICE
-                incrementBps := INCREMENT_BPS
-            }
+			if lt(next, STARTING_PRICE) {
+				next := STARTING_PRICE
+				incrementBps := INCREMENT_BPS
+			}
 
-            // add at the end to round up
-            next := div(mul(next, incrementBps), BASE_BPS)
+			// add at the end to round up
+			next := div(mul(next, incrementBps), BASE_BPS)
 
-            if iszero(iszero(mod(next, LOSS))) {
-                next := add(mul(div(next, LOSS), LOSS), LOSS)
-            }
-        }
-    }
+			if iszero(iszero(mod(next, LOSS))) {
+				next := add(mul(div(next, LOSS), LOSS), LOSS)
+			}
+		}
+	}
 
-    function validAgency(uint256 _agency, uint24 epoch) public pure returns (bool) {
-        return _agency >> 254 == 0x3 && (uint24(_agency >> 232) >= epoch || uint24(_agency >> 232) == 0);
-    }
+	function validAgency(uint256 _agency, uint24 epoch) public pure returns (bool) {
+		return _agency >> 254 == 0x3 && (uint24(_agency >> 232) >= epoch || uint24(_agency >> 232) == 0);
+	}
 
-    function agencyOf(uint24 tokenId) public view override returns (uint256 res) {
-        if (tokenId == 0 || (res = agency[tokenId]) != 0) return res;
+	function agencyOf(uint24 tokenId) public view override returns (uint256 res) {
+		if (tokenId == 0 || (res = agency[tokenId]) != 0) return res;
 
-        (uint24 start, uint24 end) = premintTokens();
+		(uint24 start, uint24 end) = premintTokens();
 
-        uint24 e;
+		uint24 e;
 
-        if ((tokenId >= start && tokenId <= end) || (e = epoch()) == tokenId) {
-            (uint96 _msp, , , , ) = minSharePriceBreakdown(stake);
+		if ((tokenId >= start && tokenId <= end) || (e = epoch()) == tokenId) {
+			(uint96 _msp, , , , ) = minSharePriceBreakdown(stake);
 
-            res = (0x03 << 254) + (uint256(((_msp / LOSS))) << 160);
+			res = (0x03 << 254) + (uint256(((_msp / LOSS))) << 160);
 
-            res += uint160(address(this));
+			res += uint160(address(this));
 
-            if (e == tokenId) {
-                res |= uint256(e) << 230;
-            }
-        }
-    }
+			if (e == tokenId) {
+				res |= uint256(e) << 230;
+			}
+		}
+	}
 
-    function itemAgencyOf(uint24 seller, uint16 itemId) public view override returns (uint256 res) {
-        res = itemAgency(seller, itemId);
+	function itemAgencyOf(uint24 seller, uint16 itemId) public view override returns (uint256 res) {
+		res = itemAgency(seller, itemId);
 
-        if (res == 0 && agency[seller] == 0 && uint16(proofOf(seller) >> 0x90) == itemId) {
-            return (0x03 << 254) + (uint256((STARTING_PRICE / LOSS)) << 160) + uint256(seller);
-        }
-    }
+		if (res == 0 && agency[seller] == 0 && uint16(proofOf(seller) >> 0x90) == itemId) {
+			return (0x03 << 254) + (uint256((STARTING_PRICE / LOSS)) << 160) + uint256(seller);
+		}
+	}
 
-    function check(
-        uint24 buyer,
-        uint24 seller,
-        uint16 itemId
-    )
-        public
-        view
-        override
-        returns (
-            bool canOffer,
-            uint96 next,
-            uint96 currentUserOffer,
-            uint96 currentLeaderOffer,
-            uint96 incrementBps,
-            bool mustClaimBuyer,
-            bool mustOfferOnSeller
-        )
-    {
-        canOffer = true;
+	function check(
+		uint24 buyer,
+		uint24 seller,
+		uint16 itemId
+	)
+		public
+		view
+		override
+		returns (
+			bool canOffer,
+			uint96 next,
+			uint96 currentUserOffer,
+			uint96 currentLeaderOffer,
+			uint96 incrementBps,
+			bool mustClaimBuyer,
+			bool mustOfferOnSeller
+		)
+	{
+		canOffer = true;
 
-        uint24 activeEpoch = epoch();
+		uint24 activeEpoch = epoch();
 
-        uint256 buyerAgency = agency[buyer];
+		uint256 buyerAgency = agency[buyer];
 
-        if (buyerAgency >> 254 == 0x3) mustClaimBuyer = true;
+		if (buyerAgency >> 254 == 0x3) mustClaimBuyer = true;
 
-        uint256 agency__cache = itemAgency(seller, itemId);
+		uint256 agency__cache = itemAgency(seller, itemId);
 
-        uint256 offerData = agency__cache;
+		uint256 offerData = agency__cache;
 
-        currentLeaderOffer = STARTING_PRICE;
+		currentLeaderOffer = STARTING_PRICE;
 
-        if (agency__cache == 0 && agency[seller] == 0 && uint16(proofOf(seller) >> 0x90) == itemId) {
-            mustOfferOnSeller = true;
+		if (agency__cache == 0 && agency[seller] == 0 && uint16(proofOf(seller) >> 0x90) == itemId) {
+			mustOfferOnSeller = true;
 
-            agency__cache = (0x03 << 254) + (uint256((STARTING_PRICE / LOSS)) << 160) + uint256(seller);
-        } else if (buyer != uint24(agency__cache)) {
-            offerData = itemOffers(buyer, seller, itemId);
-        }
+			agency__cache = (0x03 << 254) + (uint256((STARTING_PRICE / LOSS)) << 160) + uint256(seller);
+		} else if (buyer != uint24(agency__cache)) {
+			offerData = itemOffers(buyer, seller, itemId);
+		}
 
-        uint24 agencyEpoch = uint24(agency__cache >> 230);
+		uint24 agencyEpoch = uint24(agency__cache >> 230);
 
-        if (agencyEpoch == 0 && offerData == agency__cache) canOffer = false;
+		if (agencyEpoch == 0 && offerData == agency__cache) canOffer = false;
 
-        currentUserOffer = uint96((offerData << 26) >> 186) * LOSS;
+		currentUserOffer = uint96((offerData << 26) >> 186) * LOSS;
 
-        currentLeaderOffer = uint96((agency__cache << 26) >> 186) * LOSS;
+		currentLeaderOffer = uint96((agency__cache << 26) >> 186) * LOSS;
 
-        next = currentLeaderOffer;
+		next = currentLeaderOffer;
 
-        incrementBps = INCREMENT_BPS;
+		incrementBps = INCREMENT_BPS;
 
-        assembly {
-            if eq(agencyEpoch, activeEpoch) {
-                let remain := sub(INTERVAL, mod(number(), INTERVAL))
+		assembly {
+			if eq(agencyEpoch, activeEpoch) {
+				let remain := sub(INTERVAL, mod(number(), INTERVAL))
 
-                if lt(remain, 45) {
-                    remain := mul(div(remain, 5), 5)
-                    incrementBps := add(mul(sub(50, remain), 100), BASE_BPS)
-                }
-            }
+				if lt(remain, 45) {
+					remain := mul(div(remain, 5), 5)
+					incrementBps := add(mul(sub(50, remain), 100), BASE_BPS)
+				}
+			}
 
-            if lt(next, STARTING_PRICE) {
-                next := STARTING_PRICE
-                incrementBps := INCREMENT_BPS
-            }
+			if lt(next, STARTING_PRICE) {
+				next := STARTING_PRICE
+				incrementBps := INCREMENT_BPS
+			}
 
-            // add at the end to round up
-            next := div(mul(next, incrementBps), BASE_BPS)
+			// add at the end to round up
+			next := div(mul(next, incrementBps), BASE_BPS)
 
-            if iszero(iszero(mod(next, LOSS))) {
-                next := add(mul(div(next, LOSS), LOSS), LOSS)
-            }
-        }
-    }
+			if iszero(iszero(mod(next, LOSS))) {
+				next := add(mul(div(next, LOSS), LOSS), LOSS)
+			}
+		}
+	}
 
-    function vfo(
-        uint24 buyer,
-        uint24 seller,
-        uint16 itemId
-    ) public view override returns (uint96 res) {
-        (bool canOffer, uint96 next, uint96 current, , , , ) = check(buyer, seller, itemId);
+	function vfo(
+		uint24 buyer,
+		uint24 seller,
+		uint16 itemId
+	) public view override returns (uint96 res) {
+		(bool canOffer, uint96 next, uint96 current, , , , ) = check(buyer, seller, itemId);
 
-        if (canOffer) res = next - current;
-    }
+		if (canOffer) res = next - current;
+	}
 }
