@@ -2,28 +2,43 @@
 
 pragma solidity 0.8.15;
 
-import {IERC721, IERC165, IERC721Metadata} from "./interfaces/IERC721.sol";
-import {INuggftV1Migrator} from "./interfaces/nuggftv1/INuggftV1Migrator.sol";
+import {INuggftV1} from "./interfaces/INuggftV1.sol";
+import {IERC165} from "./interfaces/IERC165.sol";
+import {IERC721, IERC721Metadata} from "./interfaces/IERC721.sol";
+
+import {INuggftV1Migrator} from "./interfaces/INuggftV1Migrator.sol";
 import {IDotnuggV1} from "dotnugg-v1-core/IDotnuggV1.sol";
-import {INuggftV1Stake} from "./interfaces/nuggftv1/INuggftV1Stake.sol";
-import {INuggftV1Proof} from "./interfaces/nuggftv1/INuggftV1Proof.sol";
-
-import {INuggftV1} from "./interfaces/nuggftv1/INuggftV1.sol";
-
-import {NuggftV1Loan} from "./core/NuggftV1Loan.sol";
-import {NuggftV1Proof} from "./core/NuggftV1Proof.sol";
-import {NuggftV1Globals} from "./core/NuggftV1Globals.sol";
 
 import {DotnuggV1Lib} from "dotnugg-v1-core/DotnuggV1Lib.sol";
 
 import {decodeMakingPrettierHappy} from "./libraries/BigOleLib.sol";
 
+import "./core/NuggftV1Loan.sol";
+
 /// @title NuggftV1
 /// @author nugg.xyz - danny7even and dub6ix - 2022
-contract NuggftV1 is IERC721, IERC721Metadata, NuggftV1Loan {
+contract NuggftV1 is NuggftV1Loan {
 	constructor() payable {}
 
-	/// @inheritdoc INuggftV1Stake
+	/// @inheritdoc INuggftV1Execute
+	function extract() external requiresTrust {
+		uint256 cache = stake;
+
+		payable(msg.sender).transfer((cache << 160) >> 160);
+
+		cache = (cache >> 96) << 96;
+
+		emit Stake(bytes32(cache));
+	}
+
+	/// @inheritdoc INuggftV1Execute
+	function setMigrator(address _migrator) external requiresTrust {
+		migrator = _migrator;
+
+		emit MigratorV1Updated(_migrator);
+	}
+
+	/// @inheritdoc INuggftV1Execute
 	function migrate(uint24 tokenId) external {
 		if (migrator == address(0)) _panic(Error__0x81__MigratorNotSet);
 
@@ -99,17 +114,18 @@ contract NuggftV1 is IERC721, IERC721Metadata, NuggftV1Loan {
 		);
 	}
 
-	/// @inheritdoc INuggftV1Proof
+	/// @inheritdoc INuggftV1Lens
 	function imageURI(uint256 tokenId) public view override returns (string memory res) {
 		res = dotnuggv1.exec(decodedCoreProofOf(uint24(tokenId)), true);
 	}
 
-	/// @inheritdoc INuggftV1Proof
+	/// @inheritdoc INuggftV1Lens
 	function imageSVG(uint256 tokenId) public view override returns (string memory res) {
 		res = dotnuggv1.exec(decodedCoreProofOf(uint24(tokenId)), false);
 	}
 
-	/// this may seem like the dumbest function of all time - and it is
+	/// @inheritdoc INuggftV1Lens
+	/// @dev this may seem like the dumbest function of all time - and it is
 	/// it allows us to break up the "gas" usage over multiple view calls
 	/// it increases the chance that services like the graph will compute the dotnugg image
 	function image123(

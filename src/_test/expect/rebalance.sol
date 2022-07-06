@@ -3,6 +3,7 @@
 pragma solidity 0.8.15;
 
 import "../utils/forge.sol";
+import "../NuggftV1.test.sol";
 
 import "./base.sol";
 import "./stake.sol";
@@ -109,7 +110,7 @@ contract expectRebalance is base {
 
 			uint96 agency__eth = uint96((pre.agency << 26) >> 186) * .1 gwei;
 
-			pre.fee = agency__eth / nuggft.REBALANCE_FEE_BPS();
+			pre.fee = agency__eth / REBALANCE_FEE_BPS;
 			pre.earned = run.eps - agency__eth;
 
 			run.accFee += pre.fee;

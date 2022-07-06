@@ -2,14 +2,13 @@
 
 pragma solidity 0.8.15;
 
-import {IERC1155, IERC165, IERC1155Metadata_URI} from "./interfaces/IERC721.sol";
-
-import {IxNuggftV1} from "./interfaces/nuggftv1/IxNuggftV1.sol";
+import {IxNuggftV1} from "./interfaces/IxNuggftV1.sol";
 import {DotnuggV1Lib} from "dotnugg-v1-core/DotnuggV1Lib.sol";
 import {IDotnuggV1} from "dotnugg-v1-core/IDotnuggV1.sol";
-import {NuggftV1Constants} from "./core/NuggftV1Constants.sol";
 
-import {INuggftV1} from "./interfaces/nuggftv1/INuggftV1.sol";
+import {IERC165} from "./interfaces/IERC165.sol";
+
+import {INuggftV1} from "./interfaces/INuggftV1.sol";
 
 /// @author nugg.xyz - danny7even and dub6ix - 2022
 contract xNuggftV1 is IxNuggftV1 {

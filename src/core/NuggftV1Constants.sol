@@ -3,7 +3,6 @@
 pragma solidity 0.8.15;
 
 /// @author nugg.xyz - danny7even and dub6ix - 2022
-
 abstract contract NuggftV1Constants {
 	uint96 constant STARTING_PRICE = .005 ether;
 
@@ -38,7 +37,7 @@ abstract contract NuggftV1Constants {
 	uint96 constant INCREMENT_BPS = 10500;
 
 	// warning: causes liq and reb noFallback tests to break with +-1 wei rounding error if 600
-	uint96 public constant REBALANCE_FEE_BPS = 100;
+	uint96 constant REBALANCE_FEE_BPS = 100;
 
 	// loan
 	uint24 constant LIQUIDATION_PERIOD = 200;

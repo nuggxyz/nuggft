@@ -1,8 +1,10 @@
 // SPDX-License-Identifier: BUSL-1.1
 
 pragma solidity 0.8.15;
-import {IERC1155Metadata_URI, IERC1155} from "../IERC721.sol";
 
+import {IERC1155Metadata_URI, IERC1155} from "./IERC1155.sol";
+
+// prettier-ignore
 interface IxNuggftV1 is IERC1155Metadata_URI, IERC1155 {
     function imageURI(uint256 tokenId) external view returns (string memory);
 
@@ -24,15 +26,7 @@ interface IxNuggftV1 is IERC1155Metadata_URI, IERC1155 {
 
     function ploop(uint24 tokenId) external view returns (string memory);
 
-    function transferBatch(
-        uint256 proof,
-        address from,
-        address to
-    ) external payable;
+    function transferBatch(uint256 proof, address from, address to) external payable;
 
-    function transferSingle(
-        uint256 itemId,
-        address from,
-        address to
-    ) external payable;
+    function transferSingle(uint256 itemId, address from, address to) external payable;
 }

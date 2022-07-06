@@ -15,7 +15,7 @@ import {NuggftV1AgentType} from "./helpers/NuggftV1AgentType.sol";
 
 import {RiggedNuggFatherV1} from "./RiggedNuggFatherV1.sol";
 import {RiggedNuggftV1} from "./RiggedNuggftV1.sol";
-import {IxNuggftV1} from "../interfaces/nuggftv1/IxNuggftV1.sol";
+import {IxNuggftV1} from "../interfaces/IxNuggftV1.sol";
 
 import "./utils/forge.sol";
 

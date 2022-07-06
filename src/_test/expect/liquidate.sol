@@ -3,6 +3,7 @@
 pragma solidity 0.8.15;
 
 import "../utils/forge.sol";
+import "../NuggftV1.test.sol";
 
 import "./base.sol";
 import "./stake.sol";
@@ -107,7 +108,7 @@ contract expectLiquidate is base {
 		// (, , run.principal, run.fee, run.earned, ) = nuggft.debt(tokenId);
 
 		run.principal = uint96((run.agency << 26) >> 186) * .1 gwei;
-		run.fee = run.principal / nuggft.REBALANCE_FEE_BPS();
+		run.fee = run.principal / REBALANCE_FEE_BPS;
 		run.earned = run.eps - run.principal;
 
 		uint96 change;

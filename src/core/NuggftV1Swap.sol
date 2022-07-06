@@ -2,22 +2,22 @@
 
 pragma solidity 0.8.15;
 
-import {INuggftV1Swap} from "../interfaces/nuggftv1/INuggftV1Swap.sol";
-import {INuggftV1ItemSwap} from "../interfaces/nuggftv1/INuggftV1ItemSwap.sol";
+import {INuggftV1} from "../interfaces/INuggftV1.sol";
 
-import {NuggftV1Stake} from "./NuggftV1Stake.sol";
+import "./NuggftV1Stake.sol";
+
 import {DotnuggV1Lib} from "dotnugg-v1-core/DotnuggV1Lib.sol";
 
 /// @author nugg.xyz - danny7even and dub6ix - 2022
 /// @notice mechanism for trading of nuggs between users (and items between nuggs)
 /// @dev Explain to a developer any extra details
-abstract contract NuggftV1Swap is INuggftV1ItemSwap, INuggftV1Swap, NuggftV1Stake {
-	/// @inheritdoc INuggftV1Swap
+abstract contract NuggftV1Swap is NuggftV1Stake {
+	/// @inheritdoc INuggftV1Execute
 	function offer(uint24 tokenId) public payable override {
 		_offer(tokenId, msg.value);
 	}
 
-	/// @inheritdoc INuggftV1ItemSwap
+	/// @inheritdoc INuggftV1Execute
 	function offer(
 		uint24 buyingTokenId,
 		uint24 sellingTokenId,
@@ -26,7 +26,7 @@ abstract contract NuggftV1Swap is INuggftV1ItemSwap, INuggftV1Swap, NuggftV1Stak
 		_offer(buyingTokenId, sellingTokenId, itemId, msg.value);
 	}
 
-	/// @inheritdoc INuggftV1Swap
+	/// @inheritdoc INuggftV1Execute
 	function offer(
 		uint24 buyingTokenId,
 		uint24 sellingTokenId,
@@ -411,6 +411,7 @@ abstract contract NuggftV1Swap is INuggftV1ItemSwap, INuggftV1Swap, NuggftV1Stak
 
 		_offer(tokenId, value);
 
+		// only contract could redeem it, and since that happens implicitly, we can save some gas
 		delete _offers[tokenId][address(this)];
 	}
 
@@ -485,7 +486,7 @@ abstract contract NuggftV1Swap is INuggftV1ItemSwap, INuggftV1Swap, NuggftV1Stak
 		}
 	}
 
-	/// @inheritdoc INuggftV1Swap
+	/// @inheritdoc INuggftV1Execute
 	function claim(
 		uint24[] calldata tokenIds,
 		address[] calldata accounts,
@@ -770,7 +771,7 @@ abstract contract NuggftV1Swap is INuggftV1ItemSwap, INuggftV1Swap, NuggftV1Stak
         }
 	}
 
-	/// @inheritdoc INuggftV1ItemSwap
+	/// @inheritdoc INuggftV1Execute
 	function sell(
 		uint24 sellingTokenId,
 		uint16 itemId,
@@ -779,7 +780,7 @@ abstract contract NuggftV1Swap is INuggftV1ItemSwap, INuggftV1Swap, NuggftV1Stak
 		_sell((uint40(itemId) << 24) | uint40(sellingTokenId), floor);
 	}
 
-	/// @inheritdoc INuggftV1Swap
+	/// @inheritdoc INuggftV1Execute
 	function sell(uint24 tokenId, uint96 floor) external override {
 		_sell(tokenId, floor);
 	}
@@ -984,14 +985,14 @@ abstract contract NuggftV1Swap is INuggftV1ItemSwap, INuggftV1Swap, NuggftV1Stak
 		}
 	}
 
-	// @inheritdoc INuggftV1Swap
+	// @inheritdoc INuggftV1Lens
 	function vfo(address sender, uint24 tokenId) public view override returns (uint96 res) {
 		(bool canOffer, uint96 next, uint96 current, , ) = check(sender, tokenId);
 
 		if (canOffer) res = next - current;
 	}
 
-	// @inheritdoc INuggftV1Swap
+	// @inheritdoc INuggftV1Lens
 	function check(address sender, uint24 tokenId)
 		public
 		view
@@ -1090,10 +1091,11 @@ abstract contract NuggftV1Swap is INuggftV1ItemSwap, INuggftV1Swap, NuggftV1Stak
 		}
 	}
 
-	function validAgency(uint256 _agency, uint24 epoch) public pure returns (bool) {
+	function validAgency(uint256 _agency, uint24 epoch) internal pure returns (bool) {
 		return _agency >> 254 == 0x3 && (uint24(_agency >> 232) >= epoch || uint24(_agency >> 232) == 0);
 	}
 
+	// @inheritdoc INuggftV1Lens
 	function agencyOf(uint24 tokenId) public view override returns (uint256 res) {
 		if (tokenId == 0 || (res = agency[tokenId]) != 0) return res;
 
@@ -1114,6 +1116,7 @@ abstract contract NuggftV1Swap is INuggftV1ItemSwap, INuggftV1Swap, NuggftV1Stak
 		}
 	}
 
+	// @inheritdoc INuggftV1Lens
 	function itemAgencyOf(uint24 seller, uint16 itemId) public view override returns (uint256 res) {
 		res = itemAgency(seller, itemId);
 
@@ -1122,6 +1125,7 @@ abstract contract NuggftV1Swap is INuggftV1ItemSwap, INuggftV1Swap, NuggftV1Stak
 		}
 	}
 
+	// @inheritdoc INuggftV1Lens
 	function check(
 		uint24 buyer,
 		uint24 seller,
@@ -1198,6 +1202,7 @@ abstract contract NuggftV1Swap is INuggftV1ItemSwap, INuggftV1Swap, NuggftV1Stak
 		}
 	}
 
+	// @inheritdoc INuggftV1Lens
 	function vfo(
 		uint24 buyer,
 		uint24 seller,
