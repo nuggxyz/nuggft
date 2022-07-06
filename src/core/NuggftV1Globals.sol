@@ -9,7 +9,7 @@ import {IxNuggftV1} from "../interfaces/IxNuggftV1.sol";
 import {DotnuggV1} from "dotnugg-v1-core/DotnuggV1.sol";
 import {xNuggftV1} from "../xNuggftV1.sol";
 
-import "./NuggftV1Constants.sol";
+import {NuggftV1Constants} from "./NuggftV1Constants.sol";
 
 /// @author nugg.xyz - danny7even and dub6ix - 2022
 abstract contract NuggftV1Globals is NuggftV1Constants, INuggftV1 {

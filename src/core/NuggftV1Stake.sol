@@ -2,9 +2,9 @@
 
 pragma solidity 0.8.15;
 
-import {INuggftV1} from "../interfaces/INuggftV1.sol";
+import {INuggftV1, INuggftV1Lens} from "../interfaces/INuggftV1.sol";
 
-import "./NuggftV1Proof.sol";
+import {NuggftV1Proof} from "./NuggftV1Proof.sol";
 
 /// @author nugg.xyz - danny7even and dub6ix - 2022
 abstract contract NuggftV1Stake is NuggftV1Proof {

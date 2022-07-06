@@ -2,13 +2,13 @@
 
 pragma solidity 0.8.15;
 
-import {INuggftV1} from "../interfaces/INuggftV1.sol";
+import {INuggftV1, INuggftV1Lens, INuggftV1Execute} from "../interfaces/INuggftV1.sol";
 import {IDotnuggV1} from "dotnugg-v1-core/IDotnuggV1.sol";
 import {IxNuggftV1} from "../interfaces/IxNuggftV1.sol";
 
 import {DotnuggV1Lib} from "dotnugg-v1-core/DotnuggV1Lib.sol";
 
-import "./NuggftV1Epoch.sol";
+import {NuggftV1Epoch} from "./NuggftV1Epoch.sol";
 
 /// @author nugg.xyz - danny7even and dub6ix - 2022
 abstract contract NuggftV1Proof is NuggftV1Epoch {

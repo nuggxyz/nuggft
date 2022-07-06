@@ -2,7 +2,7 @@
 
 pragma solidity 0.8.15;
 
-import {INuggftV1} from "./interfaces/INuggftV1.sol";
+import {INuggftV1, INuggftV1Execute, INuggftV1Lens} from "./interfaces/INuggftV1.sol";
 import {IERC165} from "./interfaces/IERC165.sol";
 import {IERC721, IERC721Metadata} from "./interfaces/IERC721.sol";
 
@@ -13,7 +13,7 @@ import {DotnuggV1Lib} from "dotnugg-v1-core/DotnuggV1Lib.sol";
 
 import {decodeMakingPrettierHappy} from "./libraries/BigOleLib.sol";
 
-import "./core/NuggftV1Loan.sol";
+import {NuggftV1Loan} from "./core/NuggftV1Loan.sol";
 
 /// @title NuggftV1
 /// @author nugg.xyz - danny7even and dub6ix - 2022

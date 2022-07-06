@@ -2,9 +2,9 @@
 
 pragma solidity 0.8.15;
 
-import {INuggftV1} from "../interfaces/INuggftV1.sol";
+import {INuggftV1, INuggftV1Execute} from "../interfaces/INuggftV1.sol";
 
-import "./NuggftV1Stake.sol";
+import {NuggftV1Stake} from "./NuggftV1Stake.sol";
 
 import {DotnuggV1Lib} from "dotnugg-v1-core/DotnuggV1Lib.sol";
 

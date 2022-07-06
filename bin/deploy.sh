@@ -16,11 +16,12 @@ echo "$SEED"
 
 RESULT=$(
 	forge create NuggFatherV1 \
+		--force \
 		--constructor-args "$SEED" \
 		--mnemonic-path "$MNEMONIC_PATH_1" \
 		--mnemonic-index 1 \
 		--value 10ether \
-		--gas-limit 26500000 \
+		--gas-limit 27000000 \
 		--rpc-url "$ETH_RPC_URL" \
 		--from "$ETH_FROM" \
 		--optimize --optimizer-runs="$OPTIMIZER_RUNS" \
@@ -43,10 +44,10 @@ echo "---------------------------------------------------------"
 FATHER=$(echo "$RESULT" | grep "Deployed" | sed "s/Deployed to: //g")
 TX=$(echo "$RESULT" | grep "Transaction" | sed "s/Transaction hash: //g")
 
-NUGGFT=$(cast call "$FATHER" 'nuggft()(address)')
-xNUGGFT=$(cast call "$NUGGFT" 'xnuggftv1()(address)')
-DOTNUGG=$(cast call "$NUGGFT" 'dotnuggv1()(address)')
-GENESIS=$(cast call "$NUGGFT" 'genesis()(uint256)')
+NUGGFT=$(cast call "$FATHER" 'nuggft()(address)' --rpc-url "$ETH_RPC_URL")
+xNUGGFT=$(cast call "$NUGGFT" 'xnuggftv1()(address)' --rpc-url "$ETH_RPC_URL")
+DOTNUGG=$(cast call "$NUGGFT" 'dotnuggv1()(address)' --rpc-url "$ETH_RPC_URL")
+GENESIS=$(cast call "$NUGGFT" 'genesis()(uint256)' --rpc-url "$ETH_RPC_URL")
 
 echo "tx hash:             $TX"
 echo "nuggft deployed to:  $NUGGFT"

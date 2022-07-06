@@ -2,7 +2,7 @@
 
 pragma solidity 0.8.15;
 
-import "../interfaces/INuggftV1.sol";
+import {INuggftV1Lens} from "../interfaces/INuggftV1.sol";
 
 import {NuggftV1Globals} from "./NuggftV1Globals.sol";
 
