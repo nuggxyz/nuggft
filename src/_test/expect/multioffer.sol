@@ -9,7 +9,7 @@ import "./stake.sol";
 import "./balance.sol";
 import {Expect} from "./Expect.sol";
 
-contract expectOffer is base {
+contract expectMultiOffer is base {
 	expectStake stake;
 	expectBalance balance;
 	Expect creator;
@@ -22,27 +22,27 @@ contract expectOffer is base {
 
 	lib.txdata prepped;
 
-	function from(address user) public returns (expectOffer) {
+	function from(address user) public returns (expectMultiOffer) {
 		prepped.from = user;
 		return this;
 	}
 
-	function value(uint96 val) public returns (expectOffer) {
+	function value(uint96 val) public returns (expectMultiOffer) {
 		prepped.value = val;
 		return this;
 	}
 
-	function err(bytes memory b) public returns (expectOffer) {
+	function err(bytes memory b) public returns (expectMultiOffer) {
 		prepped.err = b;
 		return this;
 	}
 
-	function err(bytes1 b) public returns (expectOffer) {
-		if (b != 0x0) prepped.err = abi.encodePacked(bytes4(0x7e863b48), b);
+	function err(bytes1 b) public returns (expectMultiOffer) {
+		prepped.err = abi.encodePacked(bytes4(0x7e863b48), b);
 		return this;
 	}
 
-	function g() public returns (expectOffer) {
+	function g() public returns (expectMultiOffer) {
 		prepped.from = creator._globalFrom();
 		return this;
 	}

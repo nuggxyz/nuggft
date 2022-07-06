@@ -9,13 +9,13 @@ INIT_CODE_HASH=$(cast keccak "$PROXY_CODE")
 NONCE=$(cast nonce "$ETH_FROM")
 
 FACTORY=$(
-    cast compute-address "$ETH_FROM" --nonce "$NONCE" |
-        sed "s/Computed Address: //g"
+	cast compute-address "$ETH_FROM" --nonce "$NONCE" |
+		sed "s/Computed Address: //g"
 )
 
 echo "export INIT_CODE_HASH=$INIT_CODE_HASH"
 echo "export CALLER=$ETH_FROM"
-echo "export FACTORY=$NUGG_FATHER"
+echo "export FACTORY=$FACTORY"
 
 cd ../cuddly-waffle
 

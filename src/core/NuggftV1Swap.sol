@@ -254,6 +254,10 @@ abstract contract NuggftV1Swap is INuggftV1ItemSwap, INuggftV1Swap, NuggftV1Stak
                         panic(Error__0xAC__MustFinalizeOtherItemSwap)
                     }
 
+					if eq(nextEpoch, add(and(val, 0xffffff), 1)) {
+                        panic(Error__0xB4__MustFinalizeOtherItemSwapFromThisEpoch)
+                    }
+
                     val := shl(48, val)
 
                     val := or(val, shl(24, and(tokenId, 0xffffff)))

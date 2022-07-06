@@ -21,385 +21,201 @@ import {decodeMakingPrettierHappy} from "./libraries/BigOleLib.sol";
 /// @title NuggftV1
 /// @author nugg.xyz - danny7even and dub6ix - 2022
 contract NuggftV1 is IERC721, IERC721Metadata, NuggftV1Loan {
-    constructor() payable {}
+	constructor() payable {}
 
-    /// @inheritdoc INuggftV1Stake
-    function migrate(uint24 tokenId) external {
-        if (migrator == address(0)) _panic(Error__0x81__MigratorNotSet);
+	/// @inheritdoc INuggftV1Stake
+	function migrate(uint24 tokenId) external {
+		if (migrator == address(0)) _panic(Error__0x81__MigratorNotSet);
 
-        // stores the proof before deleting the nugg
-        uint256 proof = proofOf(tokenId);
+		// stores the proof before deleting the nugg
+		uint256 proof = proofOf(tokenId);
 
-        uint96 ethOwed = subStakedShare(tokenId);
+		uint96 ethOwed = subStakedShare(tokenId);
 
-        INuggftV1Migrator(migrator).nuggftMigrateFromV1{value: ethOwed}(tokenId, proof, msg.sender);
+		INuggftV1Migrator(migrator).nuggftMigrateFromV1{value: ethOwed}(tokenId, proof, msg.sender);
 
-        emit MigrateV1Sent(migrator, tokenId, bytes32(proof), msg.sender, ethOwed);
-    }
+		emit MigrateV1Sent(migrator, tokenId, bytes32(proof), msg.sender, ethOwed);
+	}
 
-    /// @notice removes a staked share from the contract,
-    /// @dev this is the only way to remove a share
-    /// @dev caculcates but does not handle dealing the eth - which is handled by the two helpers above
-    /// @dev ensures the user is the owner of the nugg
-    /// @param tokenId the id of the nugg being unstaked
-    /// @return ethOwed -> the amount of eth owed to the unstaking user - equivilent to "ethPerShare"
-    function subStakedShare(uint24 tokenId) internal returns (uint96 ethOwed) {
-        uint256 cache = agency[tokenId];
+	/// @notice removes a staked share from the contract,
+	/// @dev this is the only way to remove a share
+	/// @dev caculcates but does not handle dealing the eth - which is handled by the two helpers above
+	/// @dev ensures the user is the owner of the nugg
+	/// @param tokenId the id of the nugg being unstaked
+	/// @return ethOwed -> the amount of eth owed to the unstaking user - equivilent to "ethPerShare"
+	function subStakedShare(uint24 tokenId) internal returns (uint96 ethOwed) {
+		uint256 cache = agency[tokenId];
 
-        _repanic(address(uint160(cache)) == msg.sender && uint8(cache >> 254) == 0x01, Error__0x77__NotOwner);
+		_repanic(address(uint160(cache)) == msg.sender && uint8(cache >> 254) == 0x01, Error__0x77__NotOwner);
 
-        cache = stake;
+		cache = stake;
 
-        // handles all logic not related to staking the nugg
-        delete agency[tokenId];
-        delete proof[tokenId];
+		// handles all logic not related to staking the nugg
+		delete agency[tokenId];
+		delete proof[tokenId];
 
-        ethOwed = calculateEthPerShare(cache);
+		ethOwed = calculateEthPerShare(cache);
 
-        cache -= 1 << 192;
-        cache -= uint256(ethOwed) << 96;
+		cache -= 1 << 192;
+		cache -= uint256(ethOwed) << 96;
 
-        stake = cache;
+		stake = cache;
 
-        emit Stake(bytes32(cache));
-        emit Transfer(msg.sender, address(0), tokenId);
-    }
+		emit Stake(bytes32(cache));
+		emit Transfer(msg.sender, address(0), tokenId);
+	}
 
-    /// @inheritdoc IERC165
-    function supportsInterface(bytes4 interfaceId) public view virtual override returns (bool) {
-        return
-            interfaceId == type(IERC721).interfaceId || //
-            interfaceId == type(IERC721Metadata).interfaceId ||
-            interfaceId == type(IERC165).interfaceId;
-    }
+	/// @inheritdoc IERC165
+	function supportsInterface(bytes4 interfaceId) public view virtual override returns (bool) {
+		return
+			interfaceId == type(IERC721).interfaceId || //
+			interfaceId == type(IERC721Metadata).interfaceId ||
+			interfaceId == type(IERC165).interfaceId;
+	}
 
-    /// @inheritdoc IERC721Metadata
-    function name() public pure override returns (string memory) {
-        return "Nugg Fungible Token V1";
-    }
+	/// @inheritdoc IERC721Metadata
+	function name() public pure override returns (string memory) {
+		return "Nugg Fungible Token V1";
+	}
 
-    /// @inheritdoc IERC721Metadata
-    function symbol() public pure override returns (string memory) {
-        return "NUGGFT";
-    }
+	/// @inheritdoc IERC721Metadata
+	function symbol() public pure override returns (string memory) {
+		return "NUGGFT";
+	}
 
-    /// @inheritdoc IERC721Metadata
-    function tokenURI(uint256 tokenId) public view virtual override returns (string memory res) {
-        res = string(
-            dotnuggv1.encodeJson(
-                abi.encodePacked(
-                    '{"name":"NUGGFT","description":"Nugg Fungible Token V1","image":"',
-                    imageURI(tokenId),
-                    '","properites":',
-                    xnuggftv1.ploop(uint24(tokenId)),
-                    "}"
-                ),
-                true
-            )
-        );
-    }
+	/// @inheritdoc IERC721Metadata
+	function tokenURI(uint256 tokenId) public view virtual override returns (string memory res) {
+		res = string(
+			dotnuggv1.encodeJson(
+				abi.encodePacked(
+					'{"name":"NUGGFT","description":"Nugg Fungible Token V1","image":"',
+					imageURI(tokenId),
+					'","properites":',
+					xnuggftv1.ploop(uint24(tokenId)),
+					"}"
+				),
+				true
+			)
+		);
+	}
 
-    /// @inheritdoc INuggftV1Proof
-    function imageURI(uint256 tokenId) public view override returns (string memory res) {
-        res = dotnuggv1.exec(decodedCoreProofOf(uint24(tokenId)), true);
-    }
+	/// @inheritdoc INuggftV1Proof
+	function imageURI(uint256 tokenId) public view override returns (string memory res) {
+		res = dotnuggv1.exec(decodedCoreProofOf(uint24(tokenId)), true);
+	}
 
-    /// @inheritdoc INuggftV1Proof
-    function imageSVG(uint256 tokenId) public view override returns (string memory res) {
-        res = dotnuggv1.exec(decodedCoreProofOf(uint24(tokenId)), false);
-    }
+	/// @inheritdoc INuggftV1Proof
+	function imageSVG(uint256 tokenId) public view override returns (string memory res) {
+		res = dotnuggv1.exec(decodedCoreProofOf(uint24(tokenId)), false);
+	}
 
-    /// this may seem like the dumbest function of all time - and it is
-    /// it allows us to break up the "gas" usage over multiple view calls
-    /// it increases the chance that services like the graph will compute the dotnugg image
-    function image123(
-        uint256 tokenId,
-        bool base64,
-        uint8 chunk,
-        bytes calldata prev
-    ) public view override returns (bytes memory res) {
-        if (chunk == 1) {
-            res = abi.encode(dotnuggv1.read(decodedCoreProofOf((uint24(tokenId)))));
-        } else if (chunk == 2) {
-            (uint256[] memory calced, uint256 dat) = dotnuggv1.calc(decodeMakingPrettierHappy(prev));
-            res = abi.encode(calced, dat);
-        } else if (chunk == 3) {
-            (uint256[] memory calced, uint256 dat) = abi.decode(prev, (uint256[], uint256));
-            res = bytes(dotnuggv1.svg(calced, dat, base64));
-        }
-    }
+	/// this may seem like the dumbest function of all time - and it is
+	/// it allows us to break up the "gas" usage over multiple view calls
+	/// it increases the chance that services like the graph will compute the dotnugg image
+	function image123(
+		uint256 tokenId,
+		bool base64,
+		uint8 chunk,
+		bytes calldata prev
+	) public view override returns (bytes memory res) {
+		if (chunk == 1) {
+			res = abi.encode(dotnuggv1.read(decodedCoreProofOf((uint24(tokenId)))));
+		} else if (chunk == 2) {
+			(uint256[] memory calced, uint256 dat) = dotnuggv1.calc(decodeMakingPrettierHappy(prev));
+			res = abi.encode(calced, dat);
+		} else if (chunk == 3) {
+			(uint256[] memory calced, uint256 dat) = abi.decode(prev, (uint256[], uint256));
+			res = bytes(dotnuggv1.svg(calced, dat, base64));
+		}
+	}
 
-    /// @inheritdoc IERC721
-    function ownerOf(uint256 tokenId) public view override returns (address res) {
-        res = _ownerOf(uint24(tokenId), epoch());
+	/// @inheritdoc IERC721
+	function ownerOf(uint256 tokenId) public view override returns (address res) {
+		res = _ownerOf(uint24(tokenId), epoch());
 
-        if (res == address(0)) {
-            // if (proofOf(uint24(tokenId)) != 0) {
-            //     return address(this);
-            // }
-            _panic(Error__0x78__TokenDoesNotExist);
-        }
-    }
+		if (res == address(0)) {
+			// if (proofOf(uint24(tokenId)) != 0) {
+			//     return address(this);
+			// }
+			_panic(Error__0x78__TokenDoesNotExist);
+		}
+	}
 
-    function _ownerOf(uint256 tokenId, uint24 epoch) internal view returns (address res) {
-        uint256 cache = agencyOf(uint24(tokenId));
+	function _ownerOf(uint256 tokenId, uint24 epoch) internal view returns (address res) {
+		uint256 cache = agencyOf(uint24(tokenId));
 
-        if (cache == 0) {
-            // if (proofOf(uint24(tokenId)) != 0) {
-            //     return address(this);
-            // }
-            return address(0);
-        }
+		if (cache == 0) {
+			// if (proofOf(uint24(tokenId)) != 0) {
+			//     return address(this);
+			// }
+			return address(0);
+		}
 
-        if (cache >> 254 == 0x03 && (cache << 2) >> 232 >= epoch) {
-            return address(this);
-        }
+		if (cache >> 254 == 0x03 && (cache << 2) >> 232 >= epoch) {
+			return address(this);
+		}
 
-        return address(uint160(cache));
-    }
+		return address(uint160(cache));
+	}
 
-    function tokensOf(address you) external view override returns (uint24[] memory res) {
-        res = new uint24[](10000);
+	function tokensOf(address you) external view override returns (uint24[] memory res) {
+		res = new uint24[](10000);
 
-        uint24 iter = 0;
+		uint24 iter = 0;
 
-        uint24 epoch = epoch();
+		uint24 epoch = epoch();
 
-        for (uint24 i = 1; i < epoch; i++) if (you == _ownerOf(i, epoch)) res[iter++] = i;
+		for (uint24 i = 1; i < epoch; i++) if (you == _ownerOf(i, epoch)) res[iter++] = i;
 
-        (uint24 start, uint24 end) = premintTokens();
+		(uint24 start, uint24 end) = premintTokens();
 
-        for (uint24 i = start; i < end; i++) if (you == _ownerOf(i, epoch)) res[iter++] = i;
+		for (uint24 i = start; i < end; i++) if (you == _ownerOf(i, epoch)) res[iter++] = i;
 
-        assembly {
-            mstore(res, iter)
-        }
-    }
+		assembly {
+			mstore(res, iter)
+		}
+	}
 
-    /// @inheritdoc IERC721
-    function balanceOf(address you) external view override returns (uint256 acc) {
-        return this.tokensOf(you).length;
-    }
+	/// @inheritdoc IERC721
+	function balanceOf(address you) external view override returns (uint256 acc) {
+		return this.tokensOf(you).length;
+	}
 
-    /// @inheritdoc IERC721
-    function approve(address, uint256) external payable override {
+	/// @inheritdoc IERC721
+	function approve(address, uint256) external payable override {
+		_panic(Error__0x69__Wut);
+	}
+
+	/// @inheritdoc IERC721
+	function setApprovalForAll(address, bool) external pure override {
+		_panic(Error__0x69__Wut);
+	}
+
+	/// @inheritdoc IERC721
+	function getApproved(uint256) external pure override returns (address) {
+		return address(0);
+	}
+
+	/// @inheritdoc IERC721
+	function isApprovedForAll(address, address) external pure override returns (bool) {
+		return false;
+	}
+
+	//prettier-ignore
+	/// @inheritdoc IERC721
+	function transferFrom(address, address, uint256) external payable override {
         _panic(Error__0x69__Wut);
     }
 
-    /// @inheritdoc IERC721
-    function setApprovalForAll(address, bool) external pure override {
+	//prettier-ignore
+	/// @inheritdoc IERC721
+	function safeTransferFrom(address, address, uint256) external payable override {
         _panic(Error__0x69__Wut);
     }
 
-    /// @inheritdoc IERC721
-    function getApproved(uint256) external pure override returns (address) {
-        return address(0);
-    }
-
-    /// @inheritdoc IERC721
-    function isApprovedForAll(address, address) external pure override returns (bool) {
-        return false;
-    }
-
-    //prettier-ignore
-    /// @inheritdoc IERC721
-    function transferFrom(address, address, uint256) external payable override {
-        _panic(Error__0x69__Wut);
-    }
-
-    //prettier-ignore
-    /// @inheritdoc IERC721
-    function safeTransferFrom(address, address, uint256) external payable override {
-        _panic(Error__0x69__Wut);
-    }
-
-    //prettier-ignore
-    /// @inheritdoc IERC721
-    function safeTransferFrom(address, address, uint256, bytes memory) external payable override {
+	//prettier-ignore
+	/// @inheritdoc IERC721
+	function safeTransferFrom(address, address, uint256, bytes memory) external payable override {
         _panic(Error__0x69__Wut);
     }
 }
-// function exists(uint24 tokenId) internal view returns (bool) {
-//     return agency[tokenId] != 0 || proofOf(tokenId) != 0;
-// }
-
-// function isOwner(address sender, uint24 tokenId) internal view returns (bool res) {
-//     uint256 cache = agency[tokenId];
-//     return address(uint160(cache)) == sender && uint8(cache >> 254) == 0x01;
-// }
-
-// function isAgent(address sender, uint24 tokenId) internal view returns (bool res) {
-//     uint256 cache = agency[tokenId];
-
-//     if (uint160(cache) == uint160(sender)) {
-//         if (
-//             uint8(cache >> 254) == 0x01 || //
-//             uint8(cache >> 254) == 0x02 ||
-//             (uint8(cache >> 254) == 0x03 && ((cache >> 230) & 0xffffff) == 0)
-//         ) return true;
-//     }
-// }
-
-// 50
-// 100
-// 200
-// 400
-// 800
-// 1600
-// 3200
-// 6400
-
-// 1 month slowly mint them out to 10000
-// then free for all
-
-// minted nuggs:
-
-// teir a: (once a day from epoch mint)
-// - eyes
-// - mouth
-// - hat/hair
-// -
-
-// tier b: (from epoch mint)
-// - eyes
-// - mouth
-// - hat/hair
-
-// tier c:  (from regular mint)
-// - eyes
-// - mouth
-// - hat/hair
-// - maybe back/neck/hold
-
-// uint256 minted = MINT_OFFSET + TRUSTED_MINT_TOKENS;
-
-// function mint2(address friend) public payable {
-//     _repanic(balance[msg.sender] == TICKET, 0x00);
-//     _repanic(balance[friend] == 0, 0x01);
-//     // _repanic(friend != msg.sender, 0x02);
-
-//     uint256 _minted = minted;
-
-//     uint96 value = uint96(msg.value / 3);
-
-//     unchecked {
-//         mint(msg.sender, uint24(_minted), value);
-//         // mint(msg.sender, _minted + 1, value);
-//         // mint(msg.sender, _minted + 2, value);
-
-//         minted = _minted + 1;
-//     }
-
-//     balance[friend] = TICKET;
-
-//     balance[msg.sender] = 3 | ((_minted + 0) << 24) | ((_minted + 1) << 48) | ((_minted + 2) << 72);
-// }
-
-// function trustedMint2(address friend) public payable requiresTrust {
-//     _repanic(balance[friend] == 0, 0x03);
-//     balance[friend] = TICKET;
-// }
-
-// todo
-// define rarity of nuggft - make it calculatable
-
-// function mint(
-//     address to,
-//     uint24 tokenId,
-//     uint256 value
-// ) internal {
-//     uint256 randomEnough;
-
-//     uint256 agency__cache;
-
-//     uint256 ptr;
-
-//     // prettier-ignore
-//     assembly {
-//         mstore(0x00, tokenId)
-//         mstore(0x20, agency.slot)
-
-//         ptr := mload(0x40)
-
-//         // ============================================================
-//         // agency__sptr is the storage value that solidity would compute
-//         // + if you used "agency[tokenId]"
-//         let agency__sptr := keccak256( // =============================
-//             0x00, /* [ tokenId                               ]    0x20
-//             0x20     [ agency.slot                           ] */ 0x40
-//         ) // ==========================================================
-
-//         if iszero(iszero(sload(agency__sptr))) {
-//             mstore(0x00, Revert__Sig)
-//             mstore8(31, Error__0x80__TokenDoesExist)
-//             revert(27, 0x5)
-//         }
-
-//         // we div and mul by 16 here to make the value returned stay constant for 16 blocks
-//         // this makes gas estimation more acurate as "initFromSeed" will change in gas useage
-//         // + depending on the value returned here
-//         mstore(
-//             /* postion */ 0x20,
-//             /* value   */ blockhash(shl(shr(sub(number(), 2), 4), 4))
-//             // /* value   */ blockhash(sub(number(), 69))
-//         )
-
-//         // mstore(0x40, 69)
-
-//         randomEnough := keccak256( // ==================================
-//             0x00, /* [ tokenId                               ]    0x20
-//             0x20     [ blockhash(sub(number(), 69))          ]    0x40
-//             0x40     [ block.difficulty()                    ] */ 0x40
-//         ) // ===========================================================
-
-//         agency__cache := or( // ===================================
-//             // set agency to reflect the new agent
-//             /* flag  */ shl(254, 0x01), // = OWN(0x01)
-//             /* epoch */                 // = 0
-//             /* eth   */                 // = 0
-//             /* addr  */ to              // = new agent
-//         ) // ==========================================================
-
-//         sstore(agency__sptr, agency__cache)
-//     }
-
-//     uint256 _proof = initFromSeed(randomEnough);
-
-//     proof[tokenId] = _proof;
-
-//     addStakedShare(value);
-
-//     address itemHolder = address(xnuggftv1);
-
-//     // prettier-ignore
-//     assembly {
-
-//         mstore(0x00, value)
-//         mstore(0x20, _proof)
-//         mstore(0x60, agency__cache)
-
-//         log4(0x00, 0x00, Event__Transfer, 0, to, tokenId)
-
-//         log2( // ----------------------------------------------------------
-//             /* param #1: value   */ 0x00, /* [ msg.value       ]     0x20,
-//                param #2: proof      0x20,    [ proof[tokenId]  ]     0x40,
-//                param #2: stake      0x40,    [ stake           ]     0x60,
-//                param #3: agency     0x60,    [ agency[tokenId] ]  */ 0x80,
-//             /* topic #1: sig     */            Event__Mint,
-//             /* topic #2: tokenId */            tokenId
-//         ) // -------------------------------------------------------------
-
-//         mstore(0x00, Function__transferBatch)
-//         mstore(0x40, 0x00)
-//         mstore(0x60, caller())
-
-//         // TODO make sure this is the right way to do this
-//         if iszero(call(gas(), itemHolder, 0x00, 0x1C, 0x64, 0x00, 0x00)) {
-//             mstore(0x00, Revert__Sig)
-//             mstore8(31, Error__0xAE__FailedCallToItemsHolder)
-//             revert(27, 0x5)
-//         }
-
-//         mstore(0x40, ptr)
-//     }
-// }
