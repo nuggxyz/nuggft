@@ -2,23 +2,25 @@
 
 pragma solidity 0.8.15;
 
-import {INuggftV1, INuggftV1Execute, INuggftV1Lens} from "./interfaces/INuggftV1.sol";
-import {IERC165} from "./interfaces/IERC165.sol";
-import {IERC721, IERC721Metadata} from "./interfaces/IERC721.sol";
+import {INuggftV1, INuggftV1Execute, INuggftV1Lens} from "@nuggft-v1-core/src/interfaces/INuggftV1.sol";
+import {IERC165} from "@nuggft-v1-core/src/interfaces/IERC165.sol";
+import {IERC721, IERC721Metadata} from "@nuggft-v1-core/src/interfaces/IERC721.sol";
 
-import {INuggftV1Migrator} from "./interfaces/INuggftV1Migrator.sol";
-import {IDotnuggV1} from "dotnugg-v1-core/IDotnuggV1.sol";
+import {INuggftV1Migrator} from "@nuggft-v1-core/src/interfaces/INuggftV1Migrator.sol";
 
-import {DotnuggV1Lib} from "dotnugg-v1-core/DotnuggV1Lib.sol";
+import {IDotnuggV1} from "@dotnugg-v1-core/src/IDotnuggV1.sol";
 
-import {decodeMakingPrettierHappy} from "./libraries/BigOleLib.sol";
+import {DotnuggV1Lib} from "@dotnugg-v1-core/src/DotnuggV1Lib.sol";
 
-import {NuggftV1Loan} from "./core/NuggftV1Loan.sol";
+import {decodeMakingPrettierHappy} from "@nuggft-v1-core/src/libraries/BigOleLib.sol";
+
+import {NuggftV1Loan} from "@nuggft-v1-core/src/core/NuggftV1Loan.sol";
+import {NuggftV1Globals} from "@nuggft-v1-core/src/core/NuggftV1Globals.sol";
 
 /// @title NuggftV1
 /// @author nugg.xyz - danny7even and dub6ix - 2022
 contract NuggftV1 is NuggftV1Loan {
-	constructor() payable {}
+	constructor(bytes memory _dep) payable NuggftV1Globals(_dep) {}
 
 	/// @inheritdoc INuggftV1Execute
 	function extract() external requiresTrust {

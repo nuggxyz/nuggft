@@ -2,7 +2,7 @@
 
 pragma solidity 0.8.15;
 
-import {IERC165} from "./IERC165.sol";
+import {IERC165} from "@nuggft-v1-core/src/interfaces/IERC165.sol";
 
 /**
     Note: The ERC-165 identifier for this interface is 0x0e89341c.

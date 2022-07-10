@@ -2,10 +2,10 @@
 
 pragma solidity 0.8.15;
 
-import {IDotnuggV1} from "dotnugg-v1-core/IDotnuggV1.sol";
-import {IxNuggftV1} from "./IxNuggftV1.sol";
+import {IDotnuggV1} from "@dotnugg-v1-core/src/IDotnuggV1.sol";
+import {IxNuggftV1} from "@nuggft-v1-core/src/interfaces/IxNuggftV1.sol";
 
-import {IERC721, IERC721Metadata} from "./IERC721.sol";
+import {IERC721, IERC721Metadata} from "@nuggft-v1-core/src/interfaces/IERC721.sol";
 
 interface INuggftV1Lens {
 	/* ///////////////////////////////////////////////////////////////////
@@ -285,6 +285,12 @@ interface INuggftV1Event {
 }
 
 interface INuggftV1Execute {
+	/* ///////////////////////////////////////////////////////////////////
+                            EPOCH
+    /////////////////////////////////////////////////////////////////// */
+
+	function multicall(bytes[] calldata data) external;
+
 	/* ///////////////////////////////////////////////////////////////////
                             EPOCH
     /////////////////////////////////////////////////////////////////// */

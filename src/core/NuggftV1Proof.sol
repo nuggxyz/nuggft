@@ -2,11 +2,11 @@
 
 pragma solidity 0.8.15;
 
-import {INuggftV1, INuggftV1Lens, INuggftV1Execute} from "../interfaces/INuggftV1.sol";
-import {IDotnuggV1} from "dotnugg-v1-core/IDotnuggV1.sol";
-import {IxNuggftV1} from "../interfaces/IxNuggftV1.sol";
+import {INuggftV1, INuggftV1Lens, INuggftV1Execute} from "@nuggft-v1-core/src/interfaces/INuggftV1.sol";
+import {IDotnuggV1} from "@dotnugg-v1-core/src/IDotnuggV1.sol";
+import {IxNuggftV1} from "@nuggft-v1-core/src/interfaces/IxNuggftV1.sol";
 
-import {DotnuggV1Lib} from "dotnugg-v1-core/DotnuggV1Lib.sol";
+import {DotnuggV1Lib} from "@dotnugg-v1-core/src/DotnuggV1Lib.sol";
 
 import {NuggftV1Epoch} from "./NuggftV1Epoch.sol";
 
@@ -65,8 +65,8 @@ abstract contract NuggftV1Proof is NuggftV1Epoch {
 
 			function panic(code) {
 				mstore(0x00, Revert__Sig)
-				mstore8(31, code)
-				revert(27, 0x5)
+				mstore8(0x4, code)
+				revert(0x00, 0x5)
 			}
 
 			mstore(0x00, tokenId)

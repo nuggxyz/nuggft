@@ -2,9 +2,9 @@
 
 pragma solidity 0.8.15;
 
-import {INuggftV1, INuggftV1Execute, INuggftV1Lens} from "../interfaces/INuggftV1.sol";
+import {INuggftV1, INuggftV1Execute, INuggftV1Lens} from "@nuggft-v1-core/src/interfaces/INuggftV1.sol";
 
-import {NuggftV1Swap} from "./NuggftV1Swap.sol";
+import {NuggftV1Swap} from "@nuggft-v1-core/src/core/NuggftV1Swap.sol";
 
 /// @author nugg.xyz - danny7even and dub6ix - 2022
 abstract contract NuggftV1Loan is NuggftV1Swap {
@@ -21,8 +21,8 @@ abstract contract NuggftV1Loan is NuggftV1Swap {
 
 			function panic(code) {
 				mstore(0x00, Revert__Sig)
-				mstore8(31, code)
-				revert(27, 0x5)
+				mstore8(0x4, code)
+				revert(0x00, 0x5)
 			}
 
 			// load the length of the calldata array
@@ -114,8 +114,8 @@ abstract contract NuggftV1Loan is NuggftV1Swap {
 
 			function panic(code) {
 				mstore(0x00, Revert__Sig)
-				mstore8(31, code)
-				revert(27, 0x5)
+				mstore8(0x4, code)
+				revert(0x00, 0x5)
 			}
 
 			let stake__cache := sload(stake.slot)
@@ -259,8 +259,8 @@ abstract contract NuggftV1Loan is NuggftV1Swap {
 
 			function panic(code) {
 				mstore(0x00, Revert__Sig)
-				mstore8(31, code)
-				revert(27, 0x5)
+				mstore8(0x4, code)
+				revert(0x00, 0x5)
 			}
 
 			// load the length of the calldata array

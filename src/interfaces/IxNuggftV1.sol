@@ -2,7 +2,7 @@
 
 pragma solidity 0.8.15;
 
-import {IERC1155Metadata_URI, IERC1155} from "./IERC1155.sol";
+import {IERC1155Metadata_URI, IERC1155} from "@nuggft-v1-core/src/interfaces/IERC1155.sol";
 
 // prettier-ignore
 interface IxNuggftV1 is IERC1155Metadata_URI, IERC1155 {

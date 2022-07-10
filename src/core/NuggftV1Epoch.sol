@@ -2,14 +2,14 @@
 
 pragma solidity 0.8.15;
 
-import {INuggftV1Lens} from "../interfaces/INuggftV1.sol";
+import {INuggftV1Lens} from "@nuggft-v1-core/src/interfaces/INuggftV1.sol";
 
-import {NuggftV1Globals} from "./NuggftV1Globals.sol";
+import {NuggftV1Globals} from "@nuggft-v1-core/src/core/NuggftV1Globals.sol";
 
 /// @author nugg.xyz - danny7even and dub6ix - 2022
 abstract contract NuggftV1Epoch is NuggftV1Globals {
 	/// @inheritdoc INuggftV1Lens
-	function epoch() public view virtual override returns (uint24 res) {
+	function epoch() public view virtual override(INuggftV1Lens) returns (uint24 res) {
 		res = toEpoch(block.number, genesis);
 	}
 

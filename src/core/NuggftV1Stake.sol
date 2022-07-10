@@ -2,9 +2,9 @@
 
 pragma solidity 0.8.15;
 
-import {INuggftV1, INuggftV1Lens} from "../interfaces/INuggftV1.sol";
+import {INuggftV1, INuggftV1Lens} from "@nuggft-v1-core/src/interfaces/INuggftV1.sol";
 
-import {NuggftV1Proof} from "./NuggftV1Proof.sol";
+import {NuggftV1Proof} from "@nuggft-v1-core/src/core/NuggftV1Proof.sol";
 
 /// @author nugg.xyz - danny7even and dub6ix - 2022
 abstract contract NuggftV1Stake is NuggftV1Proof {
@@ -69,8 +69,8 @@ abstract contract NuggftV1Stake is NuggftV1Proof {
 			// ensure value >= msp
 			if gt(_msp, value) {
 				mstore(0x00, Revert__Sig)
-				mstore8(31, Error__0x71__ValueTooLow)
-				revert(27, 0x5)
+				mstore8(0x4, Error__0x71__ValueTooLow)
+				revert(0x00, 0x5)
 			}
 
 			// caculate value proveded over msp

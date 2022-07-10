@@ -2,11 +2,11 @@
 
 pragma solidity 0.8.15;
 
-import {INuggftV1, INuggftV1Execute} from "../interfaces/INuggftV1.sol";
+import {INuggftV1, INuggftV1Execute} from "@nuggft-v1-core/src/interfaces/INuggftV1.sol";
 
-import {NuggftV1Stake} from "./NuggftV1Stake.sol";
+import {NuggftV1Stake} from "@nuggft-v1-core/src/core/NuggftV1Stake.sol";
 
-import {DotnuggV1Lib} from "dotnugg-v1-core/DotnuggV1Lib.sol";
+import {DotnuggV1Lib} from "@dotnugg-v1-core/src/DotnuggV1Lib.sol";
 
 /// @author nugg.xyz - danny7even and dub6ix - 2022
 /// @notice mechanism for trading of nuggs between users (and items between nuggs)
@@ -81,8 +81,8 @@ abstract contract NuggftV1Swap is NuggftV1Stake {
 
 			function panic(code) {
 				mstore(0x00, Revert__Sig)
-				mstore8(31, code)
-				revert(27, 0x5)
+				mstore8(0x4, code)
+				revert(0x00, 0x5)
 			}
 
 			mstore(0x20, agency.slot)
@@ -165,8 +165,8 @@ abstract contract NuggftV1Swap is NuggftV1Stake {
 
             function panic(code) {
                 mstore(0x00, Revert__Sig)
-                mstore8(31, code)
-                revert(27, 0x5)
+			mstore8(0x4,  code)
+			revert(0x00, 0x5)
             }
 
             // ensure that the agency flag is "SWAP" (0x03)
@@ -450,8 +450,8 @@ abstract contract NuggftV1Swap is NuggftV1Stake {
 
 			if iszero(iszero(sload(agency__sptr))) {
 				mstore(0x00, Revert__Sig)
-				mstore8(31, Error__0x80__TokenDoesExist)
-				revert(27, 0x5)
+				mstore8(0x4, Error__0x80__TokenDoesExist)
+				revert(0x00, 0x5)
 			}
 
 			// prettier-ignore
@@ -477,8 +477,8 @@ abstract contract NuggftV1Swap is NuggftV1Stake {
 			// TODO make sure this is the right way to do this
 			if iszero(call(gas(), itemHolder, 0x00, 0x1C, 0x64, 0x00, 0x00)) {
 				mstore(0x00, Revert__Sig)
-				mstore8(31, Error__0xAE__FailedCallToItemsHolder)
-				revert(27, 0x5)
+				mstore8(0x4, Error__0xAE__FailedCallToItemsHolder)
+				revert(0x00, 0x5)
 			}
 
 			mstore(0x40, ptrA)
@@ -505,8 +505,8 @@ abstract contract NuggftV1Swap is NuggftV1Stake {
 
             function panic(code) {
                 mstore(0x00, Revert__Sig)
-                mstore8(31, code)
-                revert(27, 0x5)
+			mstore8(0x4,  code)
+			revert(0x00, 0x5)
             }
 
             function juke(x, L, R) -> b {
@@ -791,8 +791,8 @@ abstract contract NuggftV1Swap is NuggftV1Stake {
 		assembly {
 			function panic(code) {
 				mstore(0x00, Revert__Sig)
-				mstore8(31, code)
-				revert(27, 0x5)
+				mstore8(0x4, code)
+				revert(0x00, 0x5)
 			}
 
 			function juke(x, L, R) -> b {

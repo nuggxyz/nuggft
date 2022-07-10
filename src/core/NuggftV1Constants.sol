@@ -128,13 +128,13 @@ abstract contract NuggftV1Constants {
 
 	error Revert(bytes1);
 
-	uint40 constant Revert__Sig = 0x7e863b4800;
+	bytes4 constant Revert__Sig = 0x7e863b48;
 
 	function _panic(uint8 code) internal pure {
 		assembly {
 			mstore(0x00, Revert__Sig)
-			mstore8(31, code)
-			revert(27, 0x5)
+			mstore8(0x4, code)
+			revert(0x00, 0x5)
 		}
 	}
 
