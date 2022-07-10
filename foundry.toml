@@ -29,7 +29,7 @@ block_timestamp = 0
 block_difficulty = 0
 gas_reports = ["RiggedNuggft", "NuggftV1", "Expect"]
 no_storage_caching = false
-# via_ir=true
+via_ir=true
 
 [default.optimizer_details]
 constantOptimizer = true
