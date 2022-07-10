@@ -31,6 +31,10 @@ contract NuggftV1 is NuggftV1Loan {
 		emit Stake(bytes32(cache));
 	}
 
+	/* ///////////////////////////////////////////////////////////////////
+                            MIGRATION
+    /////////////////////////////////////////////////////////////////// */
+
 	/// @inheritdoc INuggftV1Execute
 	function setMigrator(address _migrator) external requiresTrust {
 		migrator = _migrator;
@@ -61,7 +65,9 @@ contract NuggftV1 is NuggftV1Loan {
 	function subStakedShare(uint24 tokenId) internal returns (uint96 ethOwed) {
 		uint256 cache = agency[tokenId];
 
-		_repanic(address(uint160(cache)) == msg.sender && uint8(cache >> 254) == 0x01, Error__0x77__NotOwner);
+		if (address(uint160(cache)) != msg.sender || uint8(cache >> 254) != 0x01) {
+			_panic(Error__0x77__NotOwner);
+		}
 
 		cache = stake;
 
@@ -80,6 +86,10 @@ contract NuggftV1 is NuggftV1Loan {
 		emit Transfer(msg.sender, address(0), tokenId);
 	}
 
+	/* ///////////////////////////////////////////////////////////////////
+                           ERC165 SUPPORT
+    /////////////////////////////////////////////////////////////////// */
+
 	/// @inheritdoc IERC165
 	function supportsInterface(bytes4 interfaceId) public view virtual override returns (bool) {
 		return
@@ -87,6 +97,10 @@ contract NuggftV1 is NuggftV1Loan {
 			interfaceId == type(IERC721Metadata).interfaceId ||
 			interfaceId == type(IERC165).interfaceId;
 	}
+
+	/* ///////////////////////////////////////////////////////////////////
+                            ERC721 METADATA
+    /////////////////////////////////////////////////////////////////// */
 
 	/// @inheritdoc IERC721Metadata
 	function name() public pure override returns (string memory) {
@@ -113,6 +127,10 @@ contract NuggftV1 is NuggftV1Loan {
 			)
 		);
 	}
+
+	/* ///////////////////////////////////////////////////////////////////
+                            SUPPLEMENTAL METADATA
+    /////////////////////////////////////////////////////////////////// */
 
 	/// @inheritdoc INuggftV1Lens
 	function imageURI(uint256 tokenId) public view override returns (string memory res) {
@@ -145,35 +163,6 @@ contract NuggftV1 is NuggftV1Loan {
 		}
 	}
 
-	/// @inheritdoc IERC721
-	function ownerOf(uint256 tokenId) public view override returns (address res) {
-		res = _ownerOf(uint24(tokenId), epoch());
-
-		if (res == address(0)) {
-			// if (proofOf(uint24(tokenId)) != 0) {
-			//     return address(this);
-			// }
-			_panic(Error__0x78__TokenDoesNotExist);
-		}
-	}
-
-	function _ownerOf(uint256 tokenId, uint24 epoch) internal view returns (address res) {
-		uint256 cache = agencyOf(uint24(tokenId));
-
-		if (cache == 0) {
-			// if (proofOf(uint24(tokenId)) != 0) {
-			//     return address(this);
-			// }
-			return address(0);
-		}
-
-		if (cache >> 254 == 0x03 && (cache << 2) >> 232 >= epoch) {
-			return address(this);
-		}
-
-		return address(uint160(cache));
-	}
-
 	function tokensOf(address you) external view override returns (uint24[] memory res) {
 		res = new uint24[](10000);
 
@@ -192,6 +181,31 @@ contract NuggftV1 is NuggftV1Loan {
 		}
 	}
 
+	/// @notice prefromance function returns the owner of the nugg given the epoch
+	function _ownerOf(uint256 tokenId, uint24 epoch) internal view returns (address res) {
+		uint256 cache = agencyOf(uint24(tokenId));
+
+		if (cache == 0) return address(0);
+
+		if (cache >> 254 == 0x03 && (cache << 2) >> 232 >= epoch) {
+			return address(this);
+		}
+
+		return address(uint160(cache));
+	}
+
+	/* ///////////////////////////////////////////////////////////////////
+                            ERC721 SUPPORT
+    /////////////////////////////////////////////////////////////////// */
+
+	/// @inheritdoc IERC721
+	function ownerOf(uint256 tokenId) public view override returns (address res) {
+		res = _ownerOf(uint24(tokenId), epoch());
+
+		// revert as per EIP-721 specificaition
+		if (res == address(0)) _panic(Error__0x78__TokenDoesNotExist);
+	}
+
 	/// @inheritdoc IERC721
 	function balanceOf(address you) external view override returns (uint256 acc) {
 		return this.tokensOf(you).length;
@@ -208,7 +222,11 @@ contract NuggftV1 is NuggftV1Loan {
 	}
 
 	/// @inheritdoc IERC721
-	function getApproved(uint256) external pure override returns (address) {
+	function getApproved(uint256 tokenId) external view override returns (address) {
+		// if token does not exist: revert as per EIP-721 specificaition
+		if (agencyOf(uint24(tokenId)) == 0) _panic(Error__0x78__TokenDoesNotExist);
+
+		// if token does exist: return 0 address to indicate no approval
 		return address(0);
 	}
 

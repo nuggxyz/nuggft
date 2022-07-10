@@ -84,10 +84,6 @@ abstract contract NuggftV1Constants {
 	uint64 constant Function__transferSingle = 0x49a035e3;
 	uint64 constant Function__transferBatch = 0xdec6d46d;
 
-	error Revert(bytes1);
-
-	uint40 constant Revert__Sig = 0x7e863b4800;
-
 	uint8 constant Error__0x65__TokenNotMintable = 0x65;
 	uint8 constant Error__0x66__TokenNotTrustMintable = 0x66;
 	uint8 constant Error__0x67__WinningClaimTooEarly = 0x67;
@@ -129,6 +125,10 @@ abstract contract NuggftV1Constants {
 	uint8 constant Error__0xB2__UnexpectedIncrement = 0xB2;
 	uint8 constant Error__0xB3__NuggIsNotItemAgent = 0xB3;
 	uint8 constant Error__0xB4__MustFinalizeOtherItemSwapFromThisEpoch = 0xB4;
+
+	error Revert(bytes1);
+
+	uint40 constant Revert__Sig = 0x7e863b4800;
 
 	function _panic(uint8 code) internal pure {
 		assembly {
