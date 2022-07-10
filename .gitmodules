@@ -4,3 +4,6 @@
 [submodule "lib/dotnugg-v1-core"]
 	path = lib/dotnugg-v1-core
 	url = https://github.com/nuggxyz/dotnugg-v1-core
+[submodule "lib/forge-std"]
+	path = lib/forge-std
+	url = https://github.com/foundry-rs/forge-std
