@@ -4,65 +4,69 @@ pragma solidity 0.8.15;
 
 import "./ds.sol";
 
+import "forge-std/console2.sol";
+
 library gas {
-    struct run {
-        string label;
-        uint256 left;
-    }
+	struct run {
+		string label;
+		uint256 left;
+	}
 
-    function ptr() private pure returns (run storage s) {
-        assembly {
-            s.slot := 0x432343243242342534
-        }
-    }
+	function ptr() private pure returns (run storage s) {
+		assembly {
+			s.slot := 0x432343243242342534
+		}
+	}
 
-    function start(string memory label) internal view returns (run memory a) {
-        // ptr().runs[label] = 0x01;
-        // ptr().runs[label] = gasleft();
+	function start(string memory label) internal view returns (run memory a) {
+		// ptr().runs[label] = 0x01;
+		// ptr().runs[label] = gasleft();
 
-        a.label = label;
-        a.left = gasleft();
+		a.label = label;
+		a.left = gasleft();
 
-        // ptr().left = gasleft();
-    }
+		// ptr().left = gasleft();
+	}
 
-    // function start() internal {
-    //     ptr().left = gasleft();
-    // }
+	// function start() internal {
+	//     ptr().left = gasleft();
+	// }
 
-    function stop(run memory b) internal view {
-        uint256 checkpointGasLeft2 = gasleft();
+	function stop(run memory b) internal view {
+		uint256 checkpointGasLeft2 = gasleft();
 
-        ds.inject.log(b.label, b.left - checkpointGasLeft2);
-    }
+		console2.log(b.label, b.left - checkpointGasLeft2);
+
+		b.left = b.left - checkpointGasLeft2;
+	}
 }
 
 contract GasTracker {
-    modifier trackGas() {
-        uint256 a;
-        assembly {
-            a := gas()
-        }
+	modifier trackGas() {
+		uint256 a;
+		assembly {
+			a := gas()
+		}
 
-        _;
-        assembly {
-            a := sub(a, gas())
-        }
+		_;
+		assembly {
+			a := sub(a, gas())
+		}
 
-        ds.inject.log("gas used: ", a);
-    }
+		ds.inject.log("gas used: ", a);
+	}
 
-    modifier trackGas2(string memory mem) {
-        uint256 a;
-        assembly {
-            a := gas()
-        }
+	modifier trackGas2(string memory mem) {
+		uint256 a;
+		assembly {
+			a := gas()
+		}
 
-        _;
-        assembly {
-            a := sub(a, gas())
-        }
+		_;
+		assembly {
+			a := sub(a, gas())
+		}
 
-        ds.inject.log(mem, a);
-    }
+		ds.inject.log(mem, a);
+	}
 }
