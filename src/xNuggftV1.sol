@@ -98,7 +98,7 @@ contract xNuggftV1 is IxNuggftV1 {
                      '{"name":"',         name(),
                     '","description":"',  DotnuggV1Lib.itemIdToString(uint16(tokenId), features()),
                     '","image":"',        imageURI(tokenId),
-                    '}'
+                    '"}'
                 ), true
             )
         );
