@@ -1,72 +1,72 @@
 
-# [default]
-# src = 'src'
-# test = 'scripts'
-# out = 'out'
-# libs = ['lib']
-# allow_paths = ["../dotnugg-v1-core/src"]
-
-# cache = true
-# force = false
-# evm_version = 'london'
-# ## Sets the concrete solc version to use, this overrides the `auto_detect_solc` value
-# solc_version = '0.8.15'
-# auto_detect_solc = false
-# optimizer = true
-# optimizer_runs = 10000000
-# verbosity = 0
-# ignored_error_codes = []
-# fuzz_runs = 1000
-# ffi = true
-# sender = '0x9b0e2b16f57648c7baf28edd7772a815af266e77'
-# tx_origin = '0x9b0e2b16f57648c7baf28edd7772a815af266e77'
-# initial_balance = '0xffffffffffffffffffffffff'
-# block_number = 4400000
-# chain_id = 31337
-# gas_limit = "9223372036854775807"
-# gas_price = 0
-# block_base_fee_per_gas = 0
-# block_coinbase = '0x0000000000000000000000000000000000000000'
-# block_timestamp = 0
-# block_difficulty = 0
-# gas_reports = ["NuggftV1Extended", "NuggftV1", "Expect"]
-# no_storage_caching = false
-# via_ir=false
-
-# [default.optimizer_details]
-# constantOptimizer = true
-# cse = true
-# deduplicate=true
-# orderLiterals=true
-# yul=true
-
-# [default.optimizer_details.yulDetails]
-# stackAllocation = true
-
-
-[default]
+[profile.default]
+src = 'src'
 test = 'scripts'
+out = 'out'
 libs = ['lib']
+allow_paths = ["../dotnugg-v1-core/src"]
+
+cache = true
+force = false
+evm_version = 'london'
+## Sets the concrete solc version to use, this overrides the `auto_detect_solc` value
+solc_version = '0.8.15'
+auto_detect_solc = false
 optimizer = true
 optimizer_runs = 10000000
-solc_version = '0.8.15'
-fuzz_runs = 100000
+verbosity = 0
+ignored_error_codes = []
+fuzz_runs = 1000
+ffi = true
+sender = '0x9b0e2b16f57648c7baf28edd7772a815af266e77'
+tx_origin = '0x9b0e2b16f57648c7baf28edd7772a815af266e77'
+initial_balance = '0xffffffffffffffffffffffff'
+block_number = 4400000
+chain_id = 31337
+gas_limit = "9223372036854775807"
+gas_price = 0
+block_base_fee_per_gas = 0
+block_coinbase = '0x0000000000000000000000000000000000000000'
+block_timestamp = 0
+block_difficulty = 0
+gas_reports = ["NuggftV1Extended", "NuggftV1", "Expect"]
+no_storage_caching = false
+via_ir=false
+
+[profile.default.optimizer_details]
+constantOptimizer = true
+cse = true
+deduplicate=true
+orderLiterals=true
+yul=true
+
+[profile.default.optimizer_details.yulDetails]
+stackAllocation = true
 
 
-[optim-on]
-test = 'scripts'
-libs = ['lib']
-optimizer = true
-optimizer_runs = 1000000
-solc_version = '0.8.15'
-fuzz_runs = 100000
+# [default]
+# test = 'scripts'
+# libs = ['lib']
+# optimizer = true
+# optimizer_runs = 10000000
+# solc_version = '0.8.15'
+# fuzz_runs = 100000
 
-[optim-off]
-test = 'scripts'
-libs = ['lib']
-optimizer = false
-solc_version = '0.8.15'
-fuzz_runs = 100000
+
+# [optim-on]
+# test = 'scripts'
+# libs = ['lib']
+# optimizer = true
+# optimizer_runs = 1000000
+# solc_version = '0.8.15'
+# fuzz_runs = 100000
+
+# [optim-off]
+# test = 'scripts'
+# libs = ['lib']
+# optimizer = false
+# solc_version = '0.8.15'
+# fuzz_runs = 100000
 
 
 # [nuggft]

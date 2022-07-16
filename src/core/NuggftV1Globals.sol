@@ -51,9 +51,13 @@ abstract contract NuggftV1Globals is NuggftV1Constants, INuggftV1 {
 
 		address _dn;
 
-		assembly {
-			_dn := create(0, add(0x20, _dep), mload(_dep))
-		}
+		// if (_dep.length == 20) {
+		_dn = address(bytes20(_dep));
+		// } else {
+		// 	assembly {
+		// 		_dn := create(0, add(0x20, _dep), mload(_dep))
+		// 	}
+		// }
 
 		dotnuggv1 = IDotnuggV1(_dn);
 
