@@ -1,7 +1,5 @@
 ds-test/=lib/ds-test/src/
-@dotnugg-v1-core=lib/dotnugg-v1-core/
+@dotnugg-v1-core=../dotnugg-v1-core/
 forge-std/=lib/forge-std/src/
 @nuggft-v1-core/src/=src/
 @nuggft-v1-core/test/=test/
-@nuggft-v1-core/deploy/=deploy/
-@nuggft-v1-core/bridge/=bridge/

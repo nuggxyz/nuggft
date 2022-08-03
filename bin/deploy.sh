@@ -16,12 +16,11 @@ echo "$SEED"
 
 RESULT=$(
 	forge create NuggFatherV1 \
-		--force \
 		--constructor-args "$SEED" \
 		--mnemonic-path "$MNEMONIC_PATH_1" \
 		--mnemonic-index 1 \
 		--value 10ether \
-		--gas-limit 27000000 \
+		--gas-limit 29000000 \
 		--rpc-url "$ETH_RPC_URL" \
 		--from "$ETH_FROM" \
 		--optimize --optimizer-runs="$OPTIMIZER_RUNS" \

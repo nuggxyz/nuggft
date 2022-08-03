@@ -3,7 +3,9 @@
 pragma solidity 0.8.15;
 
 import {INuggftV1} from "@nuggft-v1-core/src/interfaces/INuggftV1.sol";
+import {DotnuggV1} from "@dotnugg-v1-core/src/DotnuggV1.sol";
 import {IDotnuggV1} from "@dotnugg-v1-core/src/IDotnuggV1.sol";
+
 import {IxNuggftV1} from "@nuggft-v1-core/src/interfaces/IxNuggftV1.sol";
 
 import {xNuggftV1} from "@nuggft-v1-core/src/xNuggftV1.sol";
@@ -40,7 +42,7 @@ abstract contract NuggftV1Globals is NuggftV1Constants, INuggftV1 {
 
 	mapping(uint40 => uint256) internal _itemAgency;
 
-	constructor(bytes memory _dep) payable {
+	constructor() payable {
 		address dub6ix = 0x9B0E2b16F57648C7bAF28EDD7772a815Af266E77;
 
 		genesis = (block.number / INTERVAL) * INTERVAL;
@@ -49,19 +51,9 @@ abstract contract NuggftV1Globals is NuggftV1Constants, INuggftV1 {
 
 		early = uint24(msg.value / STARTING_PRICE);
 
-		address _dn;
-
-		// if (_dep.length == 20) {
-		_dn = address(bytes20(_dep));
-		// } else {
-		// 	assembly {
-		// 		_dn := create(0, add(0x20, _dep), mload(_dep))
-		// 	}
-		// }
-
-		dotnuggv1 = IDotnuggV1(_dn);
-
 		xnuggftv1 = IxNuggftV1(new xNuggftV1());
+
+		dotnuggv1 = new DotnuggV1();
 
 		stake = (msg.value << 96) + (uint256(early) << 192);
 

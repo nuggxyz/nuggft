@@ -20,7 +20,7 @@ import {NuggftV1Globals} from "@nuggft-v1-core/src/core/NuggftV1Globals.sol";
 /// @title NuggftV1
 /// @author nugg.xyz - danny7even and dub6ix - 2022
 contract NuggftV1 is NuggftV1Loan {
-	constructor(bytes memory _dep) payable NuggftV1Globals(_dep) {}
+	constructor() payable NuggftV1Globals() {}
 
 	/// @inheritdoc INuggftV1Execute
 	function extract() external requiresTrust {

@@ -48,7 +48,7 @@ interface INuggftV1Extended is INuggftV1 {
 }
 
 contract NuggftV1Extended is NuggftV1, INuggftV1Extended {
-	constructor(bytes memory abc) payable NuggftV1(abc) {}
+	constructor() payable NuggftV1() {}
 
 	function epoch() public view override(INuggftV1Lens, NuggftV1Epoch) returns (uint24 res) {
 		require(block.number >= genesis, "YOU MADE A BAD ROOOLLLLLLLLLLL");
@@ -134,6 +134,6 @@ contract NuggFatherV1Extended {
 	NuggftV1Extended public nuggft;
 
 	constructor(bytes32 salt) payable {
-		nuggft = new NuggftV1Extended{value: msg.value, salt: salt}(type(DotnuggV1).creationCode);
+		nuggft = new NuggftV1Extended{value: msg.value, salt: salt}();
 	}
 }

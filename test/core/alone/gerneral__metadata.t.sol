@@ -17,24 +17,25 @@ contract general__NuggftV1Loan is NuggftV1Test {
 	//     string memory img = nuggft.imageURI(500);
 	//     ds.emit_log_string(img);
 	// }
-	// function test__print__tokenURI() public {
-	//     forge.vm.startPrank(users.frank);
-	//     mintHelper(500, FIX_ADDRESS, 1 ether);
-
-	//     string memory img = nuggft.tokenURI(500);
-	//     ds.emit_log_string(img);
-	// }
 
 	function setUp() public {
 		reset();
 	}
 
 	function test__imageURI() public {
-		uint24 token = mintable(1);
+		uint24 token = mintable(2);
 
 		mintHelper(token, users.frank, nuggft.msp());
 
 		ds.emit_log_named_string("hi", nuggft.imageURI(token));
+	}
+
+	function test__tokenURI() public {
+		uint24 token = mintable(1);
+
+		mintHelper(token, users.frank, nuggft.msp());
+
+		ds.emit_log_named_string("hi", nuggft.tokenURI(token));
 	}
 
 	function test__image123() public {
