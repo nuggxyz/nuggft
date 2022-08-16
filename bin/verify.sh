@@ -5,9 +5,9 @@ NETWORK=$1
 OPTIMIZER_RUNS=10000000
 
 if [ "$NETWORK" == "local" ]; then
-	ETH_RPC_URL="http://127.0.0.1:8545"
+    ETH_RPC_URL="http://127.0.0.1:8545"
 else
-	ETH_RPC_URL="https://$NETWORK.infura.io/v3/$INFURA_KEY"
+    ETH_RPC_URL="https://$NETWORK.infura.io/v3/$INFURA_KEY"
 fi
 
 NUGGFT=$2
@@ -19,25 +19,25 @@ echo "                     VERIFICATION                        "
 echo "---------------------------------------------------------"
 echo "verifying NuggftV1 @ $NUGGFT"
 forge verify-contract "$NUGGFT" src/NuggftV1.sol:NuggftV1 \
-	--chain "$NETWORK" \
-	--compiler-version 0.8.15+commit.e14f2714 \
-	--num-of-optimizations "$OPTIMIZER_RUNS" \
-	--watch
+    --chain "$NETWORK" \
+    --compiler-version 0.8.16+commit.07a7930e \
+    --num-of-optimizations "$OPTIMIZER_RUNS" \
+    --watch
 echo "---------------------------------------------------------"
 
 echo "verifying xNuggftV1 @ $xNUGGFT"
 forge verify-contract "$xNUGGFT" src/xNuggftV1.sol:xNuggftV1 \
-	--chain "$NETWORK" \
-	--compiler-version 0.8.15+commit.e14f2714 \
-	--num-of-optimizations "$OPTIMIZER_RUNS" \
-	--watch
+    --chain "$NETWORK" \
+    --compiler-version 0.8.16+commit.07a7930e \
+    --num-of-optimizations "$OPTIMIZER_RUNS" \
+    --watch
 echo "---------------------------------------------------------"
 
 echo "verifying DotnuggV1 @ $DOTNUGG"
 forge verify-contract "$DOTNUGG" lib/dotnugg-v1-core/src/DotnuggV1.sol:DotnuggV1 \
-	--chain "$NETWORK" \
-	--compiler-version 0.8.15+commit.e14f2714 \
-	--num-of-optimizations "$OPTIMIZER_RUNS" \
-	--watch
+    --chain "$NETWORK" \
+    --compiler-version 0.8.16+commit.07a7930e \
+    --num-of-optimizations "$OPTIMIZER_RUNS" \
+    --watch
 
 echo "---------------------------------------------------------"

@@ -1,11 +1,11 @@
 // SPDX-License-Identifier: UNLICENSED
 
-pragma solidity 0.8.15;
+pragma solidity 0.8.16;
 
 contract NoFallback {}
 
 contract HasFallback {
-    receive() external payable {}
+	receive() external payable {}
 
-    fallback() external {}
+	fallback() external {}
 }

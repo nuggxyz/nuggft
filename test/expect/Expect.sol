@@ -1,6 +1,6 @@
 //SPDX-License-Identifier: MIT
 
-pragma solidity 0.8.15;
+pragma solidity 0.8.16;
 
 import "../utils/forge.sol";
 
@@ -16,34 +16,34 @@ import {expectLiquidate} from "./liquidate.sol";
 import {expectDonate} from "./donate.sol";
 
 contract Expect {
-    expectClaim public claim;
-    expectOffer public offer;
-    expectBalance public balance;
-    expectStake public stake;
-    expectSell public sell;
-    expectLoan public loan;
-    expectRebalance public rebalance;
-    expectLiquidate public liquidate;
-    expectDonate public donate;
+	expectClaim public claim;
+	expectOffer public offer;
+	expectBalance public balance;
+	expectStake public stake;
+	expectSell public sell;
+	expectLoan public loan;
+	expectRebalance public rebalance;
+	expectLiquidate public liquidate;
+	expectDonate public donate;
 
-    address public _globalFrom;
+	address public _globalFrom;
 
-    function globalFrom(address user) public {
-        _globalFrom = user;
-    }
+	function globalFrom(address user) public {
+		_globalFrom = user;
+	}
 
-    constructor(address nuggft_) {
-        global.set("Expect", address(this));
-        global.set("RiggedNuggft", nuggft_);
-        claim = new expectClaim();
-        offer = new expectOffer();
-        balance = new expectBalance();
-        stake = new expectStake();
-        sell = new expectSell();
-        loan = new expectLoan();
-        donate = new expectDonate();
+	constructor(address nuggft_) {
+		global.set("Expect", address(this));
+		global.set("RiggedNuggft", nuggft_);
+		claim = new expectClaim();
+		offer = new expectOffer();
+		balance = new expectBalance();
+		stake = new expectStake();
+		sell = new expectSell();
+		loan = new expectLoan();
+		donate = new expectDonate();
 
-        rebalance = new expectRebalance();
-        liquidate = new expectLiquidate();
-    }
+		rebalance = new expectRebalance();
+		liquidate = new expectLiquidate();
+	}
 }

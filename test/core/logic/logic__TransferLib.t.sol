@@ -1,4 +1,4 @@
-pragma solidity 0.8.15;
+pragma solidity 0.8.16;
 
 import "@nuggft-v1-core/test/main.sol";
 
