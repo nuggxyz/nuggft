@@ -5,7 +5,7 @@ pragma solidity 0.8.16;
 import {DotnuggV1} from "@dotnugg-v1-core/src/DotnuggV1.sol";
 import {INuggftV1, INuggftV1Lens} from "@nuggft-v1-core/src/interfaces/INuggftV1.sol";
 import {NuggftV1} from "@nuggft-v1-core/src/NuggftV1.sol";
-import {NuggftV1Epoch} from "@nuggft-v1-core/src/core/NuggftV1Epoch.sol";
+import {NuggftV1Epoch} from "@nuggft-v1-core/src/solidity/NuggftV1Epoch.sol";
 import {DotnuggV1Lib} from "@dotnugg-v1-core/src/DotnuggV1Lib.sol";
 
 interface INuggftV1Extended is INuggftV1 {

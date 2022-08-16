@@ -14,7 +14,7 @@ import {DotnuggV1Lib} from "@dotnugg-v1-core/src/DotnuggV1Lib.sol";
 
 import {decodeMakingPrettierHappy} from "@nuggft-v1-core/src/libraries/BigOleLib.sol";
 
-import {NuggftV1Loan} from "@nuggft-v1-core/src/core/NuggftV1Loan.sol";
+import {NuggftV1Loan} from "@nuggft-v1-core/src/solidity/NuggftV1Loan.sol";
 import {NuggftV1Globals} from "@nuggft-v1-core/src/core/NuggftV1Globals.sol";
 
 /// @title NuggftV1

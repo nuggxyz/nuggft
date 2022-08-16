@@ -15,18 +15,15 @@ abstract contract NuggftV1Epoch is NuggftV1Globals {
 
 	/// @notice calculates a random-enough seed that will stay the same for INTERVAL number of blocks
 	function calculateSeed(uint24 _epoch) internal view returns (uint256 res) {
-		unchecked {
-			uint256 startblock = toStartBlock(_epoch, genesis);
+		// unchecked {
+		uint256 startblock = toStartBlock(_epoch, genesis);
 
-			bytes32 bhash = getBlockHash(startblock - INTERVAL_SUB);
-			if (bhash == 0) _panic(Error__0x98__BlockHashIsZero);
+		bytes32 bhash = getBlockHash(startblock - INTERVAL_SUB);
 
-			assembly {
-				mstore(0x00, bhash)
-				mstore(0x20, _epoch)
-				res := keccak256(0x00, 0x40)
-			}
-		}
+		if (bhash == 0) _panic(Error__0x98__BlockHashIsZero);
+
+		return uint256(keccak256(abi.encodePacked(bhash)));
+		// }
 	}
 
 	function calculateSeed() internal view returns (uint256 res, uint24 _epoch) {
@@ -45,20 +42,14 @@ abstract contract NuggftV1Epoch is NuggftV1Globals {
 	}
 
 	function toStartBlock(uint24 _epoch, uint256 gen) internal pure returns (uint256 res) {
-		assembly {
-			res := add(mul(sub(_epoch, OFFSET), INTERVAL), gen)
-		}
+		res = ((_epoch - OFFSET) * INTERVAL) + gen;
 	}
 
 	function toEpoch(uint256 blocknum, uint256 gen) internal pure returns (uint24 res) {
-		assembly {
-			res := add(div(sub(blocknum, gen), INTERVAL), OFFSET)
-		}
+		res = uint24((blocknum - gen) / INTERVAL) + OFFSET;
 	}
 
 	function toEndBlock(uint24 _epoch, uint256 gen) internal pure returns (uint256 res) {
-		unchecked {
-			res = toStartBlock(_epoch + 1, gen) - 1;
-		}
+		res = toStartBlock(_epoch + 1, gen) - 1;
 	}
 }
