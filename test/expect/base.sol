@@ -7,7 +7,7 @@ import "../utils/forge.sol";
 import "@nuggft-v1-core/src/interfaces/INuggftV1.sol";
 
 import {IxNuggftV1} from "@nuggft-v1-core/src/interfaces/IxNuggftV1.sol";
-import {NuggftV1Constants} from "@nuggft-v1-core/src/core/NuggftV1Constants.sol";
+import {NuggftV1Constants} from "@nuggft-v1-core/src/common/NuggftV1Constants.sol";
 
 import "@nuggft-v1-core/test/main.sol";
 import "@nuggft-v1-core/test/extend.sol";

@@ -4,7 +4,7 @@ pragma solidity 0.8.16;
 
 import {MockNuggftV1Migrator} from "@nuggft-v1-core/test/mock/MockNuggftV1Migrator.sol";
 
-import {NuggftV1Constants} from "@nuggft-v1-core/src/core/NuggftV1Constants.sol";
+import {NuggftV1Constants} from "@nuggft-v1-core/src/common/NuggftV1Constants.sol";
 
 import {Expect} from "./expect/Expect.sol";
 

@@ -4,7 +4,7 @@ pragma solidity 0.8.16;
 
 import {INuggftV1, INuggftV1Execute, INuggftV1Lens} from "@nuggft-v1-core/src/interfaces/INuggftV1.sol";
 
-import {NuggftV1Swap} from "@nuggft-v1-core/src/core/NuggftV1Swap.sol";
+import {NuggftV1Swap} from "./NuggftV1Swap.sol";
 
 /// @author nugg.xyz - danny7even and dub6ix - 2022
 abstract contract NuggftV1Loan is NuggftV1Swap {

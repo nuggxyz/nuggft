@@ -4,9 +4,9 @@ pragma solidity 0.8.16;
 
 import {INuggftV1, INuggftV1Execute} from "@nuggft-v1-core/src/interfaces/INuggftV1.sol";
 
-import {NuggftV1Stake} from "@nuggft-v1-core/src/core/NuggftV1Stake.sol";
-
 import {DotnuggV1Lib} from "@dotnugg-v1-core/src/DotnuggV1Lib.sol";
+
+import {NuggftV1Stake} from "./NuggftV1Stake.sol";
 
 /// @author nugg.xyz - danny7even and dub6ix - 2022
 /// @notice mechanism for trading of nuggs between users (and items between nuggs)
