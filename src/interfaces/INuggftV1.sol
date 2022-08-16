@@ -216,6 +216,8 @@ interface INuggftV1Raw {
 	function lastItemSwap(uint16 itemId) external view returns (uint256 res);
 
 	function proof(uint24 tokenId) external view returns (uint256 res);
+
+	function identity(address user) external view returns (address real);
 }
 
 interface INuggftV1Event {
@@ -378,6 +380,13 @@ interface INuggftV1Execute {
 	function setMigrator(address migrator) external;
 
 	function setIsTrusted(address user, bool trust) external;
+
+	/* ///////////////////////////////////////////////////////////////////
+                            OTHER
+    /////////////////////////////////////////////////////////////////// */
+
+	/// @notice updates the sending user's identity to the new address passed
+	function setIdentity(address to) external;
 }
 
 interface INuggftV1 is IERC721, IERC721Metadata, INuggftV1Raw, INuggftV1Event, INuggftV1Execute, INuggftV1Lens {}

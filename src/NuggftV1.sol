@@ -134,6 +134,11 @@ contract NuggftV1 is NuggftV1Loan {
                             SUPPLEMENTAL METADATA
     /////////////////////////////////////////////////////////////////// */
 
+	/// @inheritdoc INuggftV1Execute
+	function setIdentity(address to) external override {
+		identity[msg.sender] = to;
+	}
+
 	/// @inheritdoc INuggftV1Lens
 	function imageURI(uint256 tokenId) public view override returns (string memory res) {
 		res = dotnuggv1.exec(decodedCoreProofOf(uint24(tokenId)), true);

@@ -30,6 +30,8 @@ abstract contract NuggftV1Globals is NuggftV1Constants, INuggftV1 {
 
 	mapping(uint24 => uint256) public override proof;
 
+	mapping(address => address) public override identity;
+
 	mapping(uint24 => uint256) public override agency;
 
 	mapping(uint16 => uint256) public override lastItemSwap;

@@ -22,6 +22,6 @@ echo "export INIT_CODE_HASH=$INIT_CODE_HASH"
 echo "export CALLER=$ETH_FROM"
 echo "export FACTORY=$FACTORY"
 
-cd ../cuddly-waffle
+# cd ../cuddly-waffle
 
-cargo run --release "$FACTORY" "$ETH_FROM" "$INIT_CODE_HASH" 2
+# cargo run --release "$FACTORY" "$ETH_FROM" "$INIT_CODE_HASH" 2
