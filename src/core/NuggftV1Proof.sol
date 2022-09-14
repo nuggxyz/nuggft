@@ -25,6 +25,11 @@ abstract contract NuggftV1Proof is NuggftV1Epoch {
 		last = first + early - 1;
 	}
 
+	/// @inheritdoc INuggftV1Lens
+	function proofFromSeed(uint256 seed) public view returns (uint256) {
+		return initFromSeed(seed);
+	}
+
 	function decodedCoreProofOf(uint24 tokenId) internal view returns (uint8[8] memory proof) {
 		return DotnuggV1Lib.decodeProofCore(proofOf(tokenId));
 	}

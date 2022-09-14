@@ -22,6 +22,8 @@ interface INuggftV1Lens {
 
 	function tokensOf(address you) external view returns (uint24[] memory res);
 
+	function proofFromSeed(uint256 seed) external view returns (uint256);
+
 	function premintTokens() external view returns (uint24 first, uint24 last);
 
 	function imageSVG(uint256 tokenId) external view returns (string memory);

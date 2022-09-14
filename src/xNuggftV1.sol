@@ -169,6 +169,37 @@ contract xNuggftV1 is IxNuggftV1 {
 		return DotnuggV1Lib.props(floop(tokenId), features());
 	}
 
+	function eloop() external view override returns (bytes memory res) {
+		uint256 early = nuggftv1.early();
+
+		(uint24 min, uint24 max) = nuggftv1.premintTokens();
+
+		uint256 seed = nuggftv1.earlySeed();
+
+		uint256 ptr;
+
+		uint256 inc = 160 / 8;
+
+		res = new bytes(early * inc);
+
+		// @solidity memory-safe-assembly
+		assembly {
+			ptr := add(res, 32)
+		}
+
+		uint256 working;
+
+		for (uint24 i = min; i <= max; i++) {
+			working = nuggftv1.proofFromSeed(uint256(keccak256(abi.encodePacked(seed, i))));
+
+			// @solidity memory-safe-assembly
+			assembly {
+				mstore(ptr, shl(96, working))
+				ptr := add(ptr, inc)
+			}
+		}
+	}
+
 	function iloop() external view override returns (bytes memory res) {
 		uint256 ptr;
 
