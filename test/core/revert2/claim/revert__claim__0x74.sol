@@ -8,8 +8,6 @@ import "@nuggft-v1-core/test/main.sol";
 /// desc: this error is thrown when the user is not someone that can receive funds for the user who owns them
 
 abstract contract revert__claim__0x74 is NuggftV1Test {
-	using NuggftV1AgentType for uint256;
-
 	uint24 FRANKS_TOKEN;
 	uint24 FRANKS_TOKEN_2;
 

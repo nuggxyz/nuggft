@@ -9,9 +9,10 @@ import {IDotnuggV1} from "@dotnugg-v1-core/src/IDotnuggV1.sol";
 import {IERC165} from "./interfaces/IERC165.sol";
 
 import {INuggftV1} from "./interfaces/INuggftV1.sol";
+import {NuggftV1Constants} from "./common/NuggftV1Constants.sol";
 
 /// @author nugg.xyz - danny7even and dub6ix - 2022
-contract xNuggftV1 is IxNuggftV1 {
+contract xNuggftV1 is IxNuggftV1, NuggftV1Constants {
 	using DotnuggV1Lib for IDotnuggV1;
 
 	INuggftV1 immutable nuggftv1;
@@ -351,6 +352,6 @@ contract xNuggftV1 is IxNuggftV1 {
 	}
 
 	function validAgency(uint256 _agency, uint24 epoch) internal pure returns (bool) {
-		return _agency >> 254 == 0x3 && (uint24(_agency >> 232) >= epoch || uint24(_agency >> 232) == 0);
+		return _agency >> AFJR == 0x3 && (uint24(_agency >> AEJR) >= epoch || uint24(_agency >> AEJR) == 0);
 	}
 }

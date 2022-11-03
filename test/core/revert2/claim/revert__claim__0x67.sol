@@ -5,8 +5,6 @@ pragma solidity 0.8.16;
 import "@nuggft-v1-core/test/main.sol";
 
 abstract contract revert__claim__0x67 is NuggftV1Test {
-	using NuggftV1AgentType for uint256;
-
 	uint24 private TOKEN_FOR_SALE;
 
 	modifier revert__claim__0x67_setUp() {
@@ -54,7 +52,7 @@ abstract contract revert__claim__0x67 is NuggftV1Test {
 
 		expect.offer().g().exec{value: nuggft.vfo(users.dee, TOKEN_FOR_SALE)}(TOKEN_FOR_SALE);
 
-		uint24 finalEpoch = nuggft.agency(TOKEN_FOR_SALE).epoch();
+		uint24 finalEpoch = getAgencyEpoch(nuggft.agency(TOKEN_FOR_SALE));
 
 		jump(finalEpoch);
 
@@ -66,7 +64,7 @@ abstract contract revert__claim__0x67 is NuggftV1Test {
 
 		expect.offer().g().exec{value: nuggft.vfo(users.dee, TOKEN_FOR_SALE)}(TOKEN_FOR_SALE);
 
-		uint24 finalEpoch = nuggft.agency(TOKEN_FOR_SALE).epoch();
+		uint24 finalEpoch = getAgencyEpoch(nuggft.agency(TOKEN_FOR_SALE));
 
 		jump(finalEpoch + 1);
 

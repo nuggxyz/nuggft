@@ -227,7 +227,18 @@ interface INuggftV1Event {
                             EPOCH
     /////////////////////////////////////////////////////////////////// */
 
-	event Genesis(uint256 blocknum, uint32 interval, uint24 offset, uint8 intervalOffset, uint24 early, address dotnugg, address xnuggftv1, bytes32 stake);
+	event Genesis(
+		uint256 blocknum,
+		uint32 blockInterval,
+		uint24 epochOffset,
+		uint8 saleLen,
+		uint24 early,
+		address dotnugg,
+		address xnuggftv1,
+		bytes32 stake,
+		uint8 agencyEthBits,
+		uint96 loss
+	);
 
 	/* ///////////////////////////////////////////////////////////////////
                             PROOF

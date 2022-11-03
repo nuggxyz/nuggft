@@ -37,7 +37,7 @@ abstract contract NuggftV1Swap is NuggftV1Stake {
 		_repanic(offerValue1 + offerValue2 == msg.value, Error__0xB1__InvalidMulticallValue);
 
 		// claim a nugg
-		if (agency[buyingTokenId] >> 254 == 0x3) {
+		if (agency[buyingTokenId] >> AFJR == 0x3) {
 			uint24[] memory a = new uint24[](1);
 			a[0] = buyingTokenId;
 
@@ -100,14 +100,14 @@ abstract contract NuggftV1Swap is NuggftV1Stake {
 				let buyerTokenAgency := sload(keccak256(0x00, 0x40))
 
 				// ensure the caller is the agent
-				if iszero(eq(juke(buyerTokenAgency, 96, 96), caller())) {
+				if iszero(eq(juke(buyerTokenAgency, AAJL, AAJR), caller())) {
 					panic(Error__0xA2__NotItemAgent)
 				}
 
 				let flag := shr(254, buyerTokenAgency)
 
 				// ensure the caller is really the agent
-				if and(eq(flag, 0x3), iszero(iszero(juke(buyerTokenAgency, 2, 232)))) {
+				if and(eq(flag, 0x3), iszero(iszero(juke(buyerTokenAgency, AEJL, AEJR)))) {
 					panic(Error__0xA3__NotItemAuthorizedAgent)
 				}
 
@@ -193,9 +193,9 @@ abstract contract NuggftV1Swap is NuggftV1Stake {
 
             /////////////////////////////////////////////////////////////////////
 
-            let agency__addr  := juke(agency__cache, 96, 96)
+            let agency__addr  := juke(agency__cache, AAJL, AAJR)
 
-            let agency__epoch := juke(agency__cache, 2, 232)
+            let agency__epoch := juke(agency__cache, AEJL, AEJR)
 
             // we assume offer__cache is same as agency__cache
             // this will only be the case for the leader
@@ -213,7 +213,7 @@ abstract contract NuggftV1Swap is NuggftV1Stake {
                 // this accomplishes two important goals:
                 // 1. forces user to claim previous swap before acting on this one
                 // 2. prevents owner from offering on their own swap before someone else has
-                if lt(juke(offer__cache, 2, 232), active) {
+                if lt(juke(offer__cache, AEJL, AEJR), active) {
                     panic(Error__0x99__InvalidEpoch)
                 }
             }
@@ -280,13 +280,13 @@ abstract contract NuggftV1Swap is NuggftV1Stake {
             /////////////////////////////////////////////////////////////////////
 
             // parse last offer value
-           let last := juke(agency__cache, 26, 186)
+           let last := juke(agency__cache, AVJL, AVJR)
 
             // store callvalue formatted in LOSS for caculation of total offer
             let next := div(value, LOSS)
 
             // parse and caculate next offer value
-            next := add(juke(offer__cache, 26, 186), next)
+            next := add(juke(offer__cache, AVJL, AVJR), next)
 
             if iszero(gt(next, 100)) {
                 panic(Error__0x68__OfferLowerThanLOSS)
@@ -599,7 +599,7 @@ abstract contract NuggftV1Swap is NuggftV1Stake {
 
                     let offerer__agency := sload(keccak256(0x00, 0x40))
 
-                    trusted := juke(offerer__agency, 96, 96)
+                    trusted := juke(offerer__agency, AAJL, AAJR)
 
                     mptroffset := 0xC0
                 }
@@ -623,9 +623,9 @@ abstract contract NuggftV1Swap is NuggftV1Stake {
 
 
                 // check if the offerer is the current agent ()
-                switch eq(offerer, juke(agency__cache, 96, 96))
+                switch eq(offerer, juke(agency__cache, AAJL, AAJR))
                 case 1 {
-                    let agency__epoch := juke(agency__cache, 2, 232)
+                    let agency__epoch := juke(agency__cache, AEJL, AEJR)
 
                     // ensure that the agency flag is "SWAP" (0x03)
                     // importantly, this only needs to be done for "winning" claims,
@@ -721,7 +721,7 @@ abstract contract NuggftV1Swap is NuggftV1Stake {
 
                     // accumulate and send value at once at end
                     // to save on gas for most common use case
-                    acc := add(acc, juke(offer__cache, 26, 186))
+                    acc := add(acc, juke(offer__cache, AVJL, AVJR))
                 }
 
                 // delete offer before we potentially send value
@@ -815,7 +815,7 @@ abstract contract NuggftV1Swap is NuggftV1Stake {
 				let buyerTokenAgency := sload(keccak256(0x00, 0x40))
 
 				// ensure the caller is the agent
-				if iszero(eq(juke(buyerTokenAgency, 96, 96), caller())) {
+				if iszero(eq(juke(buyerTokenAgency, AAJL, AAJR), caller())) {
 					panic(Error__0xA2__NotItemAgent)
 				}
 
@@ -823,7 +823,7 @@ abstract contract NuggftV1Swap is NuggftV1Stake {
 
 				// ensure the caller is really the agent
 				// aka makes sure they are not in the middle of a swap
-				if and(eq(flag, 0x3), iszero(iszero(juke(buyerTokenAgency, 2, 232)))) {
+				if and(eq(flag, 0x3), iszero(iszero(juke(buyerTokenAgency, AEJL, AEJR)))) {
 					panic(Error__0xA3__NotItemAuthorizedAgent)
 				}
 
@@ -843,7 +843,7 @@ abstract contract NuggftV1Swap is NuggftV1Stake {
 				if iszero(iszero(agency__cache)) {
 					// panic(Error__0x97__ItemAgencyAlreadySet)
 
-					if iszero(eq(juke(agency__cache, 96, 96), sender)) {
+					if iszero(eq(juke(agency__cache, AAJL, AAJR), sender)) {
 						panic(Error__0xB3__NuggIsNotItemAgent)
 					}
 
@@ -923,7 +923,7 @@ abstract contract NuggftV1Swap is NuggftV1Stake {
 
 				let flag := shr(254, agency__cache)
 
-				let isWaitingForOffer := and(eq(flag, 0x3), iszero(juke(agency__cache, 2, 232)))
+				let isWaitingForOffer := and(eq(flag, 0x3), iszero(juke(agency__cache, AEJL, AEJR)))
 
 				// ensure the agent is the owner
 				if iszero(isWaitingForOffer) {
@@ -1027,7 +1027,7 @@ abstract contract NuggftV1Swap is NuggftV1Stake {
 
 			let offerData := swapData
 
-			let isLeader := eq(juke(swapData, 96, 96), sender)
+			let isLeader := eq(juke(swapData, AAJL, AAJR), sender)
 
 			if iszero(isLeader) {
 				mstore(0x20, _offers.slot)
@@ -1055,7 +1055,7 @@ abstract contract NuggftV1Swap is NuggftV1Stake {
 				}
 			}
 			default {
-				let swapEpoch := juke(swapData, 2, 232)
+				let swapEpoch := juke(swapData, AEJL, AEJR)
 
 				if and(isLeader, iszero(swapEpoch)) {
 					canOffer := 0
@@ -1070,9 +1070,9 @@ abstract contract NuggftV1Swap is NuggftV1Stake {
 					}
 				}
 
-				currentUserOffer := mul(juke(offerData, 26, 186), LOSS)
+				currentUserOffer := mul(juke(offerData, AVJL, AVJR), LOSS)
 
-				currentLeaderOffer := mul(juke(swapData, 26, 186), LOSS)
+				currentLeaderOffer := mul(juke(swapData, AVJL, AVJR), LOSS)
 			}
 
 			next := currentLeaderOffer
@@ -1092,7 +1092,7 @@ abstract contract NuggftV1Swap is NuggftV1Stake {
 	}
 
 	function validAgency(uint256 _agency, uint24 epoch) internal pure returns (bool) {
-		return _agency >> 254 == 0x3 && (uint24(_agency >> 232) >= epoch || uint24(_agency >> 232) == 0);
+		return _agency >> AFJR == 0x3 && (uint24(_agency >> 232) >= epoch || uint24(_agency >> 232) == 0);
 	}
 
 	// @inheritdoc INuggftV1Lens
@@ -1150,7 +1150,7 @@ abstract contract NuggftV1Swap is NuggftV1Stake {
 
 		uint256 buyerAgency = agency[buyer];
 
-		if (buyerAgency >> 254 == 0x3) mustClaimBuyer = true;
+		if (buyerAgency >> AFJR == 0x3) mustClaimBuyer = true;
 
 		uint256 agency__cache = itemAgency(seller, itemId);
 
@@ -1170,9 +1170,9 @@ abstract contract NuggftV1Swap is NuggftV1Stake {
 
 		if (agencyEpoch == 0 && offerData == agency__cache) canOffer = false;
 
-		currentUserOffer = uint96((offerData << 26) >> 186) * LOSS;
+		currentUserOffer = uint96((offerData << AVJL) >> AVJR) * LOSS;
 
-		currentLeaderOffer = uint96((agency__cache << 26) >> 186) * LOSS;
+		currentLeaderOffer = uint96((agency__cache << AVJL) >> AVJR) * LOSS;
 
 		next = currentLeaderOffer;
 

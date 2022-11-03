@@ -107,7 +107,7 @@ contract expectLiquidate is base {
 
 		// (, , run.principal, run.fee, run.earned, ) = nuggft.debt(tokenId);
 
-		run.principal = uint96((run.agency << 26) >> 186) * LOSS;
+		run.principal = uint96((run.agency << AVJL) >> AVJR) * LOSS;
 		run.fee = run.principal / REBALANCE_FEE_BPS;
 		run.earned = run.eps - run.principal;
 
@@ -167,11 +167,11 @@ contract expectLiquidate is base {
 
 		uint256 postAgency = nuggft.agency(run.tokenId);
 
-		ds.assertEq(postAgency >> 254, 0x01, "EXPECT-LIQUIDATE:STOP - agency flag should be OWN - 0x01");
+		ds.assertEq(postAgency >> AFJR, 0x01, "EXPECT-LIQUIDATE:STOP - agency flag should be OWN - 0x01");
 
 		ds.assertEq(address(uint160(postAgency)), run.sender, "EXPECT-LIQUIDATE:STOP - agent should be the sender");
 
-		ds.assertEq(uint96((postAgency << 26) >> 186), 0, "EXPECT-LIQUIDATE:STOP - principal should be zero");
+		ds.assertEq(uint96((postAgency << AVJL) >> AVJR), 0, "EXPECT-LIQUIDATE:STOP - principal should be zero");
 
 		ds.assertGt(postEps, run.eps, "EXPECT-LIQUIDATE:STOP - eps should be geater than before");
 

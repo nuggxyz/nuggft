@@ -27,6 +27,7 @@ abstract contract revert__offer__0xAC is NuggftV1Test {
 		// offer on an item
 		expect.offer().from(users.frank).err(0x00).exec{value: nuggft.vfo(franksNugg, token1, item)}(franksNugg, token1, item);
 		expect.offer().from(users.frank).err(0xAC).exec{value: nuggft.vfo(franksNugg, token2, item)}(franksNugg, token2, item);
+
 		jumpUp(1);
 
 		expect.offer().from(users.frank).err(0x00).exec{value: nuggft.vfo(franksNugg, token1, item)}(franksNugg, token1, item);

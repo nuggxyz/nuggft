@@ -6,15 +6,15 @@ pragma solidity 0.8.16;
 abstract contract NuggftV1Constants {
 	uint96 constant STARTING_PRICE = .005 ether;
 
-	uint24 constant TRUSTED_MINT_TOKENS = 1000;
-
 	uint24 constant OFFSET = 1; // must be > 0
 
 	uint24 constant MINT_OFFSET = 1000000;
 
 	uint24 constant MAX_TOKENS = type(uint24).max;
 
-	uint96 constant LOSS = 10000 gwei;
+	uint96 constant LOSS = 10**14;
+
+	uint96 constant MIN_BID_MINUS_LOSS = 10;
 
 	// the portion of all other earnings to protocol
 	uint96 constant PROTOCOL_FEE_FRAC = 10;
@@ -26,7 +26,7 @@ abstract contract NuggftV1Constants {
 	uint96 constant PROTOCOL_FEE_FRAC_MINT_DIV = 2;
 
 	// epoch
-	uint8 constant INTERVAL_SUB = 4;
+	uint8 constant INTERVAL_SUB = 16;
 
 	uint24 constant INTERVAL = 8;
 
@@ -39,11 +39,61 @@ abstract contract NuggftV1Constants {
 	// warning: causes liq and reb noFallback tests to break with +-1 wei rounding error if 600
 	uint96 constant REBALANCE_FEE_BPS = 100;
 
+	// uint256 constant FLAG_NONE = 0x0;
+	// uint256 constant FLAG_SWAP = 0x1;
+	// uint256 constant FLAG_LOAN = 0x2;
+	// uint256 constant FLAG_OWN = 0x3;
+
 	// loan
-	uint24 constant LIQUIDATION_PERIOD = 200;
+	uint24 constant LIQUIDATION_PERIOD = 4;
+
+	// uint256 constant MAX_THROTTLE_PERCENT = 50;
+	// uint256 constant THROTTLE_INCREMENT_PERCENT = 5;
+	// uint256 constant THROTTLE_BLOCK_DURATION = 5;
+	// uint256 constant THROTTLE_START_WITH_REMAINING_BLOCKS = 45;
 
 	// swap
 	uint256 constant SALE_LEN = 4;
+
+	uint8 constant AVJB = 50;
+	uint8 constant AFJB = 2;
+	uint8 constant AAJB = 160;
+	uint8 constant AEJB = 44;
+
+	uint8 constant AVJO = 160;
+	uint8 constant AFJO = 254;
+	uint8 constant AAJO = 0;
+	uint8 constant AEJO = 210;
+
+	uint8 constant AVJR = 206;
+	uint8 constant AFJR = 254;
+	uint8 constant AAJR = 96;
+	uint8 constant AEJR = 212;
+
+	uint8 constant AVJL = 46;
+	uint8 constant AFJL = 0;
+	uint8 constant AAJL = 96;
+	uint8 constant AEJL = 2;
+
+	// uint8 constant AVJB = 70;
+	// uint8 constant AFJB = 2;
+	// uint8 constant AAJB = 160;
+	// uint8 constant AEJB = 24;
+
+	// uint8 constant AVJO = 160;
+	// uint8 constant AFJO = 254;
+	// uint8 constant AAJO = 0;
+	// uint8 constant AEJO = 230;
+
+	// uint8 constant AVJR = 186;
+	// uint8 constant AFJR = 254;
+	// uint8 constant AAJR = 96;
+	// uint8 constant AEJR = 232;
+
+	// uint8 constant AVJL = 26;
+	// uint8 constant AFJL = 0;
+	// uint8 constant AAJL = 96;
+	// uint8 constant AEJL = 2;
 
 	// event Rebalance(uint24,bytes32);
 	// event Liquidate(uint24,bytes32);

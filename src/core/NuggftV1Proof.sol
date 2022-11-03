@@ -79,7 +79,7 @@ abstract contract NuggftV1Proof is NuggftV1Epoch {
 			let buyerTokenAgency := sload(keccak256(0x00, 0x40))
 
 			// ensure the caller is the agent
-			if iszero(eq(juke(buyerTokenAgency, 96, 96), caller())) {
+			if iszero(eq(juke(buyerTokenAgency, AAJL, AAJR), caller())) {
 				panic(Error__0xA2__NotItemAgent)
 			}
 
@@ -87,7 +87,7 @@ abstract contract NuggftV1Proof is NuggftV1Epoch {
 
 			// ensure the caller is really the agent
 			// aka is the nugg claimed
-			if and(eq(flag, 0x3), iszero(iszero(juke(buyerTokenAgency, 2, 232)))) {
+			if and(eq(flag, 0x3), iszero(iszero(juke(buyerTokenAgency, AEJL, AEJR)))) {
 				panic(Error__0xA3__NotItemAuthorizedAgent)
 			}
 

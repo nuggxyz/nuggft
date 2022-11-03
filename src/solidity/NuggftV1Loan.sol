@@ -44,7 +44,7 @@ abstract contract NuggftV1Loan is NuggftV1Swap {
                 let agency__cache := sload(agency__sptr)
 
                 // ensure the caller is the agent
-                if iszero(eq(juke(agency__cache, 96, 96), caller())) {
+                if iszero(eq(juke(agency__cache, AAJL, AAJR), caller())) {
                     panic(Error__0xA1__NotAgent)
                 }
 
@@ -65,7 +65,7 @@ abstract contract NuggftV1Loan is NuggftV1Swap {
                 //  addr  = agent
                 // =========================
 
-                agency__cache := xor(caller(), xor(shl(160, amt), xor(shl(230, active), shl(254, 0x2))))
+                agency__cache := xor(caller(), xor(shl(AVJO, amt), xor(shl(AEJO, active), shl(AFJO, 0x2))))
 
                 // store updated agency
                 // done before external call to prevent reentrancy
@@ -138,7 +138,7 @@ abstract contract NuggftV1Loan is NuggftV1Swap {
 
 			let agency__cache := sload(agency__sptr)
 
-			let loaner := juke(agency__cache, 96, 96)
+			let loaner := juke(agency__cache, AAJL, AAJR)
 
 			// ensure that the agency flag is LOAN
 			if iszero(eq(shr(254, agency__cache), 0x02)) {
@@ -148,7 +148,7 @@ abstract contract NuggftV1Loan is NuggftV1Swap {
 			// check to see if msg.sender is the loaner
 			if iszero(eq(caller(), loaner)) {
 				// "is the loan past due"
-				switch lt(add(juke(agency__cache, 2, 232), LIQUIDATION_PERIOD), active)
+				switch lt(add(juke(agency__cache, AEJL, AEJR), LIQUIDATION_PERIOD), active)
 				case 1 {
 					// if the loan is past due, then the liquidator recieves the nugg
 					// this transfer event is the only extra logic required here since the
@@ -176,7 +176,7 @@ abstract contract NuggftV1Loan is NuggftV1Swap {
 
 			// parse agency for principal, converting it back to eth
 			// represents the value that has been sent to the user for this loan
-			let principal := mul(juke(agency__cache, 26, 186), LOSS)
+			let principal := mul(juke(agency__cache, AVJL, AVJR), LOSS)
 
 			// the amount of value earned by this token since last rebalance
 			// must be computed because fee needs to be paid
@@ -305,7 +305,7 @@ abstract contract NuggftV1Loan is NuggftV1Swap {
                 //
                 let agency__cache := sload(agency__sptr)
 
-                let agency__addr := juke(agency__cache, 96, 96)
+                let agency__addr := juke(agency__cache, AAJL, AAJR)
 
                 // make sure this token is loaned
                 if iszero(eq(shr(254, agency__cache), 0x02)) {
@@ -318,14 +318,14 @@ abstract contract NuggftV1Loan is NuggftV1Swap {
                     // why? - only after a loan has expired are the "earnings" up for grabs.
                     // otherwise only the loaner is entitled to them
                     // TODO subtract some amount from LIQUIDATION_PERIOD here, to give rebalancers a head start
-                    if iszero(lt(add(juke(agency__cache, 2, 232), LIQUIDATION_PERIOD), active)) {
+                    if iszero(lt(add(juke(agency__cache, AEJL, AEJR), LIQUIDATION_PERIOD), active)) {
                         panic(Error__0xA4__ExpiredEpoch) // ERR:0x3B
                     }
                 }
 
                 // parse agency for principal, converting it back to eth
                 // represents the value that has been sent to the user for this loan
-                let principal := mul(juke(agency__cache, 26, 186), LOSS)
+                let principal := mul(juke(agency__cache, AVJL, AVJR), LOSS)
 
                 // the amount of value earned by this token since last rebalance
                 // must be computed because fee needs to be paid

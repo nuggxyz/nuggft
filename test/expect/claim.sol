@@ -290,7 +290,7 @@ contract expectClaim is base {
 
 			env.winner = uint160(pre.agency) == (uint160(pre.offer));
 
-			if (env.winner && (2 << pre.agency) >> 232 == 0) {
+			if (env.winner && (pre.agency << AEJL) >> AEJR == 0) {
 				env.reclaim = true;
 			}
 
@@ -417,7 +417,7 @@ contract expectClaim is base {
 
 		if (!env.winner) {
 			// BALANCE CHANGE: sender balance should go up by the amount of the offer, nuggft's should go down
-			uint96 amount = uint96(((pre.offer << 26) >> 186) * LOSS);
+			uint96 amount = uint96(((pre.offer << AVJL) >> AVJR) * LOSS);
 			run.expectedBalanceChange += amount;
 		}
 
@@ -438,7 +438,7 @@ contract expectClaim is base {
 				// ds.assertEq(env.buyer, address(uint160(pre.offer)), "ASSERT:CLAIM_0x03: the offerer SHOULD be the sender");
 			}
 		} else {
-			// ds.assertEq(pre.agency >> 254, 0x03, "ASSERT:CLAIM_0x04: pre agency must have the SWAP - 0x03 - flag");
+			// ds.assertEq(pre.agency >> AFJR, 0x03, "ASSERT:CLAIM_0x04: pre agency must have the SWAP - 0x03 - flag");
 			if (env.winner) {
 				// ASSERT:CLAIM_0x04: does the agency have a SWAP flag?
 
@@ -490,7 +490,7 @@ contract expectClaim is base {
 				);
 
 				// ASSERT:CLAIM_0x0B: does the post agency have a OWN flag?
-				ds.assertEq(post.agency >> 254, 0x01, "ASSERT:CLAIM_0x0B: post agency must have the OWN - 0x01 - flag");
+				ds.assertEq(post.agency >> AFJR, 0x01, "ASSERT:CLAIM_0x0B: post agency must have the OWN - 0x01 - flag");
 				if (env.reclaim) {} else {
 					// @note AFTER a winning nugg claim
 				}

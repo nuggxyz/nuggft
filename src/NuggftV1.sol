@@ -67,7 +67,7 @@ contract NuggftV1 is NuggftV1Loan {
 	function subStakedShare(uint24 tokenId) internal returns (uint96 ethOwed) {
 		uint256 cache = agency[tokenId];
 
-		if (address(uint160(cache)) != msg.sender || uint8(cache >> 254) != 0x01) {
+		if (address(uint160(cache)) != msg.sender || uint8(cache >> AFJR) != 0x01) {
 			_panic(Error__0x77__NotOwner);
 		}
 
@@ -194,7 +194,7 @@ contract NuggftV1 is NuggftV1Loan {
 
 		if (cache == 0) return address(0);
 
-		if (cache >> 254 == 0x03 && (cache << 2) >> 232 >= epoch) {
+		if (cache >> AFJR == 0x03 && (cache << 2) >> AEJR >= epoch) {
 			return address(this);
 		}
 

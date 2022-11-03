@@ -4,14 +4,12 @@ pragma solidity 0.8.16;
 
 import {MockNuggftV1Migrator} from "@nuggft-v1-core/test/mock/MockNuggftV1Migrator.sol";
 
-import {NuggftV1Constants} from "@nuggft-v1-core/src/common/NuggftV1Constants.sol";
+import {NuggftV1AgentType} from "./helpers/NuggftV1AgentType.sol";
 
 import {Expect} from "./expect/Expect.sol";
 
 import {DotnuggV1Lib} from "@dotnugg-v1-core/src/DotnuggV1Lib.sol";
 import {IDotnuggV1} from "@dotnugg-v1-core/src/IDotnuggV1.sol";
-
-import {NuggftV1AgentType} from "./helpers/NuggftV1AgentType.sol";
 
 import {IxNuggftV1} from "@nuggft-v1-core/src/interfaces/IxNuggftV1.sol";
 
@@ -25,7 +23,7 @@ library SafeCast {
 	}
 }
 
-contract NuggftV1Test is ForgeTest, NuggftV1Constants {
+contract NuggftV1Test is ForgeTest, NuggftV1AgentType {
 	using SafeCast for uint96;
 	using SafeCast for uint256;
 	using SafeCast for uint64;
@@ -115,7 +113,7 @@ contract NuggftV1Test is ForgeTest, NuggftV1Constants {
 		// _repanic(offerValue1 + offerValue2 == msg.value, Error__0xB1__InvalidMulticallValue);
 
 		// claim a nugg
-		if (nuggft.agency(buyingTokenId) >> 254 == 0x3) {
+		if (nuggft.agency(buyingTokenId) >> AFJR == 0x3) {
 			uint24[] memory a = new uint24[](1);
 			a[0] = buyingTokenId;
 

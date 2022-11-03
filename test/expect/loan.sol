@@ -141,7 +141,7 @@ contract expectLoan is base {
 
 			ds.assertGt(pre.agency, 0, "EXPECT-LOAN:STOP - agency should not be 0");
 			ds.assertEq(address(uint160(post.agency)), run.sender, "EXPECT-LOAN:STOP - sender should still be agent");
-			ds.assertEq(post.agency >> 254, 0x02, "EXPECT-LOAN:STOP - agency flag should be LOAN - 0x02");
+			ds.assertEq(post.agency >> AFJR, 0x02, "EXPECT-LOAN:STOP - agency flag should be LOAN - 0x02");
 
 			if (!run.shouldDonate) {
 				ds.assertEq(nuggft.eps(), run.eps, "EXPECT-LOAN:STOP - eps should not change");
