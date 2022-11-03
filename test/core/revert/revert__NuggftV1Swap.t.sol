@@ -65,7 +65,7 @@ abstract contract revert__NuggftV1Swap is NuggftV1Test {
 	// function test__revert__NuggftV1Swap__0x68__offer__failWithOneWeiLessThanMin() public revert__NuggftV1Swap__setUp {
 	//     uint24 tokenId = nuggft.epoch();
 
-	//     uint96 value = 10 gwei - .1 gwei;
+	//     uint96 value = 10 gwei - LOSS;
 
 	//     expect.offer().from(users.frank).exec{value: nuggft.vfo(users.frank, tokenId)}(tokenId);
 

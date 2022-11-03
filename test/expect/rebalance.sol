@@ -108,7 +108,7 @@ contract expectRebalance is base {
 
 			pre.agency = nuggft.agency(pre.tokenId);
 
-			uint96 agency__eth = uint96((pre.agency << 26) >> 186) * .1 gwei;
+			uint96 agency__eth = uint96((pre.agency << 26) >> 186) * LOSS;
 
 			pre.fee = agency__eth / REBALANCE_FEE_BPS;
 			pre.earned = run.eps - agency__eth;
@@ -159,9 +159,9 @@ contract expectRebalance is base {
 			ds.assertEq(address(uint160(post.agency)), address(uint160(pre.agency)), "EXPECT-REBALANCE:STOP - agent should stay the same");
 
 			if (run.shouldDonate) {
-				ds.assertLe(uint96((post.agency << 26) >> 186), postEps / .1 gwei, "EXPECT-REBALANCE:STOP - principal should be lte post EPS");
+				ds.assertLe(uint96((post.agency << 26) >> 186), postEps / LOSS, "EXPECT-REBALANCE:STOP - principal should be lte post EPS");
 			} else {
-				ds.assertEq(uint96((post.agency << 26) >> 186), postEps / .1 gwei, "EXPECT-REBALANCE:STOP - principal should be same as post EPS");
+				ds.assertEq(uint96((post.agency << 26) >> 186), postEps / LOSS, "EXPECT-REBALANCE:STOP - principal should be same as post EPS");
 			}
 		}
 

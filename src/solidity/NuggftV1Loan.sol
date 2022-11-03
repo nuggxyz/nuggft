@@ -61,7 +61,7 @@ abstract contract NuggftV1Loan is NuggftV1Swap {
                 // ==== agency[tokenId] ====
                 //  flag  = LOAN(0x02)
                 //  epoch = active
-                //  eth   = eps / .1 gwei
+                //  eth   = eps / LOSS
                 //  addr  = agent
                 // =========================
 
@@ -72,7 +72,7 @@ abstract contract NuggftV1Loan is NuggftV1Swap {
                 sstore(agency__sptr, agency__cache)
 
                 // decompress amt back to eth
-                // amt becomes a floored to .1 gwei version of eps()
+                // amt becomes a floored to LOSS version of eps()
                 // ensures amt stored in agency and eth sent to caller are the same
                 amt := mul(amt, LOSS)
 

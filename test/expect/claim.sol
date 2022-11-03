@@ -417,7 +417,7 @@ contract expectClaim is base {
 
 		if (!env.winner) {
 			// BALANCE CHANGE: sender balance should go up by the amount of the offer, nuggft's should go down
-			uint96 amount = uint96(((pre.offer << 26) >> 186) * .1 gwei);
+			uint96 amount = uint96(((pre.offer << 26) >> 186) * LOSS);
 			run.expectedBalanceChange += amount;
 		}
 

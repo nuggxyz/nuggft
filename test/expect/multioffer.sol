@@ -177,13 +177,13 @@ contract expectMultiOffer is base {
 		if (pre.offer == 0 && env.buyer == address(uint160(pre.agency))) pre.offer = pre.agency;
 
 		if (env.value > 0) {
-			uint96 A = uint96(((pre.offer << 26) >> 186) * .1 gwei) + env.value;
-			uint96 B = uint96(((pre.agency << 26) >> 186) * .1 gwei);
+			uint96 A = uint96(((pre.offer << 26) >> 186) * LOSS) + env.value;
+			uint96 B = uint96(((pre.agency << 26) >> 186) * LOSS);
 			if (A >= B)
 				env.increment = A - B;
 				// this way it fails unless there is a rollback
 			else env.increment = type(uint96).max;
-			// env.increment = uint96((((pre.offer << 26) >> 186) * .1 gwei) + env.value - (((pre.agency << 26) >> 186) * .1 gwei));
+			// env.increment = uint96((((pre.offer << 26) >> 186) * LOSS) + env.value - (((pre.agency << 26) >> 186) * LOSS));
 		}
 
 		run.snapshot.env = env;

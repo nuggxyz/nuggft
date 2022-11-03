@@ -251,12 +251,17 @@ abstract contract NuggftV1Swap is NuggftV1Stake {
                     let val := sload(mload(0x80))
 
                     if eq(nextEpoch, and(val, 0xffffff)) {
-                        panic(Error__0xAC__MustFinalizeOtherItemSwap)
+						panic(Error__0xAC__MustFinalizeOtherItemSwap)
                     }
 
-					if eq(nextEpoch, add(and(val, 0xffffff), 1)) {
-                        panic(Error__0xB4__MustFinalizeOtherItemSwapFromThisEpoch)
-                    }
+					// if gt(SALE_LEN, sub(nextEpoch, and(val, 0xffffff))) {
+					if lt(active, and(val, 0xffffff)) {
+						panic(Error__0xB4__MustFinalizeOtherItemSwapFromThisEpoch)
+					}
+
+					// if eq(nextEpoch, add(and(val, 0xffffff), 1)) {
+                    //     panic(Error__0xB4__MustFinalizeOtherItemSwapFromThisEpoch)
+                    // }
 
                     val := shl(48, val)
 
@@ -282,7 +287,7 @@ abstract contract NuggftV1Swap is NuggftV1Stake {
             // parse last offer value
            let last := juke(agency__cache, 26, 186)
 
-            // store callvalue formatted in .1 gwei for caculation of total offer
+            // store callvalue formatted in LOSS for caculation of total offer
             let next := div(value, LOSS)
 
             // parse and caculate next offer value
@@ -303,9 +308,10 @@ abstract contract NuggftV1Swap is NuggftV1Stake {
             default {
                 increment := INCREMENT_BPS
             }
+			// next := div(mul(next, incrementBps), BASE_BPS) //jjjjjjjjj
 
-            // ensure next offer includes at least a 5-50% increment
-            if gt(div(mul(last, increment), BASE_BPS), next) {
+            // ensure next offer includes at least a 5-50% increment jjjjjjj
+            if lt(next, div(mul(last, increment), BASE_BPS)) {
                 panic(Error__0x72__IncrementTooLow)
             }
             // convert next into the increment
@@ -592,7 +598,7 @@ abstract contract NuggftV1Swap is NuggftV1Stake {
 
                 if isItem {
 
-                    // if this claim is for an item aucton we need to check the nugg that is
+                    // if this claim is for an item auction we need to check the nugg that is
                     // + claiming and set their owner as the "trusted"
 
                     mstore(0x00, offerer)
@@ -892,7 +898,7 @@ abstract contract NuggftV1Swap is NuggftV1Stake {
 				// ==== agency[tokenId] =====
 				//   flag  = SWAP(0x03)
 				//   epoch = 0
-				//   eth   = seller decided floor / .1 gwei
+				//   eth   = seller decided floor / LOSS
 				//   addr  = seller
 				// ==========================
 
@@ -944,7 +950,7 @@ abstract contract NuggftV1Swap is NuggftV1Stake {
 				// ==== agency[tokenId] =====
 				//   flag  = SWAP(0x03)
 				//   epoch = 0
-				//   eth   = seller decided floor / .1 gwei
+				//   eth   = seller decided floor / LOSS
 				//   addr  = seller
 				// ==========================
 
@@ -1083,7 +1089,7 @@ abstract contract NuggftV1Swap is NuggftV1Stake {
 			}
 
 			// add at the end to round up
-			next := div(mul(next, incrementBps), BASE_BPS)
+			next := div(mul(next, incrementBps), BASE_BPS) //jjjjjjjjj
 
 			if iszero(iszero(mod(next, LOSS))) {
 				next := add(mul(div(next, LOSS), LOSS), LOSS)

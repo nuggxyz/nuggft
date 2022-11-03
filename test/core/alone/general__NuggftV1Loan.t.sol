@@ -39,9 +39,9 @@ contract general__NuggftV1Loan is NuggftV1Test {
 		}
 
 		jumpUp(33);
-		uint96[] memory vfr = nuggft.vfr(array.b24(LOAN_TOKENID));
+		uint96[] memory vfr = nuggft.vfr(list);
 		forge.vm.prank(users.frank);
-		nuggft.rebalance{value: vfr[0] * 1000}(list);
+		nuggft.rebalance{value: lib.asum(vfr)}(list);
 	}
 
 	function test__general__NuggftV1Loan__rebalance() public {

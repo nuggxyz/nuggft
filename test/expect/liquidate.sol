@@ -107,7 +107,7 @@ contract expectLiquidate is base {
 
 		// (, , run.principal, run.fee, run.earned, ) = nuggft.debt(tokenId);
 
-		run.principal = uint96((run.agency << 26) >> 186) * .1 gwei;
+		run.principal = uint96((run.agency << 26) >> 186) * LOSS;
 		run.fee = run.principal / REBALANCE_FEE_BPS;
 		run.earned = run.eps - run.principal;
 

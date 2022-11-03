@@ -243,7 +243,7 @@ contract general__multioffer is NuggftV1Test {
 		expect.offer().from(users.dee).exec{value: nuggft.vfo(token2G, token1780M, item)}(token2G, token1780M, item);
 		// expect.sell().from(users.frank).err(0xA3).exec(token1780M, item, 3 ether);
 
-		jumpUp(2);
+		jumpSwap();
 
 		v1 = nuggft.vfo(users.dee, select);
 		v2 = nuggft.vfo(token2G, select, item);
@@ -292,12 +292,20 @@ contract general__multioffer is NuggftV1Test {
 		forge.vm.expectRevert(encodeRevert(0xAC));
 		nuggft.offer{value: v1 + v2}(token2G, select, item, v1, v2);
 
-		jumpUp(1);
+		if (SALE_LEN > 1) {
+			jumpUp(1);
 
-		forge.vm.expectRevert(encodeRevert(0xB4));
-		nuggft.offer{value: v1 + v2}(token2G, select, item, v1, v2);
+			forge.vm.expectRevert(encodeRevert(0xB4));
+			nuggft.offer{value: v1 + v2}(token2G, select, item, v1, v2);
+		}
 
-		jumpUp(1);
+		if (SALE_LEN > 1) {
+			jumpUp(SALE_LEN - 1);
+		} else {
+			jumpUp(1);
+		}
+		// forge.vm.expectRevert(encodeRevert(0xB4));
+		// nuggft.offer{value: v1 + v2}(token2G, select, item, v1, v2);
 
 		nuggft.offer{value: v1 + v2}(token2G, select, item, v1, v2);
 

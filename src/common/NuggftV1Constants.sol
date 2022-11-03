@@ -14,7 +14,7 @@ abstract contract NuggftV1Constants {
 
 	uint24 constant MAX_TOKENS = type(uint24).max;
 
-	uint96 constant LOSS = .1 gwei;
+	uint96 constant LOSS = 10000 gwei;
 
 	// the portion of all other earnings to protocol
 	uint96 constant PROTOCOL_FEE_FRAC = 10;
@@ -26,9 +26,9 @@ abstract contract NuggftV1Constants {
 	uint96 constant PROTOCOL_FEE_FRAC_MINT_DIV = 2;
 
 	// epoch
-	uint8 constant INTERVAL_SUB = 16;
+	uint8 constant INTERVAL_SUB = 4;
 
-	uint24 constant INTERVAL = 64;
+	uint24 constant INTERVAL = 8;
 
 	uint24 constant PREMIUM_DIV = 2000;
 
@@ -43,7 +43,7 @@ abstract contract NuggftV1Constants {
 	uint24 constant LIQUIDATION_PERIOD = 200;
 
 	// swap
-	uint256 constant SALE_LEN = 1;
+	uint256 constant SALE_LEN = 4;
 
 	// event Rebalance(uint24,bytes32);
 	// event Liquidate(uint24,bytes32);

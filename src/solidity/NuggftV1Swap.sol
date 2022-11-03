@@ -282,7 +282,7 @@ abstract contract NuggftV1Swap is NuggftV1Stake {
             // parse last offer value
            let last := juke(agency__cache, 26, 186)
 
-            // store callvalue formatted in .1 gwei for caculation of total offer
+            // store callvalue formatted in LOSS for caculation of total offer
             let next := div(value, LOSS)
 
             // parse and caculate next offer value
@@ -892,7 +892,7 @@ abstract contract NuggftV1Swap is NuggftV1Stake {
 				// ==== agency[tokenId] =====
 				//   flag  = SWAP(0x03)
 				//   epoch = 0
-				//   eth   = seller decided floor / .1 gwei
+				//   eth   = seller decided floor / LOSS
 				//   addr  = seller
 				// ==========================
 
@@ -944,7 +944,7 @@ abstract contract NuggftV1Swap is NuggftV1Stake {
 				// ==== agency[tokenId] =====
 				//   flag  = SWAP(0x03)
 				//   epoch = 0
-				//   eth   = seller decided floor / .1 gwei
+				//   eth   = seller decided floor / LOSS
 				//   addr  = seller
 				// ==========================
 

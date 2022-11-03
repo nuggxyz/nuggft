@@ -113,7 +113,7 @@ contract expectLoan is base {
 			run.snapshots[i] = pre;
 		}
 
-		uint96 expectedReward = ((run.eps * uint96(tokenIds.length)) / .1 gwei) * .1 gwei;
+		uint96 expectedReward = ((run.eps * uint96(tokenIds.length)) / LOSS) * LOSS;
 
 		if (!run.shouldDonate) {
 			stake.start(0, 0, true);
