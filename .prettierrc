@@ -8,7 +8,7 @@
 				"useTabs": true,
 				"bracketSpacing": false,
 				"explicitTypes": "always",
-				"compiler": "0.8.16"
+				"compiler": "0.8.17"
 			}
 		}
 	]

@@ -1,6 +1,6 @@
-// SPDX-License-Identifier: BUSL-1.1
+// SPDX-License-Identifier: UNLICENSED
 
-pragma solidity 0.8.16;
+pragma solidity 0.8.17;
 
 import {IxNuggftV1} from "./interfaces/IxNuggftV1.sol";
 import {DotnuggV1Lib} from "@dotnugg-v1-core/src/DotnuggV1Lib.sol";

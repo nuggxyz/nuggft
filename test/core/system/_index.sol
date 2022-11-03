@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: UNLICENSED
-pragma solidity 0.8.16;
+pragma solidity 0.8.17;
 
 import "./system__NuggftV1Loan.t.sol";
 import "./system__NuggftV1Swap.t.sol";

@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: UNLICENSED
 
-pragma solidity 0.8.16;
+pragma solidity 0.8.17;
 
 library cast {
 	function i192(uint256 input) internal pure returns (int192) {

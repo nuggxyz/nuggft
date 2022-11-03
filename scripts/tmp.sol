@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: UNLICENSED
 
-pragma solidity 0.8.16;
+pragma solidity 0.8.17;
 
 contract Tmp {
 	function checkSameSign(int256 a, int256 b) public pure returns (bool sameSign) {

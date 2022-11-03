@@ -68,5 +68,5 @@
 	"solidity-va.codelens.enable": false,
 	"solidity.packageDefaultDependenciesContractsDirectory": "src",
 	"solidity.packageDefaultDependenciesDirectory": "lib",
-	"solidity.compileUsingRemoteVersion": "v0.8.16"
+	"solidity.compileUsingRemoteVersion": "v0.8.17"
 }

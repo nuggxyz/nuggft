@@ -143,7 +143,7 @@ if [ "$NETWORK" != "local" ]; then
     echo "verifying NuggftV1 @ $NUGGFT"
     forge verify-contract "$NUGGFT" src/NuggftV1.sol:NuggftV1 \
         --chain "$NETWORK" \
-        --compiler-version 0.8.16+commit.07a7930e \
+        --compiler-version 0.8.17+commit.8df45f5f \
         --num-of-optimizations "$OPTIMIZER_RUNS" \
         --watch
     echo "---------------------------------------------------------"
@@ -151,7 +151,7 @@ if [ "$NETWORK" != "local" ]; then
     echo "verifying xNuggftV1 @ $xNUGGFT"
     forge verify-contract "$xNUGGFT" src/xNuggftV1.sol:xNuggftV1 \
         --chain "$NETWORK" \
-        --compiler-version 0.8.16+commit.07a7930e \
+        --compiler-version 0.8.17+commit.8df45f5f \
         --num-of-optimizations "$OPTIMIZER_RUNS" \
         --watch
     echo "---------------------------------------------------------"
@@ -159,7 +159,7 @@ if [ "$NETWORK" != "local" ]; then
     echo "verifying DotnuggV1 @ $DOTNUGG"
     forge verify-contract "$DOTNUGG" ../dotnugg-v1-core/src/DotnuggV1.sol:DotnuggV1 \
         --chain "$NETWORK" \
-        --compiler-version 0.8.16+commit.07a7930e \
+        --compiler-version 0.8.17+commit.8df45f5f \
         --num-of-optimizations "$OPTIMIZER_RUNS" \
         --watch
 
