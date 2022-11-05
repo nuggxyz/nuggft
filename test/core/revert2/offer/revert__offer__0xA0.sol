@@ -53,4 +53,15 @@ abstract contract revert__offer__0xA0 is NuggftV1Test {
 			expect.offer().from(users.frank).value(1 ether).exec(tokenId);
 		}
 	}
+
+	function test__revert__offer__0xA0__pass__jumpOneBidTwice() public {
+		if (SALE_LEN > 1) {
+			uint24 tokenId = nuggft.epoch();
+
+			jumpUp(1);
+
+			expect.offer().from(users.frank).value(1 ether).exec(tokenId);
+			expect.offer().from(users.frank).value(500 ether).exec(tokenId);
+		}
+	}
 }
