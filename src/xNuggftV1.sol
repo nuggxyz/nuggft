@@ -191,7 +191,7 @@ contract xNuggftV1 is IxNuggftV1, NuggftV1Constants {
 		uint256 working;
 
 		for (uint24 i = min; i <= max; i++) {
-			working = nuggftv1.proofFromSeed(uint256(keccak256(abi.encodePacked(seed, i))));
+			working = nuggftv1.proofFromSeed(uint256(keccak256(abi.encodePacked(i, seed))));
 
 			// @solidity memory-safe-assembly
 			assembly {
