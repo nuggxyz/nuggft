@@ -128,10 +128,10 @@ abstract contract NuggftV1Swap is NuggftV1Stake {
 		}
 
 		// check to see if this nugg needs to be minted
-		if (active == tokenId && agency__cache == 0) {
+		if (agency__cache == 0 && active >= tokenId && tokenId > (active > SALE_LEN ? (active - SALE_LEN) : 0)) {
 			// [Offer:Mint]
 
-			(uint256 _agency, uint256 _proof) = mint(uint24(tokenId), calculateSeed(uint24(active)), uint24(active), uint96(value), msg.sender);
+			(uint256 _agency, uint256 _proof) = mint(uint24(tokenId), calculateSeed(uint24(tokenId)), uint24(tokenId), uint96(value), msg.sender);
 
 			addStakedShare(value);
 

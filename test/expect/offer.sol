@@ -156,7 +156,7 @@ contract expectOffer is base {
 		env.isItem = tokenId > 0xffffff;
 		env.value = val;
 		env.epoch = nuggft.epoch();
-		env.mintingNugg = tokenId == env.epoch;
+		env.mintingNugg = tokenId <= env.epoch && tokenId > (env.epoch > SALE_LEN ? (env.epoch - SALE_LEN) : 0);
 		env.eps = nuggft.eps();
 		env.msp = nuggft.msp();
 		env.id = uint40(tokenId);
