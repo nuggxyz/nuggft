@@ -12,10 +12,10 @@ the core logic and smart contracts for nuggft v1
 
 ## Deployments
 
-| network | status        | address                                      |
-| ------- | ------------- | -------------------------------------------- |
-| mainnet | 🔨 pending    | `TBD`                                        |
-| goerli  | ✅ up to date | `0x69420000f032d9b7897c4b9a4603b27a6dbc007f` |
+| network | status              | address                                      |
+| ------- | ------------------- | -------------------------------------------- |
+| mainnet | 🔨 pending          | `TBD`                                        |
+| goerli  | ✅ as of 11/05/2022 | `0x69420000Bad0605988626169E32aa82FB3981add` |
 
 ## m1 configuration
 
