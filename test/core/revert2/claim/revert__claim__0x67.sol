@@ -24,7 +24,7 @@ abstract contract revert__claim__0x67 is NuggftV1Test {
 
 		expect.offer().from(users.dee).exec{value: nuggft.msp()}(tokenId);
 
-		jump(tokenId + 1);
+		jumpSwap();
 
 		expect.claim().from(users.dee).exec(array.b24(tokenId), lib.sarrAddress(users.dee));
 	}

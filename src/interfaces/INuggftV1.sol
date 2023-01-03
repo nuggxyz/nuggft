@@ -266,7 +266,10 @@ interface INuggftV1Event {
 
 	event PreMint(uint24 indexed tokenId, bytes32 proof, bytes32 nuggAgency, uint16 indexed itemId, bytes32 itemAgency);
 
-	event Claim(uint24 indexed tokenId, address indexed account);
+	// event Claim(uint24 indexed tokenId, address indexed account);
+
+	// Claim(uint40,bytes32,bytes32,bytes32)
+	event Claim(uint40 indexed tokenId, bytes32 proof, bytes32 offerAgency, bytes32 agency);
 
 	event Sell(uint24 indexed tokenId, bytes32 agency);
 

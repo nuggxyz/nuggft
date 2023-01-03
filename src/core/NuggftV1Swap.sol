@@ -633,14 +633,14 @@ abstract contract NuggftV1Swap is NuggftV1Stake {
                 case 1 {
                     let agency__epoch := juke(agency__cache, AEJL, AEJR)
 
+					mstore(0x1C0, agency__cache)
+
                     // ensure that the agency flag is "SWAP" (0x03)
                     // importantly, this only needs to be done for "winning" claims,
                     // + otherwise
                     if iszero(eq(juke(agency__cache, AFJL, AFJR), 0x03)) {
                         panic(Error__0xA0__NotSwapping)
                     }
-
-					log2(0x00, 0x00, agency__cache, active)
 
                     // check to make sure the user is the seller or the swap is over
                     // we know a user is a seller if the epoch is still 0
@@ -680,15 +680,17 @@ abstract contract NuggftV1Swap is NuggftV1Stake {
                          }
 
                         mstore(0x1A0, _proof)
+
+						mstore(0x1E0, offerer)
                     }
                     default {
 
                         mstore(0x140, tokenId)
 
-                        let _proof := sload(keccak256(0x140, 0x40))
+                        let wrk := sload(keccak256(0x140, 0x40)) // wrk is the proof
 
                         mstore(0x220, Function__transferBatch)
-                        mstore(0x240, _proof)
+                        mstore(0x240, wrk) // proof
                         mstore(0x260, address())
                         mstore(0x280, trusted)
 
@@ -697,13 +699,19 @@ abstract contract NuggftV1Swap is NuggftV1Stake {
                             panic(Error__0xAE__FailedCallToItemsHolder)
                         }
 
-                        // save the updated agency
-                        sstore(agency__sptr, xor( // =============================
+						mstore(0x1A0, wrk)
+
+						wrk := xor( // ================================================
                                 /* addr     0       [ */ offerer, /*  ] AVJO */
                                 /* eth      AVJO,    [    next         ] AEJO */
                                 /* epoch    AEJO,    [    active       ] AFJO */
-                           shl( /* flag  */ AFJO, /* [ */ 0x01      /* ] 255 */ ))
+                           shl( /* flag  */ AFJO, /* [ */ 0x01      /* ] 255 */ )
                         ) // ==========================================================
+
+						mstore(0x1E0, wrk)
+
+                        // save the updated agency
+                        sstore(agency__sptr, wrk)
 
                         // "transfer" token to the new owner
                         log4( // =======================================================
@@ -722,6 +730,8 @@ abstract contract NuggftV1Swap is NuggftV1Stake {
 
                     let offer__cache := sload(offer__sptr)
 
+					mstore(0x1C0, offer__cache)
+
                     // ensure this user has an offer to claim
                     if iszero(offer__cache) {
                         panic(Error__0xA5__NoOffer)
@@ -735,14 +745,16 @@ abstract contract NuggftV1Swap is NuggftV1Stake {
                 // delete offer before we potentially send value
                 sstore(offer__sptr, 0)
 
-                switch isItem
-                case 1 {
-                    log4(0x1A0, 0x20, Event__ClaimItem, and(tokenId, 0xffffff), shr(24, tokenId), offerer)
-                    mstore(0x1A0, 0x00)
-                }
-                default {
-                    log3(0x00, 0x00, Event__Claim, tokenId, offerer)
-                }
+				log2(0x1A0, 0x60, Event__Claim, tokenId)
+
+                // switch isItem
+                // case 1 {
+                //     log4(0x1A0, 0x20, Event__ClaimItem, and(tokenId, 0xffffff), shr(24, tokenId), offerer)
+                //     mstore(0x1A0, 0x00)
+                // }
+                // default {
+                //     log3(0x00, 0x00, Event__Claim, tokenId, offerer)
+                // }
             }
 
             // skip sending value if amount to send is 0

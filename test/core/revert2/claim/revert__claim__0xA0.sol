@@ -23,8 +23,20 @@ abstract contract revert__claim__0xA0 is NuggftV1Test {
 
 		expect.offer().from(users.frank).value(1 ether).exec(tokenId);
 
-		jumpUp(1);
+		jumpSwap();
 
 		expect.claim().from(users.frank).exec(array.b24(tokenId), lib.sarrAddress(users.frank));
+	}
+
+	function test__revert__claim__0xA0__fail__0x67() public {
+		jumpStart();
+
+		uint24 tokenId = nuggft.epoch();
+
+		expect.offer().from(users.frank).value(1 ether).exec(tokenId);
+
+		jumpUp(1);
+
+		expect.claim().from(users.frank).err(0x67).exec(array.b24(tokenId), lib.sarrAddress(users.frank));
 	}
 }

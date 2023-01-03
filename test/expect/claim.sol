@@ -153,9 +153,15 @@ contract expectClaim is base {
 			forge.vm.expectRevert(txdata.err);
 		} else {
 			for (uint256 a = 0; a < tokenIds.length; a++) {
+				bytes32 agen;
+				uint256 proof;
 				if (offerers[a] == address(0)) {
-					forge.vm.expectEmit(true, true, true, false);
-					emit ClaimItem(tokenIds[a], itemIds[a], buyingTokenIds[a], 0);
+					if (run.snapshots[a].env.winner) {
+						agen = bytes32(uint256(buyingTokenIds[a]));
+						(, , proof) = mockInsertItem(run.snapshots[a].env.nuggsProof, itemIds[a]);
+					}
+					forge.vm.expectEmit(true, true, true, true);
+					emit Claim((uint40(itemIds[a]) << 24) | uint40(tokenIds[a]), bytes32(proof), bytes32(run.snapshots[a].data.offer), agen);
 					if (run.snapshots[a].env.winner) {
 						forge.vm.expectCall(
 							address(xnuggft),
@@ -163,9 +169,12 @@ contract expectClaim is base {
 						);
 					}
 				} else {
-					forge.vm.expectEmit(true, true, false, false);
-					emit Claim(tokenIds[a], offerers[a]);
-
+					if (run.snapshots[a].env.winner) {
+						agen = bytes32(uint256((0x01) << AFJO) | uint160(offerers[a]));
+						proof = run.snapshots[a].env.nuggsProof;
+					}
+					forge.vm.expectEmit(true, true, true, true);
+					emit Claim(tokenIds[a], bytes32(proof), bytes32(run.snapshots[a].data.offer), agen);
 					if (run.snapshots[a].env.winner) {
 						forge.vm.expectCall(
 							address(xnuggft),
@@ -276,6 +285,7 @@ contract expectClaim is base {
 				pre.agency = nuggft.itemAgency(safe.u24(env.id & 0xffffff), safe.u16(env.id >> 24));
 				pre.offer = nuggft.itemOffers(safe.u24(env.buyer), safe.u24(env.id & 0xffffff), safe.u16(env.id >> 24));
 				env.buyingNuggOwner = address(uint160(nuggft.agency(safe.u24(uint160(env.buyer)))));
+				env.nuggsProof = nuggft.proofOf(safe.u24(env.buyer));
 			} else {
 				pre.agency = nuggft.agency(safe.u24(env.id));
 				pre.offer = nuggft.offers(safe.u24(env.id), env.buyer);
@@ -383,6 +393,29 @@ contract expectClaim is base {
 			if (proof & 0xffff == itemId) return (true, index);
 			index++;
 		} while ((proof >>= 16) != 0);
+	}
+
+	function mockInsertItem(uint256 proof, uint16 itemId)
+		internal
+		pure
+		returns (
+			bool ok,
+			uint8 index,
+			uint256 res
+		)
+	{
+		res = proof;
+		index = 8;
+		proof >>= 128;
+		do {
+			if (proof & 0xffff == 0) {
+				return (true, index, res + (uint256(itemId) << (index * 16)));
+			}
+			index++;
+			proof >>= 16;
+		} while (index < 16);
+
+		return (false, 0, res);
 	}
 
 	function assertProofContains(
