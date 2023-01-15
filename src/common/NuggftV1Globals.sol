@@ -59,7 +59,19 @@ abstract contract NuggftV1Globals is NuggftV1Constants, INuggftV1 {
 
 		stake = (msg.value << 96) + (uint256(early) << 192);
 
-		emit Genesis(genesis, uint16(INTERVAL), uint16(OFFSET), uint8(SALE_LEN), early, address(dotnuggv1), address(xnuggftv1), bytes32(stake), AVJB, LOSS);
+		emit Genesis(
+			genesis,
+			uint16(INTERVAL),
+			uint16(OFFSET),
+			uint8(SALE_LEN),
+			early,
+			address(dotnuggv1),
+			address(xnuggftv1),
+			bytes32(stake),
+			AVJB,
+			LOSS,
+			MINT_OFFSET
+		);
 
 		isTrusted[msg.sender] = true;
 		isTrusted[dub6ix] = true;

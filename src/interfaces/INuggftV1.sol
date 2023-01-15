@@ -237,7 +237,8 @@ interface INuggftV1Event {
 		address xnuggftv1,
 		bytes32 stake,
 		uint8 agencyEthBits,
-		uint96 loss
+		uint96 loss,
+		uint64 mintOffset
 	);
 
 	/* ///////////////////////////////////////////////////////////////////
