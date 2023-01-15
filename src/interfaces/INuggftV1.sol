@@ -238,7 +238,8 @@ interface INuggftV1Event {
 		bytes32 stake,
 		uint8 agencyEthBits,
 		uint96 loss,
-		uint64 mintOffset
+		uint64 mintOffset,
+		bytes32 earlySeed
 	);
 
 	/* ///////////////////////////////////////////////////////////////////

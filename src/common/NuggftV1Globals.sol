@@ -70,7 +70,8 @@ abstract contract NuggftV1Globals is NuggftV1Constants, INuggftV1 {
 			bytes32(stake),
 			AVJB,
 			LOSS,
-			MINT_OFFSET
+			MINT_OFFSET,
+			bytes32(earlySeed)
 		);
 
 		isTrusted[msg.sender] = true;
