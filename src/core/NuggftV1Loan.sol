@@ -160,9 +160,9 @@ abstract contract NuggftV1Loan is NuggftV1Swap {
 
 					let _proof := sload(keccak256(0x00, 0x40))
 
-					mstore(0x00, Function__transferBatch)
+					mstore(0x00, Function__transfer)
 					mstore(0x20, _proof)
-					mstore(0x40, address())
+					mstore(0x40, xor(address(), shl(160, and(tokenId, 0xffffff))))
 					mstore(0x60, caller())
 
 					pop(call(gas(), itemHolder, 0x00, 0x1C, 0x64, 0x00, 0x00))

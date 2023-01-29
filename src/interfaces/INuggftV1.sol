@@ -266,7 +266,7 @@ interface INuggftV1Event {
 
 	event OfferMint(uint24 indexed tokenId, bytes32 agency, bytes32 proof, bytes32 stake);
 
-	event PreMint(uint24 indexed tokenId, bytes32 proof, bytes32 nuggAgency, uint16 indexed itemId, bytes32 itemAgency);
+	// event PreMint(uint24 indexed tokenId, bytes32 proof, bytes32 nuggAgency, uint16 indexed itemId, bytes32 itemAgency);
 
 	// event Claim(uint24 indexed tokenId, address indexed account);
 
@@ -279,9 +279,9 @@ interface INuggftV1Event {
                             ITEM SWAPS
     /////////////////////////////////////////////////////////////////// */
 
-	event OfferItem(uint24 indexed sellingTokenId, uint16 indexed itemId, bytes32 agency, bytes32 stake);
+	// event OfferItem(uint24 indexed sellingTokenId, uint16 indexed itemId, bytes32 agency, bytes32 stake);
 
-	event ClaimItem(uint24 indexed sellingTokenId, uint16 indexed itemId, uint24 indexed buyerTokenId, bytes32 proof);
+	// event ClaimItem(uint24 indexed sellingTokenId, uint16 indexed itemId, uint24 indexed buyerTokenId, bytes32 proof);
 
 	event SellItem(uint24 indexed sellingTokenId, uint16 indexed itemId, bytes32 agency, bytes32 proof);
 

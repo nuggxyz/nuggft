@@ -375,26 +375,13 @@ abstract contract NuggftV1Swap is NuggftV1Stake {
 
             mstore(0x20, last)
 
-            switch isItem
-            case 1 {
-                log3( // =======================================================
-                    /* param #1: agency   bytes32 */ 0x00, /* [ _itemAgency[tokenId][itemId] )   0x20
-                       param #2: stake    bytes32    0x20     [ stake                       ) */ 0x40,
-                    // ---------------------------------------------------------
-                    /* topic #1: sig              */ Event__OfferItem,
-                    /* topic #2: sellerId uint24  */ and(tokenId, 0xffffff),
-                    /* topic #3: itemId   uint16  */ shr(24, tokenId)
-                ) // ===========================================================
-            }
-            default {
-                log2( // =======================================================
-                    /* param #1: agency  bytes32 */ 0x00, /* [ agency[tokenId] )    0x20
-                       param #2: stake   bytes32    0x20     [ stake           ) */ 0x40,
-                    // ---------------------------------------------------------
-                    /* topic #1: sig             */ Event__Offer,
-                    /* topic #2: tokenId uint24 */ tokenId
-                ) // ===========================================================
-            }
+			log2( // =======================================================
+				/* param #1: agency  bytes32 */ 0x00, /* [ agency[tokenId] )    0x20
+				   param #2: stake   bytes32    0x20     [ stake           ) */ 0x40,
+				// ---------------------------------------------------------
+				/* topic #1: sig             */ Event__Offer,
+				/* topic #2: tokenId uint24 */ tokenId
+			) // ===========================================================
         }
 	}
 
@@ -476,8 +463,10 @@ abstract contract NuggftV1Swap is NuggftV1Stake {
 
 			log4(0x00, 0x00, Event__Transfer, 0, address(), tokenId)
 
-			mstore(0x00, Function__transferBatch)
-			mstore(0x40, 0x00)
+			let big := tokenId
+
+			mstore(0x00, Function__transfer)
+			mstore(0x40, shl(160, big))
 			mstore(0x60, address())
 
 			// TODO make sure this is the right way to do this
@@ -670,9 +659,9 @@ abstract contract NuggftV1Swap is NuggftV1Stake {
 
                         sstore(proof__sptr, _proof)
 
-                        mstore(0x220, Function__transferSingle)
+                        mstore(0x220, Function__transfer)
                         mstore(0x240, shr(24, tokenId))
-                        mstore(0x260, address())
+                        mstore(0x260, xor(address(), shl(160, and(tokenId, 0xffffff))))
                         mstore(0x280, trusted)
 
                         if iszero(call(gas(), mload(0x200), 0x00, 0x23C, 0x64, 0x00, 0x00)) {
@@ -689,9 +678,9 @@ abstract contract NuggftV1Swap is NuggftV1Stake {
 
                         let wrk := sload(keccak256(0x140, 0x40)) // wrk is the proof
 
-                        mstore(0x220, Function__transferBatch)
+                        mstore(0x220, Function__transfer)
                         mstore(0x240, wrk) // proof
-                        mstore(0x260, address())
+                        mstore(0x260, xor(address(), shl(160, and(tokenId, 0xffffff))))
                         mstore(0x280, trusted)
 
                         // this call can only fail if not enough gas is passed
@@ -926,9 +915,9 @@ abstract contract NuggftV1Swap is NuggftV1Stake {
 
 				log3(0x00, 0x40, Event__SellItem, and(tokenId, 0xffffff), shr(24, tokenId))
 
-				mstore(0x00, Function__transferSingle)
+				mstore(0x00, Function__transfer)
 				mstore(0x20, shr(24, tokenId))
-				mstore(0x40, caller())
+				mstore(0x40, xor(caller(), shl(160, and(tokenId, 0xffffff))))
 				mstore(0x60, address())
 
 				if iszero(call(gas(), itemHolder, 0x00, 0x1C, 0x64, 0x00, 0x00)) {
@@ -992,9 +981,9 @@ abstract contract NuggftV1Swap is NuggftV1Stake {
 
 					let _proof := sload(keccak256(0x00, 0x40))
 
-					mstore(0x00, Function__transferBatch)
+					mstore(0x00, Function__transfer)
 					mstore(0x20, _proof)
-					mstore(0x40, address())
+					mstore(0x40, xor(address(), shl(160, and(tokenId, 0xffffff))))
 					mstore(0x60, caller())
 
 					if iszero(call(gas(), itemHolder, 0x00, 0x1C, 0x64, 0x00, 0x00)) {

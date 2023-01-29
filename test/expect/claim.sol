@@ -165,7 +165,12 @@ contract expectClaim is base {
 					if (run.snapshots[a].env.winner) {
 						forge.vm.expectCall(
 							address(xnuggft),
-							abi.encodeWithSelector(xnuggft.transferSingle.selector, itemIds[a], address(nuggft), run.snapshots[a].env.buyingNuggOwner)
+							abi.encodeWithSelector(
+								xnuggft.transfer.selector,
+								itemIds[a],
+								uint256(uint160(address(nuggft))) | (uint256(tokenIds[a]) << 160),
+								run.snapshots[a].env.buyingNuggOwner
+							)
 						);
 					}
 				} else {
@@ -178,7 +183,12 @@ contract expectClaim is base {
 					if (run.snapshots[a].env.winner) {
 						forge.vm.expectCall(
 							address(xnuggft),
-							abi.encodeWithSelector(xnuggft.transferBatch.selector, run.snapshots[a].env.nuggsProof, address(nuggft), offerers[a])
+							abi.encodeWithSelector(
+								xnuggft.transfer.selector,
+								run.snapshots[a].env.nuggsProof,
+								uint256(uint160(address(nuggft))) | (uint256(tokenIds[a]) << 160),
+								offerers[a]
+							)
 						);
 					}
 				}

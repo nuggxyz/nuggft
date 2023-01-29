@@ -11,6 +11,26 @@ import {IERC165} from "./interfaces/IERC165.sol";
 import {INuggftV1} from "./interfaces/INuggftV1.sol";
 import {NuggftV1Constants} from "./common/NuggftV1Constants.sol";
 
+// 5 - 14
+// 6 - 16
+// 7 - 18
+// 0000000000000000000000000000000000000000000000000000000000000040
+// 0000000000000000000000000000000000000000000000000000000000000120
+// 0000000000000000000000000000000000000000000000000000000000000006
+// 0000000000000000000000000000000000000000000000000000000000000012
+// 0000000000000000000000000000000000000000000000000000000000001776
+// 0000000000000000000000000000000000000000000000000000000000000bee
+// 0000000000000000000000000000000000000000000000000000000000000bf7
+// 0000000000000000000000000000000000000000000000000000000000000829
+// 0000000000000000000000000000000000000000000000000000000000000404
+// 0000000000000000000000000000000000000000000000000000000000000006
+// 0000000000000000000000000000000000000000000000000000000000000001
+// 0000000000000000000000000000000000000000000000000000000000000001
+// 0000000000000000000000000000000000000000000000000000000000000001
+// 0000000000000000000000000000000000000000000000000000000000000001
+// 0000000000000000000000000000000000000000000000000000000000000001
+// 0000000000000000000000000000000000000000000000000000000000000001
+
 /// @author nugg.xyz - danny7even and dub6ix - 2022
 contract xNuggftV1 is IxNuggftV1, NuggftV1Constants {
 	using DotnuggV1Lib for IDotnuggV1;
@@ -33,43 +53,71 @@ contract xNuggftV1 is IxNuggftV1, NuggftV1Constants {
 		res = nuggftv1.dotnuggv1().exec(feature, position, false);
 	}
 
-	function transferBatch(
+	function transfer(
 		uint256 proof,
-		address from,
-		address to
+		uint256 from,
+		uint256 to
 	) external payable {
 		require(msg.sender == address(nuggftv1));
 
 		unchecked {
-			uint256 tmp = proof;
+			assembly {
+				let nugg := shr(160, from)
 
-			uint256 length = 1;
+				if iszero(shr(16, proof)) {
+					let a := shl(160, nugg)
 
-			while (tmp != 0) if ((tmp >>= 16) & 0xffff != 0) length++;
+					mstore(0x00, proof)
+					mstore(0x20, 1)
 
-			uint256[] memory ids = new uint256[](length);
-			uint256[] memory values = new uint256[](length);
-
-			ids[0] = proof & 0xffff;
-			values[0] = 1;
-
-			while (proof != 0)
-				if ((tmp = ((proof >>= 16) & 0xffff)) != 0) {
-					ids[--length] = tmp;
-					values[length] = 1;
+					log4(0x00, 0x40, Event_TransferSingle, a, from, to)
+					return(0x00, 0x00)
 				}
 
-			emit TransferBatch(address(0), from, to, ids, values);
-		}
-	}
+				let ptr := mload(0x40)
+				let a := shl(160, nugg)
 
-	function transferSingle(
-		uint256 itemId,
-		address from,
-		address to
-	) external payable {
-		require(msg.sender == address(nuggftv1));
-		emit TransferSingle(address(0), from, to, itemId, 1);
+				mstore(ptr, 0x40)
+
+				let offset := 0
+
+				for {
+					let z := proof
+					let g := and(z, 0xffff)
+				} iszero(eq(z, 0)) {
+					z := shr(16, z)
+					g := and(z, 0xffff)
+				} {
+					if iszero(eq(g, 0)) {
+						mstore(offset, g)
+						offset := add(offset, 0x20)
+					}
+				}
+
+				let count := div(sub(offset, 0x60), 0x20)
+
+				mstore(add(ptr, 0x40), count)
+				mstore(offset, count)
+				mstore(add(ptr, 0x20), offset)
+
+				offset := add(offset, 0x20)
+
+				for {
+					let i := 0
+				} lt(i, count) {
+					i := sub(i, 1)
+				} {
+					mstore(offset, 1)
+					offset := add(offset, 0x20)
+				}
+
+				from := shr(96, shl(96, from))
+				to := shr(96, shl(96, to))
+
+				log4(ptr, sub(offset, ptr), Event_TransferBatch, a, from, to)
+				return(0x00, 0x00)
+			}
+		}
 	}
 
 	function supportsInterface(bytes4 interfaceId) public view virtual override returns (bool) {
