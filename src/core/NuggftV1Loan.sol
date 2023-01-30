@@ -244,7 +244,7 @@ abstract contract NuggftV1Loan is NuggftV1Swap {
 			// ===========================
 
 			mstore(0x00, agency__cache)
-			log2(0x00, 0x20, Event__Liquidate, tokenId)
+			log2(0x00, 0x20, Event__Loan, tokenId)
 		}
 	}
 
@@ -384,7 +384,7 @@ abstract contract NuggftV1Loan is NuggftV1Swap {
 
                 mstore(0x40, agency__cache)
 
-                log2(0x40, 0x20, Event__Rebalance, mload(0x00))
+                log2(0x40, 0x20, Event__Loan, mload(0x00))
             }
 
 			// ======================================================================

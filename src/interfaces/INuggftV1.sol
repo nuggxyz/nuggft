@@ -291,9 +291,9 @@ interface INuggftV1Event {
 
 	event Loan(uint24 indexed tokenId, bytes32 agency);
 
-	event Rebalance(uint24 indexed tokenId, bytes32 agency);
+	// event Rebalance(uint24 indexed tokenId, bytes32 agency);
 
-	event Liquidate(uint24 indexed tokenId, bytes32 agency);
+	// event Liquidate(uint24 indexed tokenId, bytes32 agency);
 
 	/* ///////////////////////////////////////////////////////////////////
                             TRUST
