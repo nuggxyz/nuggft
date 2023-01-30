@@ -131,24 +131,23 @@ abstract contract NuggftV1Swap is NuggftV1Stake {
 		if (agency__cache == 0 && active >= tokenId && tokenId > (active > SALE_LEN ? (active - SALE_LEN) : 0)) {
 			// [Offer:Mint]
 
-			(uint256 _agency, uint256 _proof) = mint(uint24(tokenId), calculateSeed(uint24(tokenId)), uint24(tokenId + SALE_LEN), uint96(value), msg.sender);
+			(uint256 _agency, ) = mint(uint24(tokenId), calculateSeed(uint24(tokenId)), uint24(tokenId + SALE_LEN), uint96(value), msg.sender);
 
-			addStakedShare(value);
+			uint256 cache = addStakedShare(value);
 
 			// prettier-ignore
 			assembly {
 
-                // log the updated agency
-                mstore(0x00, _agency)
-                mstore(0x20, _proof)
+                mstore(0x20, _agency)
+				mstore(0x40, cache)
 
-                log2( // -------------------------------------------------------
-                    /* param #1: agency  */ 0x00, /* [ agency[tokenId]    ]     0x20,
-                       param #2: proof      0x20,    [ proof[tokenId]     ]     0x40,
-                       param #3: proof      0x40,    [ stake              ]  */ 0x60,
-                    /* topic #1: sig     */ Event__OfferMint,
-                    /* topic #2: tokenId */ tokenId
-                ) // ===========================================================
+				log2( // =======================================================
+					/* param #1: agency  bytes32 */ 0x00, /* [ agency[tokenId] )    0x20
+					   param #2: stake   bytes32    0x20     [ stake           ) */ 0x40,
+					// ---------------------------------------------------------
+					/* topic #1: sig             */ Event__Offer,
+					/* topic #2: tokenId uint24 */ tokenId
+				) // ===========================================================
             }
 
 			return;
@@ -460,6 +459,7 @@ abstract contract NuggftV1Swap is NuggftV1Stake {
 			// mstore(0x00, value)
 			mstore(0x20, _proof)
 			// mstore(0x60, _agency)
+			log2(0x20, 0x20, Event__Rotate, tokenId)
 
 			log4(0x00, 0x00, Event__Transfer, 0, address(), tokenId)
 
@@ -861,9 +861,9 @@ abstract contract NuggftV1Swap is NuggftV1Stake {
 					sstore(agency__sptr, agency__cache)
 
 					mstore(0x00, agency__cache)
-					mstore(0x20, 0x00)
+					// mstore(0x20, 0x00)
 
-					log3(0x00, 0x40, Event__SellItem, and(tokenId, 0xffffff), shr(24, tokenId))
+					log2(0x00, 0x20, Event__Sell, tokenId)
 
 					// panic(Error__0x97__ItemAgencyAlreadySet)
 
@@ -913,7 +913,9 @@ abstract contract NuggftV1Swap is NuggftV1Stake {
 				mstore(0x00, agency__cache)
 				mstore(0x20, _proof)
 
-				log3(0x00, 0x40, Event__SellItem, and(tokenId, 0xffffff), shr(24, tokenId))
+				log2(0x00, 0x20, Event__Sell, tokenId)
+
+				log2(0x20, 0x20, Event__Rotate, and(tokenId, 0xffffff))
 
 				mstore(0x00, Function__transfer)
 				mstore(0x20, shr(24, tokenId))

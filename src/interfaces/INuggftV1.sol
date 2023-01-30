@@ -264,7 +264,7 @@ interface INuggftV1Event {
 
 	event Offer(uint24 indexed tokenId, bytes32 agency, bytes32 stake);
 
-	event OfferMint(uint24 indexed tokenId, bytes32 agency, bytes32 proof, bytes32 stake);
+	// event OfferMint(uint24 indexed tokenId, bytes32 agency, bytes32 proof, bytes32 stake);
 
 	// event PreMint(uint24 indexed tokenId, bytes32 proof, bytes32 nuggAgency, uint16 indexed itemId, bytes32 itemAgency);
 
@@ -273,7 +273,7 @@ interface INuggftV1Event {
 	// Claim(uint40,bytes32,bytes32,bytes32)
 	event Claim(uint40 indexed tokenId, bytes32 proof, bytes32 offerAgency, bytes32 agency);
 
-	event Sell(uint24 indexed tokenId, bytes32 agency);
+	event Sell(uint40 indexed tokenId, bytes32 agency);
 
 	/* ///////////////////////////////////////////////////////////////////
                             ITEM SWAPS
@@ -283,7 +283,7 @@ interface INuggftV1Event {
 
 	// event ClaimItem(uint24 indexed sellingTokenId, uint16 indexed itemId, uint24 indexed buyerTokenId, bytes32 proof);
 
-	event SellItem(uint24 indexed sellingTokenId, uint16 indexed itemId, bytes32 agency, bytes32 proof);
+	// event SellItem(uint24 indexed sellingTokenId, uint16 indexed itemId, bytes32 agency, bytes32 proof);
 
 	/* ///////////////////////////////////////////////////////////////////
                             LOANS
