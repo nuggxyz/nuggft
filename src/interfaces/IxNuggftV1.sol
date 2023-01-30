@@ -28,6 +28,6 @@ interface IxNuggftV1 is IERC1155Metadata_URI, IERC1155 {
 
 	function eloop() external view returns (bytes memory res) ;
 
-    function transfer(uint256 proof, uint256 from, uint256 to) external payable;
+    function transfer(bytes32 proof, bytes32 from, bytes32 to) external payable;
 
 }

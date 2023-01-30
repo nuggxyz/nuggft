@@ -31,6 +31,11 @@ import {NuggftV1Constants} from "./common/NuggftV1Constants.sol";
 // 0000000000000000000000000000000000000000000000000000000000000001
 // 0000000000000000000000000000000000000000000000000000000000000001
 
+// 0000000000000000000000000000000000000000000000000000000000001772
+// 00000000000000000000000000000000000000000000000000000000000000c0
+// 0000000000000000000000000000000000000000000000000000000000000003
+// 0000000000000000000000000000000000000000000000000000000000000001
+
 /// @author nugg.xyz - danny7even and dub6ix - 2022
 contract xNuggftV1 is IxNuggftV1, NuggftV1Constants {
 	using DotnuggV1Lib for IDotnuggV1;
@@ -54,9 +59,9 @@ contract xNuggftV1 is IxNuggftV1, NuggftV1Constants {
 	}
 
 	function transfer(
-		uint256 proof,
-		uint256 from,
-		uint256 to
+		bytes32 proof,
+		bytes32 from,
+		bytes32 to
 	) external payable {
 		address nuggft = address(nuggftv1);
 
@@ -86,7 +91,7 @@ contract xNuggftV1 is IxNuggftV1, NuggftV1Constants {
 
 				mstore(ptr, 0x40)
 
-				let offset := 0
+				let offset := add(ptr, 0x60)
 
 				for {
 					let z := proof
@@ -101,18 +106,18 @@ contract xNuggftV1 is IxNuggftV1, NuggftV1Constants {
 					}
 				}
 
-				let count := div(sub(offset, 0x60), 0x20)
+				let count := div(sub(sub(offset, 0x60), ptr), 0x20)
 
 				mstore(add(ptr, 0x40), count)
 				mstore(offset, count)
-				mstore(add(ptr, 0x20), offset)
+				mstore(add(ptr, 0x20), sub(offset, ptr))
 
 				offset := add(offset, 0x20)
 
 				for {
 					let i := 0
 				} lt(i, count) {
-					i := sub(i, 1)
+					i := add(i, 1)
 				} {
 					mstore(offset, 1)
 					offset := add(offset, 0x20)

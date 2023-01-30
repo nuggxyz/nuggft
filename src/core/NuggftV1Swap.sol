@@ -72,7 +72,7 @@ abstract contract NuggftV1Swap is NuggftV1Stake {
 		address sender;
 		uint256 offersSlot;
 
-		bool isItem;
+		address xnuggft = address(xnuggftv1);
 
 		assembly {
 			function juke(x, L, R) -> b {
@@ -87,9 +87,7 @@ abstract contract NuggftV1Swap is NuggftV1Stake {
 
 			mstore(0x20, agency.slot)
 
-			isItem := gt(tokenId, 0xffffff)
-
-			switch isItem
+			switch gt(tokenId, 0xffffff)
 			case 1 {
 				sender := shr(40, tokenId)
 
@@ -151,7 +149,7 @@ abstract contract NuggftV1Swap is NuggftV1Stake {
             }
 
 			return;
-		} else if (!isItem && agency__cache == 0) {
+		} else if (tokenId <= 0xffffff && agency__cache == 0) {
 			premint(uint24(tokenId), value);
 			return;
 		}
@@ -217,6 +215,8 @@ abstract contract NuggftV1Swap is NuggftV1Stake {
                 }
             }
 
+
+
             /////////////////////////////////////////////////////////////////////
 
             // check to see if the swap's epoch is 0, make required updates
@@ -238,7 +238,8 @@ abstract contract NuggftV1Swap is NuggftV1Stake {
                         /* flag        AFJO,    [                 ) 256 */
                 ) // ==========================================================
 
-                if isItem {
+                switch gt(tokenId, 0xffffff) // isItem
+				case 1 {
                     // check to make sure there is not a swap
                     // this blocks more than one swap of a particular item of ending in the same epoch
 
@@ -269,7 +270,44 @@ abstract contract NuggftV1Swap is NuggftV1Stake {
                     // since epoch 1 cant happen (unless OFFSET is 0)
                     sstore(mload(0x80), or(val, nextEpoch))
 
+					/////////////////////////////////////////////////////////////////
+
+					log2(0x20, 0x20, Event__Rotate, and(tokenId, 0xffffff))
+
+					mstore(0x00, Function__transfer)
+					mstore(0x20, shr(24, tokenId))
+					mstore(0x40, xor(caller(), shl(160, and(tokenId, 0xffffff))))
+					mstore(0x60, address())
+
+					if iszero(call(gas(), xnuggft, 0x00, 0x1C, 0x64, 0x00, 0x00)) {
+						panic(Error__0xAE__FailedCallToItemsHolder)
+					}
+
                 }
+				default {
+						// prettier-ignore
+					log4( // =======================================================
+                        /* param 0: n/a  */ 0x00, 0x00,
+                        /* topic 1: sig  */ Event__Transfer,
+                        /* topic 2: from */ caller(),
+                        /* topic 3: to   */ address(),
+                        /* topic 4: id   */ tokenId
+                    ) // ===========================================================
+
+					mstore(0x00, tokenId)
+					mstore(0x20, proof.slot)
+
+					let _proof := sload(keccak256(0x00, 0x40))
+
+					mstore(0x00, Function__transfer)
+					mstore(0x20, _proof)
+					mstore(0x40, xor(address(), shl(160, and(tokenId, 0xffffff))))
+					mstore(0x60, caller())
+
+					if iszero(call(gas(), xnuggft, 0x00, 0x1C, 0x64, 0x00, 0x00)) {
+						panic(Error__0xAE__FailedCallToItemsHolder)
+					}
+				}
 
             }
             default { // [Offer:Carry]
@@ -914,17 +952,6 @@ abstract contract NuggftV1Swap is NuggftV1Stake {
 				mstore(0x20, _proof)
 
 				log2(0x00, 0x20, Event__Sell, tokenId)
-
-				log2(0x20, 0x20, Event__Rotate, and(tokenId, 0xffffff))
-
-				mstore(0x00, Function__transfer)
-				mstore(0x20, shr(24, tokenId))
-				mstore(0x40, xor(caller(), shl(160, and(tokenId, 0xffffff))))
-				mstore(0x60, address())
-
-				if iszero(call(gas(), itemHolder, 0x00, 0x1C, 0x64, 0x00, 0x00)) {
-					panic(Error__0xAE__FailedCallToItemsHolder)
-				}
 			}
 			default {
 				// ensure the caller is the agent
@@ -969,28 +996,7 @@ abstract contract NuggftV1Swap is NuggftV1Stake {
 				log2(0x00, 0x20, Event__Sell, tokenId)
 
 				if iszero(isWaitingForOffer) {
-					// prettier-ignore
-					log4( // =======================================================
-                        /* param 0: n/a  */ 0x00, 0x00,
-                        /* topic 1: sig  */ Event__Transfer,
-                        /* topic 2: from */ caller(),
-                        /* topic 3: to   */ address(),
-                        /* topic 4: id   */ tokenId
-                    ) // ===========================================================
 
-					mstore(0x00, tokenId)
-					mstore(0x20, proof.slot)
-
-					let _proof := sload(keccak256(0x00, 0x40))
-
-					mstore(0x00, Function__transfer)
-					mstore(0x20, _proof)
-					mstore(0x40, xor(address(), shl(160, and(tokenId, 0xffffff))))
-					mstore(0x60, caller())
-
-					if iszero(call(gas(), itemHolder, 0x00, 0x1C, 0x64, 0x00, 0x00)) {
-						panic(Error__0xAE__FailedCallToItemsHolder)
-					}
 				}
 			}
 		}

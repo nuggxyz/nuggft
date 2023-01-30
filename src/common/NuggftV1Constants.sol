@@ -122,7 +122,7 @@ abstract contract NuggftV1Constants {
 	bytes32 constant Event__Loan = 0x9fee03d24f4262ff4c5fb3232ff16949f4dccdd085da00bf1f1193c3723eee53;
 	bytes32 constant Event__Claim = 0x41a23341bbb80e8168a44690c9c4a06ea716a81135bfd91090e02eb9f512dfed;
 	// bytes32 constant Event__ClaimItem = 0xcd1615176b23cfc579068e17d243a2b8aa647d8052f1f285153e4d2464c5faf8;
-	bytes32 constant Event__Sell = 0x8db33e627ce35c1bbfb6417c838e02c148d2c95bed15ec87fdaf3855d0afbb8c;
+	bytes32 constant Event__Sell = 0xa22a2f700e25812c5b49134de558e904b32f69ebbb066950e5bfd52e3f65339e;
 	// bytes32 constant Event__SellItem = 0xe6b9f9b164a3157991009234a9a3018382c7bef2519e6293bfa9e496174fbbcb;
 	bytes32 constant Event__Offer = 0x4c15f3795daf7602f4762cff646acbca438577dc8ba33ed2af7f2d37f321cbd1;
 	// bytes32 constant Event__Repayment = 0xc928c04c08e9d5085139dee5b4b0a24f48d84c91f8f44caefaea39da6108fce3;
@@ -137,7 +137,7 @@ abstract contract NuggftV1Constants {
 	// uint64 constant Function__transferSingle = 0x49a035e3;
 	// uint64 constant Function__transferBatch = 0xdec6d46d;
 	// 0x90dd26273ca9c6e53604fc507572652ee2f908f457ff5ac5941fa97ce5859d99
-	uint64 constant Function__transfer = 0x90dd2627;
+	uint64 constant Function__transfer = 0x80c15e11;
 
 	uint8 constant Error__0x65__TokenNotMintable = 0x65;
 	uint8 constant Error__0x66__TokenNotTrustMintable = 0x66;
