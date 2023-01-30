@@ -265,17 +265,29 @@ abstract contract NuggftV1Swap is NuggftV1Stake {
 
                     val := or(val, shl(24, and(tokenId, 0xffffff)))
 
+
+
                     // since epoch 1 cant happen (unless OFFSET is 0)
                     sstore(mload(0x80), or(val, nextEpoch))
 
 					/////////////////////////////////////////////////////////////////
+
+					mstore(0x40, and(tokenId, 0xffffff))
+					mstore(0x60, agency.slot)
+
+					val := keccak256( // ======================================
+            		    0x40, /* [ tokenId        )    0x20
+            		    0x20     [ agency.slot ) */ 0x40
+            		)// =======================================================
+
+					val := juke(sload(val), AAJL, AAJR )
 
 					mstore(0x40, Function__transfer)
 					mstore(0x60, shr(24, tokenId))
 
 					log2(0x60, 0x20, Event__Rotate, and(tokenId, 0xffffff))
 
-					mstore(0x80, xor(agency__addr, shl(160, and(tokenId, 0xffffff))))
+					mstore(0x80, xor(val, shl(160, and(tokenId, 0xffffff))))
 					mstore(0xa0, address())
 
 					if iszero(call(gas(), xnuggft, 0x00, 0x5C, 0x64, 0x00, 0x00)) {
@@ -300,8 +312,8 @@ abstract contract NuggftV1Swap is NuggftV1Stake {
 
 					mstore(0x40, Function__transfer)
 					mstore(0x60, _proof)
-					mstore(0x80, xor(address(), shl(160, and(tokenId, 0xffffff))))
-					mstore(0xa0, caller())
+					mstore(0x80, xor(agency__addr, shl(160, and(tokenId, 0xffffff))))
+					mstore(0xa0, address())
 
 					if iszero(call(gas(), xnuggft, 0x00, 0x5C, 0x64, 0x00, 0x00)) {
 						panic(Error__0xAE__FailedCallToItemsHolder)
