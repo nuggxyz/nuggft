@@ -136,8 +136,8 @@ abstract contract NuggftV1Swap is NuggftV1Stake {
 			// prettier-ignore
 			assembly {
 
-                mstore(0x20, _agency)
-				mstore(0x40, cache)
+                mstore(0x00, _agency)
+				mstore(0x20, cache)
 
 				log2( // =======================================================
 					/* param #1: agency  bytes32 */ 0x00, /* [ agency[tokenId] )    0x20
@@ -215,8 +215,6 @@ abstract contract NuggftV1Swap is NuggftV1Stake {
                 }
             }
 
-
-
             /////////////////////////////////////////////////////////////////////
 
             // check to see if the swap's epoch is 0, make required updates
@@ -272,14 +270,15 @@ abstract contract NuggftV1Swap is NuggftV1Stake {
 
 					/////////////////////////////////////////////////////////////////
 
-					log2(0x20, 0x20, Event__Rotate, and(tokenId, 0xffffff))
+					mstore(0x40, Function__transfer)
+					mstore(0x60, shr(24, tokenId))
 
-					mstore(0x00, Function__transfer)
-					mstore(0x20, shr(24, tokenId))
-					mstore(0x40, xor(caller(), shl(160, and(tokenId, 0xffffff))))
-					mstore(0x60, address())
+					log2(0x60, 0x20, Event__Rotate, and(tokenId, 0xffffff))
 
-					if iszero(call(gas(), xnuggft, 0x00, 0x1C, 0x64, 0x00, 0x00)) {
+					mstore(0x80, xor(agency__addr, shl(160, and(tokenId, 0xffffff))))
+					mstore(0xa0, address())
+
+					if iszero(call(gas(), xnuggft, 0x00, 0x5C, 0x64, 0x00, 0x00)) {
 						panic(Error__0xAE__FailedCallToItemsHolder)
 					}
 
@@ -289,25 +288,26 @@ abstract contract NuggftV1Swap is NuggftV1Stake {
 					log4( // =======================================================
                         /* param 0: n/a  */ 0x00, 0x00,
                         /* topic 1: sig  */ Event__Transfer,
-                        /* topic 2: from */ caller(),
+                        /* topic 2: from */ agency__addr,
                         /* topic 3: to   */ address(),
                         /* topic 4: id   */ tokenId
                     ) // ===========================================================
 
-					mstore(0x00, tokenId)
-					mstore(0x20, proof.slot)
+					mstore(0x40, tokenId)
+					mstore(0x60, proof.slot)
 
-					let _proof := sload(keccak256(0x00, 0x40))
+					let _proof := sload(keccak256(0x40, 0x40))
 
-					mstore(0x00, Function__transfer)
-					mstore(0x20, _proof)
-					mstore(0x40, xor(address(), shl(160, and(tokenId, 0xffffff))))
-					mstore(0x60, caller())
+					mstore(0x40, Function__transfer)
+					mstore(0x60, _proof)
+					mstore(0x80, xor(address(), shl(160, and(tokenId, 0xffffff))))
+					mstore(0xa0, caller())
 
-					if iszero(call(gas(), xnuggft, 0x00, 0x1C, 0x64, 0x00, 0x00)) {
+					if iszero(call(gas(), xnuggft, 0x00, 0x5C, 0x64, 0x00, 0x00)) {
 						panic(Error__0xAE__FailedCallToItemsHolder)
 					}
 				}
+
 
             }
             default { // [Offer:Carry]
@@ -346,7 +346,7 @@ abstract contract NuggftV1Swap is NuggftV1Stake {
                 increment := INCREMENT_BPS
             }
 			// next := div(mul(next, incrementBps), BASE_BPS) //jjjjjjjjj
-			log3(0x00, 0x20, last, increment, next)
+			// log3(0x00, 0x20, last, increment, next)
             // ensure next offer includes at least a 5-50% increment jjjjjjj
             if lt(next, div(mul(last, increment), BASE_BPS)) {
                 panic(Error__0x72__IncrementTooLow)
@@ -411,6 +411,9 @@ abstract contract NuggftV1Swap is NuggftV1Stake {
             sstore(stake.slot, last)
 
             mstore(0x20, last)
+
+
+
 
 			log2( // =======================================================
 				/* param #1: agency  bytes32 */ 0x00, /* [ agency[tokenId] )    0x20
