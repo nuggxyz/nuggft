@@ -58,15 +58,23 @@ contract xNuggftV1 is IxNuggftV1, NuggftV1Constants {
 		uint256 from,
 		uint256 to
 	) external payable {
-		require(msg.sender == address(nuggftv1));
+		address nuggft = address(nuggftv1);
+
+		require(msg.sender == nuggft);
 
 		unchecked {
 			assembly {
 				let nugg := shr(160, from)
 
-				if iszero(shr(16, proof)) {
-					let a := shl(160, nugg)
+				let tonuggft := 0
 
+				if eq(to, nuggft) {
+					tonuggft := 1
+				}
+
+				let a := xor(shl(96, nugg), shl(88, tonuggft))
+
+				if iszero(shr(16, proof)) {
 					mstore(0x00, proof)
 					mstore(0x20, 1)
 
@@ -75,7 +83,6 @@ contract xNuggftV1 is IxNuggftV1, NuggftV1Constants {
 				}
 
 				let ptr := mload(0x40)
-				let a := shl(160, nugg)
 
 				mstore(ptr, 0x40)
 
