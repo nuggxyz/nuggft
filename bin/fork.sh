@@ -13,4 +13,4 @@ else
 	ETH_RPC_URL="https://$NETWORK.infura.io/v3/$INFURA_KEY"
 fi
 
-anvil --mnemonic "$MNEMONIC_PATH_1" --rpc-url "$ETH_RPC_URL" --gas-limit $GAS
+anvil --mnemonic "$MNEMONIC_PATH_1" --rpc-url "$ETH_RPC_URL" --silent --gas-limit "$GAS"
