@@ -10,6 +10,8 @@ import {DotnuggV1Lib} from "@dotnugg-v1-core/src/DotnuggV1Lib.sol";
 
 import {NuggftV1Epoch} from "./NuggftV1Epoch.sol";
 
+import "forge-std/console2.sol";
+
 /// @author nugg.xyz - danny7even and dub6ix - 2022
 abstract contract NuggftV1Proof is NuggftV1Epoch {
 	using DotnuggV1Lib for IDotnuggV1;
@@ -46,10 +48,11 @@ abstract contract NuggftV1Proof is NuggftV1Epoch {
 			seed = calculateEarlySeed(tokenId);
 		} else {
 			uint24 epoch = epoch();
-
-			if (tokenId == epoch + 1) epoch++;
-
-			seed = calculateSeed(epoch);
+			if (tokenId == epoch + 1 || tokenId == epoch || (tokenId < epoch && tokenId > (epoch > SALE_LEN ? (epoch - SALE_LEN) : 0))) {
+				seed = calculateSeed(tokenId);
+			} else {
+				return 0;
+			}
 		}
 
 		if (seed != 0) return initFromSeed(seed);

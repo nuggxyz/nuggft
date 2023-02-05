@@ -55,7 +55,7 @@ abstract contract NuggftV1Globals is NuggftV1Constants, INuggftV1 {
 
 		xnuggftv1 = IxNuggftV1(new xNuggftV1());
 
-		dotnuggv1 = new DotnuggV1();
+		dotnuggv1 = IDotnuggV1(address(new DotnuggV1()));
 
 		stake = (msg.value << 96) + (uint256(early) << 192);
 
