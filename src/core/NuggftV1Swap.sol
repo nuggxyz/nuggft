@@ -772,6 +772,7 @@ abstract contract NuggftV1Swap is NuggftV1Stake {
 
                     let offer__cache := sload(offer__sptr)
 
+					// to log in claim event
 					mstore(0x1C0, offer__cache)
 
                     // ensure this user has an offer to claim
