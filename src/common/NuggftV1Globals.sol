@@ -71,7 +71,9 @@ abstract contract NuggftV1Globals is NuggftV1Constants, INuggftV1 {
 			AVJB,
 			LOSS,
 			MINT_OFFSET,
-			bytes32(earlySeed)
+			bytes32(earlySeed),
+			PROTOCOL_FEE_FRAC_MINT,
+			PREMIUM_DIV
 		);
 
 		isTrusted[msg.sender] = true;

@@ -239,7 +239,9 @@ interface INuggftV1Event {
 		uint8 agencyEthBits,
 		uint96 loss,
 		uint64 mintOffset,
-		bytes32 earlySeed
+		bytes32 earlySeed,
+		uint96 protocolFeeFracMint,
+		uint24 premiumDiv
 	);
 
 	/* ///////////////////////////////////////////////////////////////////
