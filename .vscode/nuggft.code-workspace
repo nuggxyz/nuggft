@@ -9,8 +9,8 @@
 		"editor.detectIndentation": false,
 		"prettier.requireConfig": true,
 		"editor.formatOnSave": true,
-		"editor.defaultFormatter": "esbenp.prettier-vscode",
 		"editor.bracketPairColorization.enabled": true,
+		"[solidity]": {},
 		"[svg]": {
 			"editor.defaultFormatter": "jock.svg"
 		},
@@ -30,5 +30,17 @@
 		"solidity-va.deco.statevars": false,
 		"solidity-va.deco.warn.reserved": true,
 		"solidity-va.codelens.enable": false,
+		"solidity.formatter": "forge",
+		"solidity.enabledAsYouTypeCompilationErrorCheck": true,
+		"emeraldwalk.runonsave": {
+			"shell": "bash",
+			"commands": [
+				{
+					"isAsync": true,
+					"match": "\\.sol$",
+					"cmd": "forge fmt \"${file}\" && sed -e'':a'' -e's/^\\(\\t*\\)    /\\1\\t/;ta' \"${file}\" > \"${file}\"-notab && mv \"${file}\"-notab \"${file}\""
+				},
+			]
+		},
 	}
 }

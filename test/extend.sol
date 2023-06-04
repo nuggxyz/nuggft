@@ -38,13 +38,7 @@ interface INuggftV1Extended is INuggftV1 {
 	function external__minSharePriceBreakdown()
 		external
 		view
-		returns (
-			uint96 total,
-			uint96 ethPerShare,
-			uint96 protocolFee,
-			uint96 premium,
-			uint96 increment
-		);
+		returns (uint96 total, uint96 ethPerShare, uint96 protocolFee, uint96 premium, uint96 increment);
 }
 
 contract NuggftV1Extended is NuggftV1, INuggftV1Extended {
@@ -118,13 +112,7 @@ contract NuggftV1Extended is NuggftV1, INuggftV1Extended {
 	function external__minSharePriceBreakdown()
 		public
 		view
-		returns (
-			uint96 total,
-			uint96 ethPerShare,
-			uint96 protocolFee,
-			uint96 premium,
-			uint96 increment
-		)
+		returns (uint96 total, uint96 ethPerShare, uint96 protocolFee, uint96 premium, uint96 increment)
 	{
 		return minSharePriceBreakdown(stake);
 	}

@@ -109,7 +109,9 @@ contract NuggftV1Test is ForgeTest, NuggftV1AgentType {
 		bytes1 errOnClaim,
 		bytes1 errOnNuggOffer,
 		bytes1 errOnItemOffer
-	) public {
+	)
+		public
+	{
 		// _repanic(offerValue1 + offerValue2 == msg.value, Error__0xB1__InvalidMulticallValue);
 
 		// claim a nugg
@@ -147,10 +149,8 @@ contract NuggftV1Test is ForgeTest, NuggftV1AgentType {
 		for (uint256 i = 0; i < nuggs.length; i++) {
 			uint256 _proof = nuggft.proofOf(nuggs[i]);
 			if (
-				uint16(_proof >> 0x90) == item && //
-				nuggs[i] != tokenToExclude &&
-				nuggft.agency(nuggs[i]) == 0 &&
-				nuggs[i] != nuggft.epoch()
+				uint16(_proof >> 0x90) == item //
+					&& nuggs[i] != tokenToExclude && nuggft.agency(nuggs[i]) == 0 && nuggs[i] != nuggft.epoch()
 			) {
 				select = nuggs[i];
 				break;
@@ -254,11 +254,7 @@ contract NuggftV1Test is ForgeTest, NuggftV1AgentType {
 		return abi.encodePacked(Revert.selector, code);
 	}
 
-	function encItemId(
-		uint24 buyerTokenId,
-		uint24 tokenId,
-		uint16 itemId
-	) internal pure returns (uint64) {
+	function encItemId(uint24 buyerTokenId, uint24 tokenId, uint16 itemId) internal pure returns (uint64) {
 		return uint64((uint256(buyerTokenId) << 40) | (uint256(itemId) << 24) | uint256(tokenId));
 	}
 
@@ -267,8 +263,8 @@ contract NuggftV1Test is ForgeTest, NuggftV1AgentType {
 	}
 
 	/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-                                eth modifiers
-       ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+					eth modifiers
+	━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
 
 	modifier baldiff(address user, int192 exp) {
 		int192 got = int192(int256(uint256(address(nuggft).balance)));
@@ -279,8 +275,8 @@ contract NuggftV1Test is ForgeTest, NuggftV1AgentType {
 	}
 
 	/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-                            expectBalanceChange
-       ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+				expectBalanceChange
+	━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
 
 	struct BalDiff {
 		address user;
@@ -288,16 +284,13 @@ contract NuggftV1Test is ForgeTest, NuggftV1AgentType {
 	}
 
 	BalDiff[] _baldiffarr;
+
 	enum Direction {
 		down,
 		up
 	}
 
-	function expectBalChange(
-		address user,
-		uint96 exp,
-		Direction direction
-	) internal {
+	function expectBalChange(address user, uint96 exp, Direction direction) internal {
 		_baldiffarr.push(
 			BalDiff({
 				user: user, //
@@ -319,28 +312,19 @@ contract NuggftV1Test is ForgeTest, NuggftV1AgentType {
 		return (value * percent) / 100;
 	}
 
-	function mintHelper(
-		uint24 tokenId,
-		address user,
-		uint256 value
-	) public {
+	function mintHelper(uint24 tokenId, address user, uint256 value) public {
 		expect.offer().from(user).exec{value: value}(tokenId);
 		jumpSwap();
 		expect.claim().from(user).exec(tokenId, user);
 	}
 
-	function mintHelper(
-		uint24 tokenId,
-		address user,
-		uint256 value,
-		bytes1 err
-	) public {
+	function mintHelper(uint24 tokenId, address user, uint256 value, bytes1 err) public {
 		expect.offer().err(err).from(user).exec{value: value}(tokenId);
 	}
 
 	/*━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-                                scenarios
-    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━*/
+					scenarios
+	━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━*/
 
 	function scenario_dee_has_a_token() public payable returns (uint24 tokenId) {
 		tokenId = mintable(1069);
@@ -404,7 +388,7 @@ contract NuggftV1Test is ForgeTest, NuggftV1AgentType {
 	}
 
 	function scenario_dee_has_sold_a_token_and_mac_has_offered() public payable returns (uint24 tokenId, uint96 eth) {
-		(tokenId, ) = scenario_dee_has_sold_a_token();
+		(tokenId,) = scenario_dee_has_sold_a_token();
 
 		eth = 2 ether;
 
@@ -412,7 +396,7 @@ contract NuggftV1Test is ForgeTest, NuggftV1AgentType {
 	}
 
 	function scenario_dee_has_sold_a_token_and_mac_can_claim() public payable returns (uint24 tokenId) {
-		(tokenId, ) = scenario_dee_has_sold_a_token_and_mac_has_offered();
+		(tokenId,) = scenario_dee_has_sold_a_token_and_mac_has_offered();
 
 		jumpSwap();
 	}
@@ -434,11 +418,7 @@ contract NuggftV1Test is ForgeTest, NuggftV1AgentType {
 	function scenario_dee_has_a_token_and_can_sell_an_item()
 		public
 		payable
-		returns (
-			uint24 tokenId,
-			uint16 itemId,
-			uint8 feature
-		)
+		returns (uint24 tokenId, uint16 itemId, uint8 feature)
 	{
 		(tokenId) = scenario_dee_has_a_token();
 
@@ -453,12 +433,7 @@ contract NuggftV1Test is ForgeTest, NuggftV1AgentType {
 	function scenario_dee_has_sold_an_item()
 		public
 		payable
-		returns (
-			uint24 tokenId,
-			uint8 feature,
-			uint16 itemId,
-			uint96 floor
-		)
+		returns (uint24 tokenId, uint8 feature, uint16 itemId, uint96 floor)
 	{
 		(tokenId, itemId, feature) = scenario_dee_has_a_token_and_can_sell_an_item();
 		floor = 3 ether;
@@ -469,11 +444,7 @@ contract NuggftV1Test is ForgeTest, NuggftV1AgentType {
 	function scenario_dee_has_sold_an_item_and_charlie_can_claim()
 		public
 		payable
-		returns (
-			uint24 charliesTokenId,
-			uint24 tokenId,
-			uint16 itemId
-		)
+		returns (uint24 charliesTokenId, uint24 tokenId, uint16 itemId)
 	{
 		uint256 feature;
 		uint96 floor;
@@ -487,12 +458,12 @@ contract NuggftV1Test is ForgeTest, NuggftV1AgentType {
 	}
 
 	/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-                                encodeWithSelector
-       ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+					encodeWithSelector
+	━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
 
 	/*━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-                                scenarios
-    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━*/
+					scenarios
+	━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━*/
 
 	// function environment() public returns (address[] memory users) {
 	//     users = new address[](2000);

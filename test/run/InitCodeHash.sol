@@ -3,14 +3,12 @@
 pragma solidity 0.8.20;
 
 contract InitCodeHash {
-	function run(address nuggftv1, uint24 id)
+	function run(
+		address nuggftv1,
+		uint24 id
+	)
 		external
-		returns (
-			address eoa__deployer,
-			address contract__deployer,
-			bytes32 hash__nuggft,
-			bytes32 hash__dotnugg
-		)
+		returns (address eoa__deployer, address contract__deployer, bytes32 hash__nuggft, bytes32 hash__dotnugg)
 	{
 		assembly {
 			let addr := mload(0x40)
