@@ -24,7 +24,7 @@ the core logic and smart contracts for nuggft v1
 brew install solidity
 
 # each shell you want to use forge in
-export SOLC_PATH=/opt/homebrew/Cellar/solidity/0.8.17/bin/solc
+export SOLC_PATH=/opt/homebrew/Cellar/solidity/0.8.20/bin/solc
 ```
 
 ## bug bounty

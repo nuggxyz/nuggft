@@ -1,6 +1,6 @@
 //SPDX-License-Identifier: MIT
 
-pragma solidity 0.8.17;
+pragma solidity 0.8.20;
 
 import "../utils/forge.sol";
 import "git.nugg.xyz/nuggft/test/main.sol";

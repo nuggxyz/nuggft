@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: UNLICENSED
 
-pragma solidity 0.8.17;
+pragma solidity 0.8.20;
 
 library TransferLib {
 	function give(address to, uint256 amount) internal {

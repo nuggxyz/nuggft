@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: UNLICENSED
 
-pragma solidity 0.8.17;
+pragma solidity 0.8.20;
 
 import {IERC165} from "git.nugg.xyz/nuggft/src/interfaces/IERC165.sol";
 

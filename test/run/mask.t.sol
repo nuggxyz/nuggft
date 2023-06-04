@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: UNLICENSED
 
-pragma solidity 0.8.17;
+pragma solidity 0.8.20;
 
 contract main {
 	function mask(uint8 bits) internal pure returns (uint256 res) {

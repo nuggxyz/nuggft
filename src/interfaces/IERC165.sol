@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: UNLICENSED
 
-pragma solidity 0.8.17;
+pragma solidity 0.8.20;
 
 interface IERC165 {
 	/// @notice Query if a contract implements an interface

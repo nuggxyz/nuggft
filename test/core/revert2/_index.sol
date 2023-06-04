@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: UNLICENSED
-pragma solidity 0.8.17;
+pragma solidity 0.8.20;
 
 import "./claim/revert__claim__0x67.sol";
 import "./claim/revert__claim__0x74.sol";

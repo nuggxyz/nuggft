@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: UNLICENSED
 
-pragma solidity 0.8.17;
+pragma solidity 0.8.20;
 
 library CastLib {
 	function to160(uint256 x) internal pure returns (uint24 y) {

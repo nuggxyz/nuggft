@@ -125,7 +125,7 @@ echo "---------------------------------------------------------"
 # 	echo "verifying NuggftV1 @ $NUGGFT"
 # 	forge verify-contract "$NUGGFT" src/NuggftV1.sol:NuggftV1 \
 # 		--chain "$NETWORK" \
-# 		--compiler-version 0.8.17+commit.8df45f5f \
+# 		--compiler-version 0.8.20+commit.a1b79de6\
 # 		--num-of-optimizations "$OPTIMIZER_RUNS" \
 # 		--watch
 # 	echo "---------------------------------------------------------"
@@ -133,7 +133,7 @@ echo "---------------------------------------------------------"
 # 	echo "verifying xNuggftV1 @ $xNUGGFT"
 # 	forge verify-contract "$xNUGGFT" src/xNuggftV1.sol:xNuggftV1 \
 # 		--chain "$NETWORK" \
-# 		--compiler-version 0.8.17+commit.8df45f5f \
+# 		--compiler-version 0.8.20+commit.a1b79de6\
 # 		--num-of-optimizations "$OPTIMIZER_RUNS" \
 # 		--watch
 # 	echo "---------------------------------------------------------"
@@ -141,7 +141,7 @@ echo "---------------------------------------------------------"
 # 	echo "verifying DotnuggV1 @ $DOTNUGG"
 # 	forge verify-contract "$DOTNUGG" ../dotnugg/src/DotnuggV1.sol:DotnuggV1 \
 # 		--chain "$NETWORK" \
-# 		--compiler-version 0.8.17+commit.8df45f5f \
+# 		--compiler-version 0.8.20+commit.a1b79de6\
 # 		--num-of-optimizations "$OPTIMIZER_RUNS" \
 # 		--watch
 

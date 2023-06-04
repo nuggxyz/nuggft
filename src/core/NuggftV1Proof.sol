@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: UNLICENSED
 
-pragma solidity 0.8.17;
+pragma solidity 0.8.20;
 
 import {INuggftV1, INuggftV1Lens, INuggftV1Execute} from "git.nugg.xyz/nuggft/src/interfaces/INuggftV1.sol";
 import {IDotnuggV1} from "git.nugg.xyz/dotnugg/src/IDotnuggV1.sol";
