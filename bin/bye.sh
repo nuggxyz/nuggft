@@ -4,16 +4,16 @@ NETWORK=$1
 NUGGFT=$2
 
 if [ "$NETWORK" == "local" ]; then
-	ETH_RPC_URL="http://127.0.0.1:8545"
+    ETH_RPC_URL="http://127.0.0.1:8545"
 else
-	ETH_RPC_URL="https://$NETWORK.infura.io/v3/$INFURA_KEY"
+    ETH_RPC_URL="https://$NETWORK.infura.io/v3/$INFURA_KEY"
 fi
 
 cast send "$NUGGFT" 'bye()' \
-	--mnemonic-path "$MNEMONIC_PATH_1" \
-	--mnemonic-index 1 \
-	--from "$ETH_FROM" \
-	--rpc-url "$ETH_RPC_URL"
+    --mnemonic-path "$MNEMONIC_PATH_1" \
+    --mnemonic-index 1 \
+    --from "$ETH_FROM" \
+    --rpc-url "$ETH_RPC_URL"
 
 # rinkeby
 # 0x6942000062516fab40349b13131c34346c0446e8
@@ -35,5 +35,5 @@ cast send "$NUGGFT" 'bye()' \
 # kovan
 # 0x694200002e1540157c5fe987705e418ee0a9577d
 
-# //➜  nuggft-v1-core git:(main) ✗ bin/bye.sh goerli 0x69420000813E88EA1900125E91b61E1028C4C978
-# //➜  nuggft-v1-core git:(main) ✗ bin/bye.sh goerli 0x69420000Bad0605988626169E32aa82FB3981add
+# //➜  nuggft git:(main) ✗ bin/bye.sh goerli 0x69420000813E88EA1900125E91b61E1028C4C978
+# //➜  nuggft git:(main) ✗ bin/bye.sh goerli 0x69420000Bad0605988626169E32aa82FB3981add

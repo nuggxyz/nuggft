@@ -2,11 +2,11 @@
 
 pragma solidity 0.8.17;
 
-import {DotnuggV1} from "@dotnugg-v1-core/src/DotnuggV1.sol";
-import {INuggftV1, INuggftV1Lens} from "@nuggft-v1-core/src/interfaces/INuggftV1.sol";
-import {NuggftV1} from "@nuggft-v1-core/src/NuggftV1.sol";
-import {NuggftV1Epoch} from "@nuggft-v1-core/src/core/NuggftV1Epoch.sol";
-import {DotnuggV1Lib} from "@dotnugg-v1-core/src/DotnuggV1Lib.sol";
+import {DotnuggV1} from "git.nugg.xyz/dotnugg/src/DotnuggV1.sol";
+import {INuggftV1, INuggftV1Lens} from "git.nugg.xyz/nuggft/src/interfaces/INuggftV1.sol";
+import {NuggftV1} from "git.nugg.xyz/nuggft/src/NuggftV1.sol";
+import {NuggftV1Epoch} from "git.nugg.xyz/nuggft/src/core/NuggftV1Epoch.sol";
+import {DotnuggV1Lib} from "git.nugg.xyz/dotnugg/src/DotnuggV1Lib.sol";
 
 interface INuggftV1Extended is INuggftV1 {
 	function external__search(uint8 feature, uint256 seed) external view returns (uint8);

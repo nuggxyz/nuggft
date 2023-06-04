@@ -2,7 +2,7 @@
 
 pragma solidity 0.8.17;
 
-import "@nuggft-v1-core/test/main.sol";
+import "git.nugg.xyz/nuggft/test/main.sol";
 
 contract sim__release is NuggftV1Test {
 	function setUp() public {}

@@ -2,8 +2,8 @@
 
 pragma solidity 0.8.17;
 
-import "@nuggft-v1-core/test/main.sol";
-import {NuggftV1Proof} from "@nuggft-v1-core/src/core/NuggftV1Proof.sol";
+import "git.nugg.xyz/nuggft/test/main.sol";
+import {NuggftV1Proof} from "git.nugg.xyz/nuggft/src/core/NuggftV1Proof.sol";
 
 abstract contract fragments is NuggftV1Test {
 	uint16 itemId;

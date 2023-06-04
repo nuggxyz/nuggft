@@ -2,11 +2,11 @@
 
 pragma solidity 0.8.17;
 
-import {INuggftV1, INuggftV1Lens, INuggftV1Execute} from "@nuggft-v1-core/src/interfaces/INuggftV1.sol";
-import {IDotnuggV1} from "@dotnugg-v1-core/src/IDotnuggV1.sol";
-import {IxNuggftV1} from "@nuggft-v1-core/src/interfaces/IxNuggftV1.sol";
+import {INuggftV1, INuggftV1Lens, INuggftV1Execute} from "git.nugg.xyz/nuggft/src/interfaces/INuggftV1.sol";
+import {IDotnuggV1} from "git.nugg.xyz/dotnugg/src/IDotnuggV1.sol";
+import {IxNuggftV1} from "git.nugg.xyz/nuggft/src/interfaces/IxNuggftV1.sol";
 
-import {DotnuggV1Lib} from "@dotnugg-v1-core/src/DotnuggV1Lib.sol";
+import {DotnuggV1Lib} from "git.nugg.xyz/dotnugg/src/DotnuggV1Lib.sol";
 
 import {NuggftV1Epoch} from "./NuggftV1Epoch.sol";
 

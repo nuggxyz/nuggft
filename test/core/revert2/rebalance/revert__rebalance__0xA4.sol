@@ -2,7 +2,7 @@
 
 pragma solidity 0.8.17;
 
-import "@nuggft-v1-core/test/main.sol";
+import "git.nugg.xyz/nuggft/test/main.sol";
 
 abstract contract revert__rebalance__0xA4 is NuggftV1Test {
 	function test__revert__rebalance__0xA4__fail__desc() public {

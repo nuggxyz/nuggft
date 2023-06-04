@@ -2,7 +2,7 @@
 
 ## Overview
 
-Starting on June 12th, 2022, the [nuggft-v1-core](https://github.com/nuggft/nuggft-v1-core) repository is subject to the nuggft v1 Bug Bounty (the “Program”) to incentivize responsible bug disclosure.
+Starting on June 12th, 2022, the [nuggft](https://github.com/nuggft/nuggft) repository is subject to the nuggft v1 Bug Bounty (the “Program”) to incentivize responsible bug disclosure.
 
 We are limiting the scope of the Program to critical and high severity bugs, and are offering a portion of nugg.xyz's earnings from nuggft v1. Happy hunting!
 

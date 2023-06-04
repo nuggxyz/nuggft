@@ -2,7 +2,7 @@
 
 pragma solidity 0.8.17;
 
-import {INuggftV1Migrator} from "@nuggft-v1-core/src/interfaces/INuggftV1Migrator.sol";
+import {INuggftV1Migrator} from "git.nugg.xyz/nuggft/src/interfaces/INuggftV1Migrator.sol";
 
 contract MockNuggftV1Migrator is INuggftV1Migrator {
 	function nuggftMigrateFromV1(

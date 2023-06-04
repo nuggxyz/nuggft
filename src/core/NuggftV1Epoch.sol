@@ -2,9 +2,9 @@
 
 pragma solidity 0.8.17;
 
-import {INuggftV1Lens} from "@nuggft-v1-core/src/interfaces/INuggftV1.sol";
+import {INuggftV1Lens} from "git.nugg.xyz/nuggft/src/interfaces/INuggftV1.sol";
 
-import {NuggftV1Globals} from "@nuggft-v1-core/src/common/NuggftV1Globals.sol";
+import {NuggftV1Globals} from "git.nugg.xyz/nuggft/src/common/NuggftV1Globals.sol";
 
 /// @author nugg.xyz - danny7even and dub6ix - 2022
 abstract contract NuggftV1Epoch is NuggftV1Globals {

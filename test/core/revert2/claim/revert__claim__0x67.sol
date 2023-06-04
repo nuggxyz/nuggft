@@ -2,7 +2,7 @@
 
 pragma solidity 0.8.17;
 
-import "@nuggft-v1-core/test/main.sol";
+import "git.nugg.xyz/nuggft/test/main.sol";
 
 abstract contract revert__claim__0x67 is NuggftV1Test {
 	uint24 private TOKEN_FOR_SALE;

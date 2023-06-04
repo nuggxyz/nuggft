@@ -3,8 +3,8 @@
 pragma solidity 0.8.17;
 
 import {IxNuggftV1} from "./interfaces/IxNuggftV1.sol";
-import {DotnuggV1Lib} from "@dotnugg-v1-core/src/DotnuggV1Lib.sol";
-import {IDotnuggV1} from "@dotnugg-v1-core/src/IDotnuggV1.sol";
+import {DotnuggV1Lib} from "git.nugg.xyz/dotnugg/src/DotnuggV1Lib.sol";
+import {IDotnuggV1} from "git.nugg.xyz/dotnugg/src/IDotnuggV1.sol";
 
 import {IERC165} from "./interfaces/IERC165.sol";
 

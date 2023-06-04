@@ -3,7 +3,7 @@
 pragma solidity 0.8.17;
 
 import "../utils/forge.sol";
-import "@nuggft-v1-core/test/main.sol";
+import "git.nugg.xyz/nuggft/test/main.sol";
 
 import "./base.sol";
 import "./stake.sol";

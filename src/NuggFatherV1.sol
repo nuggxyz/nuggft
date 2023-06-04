@@ -2,8 +2,8 @@
 
 pragma solidity 0.8.17;
 
-import {NuggftV1} from "@nuggft-v1-core/src/NuggftV1.sol";
-import {DotnuggV1} from "@dotnugg-v1-core/src/DotnuggV1.sol";
+import {NuggftV1} from "git.nugg.xyz/nuggft/src/NuggftV1.sol";
+import {DotnuggV1} from "git.nugg.xyz/dotnugg/src/DotnuggV1.sol";
 
 contract NuggFatherV1 {
 	NuggftV1 public nuggft;

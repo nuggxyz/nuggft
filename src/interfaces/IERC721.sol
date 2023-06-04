@@ -2,7 +2,7 @@
 
 pragma solidity 0.8.17;
 
-import {IERC165} from "@nuggft-v1-core/src/interfaces/IERC165.sol";
+import {IERC165} from "git.nugg.xyz/nuggft/src/interfaces/IERC165.sol";
 
 /// @title ERC-721 Non-Fungible Token Standard
 /// @dev See https://eips.ethereum.org/EIPS/eip-721

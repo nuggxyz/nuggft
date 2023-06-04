@@ -2,8 +2,8 @@
 
 pragma solidity 0.8.17;
 
-import "@nuggft-v1-core/test/main.sol";
-import {DotnuggV1Lib} from "@dotnugg-v1-core/src/DotnuggV1Lib.sol";
+import "git.nugg.xyz/nuggft/test/main.sol";
+import {DotnuggV1Lib} from "git.nugg.xyz/dotnugg/src/DotnuggV1Lib.sol";
 
 abstract contract logic__DotnuggV1Lib is NuggftV1Test {
 	function test__logic__DotnuggV1Lib__ratityX128__2() public {

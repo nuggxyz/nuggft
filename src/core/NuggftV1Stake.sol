@@ -2,7 +2,7 @@
 
 pragma solidity 0.8.17;
 
-import {INuggftV1, INuggftV1Lens} from "@nuggft-v1-core/src/interfaces/INuggftV1.sol";
+import {INuggftV1, INuggftV1Lens} from "git.nugg.xyz/nuggft/src/interfaces/INuggftV1.sol";
 
 import {NuggftV1Proof} from "./NuggftV1Proof.sol";
 

@@ -1,16 +1,16 @@
 {
-	"name": "nuggft-v1-core",
-	"version": "0.0.1",
-	"description": "Core smart contracts for NuggftV1",
-	"repository": "https://github.com/nuggxyz/nuggft-v1-core.git",
-	"author": "dub6ix <dub6ix@nugg.xyz>",
-	"license": "UNLICENSED",
-	"scripts": {
-		"generate": "yarn --cwd ../dotnugg-sdk generate-uploader nuggft-art nuggft-core2"
-	},
-	"devDependencies": {
-		"prettier": "2.4.1",
-		"prettier-plugin-solidity": "1.0.0-beta.19",
-		"solhint": "3.3.6"
-	}
+    "name": "nuggft",
+    "version": "0.0.1",
+    "description": "Core smart contracts for NuggftV1",
+    "repository": "https://github.com/nuggxyz/nuggft.git",
+    "author": "dub6ix <dub6ix@nugg.xyz>",
+    "license": "UNLICENSED",
+    "scripts": {
+        "generate": "yarn --cwd ../dotnugg-sdk generate-uploader nuggft-art nuggft-core2"
+    },
+    "devDependencies": {
+        "prettier": "2.4.1",
+        "prettier-plugin-solidity": "1.0.0-beta.19",
+        "solhint": "3.3.6"
+    }
 }

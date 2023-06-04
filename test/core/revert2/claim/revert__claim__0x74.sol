@@ -2,7 +2,7 @@
 
 pragma solidity 0.8.17;
 
-import "@nuggft-v1-core/test/main.sol";
+import "git.nugg.xyz/nuggft/test/main.sol";
 
 /// Error__0x74__Untrusted
 /// desc: this error is thrown when the user is not someone that can receive funds for the user who owns them

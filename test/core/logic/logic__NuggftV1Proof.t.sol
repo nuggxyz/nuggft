@@ -2,9 +2,9 @@
 
 pragma solidity 0.8.17;
 
-import "@nuggft-v1-core/test/main.sol";
+import "git.nugg.xyz/nuggft/test/main.sol";
 import {ShiftLib} from "../../helpers/ShiftLib.sol";
-import {NuggftV1Proof} from "@nuggft-v1-core/src/core/NuggftV1Proof.sol";
+import {NuggftV1Proof} from "git.nugg.xyz/nuggft/src/core/NuggftV1Proof.sol";
 
 abstract contract logic__NuggftV1Proof is NuggftV1Test {
 	using DotnuggV1Lib for IDotnuggV1;

@@ -2,7 +2,7 @@
 
 pragma solidity 0.8.17;
 
-import "@nuggft-v1-core/test/main.sol";
+import "git.nugg.xyz/nuggft/test/main.sol";
 
 abstract contract system__one is NuggftV1Test {
 	using SafeCast for uint96;

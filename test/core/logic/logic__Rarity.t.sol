@@ -1,12 +1,12 @@
 pragma solidity 0.8.17;
 
-import "@nuggft-v1-core/test/main.sol";
+import "git.nugg.xyz/nuggft/test/main.sol";
 
 import {CastLib} from "../../helpers/CastLib.sol";
-import {INuggftV1} from "@nuggft-v1-core/src/interfaces/INuggftV1.sol";
-import {NuggFatherV1Extended} from "@nuggft-v1-core/test/extend.sol";
+import {INuggftV1} from "git.nugg.xyz/nuggft/src/interfaces/INuggftV1.sol";
+import {NuggFatherV1Extended} from "git.nugg.xyz/nuggft/test/extend.sol";
 
-import {DotnuggV1Lib} from "@dotnugg-v1-core/src/DotnuggV1Lib.sol";
+import {DotnuggV1Lib} from "git.nugg.xyz/dotnugg/src/DotnuggV1Lib.sol";
 
 abstract contract logic__Rarity is NuggftV1Test {
 	error Stupid(uint256);

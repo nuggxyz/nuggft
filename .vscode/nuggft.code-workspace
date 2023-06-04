@@ -8,7 +8,6 @@
 	"settings": {
 		"editor.detectIndentation": false,
 		"prettier.requireConfig": true,
-		"gitlens.codeLens.enabled": false,
 		"editor.formatOnSave": true,
 		"editor.defaultFormatter": "esbenp.prettier-vscode",
 		"editor.bracketPairColorization.enabled": true,
@@ -31,9 +30,5 @@
 		"solidity-va.deco.statevars": false,
 		"solidity-va.deco.warn.reserved": true,
 		"solidity-va.codelens.enable": false,
-		"solidity.packageDefaultDependenciesContractsDirectory": "src",
-		"solidity.packageDefaultDependenciesDirectory": "lib",
-		"solidity.compileUsingRemoteVersion": "v0.8.17"
 	}
-
 }

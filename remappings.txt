@@ -1,6 +1,6 @@
-ds-test/=lib/ds-test/src/
-@dotnugg-v1-core=../dotnugg
+ds-test/=lib/forge-std/lib/ds-test/src/
+git.nugg.xyz/dotnugg=lib/dotnugg/
 forge-std/=lib/forge-std/src/
-@nuggft-v1-core/src/core/=src/core/
-@nuggft-v1-core/src/=src/
-@nuggft-v1-core/test/=test/
+git.nugg.xyz/nuggft/src/core/=src/core/
+git.nugg.xyz/nuggft/src/=src/
+git.nugg.xyz/nuggft/test/=test/

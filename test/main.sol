@@ -2,20 +2,20 @@
 
 pragma solidity 0.8.17;
 
-import {MockNuggftV1Migrator} from "@nuggft-v1-core/test/mock/MockNuggftV1Migrator.sol";
+import {MockNuggftV1Migrator} from "git.nugg.xyz/nuggft/test/mock/MockNuggftV1Migrator.sol";
 
 import {NuggftV1AgentType} from "./helpers/NuggftV1AgentType.sol";
 
 import {Expect} from "./expect/Expect.sol";
 
-import {DotnuggV1Lib} from "@dotnugg-v1-core/src/DotnuggV1Lib.sol";
-import {IDotnuggV1} from "@dotnugg-v1-core/src/IDotnuggV1.sol";
+import {DotnuggV1Lib} from "git.nugg.xyz/dotnugg/src/DotnuggV1Lib.sol";
+import {IDotnuggV1} from "git.nugg.xyz/dotnugg/src/IDotnuggV1.sol";
 
-import {IxNuggftV1} from "@nuggft-v1-core/src/interfaces/IxNuggftV1.sol";
+import {IxNuggftV1} from "git.nugg.xyz/nuggft/src/interfaces/IxNuggftV1.sol";
 
 import "./utils/forge.sol";
 
-import "@nuggft-v1-core/test/extend.sol";
+import "git.nugg.xyz/nuggft/test/extend.sol";
 
 library SafeCast {
 	function safeInt(uint96 input) internal pure returns (int192) {

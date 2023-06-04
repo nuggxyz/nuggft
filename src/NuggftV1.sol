@@ -2,20 +2,20 @@
 
 pragma solidity 0.8.17;
 
-import {INuggftV1, INuggftV1Execute, INuggftV1Lens} from "@nuggft-v1-core/src/interfaces/INuggftV1.sol";
-import {IERC165} from "@nuggft-v1-core/src/interfaces/IERC165.sol";
-import {IERC721, IERC721Metadata} from "@nuggft-v1-core/src/interfaces/IERC721.sol";
+import {INuggftV1, INuggftV1Execute, INuggftV1Lens} from "git.nugg.xyz/nuggft/src/interfaces/INuggftV1.sol";
+import {IERC165} from "git.nugg.xyz/nuggft/src/interfaces/IERC165.sol";
+import {IERC721, IERC721Metadata} from "git.nugg.xyz/nuggft/src/interfaces/IERC721.sol";
 
-import {INuggftV1Migrator} from "@nuggft-v1-core/src/interfaces/INuggftV1Migrator.sol";
+import {INuggftV1Migrator} from "git.nugg.xyz/nuggft/src/interfaces/INuggftV1Migrator.sol";
 
-import {IDotnuggV1} from "@dotnugg-v1-core/src/IDotnuggV1.sol";
+import {IDotnuggV1} from "git.nugg.xyz/dotnugg/src/IDotnuggV1.sol";
 
-import {DotnuggV1Lib} from "@dotnugg-v1-core/src/DotnuggV1Lib.sol";
+import {DotnuggV1Lib} from "git.nugg.xyz/dotnugg/src/DotnuggV1Lib.sol";
 
-import {decodeMakingPrettierHappy} from "@nuggft-v1-core/src/libraries/BigOleLib.sol";
+import {decodeMakingPrettierHappy} from "git.nugg.xyz/nuggft/src/libraries/BigOleLib.sol";
 
-import {NuggftV1Loan} from "@nuggft-v1-core/src/core/NuggftV1Loan.sol";
-import {NuggftV1Globals, NuggftV1Dotnugg} from "@nuggft-v1-core/src/common/NuggftV1Globals.sol";
+import {NuggftV1Loan} from "git.nugg.xyz/nuggft/src/core/NuggftV1Loan.sol";
+import {NuggftV1Globals, NuggftV1Dotnugg} from "git.nugg.xyz/nuggft/src/common/NuggftV1Globals.sol";
 
 /// @title NuggftV1
 /// @author nugg.xyz - danny7even and dub6ix - 2022

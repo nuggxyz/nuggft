@@ -9,11 +9,11 @@ SEED=$2
 OPTIMIZER_RUNS=10000000
 
 if [ "$NETWORK" == "local" ]; then
-	ETH_RPC_URL="http://127.0.0.1:8545"
+    ETH_RPC_URL="http://127.0.0.1:8545"
 elif [ "$NETWORK" == "exported" ]; then
-	echo "using exported ETH_RPC_URL=$ETH_RPC_URL"
+    echo "using exported ETH_RPC_URL=$ETH_RPC_URL"
 else
-	ETH_RPC_URL="https://$NETWORK.infura.io/v3/$INFURA_KEY"
+    ETH_RPC_URL="https://$NETWORK.infura.io/v3/$INFURA_KEY"
 fi
 
 echo "$SEED"
@@ -26,13 +26,13 @@ echo "               forge create DotnuggV1Light       "
 echo "---------------------------------------------------------"
 
 RESULT=$(
-	forge create DotnuggV1Light \
-		--private-key "$ETH_PRIVATE_SECRET" \
-		--rpc-url "$ETH_RPC_URL" \
-		--from "$ETH_FROM" \
-		--gas-price 4gwei \
-		--optimize --optimizer-runs="$OPTIMIZER_RUNS" \
-		--extra-output-files metadata
+    forge create DotnuggV1Light \
+        --private-key "$ETH_PRIVATE_SECRET" \
+        --rpc-url "$ETH_RPC_URL" \
+        --from "$ETH_FROM" \
+        --gas-price 4gwei \
+        --optimize --optimizer-runs="$OPTIMIZER_RUNS" \
+        --extra-output-files metadata
 )
 
 echo "$RESULT"
@@ -55,11 +55,11 @@ echo "    cast send lightWrite(bytes) to DotnuggV1Light        "
 echo "---------------------------------------------------------"
 
 RESULT=$(
-	cast send "$DOTNUGG" "lightWrite(bytes)" "$DATA" \
-		--private-key "$ETH_PRIVATE_SECRET" \
-		--rpc-url "$ETH_RPC_URL" \
-		--from "$ETH_FROM" \
-		--chain-id 80001
+    cast send "$DOTNUGG" "lightWrite(bytes)" "$DATA" \
+        --private-key "$ETH_PRIVATE_SECRET" \
+        --rpc-url "$ETH_RPC_URL" \
+        --from "$ETH_FROM" \
+        --chain-id 80001
 )
 
 echo "$RESULT"
@@ -81,14 +81,14 @@ echo "               forge create NuggftV1            "
 echo "---------------------------------------------------------"
 
 RESULT=$(
-	forge create NuggftV1 \
-		--private-key "$ETH_PRIVATE_SECRET" \
-		--rpc-url "$ETH_RPC_URL" \
-		--from "$ETH_FROM" \
-		--value 0.25ether \
-		--optimize --optimizer-runs="$OPTIMIZER_RUNS" \
-		--extra-output-files metadata \
-		--constructor-args "$DOTNUGG"
+    forge create NuggftV1 \
+        --private-key "$ETH_PRIVATE_SECRET" \
+        --rpc-url "$ETH_RPC_URL" \
+        --from "$ETH_FROM" \
+        --value 0.25ether \
+        --optimize --optimizer-runs="$OPTIMIZER_RUNS" \
+        --extra-output-files metadata \
+        --constructor-args "$DOTNUGG"
 )
 
 echo "$RESULT"
@@ -139,7 +139,7 @@ echo "---------------------------------------------------------"
 # 	echo "---------------------------------------------------------"
 
 # 	echo "verifying DotnuggV1 @ $DOTNUGG"
-# 	forge verify-contract "$DOTNUGG" ../dotnugg-v1-core/src/DotnuggV1.sol:DotnuggV1 \
+# 	forge verify-contract "$DOTNUGG" ../dotnugg/src/DotnuggV1.sol:DotnuggV1 \
 # 		--chain "$NETWORK" \
 # 		--compiler-version 0.8.17+commit.8df45f5f \
 # 		--num-of-optimizations "$OPTIMIZER_RUNS" \

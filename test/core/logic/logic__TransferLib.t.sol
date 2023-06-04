@@ -1,6 +1,6 @@
 pragma solidity 0.8.17;
 
-import "@nuggft-v1-core/test/main.sol";
+import "git.nugg.xyz/nuggft/test/main.sol";
 
 import {TransferLib} from "../../helpers/TransferLib.sol";
 

@@ -5,7 +5,7 @@ pragma solidity 0.8.17;
 import {ShiftLib} from "./ShiftLib.sol";
 import {CastLib} from "./CastLib.sol";
 
-import {NuggftV1Constants} from "@nuggft-v1-core/src/common/NuggftV1Constants.sol";
+import {NuggftV1Constants} from "git.nugg.xyz/nuggft/src/common/NuggftV1Constants.sol";
 
 /// @notice Explain to an end user what this does
 /// @dev Explain to a developer any extra details

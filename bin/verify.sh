@@ -34,7 +34,7 @@ forge verify-contract "$xNUGGFT" src/xNuggftV1.sol:xNuggftV1 \
 echo "---------------------------------------------------------"
 
 echo "verifying DotnuggV1 @ $DOTNUGG"
-forge verify-contract "$DOTNUGG" lib/dotnugg-v1-core/src/DotnuggV1.sol:DotnuggV1 \
+forge verify-contract "$DOTNUGG" lib/dotnugg/src/DotnuggV1.sol:DotnuggV1 \
     --chain "$NETWORK" \
     --compiler-version 0.8.17+commit.8df45f5f \
     --num-of-optimizations "$OPTIMIZER_RUNS" \

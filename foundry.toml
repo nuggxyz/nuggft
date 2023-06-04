@@ -72,7 +72,7 @@ stackAllocation = true
 # [nuggft]
 # src = './src'
 # test = './src'
-# allow_paths = ["../dotnugg-v1-core/src"]
+# allow_paths = ["../dotnugg/src"]
 # optimizer_runs = 10000000
 # cache = false
 # force = false
@@ -80,10 +80,10 @@ stackAllocation = true
 # solc_version = '0.8.17'
 
 # [dotnugg]
-# src = "../dotnugg-v1-core/src"
-# test = '../dotnugg-v1-core/src'
+# src = "../dotnugg/src"
+# test = '../dotnugg/src'
 # out = "./out"
-# allow_paths = ["../dotnugg-v1-core/src"]
+# allow_paths = ["../dotnugg/src"]
 # optimizer_runs = 10000000
 # cache = false
 # force = false
@@ -95,7 +95,7 @@ stackAllocation = true
 # [test]
 # src = './src'
 # test = './test'
-# # allow_paths = ["../dotnugg-v1-core/src"]
+# # allow_paths = ["../dotnugg/src"]
 # # libs = ['./_libs']
 # # sparse_mode = true
 # sender = '0x9b0e2b16f57648c7baf28edd7772a815af266e77'

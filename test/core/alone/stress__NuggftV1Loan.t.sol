@@ -2,10 +2,10 @@
 
 pragma solidity 0.8.17;
 
-import "@nuggft-v1-core/test/main.sol";
+import "git.nugg.xyz/nuggft/test/main.sol";
 
 import {ShiftLib} from "../../helpers/ShiftLib.sol";
-import {NuggftV1Loan} from "@nuggft-v1-core/src/core/NuggftV1Loan.sol";
+import {NuggftV1Loan} from "git.nugg.xyz/nuggft/src/core/NuggftV1Loan.sol";
 
 contract stress__NuggftV1Loan is NuggftV1Test {
 	uint24 internal LOAN_TOKENID;

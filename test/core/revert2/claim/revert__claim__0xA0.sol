@@ -2,7 +2,7 @@
 
 pragma solidity 0.8.17;
 
-import "@nuggft-v1-core/test/main.sol";
+import "git.nugg.xyz/nuggft/test/main.sol";
 
 abstract contract revert__claim__0xA0 is NuggftV1Test {
 	// had to rig this one. the checks are too good

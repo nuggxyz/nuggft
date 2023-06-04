@@ -3,7 +3,7 @@
 > **Warning**
 > this code is yet to be deployed and licensed under UNLICENSED
 
-[![forge](https://github.com/nuggxyz/nuggft-v1-core/actions/workflows/forge.yaml/badge.svg)](https://github.com/nuggxyz/nuggft-v1-core/actions/workflows/forge.yaml)
+[![forge](https://github.com/nuggxyz/nuggft/actions/workflows/forge.yaml/badge.svg)](https://github.com/nuggxyz/nuggft/actions/workflows/forge.yaml)
 
 the core logic and smart contracts for nuggft v1
 

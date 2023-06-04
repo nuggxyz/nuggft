@@ -2,10 +2,10 @@
 
 pragma solidity 0.8.17;
 
-import {IDotnuggV1} from "@dotnugg-v1-core/src/IDotnuggV1.sol";
-import {IxNuggftV1} from "@nuggft-v1-core/src/interfaces/IxNuggftV1.sol";
+import {IDotnuggV1} from "git.nugg.xyz/dotnugg/src/IDotnuggV1.sol";
+import {IxNuggftV1} from "git.nugg.xyz/nuggft/src/interfaces/IxNuggftV1.sol";
 
-import {IERC721, IERC721Metadata} from "@nuggft-v1-core/src/interfaces/IERC721.sol";
+import {IERC721, IERC721Metadata} from "git.nugg.xyz/nuggft/src/interfaces/IERC721.sol";
 
 interface INuggftV1Lens {
 	/* ///////////////////////////////////////////////////////////////////
