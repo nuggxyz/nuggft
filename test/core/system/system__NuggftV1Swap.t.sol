@@ -346,7 +346,6 @@ abstract contract system__NuggftV1Swap is NuggftV1Test, fragments {
 
 		expect.sell().from(users.frank).exec(token1, itemId, 50 ether);
 
-		forge.vm.stopPrank();
 	}
 
 	function test__system__item__sellTwoClaimBack__frank() public clean {
