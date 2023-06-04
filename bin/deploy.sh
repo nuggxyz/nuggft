@@ -14,18 +14,18 @@ fi
 
 echo "$SEED"
 
-RESULT=$(
-	forge create NuggFatherV1 \
-		--constructor-args "$SEED" \
-		--mnemonic-path "$MNEMONIC_PATH_1" \
-		--mnemonic-index 1 \
-		--value 5ether \
-		--gas-limit 29000000 \
-		--rpc-url "$ETH_RPC_URL" \
-		--from "$ETH_FROM" \
-		--optimize --optimizer-runs="$OPTIMIZER_RUNS" \
-		--extra-output-files metadata
-)
+# RESULT=$(
+# 	forge create DotnuggV1 \
+# 		--constructor-args "$SEED" \
+# 		--private-key 0xedf370e9795f88d24d19c41c85ad608e3084742d6e431563f3dfb9a0028b4bca \
+# 		--gas-limit 15000000 \
+# 		--value 10ether \
+# 		--rpc-url "$ETH_RPC_URL" \
+# 		--from "$ETH_FROM" \
+# 		--optimize --optimizer-runs="$OPTIMIZER_RUNS" \
+# 		--extra-output-files metadata
+# )
+# --mnemonic-index 1 \
 
 echo "---------------------------------------------------------"
 echo "               forge create NuggFatherV1                 "

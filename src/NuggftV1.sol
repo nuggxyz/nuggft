@@ -15,12 +15,12 @@ import {DotnuggV1Lib} from "@dotnugg-v1-core/src/DotnuggV1Lib.sol";
 import {decodeMakingPrettierHappy} from "@nuggft-v1-core/src/libraries/BigOleLib.sol";
 
 import {NuggftV1Loan} from "@nuggft-v1-core/src/core/NuggftV1Loan.sol";
-import {NuggftV1Globals} from "@nuggft-v1-core/src/common/NuggftV1Globals.sol";
+import {NuggftV1Globals, NuggftV1Dotnugg} from "@nuggft-v1-core/src/common/NuggftV1Globals.sol";
 
 /// @title NuggftV1
 /// @author nugg.xyz - danny7even and dub6ix - 2022
 contract NuggftV1 is NuggftV1Loan {
-	constructor() payable NuggftV1Globals() {}
+	constructor(address dotnugg) payable NuggftV1Globals() NuggftV1Dotnugg(dotnugg) {}
 
 	/// @inheritdoc INuggftV1Execute
 	function extract() external requiresTrust {

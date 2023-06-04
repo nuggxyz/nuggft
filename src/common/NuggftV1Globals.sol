@@ -12,15 +12,24 @@ import {xNuggftV1} from "@nuggft-v1-core/src/xNuggftV1.sol";
 
 import {NuggftV1Constants} from "./NuggftV1Constants.sol";
 
+abstract contract NuggftV1Dotnugg is INuggftV1 {
+	IDotnuggV1 public immutable override dotnuggv1;
+
+	constructor(address dotnuggv1_) {
+		// if (dotnuggv1_ == address(0)) {
+		// 	dotnuggv1_ = address(new DotnuggV1{salt: bytes32(0)}());
+		// }
+		dotnuggv1 = IDotnuggV1(dotnuggv1_);
+	}
+}
+
 /// @author nugg.xyz - danny7even and dub6ix - 2022
-abstract contract NuggftV1Globals is NuggftV1Constants, INuggftV1 {
+abstract contract NuggftV1Globals is NuggftV1Constants, INuggftV1, NuggftV1Dotnugg {
 	uint256 public override stake;
 
 	address public override migrator;
 
 	uint256 public immutable override genesis;
-
-	IDotnuggV1 public immutable override dotnuggv1;
 
 	IxNuggftV1 public immutable xnuggftv1;
 
@@ -54,8 +63,6 @@ abstract contract NuggftV1Globals is NuggftV1Constants, INuggftV1 {
 		early = uint24(msg.value / STARTING_PRICE);
 
 		xnuggftv1 = IxNuggftV1(new xNuggftV1());
-
-		dotnuggv1 = IDotnuggV1(address(new DotnuggV1()));
 
 		stake = (msg.value << 96) + (uint256(early) << 192);
 

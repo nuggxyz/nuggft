@@ -34,3 +34,6 @@ cast send "$NUGGFT" 'bye()' \
 # 0x694200000FdFBc056b59c498c60A7330255A9755
 # kovan
 # 0x694200002e1540157c5fe987705e418ee0a9577d
+
+# //➜  nuggft-v1-core git:(main) ✗ bin/bye.sh goerli 0x69420000813E88EA1900125E91b61E1028C4C978
+# //➜  nuggft-v1-core git:(main) ✗ bin/bye.sh goerli 0x69420000Bad0605988626169E32aa82FB3981add

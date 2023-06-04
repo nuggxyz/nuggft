@@ -7,24 +7,24 @@ SEED=$2
 OPTIMIZER_RUNS=10000000
 
 if [ "$NETWORK" == "local" ]; then
-    ETH_RPC_URL="http://127.0.0.1:8545"
+	ETH_RPC_URL="http://127.0.0.1:8545"
 else
-    ETH_RPC_URL="https://$NETWORK.infura.io/v3/$INFURA_KEY"
+	ETH_RPC_URL="https://$NETWORK.infura.io/v3/$INFURA_KEY"
 fi
 
 echo "$SEED"
 
 RESULT=$(
-    forge create NuggFatherV1PartA \
-        --force \
-        --legacy \
-        --mnemonic-path "$MNEMONIC_PATH_1" \
-        --mnemonic-index 1 \
-        --gas-limit 15000000 \
-        --rpc-url "$ETH_RPC_URL" \
-        --from "$ETH_FROM" \
-        --optimize --optimizer-runs="$OPTIMIZER_RUNS" \
-        --extra-output-files metadata
+	forge create NuggFatherV1PartA \
+		--force \
+		--legacy \
+		--mnemonic-path "$MNEMONIC_PATH_1" \
+		--mnemonic-index 1 \
+		--gas-limit 15000000 \
+		--rpc-url "$ETH_RPC_URL" \
+		--from "$ETH_FROM" \
+		--optimize --optimizer-runs="$OPTIMIZER_RUNS" \
+		--extra-output-files metadata
 )
 
 echo "---------------------------------------------------------"
@@ -50,17 +50,17 @@ echo "               forge create NuggFatherV1 B             "
 echo "---------------------------------------------------------"
 
 RESULT=$(
-    forge create NuggFatherV1PartB \
-        --force \
-        --legacy \
-        --mnemonic-path "$MNEMONIC_PATH_1" \
-        --mnemonic-index 1 \
-        --gas-limit 15000000 \
-        --rpc-url "$ETH_RPC_URL" \
-        --from "$ETH_FROM" \
-        --optimize --optimizer-runs="$OPTIMIZER_RUNS" \
-        --extra-output-files metadata \
-        --constructor-args "$DOTNUGG"
+	forge create NuggftV1 \
+		--force \
+		--legacy \
+		--mnemonic-path "$MNEMONIC_PATH_1" \
+		--mnemonic-index 1 \
+		--gas-limit 15000000 \
+		--rpc-url "$ETH_RPC_URL" \
+		--from "$ETH_FROM" \
+		--optimize --optimizer-runs="$OPTIMIZER_RUNS" \
+		--extra-output-files metadata \
+		--constructor-args "$DOTNUGG"
 
 )
 
@@ -81,17 +81,17 @@ echo "               forge create NuggFatherV1 C             "
 echo "---------------------------------------------------------"
 
 RESULT=$(
-    forge create NuggFatherV1PartC \
-        --force --legacy \
-        --mnemonic-path "$MNEMONIC_PATH_1" \
-        --mnemonic-index 1 \
-        --value 1ether \
-        --gas-limit 15000000 \
-        --rpc-url "$ETH_RPC_URL" \
-        --from "$ETH_FROM" \
-        --optimize --optimizer-runs="$OPTIMIZER_RUNS" \
-        --extra-output-files metadata \
-        --constructor-args "$SEED" "$DOTNUGG"
+	forge create NuggFatherV1PartC \
+		--force --legacy \
+		--mnemonic-path "$MNEMONIC_PATH_1" \
+		--mnemonic-index 1 \
+		--value 1ether \
+		--gas-limit 15000000 \
+		--rpc-url "$ETH_RPC_URL" \
+		--from "$ETH_FROM" \
+		--optimize --optimizer-runs="$OPTIMIZER_RUNS" \
+		--extra-output-files metadata \
+		--constructor-args "$SEED" "$DOTNUGG"
 
 )
 
@@ -133,37 +133,37 @@ echo "genesis block is:    $GENESIS"
 echo "---------------------------------------------------------"
 
 if [ "$NETWORK" != "local" ]; then
-    echo ""
-    echo "sleeping for 15 seconds"
-    sleep 15
-    echo ""
-    echo "---------------------------------------------------------"
-    echo "                     VERIFICATION                        "
-    echo "---------------------------------------------------------"
-    echo "verifying NuggftV1 @ $NUGGFT"
-    forge verify-contract "$NUGGFT" src/NuggftV1.sol:NuggftV1 \
-        --chain "$NETWORK" \
-        --compiler-version 0.8.17+commit.8df45f5f \
-        --num-of-optimizations "$OPTIMIZER_RUNS" \
-        --watch
-    echo "---------------------------------------------------------"
+	echo ""
+	echo "sleeping for 15 seconds"
+	sleep 15
+	echo ""
+	echo "---------------------------------------------------------"
+	echo "                     VERIFICATION                        "
+	echo "---------------------------------------------------------"
+	echo "verifying NuggftV1 @ $NUGGFT"
+	forge verify-contract "$NUGGFT" src/NuggftV1.sol:NuggftV1 \
+		--chain "$NETWORK" \
+		--compiler-version 0.8.17+commit.8df45f5f \
+		--num-of-optimizations "$OPTIMIZER_RUNS" \
+		--watch
+	echo "---------------------------------------------------------"
 
-    echo "verifying xNuggftV1 @ $xNUGGFT"
-    forge verify-contract "$xNUGGFT" src/xNuggftV1.sol:xNuggftV1 \
-        --chain "$NETWORK" \
-        --compiler-version 0.8.17+commit.8df45f5f \
-        --num-of-optimizations "$OPTIMIZER_RUNS" \
-        --watch
-    echo "---------------------------------------------------------"
+	echo "verifying xNuggftV1 @ $xNUGGFT"
+	forge verify-contract "$xNUGGFT" src/xNuggftV1.sol:xNuggftV1 \
+		--chain "$NETWORK" \
+		--compiler-version 0.8.17+commit.8df45f5f \
+		--num-of-optimizations "$OPTIMIZER_RUNS" \
+		--watch
+	echo "---------------------------------------------------------"
 
-    echo "verifying DotnuggV1 @ $DOTNUGG"
-    forge verify-contract "$DOTNUGG" ../dotnugg-v1-core/src/DotnuggV1.sol:DotnuggV1 \
-        --chain "$NETWORK" \
-        --compiler-version 0.8.17+commit.8df45f5f \
-        --num-of-optimizations "$OPTIMIZER_RUNS" \
-        --watch
+	echo "verifying DotnuggV1 @ $DOTNUGG"
+	forge verify-contract "$DOTNUGG" ../dotnugg-v1-core/src/DotnuggV1.sol:DotnuggV1 \
+		--chain "$NETWORK" \
+		--compiler-version 0.8.17+commit.8df45f5f \
+		--num-of-optimizations "$OPTIMIZER_RUNS" \
+		--watch
 
-    echo "---------------------------------------------------------"
+	echo "---------------------------------------------------------"
 
 fi
 
