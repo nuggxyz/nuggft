@@ -4,7 +4,7 @@ src = 'src'
 test = 'test'
 out = 'out'
 libs = ['lib']
-allow_paths = ["../dotnugg-v1-core/src"]
+allow_paths = ["../dotnugg/src"]
 
 cache = true
 force = false

@@ -1,9 +1,6 @@
-[submodule "lib/ds-test"]
-	path = lib/ds-test
-	url = https://github.com/dapphub/ds-test
-[submodule "lib/dotnugg-v1-core"]
-	path = lib/dotnugg-v1-core
-	url = https://github.com/nuggxyz/dotnugg-v1-core
 [submodule "lib/forge-std"]
 	path = lib/forge-std
 	url = https://github.com/foundry-rs/forge-std
+[submodule "lib/dotnugg"]
+	path = lib/dotnugg
+	url = git@github.com:nuggxyz/dotnugg.git
