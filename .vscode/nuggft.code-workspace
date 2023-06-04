@@ -1,46 +1,51 @@
 {
-	"folders": [
-		{
-			"path": "..",
-			"name": "root"
-		}
-	],
-	"settings": {
-		"editor.detectIndentation": false,
-		"prettier.requireConfig": true,
-		"editor.formatOnSave": true,
-		"editor.bracketPairColorization.enabled": true,
-		"[solidity]": {},
-		"[svg]": {
-			"editor.defaultFormatter": "jock.svg"
-		},
-		"[dotenv]": {
-			"editor.defaultFormatter": "foxundermoon.shell-format"
-		},
-		"search.exclude": {
-			"lib": true
-		},
-		"[shellscript]": {
-			"editor.defaultFormatter": "foxundermoon.shell-format"
-		},
-		"[properties]": {
-			"editor.defaultFormatter": "foxundermoon.shell-format"
-		},
-		"solidity-va.deco.arguments": false,
-		"solidity-va.deco.statevars": false,
-		"solidity-va.deco.warn.reserved": true,
-		"solidity-va.codelens.enable": false,
-		"solidity.formatter": "forge",
-		"solidity.enabledAsYouTypeCompilationErrorCheck": true,
-		"emeraldwalk.runonsave": {
-			"shell": "bash",
-			"commands": [
-				{
-					"isAsync": true,
-					"match": "\\.sol$",
-					"cmd": "forge fmt \"${file}\" && sed -e'':a'' -e's/^\\(\\t*\\)    /\\1\\t/;ta' \"${file}\" > \"${file}\"-notab && mv \"${file}\"-notab \"${file}\""
-				},
-			]
-		},
-	}
+    "folders": [
+        {
+            "path": "..",
+            "name": "root"
+        }
+    ],
+    "settings": {
+        "editor.detectIndentation": false,
+        "prettier.requireConfig": true,
+        "editor.formatOnSave": true,
+        "editor.bracketPairColorization.enabled": true,
+        "[solidity]": {},
+        "[svg]": {
+            "editor.defaultFormatter": "jock.svg"
+        },
+        "[dotenv]": {
+            "editor.defaultFormatter": "foxundermoon.shell-format"
+        },
+        "search.exclude": {
+            "lib": true
+        },
+        "[shellscript]": {
+            "editor.defaultFormatter": "foxundermoon.shell-format"
+        },
+        "[properties]": {
+            "editor.defaultFormatter": "foxundermoon.shell-format"
+        },
+        "solidity-va.deco.arguments": false,
+        "solidity-va.deco.statevars": false,
+        "solidity-va.deco.warn.reserved": true,
+        "solidity-va.codelens.enable": false,
+        "solidity.formatter": "forge",
+        "solidity.enabledAsYouTypeCompilationErrorCheck": true,
+        "emeraldwalk.runonsave": {
+            "shell": "bash",
+            "commands": [
+                {
+                    "isAsync": true,
+                    "match": "\\.sol$",
+                    "cmd": "forge fmt \"${file}\" && sed -e'':a'' -e's/^\\(\\t*\\)    /\\1\\t/;ta' \"${file}\" > \"${file}\"-notab && mv \"${file}\"-notab \"${file}\""
+                },
+            ]
+        },
+        "git.ignoredRepositories": [
+            "./lib/dotnugg",
+            "./lib/forge-std",
+            "./lib/ds-test",
+        ],
+    }
 }
