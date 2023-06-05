@@ -49,9 +49,11 @@ contract NuggftV1Extended is NuggftV1, INuggftV1Extended {
 		return super.epoch();
 	}
 
+	uint256 wait = block.timestamp;
+
 	function getBlockHash(uint256 blocknum) internal view override returns (bytes32 res) {
 		if (block.number > blocknum && block.number - blocknum < 256) {
-			return keccak256(abi.encodePacked(blocknum));
+			return keccak256(abi.encodePacked(blocknum + wait));
 		}
 	}
 

@@ -160,6 +160,17 @@ contract NuggftV1Test is ForgeTest, NuggftV1AgentType {
 		assert(select != 0);
 	}
 
+	function findNewNuggWithItem2(uint16 item, uint24 tokenToExclude) public view returns (uint24 nugg) {
+		uint24[] memory nuggs = getAllNuggs();
+		for (uint256 i = 0; i < nuggs.length; i++) {
+			if (nuggs[i] != tokenToExclude && nuggs[i] != nuggft.epoch()) {
+				if (xnuggft.floop(nuggs[i])[9] == item) return (nuggs[i]);
+			}
+		}
+
+		assert(false);
+	}
+
 	function findNuggWithItem(uint16 item, uint24 tokenToExclude) public view returns (uint24 nugg, uint8 index) {
 		uint24[] memory nuggs = getAllNuggs();
 		for (uint256 i = 0; i < nuggs.length; i++) {
@@ -235,7 +246,11 @@ contract NuggftV1Test is ForgeTest, NuggftV1AgentType {
 	}
 
 	function jumpSwap() public {
-		jump(nuggft.epoch() + uint24(SALE_LEN) + 1);
+		jumpUp(uint24(SALE_LEN) + 1);
+	}
+
+	function jumpSwapDown(uint256 amount) public {
+		jump(nuggft.epoch() + uint24(uint24(SALE_LEN) + 1 - amount));
 	}
 
 	function jumpLoan() public {
@@ -263,7 +278,7 @@ contract NuggftV1Test is ForgeTest, NuggftV1AgentType {
 	}
 
 	/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-					eth modifiers
+	eth modifiers
 	━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
 
 	modifier baldiff(address user, int192 exp) {
@@ -275,7 +290,7 @@ contract NuggftV1Test is ForgeTest, NuggftV1AgentType {
 	}
 
 	/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-				expectBalanceChange
+	expectBalanceChange
 	━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
 
 	struct BalDiff {
@@ -323,7 +338,7 @@ contract NuggftV1Test is ForgeTest, NuggftV1AgentType {
 	}
 
 	/*━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-					scenarios
+	scenarios
 	━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━*/
 
 	function scenario_dee_has_a_token() public payable returns (uint24 tokenId) {
@@ -458,11 +473,11 @@ contract NuggftV1Test is ForgeTest, NuggftV1AgentType {
 	}
 
 	/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-					encodeWithSelector
+	encodeWithSelector
 	━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
 
 	/*━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-					scenarios
+	scenarios
 	━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━*/
 
 	// function environment() public returns (address[] memory users) {

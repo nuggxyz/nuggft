@@ -229,7 +229,7 @@ contract general__multioffer is NuggftV1Test {
 
 		ds.emit_log_named_uint("item 1119 is:", item);
 
-		uint24 select = findNewNuggWithItem(item, token1780M);
+		uint24 select = findNewNuggWithItem2(item, token1780M);
 
 		uint96 v1 = nuggft.vfo(users.frank, token1780M);
 		uint96 v2 = nuggft.vfo(token42M, token1780M, item);
