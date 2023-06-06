@@ -53,7 +53,7 @@ abstract contract NuggftV1Globals is NuggftV1Constants, INuggftV1, NuggftV1Dotnu
 
 	mapping(uint40 => uint256) internal _itemAgency;
 
-	constructor() payable {
+	constructor(uint8) payable {
 		address dub6ix = 0x9B0E2b16F57648C7bAF28EDD7772a815Af266E77;
 
 		genesis = (block.number / INTERVAL) * INTERVAL;
@@ -102,9 +102,7 @@ abstract contract NuggftV1Globals is NuggftV1Constants, INuggftV1, NuggftV1Dotnu
 				a = data[i];
 				assembly {
 					success := delegatecall(gas(), address(), add(a, 32), mload(a), a, 5)
-					if iszero(success) {
-						revert(a, 5)
-					}
+					if iszero(success) { revert(a, 5) }
 				}
 			}
 		}
@@ -122,13 +120,18 @@ abstract contract NuggftV1Globals is NuggftV1Constants, INuggftV1, NuggftV1Dotnu
 		uint24 buyingTokenid,
 		uint24 sellingTokenId,
 		uint16 itemId
-	) public view override returns (uint256 value) {
+	)
+		public
+		view
+		override
+		returns (uint256 value)
+	{
 		return _itemOffers[uint40(sellingTokenId) | (uint40(itemId) << 24)][buyingTokenid];
 	}
 
 	/* ///////////////////////////////////////////////////////////////////
-                            TRUST
-    /////////////////////////////////////////////////////////////////// */
+				TRUST
+	/////////////////////////////////////////////////////////////////// */
 
 	function setIsTrusted(address user, bool trusted) public virtual requiresTrust {
 		isTrusted[user] = trusted;

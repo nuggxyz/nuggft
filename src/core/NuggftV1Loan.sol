@@ -35,70 +35,64 @@ abstract contract NuggftV1Loan is NuggftV1Swap {
 
 			// prettier-ignore
 			for { let i := 0 } lt(i, len) { i := add(i, 0x1) } {
-                // get a tokenId from calldata and store it to mem pos 0x00
-                mstore(mptr, calldataload(add(tokenIds.offset, mul(i, 0x20))))
+				// get a tokenId from calldata and store it to mem pos 0x00
+				mstore(mptr, calldataload(add(tokenIds.offset, mul(i, 0x20))))
 
-                let agency__sptr := keccak256(mptr, 0x40)
+				let agency__sptr := keccak256(mptr, 0x40)
 
-                // load agency value from storage
-                let agency__cache := sload(agency__sptr)
+				// load agency value from storage
+				let agency__cache := sload(agency__sptr)
 
-                // ensure the caller is the agent
-                if iszero(eq(juke(agency__cache, AAJL, AAJR), caller())) {
-                    panic(Error__0xA1__NotAgent)
-                }
+				// ensure the caller is the agent
+				if iszero(eq(juke(agency__cache, AAJL, AAJR), caller())) { panic(Error__0xA1__NotAgent) }
 
-                // ensure the agent is the owner
-                if iszero(eq(shr(AFJO, agency__cache), 0x1)) {
-                    panic(Error__0x77__NotOwner)
-                }
+				// ensure the agent is the owner
+				if iszero(eq(shr(AFJO, agency__cache), 0x1)) { panic(Error__0x77__NotOwner) }
 
-                // compress amt into 70 bits
-                amt := div(amt, LOSS)
+				// compress amt into 70 bits
+				amt := div(amt, LOSS)
 
-                // update agency to reflect the loan
+				// update agency to reflect the loan
 
-                // ==== agency[tokenId] ====
-                //  flag  = LOAN(0x02)
-                //  epoch = active
-                //  eth   = eps / LOSS
-                //  addr  = agent
-                // =========================
+				// ==== agency[tokenId] ====
+				//  flag  = LOAN(0x02)
+				//  epoch = active
+				//  eth   = eps / LOSS
+				//  addr  = agent
+				// =========================
 
-                agency__cache := xor(caller(), xor(shl(AVJO, amt), xor(shl(AEJO, active), shl(AFJO, 0x2))))
+				agency__cache := xor(caller(), xor(shl(AVJO, amt), xor(shl(AEJO, active), shl(AFJO, 0x2))))
 
-                // store updated agency
-                // done before external call to prevent reentrancy
-                sstore(agency__sptr, agency__cache)
+				// store updated agency
+				// done before external call to prevent reentrancy
+				sstore(agency__sptr, agency__cache)
 
-                // decompress amt back to eth
-                // amt becomes a floored to LOSS version of eps()
-                // ensures amt stored in agency and eth sent to caller are the same
-                amt := mul(amt, LOSS)
+				// decompress amt back to eth
+				// amt becomes a floored to LOSS version of eps()
+				// ensures amt stored in agency and eth sent to caller are the same
+				amt := mul(amt, LOSS)
 
-                // send accumulated value * LOSS to msg.sender
-                switch iszero(extcodesize(caller()))
-                case 1 {
-                    pop(call(gas(), caller(), amt, 0, 0, 0, 0))
-                }
-                default {
-                    // if someone really ends up here, just donate the eth
-                    let pro := div(amt, PROTOCOL_FEE_FRAC)
+				// send accumulated value * LOSS to msg.sender
+				switch iszero(extcodesize(caller()))
+				case 1 { pop(call(gas(), caller(), amt, 0, 0, 0, 0)) }
+				default {
+					// if someone really ends up here, just donate the eth
+					let pro := div(amt, PROTOCOL_FEE_FRAC)
 
-                    let cache := add(sload(stake.slot), or(shl(96, sub(amt, pro)), pro))
+					let cache := add(sload(stake.slot), or(shl(96, sub(amt, pro)), pro))
 
-                    sstore(stake.slot, cache)
+					sstore(stake.slot, cache)
 
-                    mstore(0x00, cache)
+					mstore(0x00, cache)
 
-                    log1(0x00, 0x20, Event__Stake)
-                }
+					log1(0x00, 0x20, Event__Stake)
+				}
 
-                // log2 with "Loan(uint24,bytes32)" topic
-                mstore(add(mptr, 0x40), agency__cache)
+				// log2 with "Loan(uint24,bytes32)" topic
+				mstore(add(mptr, 0x40), agency__cache)
 
-                log2(add(mptr, 0x40), 0x20, Event__Loan, mload(mptr))
-            }
+				log2(add(mptr, 0x40), 0x20, Event__Loan, mload(mptr))
+			}
 		}
 	}
 
@@ -141,9 +135,7 @@ abstract contract NuggftV1Loan is NuggftV1Swap {
 			let loaner := juke(agency__cache, AAJL, AAJR)
 
 			// ensure that the agency flag is LOAN
-			if iszero(eq(shr(AFJO, agency__cache), 0x02)) {
-				panic(Error__0xA8__NotLoaned)
-			}
+			if iszero(eq(shr(AFJO, agency__cache), 0x02)) { panic(Error__0xA8__NotLoaned) }
 
 			// check to see if msg.sender is the loaner
 			if iszero(eq(caller(), loaner)) {
@@ -188,9 +180,7 @@ abstract contract NuggftV1Loan is NuggftV1Swap {
 
 			let value := add(earn, callvalue())
 
-			if lt(value, fee) {
-				panic(Error__0xA7__LiquidationPaymentTooLow)
-			}
+			if lt(value, fee) { panic(Error__0xA7__LiquidationPaymentTooLow) }
 
 			earn := sub(value, fee)
 
@@ -297,65 +287,61 @@ abstract contract NuggftV1Loan is NuggftV1Swap {
 
 			// prettier-ignore
 			for { let i := 0 } lt(i, len) { i := add(i, 0x1) } {
-                // get a tokenId from calldata and store it to mem pos 0x00
-                mstore(0x00, calldataload(add(tokenIds.offset, mul(i, 0x20))))
+				// get a tokenId from calldata and store it to mem pos 0x00
+				mstore(0x00, calldataload(add(tokenIds.offset, mul(i, 0x20))))
 
-                let agency__sptr := keccak256(0x00, 0x40)
+				let agency__sptr := keccak256(0x00, 0x40)
 
-                //
-                let agency__cache := sload(agency__sptr)
+				//
+				let agency__cache := sload(agency__sptr)
 
-                let agency__addr := juke(agency__cache, AAJL, AAJR)
+				let agency__addr := juke(agency__cache, AAJL, AAJR)
 
-                // make sure this token is loaned
-                if iszero(eq(shr(AFJO, agency__cache), 0x02)) {
-                    panic(Error__0xA8__NotLoaned)
-                }
+				// make sure this token is loaned
+				if iszero(eq(shr(AFJO, agency__cache), 0x02)) { panic(Error__0xA8__NotLoaned) }
 
-                // is the caller different from the agent?
-                if iszero(eq(caller(), agency__addr)) {
-                    // if so: ensure the loan is expired
-                    // why? - only after a loan has expired are the "earnings" up for grabs.
-                    // otherwise only the loaner is entitled to them
-                    // TODO subtract some amount from LIQUIDATION_PERIOD here, to give rebalancers a head start
-                    if iszero(lt(add(juke(agency__cache, AEJL, AEJR), LIQUIDATION_PERIOD), active)) {
-                        panic(Error__0xA4__ExpiredEpoch) // ERR:0x3B
-                    }
-                }
+				// is the caller different from the agent?
+				if iszero(eq(caller(), agency__addr)) {
+					// if so: ensure the loan is expired
+					// why? - only after a loan has expired are the "earnings" up for grabs.
+					// otherwise only the loaner is entitled to them
+					// TODO subtract some amount from LIQUIDATION_PERIOD here, to give rebalancers a head start
+					if iszero(lt(add(juke(agency__cache, AEJL, AEJR), LIQUIDATION_PERIOD), active)) {
+						panic(Error__0xA4__ExpiredEpoch) // ERR:0x3B
+					}
+				}
 
-                // parse agency for principal, converting it back to eth
-                // represents the value that has been sent to the user for this loan
-                let principal := mul(juke(agency__cache, AVJL, AVJR), LOSS)
+				// parse agency for principal, converting it back to eth
+				// represents the value that has been sent to the user for this loan
+				let principal := mul(juke(agency__cache, AVJL, AVJR), LOSS)
 
-                // the amount of value earned by this token since last rebalance
-                // must be computed because fee needs to be paid
-                // increase in earnings per share since last rebalance
-                let earn := sub(activeEps, principal)
+				// the amount of value earned by this token since last rebalance
+				// must be computed because fee needs to be paid
+				// increase in earnings per share since last rebalance
+				let earn := sub(activeEps, principal)
 
-                // the maximum fee that can be levied
-                // let fee := earn
+				// the maximum fee that can be levied
+				// let fee := earn
 
-                // true fee
-                let fee := div(principal, REBALANCE_FEE_BPS)
+				// true fee
+				let fee := div(principal, REBALANCE_FEE_BPS)
 
-                let value := add(earn, acc)
+				let value := add(earn, acc)
 
-                if lt(value, fee) {
-                    panic(Error__0xAA__RebalancePaymentTooLow)
-                }
+				if lt(value, fee) { panic(Error__0xAA__RebalancePaymentTooLow) }
 
-                accFee := add(accFee, fee)
+				accFee := add(accFee, fee)
 
-                acc := sub(value, fee)
+				acc := sub(value, fee)
 
-                mstore(add(0x60, mul(i, 0xA0)), agency__addr)
+				mstore(add(0x60, mul(i, 0xA0)), agency__addr)
 
-                // set the agency temporarily to 1 to avoid reentrancy
-                // reentrancy here referes to a tokenId being passed multiple times in the calldata array
-                // the only value that actually matters here is the "flag", but since it is reset below
-                // ... we can just set the entire agency to 1
-                sstore(agency__sptr, 0x01)
-            }
+				// set the agency temporarily to 1 to avoid reentrancy
+				// reentrancy here referes to a tokenId being passed multiple times in the calldata array
+				// the only value that actually matters here is the "flag", but since it is reset below
+				// ... we can just set the entire agency to 1
+				sstore(agency__sptr, 0x01)
+			}
 
 			let pro := div(accFee, PROTOCOL_FEE_FRAC)
 
@@ -367,25 +353,25 @@ abstract contract NuggftV1Loan is NuggftV1Swap {
 
 			// prettier-ignore
 			for { let i := 0 } lt(i, len) { i := add(i, 0x1) } {
-                mstore(0x00, calldataload(add(tokenIds.offset, mul(i, 0x20))))
+				mstore(0x00, calldataload(add(tokenIds.offset, mul(i, 0x20))))
 
-                let account := mload(add(0x60, mul(i, 0xA0)))
+				let account := mload(add(0x60, mul(i, 0xA0)))
 
-                // update agency to reflect new principle and epoch
-                // ==== agency[tokenId] =====
-                //     flag  = LOAN(0x02)
-                //     epoch = active
-                //     eth   = eps
-                //     addr  = loaner
-                // =========================
-                let agency__cache := or(shl(AFJO, 0x2), or(shl(AEJO, active), or(shl(AVJO, newPrincipal), account)))
+				// update agency to reflect new principle and epoch
+				// ==== agency[tokenId] =====
+				//     flag  = LOAN(0x02)
+				//     epoch = active
+				//     eth   = eps
+				//     addr  = loaner
+				// =========================
+				let agency__cache := or(shl(AFJO, 0x2), or(shl(AEJO, active), or(shl(AVJO, newPrincipal), account)))
 
-                sstore(keccak256(0x00, 0x40), agency__cache)
+				sstore(keccak256(0x00, 0x40), agency__cache)
 
-                mstore(0x40, agency__cache)
+				mstore(0x40, agency__cache)
 
-                log2(0x40, 0x20, Event__Loan, mload(0x00))
-            }
+				log2(0x40, 0x20, Event__Loan, mload(0x00))
+			}
 
 			// ======================================================================
 
@@ -404,7 +390,10 @@ abstract contract NuggftV1Loan is NuggftV1Swap {
 		}
 	}
 
-	function calc(uint96 principal, uint96 activeEps)
+	function calc(
+		uint96 principal,
+		uint96 activeEps
+	)
 		internal
 		pure
 		returns (
@@ -432,14 +421,7 @@ abstract contract NuggftV1Loan is NuggftV1Swap {
 	function debt(uint24 tokenId)
 		public
 		view
-		returns (
-			bool isLoaned,
-			address account,
-			uint96 prin,
-			uint96 fee,
-			uint96 earn,
-			uint24 expire
-		)
+		returns (bool isLoaned, address account, uint96 prin, uint96 fee, uint96 earn, uint24 expire)
 	{
 		uint96 activeEps = eps();
 
@@ -455,9 +437,7 @@ abstract contract NuggftV1Loan is NuggftV1Swap {
 
 			let agency__cache := sload(keccak256(mptr, 0x40))
 
-			if iszero(eq(shr(AFJO, agency__cache), 0x02)) {
-				return(0x00, 0x00)
-			}
+			if iszero(eq(shr(AFJO, agency__cache), 0x02)) { return(0x00, 0x00) }
 
 			isLoaned := 0x01
 
@@ -478,7 +458,7 @@ abstract contract NuggftV1Loan is NuggftV1Swap {
 	function vfr(uint24[] calldata tokenIds) external view returns (uint96[] memory vals) {
 		vals = new uint96[](tokenIds.length);
 		for (uint256 i = 0; i < vals.length; i++) {
-			(bool ok, , , uint96 fee, uint96 earn, ) = debt(tokenIds[i]);
+			(bool ok,,, uint96 fee, uint96 earn,) = debt(tokenIds[i]);
 
 			if (!ok) continue;
 
@@ -493,7 +473,7 @@ abstract contract NuggftV1Loan is NuggftV1Swap {
 	function vfl(uint24[] calldata tokenIds) external view returns (uint96[] memory vals) {
 		vals = new uint96[](tokenIds.length);
 		for (uint256 i = 0; i < vals.length; i++) {
-			(bool ok, , uint96 prin, uint96 fee, uint96 earn, ) = debt(tokenIds[i]);
+			(bool ok,, uint96 prin, uint96 fee, uint96 earn,) = debt(tokenIds[i]);
 
 			if (ok && (prin = prin + fee) > earn) {
 				vals[i] = prin - earn;

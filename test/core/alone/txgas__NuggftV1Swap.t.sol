@@ -21,7 +21,7 @@ contract txgas__NuggftV1Swap is NuggftV1Test {
 
 		SELL_TOKENID = mintable(1496);
 		CLAIM_TOKENID = mintable(1497);
-		forge.vm.deal(users.dee, 40000 ether);
+		forge.vm.deal(users.dee, 40_000 ether);
 		mintHelper(COMMIT_TOKENID, users.dee, 100 ether);
 
 		mintHelper(CARRY_TOKENID, users.dee, nuggft.msp());
@@ -33,7 +33,7 @@ contract txgas__NuggftV1Swap is NuggftV1Test {
 
 		mintHelper(SELL_TOKENID, users.frank, nuggft.msp());
 
-		forge.vm.deal(users.mac, 40000 ether);
+		forge.vm.deal(users.mac, 40_000 ether);
 		forge.vm.startPrank(users.mac);
 		uint96 val = nuggft.vfo(users.mac, CARRY_TOKENID);
 		nuggft.offer{value: val}(CARRY_TOKENID);

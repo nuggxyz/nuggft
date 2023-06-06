@@ -4,15 +4,15 @@ pragma solidity 0.8.20;
 
 /// @author nugg.xyz - danny7even and dub6ix - 2022
 abstract contract NuggftV1Constants {
-	uint96 constant STARTING_PRICE = .005 ether;
+	uint96 constant STARTING_PRICE = 0.005 ether;
 
 	uint24 constant OFFSET = 1; // must be > 0
 
-	uint24 constant MINT_OFFSET = 1000000;
+	uint24 constant MINT_OFFSET = 1_000_000;
 
 	uint24 constant MAX_TOKENS = type(uint24).max;
 
-	uint96 constant LOSS = 10**14;
+	uint96 constant LOSS = 10 ** 14;
 
 	uint96 constant MIN_BID_MINUS_LOSS = 10;
 
@@ -34,9 +34,9 @@ abstract contract NuggftV1Constants {
 	// need in event
 	uint24 constant PREMIUM_DIV = 2000;
 
-	uint96 constant BASE_BPS = 10000;
+	uint96 constant BASE_BPS = 10_000;
 
-	uint96 constant INCREMENT_BPS = 10500;
+	uint96 constant INCREMENT_BPS = 10_500;
 
 	// warning: causes liq and reb noFallback tests to break with +-1 wei rounding error if 600
 	uint96 constant REBALANCE_FEE_BPS = 100;

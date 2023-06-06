@@ -12,15 +12,13 @@ import {IDotnuggV1} from "git.nugg.xyz/dotnugg/src/IDotnuggV1.sol";
 
 import {DotnuggV1Lib} from "git.nugg.xyz/dotnugg/src/DotnuggV1Lib.sol";
 
-import {decodeMakingPrettierHappy} from "git.nugg.xyz/nuggft/src/libraries/BigOleLib.sol";
-
 import {NuggftV1Loan} from "git.nugg.xyz/nuggft/src/core/NuggftV1Loan.sol";
 import {NuggftV1Globals, NuggftV1Dotnugg} from "git.nugg.xyz/nuggft/src/common/NuggftV1Globals.sol";
 
 /// @title NuggftV1
 /// @author nugg.xyz - danny7even and dub6ix - 2022
 contract NuggftV1 is NuggftV1Loan {
-	constructor(address dotnugg) payable NuggftV1Globals() NuggftV1Dotnugg(dotnugg) {}
+	constructor(address dotnugg) payable NuggftV1Dotnugg(dotnugg) NuggftV1Globals(0) {}
 
 	/// @inheritdoc INuggftV1Execute
 	function extract() external requiresTrust {
@@ -34,8 +32,8 @@ contract NuggftV1 is NuggftV1Loan {
 	}
 
 	/* ///////////////////////////////////////////////////////////////////
-                            MIGRATION
-    /////////////////////////////////////////////////////////////////// */
+	MIGRATION
+	/////////////////////////////////////////////////////////////////// */
 
 	/// @inheritdoc INuggftV1Execute
 	function setMigrator(address _migrator) external requiresTrust {
@@ -89,20 +87,18 @@ contract NuggftV1 is NuggftV1Loan {
 	}
 
 	/* ///////////////////////////////////////////////////////////////////
-                           ERC165 SUPPORT
-    /////////////////////////////////////////////////////////////////// */
+	ERC165 SUPPORT
+	/////////////////////////////////////////////////////////////////// */
 
 	/// @inheritdoc IERC165
 	function supportsInterface(bytes4 interfaceId) public view virtual override returns (bool) {
-		return
-			interfaceId == type(IERC721).interfaceId || //
-			interfaceId == type(IERC721Metadata).interfaceId ||
-			interfaceId == type(IERC165).interfaceId;
+		return interfaceId == type(IERC721).interfaceId //
+			|| interfaceId == type(IERC721Metadata).interfaceId || interfaceId == type(IERC165).interfaceId;
 	}
 
 	/* ///////////////////////////////////////////////////////////////////
-                            ERC721 METADATA
-    /////////////////////////////////////////////////////////////////// */
+	ERC721 METADATA
+	/////////////////////////////////////////////////////////////////// */
 
 	/// @inheritdoc IERC721Metadata
 	function name() public pure override returns (string memory) {
@@ -131,8 +127,8 @@ contract NuggftV1 is NuggftV1Loan {
 	}
 
 	/* ///////////////////////////////////////////////////////////////////
-                            SUPPLEMENTAL METADATA
-    /////////////////////////////////////////////////////////////////// */
+	SUPPLEMENTAL METADATA
+	/////////////////////////////////////////////////////////////////// */
 
 	/// @inheritdoc INuggftV1Execute
 	function setIdentity(address to) external override {
@@ -158,11 +154,16 @@ contract NuggftV1 is NuggftV1Loan {
 		bool base64,
 		uint8 chunk,
 		bytes calldata prev
-	) public view override returns (bytes memory res) {
+	)
+		public
+		view
+		override
+		returns (bytes memory res)
+	{
 		if (chunk == 1) {
 			res = abi.encode(dotnuggv1.read(decodedCoreProofOf((uint24(tokenId)))));
 		} else if (chunk == 2) {
-			(uint256[] memory calced, uint256 dat) = dotnuggv1.calc(decodeMakingPrettierHappy(prev));
+			(uint256[] memory calced, uint256 dat) = dotnuggv1.calc(abi.decode(prev, (uint256[][])));
 			res = abi.encode(calced, dat);
 		} else if (chunk == 3) {
 			(uint256[] memory calced, uint256 dat) = abi.decode(prev, (uint256[], uint256));
@@ -177,11 +178,15 @@ contract NuggftV1 is NuggftV1Loan {
 
 		uint24 epoch = epoch();
 
-		for (uint24 i = 1; i < epoch; i++) if (you == _ownerOf(i, epoch)) res[iter++] = i;
+		for (uint24 i = 1; i < epoch; i++) {
+			if (you == _ownerOf(i, epoch)) res[iter++] = i;
+		}
 
 		(uint24 start, uint24 end) = premintTokens();
 
-		for (uint24 i = start; i < end; i++) if (you == _ownerOf(i, epoch)) res[iter++] = i;
+		for (uint24 i = start; i < end; i++) {
+			if (you == _ownerOf(i, epoch)) res[iter++] = i;
+		}
 
 		assembly {
 			mstore(res, iter)
@@ -202,8 +207,8 @@ contract NuggftV1 is NuggftV1Loan {
 	}
 
 	/* ///////////////////////////////////////////////////////////////////
-                            ERC721 SUPPORT
-    /////////////////////////////////////////////////////////////////// */
+	ERC721 SUPPORT
+	/////////////////////////////////////////////////////////////////// */
 
 	/// @inheritdoc IERC721
 	function ownerOf(uint256 tokenId) public view override returns (address res) {
@@ -245,18 +250,18 @@ contract NuggftV1 is NuggftV1Loan {
 	//prettier-ignore
 	/// @inheritdoc IERC721
 	function transferFrom(address, address, uint256) external payable override {
-        _panic(Error__0x69__Wut);
-    }
+		_panic(Error__0x69__Wut);
+	}
 
 	//prettier-ignore
 	/// @inheritdoc IERC721
 	function safeTransferFrom(address, address, uint256) external payable override {
-        _panic(Error__0x69__Wut);
-    }
+		_panic(Error__0x69__Wut);
+	}
 
 	//prettier-ignore
 	/// @inheritdoc IERC721
 	function safeTransferFrom(address, address, uint256, bytes memory) external payable override {
-        _panic(Error__0x69__Wut);
-    }
+		_panic(Error__0x69__Wut);
+	}
 }

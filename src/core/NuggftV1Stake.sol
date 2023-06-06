@@ -19,7 +19,7 @@ abstract contract NuggftV1Stake is NuggftV1Proof {
 
 	/// @inheritdoc INuggftV1Lens
 	function msp() public view override returns (uint96 res) {
-		(uint96 total, , , , uint96 increment) = minSharePriceBreakdown(stake);
+		(uint96 total,,,, uint96 increment) = minSharePriceBreakdown(stake);
 		res = total + increment;
 	}
 
@@ -44,8 +44,8 @@ abstract contract NuggftV1Stake is NuggftV1Proof {
 	}
 
 	/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-                                   adders
-       ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+								   adders
+	   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
 
 	/// @notice handles the adding of shares - ensures enough eth is being added
 	/// @dev this is the only way to add shares - the logic here ensures that "ethPerShare" can never decrease
@@ -118,13 +118,7 @@ abstract contract NuggftV1Stake is NuggftV1Proof {
 	function minSharePriceBreakdown(uint256 cache)
 		internal
 		pure
-		returns (
-			uint96 total,
-			uint96 ethPerShare,
-			uint96 protocolFee,
-			uint96 premium,
-			uint96 increment
-		)
+		returns (uint96 total, uint96 ethPerShare, uint96 protocolFee, uint96 premium, uint96 increment)
 	{
 		assembly {
 			let shrs := shr(192, cache)
