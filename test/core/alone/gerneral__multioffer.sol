@@ -212,11 +212,42 @@ contract general__multioffer is NuggftV1Test {
 		expect.sell().from(users.frank).err(0xB3).exec(token1780M, item, 3 ether);
 	}
 
-	function test__multioffer__8() public {
+	function setupWeirdSituation() internal returns (uint24 a, uint24 b, uint24 c) {
 		(uint24 first, uint24 last) = nuggft.premintTokens();
+
 		uint24 token2G = first + 10;
 		uint24 token42M = first + 11;
-		uint24 token1780M = first + 12;
+
+		uint16[] memory abc = getAllItems();
+
+		uint16 itm = 0;
+
+		for (uint16 i = 100; i < abc.length; i++) {
+			if (findCountOfNewNuggWithItem(abc[i], 0) > 1) {
+				itm = abc[i];
+				break;
+			}
+		}
+
+		if (itm == 0) {
+			revert("no item found");
+		}
+
+		while (uint16(nuggft.proofOf(token2G) >> 0x90) == itm) {
+			token2G++;
+		}
+
+		while (uint16(nuggft.proofOf(token42M) >> 0x90) == itm) {
+			token42M++;
+		}
+
+		uint24 token1780M = findNewNuggWithItem2(itm, 0);
+
+		return (token2G, token42M, token1780M);
+	}
+
+	function test__multioffer__8() public {
+		(uint24 token2G, uint24 token42M, uint24 token1780M) = setupWeirdSituation();
 
 		forge.vm.deal(users.dee, 5 ether);
 
@@ -254,10 +285,7 @@ contract general__multioffer is NuggftV1Test {
 	}
 
 	function test__multioffer__9() public {
-		(uint24 first, uint24 last) = nuggft.premintTokens();
-		uint24 token2G = first + 10;
-		uint24 token42M = first + 11;
-		uint24 token1780M = first + 12;
+		(uint24 token2G, uint24 token42M, uint24 token1780M) = setupWeirdSituation();
 
 		forge.vm.deal(users.dee, 5 ether);
 

@@ -9,14 +9,14 @@ import {IERC721, IERC721Metadata} from "git.nugg.xyz/nuggft/src/interfaces/IERC7
 
 interface INuggftV1Lens {
 	/* ///////////////////////////////////////////////////////////////////
-                            EPOCH
-    /////////////////////////////////////////////////////////////////// */
+							EPOCH
+	/////////////////////////////////////////////////////////////////// */
 
 	function epoch() external view returns (uint24 res);
 
 	/* ///////////////////////////////////////////////////////////////////
-                            PROOF
-    /////////////////////////////////////////////////////////////////// */
+							PROOF
+	/////////////////////////////////////////////////////////////////// */
 
 	function proofOf(uint24 tokenId) external view returns (uint256 res);
 
@@ -35,11 +35,14 @@ interface INuggftV1Lens {
 		bool base64,
 		uint8 chunk,
 		bytes memory prev
-	) external view returns (bytes memory res);
+	)
+		external
+		view
+		returns (bytes memory res);
 
 	/* ///////////////////////////////////////////////////////////////////
-                            STAKE
-    /////////////////////////////////////////////////////////////////// */
+							STAKE
+	/////////////////////////////////////////////////////////////////// */
 
 	/// @notice returns the total "eps" held by the contract
 	/// @dev this value not always equivilent to the "floor" price which can consist of perceived value.
@@ -74,8 +77,8 @@ interface INuggftV1Lens {
 	function staked() external view returns (uint96);
 
 	/* ///////////////////////////////////////////////////////////////////
-                            NUGG SWAPS
-    /////////////////////////////////////////////////////////////////// */
+							NUGG SWAPS
+	/////////////////////////////////////////////////////////////////// */
 
 	/// @notice calculates the minimum eth that must be sent with a offer call
 	/// @dev returns 0 if no offer can be made for this oken
@@ -84,7 +87,10 @@ interface INuggftV1Lens {
 	/// @return canOffer -> instead of reverting this function will return false
 	/// @return nextMinUserOffer -> the minimum value that must be sent with a offer call
 	/// @return currentUserOffer ->
-	function check(address sender, uint24 tokenId)
+	function check(
+		address sender,
+		uint24 tokenId
+	)
 		external
 		view
 		returns (
@@ -100,8 +106,8 @@ interface INuggftV1Lens {
 	function agencyOf(uint24 tokenId) external view returns (uint256 res);
 
 	/* ///////////////////////////////////////////////////////////////////
-                            ITEM SWAPS
-    /////////////////////////////////////////////////////////////////// */
+							ITEM SWAPS
+	/////////////////////////////////////////////////////////////////// */
 
 	/// @notice calculates the minimum eth that must be sent with a offer call
 	/// @dev returns 0 if no offer can be made for this oken
@@ -128,17 +134,13 @@ interface INuggftV1Lens {
 			bool mustOfferOnSeller
 		);
 
-	function vfo(
-		uint24 buyer,
-		uint24 seller,
-		uint16 itemId
-	) external view returns (uint96 res);
+	function vfo(uint24 buyer, uint24 seller, uint16 itemId) external view returns (uint96 res);
 
 	function itemAgencyOf(uint24 seller, uint16 itemId) external view returns (uint256 res);
 
 	/* ///////////////////////////////////////////////////////////////////
-                            LOANS
-    /////////////////////////////////////////////////////////////////// */
+							LOANS
+	/////////////////////////////////////////////////////////////////// */
 
 	/// @notice for a nugg's active loan: calculates the current min eth a user must send to liquidate or rebalance
 	/// @dev contract     ->
@@ -152,14 +154,7 @@ interface INuggftV1Lens {
 	function debt(uint24 tokenId)
 		external
 		view
-		returns (
-			bool isLoaned,
-			address account,
-			uint96 prin,
-			uint96 fee,
-			uint96 earn,
-			uint24 expire
-		);
+		returns (bool isLoaned, address account, uint96 prin, uint96 fee, uint96 earn, uint24 expire);
 
 	/// @notice "Values For Liquadation"
 	/// @dev used to tell user how much eth to send for liquidate
@@ -170,16 +165,16 @@ interface INuggftV1Lens {
 	function vfr(uint24[] calldata tokenIds) external view returns (uint96[] memory res);
 
 	/* ///////////////////////////////////////////////////////////////////
-                           	 TRUSTED
-    /////////////////////////////////////////////////////////////////// */
+						   	 TRUSTED
+	/////////////////////////////////////////////////////////////////// */
 
 	function isTrusted(address user) external view returns (bool);
 }
 
 interface INuggftV1Raw {
 	/* ///////////////////////////////////////////////////////////////////
-	                           IMMUTABLES
-    /////////////////////////////////////////////////////////////////// */
+							IMMUTABLES
+	/////////////////////////////////////////////////////////////////// */
 
 	function dotnuggv1() external view returns (IDotnuggV1);
 
@@ -194,14 +189,14 @@ interface INuggftV1Raw {
 	function earlySeed() external view returns (uint256 res);
 
 	/* ///////////////////////////////////////////////////////////////////
-	                           GLOBAL STATE VARS
-    /////////////////////////////////////////////////////////////////// */
+							GLOBAL STATE VARS
+	/////////////////////////////////////////////////////////////////// */
 
 	function stake() external view returns (uint256 res);
 
 	/* ///////////////////////////////////////////////////////////////////
-	                           MAPS
-    /////////////////////////////////////////////////////////////////// */
+							MAPS
+	/////////////////////////////////////////////////////////////////// */
 
 	function agency(uint24 tokenId) external view returns (uint256 res);
 
@@ -213,7 +208,10 @@ interface INuggftV1Raw {
 		uint24 buyingTokenid,
 		uint24 sellingTokenId,
 		uint16 itemId
-	) external view returns (uint256 res);
+	)
+		external
+		view
+		returns (uint256 res);
 
 	function lastItemSwap(uint16 itemId) external view returns (uint256 res);
 
@@ -224,8 +222,8 @@ interface INuggftV1Raw {
 
 interface INuggftV1Event {
 	/* ///////////////////////////////////////////////////////////////////
-                            EPOCH
-    /////////////////////////////////////////////////////////////////// */
+							EPOCH
+	/////////////////////////////////////////////////////////////////// */
 
 	event Genesis(
 		uint256 blocknum,
@@ -245,30 +243,31 @@ interface INuggftV1Event {
 	);
 
 	/* ///////////////////////////////////////////////////////////////////
-                            PROOF
-    /////////////////////////////////////////////////////////////////// */
+							PROOF
+	/////////////////////////////////////////////////////////////////// */
 
 	event Rotate(uint24 indexed tokenId, bytes32 proof);
 
 	event MigrateV1Sent(address v2, uint24 tokenId, bytes32 proof, address owner, uint96 eth);
 
 	/* ///////////////////////////////////////////////////////////////////
-                            STAKE
-    /////////////////////////////////////////////////////////////////// */
+							STAKE
+	/////////////////////////////////////////////////////////////////// */
 
 	event Extract(uint96 eth);
 
 	event Stake(bytes32 stake);
 
 	/* ///////////////////////////////////////////////////////////////////
-                            NUGG SWAPS
-    /////////////////////////////////////////////////////////////////// */
+							NUGG SWAPS
+	/////////////////////////////////////////////////////////////////// */
 
 	event Offer(uint24 indexed tokenId, bytes32 agency, bytes32 stake);
 
 	// event OfferMint(uint24 indexed tokenId, bytes32 agency, bytes32 proof, bytes32 stake);
 
-	// event PreMint(uint24 indexed tokenId, bytes32 proof, bytes32 nuggAgency, uint16 indexed itemId, bytes32 itemAgency);
+	// event PreMint(uint24 indexed tokenId, bytes32 proof, bytes32 nuggAgency, uint16 indexed itemId, bytes32
+	// itemAgency);
 
 	// event Claim(uint24 indexed tokenId, address indexed account);
 
@@ -278,18 +277,19 @@ interface INuggftV1Event {
 	event Sell(uint40 indexed tokenId, bytes32 agency);
 
 	/* ///////////////////////////////////////////////////////////////////
-                            ITEM SWAPS
-    /////////////////////////////////////////////////////////////////// */
+							ITEM SWAPS
+	/////////////////////////////////////////////////////////////////// */
 
 	// event OfferItem(uint24 indexed sellingTokenId, uint16 indexed itemId, bytes32 agency, bytes32 stake);
 
-	// event ClaimItem(uint24 indexed sellingTokenId, uint16 indexed itemId, uint24 indexed buyerTokenId, bytes32 proof);
+	// event ClaimItem(uint24 indexed sellingTokenId, uint16 indexed itemId, uint24 indexed buyerTokenId, bytes32
+	// proof);
 
 	// event SellItem(uint24 indexed sellingTokenId, uint16 indexed itemId, bytes32 agency, bytes32 proof);
 
 	/* ///////////////////////////////////////////////////////////////////
-                            LOANS
-    /////////////////////////////////////////////////////////////////// */
+							LOANS
+	/////////////////////////////////////////////////////////////////// */
 
 	event Loan(uint24 indexed tokenId, bytes32 agency);
 
@@ -298,8 +298,8 @@ interface INuggftV1Event {
 	// event Liquidate(uint24 indexed tokenId, bytes32 agency);
 
 	/* ///////////////////////////////////////////////////////////////////
-                            TRUST
-    /////////////////////////////////////////////////////////////////// */
+							TRUST
+	/////////////////////////////////////////////////////////////////// */
 
 	event TrustUpdated(address indexed user, bool trust);
 
@@ -308,54 +308,42 @@ interface INuggftV1Event {
 
 interface INuggftV1Execute {
 	/* ///////////////////////////////////////////////////////////////////
-                            EPOCH
-    /////////////////////////////////////////////////////////////////// */
+							EPOCH
+	/////////////////////////////////////////////////////////////////// */
 
 	function multicall(bytes[] calldata data) external;
 
 	/* ///////////////////////////////////////////////////////////////////
-                            EPOCH
-    /////////////////////////////////////////////////////////////////// */
+							EPOCH
+	/////////////////////////////////////////////////////////////////// */
 
 	// none
 
 	/* ///////////////////////////////////////////////////////////////////
-                            PROOF
-    /////////////////////////////////////////////////////////////////// */
+							PROOF
+	/////////////////////////////////////////////////////////////////// */
 
-	function rotate(
-		uint24 tokenId,
-		uint8[] calldata from,
-		uint8[] calldata to
-	) external;
+	function rotate(uint24 tokenId, uint8[] calldata from, uint8[] calldata to) external;
 
 	function migrate(uint24 tokenId) external;
 
 	/* ///////////////////////////////////////////////////////////////////
-                            STAKE
-    /////////////////////////////////////////////////////////////////// */
+							STAKE
+	/////////////////////////////////////////////////////////////////// */
 
 	// none
 
 	/* ///////////////////////////////////////////////////////////////////
-                            NUGG SWAPS
-    /////////////////////////////////////////////////////////////////// */
+							NUGG SWAPS
+	/////////////////////////////////////////////////////////////////// */
 
-	function offer(
-		uint24 buyerTokenId,
-		uint24 sellerTokenId,
-		uint16 itemId
-	) external payable;
+	function offer(uint24 buyerTokenId, uint24 sellerTokenId, uint16 itemId) external payable;
 
-	function sell(
-		uint24 sellerTokenId,
-		uint16 itemid,
-		uint96 floor
-	) external;
+	function sell(uint24 sellerTokenId, uint16 itemid, uint96 floor) external;
 
 	/* ///////////////////////////////////////////////////////////////////
-                            ITEM SWAPS
-    /////////////////////////////////////////////////////////////////// */
+							ITEM SWAPS
+	/////////////////////////////////////////////////////////////////// */
 
 	function offer(uint24 tokenId) external payable;
 
@@ -365,20 +353,23 @@ interface INuggftV1Execute {
 		uint16 itemId,
 		uint96 value1,
 		uint96 value2
-	) external payable;
+	)
+		external
+		payable;
 
 	function claim(
 		uint24[] calldata tokenIds,
 		address[] calldata accounts,
 		uint24[] calldata buyingTokenIds,
 		uint16[] calldata itemIds
-	) external;
+	)
+		external;
 
 	function sell(uint24 tokenId, uint96 floor) external;
 
 	/* ///////////////////////////////////////////////////////////////////
-                            LOANS
-    /////////////////////////////////////////////////////////////////// */
+							LOANS
+	/////////////////////////////////////////////////////////////////// */
 
 	function rebalance(uint24[] calldata tokenIds) external payable;
 
@@ -387,8 +378,8 @@ interface INuggftV1Execute {
 	function liquidate(uint24 tokenId) external payable;
 
 	/* ///////////////////////////////////////////////////////////////////
-                           	 TRUSTED
-    /////////////////////////////////////////////////////////////////// */
+						   	 TRUSTED
+	/////////////////////////////////////////////////////////////////// */
 
 	/// @notice sends the current protocolEth to the user and resets the value to zero
 	/// @dev caller must be a trusted user
@@ -402,8 +393,8 @@ interface INuggftV1Execute {
 	function setIsTrusted(address user, bool trust) external;
 
 	/* ///////////////////////////////////////////////////////////////////
-                            OTHER
-    /////////////////////////////////////////////////////////////////// */
+							OTHER
+	/////////////////////////////////////////////////////////////////// */
 
 	/// @notice updates the sending user's identity to the new address passed
 	function setIdentity(address to) external;

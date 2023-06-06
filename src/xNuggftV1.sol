@@ -58,11 +58,7 @@ contract xNuggftV1 is IxNuggftV1, NuggftV1Constants {
 		res = nuggftv1.dotnuggv1().exec(feature, position, false);
 	}
 
-	function transfer(
-		bytes32 proof,
-		bytes32 from,
-		bytes32 to
-	) external payable {
+	function transfer(bytes32 proof, bytes32 from, bytes32 to) external payable {
 		address nuggft = address(nuggftv1);
 
 		require(msg.sender == nuggft);
@@ -73,9 +69,7 @@ contract xNuggftV1 is IxNuggftV1, NuggftV1Constants {
 
 				let tonuggft := 0
 
-				if eq(to, nuggft) {
-					tonuggft := 1
-				}
+				if eq(to, nuggft) { tonuggft := 1 }
 
 				let a := xor(shl(96, nugg), shl(88, tonuggft))
 
@@ -114,11 +108,7 @@ contract xNuggftV1 is IxNuggftV1, NuggftV1Constants {
 
 				offset := add(offset, 0x20)
 
-				for {
-					let i := 0
-				} lt(i, count) {
-					i := add(i, 1)
-				} {
+				for { let i := 0 } lt(i, count) { i := add(i, 1) } {
 					mstore(offset, 1)
 					offset := add(offset, 0x20)
 				}
@@ -133,10 +123,8 @@ contract xNuggftV1 is IxNuggftV1, NuggftV1Constants {
 	}
 
 	function supportsInterface(bytes4 interfaceId) public view virtual override returns (bool) {
-		return
-			interfaceId == 0xd9b67a26 || //
-			interfaceId == 0x0e89341c ||
-			interfaceId == type(IERC165).interfaceId;
+		return interfaceId == 0xd9b67a26 //
+			|| interfaceId == 0x0e89341c || interfaceId == type(IERC165).interfaceId;
 	}
 
 	function name() public pure returns (string memory) {
@@ -154,19 +142,25 @@ contract xNuggftV1 is IxNuggftV1, NuggftV1Constants {
 	function uri(uint256 tokenId) public view virtual override returns (string memory res) {
 		// prettier-ignore
 		res = string(
-            nuggftv1.dotnuggv1().encodeJson(
-                abi.encodePacked(
-                     '{"name":"',         name(),
-                    '","description":"',  DotnuggV1Lib.itemIdToString(uint16(tokenId), features()),
-                    '","image":"',        imageURI(tokenId),
-                    '"}'
-                ), true
-            )
-        );
+			nuggftv1.dotnuggv1().encodeJson(
+				abi.encodePacked(
+					'{"name":"',
+					name(),
+					'","description":"',
+					DotnuggV1Lib.itemIdToString(uint16(tokenId), features()),
+					'","image":"',
+					imageURI(tokenId),
+					'"}'
+				),
+				true
+			)
+		);
 	}
 
 	function totalSupply() public view returns (uint256 res) {
-		for (uint8 i = 0; i < 8; i++) res += featureSupply(i);
+		for (uint8 i = 0; i < 8; i++) {
+			res += featureSupply(i);
+		}
 	}
 
 	function featureSupply(uint8 feature) public view override returns (uint256 res) {
@@ -190,7 +184,15 @@ contract xNuggftV1 is IxNuggftV1, NuggftV1Constants {
 		}
 	}
 
-	function balanceOfBatch(address[] calldata _owners, uint256[] memory _ids) external view override returns (uint256[] memory) {
+	function balanceOfBatch(
+		address[] calldata _owners,
+		uint256[] memory _ids
+	)
+		external
+		view
+		override
+		returns (uint256[] memory)
+	{
 		for (uint256 i = 0; i < _owners.length; i++) {
 			_ids[i] = balanceOf(_owners[i], _ids[i]);
 		}
@@ -202,13 +204,7 @@ contract xNuggftV1 is IxNuggftV1, NuggftV1Constants {
 		return false;
 	}
 
-	function safeTransferFrom(
-		address _from,
-		address _to,
-		uint256 _id,
-		uint256 _value,
-		bytes calldata _data
-	) public {}
+	function safeTransferFrom(address _from, address _to, uint256 _id, uint256 _value, bytes calldata _data) public {}
 
 	function safeBatchTransferFrom(
 		address _from,
@@ -216,7 +212,9 @@ contract xNuggftV1 is IxNuggftV1, NuggftV1Constants {
 		uint256[] calldata _ids,
 		uint256[] calldata _values,
 		bytes calldata _data
-	) external {}
+	)
+		external
+	{}
 
 	function setApprovalForAll(address, bool) external pure {
 		revert("whut");
@@ -298,7 +296,7 @@ contract xNuggftV1 is IxNuggftV1, NuggftV1Constants {
 			ptr := add(res, 32)
 		}
 
-		for (uint24 i = 1; i <= epoch; i++)
+		for (uint24 i = 1; i <= epoch; i++) {
 			if (0 != nuggftv1.agencyOf(i)) {
 				// @solidity memory-safe-assembly
 				assembly {
@@ -308,10 +306,11 @@ contract xNuggftV1 is IxNuggftV1, NuggftV1Constants {
 					ptr := add(ptr, 3)
 				}
 			}
+		}
 
 		(uint24 start, uint24 end) = nuggftv1.premintTokens();
 
-		for (uint24 i = start; i <= end; i++)
+		for (uint24 i = start; i <= end; i++) {
 			if (0 != nuggftv1.agencyOf(i)) {
 				// @solidity memory-safe-assembly
 				assembly {
@@ -321,6 +320,7 @@ contract xNuggftV1 is IxNuggftV1, NuggftV1Constants {
 					ptr := add(ptr, 3)
 				}
 			}
+		}
 
 		assembly {
 			mstore(res, sub(sub(ptr, res), 32))

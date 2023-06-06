@@ -144,6 +144,20 @@ contract NuggftV1Test is ForgeTest, NuggftV1AgentType {
 		}
 	}
 
+	function getAllItems() public returns (uint16[] memory) {
+		bytes memory check = xnuggft.iloop();
+
+		uint256 len = check.length / 2;
+
+		uint16[] memory items = new uint16[](len);
+
+		for (uint256 i = 0; i < len; i++) {
+			items[i] = uint16(bytes2(byteslib.slice(check, i * 2, 2)));
+		}
+
+		return items;
+	}
+
 	function findNewNuggWithItem(uint16 item, uint24 tokenToExclude) public view returns (uint24 select) {
 		uint24[] memory nuggs = getAllNuggs();
 		for (uint256 i = 0; i < nuggs.length; i++) {
@@ -169,6 +183,17 @@ contract NuggftV1Test is ForgeTest, NuggftV1AgentType {
 		}
 
 		assert(false);
+	}
+
+	function findCountOfNewNuggWithItem(uint16 item, uint24 tokenToExclude) public view returns (uint24 nugg) {
+		uint24[] memory nuggs = getAllNuggs();
+		for (uint256 i = 0; i < nuggs.length; i++) {
+			if (nuggs[i] != tokenToExclude && nuggs[i] != nuggft.epoch()) {
+				if (xnuggft.floop(nuggs[i])[9] == item) nugg++;
+			}
+		}
+
+		return nugg;
 	}
 
 	function findNuggWithItem(uint16 item, uint24 tokenToExclude) public view returns (uint24 nugg, uint8 index) {
